@@ -5372,6 +5372,35 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 90. ⭐ A TÜRELMES OLVASÓ — mit tesz a mai program egy nála újabb társ üzeneteivel? (D123 ③, PR6 — a nyelvváltozat, 2026-11-06, a laptopon)
+
+*`protokollMeres.js` (a terv: `docs/protokoll_valtozat_atvizsgalas.md` 4.). Két mai program cserél a védett UDP-résen (kézfogás,
+titkosítás — mint az őrjáratban); az EGYIK (A, 3 gondolat) a kimenő sorait „jövőbelivé” alakítja, a másik (B, 2 gondolat) mai.*
+
+```
+A TÜRELMES OLVASÓ — egy „jövőbeli” program (A, 3 gondolat) és egy mai (B, 2 gondolat) cseréje a védett UDP-résen
+  (a) alap — két mai program
+      lement: IGEN (A-nál 5, B-nél 5 gondolat; 5 a teljes)
+  (b) ismeretlen MEZŐ minden üzenetben
+      lement: IGEN (A-nál 5, B-nél 5 gondolat; 5 a teljes)
+  (c) ismeretlen ÜZENET a nyitás után
+      lement: NEM (A-nál 3, B-nél 2 gondolat; 5 a teljes)
+      a jövőbeli fél: A másik fél nem válaszol (8000 ms) | a mai fél: Várt üzenet: CIMEK, érkezett: JOVO
+  (d) a NYITÁS nyelvváltozat-jellel ("v":[1,2])
+      lement: IGEN (A-nál 5, B-nél 5 gondolat; 5 a teljes)
+      a NYITÁS: 135 → 145 bájt (+10, nyíltan; a résen titkosítva megy)
+```
+
+⭐ **A lelet:** a mai program a párbeszédben **türelmes a mezőre, de nem az üzenetre** — az új mező (és így egy nyelvváltozat-jel)
+semmit nem tör el, egy új lépés viszont a csere közepén megállítja, és ⛔ **a hiba csak a mai oldalon kap nevet**: az újabb fél
+csak a tétlenségi óráig vár, a valódi okot nem tudja meg. → **PR6:** a jelnek az első üzenetben kell mennie, és az újabb programnak
+az egyezés UTÁN szabad csak új lépést tennie; a jel ára +10 bájt (egy „nincs újdonság” csere 1,2–1,7 KB-jának < 1%-a). ⚠️ Amit ez
+nem mér: a közös számítások változását (szelet-halmaz, lenyomat, DHT-téma) — arra nincs hibaüzenet, a két fél csendben mást
+hasonlít össze (az átvizsgálás 2.); és a szállítás rétegét (a kézfogás-csomag pontosan 33 bájt, az ismeretlen csomag némán elvész —
+kódból olvasva).
+
+---
+
 ## 89. ⭐ A SZÁMÍTÁS MAGJÁNAK STABILITÁSA — milyen gyakran változik az, ami egy koinóban mindenkinél azonos kell legyen? (D123, a program rétegei, 2026-11-06, a laptopon)
 
 *`magMeres.js` (a terv: `docs/program_retegek_atvizsgalas.md` 5. szakasz — „mérés előtte: a mag stabilitása”). A mag a koinó képének

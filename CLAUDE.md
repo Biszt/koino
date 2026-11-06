@@ -33,8 +33,16 @@ sor is — azok a régi tár fagyasztott telepítőjén át ide költöznek. A r
 telepítő eltakarítja (a meghívó-próba a régi sor hívási láncával méri). ⚠️ A Termux-telepítő leállító része (`pkill`) csak a
 telefonon próbálható.
 
+🔍 **D123 ③ — PR6, a protokoll nyelvváltozata: ÁTVIZSGÁLVA** (Csaba: *„csinálhatod, a pr6-ot”*;
+[`protokoll_valtozat_atvizsgalas.md`](docs/protokoll_valtozat_atvizsgalas.md), **90. mérés** — `protokollMeres.js`: a mai program az
+ismeretlen MEZŐT átlépi, az ismeretlen ÜZENETRE megáll, és a hiba csak az ő oldalán kap nevet; a jel +10 bájt). A protokoll négy
+rétege: kopogás (türelmes) · szállítás (az ismeretlen csomag némán elvész) · párbeszéd (41 üzenet) · kiírt alakok — és a **közös
+számítások** (szelet-halmaz, lenyomat, DHT-téma), amelyek változására nincs hibaüzenet. A javaslat: `v` minden munka első
+üzenetében, az egyezés új üzenet nélkül, nincs közös → mindkét fél kimondva áll meg; a régi a szélén fordítva, a régi számítások
+egy jegyzékben, egy dátumig. ⏸️ **Csabánál PV1–PV6** (az átvizsgálás 7.). Kód még nincs (csak a mérő szkript).
+
 **Az állapot:** **1395 önpróba** (64 próba-fájl; a legutóbbi teljes soron mind zöld — 2026-11-06, az új tárban; előtte a
-D123 ① után is) · 360 fájl / 7037,7 KB (⚠️ CR nélkül mérve —
+D123 ① után is) · 361 fájl / 7048,0 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8
@@ -515,7 +523,7 @@ D100 parancssor-próbája méri, egy végig futó felülettel) · a lap a még m
   minden kérdéshez újraindított folyamat mindent frissen lát, és elrejti, amit közben egy MÁSIK folyamat írt — a ház
   bekötés-próbája így nem vette észre, hogy a futó felület nem látja az őrjárat hozta választ.
 - ⛔ **Előbb a mérés, aztán az építés** — a mérések jegyzőkönyve:
-  [`meres/eredmenyek.md`](meres/eredmenyek.md) (számozott, 1–89.; a 88. a BEP 5 mérésnek fenntartva).
+  [`meres/eredmenyek.md`](meres/eredmenyek.md) (számozott, 1–90.; a 88. a BEP 5 mérésnek fenntartva).
 
 #### ⏸️ Régebbi nyitott döntések (mind Csabáé — részletek a naplóban)
 
@@ -582,7 +590,7 @@ A koino nem támaszkodhat arra, hogy egy platform-tulajdonos (Google, Apple, bö
 
    - ⛔ **KEMÉNY: nulla függőség.** Ma **0 npm-csomag**, és ez nem alkudható. Minden új függőség egy újabb fojtópont — valaki más dönthet arról, fut-e a koino. A kriptográfia is ezért a beépített WebCryptóból jön.
    - ⛔ **KEMÉNY: az ADAT-csomag kicsi marad.** Ez a valódi szűk keresztmetszet: a programot egyszer töltöd le, az adat **minden nap utazik** — a telefonodon, a mért hálózaton, a lassú vonalon. A mai mércék: egy esemény **~400 bájt** · egy „nincs újdonság" csere a résen **1,2–1,7 KB** (43. mérés, terepen — TCP-n 334 bájt volt; ⚠️ D89/1 óta titkosítva +~0,4 KB: kézfogás, csomagonként ~18 B, az aláírás — 57. mérés; D95/4 óta a gyökér-darab jele +76–100 B) · a **D21** szerint ~**1 KB/fő** a saját lap (az újjáépítés magja). ⚠️ **Új eseménymezőnél, új protokoll-üzenetnél EZT kell megnézni**, nem a mappa méretét.
-   - 🟡 **LÁGY: a program mérete.** Ma **360 fájl, 7037,7 KB** — ⚠️ *ebből a `felulet/` 146 fájl / 1603,8 KB (2026-10-22), ami 2026-09-06-án érkezett: **örökölt, változatlan** kártya-kód és CSS a prototípusból (5.3).* Nem korlát, de érték: ekkora program **elfér egy üzenetben, és bárki újraírhatja** — ez a fojtópont-védelem másik fele. A felülettel (Szakasz 5) nőni fog, és **ez rendben van**; a szám itt attól hasznos, hogy tudjuk, hol tartunk.
+   - 🟡 **LÁGY: a program mérete.** Ma **361 fájl, 7048,0 KB** — ⚠️ *ebből a `felulet/` 146 fájl / 1603,8 KB (2026-10-22), ami 2026-09-06-án érkezett: **örökölt, változatlan** kártya-kód és CSS a prototípusból (5.3).* Nem korlát, de érték: ekkora program **elfér egy üzenetben, és bárki újraírhatja** — ez a fojtópont-védelem másik fele. A felülettel (Szakasz 5) nőni fog, és **ez rendben van**; a szám itt attól hasznos, hogy tudjuk, hol tartunk.
 
    ⚠️⚠️ **A PROGRAM-MÉRET MÉRCÉJE: a FÁJLOK BÁJTJAINAK ÖSSZEGE, nem a lemezfoglalás.** A `du -sk koino` **920 KB**-ot mond ugyanerre a mappára, mert lemezblokkokat számol (39 fájl × félig üres utolsó blokk). A kettő nem hiba, hanem két különböző kérdés — de csak az egyik az, ami „elfér egy üzenetben". A mérés:
    ```bash
@@ -886,7 +894,7 @@ node meres/ebredesProba.js res <cím> <port>   # …és KÉT hálózat között:
 [`docs/telepites_windows.md`](docs/telepites_windows.md) — a meghívó 💻 sora (a PowerShellbe vagy a cmd-be): a GitHub zip-je (⭐ D123 ②: a régi
 MELLÉ, `koino-uj` — az új `telepit.ps1` a futó régit leállítja, és cserél; a régi `koino-regi`), a Node a
 `winget`-tel, `windows/telepit.ps1` → `indit.ps1` (a két folyamat egy konzolban, Ctrl+C vagy az ablak bezárása leállítja), az
-adat `%USERPROFILE%\koino-adat`, a további indítás az asztali „koino” ikon, a parancsok `koino\windows\koino.cmd <parancs>`. `git clone --depth 1` a nyilvános tárból. A program **önmagában futtatható**: 360 fájl, 7037,7 KB (egyben tömörítve ~1,9 MB — 84. mérés), nulla függőség — *ugyanaz a szám, mint a 6. szabálynál; ha az egyik változik, mindkettőt vezesd át.* ⚠️ A mércét a 6. szabály mondja meg: **bájtok összege, nem `du`**.
+adat `%USERPROFILE%\koino-adat`, a további indítás az asztali „koino” ikon, a parancsok `koino\windows\koino.cmd <parancs>`. `git clone --depth 1` a nyilvános tárból. A program **önmagában futtatható**: 361 fájl, 7048,0 KB (egyben tömörítve ~1,9 MB — 84. mérés), nulla függőség — *ugyanaz a szám, mint a 6. szabálynál; ha az egyik változik, mindkettőt vezesd át.* ⚠️ A mércét a 6. szabály mondja meg: **bájtok összege, nem `du`**.
 
 **Két készülék egy gépen** (Szakasz 2 / 1. lépés — a `KOINO_ADAT` két külön „készüléket" ad, saját kulccsal):
 

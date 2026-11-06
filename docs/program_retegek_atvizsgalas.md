@@ -76,7 +76,8 @@ A gond tehát nem az elv, hanem hogy **a program ma nem rétegzett**: egyetlen c
   — elvetendő (a D9 önfrissítése helyett van a költözés: *a jelenlét személyes*).
   ⚠️ A lenyomat csak azt bizonyítja, hogy a kód az, amit a kártya megnevez — azt nem, hogy jó. A védelem itt is az éberség (a kód
   olvasható a „Kód” fülön) és a kilépés joga.
-- **PR6 — A protokoll-törés (KZ5).** (A) ⭐ **verziózott protokoll:** a NYITÁS kimondja a protokoll-verziót, és az új program egy
+- **PR6 — A protokoll-törés (KZ5).** 🔍 *(2026-11-06: a hol és a hogyan átvizsgálva — `protokoll_valtozat_atvizsgalas.md`, 90.
+  mérés; ⏸️ PV1–PV6 Csabánál.)* (A) ⭐ **verziózott protokoll:** a NYITÁS kimondja a protokoll-verziót, és az új program egy
   ideig a régit is beszéli (a régi felé a régi alakot küldi); a régit egy kimondott dátumig tartjuk; (B) tiszta törés + mindenki
   frissít (ma — fejlesztés közben elfogadható, egy élő közösségben kettévágja a hálót); (C) a protokoll is a magba (költözés) —
   nem javaslom: a hálózat alakja nem a koinó döntése, és két koinó ugyanazon a protokollon beszél (a családi csere).
