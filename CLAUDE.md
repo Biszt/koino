@@ -44,11 +44,14 @@ VALÓDI régi program ellen. ✅ **① a jel és az egyezés** (elágazás 241):
 minden munka első üzenetében (NYITAS, KERELEM, FAJLKEREK, VALASZ; a randevú kiszolgálójánál az első válaszban), a mai nyelv az 1-es
 (a jel nélküli régi program is) — a D124 maga nem törés; `meres/nyelvProba.js` (`nyelv` csoport, a `csere`-ben is): a csere, a
 kérelem négy útja, és a git-ből elővett régi program (`520aefa`). ⛔ A próba lelete: a megnevezett hiba előtt a kimenő sort ki kell
-üríteni (`tarsNyelvenekEllenorzese`). ⏭️ **② a kopogás jele** (a szállításé) → ③ az emlékezet és a kimondás (a lap, a parancs) → ④ a
+üríteni (`tarsNyelvenekEllenorzese`). ✅ **② a kopogás jele** (elágazás 242): `sz: [legrégebbi, legújabb]` minden kopogás-üzenetben
+(`KOPOG`, `HALLAK`, `FOGLALT` — a kapu `kuld`-jában), a mai szállítás az 1-es; közös nélkül se munka, se visszakopogás, de a `HALLAK` a
+jelünkkel megy — mindkét kapu kimondja (`NINCS-KOZOS-SZALLITAS`), a kör bukása megnevezett (`nincsKozos`); a próba a valódi régi
+kapuval is. ⏭️ **③ az emlékezet és a kimondás** (a lap, a parancs — ⚠️ nem épülhet egyetlen, hamisítható kopogásra) → ④ a
 fordító-szél → ⑤ a kiírt alakok.
 
-**Az állapot:** **1399 önpróba** (65 próba-fájl; a legutóbbi teljes soron mind zöld — 2026-11-06, a D124 ① után; előtte a
-D123 ① után is) · 363 fájl / 7077,2 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1403 önpróba** (65 próba-fájl; a legutóbbi teljes soron mind zöld — 2026-11-06, a D124 ② után; előtte a
+D124 ① után is) · 363 fájl / 7097,1 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8
@@ -450,7 +453,7 @@ most legfeljebb kétszer újrapróbál, és ha így sem, a bukás megnevezi (ros
 — a tétlenségi óra); magában 5/5 zöld — ugyanaz a jelenség, mint a lenti lezárás-próbáé: a 10 mp-es óra terhelés alatt;
 MÉRENDŐ (mi hallgat el 10 mp-ig 30% veszteség mellett?), nem hangolandó · ⚠️ (2026-10-11) a `csereProba` „a lezárás NEM dobhatja el az utolsó darabot (5×)” próbája a
 teljes sor terhelése alatt egyszer bukott (a 10 mp-es tétlenségi óra — „a másik fél nem válaszol”); magában 5/5, a `csere`
-témakör egészében 363/363 zöld — a bukásnak meg kell neveznie az okát, mielőtt bárki az időzítéséhez nyúl · egy egyszeri téves „0 új esemény” kiírás a telefonon (helyben nem jön
+témakör egészében 363/363 zöld; 2026-11-06-án harmadszor (a D124 ② teljes során, 1402/1403 — magában 3 × 108/108, a következő teljes soron 1403/1403) — a bukásnak meg kell neveznie az okát, mielőtt bárki az időzítéséhez nyúl · egy egyszeri téves „0 új esemény” kiírás a telefonon (helyben nem jön
 elő) · a D71 őrjárat-próba egyszer bukott a teljes sor terhelése alatt (magában 3/3 zöld, a következő teljes soron
 is) · a `koinoPakli.js` csendes újrakérdezését csak böngészőben mértük (node alatt nem futtatható; a program oldalát a
 D100 parancssor-próbája méri, egy végig futó felülettel) · a lap a még meg nem érkezett szöveget üresen mutatja
@@ -596,7 +599,7 @@ A koino nem támaszkodhat arra, hogy egy platform-tulajdonos (Google, Apple, bö
 
    - ⛔ **KEMÉNY: nulla függőség.** Ma **0 npm-csomag**, és ez nem alkudható. Minden új függőség egy újabb fojtópont — valaki más dönthet arról, fut-e a koino. A kriptográfia is ezért a beépített WebCryptóból jön.
    - ⛔ **KEMÉNY: az ADAT-csomag kicsi marad.** Ez a valódi szűk keresztmetszet: a programot egyszer töltöd le, az adat **minden nap utazik** — a telefonodon, a mért hálózaton, a lassú vonalon. A mai mércék: egy esemény **~400 bájt** · egy „nincs újdonság" csere a résen **1,2–1,7 KB** (43. mérés, terepen — TCP-n 334 bájt volt; ⚠️ D89/1 óta titkosítva +~0,4 KB: kézfogás, csomagonként ~18 B, az aláírás — 57. mérés; D95/4 óta a gyökér-darab jele +76–100 B) · a **D21** szerint ~**1 KB/fő** a saját lap (az újjáépítés magja). ⚠️ **Új eseménymezőnél, új protokoll-üzenetnél EZT kell megnézni**, nem a mappa méretét.
-   - 🟡 **LÁGY: a program mérete.** Ma **363 fájl, 7077,2 KB** — ⚠️ *ebből a `felulet/` 146 fájl / 1603,8 KB (2026-10-22), ami 2026-09-06-án érkezett: **örökölt, változatlan** kártya-kód és CSS a prototípusból (5.3).* Nem korlát, de érték: ekkora program **elfér egy üzenetben, és bárki újraírhatja** — ez a fojtópont-védelem másik fele. A felülettel (Szakasz 5) nőni fog, és **ez rendben van**; a szám itt attól hasznos, hogy tudjuk, hol tartunk.
+   - 🟡 **LÁGY: a program mérete.** Ma **363 fájl, 7097,1 KB** — ⚠️ *ebből a `felulet/` 146 fájl / 1603,8 KB (2026-10-22), ami 2026-09-06-án érkezett: **örökölt, változatlan** kártya-kód és CSS a prototípusból (5.3).* Nem korlát, de érték: ekkora program **elfér egy üzenetben, és bárki újraírhatja** — ez a fojtópont-védelem másik fele. A felülettel (Szakasz 5) nőni fog, és **ez rendben van**; a szám itt attól hasznos, hogy tudjuk, hol tartunk.
 
    ⚠️⚠️ **A PROGRAM-MÉRET MÉRCÉJE: a FÁJLOK BÁJTJAINAK ÖSSZEGE, nem a lemezfoglalás.** A `du -sk koino` **920 KB**-ot mond ugyanerre a mappára, mert lemezblokkokat számol (39 fájl × félig üres utolsó blokk). A kettő nem hiba, hanem két különböző kérdés — de csak az egyik az, ami „elfér egy üzenetben". A mérés:
    ```bash
@@ -805,7 +808,7 @@ node koino.js ellenoriz                       # ⭐ D82: a tár MINDEN eseménye
                                  # → bejelentés a vádolt azonosság-szeletébe (a csere és a `behoz` után magától is)
                                  # A fájl alakja a táré: a másolt esemenyek.jsonl is behozható.
                                  # ⛔ A kapu UGYANAZ: az átírt esemény itt is elbukik.
-node meres/mind.js         # a 1399 önpróba
+node meres/mind.js         # a 1403 önpróba
 node meres/mind.js fa      # ⭐ egy témakör (csoport): alap · allapot · felulet · csere · fajl · fa · parancssor
 KOINO_PROBA="részlet" node meres/mind.js parancssor  # ⭐ csak a nevükben ezt tartalmazó próbák (kimondja magát)
 node meres/skalaMeres.js   # SKÁLA-MÉRÉS (nem önpróba: számokat ad, nem igen/nem-et)
@@ -900,7 +903,7 @@ node meres/ebredesProba.js res <cím> <port>   # …és KÉT hálózat között:
 [`docs/telepites_windows.md`](docs/telepites_windows.md) — a meghívó 💻 sora (a PowerShellbe vagy a cmd-be): a GitHub zip-je (⭐ D123 ②: a régi
 MELLÉ, `koino-uj` — az új `telepit.ps1` a futó régit leállítja, és cserél; a régi `koino-regi`), a Node a
 `winget`-tel, `windows/telepit.ps1` → `indit.ps1` (a két folyamat egy konzolban, Ctrl+C vagy az ablak bezárása leállítja), az
-adat `%USERPROFILE%\koino-adat`, a további indítás az asztali „koino” ikon, a parancsok `koino\windows\koino.cmd <parancs>`. `git clone --depth 1` a nyilvános tárból. A program **önmagában futtatható**: 363 fájl, 7077,2 KB (egyben tömörítve ~1,9 MB — 84. mérés), nulla függőség — *ugyanaz a szám, mint a 6. szabálynál; ha az egyik változik, mindkettőt vezesd át.* ⚠️ A mércét a 6. szabály mondja meg: **bájtok összege, nem `du`**.
+adat `%USERPROFILE%\koino-adat`, a további indítás az asztali „koino” ikon, a parancsok `koino\windows\koino.cmd <parancs>`. `git clone --depth 1` a nyilvános tárból. A program **önmagában futtatható**: 363 fájl, 7097,1 KB (egyben tömörítve ~1,9 MB — 84. mérés), nulla függőség — *ugyanaz a szám, mint a 6. szabálynál; ha az egyik változik, mindkettőt vezesd át.* ⚠️ A mércét a 6. szabály mondja meg: **bájtok összege, nem `du`**.
 
 **Két készülék egy gépen** (Szakasz 2 / 1. lépés — a `KOINO_ADAT` két külön „készüléket" ad, saját kulccsal):
 

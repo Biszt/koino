@@ -5871,6 +5871,13 @@ function kapuJelzesKiiro() {
       kiir(SZIN.halvany + '  · ' + ora() + ' ' + e.cim + ':' + e.port + ' foglalt — épp'
         + ' egy korábbi munkán dolgozik velem; újra kopogok' + SZIN.vege);
     }
+    // ⭐⭐ D124 ②: a társ felelt, de nincs közös szállításunk — a kézfogás el sem indul; az irány és a teendő a mondatban.
+    if (e.mi === 'NINCS-KOZOS-SZALLITAS') {
+      kiir(SZIN.nem + '  ✗ ' + ora() + ' ' + e.cim + ':' + e.port + ' — ' + e.ok + SZIN.vege);
+    }
+    if (e.mi === 'HIBAS-SZALLITASJEL') {
+      kiir(SZIN.nem + '  ✗ ' + ora() + ' ' + e.cim + ':' + e.port + ' — ' + e.ok + SZIN.vege);
+    }
     // ⚠️ A UDP-kapu ma IPv4-es: egy IPv6-os célt nem hallgatunk el, kimondjuk (D19).
     if (e.mi === 'CEL-KIHAGYVA') {
       kiir(SZIN.nem + '  ✗ ' + ora() + ' ' + e.cim + ' kihagyva: ' + e.ok + SZIN.vege);

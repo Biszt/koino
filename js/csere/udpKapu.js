@@ -43,6 +43,18 @@
 // felduzzaszthatná. A plafon felett a legrégebben látott, munka és friss kopogásunk nélküli
 // bejegyzés esik ki; ha ilyen nincs, az idegen új feladónak nem felelünk (2026-09-25).
 //
+// ===== ⭐⭐ D124 ②: A SZÁLLÍTÁS JELE (2026-11-06) =====
+//
+// Minden kopogás-üzenet viszi a szállítás jelét: `{"uzenet":"KOPOG","tol":"…","sz":[1,1]}` (`nyelvValtozat.js`). A régi kapu
+// az ismeretlen mezőt átlépi; a jel nélküli kopogás az 1-es szállítás. ⭐ A szabály: ha a társ jeléből NINCS KÖZÖS szállítás,
+// a kapu (1) munkát nem indít (a kézfogás úgysem menne át), (2) nem kopog vissza, (3) a kopogására mégis `HALLAK`-kal felel —
+// ebből tudja meg a társ a MI jelünket, és ő is kimondhatja az okot (különben nála csak „nem felelt” lenne: a nem-esemény
+// néma) —, és (4) kimondja (`NINCS-KOZOS-SZALLITAS`, társanként egyszer, az iránnyal). A kör az ilyen célt nem hívja tovább,
+// és a bukását megnevezi (`nincsKozos`). A közös szállítás a munkához is átér (`tars.szallitas`) — a fordító-szél (④) ebből
+// választ kézfogást.
+// ⚠️ A kopogás nem hitelesített (a UDP feladócíme hamisítható): egy hamis „nincs közös” egy kört elvehet — mint ma egy hamis
+// FOGLALT. Egy valódi `HALLAK` a közös jellel ugyanúgy munkát indít.
+//
 // ⚠️ AMIT NEM CSINÁL: nem tud a koinóról, nem cserél, nem ír táblára. A munkát a hívó adja
 // (`munka(halo, tars)`), ez a fájl csak azt dönti el, KIVEL és MIKOR indulhat.
 //
@@ -52,6 +64,8 @@
 import { TITKOS_JEL, KF_JEL } from './titkositas.js';
 import { createSocket } from 'node:dgram';
 import { stunValaszE, kulsoCimFoglalaton } from './pajzsfuro.js';
+// ⭐ D124 ②: a szállítás jele a kopogásban.
+import { sajatSzallitas, szallitasJel, szallitasEgyezese } from './nyelvValtozat.js';
 
 // ⭐ Ennyi ezredmásodpercenként kopogunk egy még nem felelt társra — mint eddig a fúróban.
 const KOPOGAS_KOZ = 1000;
@@ -78,12 +92,13 @@ const JEGYZEK_KORLAT = 1000;
  *
  * @param {Object} beallitas
  * @param {number} beallitas.port - a helyi UDP-port (ugyanaz a szám, mint a TCP-kapué)
- * @param {(halo: Object, tars: {cim: string, port: number, bekopogo: boolean}) => Promise<Object>} beallitas.munka
- *   - a résen elvégzendő munka (csere + fájl-randevú); a hívó adja
+ * @param {(halo: Object, tars: {cim: string, port: number, bekopogo: boolean, szallitas: number}) => Promise<Object>} beallitas.munka
+ *   - a résen elvégzendő munka (csere + fájl-randevú); a hívó adja. A `szallitas` a közös szállítás (D124 ②).
  * @param {Function} [beallitas.jelez] - események a naplónak (D19)
  * @param {number} [beallitas.bekopogoKorlat] - egyszerre legfeljebb ennyi ismeretlen bekopogóval dolgozunk
  * @param {number} [beallitas.jegyzekKorlat] - a társ-jegyzék legfeljebb ennyi bejegyzést tart
  * @param {number} [beallitas.kopogasKoz]
+ * @param {number[]} [beallitas.szallitas] - ⚠️ csak próbának: a saját szállítás [legrégebbi, legújabb] (D124 ②)
  * @returns {Promise<Object>} { port, azonosito, kopog, sajatCim, zar, tarsakSzama }
  */
 export async function udpKapuNyitasa(beallitas) {
@@ -113,10 +128,13 @@ export async function udpKapuNyitasa(beallitas) {
   const korok = new Set();
   let lezarva = false;
 
+  // ⭐ D124 ②: a saját szállításunk — minden kopogás-üzenet viszi (egy helyen, a `kuld`-ban).
+  const sajatSz = sajatSzallitas(beallitas);
+
   const most = () => Date.now();
   const kuld = (uzenet, cim, cport) => {
     if (lezarva) return;
-    halo.send(JSON.stringify({ uzenet, tol: azonosito }), cport, cim, (hiba) => {
+    halo.send(JSON.stringify({ uzenet, tol: azonosito, ...szallitasJel(sajatSz) }), cport, cim, (hiba) => {
       if (hiba) jelez({ mi: 'KULDES-BUKOTT', cim, port: cport, ok: hiba.message });
     });
   };
@@ -161,7 +179,7 @@ export async function udpKapuNyitasa(beallitas) {
       }
       if (plafonAlatt) teleJelezve = false;
       t = { cim, port: cport, kulcs, munka: null, adatJott: false, ujKopogas: false,
-        bekopogo: false, utolsoKopogasunk: 0, latva: most() };
+        bekopogo: false, utolsoKopogasunk: 0, latva: most(), szallitas: null, nincsKozos: null, hibasJel: false };
       tarsak.set(kulcs, t);
     }
     if (t) t.latva = most();
@@ -190,7 +208,7 @@ export async function udpKapuNyitasa(beallitas) {
     jelez({ mi: 'ATFURVA', cim: t.cim, port: t.port, bekopogo: t.bekopogo, eltelt });
     const igeret = (async () => {
       try {
-        const eredmeny = await munka(halo, { cim: t.cim, port: t.port, bekopogo: t.bekopogo });
+        const eredmeny = await munka(halo, { cim: t.cim, port: t.port, bekopogo: t.bekopogo, szallitas: t.szallitas });
         return { ok: true, eredmeny, eltelt: most() - kezdet };
       } catch (hiba) {
         jelez({ mi: 'ATFURT-MUNKA-BUKOTT', cim: t.cim, port: t.port, ok: hiba.message });
@@ -206,6 +224,35 @@ export async function udpKapuNyitasa(beallitas) {
     });
     for (const kor of korok) kor.munkaIndult(t, igeret);
     return igeret;
+  };
+
+  /**
+   * ⭐⭐ D124 ②: a társ kopogás-üzenetének szállítás-jele. Közös szállításnál feljegyzi (`t.szallitas`); ha nincs közös (vagy
+   * a jel hibás), kimondja — társanként egyszer, amíg nem változik —, és a nincs-közöst a köröknek is beszámolja: akkor se
+   * munka, se visszakopogás. Az egyezést adja vissza (`szallitasEgyezese`: `szallitas` null, ha nem mehet tovább).
+   * ⭐ A `KOPOG`-ra ilyenkor is `HALLAK` megy (a hívó küldi): ebből tudja meg a társ a mi jelünket.
+   */
+  const szallitasRendben = (t, u) => {
+    const e = szallitasEgyezese(u, sajatSz);
+    if (e.szallitas !== null) {
+      t.szallitas = e.szallitas;
+      t.nincsKozos = null;
+      t.hibasJel = false;
+      return e;
+    }
+    if (e.hibas) {
+      if (!t.hibasJel) jelez({ mi: 'HIBAS-SZALLITASJEL', cim: t.cim, port: t.port, ok: e.uzenet });
+      t.hibasJel = true;
+      return e;
+    }
+    const valtozott = !t.nincsKozos || t.nincsKozos.tars.join() !== e.tars.join();
+    t.nincsKozos = e;
+    if (valtozott) {
+      jelez({ mi: 'NINCS-KOZOS-SZALLITAS', cim: t.cim, port: t.port, irany: e.irany, sajat: e.sajat, tars: e.tars,
+        ok: e.uzenet });
+    }
+    for (const kor of korok) kor.nincsKozos(t, e);
+    return e;
   };
 
   halo.on('message', (adat, felado) => {
@@ -234,6 +281,13 @@ export async function udpKapuNyitasa(beallitas) {
       // ⛔ Tele a jegyzék, és nincs kiszorítható hely: nem felelünk (se HALLAK, se
       // visszakopogás) — egy hamisított feladónak így nem küldünk semmit.
       if (!t) return;
+      // ⭐ D124 ②: nincs közös szállítás — a HALLAK-unk a jelünket viszi (a társ ebből mondja ki), de munka és visszakopogás
+      // nincs; a bekopogó-helyet sem foglalja.
+      const sz = szallitasRendben(t, u);
+      if (sz.szallitas === null) {
+        if (!sz.hibas) kuld('HALLAK', felado.address, felado.port);
+        return;
+      }
       if (t.munka && t.adatJott) {
         // ⛔ A munkánk vele már javában folyik — egy második csere összeakadna vele.
         t.ujKopogas = true;
@@ -263,6 +317,8 @@ export async function udpKapuNyitasa(beallitas) {
     if (u.uzenet === 'HALLAK') {
       const t = bejegyzes(felado.address, felado.port);
       if (!t) return;
+      // ⭐ D124 ②: a társ hall minket, de nincs közös szállításunk — a kör megnevezi, munka nem indul.
+      if (szallitasRendben(t, u).szallitas === null) return;
       for (const kor of korok) kor.hallak(t);
       if (t.munka) return;
       // ⭐ A CÍMRE kopogtunk, és egy MÁSIK portjáról felelt? A mobil NAT portot válthat
@@ -284,6 +340,7 @@ export async function udpKapuNyitasa(beallitas) {
     if (u.uzenet === 'FOGLALT') {
       const t = bejegyzes(felado.address, felado.port);
       if (!t) return;
+      if (szallitasRendben(t, u).szallitas === null) return;
       for (const kor of korok) kor.foglalt(t);
       jelez({ mi: 'FOGLALT', cim: t.cim, port: t.port });
     }
@@ -308,7 +365,7 @@ export async function udpKapuNyitasa(beallitas) {
    * a cél „nem felelt" (`masJelentkezett`), pontos címen „más felelt" (`masFelelt`).
    *
    * @returns {Promise<{celok: number, atfurt: number, sikeres: number, foglalt: number,
-   *                    kuldott: number, eredmenyek: Array<Object>}>}
+   *                    nincsKozos: number, kuldott: number, eredmenyek: Array<Object>}>}
    */
   async function kopog(celok, { idokorlat }) {
     const jok = (celok ?? [])
@@ -322,7 +379,7 @@ export async function udpKapuNyitasa(beallitas) {
     const allapotok = jok
       .filter((c) => !c.cim.includes(':'))
       .map((c) => ({ ...c, kulcs: c.cim + ':' + c.port, tars: null, igeret: null,
-        hallak: false, foglalt: false, masJelentkezett: false, bukott: null,
+        hallak: false, foglalt: false, masJelentkezett: false, bukott: null, nincsKozos: null,
         jo: undefined, kopogtunk: false, csoport: null }));
     let kuldott = 0;
 
@@ -358,6 +415,7 @@ export async function udpKapuNyitasa(beallitas) {
     const munkatFigyel = (a, igeret) => {
       a.igeret = igeret;
       a.jo = undefined;
+      a.nincsKozos = null;              // ⭐ D124 ②: egy közös jellel jött HALLAK munkát indított — az számít
       igeret.then((e) => {
         if (a.igeret !== igeret) return;
         a.jo = e.ok && !e.eredmeny?.masutt && !(a.alairo && e.eredmeny?.alairo && e.eredmeny.alairo !== a.alairo);
@@ -430,6 +488,13 @@ export async function udpKapuNyitasa(beallitas) {
         const a = pontos(t) ?? allapotok.find((c) => c.tars === t)
           ?? jeloltek(t).find((c) => !c.alairo);
         if (a) { a.foglalt = true; a.tars = t; }
+      },
+      // ⭐⭐ D124 ②: a cél felelt, de nincs közös szállításunk — kész (nem hívjuk tovább), és nem ő (a csoport következő
+      // címe jöhet). ⚠️ Mint a „foglalt”: nem erősíthető meg, tehát várt társnál portváltásra nem könyveljük.
+      nincsKozos(t, e) {
+        const a = pontos(t) ?? allapotok.find((c) => c.tars === t)
+          ?? jeloltek(t).find((c) => !c.alairo);
+        if (a && !a.igeret) { a.hallak = true; a.tars = t; a.jo = false; a.nincsKozos = e; }
       },
       munkaIndult(t, igeret) {
         const a = hozzarendel(t);
@@ -506,6 +571,12 @@ export async function udpKapuNyitasa(beallitas) {
           hiba: 'a társat a másik címén értük el' });
         continue;
       }
+      // ⭐⭐ D124 ②: felelt, de nincs közös szállításunk — megnevezve, az iránnyal és a teendővel (a `hiba` a mondat).
+      if (!a.igeret && a.nincsKozos) {
+        eredmenyek.push({ cim: a.tars?.cim ?? a.cim, port: a.tars?.port ?? a.port, cel, ok: false, hiba: a.nincsKozos.uzenet,
+          nincsKozos: { irany: a.nincsKozos.irany, sajat: a.nincsKozos.sajat, tars: a.nincsKozos.tars } });
+        continue;
+      }
       if (!a.igeret) {
         eredmenyek.push({ cim: a.cim, port: a.port, cel, ok: false,
           hiba: a.foglalt ? 'foglalt' : a.hallak ? 'felelt, de nem indult munka' : 'nem felelt',
@@ -526,6 +597,7 @@ export async function udpKapuNyitasa(beallitas) {
       atfurt: allapotok.filter((a) => a.igeret).length,
       sikeres: eredmenyek.filter((e) => e.ok).length,
       foglalt: allapotok.filter((a) => a.foglalt && !a.igeret).length,
+      nincsKozos: allapotok.filter((a) => a.nincsKozos && !a.igeret).length,
       kuldott,
       eredmenyek
     };

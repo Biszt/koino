@@ -6283,6 +6283,15 @@ elveszett, és a kérő csak „nem válaszol”-t látott). A fájl-randevú ki
 régi kérő hiánynak olvassa). A csere eredménye a közös nyelvet is mondja (`nyelv`). A próba (`meres/nyelvProba.js`): a számítás,
 a csere, a kérelem négy útja, és a VALÓDI régi program (`520aefa`, a git-ből — PV6).
 
+*A kopogás jele (②, 2026-11-06 — elágazás 242):* a szállítás (a kézfogás, a titkosított csomag) a párbeszéd alatt van, azt a
+`NYITAS` nem egyeztetheti — a saját jelét a kopogás viszi: `sz: [legrégebbi, legújabb]` minden kopogás-üzenetben (`KOPOG`,
+`HALLAK`, `FOGLALT` — egy helyen, a kapu `kuld`-jában), ugyanazzal a számítással (`nyelvValtozat.js`: `szallitasEgyezese`, dobás
+nélkül). Jel nélkül az 1-es szállítás; a mai is az. Közös nélkül a kapu se munkát, se visszakopogást nem indít, de a `KOPOG`-ra
+`HALLAK`-kal felel (a jelével — különben a társnál csak „nem felelt” lenne), és mindkét kapu kimondja (`NINCS-KOZOS-SZALLITAS`,
+társanként egyszer); a kör bukása megnevezett (`nincsKozos`, az irány és a teendő). Új kopogás-üzenet nem kellett. A közös szám a
+munkához is átér (`tars.szallitas`). A próba a valódi régi kapuval is (a git-ből). ⚠️ A kopogás nem hitelesített: egy hamis
+„nincs közös” egy kört elvehet (mint egy hamis `FOGLALT`) — a ③ emlékezete ezért nem épülhet egyetlen csomagra.
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem

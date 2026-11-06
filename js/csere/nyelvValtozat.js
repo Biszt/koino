@@ -29,7 +29,18 @@
 // mindkét fél jelezte (`cs`, `kd`, `FOGLALT`, `KESZ` + `kesobb` — eddig is így). A törések gyűjtve jönnek: egy kiadás legfeljebb
 // EGY új számot hoz (PV3); a régit a program legalább 6 hónapig beszéli, a szélén fordítva (PV2 — az építés ④-e).
 //
-// Használják: csere/vonal.js (a jel és az ellenőrzés), a próbák (`meres/nyelvProba.js`).
+// ===== ⭐ A SZÁLLÍTÁS JELE (D124 — az építés ②-e) =====
+//
+// A szállítás (a kézfogás, a titkosított csomag — `udpVonal.js`, `titkositas.js`) a párbeszéd ALATT van: ha az változik, a
+// `NYITAS` el sem jut a társhoz, tehát azt a nyitás jele nem egyeztetheti. A szállítás saját jelét ezért a KOPOGÁS viszi
+// (`KOPOG`, `HALLAK`, `FOGLALT` — `udpKapu.js`): `sz: [legrégebbi, legújabb]`, ugyanazzal a számítással. A kopogás türelmes (a
+// régi kapu az ismeretlen mezőt átlépi); aki nem küld jelet, az az **1-es** szállítást beszéli. Ha nincs közös, a kézfogás el
+// sem indul — és mindkét fél kimondja (a kapu `NINCS-KOZOS-SZALLITAS` jelzése). ⚠️ Ára: a kopogás nyílt — az úton ülő egy
+// számot lát (melyik szállítás-nemzedék); a koino forgalom a kopogásról ma is felismerhető.
+// ⚠️ A `sz` a kopogás mezője: a megbízható folyam darabjainak `sz`-e (a sorszám, `udpKapcsolat`) a titkosított csatornán belül
+// él, `uzenet` nélkül — a kettő nem találkozik (a kapu az `uzenet` nélküli csomagot adatnak látja, a jelét nem nézi).
+//
+// Használják: csere/vonal.js (a nyelv jele és ellenőrzése), csere/udpKapu.js (a szállításé), a próbák (`meres/nyelvProba.js`).
 
 // ===== A MAI NYELV =====
 
@@ -69,8 +80,13 @@ export function nyelvJel(sajat) {
  * @returns {number[]|null}
  */
 export function tarsNyelve(uzenet) {
-  if (!uzenet || typeof uzenet !== 'object' || !(NYELV_MEZO in uzenet)) return [...JEL_NELKUL];
-  const p = uzenet[NYELV_MEZO];
+  return jelbol(uzenet, NYELV_MEZO);
+}
+
+/** Egy jel az üzenetből — a nyelvé és a szállításé ugyanígy: jel nélkül az 1-es, hibás jelnél null. */
+function jelbol(uzenet, mezo) {
+  if (!uzenet || typeof uzenet !== 'object' || !(mezo in uzenet)) return [...JEL_NELKUL];
+  const p = uzenet[mezo];
   return ervenyesPar(p) ? [p[0], p[1]] : null;
 }
 
@@ -104,14 +120,67 @@ export function nyelvEllenorzese(uzenet, sajat) {
   }
   const k = kozosNyelv(sajat, tars);
   if (k.nyelv !== null) return k.nyelv;
-  const hiba = new Error(k.irany === 'regebbi'
-    ? 'Nincs közös nyelvünk: a társ programja régebbi (' + nyelvSzoveg(tars) + ' nyelv), az enyém ' + nyelvSzoveg(sajat)
-      + ' — amíg nem frissít, nem cserélünk'
-    : 'Nincs közös nyelvünk: a társ programja újabb (' + nyelvSzoveg(tars) + ' nyelv), az enyém ' + nyelvSzoveg(sajat)
-      + ' — frissítsd a programot (a telepítő sorral)');
+  const hiba = new Error(nincsKozosSzovege('nyelvünk', 'nyelv', k.irany, tars, sajat));
   hiba.kod = 'NINCS-KOZOS-NYELV';
   hiba.irany = k.irany;
   hiba.sajatNyelve = [...sajat];
   hiba.tarsNyelve = tars;
   throw hiba;
+}
+
+/** A közös hiányának mondata — az irány szerint a teendővel (a nyelvnél és a szállításnál ugyanaz). */
+function nincsKozosSzovege(mi, egyseg, irany, tars, sajat) {
+  return irany === 'regebbi'
+    ? 'Nincs közös ' + mi + ': a társ programja régebbi (' + nyelvSzoveg(tars) + ' ' + egyseg + '), az enyém ' + nyelvSzoveg(sajat)
+      + ' — amíg nem frissít, nem cserélünk'
+    : 'Nincs közös ' + mi + ': a társ programja újabb (' + nyelvSzoveg(tars) + ' ' + egyseg + '), az enyém ' + nyelvSzoveg(sajat)
+      + ' — frissítsd a programot (a telepítő sorral)';
+}
+
+// ===== ⭐ A SZÁLLÍTÁS (az építés ②-e — a kopogásban) =====
+
+/** A legrégebbi szállítás-nemzedék, amit ez a program még beszél (a kézfogás és a titkosított csomag alakja). */
+export const SZALLITAS_LEGREGEBBI = 1;
+/** A legújabb szállítás-nemzedék. ⭐ Új számot csak a szállítás törése hoz (más kézfogás, más csomag-alak). */
+export const SZALLITAS_LEGUJABB = 1;
+/** A jel mezője a kopogás üzeneteiben. ⛔ A neve és az alakja (`[a, b]`) soha nem változik. */
+export const SZALLITAS_MEZO = 'sz';
+
+/**
+ * A saját szállítás — a program állandói, vagy (a próbáknak) a hívó adta pár (`beallitas.szallitas`).
+ * @returns {number[]} [legrégebbi, legújabb]
+ */
+export function sajatSzallitas(beallitas) {
+  const n = beallitas?.szallitas;
+  return ervenyesPar(n) ? [n[0], n[1]] : [SZALLITAS_LEGREGEBBI, SZALLITAS_LEGUJABB];
+}
+
+/** A jel, egy kopogás-üzenetbe szórva: `{ sz: [a, b] }`. */
+export function szallitasJel(sajat) {
+  return { [SZALLITAS_MEZO]: [sajat[0], sajat[1]] };
+}
+
+/** A társ szállítása a kopogásából. Jel nélkül az 1-es (a D124 ② előtti program); hibás jelnél null. */
+export function tarsSzallitasa(uzenet) {
+  return jelbol(uzenet, SZALLITAS_MEZO);
+}
+
+/**
+ * ⭐⭐ A társ kopogásának szállítás-jele — DOBÁS NÉLKÜL (a kapu egy csomag-figyelőben dönt, nem egy munkában):
+ *   · `{ szallitas: n }` — a közös szállítás;
+ *   · `{ szallitas: null, irany, sajat, tars, uzenet }` — nincs közös (`irany` a TÁRSRÓL szól: 'regebbi' | 'ujabb');
+ *   · `{ szallitas: null, hibas: true, uzenet }` — a jel ott van, de nem az örök alakban.
+ * @param {Object} uzenet - a társ kopogás-üzenete
+ * @param {number[]} sajat - `sajatSzallitas(...)`
+ */
+export function szallitasEgyezese(uzenet, sajat) {
+  const tars = tarsSzallitasa(uzenet);
+  if (!tars) {
+    return { szallitas: null, hibas: true,
+      uzenet: 'A társ szállítás-jele hibás (' + JSON.stringify(uzenet?.[SZALLITAS_MEZO]) + ') — nem fogunk vele kezet' };
+  }
+  const k = kozosNyelv(sajat, tars);
+  if (k.nyelv !== null) return { szallitas: k.nyelv };
+  return { szallitas: null, irany: k.irany, sajat: [...sajat], tars,
+    uzenet: nincsKozosSzovege('szállításunk', 'szállítás', k.irany, tars, sajat) };
 }

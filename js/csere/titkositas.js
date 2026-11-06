@@ -9,7 +9,7 @@
 // ⭐ Az úton ülő (szolgáltató, nyilvános wifi) elől rejti a cserét: az eseményeket, a koinó azonosítóját, és
 // a készülék tábla-kulcsát — ez utóbbi állandó, tehát nyíltan hálózatról hálózatra követni lehetett volna a
 // készüléket. ⚠️ Ami látszik: hogy két cím beszél, mikor, és nagyjából mennyit; és a kopogás (KOPOG/HALLAK,
-// véletlen azonosítóval). A tárolt adatot a lemezen nem titkosítja (az a készülék biztonsága).
+// véletlen azonosítóval, és a D124 ② óta a szállítás-nemzedék száma: `sz`). A tárolt adatot a lemezen nem titkosítja (az a készülék biztonsága).
 //
 // ===== A KÉZFOGÁS — két lépés, mindkét oldal egyszerre (a D89 pontosítása, 2026-10-03) =====
 //

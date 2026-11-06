@@ -128,7 +128,7 @@ most legfeljebb kétszer újrapróbál, és ha így sem, a bukás megnevezi (ros
 — a tétlenségi óra); magában 5/5 zöld — ugyanaz a jelenség, mint a lenti lezárás-próbáé: a 10 mp-es óra terhelés alatt;
 MÉRENDŐ (mi hallgat el 10 mp-ig 30% veszteség mellett?), nem hangolandó · ⚠️ (2026-10-11) a `csereProba` „a lezárás NEM dobhatja el az utolsó darabot (5×)” próbája a
 teljes sor terhelése alatt egyszer bukott (a 10 mp-es tétlenségi óra — „a másik fél nem válaszol”); magában 5/5, a `csere`
-témakör egészében 363/363 zöld — a bukásnak meg kell neveznie az okát, mielőtt bárki az időzítéséhez nyúl · egy egyszeri téves „0 új esemény” kiírás a telefonon (helyben nem jön
+témakör egészében 363/363 zöld; 2026-11-06-án harmadszor (a D124 ② teljes során, 1402/1403 — magában 3 × 108/108, a következő teljes soron 1403/1403) — a bukásnak meg kell neveznie az okát, mielőtt bárki az időzítéséhez nyúl · egy egyszeri téves „0 új esemény” kiírás a telefonon (helyben nem jön
 elő) · a D71 őrjárat-próba egyszer bukott a teljes sor terhelése alatt (magában 3/3 zöld, a következő teljes soron
 is) · a `koinoPakli.js` csendes újrakérdezését csak böngészőben mértük (node alatt nem futtatható; a program oldalát a
 D100 parancssor-próbája méri, egy végig futó felülettel) · a lap a még meg nem érkezett szöveget üresen mutatja

@@ -1,8 +1,8 @@
 # A protokoll nyelvváltozata — átvizsgálás (D123 ③, PR6 — 2026-11-06, kód nélkül)
 
 > **Állapot:** ✅ **D124** (Csaba, 2026-11-06: *„minden javaslatodat elfogadom, mehetünk tovább.”* — PV1–PV6 mind (A)) · 🚧 az
-> építés: ✅ ① a jel és az egyezés (elágazás 241) · ⏭️ ② a kopogás jele → ③ az emlékezet és a kimondás → ④ a fordító-szél → ⑤ a kiírt
-> alakok (8.).
+> építés: ✅ ① a jel és az egyezés (elágazás 241) · ✅ ② a kopogás jele (elágazás 242) · ⏭️ ③ az emlékezet és a kimondás → ④ a
+> fordító-szél → ⑤ a kiírt alakok (8.).
 >
 > Csaba (2026-11-06): *„rendben értem. csinálhatod, a pr6-ot”*. Az
 > elv a D123-ban eldőlt (PR6 (A) — a KZ5 válasza): *a programok kimondják, melyik nyelvváltozatot beszélik, és az új program egy
@@ -145,7 +145,13 @@ törésébe került). A dátum a kódban áll (a jegyzékben); a lap 30 nappal e
 félnél) + a próbák a valódi régi programmal (PV6). Ez maga NEM törés: a mai program az 1-es, a régi jel nélkül is az. *(Megépült
 2026-11-06: a jel neve `ny` lett — a NYITAS-ban a `pv` már foglalt (a részvételi halmaz változata), a `v` könnyen összekeverhető vele; `js/csere/nyelvValtozat.js`, `meres/nyelvProba.js`. ⛔ A
 próba egy valódi hibát talált: a megnevezett hiba előtt a kimenő sort ki kell üríteni, különben a jelünk a zárásban elveszik.)* →
-② **a kopogás jele** (a szállításé, `sz`) → ③ **az emlékezet és a kimondás** (társanként megjegyezve, a lap alsó sávja, a `koino`
+② ✅ **a kopogás jele** (a szállításé, `sz`). *(Megépült 2026-11-06: minden kopogás-üzenet — `KOPOG`, `HALLAK`, `FOGLALT` — viszi,
+egy helyen, a kapu `kuld`-jában; +11 bájt kopogásonként. Közös szállítás nélkül a kapu se munkát, se visszakopogást nem indít, de a
+`KOPOG`-ra `HALLAK`-kal felel, hogy a társ a mi jelünket is lássa — így mindkét kapu kimondja (`NINCS-KOZOS-SZALLITAS`, társanként
+egyszer), és a kör bukása is megnevezett (`nincsKozos`, a mondat az iránnyal és a teendővel). Új kopogás-üzenet nem kellett. A
+közös szám a munkához is átér (`tars.szallitas` — a ④ kézfogás-választójának). A próba a valódi régi kapuval is (a git-ből). ⚠️ A
+kopogás nem hitelesített: egy hamis „nincs közös” egy kört elvehet, mint ma egy hamis FOGLALT — a ③ emlékezetének ezért nem elég
+egyetlen csomag.)* → ③ **az emlékezet és a kimondás** (társanként megjegyezve, a lap alsó sávja, a `koino`
 parancs) → ④ **a fordító-szél és a régi számítások jegyzéke** — üresen, de egy kitalált 2-es változattal végigpróbálva (különben a
 réteg kész, és az éles út nem hívja — a 4. szabály-hiány) → ⑤ **a kiírt alakok** szabálya (PV5) és a meglévők változatjele.
 

@@ -1815,3 +1815,13 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     VALÓDI régi program ellen (a git-ből, `520aefa`) — cserélnek, a régi kérő megkapja a szeletet és fordítva, a mai „2-es” a régit
     régebbinek nevezi; sekély klónon (telefon) kimondva kihagyja · ⏭️ ② a kopogás jele (a szállításé) → ③ az emlékezet és a kimondás
     → ④ a fordító-szél → ⑤ a kiírt alakok · `protokoll_valtozat_atvizsgalas.md` 8.
+242. **2026-11-06 · D124 ② — a szállítás jele a kopogásban** → **`sz: [legrégebbi, legújabb]` minden kopogás-üzenetben (`KOPOG`,
+    `HALLAK`, `FOGLALT` — egy helyen, a kapu `kuld`-jában; +11 bájt), ugyanazzal a számítással, mint a nyelvé; jel nélkül az 1-es (a
+    mai is); közös nélkül se munka, se visszakopogás — de a `KOPOG`-ra `HALLAK` megy a jelünkkel, így MINDKÉT kapu kimondja
+    (`NINCS-KOZOS-SZALLITAS`, társanként egyszer, az iránnyal), és a kör bukása is megnevezett (`nincsKozos`); a közös szám a munkához
+    is átér (`tars.szallitas`)** · ⭐ miért a kopogás: a szállítás a párbeszéd ALATT van — ha az változik, a `NYITAS` el sem jut · ⭐
+    új kopogás-üzenet nem kellett: a `HALLAK` a jellel elég, a társ maga dönt belőle · ⭐ a próba a VALÓDI régi kapuval (a git-ből):
+    kopognak és dolgoznak, a mai „2-es” a régit megnevezi · ⚠️ a régi kapu a „2-es” `HALLAK`-jára a maga munkáját elkezdi (ő a jelet
+    nem ismeri; a valódi munkája a kézfogásnál bukna) — ezen a régi programban nem segíthetünk · ⚠️ a kopogás nem hitelesített: egy
+    hamis „nincs közös” egy kört elvehet, mint egy hamis `FOGLALT` — a ③ emlékezete nem épülhet egyetlen csomagra · ⏭️ ③ az
+    emlékezet és a kimondás → ④ a fordító-szél → ⑤ a kiírt alakok.

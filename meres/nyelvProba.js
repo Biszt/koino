@@ -9,6 +9,10 @@
 //   · ⭐⭐ (D124 / PV6) a VALÓDI régi program — a git-ből elővéve (a PR6 előtti utolsó program, jel nélkül) — a mai programmal:
 //     cserélnek, a régi kérő megkapja a szeletét, a mai kérő is a régitől; és a mai „2-es” program a régit régebbinek nevezi.
 //     Ha a régi program nincs meg (nincs git, vagy egy sekély klón a telefonon), a próba ezt kimondja, és kihagyja.
+//   · ⭐⭐ (az építés ②-e) a SZÁLLÍTÁS JELE a kopogásban (`udpKapu.js`): közös szállításon munka indul (a közös számmal);
+//     közös nélkül munka és visszakopogás nincs, mindkét kapu megnevezi az irányt, a kör bukása is megnevezve; a csomagok
+//     szintjén: a válasz viszi a jelünket, egy társ sok kopogása egy jelzés, a hibás jel válasz nélkül, megnevezve; és a VALÓDI
+//     régi kapu (a git-ből) a maival kopog és dolgozik, a mai „2-es” pedig a régit megnevezi.
 //
 // Használja: meres/mind.js (`nyelv` csoport, a `csere` csoportban is).
 
@@ -26,8 +30,10 @@ import {
   csereUdpResen, szeletUdpResen, valaszUdpResen, fajlUdpResen, kezfogasUdpResen, udpKapcsolat
 } from '../js/csere/udpVonal.js';
 import {
-  NYELV_LEGREGEBBI, NYELV_LEGUJABB, sajatNyelv, tarsNyelve, kozosNyelv, nyelvEllenorzese
+  NYELV_LEGREGEBBI, NYELV_LEGUJABB, sajatNyelv, tarsNyelve, kozosNyelv, nyelvEllenorzese,
+  SZALLITAS_LEGREGEBBI, SZALLITAS_LEGUJABB, sajatSzallitas, tarsSzallitasa, szallitasEgyezese
 } from '../js/csere/nyelvValtozat.js';
+import { udpKapuNyitasa } from '../js/csere/udpKapu.js';
 import { probaGyujtemeny, ujEember } from './probaFuttato.js';
 
 const { proba, futtatas } = probaGyujtemeny('A protokoll nyelvváltozata (D124 — PR6)');
@@ -36,6 +42,7 @@ const KOINO = 'proba';
 const mappak = [];
 // ⭐ A próbák nem várják ki a 20 mp-es tétlenségi órát: a megnevezett hiba azonnal jön, a régi program néma oldala 3 mp után.
 const TURELEM = 3000;
+const varj = (ms) => new Promise((kesz) => setTimeout(kesz, ms));
 
 // ===== A KÉSZÜLÉKEK =====
 
@@ -252,6 +259,8 @@ async function regiProgram() {
   }
   const betolt = (ut) => import(pathToFileURL(join(hely, ut)).href);
   regiBetoltve = {
+    // ⭐ A régi kapu is (a ② próbájának): az `520aefa` kapuja a D124 ② előtti — a kopogása jel nélkül megy.
+    udpKapu: await betolt('js/csere/udpKapu.js'),
     udpVonal: await betolt('js/csere/udpVonal.js'),
     fajlTar: await betolt('js/tar/fajlTar.js'),
     esemenyTar: await betolt('js/tar/esemenyTar.js')
@@ -313,6 +322,161 @@ proba('⭐⭐⭐ a VALÓDI régi program (a PR6 előtti, a git-ből) a maival: c
   };
   const ok = Object.values(jo).every(Boolean);
   if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([csA, csB, rk, mk, ketto].map((r) => r.ok ? 'rendben' : r.kod + ' ' + r.uzenet)) + ')\n');
+  return ok;
+});
+
+// ===== ⭐⭐ A SZÁLLÍTÁS JELE A KOPOGÁSBAN (az építés ②-e) =====
+
+/** Egy kapu hamis munkával (a `nyito` a mai vagy a régi program kapuja): feljegyzi a munkákat (a társsal) és a jelzéseket. */
+async function szKapu(nyito, szallitas) {
+  const naplo = { munkak: [], jelzesek: [] };
+  const kapu = await nyito({
+    port: 0, szallitas, bekopogoKorlat: 3,
+    jelez: (e) => naplo.jelzesek.push(e),
+    munka: async (halo, tars) => { naplo.munkak.push(tars); await varj(100); return { uj: 0 }; }
+  });
+  return { kapu, naplo };
+}
+
+/** Az A kapu kopog a B-re (egy kör); a végén a kör, és mindkét kapu naplója. */
+async function kopogas(nyitoA, szA, nyitoB, szB) {
+  const a = await szKapu(nyitoA, szA), b = await szKapu(nyitoB, szB);
+  try {
+    const kor = await a.kapu.kopog([{ cim: '127.0.0.1', port: b.kapu.port }], { idokorlat: TURELEM });
+    await varj(300);
+    return { kor, a: a.naplo, b: b.naplo };
+  } finally {
+    a.kapu.zar();
+    b.kapu.zar();
+  }
+}
+
+/** Egyetlen `NINCS-KOZOS-SZALLITAS` jelzés, ebben az irányban. */
+const szMegnevezve = (naplo, irany) =>
+  naplo.jelzesek.filter((e) => e.mi === 'NINCS-KOZOS-SZALLITAS').length === 1
+  && naplo.jelzesek.some((e) => e.mi === 'NINCS-KOZOS-SZALLITAS' && e.irany === irany);
+
+/** A kör bukása megnevezve (`nincsKozos`, az iránnyal), és munka egyik oldalon sem. */
+const korMegnevezi = (k, irany) => k.kor.nincsKozos === 1 && k.kor.sikeres === 0
+  && k.kor.eredmenyek[0]?.nincsKozos?.irany === irany && /Nincs közös szállításunk/.test(k.kor.eredmenyek[0]?.hiba ?? '');
+
+// Rontás: (a) a szállítás egyezése a NAGYOBBIK „legújabbat” veszi → [1,3]/[2,4] nem 3 → bukik; (b) jel nélkül nem az 1-es → a
+// régi kapu „hibás jelű” lenne → bukik; (c) a hibás jel nem null → bukik.
+proba('⭐ a SZÁLLÍTÁS jele — ugyanaz a számítás: jel nélkül az 1-es; a hibás jel és a közös hiánya megnevezve (dobás nélkül)', () => {
+  const e = (u, s) => szallitasEgyezese(u, s);
+  const jo = {
+    mai: SZALLITAS_LEGREGEBBI === 1 && SZALLITAS_LEGUJABB === 1 && sajatSzallitas().join() === '1,1',
+    beallitva: sajatSzallitas({ szallitas: [2, 3] }).join() === '2,3' && sajatSzallitas({ szallitas: [3, 2] }).join() === '1,1',
+    jelNelkul: tarsSzallitasa({ uzenet: 'KOPOG', tol: 'x' }).join() === '1,1' && e({ uzenet: 'KOPOG' }, [1, 1]).szallitas === 1,
+    kozos: e({ sz: [2, 4] }, [1, 3]).szallitas === 3 && e({ sz: [1, 3] }, [2, 4]).szallitas === 3,
+    nincs: e({ sz: [2, 2] }, [1, 1]).szallitas === null && e({ sz: [2, 2] }, [1, 1]).irany === 'ujabb'
+      && e({}, [2, 2]).irany === 'regebbi' && /régebbi/.test(e({}, [2, 2]).uzenet),
+    hibas: [[0, 1], [2, 1], 'x', [1], null].every((j) => e({ sz: j }, [1, 1]).hibas === true),
+    // ⭐ A nyelv jele nem a szállításé (két külön mező): a `ny` nem számít bele.
+    kulonMezo: e({ ny: [5, 5] }, [1, 1]).szallitas === 1 && tarsNyelve({ sz: [5, 5] }).join() === '1,1'
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ')\n');
+  return ok;
+});
+
+// Rontás: (a) a kapu a kopogást jel nélkül küldi → a „2-es” kopogását a mai 1-esnek látja, munkát kezd → bukik; (b) a KOPOG-ágban
+// nincs ellenőrzés → a kapu visszakopog (BEKOPOGO-CEL) → bukik; (c) a HALLAK-ágban nincs ellenőrzés → munka indul → bukik; (d) a
+// nincs-közösre nem megy HALLAK → a kopogó kör „nem felelt”-et mond, nem nevezi meg → bukik; (e) a kör nem könyveli → bukik;
+// (f) a munka nem kapja a közös számot → bukik.
+proba('⭐⭐ a KOPOGÁS jele: közös szállításon munka (a közös számmal); közös nélkül se munka, se visszakopogás — mindkét kapu és a kör is megnevezi, mindkét irányban', async () => {
+  const kozosEgy = await kopogas(udpKapuNyitasa, [1, 2], udpKapuNyitasa, [1, 1]);
+  const kozosHarom = await kopogas(udpKapuNyitasa, [1, 3], udpKapuNyitasa, [2, 4]);
+  const ujabbKopog = await kopogas(udpKapuNyitasa, [2, 2], udpKapuNyitasa, [1, 1]);
+  const regebbiKopog = await kopogas(udpKapuNyitasa, [1, 1], udpKapuNyitasa, [2, 2]);
+  const munkaSzammal = (k, n) => k.kor.sikeres === 1 && [k.a, k.b].every((x) => x.munkak.length === 1 && x.munkak[0].szallitas === n);
+  const semmi = (k) => k.a.munkak.length === 0 && k.b.munkak.length === 0
+    && ![k.a, k.b].some((x) => x.jelzesek.some((e) => e.mi === 'BEKOPOGO-CEL' || e.mi === 'ATFURVA'));
+  const jo = {
+    kozosEgy: munkaSzammal(kozosEgy, 1),
+    kozosHarom: munkaSzammal(kozosHarom, 3),
+    // ⭐ A „2-es” kopog: neki a mai régebbi, a mainak ő újabb — és a kör a bukást megnevezi.
+    ujabbKopog: korMegnevezi(ujabbKopog, 'regebbi') && szMegnevezve(ujabbKopog.a, 'regebbi') && szMegnevezve(ujabbKopog.b, 'ujabb')
+      && semmi(ujabbKopog),
+    // ⭐ A mai kopog a „2-es”-re: a mai kör tudja meg, hogy a társ újabb — a „2-es” HALLAK-jából (a jelével).
+    regebbiKopog: korMegnevezi(regebbiKopog, 'ujabb') && szMegnevezve(regebbiKopog.a, 'ujabb')
+      && szMegnevezve(regebbiKopog.b, 'regebbi') && semmi(regebbiKopog)
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) {
+    const kep = (k) => ({ kor: k.kor.eredmenyek.map((e) => e.hiba ?? 'rendben'), a: k.a.jelzesek.map((e) => e.mi + (e.irany ? ':' + e.irany : '')),
+      b: k.b.jelzesek.map((e) => e.mi + (e.irany ? ':' + e.irany : '')), munka: [k.a.munkak.length, k.b.munkak.length] });
+    process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([ujabbKopog, regebbiKopog].map(kep)) + ')\n');
+  }
+  return ok;
+});
+
+/** Egy nyers foglalat, ami a kapura kopog, és feljegyzi, mit kapott vissza. */
+async function nyersKopogo() {
+  const s = createSocket({ type: 'udp4' });
+  await new Promise((kesz) => s.bind(0, '127.0.0.1', kesz));
+  const kapott = [];
+  s.on('message', (adat) => { try { kapott.push(JSON.parse(adat.toString('utf8'))); } catch { kapott.push(null); } });
+  return { kapott, kuld: (u, port) => s.send(JSON.stringify(u), port, '127.0.0.1'), zar: () => s.close() };
+}
+
+// Rontás: (a) a válasz jel nélkül megy → bukik; (b) a „változott” mindig igaz (minden kopogásra egy jelzés) → bukik; (c) a hibás
+// jelre is HALLAK megy → bukik; (d) a jel nélküli kopogás nem az 1-es (nem kap HALLAK-ot és visszakopogást) → bukik.
+proba('⭐ a kopogás jele a csomagban: a válasz viszi a mi jelünket; egy társ sok kopogása EGY jelzés; a hibás jel válasz nélkül, megnevezve; a jel nélküli az 1-es', async () => {
+  const b = await szKapu(udpKapuNyitasa, [1, 1]);
+  const uj = await nyersKopogo(), hibas = await nyersKopogo(), regi = await nyersKopogo();
+  try {
+    for (let i = 0; i < 3; i++) {
+      uj.kuld({ uzenet: 'KOPOG', tol: 'uj', sz: [2, 3] }, b.kapu.port);
+      hibas.kuld({ uzenet: 'KOPOG', tol: 'hibas', sz: 'x' }, b.kapu.port);
+      await varj(60);
+    }
+    regi.kuld({ uzenet: 'KOPOG', tol: 'regi' }, b.kapu.port);
+    await varj(300);
+    const jelzes = (mi) => b.naplo.jelzesek.filter((e) => e.mi === mi);
+    const jel = (u) => JSON.stringify(u?.sz) === '[1,1]';
+    const jo = {
+      valaszJellel: uj.kapott.length === 3 && uj.kapott.every((u) => u?.uzenet === 'HALLAK' && jel(u)),
+      egyJelzes: jelzes('NINCS-KOZOS-SZALLITAS').length === 1 && jelzes('NINCS-KOZOS-SZALLITAS')[0].irany === 'ujabb'
+        && jelzes('NINCS-KOZOS-SZALLITAS')[0].tars.join() === '2,3',
+      hibasValaszNelkul: hibas.kapott.length === 0 && jelzes('HIBAS-SZALLITASJEL').length === 1,
+      jelNelkulEgyes: regi.kapott.some((u) => u?.uzenet === 'HALLAK' && jel(u)) && regi.kapott.some((u) => u?.uzenet === 'KOPOG' && jel(u)),
+      munkaNincs: b.naplo.munkak.length === 0
+    };
+    const ok = Object.values(jo).every(Boolean);
+    if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify({ uj: uj.kapott, hibas: hibas.kapott, regi: regi.kapott }) + ')\n');
+    return ok;
+  } finally {
+    uj.zar(); hibas.zar(); regi.zar(); b.kapu.zar();
+  }
+});
+
+// Rontás: (a) a jel nélküli kopogás nem az 1-es → a mai a régit nem szolgálja ki (nincs munka) → bukik; (b) a mai kopogás egy új,
+// a régi számára ismeretlen ÜZENETTEL jönne → a régi nem felel → bukik; (c) a „2-es” mai a régi HALLAK-jára munkát kezd → bukik.
+proba('⭐⭐⭐ a VALÓDI régi kapu (a D124 ② előtti, a git-ből) a maival: kopogásra mindkét irányban munka indul (a mainál az 1-es szállítással); a mai „2-es” a régit megnevezi, és munkát nem kezd', async () => {
+  const regi = await regiProgram();
+  if (!regi) { process.stdout.write('    (a régi program (' + REGI_PROGRAM + ') nincs meg a git-történetben — kihagyva)\n'); return true; }
+  const regiNyit = regi.udpKapu.udpKapuNyitasa;
+  const regiKopog = await kopogas(regiNyit, undefined, udpKapuNyitasa, undefined);
+  const maiKopog = await kopogas(udpKapuNyitasa, undefined, regiNyit, undefined);
+  const kettesKopog = await kopogas(udpKapuNyitasa, [2, 2], regiNyit, undefined);
+  const regiKopogKetteshez = await kopogas(regiNyit, undefined, udpKapuNyitasa, [2, 2]);
+  const jo = {
+    regiKopog: regiKopog.kor.sikeres === 1 && regiKopog.a.munkak.length === 1 && regiKopog.b.munkak.length === 1
+      && regiKopog.b.munkak[0].szallitas === 1,
+    maiKopog: maiKopog.kor.sikeres === 1 && maiKopog.a.munkak.length === 1 && maiKopog.a.munkak[0].szallitas === 1
+      && maiKopog.b.munkak.length === 1,
+    kettesMegnevezi: korMegnevezi(kettesKopog, 'regebbi') && kettesKopog.a.munkak.length === 0 && szMegnevezve(kettesKopog.a, 'regebbi'),
+    // ⚠️ A régi kapu a „2-es” HALLAK-jára a maga munkáját elkezdi (ő a jelet nem ismeri — a valódi munkája a kézfogásnál bukna); a
+    // „2-es” viszont nem kezd, és megnevezi.
+    kettesNemKezd: regiKopogKetteshez.b.munkak.length === 0 && szMegnevezve(regiKopogKetteshez.b, 'regebbi')
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) {
+    const kep = (k) => ({ kor: k.kor.eredmenyek.map((e) => e.hiba ?? 'rendben'), munka: [k.a.munkak.length, k.b.munkak.length],
+      a: k.a.jelzesek.map((e) => e.mi), b: k.b.jelzesek.map((e) => e.mi) });
+    process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([regiKopog, maiKopog, kettesKopog, regiKopogKetteshez].map(kep)) + ')\n');
+  }
   return ok;
 });
 
