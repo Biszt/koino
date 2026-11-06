@@ -92,6 +92,8 @@ import felajanlas from './felajanlasProba.js';
 import kereses from './keresesProba.js';
 // ⭐⭐ D121: a meghívó szövege és az ellenőrző kód (a meghívás a lapon)
 import meghivo from './meghivoProba.js';
+// ⭐⭐ D124 (PR6 ①): a protokoll nyelvváltozata — a jel, az egyezés, és a valódi régi program a git-ből
+import nyelv from './nyelvProba.js';
 // ⭐ D95/1: a lezárási összegzés — a nagy szeletű érintett döntése az összegző tartónak.
 import lezarasiOsszegzes from './lezarasiOsszegzesProba.js';
 // ⭐ D95/1, D95/3: a két fokú vállalás szerepei a valódi cserén.
@@ -147,6 +149,7 @@ const PROBAK = [
   { nev: 'felajanlas', futtat: felajanlas },
   { nev: 'kereses', futtat: kereses },
   { nev: 'meghivo', futtat: meghivo },
+  { nev: 'nyelv', futtat: nyelv },
   { nev: 'szovegdarab', futtat: szovegDarab },
   { nev: 'tartomany', futtat: tartomany },
   { nev: 'titkositas', futtat: titkositas },
@@ -198,7 +201,7 @@ const CSOPORTOK = {
   // a felületnek felelő réteg
   felulet: ['kapu', 'pakli', 'ter', 'csereallapot'],
   // két készülék között: a párbeszéd, a kézi út, a társak, a kapu, a kötések, a tábla, a DHT
-  csere: ['csere', 'fajlcsere', 'tarsak', 'tartomany', 'titkositas', 'udpkapu', 'kotes', 'tabla', 'dht', 'cimjegyzek', 'kerelem', 'osszegzotartas', 'tagsagkisero', 'gyokerdarab', 'kereso', 'kozoshalmaz', 'reszvetel', 'tarsemlekezet', 'vizsga', 'kiszolgalasikeret', 'keresoregio', 'melysegtanulas', 'felajanlas', 'kereses', 'meghivo'],
+  csere: ['csere', 'fajlcsere', 'tarsak', 'tartomany', 'titkositas', 'udpkapu', 'kotes', 'tabla', 'dht', 'cimjegyzek', 'kerelem', 'osszegzotartas', 'tagsagkisero', 'gyokerdarab', 'kereso', 'kozoshalmaz', 'reszvetel', 'tarsemlekezet', 'vizsga', 'kiszolgalasikeret', 'keresoregio', 'melysegtanulas', 'felajanlas', 'kereses', 'meghivo', 'nyelv'],
   // a fájl-bájtok és a szöveg-darab: tár, igény, kérelem, átvitel
   fajl: ['fajl', 'fajligeny', 'fajlkerelem', 'fajlatvitel', 'szovegdarab'],
   // az A pillér: az összegző Merkle-fa és ami rá épül

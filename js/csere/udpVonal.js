@@ -1390,6 +1390,7 @@ export async function fajlRandevu(nyersHalo, tarsCim, tarsPort, beallitas = {}) 
         const fk = typeof fajlKorlat === 'function' ? fajlKorlat(lenyomat) : null;
         const e = await fajlUdpResen(halo, tarsCim, tarsPort, blob, koino, lenyomat,
           { korlat: Number.isSafeInteger(fk) ? fk : korlat, varakozasiIdo, torlodasJel: jel,
+            ...(beallitas.nyelv ? { nyelv: beallitas.nyelv } : {}),   // ⭐ D124: a próbák nyelve
             ...(munka ? { munka, adott: () => kozosMunka.adott(lenyomat, forras) } : {}),
             ...(Number.isFinite(feladasIdo) && feladasIdo > 0 ? { feladasIdo } : {}) });
         if (Number.isInteger(e.kesobb)) {
@@ -1475,7 +1476,8 @@ export async function fajlRandevu(nyersHalo, tarsCim, tarsPort, beallitas = {}) 
           const it = await kiszolgalasiKeret.itelet(keretTars ?? { cim: tarsCim });
           return it?.szabad === false ? (Number.isInteger(it.kesobb) && it.kesobb > 0 ? it.kesobb : 60) : null;
         } : null;
-        const e = await fajlKiszolgalas(kapcsolat, olvas, keretKesobb ? { kesobb: keretKesobb } : {});
+        const e = await fajlKiszolgalas(kapcsolat, olvas, { ...(keretKesobb ? { kesobb: keretKesobb } : {}),
+          ...(beallitas.nyelv ? { nyelv: beallitas.nyelv } : {}) });   // ⭐ D124: a próbák nyelve
         if (kiszolgalasiKeret && (kapcsolat.bytesWritten ?? 0) > 0) {
           await kiszolgalasiKeret.feljegyez({ ...(keretTars ?? { cim: tarsCim }), bajt: kapcsolat.bytesWritten, keres: 1 });
         }
@@ -1580,7 +1582,8 @@ export async function szeletUdpResen(halo, tarsCim, tarsPort, tar, koino, entita
     const h = kezfogasHitelesitese(res, beallitas, koino);
     const eredmeny = await szeletKapcsolaton(tar, koino, kapcsolat, entitas, beallitas.tovabb ?? {},
       { ki: h.ki, tabla: kerelemTablaja(beallitas, h), tagsagiCsomag: beallitas.tagsagiCsomag,
-        meghivoBizonyitek: beallitas.meghivoBizonyitek, utkozesben: utkozesKiszolgalo(res, beallitas) });
+        meghivoBizonyitek: beallitas.meghivoBizonyitek, utkozesben: utkozesKiszolgalo(res, beallitas),
+        ...(beallitas.nyelv ? { nyelv: beallitas.nyelv } : {}) });   // ⭐ D124: a próbák nyelve
     // ⚠️ Előbb kiürítés — a kérésünk nyugtája még úton lehet (ugyanaz az ok, mint a cserénél).
     await kapcsolat.kiurites();
     console.log('szeletUdpResen - VÉGE', eredmeny);
@@ -1665,7 +1668,8 @@ export async function valaszUdpResen(halo, tarsCim, tarsPort, koino, valasz, bea
     kapcsolat.destroy(new Error('A másik fél nem válaszol (' + varakozasiIdo + ' ms)'));
   });
   try {
-    const eredmeny = await valaszKapcsolaton(kapcsolat, koino, valasz);
+    const eredmeny = await valaszKapcsolaton(kapcsolat, koino, valasz,
+      beallitas.nyelv ? { nyelv: beallitas.nyelv } : {});   // ⭐ D124: a próbák nyelve
     await kapcsolat.kiurites();
     return eredmeny;
   } finally {

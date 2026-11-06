@@ -1,6 +1,10 @@
 # A protokoll nyelvváltozata — átvizsgálás (D123 ③, PR6 — 2026-11-06, kód nélkül)
 
-> **Állapot:** átvizsgálás — ⏸️ a kérdések (PV1–PV6) Csabáé. Csaba (2026-11-06): *„rendben értem. csinálhatod, a pr6-ot”*. Az
+> **Állapot:** ✅ **D124** (Csaba, 2026-11-06: *„minden javaslatodat elfogadom, mehetünk tovább.”* — PV1–PV6 mind (A)) · 🚧 az
+> építés: ✅ ① a jel és az egyezés (elágazás 241) · ⏭️ ② a kopogás jele → ③ az emlékezet és a kimondás → ④ a fordító-szél → ⑤ a kiírt
+> alakok (8.).
+>
+> Csaba (2026-11-06): *„rendben értem. csinálhatod, a pr6-ot”*. Az
 > elv a D123-ban eldőlt (PR6 (A) — a KZ5 válasza): *a programok kimondják, melyik nyelvváltozatot beszélik, és az új program egy
 > ideig a régit is beszéli; a régit egy kimondott dátumig tartjuk.* Ez az átvizsgálás azt nézi meg, HOL és HOGYAN — a kód és a
 > 90. mérés alapján. Kód még nem épült belőle (csak a mérő szkript: `meres/protokollMeres.js`).
@@ -13,7 +17,7 @@ a `KESZ` + `kesobb`). ⛔ Az ismeretlen ÜZENET viszont a párbeszéd közepén 
 látszik — a másik csak annyit tud, hogy „a társ nem válaszol” (90. mérés). Ami a legveszélyesebb: ha egy **közös számítás**
 változik (a szelet-halmaz, egy lenyomat, egy DHT-téma), arra semmilyen hiba nem jön — a két program csendben mást hasonlít össze.
 
-⭐ A javaslat (5.): **minden munka első üzenete kimondja a nyelvváltozatot** (`v`: a legrégebbi és a legújabb, amit a program
+⭐ A javaslat (5.): **minden munka első üzenete kimondja a nyelvváltozatot** (`ny`: a legrégebbi és a legújabb, amit a program
 beszél), mindkét fél ugyanabból a két számból ugyanazt a közöset számolja (új üzenet nélkül), és ha nincs közös, **mindkét fél
 megnevezett hibával áll meg**, és a lap kimondja, ki a régebbi. Új változat csak valódi törésnél kell (a bővítés jellel megy, mint
 eddig); a régit a program a **szélén fordítja**, a régi közös számításokat egy jegyzékben tartja, egy kimondott dátumig.
@@ -78,7 +82,7 @@ MIELŐTT új lépést tesz, különben a hiba az ő oldalán néma.
 
 ## 5. A javaslat
 
-**① A jel.** A program egy helyen mondja ki, melyik nyelvváltozatokat beszéli: a legrégebbit és a legújabbat (`v: [1, 1]` — a mai
+**① A jel.** A program egy helyen mondja ki, melyik nyelvváltozatokat beszéli: a legrégebbit és a legújabbat (`ny: [1, 1]` — a mai
 nyelv az **1-es**; aki nem küld jelet, az is 1-es, vagyis a mai és a régebbi programok mind). A jel **minden munka első üzenetében**
 megy (`NYITAS`, `KERELEM`, `FAJLKEREK`, `VALASZ`). ⛔ Az első üzenet alakját nem törjük: mindig a legrégebbi beszélt alakban megy,
 az újdonság legfeljebb mező — így a régi program is elolvassa, és tudja, hogy nem érti a folytatást.
@@ -137,8 +141,10 @@ törésébe került). A dátum a kódban áll (a jegyzékben); a lap 30 nappal e
 
 ## 8. Az építés sorrendje (ha a kérdések eldőlnek)
 
-① **A jel és az egyezés** (a négy első üzenet `v`-je, a nyelvváltozat egy helyen, a közös nyelv számítása, a megnevezett hiba mindkét
-félnél) + a próbák a valódi régi programmal (PV6). Ez maga NEM törés: a mai program az 1-es, a régi jel nélkül is az. →
+① ✅ **A jel és az egyezés** (a négy első üzenet jele, a nyelvváltozat egy helyen, a közös nyelv számítása, a megnevezett hiba mindkét
+félnél) + a próbák a valódi régi programmal (PV6). Ez maga NEM törés: a mai program az 1-es, a régi jel nélkül is az. *(Megépült
+2026-11-06: a jel neve `ny` lett — a NYITAS-ban a `pv` már foglalt (a részvételi halmaz változata), a `v` könnyen összekeverhető vele; `js/csere/nyelvValtozat.js`, `meres/nyelvProba.js`. ⛔ A
+próba egy valódi hibát talált: a megnevezett hiba előtt a kimenő sort ki kell üríteni, különben a jelünk a zárásban elveszik.)* →
 ② **a kopogás jele** (a szállításé, `sz`) → ③ **az emlékezet és a kimondás** (társanként megjegyezve, a lap alsó sávja, a `koino`
 parancs) → ④ **a fordító-szél és a régi számítások jegyzéke** — üresen, de egy kitalált 2-es változattal végigpróbálva (különben a
 réteg kész, és az éles út nem hívja — a 4. szabály-hiány) → ⑤ **a kiírt alakok** szabálya (PV5) és a meglévők változatjele.

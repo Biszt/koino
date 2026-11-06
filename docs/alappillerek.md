@@ -1796,3 +1796,22 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     leállítás a csere ELŐTT; ⛔ a rontás mutatta meg, hogy a próba ezt eleinte nem mérte (a csere utáni második kör a régit amúgy is
     leállította) · ⛔ egy git-tárat (`koino_1.1\.git`) a telepítő nem cserél le (egy fejlesztő munkáját vinné el) · a zárolt mappánál a
     régi visszakerül, és a régi program indul — kimondva · `program_retegek_atvizsgalas.md` 7.
+240. **2026-11-06 · a P2P koino saját tárba költözik — tiszta lappal** → **a program a `github.com/Biszt/koino` tár GYÖKERE (a gépen
+    `C:\koino`; a régi `koino_1.1` a prototípusé — `backend/` + `frontend/`, koino.hu, befagyasztva); a régi történet nélkül (az a
+    koino_1.1-ben olvasható); a `docs/`, a `CLAUDE.md`, a `LICENSE`, a `.gitignore` nem a program (`kodCsomag.js` `programE` — a
+    kód-csomag így ugyanaz maradt); a telepítő sorok `~/koino` / `%USERPROFILE%\koino` (`koino-uj` / `koino-regi`), és a régi helyről
+    (`koino_1.1\koino`) futó koinót is leállítják; a régi tár `koino/` mappája átmenetileg FAGYASZTVA marad, költöztető telepítővel
+    (a régi meghívó-sorok miatt), a régi sor letöltését (`koino_1.1-uj`) az új telepítő eltakarítja** · Csaba: *„a p2p koino-nak külön
+    kéne lennie”* → *„tiszta lappal szeretnék indúlni. nem probléma, hogy ha megszűnik az a koino teszt közösség, aminek már 5 tagja
+    van”* · ⭐ a valódi GitHubról kipróbálva (az új és a régi sorok, Windowson és Git Bash-sel a Termux-sort) · ⚠️ a Termux-telepítő
+    leállító része (`pkill`) csak a telefonon · CLAUDE.md „Két tár, két program”.
+241. **2026-11-06 · D124 ① — a protokoll nyelvváltozata: minden munka elején kimondva (PR6, PV1–PV6 (A))** → **`ny: [legrégebbi,
+    legújabb]` minden munka első üzenetében (`NYITAS`, `KERELEM`, `FAJLKEREK`, `VALASZ`; a fájl-randevú kiszolgálójánál az első
+    válaszban); a közös nyelv a két „legújabb” közül a kisebbik, ha eléri a két „legrégebbi” közül a nagyobbikat — mindkét fél
+    ugyanazt számolja, új üzenet nélkül; közös nélkül mindkét fél `NINCS-KOZOS-NYELV`-vel áll meg (az iránnyal); jel nélkül az 1-es
+    (a PR6 előtti program — a mai is az: a D124 maga nem törés)** · ⭐ a 90. mérés adta: a mai program az ismeretlen mezőt átlépi, az
+    ismeretlen üzenetre megáll, és a hiba csak az ő oldalán kap nevet · ⛔ mérve (a nyelv-próba szelet-útján): a hiba előtt a kimenő
+    sort ki kell üríteni — különben a kiszolgáló NYITAS-a a zárásban elveszett, és a kérő csak „nem válaszol”-t látott · ⭐ a próba a
+    VALÓDI régi program ellen (a git-ből, `520aefa`) — cserélnek, a régi kérő megkapja a szeletet és fordítva, a mai „2-es” a régit
+    régebbinek nevezi; sekély klónon (telefon) kimondva kihagyja · ⏭️ ② a kopogás jele (a szállításé) → ③ az emlékezet és a kimondás
+    → ④ a fordító-szél → ⑤ a kiírt alakok · `protokoll_valtozat_atvizsgalas.md` 8.

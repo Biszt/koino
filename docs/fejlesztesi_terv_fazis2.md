@@ -6248,6 +6248,41 @@ figyelmeztet, ha a mag más. A 89. mérés előtte: a mag 10-24 óta 36 commitb�
 `koino_1.1-regi`-nek nevezi, az újat a helyére teszi; egy git-tárat nem cserél le; ha a csere nem sikerül, a régi program indul. A
 Termux-telepítő is leállítja a futó régi koinót (`pkill`). Az adat mindkét helyen a program mappáján kívül van.
 
+*2026-11-06 (a ② után): a P2P koino saját tárba költözött (`github.com/Biszt/koino`, a gépen `C:\koino`) — Csaba: „a p2p koino-nak
+külön kéne lennie” → „tiszta lappal szeretnék indúlni”. A telepítő sorok azóta a `~/koino` / `%USERPROFILE%\koino` helyre mutatnak
+(Windowson `koino-uj` / `koino-regi`); a régi tár fagyasztott telepítői ide költöztetnek. Elágazás 240.*
+
+### D124. A PROTOKOLL NYELVVÁLTOZATA: „MINDEN MUNKA ELEJÉN KIMONDVA” (2026-11-06)
+
+*A D123 PR6-jának hol-ja és hogyan-ja. Az átvizsgálás: [`protokoll_valtozat_atvizsgalas.md`](protokoll_valtozat_atvizsgalas.md),
+a 90. mérés (a mai program az ismeretlen MEZŐT átlépi, az ismeretlen ÜZENETRE megáll — és a hiba csak az ő oldalán kap nevet).*
+
+**A döntés** (Csaba, 2026-11-06: *„minden javaslatodat elfogadom, mehetünk tovább.”* — PV1–PV6 mind (A)):
+1. **PV1 — új nyelvváltozat csak TÖRÉSNÉL.** A bővítés jellel megy, szám nélkül (új mező mindig elhagyható; új lépés csak ha mindkét
+   fél jelezte — ahogy eddig: `cs`, `kd`, `FOGLALT`, `KESZ` + `kesobb`); új szám kell, ha egy régi programmal másképp működne (más
+   alak, elhagyott lépés, más közös számítás — szelet-halmaz, lenyomat, DHT-téma).
+2. **PV2 — a régi nyelv a SZÉLÉN fordítva:** a csere logikája a legújabbat beszéli, a vonal széle fordít; a régi közös számítások egy
+   jegyzékben (melyik változathoz, meddig).
+3. **PV3 — legalább 6 hónapig**, a töréseket gyűjtve: egy kiadás legfeljebb EGY új számot hoz; a dátum a kódban, a lap 30 nappal
+   előtte szól.
+4. **PV4 — ha nincs közös nyelv, mindkét fél KIMONDVA áll meg** (`NINCS-KOZOS-NYELV`, az irány: a társ régebbi / újabb), a társat
+   órákig nem kérdezi újra, a lap és a parancs megmondja a teendőt.
+5. **PV5 — a kiírt alakok** (tábla, rekesz, DHT-témák, helyi kiáltás) a saját számukat hordozzák, és az átmenet alatt az új program
+   mindkét alakot írja és olvassa.
+6. **PV6 — a próba a VALÓDI régi program ellen:** a git-ből elővett PR6 előtti program cserél a maival (és egy kitalált 2-es
+   változattal a fordító-szél is végigmegy).
+
+**A jel:** `ny: [legrégebbi, legújabb]` minden munka első üzenetében (`NYITAS`, `KERELEM`, `FAJLKEREK`, `VALASZ`; a fájl-randevú
+kiszolgálójánál az első válaszban). ⛔ Ennek a mezőnek a neve és az alakja soha nem változik. Aki nem küld jelet (a PR6 előtti
+program), az az **1-es** — a mai program is az (`NYELV_LEGREGEBBI` = `NYELV_LEGUJABB` = 1): a D124 maga nem törés.
+
+*Az építés alakja (①, 2026-11-06 — elágazás 241):* `js/csere/nyelvValtozat.js` (a mai nyelv, a jel, a közös nyelv —
+`kozosNyelv`, `nyelvEllenorzese`); a `vonal.js` a jelet minden munka első üzenetébe teszi, és a társét az ő első üzenetéből
+ellenőrzi (`tarsNyelvenekEllenorzese`) — ⛔ a hiba előtt kiüríti a kimenő sort (mérve: e nélkül a kiszolgáló NYITAS-a a zárásban
+elveszett, és a kérő csak „nem válaszol”-t látott). A fájl-randevú kiszolgálója közös nyelv nélkül `FAJLNINCS`-t mond a jelével (a
+régi kérő hiánynak olvassa). A csere eredménye a közös nyelvet is mondja (`nyelv`). A próba (`meres/nyelvProba.js`): a számítás,
+a csere, a kérelem négy útja, és a VALÓDI régi program (`520aefa`, a git-ből — PV6).
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem
