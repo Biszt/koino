@@ -8568,6 +8568,90 @@ proba('⭐⭐ D112 ④: a felderítés törzse — a fejlécek után a szöveg-d
   }
 });
 
+// ⭐⭐ D124 ③ — AKIVEL NEM ÉRTJÜK EGYMÁST, a valódi programmal: A őrjárata két „2-es” postaládára kopog (B1: a SZÁLLÍTÁSA 2-es —
+// a kopogásban derül ki, ②; B2: a NYELVE 2-es — a munka első üzenetében, ①; a próba-hurok: `KOINO_SZALLITAS`, `KOINO_NYELV`). ⭐
+// Viselkedést mérünk: 3 kör után mindkettő 6 óra szünetre kerül (A naplója kimondja, és a következő kör nem hívja őket), A `koino`
+// parancsa és a lapja (`/api/csere-allapot` → `nyelvek`) kimondja: „2 társad újabb programot futtat — frissíts”; a B-k naplója is
+// megnevezi az okot (a társ régebbi). ⭐ Aztán B1 „frissít” (a mai program őrjárata ugyanazon a porton), és ő kopog A-ra: a munka
+// lemegy, és A-nál a bejegyzése törlődik (a szünet csak A kopogását fogja meg). Rontás: (a) a kör nem könyveli → nincs szünet →
+// bukik; (b) a célok szűrője hiányzik → a 4. kör is hívja őket → bukik; (c) a kapu a nyelv hiányát nem teszi a kör eredményébe →
+// csak 1 társ → bukik; (d) a lap vagy a parancs nem mondja → bukik; (e) a lement munka nem törli a bejegyzést → bukik.
+proba('⭐⭐ D124 ③: a „2-es” társak (szállítás és nyelv) — 3 kör után az őrjárat 6 óráig nem hívja őket, és a `koino` parancs és a lap kimondja: frissíts',
+  async () => {
+    const a = await ujKeszulek(), b1 = await ujKeszulek(), b2 = await ujKeszulek();
+    const PA = 7974, PB1 = 7978, PB2 = 7980, FA = 7984;
+    const helyben = { KOINO_DHT_BELEPOK: 'nincs', KOINO_TUKOR: '127.0.0.1:9' };
+    const futok = [];
+    const naplo = { a: '', b1: '', b2: '', b1uj: '' };
+    const tiszta = (s) => s.replace(/\x1b\[[0-9;]*m/g, '');
+    let fa = null;
+    try {
+      await fut(a, 'koino', 'Nyelv-A', 'nyilt');
+      await fut(b1, 'koino', 'Nyelv-B1', 'nyilt');
+      await fut(b2, 'koino', 'Nyelv-B2', 'nyilt');
+      await fut(a, 'tars', '127.0.0.1', String(PB1), 'B1');
+      await fut(a, 'tars', '127.0.0.1', String(PB2), 'B2');
+      const indit = (hely, ervek, kornyezet, k) => {
+        const o = spawn(process.execPath, [KOINO_JS, ...ervek],
+          { env: { ...process.env, KOINO_ADAT: hely, KOINO_NAPLO: '', ...helyben, ...kornyezet }, stdio: ['ignore', 'pipe', 'pipe'] });
+        o.stdout.on('data', (x) => { naplo[k] += x; });
+        futok.push(o);
+      };
+      indit(b1, ['figyel', String(PB1)], { KOINO_SZALLITAS: '2,2' }, 'b1');
+      indit(b2, ['figyel', String(PB2)], { KOINO_NYELV: '2,2' }, 'b2');
+      await varj(1500);
+      indit(a, ['orjarat', '0.05', String(PA)], {}, 'a');
+      const kesz = () => /óráig nem hívom/.test(tiszta(naplo.a)) && /2 társat most nem hívok — nincs közös nyelvünk/.test(tiszta(naplo.a));
+      const indul = Date.now();
+      for (let i = 0; i < 120 && !kesz(); i++) await varj(500);
+      const jegyzek = JSON.parse(await readFile(join(a, 'nyelvek.json'), 'utf8').catch(() => '{}'));
+      const bejegyzesek = Object.values(jegyzek.tarsak ?? {});
+      const parancs = tiszta(await fut(a, 'koino', helyben));
+      fa = await feluletet(a, FA, helyben);
+      const ny = (await fa.hiv('/api/csere-allapot')).adat?.adatok?.nyelvek ?? null;
+      // ⭐ ② B1 „frissít”: a 2-es postaládája helyett a mai program őrjárata fut ugyanazon a porton, és ő kopog A-ra — A a szünete
+      // alatt nem hívja, de a kopogására felel: a munka lemegy (két külön koinó — a lenyomatnál véget ér), és a bejegyzése törlődik.
+      futok[0].kill();
+      await varj(500);
+      await fut(b1, 'tars', '127.0.0.1', String(PA), 'A');
+      indit(b1, ['orjarat', '0.05', String(PB1)], {}, 'b1uj');
+      let maradt = null;
+      for (let i = 0; i < 60; i++) {
+        await varj(500);
+        maradt = Object.keys(JSON.parse(await readFile(join(a, 'nyelvek.json'), 'utf8').catch(() => '{}')).tarsak ?? {});
+        if (maradt.length === 1) break;
+      }
+      const parancsUtana = tiszta(await fut(a, 'koino', helyben));
+      const ki = {
+        frissitettTorolve: maradt?.length === 1 && !maradt.includes('127.0.0.1:' + PB1)
+          && /⚠ 1 társad újabb programot futtat — frissíts \(a telepítő sorral\), különben vele nem cseréltek/.test(parancsUtana),
+        szunet: /társsal 3 kör óta nincs közös nyelvünk — 6 óráig nem hívom/.test(tiszta(naplo.a)),
+        nemHivja: /2 társat most nem hívok — nincs közös nyelvünk/.test(tiszta(naplo.a)),
+        ketReteg: bejegyzesek.length === 2 && bejegyzesek.every((b) => b.irany === 'ujabb' && b.szunetEddig > Date.now())
+          && bejegyzesek.map((b) => b.mi).sort().join() === 'nyelv,szallitas',
+        parancs: /A protokoll ezen a készüléken: nyelv 1, szállítás 1 — ⚠ 2 társad újabb programot futtat — frissíts/.test(parancs),
+        lap: ny?.ujabb === 2 && ny.regebbi === 0 && /^2 társad újabb programot futtat — frissíts/.test(ny.mondatok?.[0] ?? ''),
+        b1: /Nincs közös szállításunk: a társ programja régebbi/.test(tiszta(naplo.b1)),
+        b2: /Nincs közös nyelvünk: a társ programja régebbi/.test(tiszta(naplo.b2))
+      };
+      const ok = Object.values(ki).every(Boolean);
+      if (!ok) {
+        process.stderr.write('    (D124 ③: ' + JSON.stringify({ ...ki, ido: Date.now() - indul, bejegyzesek, ny, maradt }) + ')\n'
+          + '    (B1 frissítve: ' + tiszta(naplo.b1uj ?? '').replace(/\s+/g, ' ').slice(-400) + ')\n'
+          + '    (A napló: ' + tiszta(naplo.a).replace(/\s+/g, ' ').slice(-900) + ')\n'
+          + '    (A parancs: ' + parancs.replace(/\s+/g, ' ').slice(-400) + ')\n'
+          + '    (B1: ' + tiszta(naplo.b1).replace(/\s+/g, ' ').slice(-300) + ')\n'
+          + '    (B2: ' + tiszta(naplo.b2).replace(/\s+/g, ' ').slice(-300) + ')\n');
+      }
+      return ok;
+    } finally {
+      if (fa) fa.folyamat.kill();
+      for (const f of futok) f.kill();
+      await varj(800);
+      for (const h of [a, b1, b2]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
 export default futtatas;
 
 // Önállóan is futtatható: node meres/parancssorProba.js

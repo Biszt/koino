@@ -65,8 +65,20 @@ function ervenyesPar(p) {
  * @returns {number[]} [legrégebbi, legújabb]
  */
 export function sajatNyelv(beallitas) {
-  const n = beallitas?.nyelv;
+  const n = beallitas?.nyelv ?? kornyezetbol('KOINO_NYELV');
   return ervenyesPar(n) ? [n[0], n[1]] : [NYELV_LEGREGEBBI, NYELV_LEGUJABB];
+}
+
+/**
+ * ⚠️ CSAK PRÓBÁNAK (D124 ③): egy valódi folyamat (őrjárat, postaláda) nyelve a környezetből — `KOINO_NYELV=2,2`,
+ * `KOINO_SZALLITAS=2,2` —, hogy a parancssor-próba egy „2-es” készüléket indíthasson (mint a `KOINO_KERET`). Ami nem pár, az
+ * nem számít.
+ */
+function kornyezetbol(nev) {
+  const v = globalThis.process?.env?.[nev];
+  if (typeof v !== 'string' || !v) return null;
+  const p = v.split(',').map((x) => Number.parseInt(x, 10));
+  return ervenyesPar(p) ? p : null;
 }
 
 /** A jel, egy üzenetbe szórva: `{ ny: [a, b] }`. */
@@ -151,7 +163,7 @@ export const SZALLITAS_MEZO = 'sz';
  * @returns {number[]} [legrégebbi, legújabb]
  */
 export function sajatSzallitas(beallitas) {
-  const n = beallitas?.szallitas;
+  const n = beallitas?.szallitas ?? kornyezetbol('KOINO_SZALLITAS');
   return ervenyesPar(n) ? [n[0], n[1]] : [SZALLITAS_LEGREGEBBI, SZALLITAS_LEGUJABB];
 }
 

@@ -1825,3 +1825,14 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     nem ismeri; a valódi munkája a kézfogásnál bukna) — ezen a régi programban nem segíthetünk · ⚠️ a kopogás nem hitelesített: egy
     hamis „nincs közös” egy kört elvehet, mint egy hamis `FOGLALT` — a ③ emlékezete nem épülhet egyetlen csomagra · ⏭️ ③ az
     emlékezet és a kimondás → ④ a fordító-szél → ⑤ a kiírt alakok.
+243. **2026-11-07 · D124 ③ — akivel nem értjük egymást: megjegyezve, órákig nem hívva, kimondva** → **`nyelvEmlekezet.js` +
+    `<adat>/nyelvek.json` (készülék-szintű); a kapu a nyelv hiányát is a kör eredményébe teszi (`nincsKozos`, a réteggel); társanként
+    egy körben egy megfigyelés, 3 egymás utáni kör után 6 óra szünet (mint az M3 (a)), utána egy megfigyelés is újra szünetet ad; a
+    „nem felelt” nem nulláz, bármelyik lement munka törli (a frissített társ bekopogása is); a kimondás egy helyen (`nyelvekKepe`):
+    az őrjárat naplója, a lap alsó sávja (`/api/csere-allapot` → `nyelvek`: „⚠ frissíts” / „⚠ N régebbi társ”) és a `koino`
+    parancs (a készülék nyelve, szállítása és a teendő)** · ⭐ a ② tanulsága szerint nem egy csomagra: a kopogás hamisítható, három
+    külön kör kell · ⭐ a szünet csak a MI kopogásunkat fogja meg — a kapu a társ kopogására közben is felel, így a frissítés után
+    nem kell kivárni · ⛔ mérve (a kézi próbán): a jegyzék tárolója először a koinónkénti gyárba került, és a lap kezelője nem látta
+    („nyelvJegyzek is not defined”, 500) — a nyelv készülék-szintű, a helye a gyár előtt van · ⭐ a parancssor-próba két valódi „2-es”
+    készülékkel (`KOINO_SZALLITAS`, `KOINO_NYELV` — csak próbának): 3 kör után szünet, a lap és a parancs kimondja, a frissített
+    társ bekopogása törli · ⏭️ ④ a fordító-szél és a régi számítások jegyzéke (egy kitalált 2-essel) → ⑤ a kiírt alakok.

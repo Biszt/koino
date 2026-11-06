@@ -1,8 +1,8 @@
 # A protokoll nyelvváltozata — átvizsgálás (D123 ③, PR6 — 2026-11-06, kód nélkül)
 
 > **Állapot:** ✅ **D124** (Csaba, 2026-11-06: *„minden javaslatodat elfogadom, mehetünk tovább.”* — PV1–PV6 mind (A)) · 🚧 az
-> építés: ✅ ① a jel és az egyezés (elágazás 241) · ✅ ② a kopogás jele (elágazás 242) · ⏭️ ③ az emlékezet és a kimondás → ④ a
-> fordító-szél → ⑤ a kiírt alakok (8.).
+> építés: ✅ ① a jel és az egyezés (elágazás 241) · ✅ ② a kopogás jele (elágazás 242) · ✅ ③ az emlékezet és a kimondás (elágazás
+> 243) · ⏭️ ④ a fordító-szél → ⑤ a kiírt alakok (8.).
 >
 > Csaba (2026-11-06): *„rendben értem. csinálhatod, a pr6-ot”*. Az
 > elv a D123-ban eldőlt (PR6 (A) — a KZ5 válasza): *a programok kimondják, melyik nyelvváltozatot beszélik, és az új program egy
@@ -151,8 +151,16 @@ egy helyen, a kapu `kuld`-jában; +11 bájt kopogásonként. Közös szállítá
 egyszer), és a kör bukása is megnevezett (`nincsKozos`, a mondat az iránnyal és a teendővel). Új kopogás-üzenet nem kellett. A
 közös szám a munkához is átér (`tars.szallitas` — a ④ kézfogás-választójának). A próba a valódi régi kapuval is (a git-ből). ⚠️ A
 kopogás nem hitelesített: egy hamis „nincs közös” egy kört elvehet, mint ma egy hamis FOGLALT — a ③ emlékezetének ezért nem elég
-egyetlen csomag.)* → ③ **az emlékezet és a kimondás** (társanként megjegyezve, a lap alsó sávja, a `koino`
-parancs) → ④ **a fordító-szél és a régi számítások jegyzéke** — üresen, de egy kitalált 2-es változattal végigpróbálva (különben a
+egyetlen csomag.)* → ③ ✅ **az emlékezet és a kimondás** (társanként megjegyezve, a lap alsó sávja, a `koino`
+parancs). *(Megépült 2026-11-07: `js/csere/nyelvEmlekezet.js` + a készülék-szintű `nyelvek.json`. Az őrjárat körének eredményei — a
+kapu a nyelv hiányát (①, a munka bukásából) is a kör eredményébe teszi, ugyanabban az alakban, mint a szállításét (②): `nincsKozos`,
+a réteggel és az iránnyal. Társanként (a kötés tábla-aláírója, különben a cím) egy körben egy megfigyelés; **3 egymás utáni kör**
+után **6 óra szünet** (mint a kopogtatók számlálója, M3 (a) — a ② tanulsága: nem egy csomagra), utána egy megfigyelés is újra
+szünetet ad. A „nem felelt” nem nulláz; bármelyik lement munka törli — a frissített társ bekopogása is (a szünet csak a mi
+kopogásunkat fogja meg, a kapu közben is felel). A kimondás egy helyen (`nyelvekKepe`): az őrjárat naplója, a lap alsó sávja
+(`/api/csere-allapot` → `nyelvek`: „⚠ frissíts” / „⚠ N régebbi társ”, a teljes mondat a címkében) és a `koino` parancs („A
+protokoll ezen a készüléken: nyelv 1, szállítás 1 — ⚠ 2 társad újabb programot futtat — frissíts …”). A parancssor-próba két
+valódi „2-es” készülékkel (`KOINO_SZALLITAS`, `KOINO_NYELV` — csak próbának) méri, a frissítést is.)* → ④ **a fordító-szél és a régi számítások jegyzéke** — üresen, de egy kitalált 2-es változattal végigpróbálva (különben a
 réteg kész, és az éles út nem hívja — a 4. szabály-hiány) → ⑤ **a kiírt alakok** szabálya (PV5) és a meglévők változatjele.
 
 *Kapcsolódik:* `program_retegek_atvizsgalas.md` (D123, R2, PR6), `koltozes_atvizsgalas.md` (KZ5), `meres/eredmenyek.md` 90., a

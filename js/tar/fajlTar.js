@@ -2229,6 +2229,47 @@ export function udpCimTarolo(hely = alapHely()) {
 }
 
 // ===================================
+// ⭐⭐ D124 ③: AKIVEL NEM ÉRTJÜK EGYMÁST (`nyelvek.json`)
+// ===================================
+
+/**
+ * ⭐ D124 ③: a nem értett társak jegyzéke (`<adat>/nyelvek.json` — KÉSZÜLÉK-szintű: a nyelv a programé, nem a koinóé). Az alak és
+ * a szabály a `nyelvEmlekezet.js`-é; helyi feljegyzés, nem esemény, nem terjed. Több folyamat írhatja (az őrjárat, egy kézi
+ * csere munkája): a `modosit` a mostanit olvassa, és arra vezeti rá a változást, folyamaton belül sorban; ⭐ ha az átalakítás
+ * ugyanazt az objektumot adja vissza (nincs változás), nem ír — egy munka után a szokásos eset ez. Ha az írás nem sikerül,
+ * csendben elmarad (a csere fontosabb).
+ * @param {string} [hely]
+ * @param {Function} [alak] - a beolvasott adat ellenőrzött alakja (`nyelvJegyzekAlakja`)
+ */
+export function nyelvJegyzekTarolo(hely = alapHely(), alak = (x) => x ?? { tarsak: {} }) {
+  const fajl = join(hely, 'nyelvek.json');
+  const olvas = async () => {
+    try { return alak(JSON.parse(await readFile(fajl, 'utf8'))); } catch { return alak(null); }
+  };
+  return {
+    fajl,
+    olvas,
+    /** @param {Function} atalakit - a mostani jegyzéket kapja, az újat (vagy változatlanul ugyanazt) adja vissza */
+    modosit(atalakit) {
+      return sorban(fajl, async () => {
+        const regi = await olvas();
+        const uj = atalakit(regi);
+        if (uj === regi) return uj;
+        await mkdir(dirname(fajl), { recursive: true });
+        const ideiglenes = fajl + '.' + process.pid + '-' + Math.random().toString(36).slice(2) + '.uj';
+        try {
+          await writeFile(ideiglenes, JSON.stringify(uj), 'utf8');
+          await rename(ideiglenes, fajl);
+        } catch {
+          await rm(ideiglenes, { force: true }).catch(() => {});
+        }
+        return uj;
+      }).catch(() => null);
+    }
+  };
+}
+
+// ===================================
 // ⭐ D92/1 (c), K2: A MEMÓRIABELI FÁJL-TÁR — a továbbító ide hozza a törzset, és innen viszi vissza
 // ===================================
 //

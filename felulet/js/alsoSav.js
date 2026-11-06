@@ -3,6 +3,8 @@
 // Felelősség: AZ ALSÓ SÁV (Csaba, 2026-10-15) — a prototípus `foOldal.js`-ének az a része, ami az alsó sávot hajtja:
 //   · a VISSZA / ELŐRE történet (a `FoOldalTortenetKezelo` — bájtra a prototípusé —, a gombok és az Alt+←/→);
 //   · az INFÓK (a név, a szabad tudatpont, és a számok — `adatokBetoltese`, `alsoSavFrissitese`, `alsoSavHibaJelzes`).
+//   · ⭐⭐ D124 ③: akivel NEM ÉRTJÜK EGYMÁST (a csere állapotának `nyelvek` része — `nyelvEmlekezet.js`): hány társ fut régebbi
+//     vagy újabb programot, és mi a teendő (`_nyelvKiirasa`). A mondatokat a program adja; a sáv csak kiírja.
 // A metódusok a prototípus nevein és lépésein mennek; a menü a `foMenu.js`-é, a pakli a `koinoPakli.js`-é.
 //
 // ===== ⭐ A KOINÓS TÖBBLET: A CSERE =====
@@ -402,7 +404,26 @@ export class AlsoSav {
       this.csere = null;
     } finally {
       this._csereKiirasa();
+      this._nyelvKiirasa();
     }
+  }
+
+  /**
+   * ⭐⭐ D124 ③: akivel nem értjük egymást — ha van ilyen társ, a sáv kimondja (különben rejtve). Ha valaki ÚJABB programot futtat,
+   * az a hangsúlyos (neked van teendőd: frissíts); ha csak régebbi, a szám. A teljes mondat (a teendővel) a címkében.
+   */
+  _nyelvKiirasa() {
+    const elem = document.getElementById('info-nyelv');
+    const elv = document.getElementById('info-nyelv-elvalaszto');
+    if (!elem) return;
+    const n = this.csere?.nyelvek;
+    const mutat = !!n && (n.ujabb > 0 || n.regebbi > 0);
+    elem.hidden = !mutat;
+    if (elv) elv.hidden = !mutat;
+    if (!mutat) return;
+    elem.textContent = n.ujabb > 0 ? '⚠ frissíts' : '⚠ ' + n.regebbi + ' régebbi társ';
+    elem.title = (n.mondatok ?? []).join('\n') + '\n(Ezekkel a társakkal a program nem tud cserélni: nincs közös nyelvetek. Amíg így '
+      + 'van, órákig nem hívja őket — ha a régebbi programot futtató fél frissít, a következő találkozáskor újra cseréltek.)';
   }
 
   /**

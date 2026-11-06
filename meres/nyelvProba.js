@@ -13,10 +13,13 @@
 //     közös nélkül munka és visszakopogás nincs, mindkét kapu megnevezi az irányt, a kör bukása is megnevezve; a csomagok
 //     szintjén: a válasz viszi a jelünket, egy társ sok kopogása egy jelzés, a hibás jel válasz nélkül, megnevezve; és a VALÓDI
 //     régi kapu (a git-ből) a maival kopog és dolgozik, a mai „2-es” pedig a régit megnevezi.
+//   · ⭐⭐ (az építés ③-a) AKIVEL NEM ÉRTJÜK EGYMÁST (`nyelvEmlekezet.js`): 3 egymás utáni kör után 6 óra szünet, egy kör egy
+//     megfigyelés (egy társ több címe is), a siker törli, a kép csak a megerősítetteket mondja, iránnyal; a kapu a nyelv hiányát
+//     is a kör eredményébe teszi; a tároló nem ír, ha nincs változás. (Az őrjárat egészét a parancssor-próba méri.)
 //
 // Használja: meres/mind.js (`nyelv` csoport, a `csere` csoportban is).
 
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -34,6 +37,11 @@ import {
   SZALLITAS_LEGREGEBBI, SZALLITAS_LEGUJABB, sajatSzallitas, tarsSzallitasa, szallitasEgyezese
 } from '../js/csere/nyelvValtozat.js';
 import { udpKapuNyitasa } from '../js/csere/udpKapu.js';
+import {
+  NEM_ERTJUK_HATAR, NEM_ERTJUK_SZUNET, NEM_ERTJUK_LATSZIK, NEM_ERTJUK_KORLAT, uresNyelvJegyzek, nyelvJegyzekAlakja, hivhatoE,
+  nemErtjukKulcsa, korMegfigyelesei, ertjukFeljegyzese, nyelvekKepe
+} from '../js/csere/nyelvEmlekezet.js';
+import { nyelvJegyzekTarolo } from '../js/tar/fajlTar.js';
 import { probaGyujtemeny, ujEember } from './probaFuttato.js';
 
 const { proba, futtatas } = probaGyujtemeny('A protokoll nyelvváltozata (D124 — PR6)');
@@ -477,6 +485,112 @@ proba('⭐⭐⭐ a VALÓDI régi kapu (a D124 ② előtti, a git-ből) a maival:
       a: k.a.jelzesek.map((e) => e.mi), b: k.b.jelzesek.map((e) => e.mi) });
     process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([regiKopog, maiKopog, kettesKopog, regiKopogKetteshez].map(kep)) + ')\n');
   }
+  return ok;
+});
+
+// ===== ⭐⭐ AKIVEL NEM ÉRTJÜK EGYMÁST (az építés ③-a) =====
+
+// Rontás: (a) a határ 1 (egy kör elég) → az első kör után már szünet és kép → bukik; (b) egy körben társanként nem egy megfigyelés
+// (a kötés két címe kettőnek számít) → 2 kör után szünet → bukik; (c) a „nem felelt” nulláz → bukik; (d) a siker nem töröl → bukik;
+// (e) a lejárt szünet után egy megfigyelés nem ad újra szünetet → bukik; (f) a kép a meg nem erősítettet is számolja → bukik; (g)
+// az elévült bejegyzés is számít → bukik.
+proba('⭐⭐ AKIVEL NEM ÉRTJÜK EGYMÁST: 3 egymás utáni kör után 6 óra szünet; egy kör egy megfigyelés (a kötés több címe is); a „nem felelt” nem nulláz, a siker töröl; a kép csak a megerősítetteket mondja, iránnyal', () => {
+  const T0 = 1_800_000_000_000, PERC = 60 * 1000;
+  const P = 'P'.repeat(43);
+  const ujabb = { mi: 'szallitas', irany: 'ujabb', sajat: [1, 1], tars: [2, 2] };
+  const regebbi = { mi: 'nyelv', irany: 'regebbi', sajat: [2, 2], tars: [1, 1] };
+  const e = (cim, port, n) => ({ cim, port, cel: { cim, port }, ok: !n, ...(n ? { hiba: 'nincs közös', nincsKozos: n } : {}) });
+  const nemFelelt = (cim, port) => ({ cim, port, cel: { cim, port }, ok: false, hiba: 'nem felelt' });
+  // ⭐ A kötés (P) két címe: 10.0.0.1:1 és 10.0.0.2:1 — a hívó a cél címéből tudja az aláírót.
+  const kulcsa = (x) => nemErtjukKulcsa({ alairo: x.cel.port === 1 ? P : null, cim: x.cel.cim, port: x.cel.port });
+  const R = '10.0.0.9:9';
+  let j = uresNyelvJegyzek();
+  const kor = (eredmenyek, t) => { const m = korMegfigyelesei(j, eredmenyek, kulcsa, t); j = m.jegyzek; return m; };
+  const ketto = [e('10.0.0.1', 1, ujabb), e('10.0.0.2', 1, ujabb), e('10.0.0.9', 9, regebbi)];
+
+  const k1 = kor(ketto, T0);
+  const egyKorEgy = j.tarsak[P]?.egymasUtan === 1 && j.tarsak[R]?.egymasUtan === 1 && !k1.szunetre.length
+    && nyelvekKepe(j, T0).mondatok.length === 0 && hivhatoE(j, P, T0);
+  const kozben = kor([nemFelelt('10.0.0.1', 1), nemFelelt('10.0.0.9', 9)], T0 + PERC);
+  const nemFeleltMarad = kozben.valtozott === false && j.tarsak[P].egymasUtan === 1;
+  kor(ketto, T0 + 2 * PERC);
+  const k3 = kor(ketto, T0 + 3 * PERC);
+  const kep = nyelvekKepe(j, T0 + 3 * PERC);
+  const harmadikra = k3.szunetre.map((x) => x.kulcs).sort().join() === [P, R].sort().join()
+    && !hivhatoE(j, P, T0 + 3 * PERC + 1) && !hivhatoE(j, R, T0 + 3 * PERC + 1)
+    && hivhatoE(j, P, T0 + 3 * PERC + NEM_ERTJUK_SZUNET + 1);
+  const kepJo = kep.ujabb === 1 && kep.regebbi === 1
+    && /^1 társad újabb programot futtat — frissíts \(a telepítő sorral\)/.test(kep.mondatok[0] ?? '')
+    && /^1 társad régebbi programot futtat — amíg nem frissít, nem cseréltek/.test(kep.mondatok[1] ?? '');
+  // ⭐ A szünet után a kör újra hívja — ha még mindig nem értjük egymást, EGY megfigyelés is újra szünetet ad.
+  const utana = T0 + 3 * PERC + NEM_ERTJUK_SZUNET + 2;
+  const k4 = kor([e('10.0.0.9', 9, regebbi)], utana);
+  const ujraSzunet = k4.szunetre.length === 1 && k4.szunetre[0].kulcs === R && !hivhatoE(j, R, utana + 1);
+  // ⭐ A siker (a kötés MÁSIK címén) törli; az `ertjukFeljegyzese` is — és ha nincs mit törölni, ugyanazt az objektumot adja.
+  kor([e('10.0.0.2', 1)], utana + PERC);
+  const sikerTorol = !j.tarsak[P] && hivhatoE(j, P, utana + PERC);
+  const elotte = j;
+  const ugyanaz = ertjukFeljegyzese(j, ['nincs-ilyen', null]) === elotte;
+  j = ertjukFeljegyzese(j, [R]);
+  const ertjukTorol = !j.tarsak[R] && Object.keys(j.tarsak).length === 0;
+  // ⭐ Elévülés és korlát: a rég nem látott nem számít; a jegyzék nem nő a korlát fölé.
+  let k = uresNyelvJegyzek();
+  for (let i = 0; i < NEM_ERTJUK_HATAR; i++) k = korMegfigyelesei(k, [e('10.1.0.1', 7, ujabb)], kulcsa, T0 + i).jegyzek;
+  const elevul = nyelvekKepe(k, T0 + NEM_ERTJUK_HATAR).ujabb === 1 && nyelvekKepe(k, T0 + NEM_ERTJUK_LATSZIK + NEM_ERTJUK_HATAR + 1).ujabb === 0;
+  // ⭐ A többes szám: „velük”, „frissítenek”.
+  let t2 = uresNyelvJegyzek();
+  for (let i = 0; i < NEM_ERTJUK_HATAR; i++) {
+    t2 = korMegfigyelesei(t2, [e('10.3.0.1', 7, ujabb), e('10.3.0.2', 7, ujabb), e('10.3.0.3', 7, regebbi), e('10.3.0.4', 7, regebbi)],
+      kulcsa, T0 + i).jegyzek;
+  }
+  const tm = nyelvekKepe(t2, T0 + NEM_ERTJUK_HATAR).mondatok;
+  const tobbes = /^2 társad újabb programot futtat — frissíts \(a telepítő sorral\), különben velük nem cseréltek$/.test(tm[0] ?? '')
+    && /^2 társad régebbi programot futtat — amíg nem frissítenek, nem cseréltek$/.test(tm[1] ?? '');
+  const sok = Array.from({ length: NEM_ERTJUK_KORLAT + 40 }, (_, i) => e('10.2.' + (i >> 8) + '.' + (i & 255), 7, ujabb));
+  const korlatos = Object.keys(korMegfigyelesei(uresNyelvJegyzek(), sok, kulcsa, T0).jegyzek.tarsak).length === NEM_ERTJUK_KORLAT;
+  // ⭐ A sérült fájl: ami nem illik, kiesik.
+  const alak = nyelvJegyzekAlakja({ tarsak: { rossz: { irany: 'oldalt', mi: 'nyelv', utoljara: T0 }, szoveg: 'x',
+    jo: { mi: 'szallitas', irany: 'ujabb', utoljara: T0, egymasUtan: 3, sajat: [1, 1], tars: [2, 2], szunetEddig: T0 + 5 } } });
+  const serultJo = Object.keys(alak.tarsak).join() === 'jo' && alak.tarsak.jo.egymasUtan === 3
+    && Object.keys(nyelvJegyzekAlakja('szemét').tarsak).length === 0;
+  const jo = { egyKorEgy, nemFeleltMarad, harmadikra, kepJo, ujraSzunet, sikerTorol, ugyanaz, ertjukTorol, elevul, tobbes, korlatos,
+    serultJo };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ')\n');
+  return ok;
+});
+
+// Rontás: (a) a kapu a munka bukásából nem teszi át a nyelv hiányát (`nincsKozos`) → bukik; (b) a szállítás hiánya réteg nélkül
+// megy → bukik; (c) a tároló változás nélkül is ír → a fájl ott van → bukik; (d) a sérült fájl eltöri az olvasást → bukik.
+proba('⭐ a kör eredménye a NYELV hiányát is mondja (a munka bukásából: `nincsKozos`, a réteggel); a jegyzék tárolója nem ír, ha nincs változás, és a sérült fájl üres', async () => {
+  // ① a kapu: a munka a nyelv hiányával bukik (mint a `parbeszed` megnevezett hibája) → a kör eredménye megnevezi
+  const nyelvHiba = () => {
+    const h = new Error('Nincs közös nyelvünk: a társ programja újabb (2. nyelv), az enyém 1.');
+    Object.assign(h, { kod: 'NINCS-KOZOS-NYELV', irany: 'ujabb', sajatNyelve: [1, 1], tarsNyelve: [2, 2] });
+    return h;
+  };
+  const a = await udpKapuNyitasa({ port: 0, jelez: () => {}, munka: async () => { await varj(50); throw nyelvHiba(); } });
+  const b = await udpKapuNyitasa({ port: 0, jelez: () => {}, munka: async () => { await varj(50); throw nyelvHiba(); } });
+  let kor;
+  try { kor = await a.kopog([{ cim: '127.0.0.1', port: b.port }], { idokorlat: TURELEM }); } finally { a.zar(); b.zar(); }
+  const n = kor.eredmenyek[0]?.nincsKozos;
+  const nyelvben = kor.eredmenyek[0]?.ok === false && n?.mi === 'nyelv' && n.irany === 'ujabb' && n.tars?.join() === '2,2';
+  // a szállítás hiánya a réteggel (a ② útja)
+  const sz = await kopogas(udpKapuNyitasa, [2, 2], udpKapuNyitasa, [1, 1]);
+  const szallitasban = sz.kor.eredmenyek[0]?.nincsKozos?.mi === 'szallitas';
+  // ② a tároló
+  const hely = await ujMappa('koino-nyelvek-');
+  const t = nyelvJegyzekTarolo(hely, nyelvJegyzekAlakja);
+  await t.modosit((j) => ertjukFeljegyzese(j, ['senki']));
+  const nemIrt = await readFile(t.fajl).then(() => false, () => true);
+  await t.modosit((j) => korMegfigyelesei(j, [{ cim: 'x', port: 1, cel: { cim: 'x', port: 1 }, ok: false,
+    nincsKozos: { mi: 'nyelv', irany: 'regebbi', sajat: [2, 2], tars: [1, 1] } }], (e) => e.cel.cim + ':' + e.cel.port, Date.now()).jegyzek);
+  const irt = (await t.olvas()).tarsak['x:1']?.egymasUtan === 1;
+  await writeFile(t.fajl, '{ ez nem json');
+  const serult = Object.keys((await t.olvas()).tarsak).length === 0;
+  const jo = { nyelvben, szallitasban, nemIrt, irt, serult };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify(kor.eredmenyek) + ')\n');
   return ok;
 });
 

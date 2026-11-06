@@ -122,8 +122,14 @@ import {
   // ⭐ D112 ① (F3): a fájl-tár kerete — a nem vállalt törzs átmeneti
   FAJL_ATMENETI_KORLAT, FAJL_FRISS, fajlTakaritasTerve,
   // ⭐ D120: a törzs-elemek helyi jegyzéke (a határ fölötti fájlok mérete, a kért elemek)
-  torzsElemTarolo
+  torzsElemTarolo,
+  // ⭐⭐ D124 ③: akivel nem értjük egymást (készülék-szintű)
+  nyelvJegyzekTarolo
 } from './js/tar/fajlTar.js';
+// ⭐⭐ D124 ③: akivel nem értjük egymást — társanként megjegyezve, órákig nem hívva, kimondva (a lap, a `koino` parancs)
+import { hivhatoE, nemErtjukKulcsa, korMegfigyelesei, ertjukFeljegyzese, nyelvekKepe, nyelvJegyzekAlakja, NEM_ERTJUK_HATAR,
+  NEM_ERTJUK_SZUNET } from './js/csere/nyelvEmlekezet.js';
+import { sajatNyelv, sajatSzallitas } from './js/csere/nyelvValtozat.js';
 // ⭐ Az alsó sáv (2026-10-15): mikor cserélt utoljára a készülék, és mikor jön a következő kör (helyi feljegyzés)
 import { csereAllapotAlakja, korKezdete, korVege, csereFeljegyzese, csereAllapotKepe, belepesKezdete, belepesJelentkezese,
   belepesKopogasa, belepesKapcsolata, belepesTagsaga } from './js/csere/csereAllapot.js';
@@ -509,6 +515,22 @@ const csaladKozosTarssal = new Map();
 // ⭐ D119 (④b–④d): a család többi példányának munka-állapota (koinó → állapot: a kopogtatóik, a próbált kérelmeik, a raj-körük,
 // a címjegyzék-hirdetésük) — a fő koinóé a hívóé (az őrjárat `res`-e). Készülék-szintű: a kapu munkája is olvassa.
 const csaladAllapotok = new Map();
+
+/**
+ * ⭐⭐ D124 ③: akivel nem értjük egymást (`<adat>/nyelvek.json`, `nyelvEmlekezet.js`) — készülék-szintű: a nyelv a programé, a
+ * család minden koinója ugyanazon a kapun beszél. Folyamatonként egy tároló (a módosítások sorban mennek) — a gyár előtt.
+ */
+let nyelvJegyzekPeldany = null;
+function nyelvJegyzek() {
+  nyelvJegyzekPeldany ??= nyelvJegyzekTarolo(alapHely(), nyelvJegyzekAlakja);
+  return nyelvJegyzekPeldany;
+}
+
+/** ⭐ D124 ③: egy munka lement a társsal — értjük egymást (a bejegyzése, ha volt, törlődik; különben nem ír). */
+async function ertjukEgymast(alairo, tars) {
+  const kulcsok = [alairo ?? null, tars?.cim ? tars.cim + ':' + tars.port : null];
+  await nyelvJegyzek().modosit((j) => ertjukFeljegyzese(j, kulcsok));
+}
 
 // ===================================
 // ⭐⭐ D119 (②): A KOINÓ-PÉLDÁNY — a koinó-szintű rész egy gyárban
@@ -6613,6 +6635,9 @@ function csaladMunkaKeszito(allapot) {
     } finally {
       halo.zar();
     }
+    // ⭐⭐ D124 ③: a munka lement — közös a szállításunk és a nyelvünk; ha a társat „nem értettük”, már értjük (a bekopogó is törli:
+    // ha ő frissített, és ő kopog be, nem kell kivárnunk a szünetünket).
+    await ertjukEgymast(elso?.alairo ?? null, tars);
     // ⭐ D119 (⑤): ha a társ egy MÁSIK koinón felelt, és közös koinónk sincs vele (egy független család kapuja, vagy a régi
     // program), ez a címe nem az, ahol keressük — a kör nem veszi elértnek (`masutt`), és a társ többi címét hívja.
     if (!Array.isArray(elso?.tarsCsalad)) return elso?.masKoino ? { ...elso, masutt: true } : elso;
@@ -7230,6 +7255,13 @@ try {
             kiir(SZIN.halvany + 'A születése nem nevez meg teljes programot (gyökér-koinó, vagy a D119 előtti) · ezen a készüléken: '
               + pv.sajat.lenyomat + SZIN.vege);
           }
+          // ⭐⭐ D124 ③: a protokoll — a készülék nyelve és szállítása, és akivel nem értjük egymást (a teendővel)
+          const ny = sajatNyelv(), sz = sajatSzallitas();
+          const valtozat = (p) => (p[0] === p[1] ? String(p[0]) : p[0] + '–' + p[1]);
+          const nyelvKep = nyelvekKepe(await nyelvJegyzek().olvas(), Date.now());
+          kiir('A protokoll ezen a készüléken: nyelv ' + valtozat(ny) + ', szállítás ' + valtozat(sz)
+            + (nyelvKep.mondatok.length ? SZIN.nem + ' — ⚠ ' + nyelvKep.mondatok.join('; ') + SZIN.vege
+              : SZIN.halvany + ' — minden ismert társammal közös' + SZIN.vege));
           kiir(SZIN.halvany + 'Ezen a készüléken a becenév: ' + KOINO_BECENEV + ' · a másik készüléken: csatlakoz ' + KOINO
             + SZIN.vege);
         }
@@ -8975,6 +9007,18 @@ try {
         }
         // ⭐ D109 (KK6): aki „később”-t mondott (a kiszolgálási kerete betelt), azt addig nem hívjuk.
         for (let i = celok.length - 1; i >= 0; i--) if (!kesobbHivando(celok[i].hoszt, celok[i].port)) celok.splice(i, 1);
+        // ⭐⭐ D124 ③: akivel 3 kör óta nincs közös nyelvünk (vagy szállításunk), azt a szünete alatt nem hívjuk — a kapu a
+        // kopogására közben is felel (ha ő frissített, a munka lemegy, és a bejegyzés törlődik).
+        const nyelvek = await nyelvJegyzek().olvas();
+        const nemErtett = new Set();
+        for (let i = celok.length - 1; i >= 0; i--) {
+          const k = nemErtjukKulcsa({ alairo: celok[i].alairo, cim: celok[i].hoszt, port: celok[i].port });
+          if (!hivhatoE(nyelvek, k, Date.now())) { nemErtett.add(k); celok.splice(i, 1); }
+        }
+        if (nemErtett.size) {
+          kiir(SZIN.halvany + '  · ' + ora() + ' ' + nemErtett.size + ' társat most nem hívok — nincs közös nyelvünk ('
+            + nyelvekKepe(nyelvek, Date.now()).mondatok.join('; ') + ')' + SZIN.vege);
+        }
         const udpCelok = celok.filter((c) => {
           // A saját, épp mért külső címünk — pontos pár szerint.
           if (res.sajatKulsoUdp && sajatCimE(c.hoszt, [res.sajatKulsoUdp.cim])
@@ -9080,6 +9124,25 @@ try {
             }
           } catch (hiba) { console.warn('a kopogtatók könyvelése nem sikerült', { ok: hiba.message }); }
 
+          // ⭐⭐ D124 ③: AKIVEL NEM ÉRTJÜK EGYMÁST — az első menet eredményei: a „nincs közös” (a szállítás a kopogásban, a nyelv a
+          // munka első üzenetében) társanként egy megfigyelés; 3 egymás utáni kör után 6 óráig nem hívjuk. A siker törli.
+          try {
+            const alairok = new Map(udpCelok.map((c) => [c.hoszt + ':' + c.port, c.alairo ?? null]));
+            const kulcsa = (e) => nemErtjukKulcsa({ alairo: alairok.get(e.cel.cim + ':' + e.cel.port) ?? null,
+              cim: e.cel.cim, port: e.cel.port });
+            let szunetre = [];
+            const uj = await nyelvJegyzek().modosit((j) => {
+              const m = korMegfigyelesei(j, elso.eredmenyek, kulcsa, Date.now());
+              szunetre = m.szunetre;
+              return m.jegyzek;
+            });
+            if (szunetre.length && uj) {
+              kiir(SZIN.nem + '  🚫 ' + ora() + ' ' + szunetre.length + ' társsal ' + NEM_ERTJUK_HATAR + ' kör óta nincs közös nyelvünk'
+                + ' — ' + Math.round(NEM_ERTJUK_SZUNET / 3600000) + ' óráig nem hívom: ' + nyelvekKepe(uj, Date.now()).mondatok.join('; ')
+                + SZIN.vege);
+            }
+          } catch (hiba) { console.warn('a nem értett társak könyvelése nem sikerült', { ok: hiba.message }); }
+
           // ⭐ A KÖNYVELÉS: az induló címek közül ki felelt, ki nem — csak az ELSŐ menetből
           // (a többi menet csak az ott sikereseket ismételte). ⚠️ A `modosit()`-on át, és
           // RÁVEZETVE, nem ráírva (2026-09-22): amit a kéz közben felvett, az megmarad.
@@ -9101,7 +9164,10 @@ try {
                 ? elso.atfurt + ' rés nyílt meg, de a csere egyiken sem ment végig'
                 : elso.foglalt
                   ? elso.foglalt + ' társ foglalt volt (egy korábbi munkán dolgozik velem)'
-                  : 'egyik rés sem nyílt meg') + SZIN.vege);
+                  // ⭐ D124 ②: a társ felelt, de nincs közös szállításunk — nem „nem nyílt meg”
+                  : elso.nincsKozos
+                    ? elso.nincsKozos + ' társsal nincs közös szállításunk (lásd fent)'
+                    : 'egyik rés sem nyílt meg') + SZIN.vege);
           }
         }
 
@@ -11220,7 +11286,9 @@ try {
           await atmeneti.frissit();
           const a = tar.allas?.();
           const tudas = (a ? a.n + ':' + a.g : '') + ':' + atmeneti.valtozas();
-          return { adat: { success: true, adatok: { ...kep, tudas, most: Date.now() } } };
+          // ⭐⭐ D124 ③: akivel nem értjük egymást — a sáv kimondja (hány társ fut régebbi / újabb programot, és mi a teendő)
+          const nyelvek = nyelvekKepe(await nyelvJegyzek().olvas(), Date.now());
+          return { adat: { success: true, adatok: { ...kep, tudas, nyelvek, most: Date.now() } } };
         }
 
         // ----- EGY ENTITÁS RÉSZLETEI (5.5) — a ReszletekModal kéri -----

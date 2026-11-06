@@ -212,7 +212,11 @@ export async function udpKapuNyitasa(beallitas) {
         return { ok: true, eredmeny, eltelt: most() - kezdet };
       } catch (hiba) {
         jelez({ mi: 'ATFURT-MUNKA-BUKOTT', cim: t.cim, port: t.port, ok: hiba.message });
-        return { ok: false, hiba: hiba.message, eltelt: most() - kezdet };
+        // ⭐ D124 ③: ha a munka azért bukott, mert nincs közös NYELVÜNK (①), a kör is megtudja — ugyanabban az alakban, mint a
+        // közös szállítás hiányát (②): `nincsKozos`, a réteggel és az iránnyal (az őrjárat ebből jegyzi a társat).
+        return { ok: false, hiba: hiba.message, eltelt: most() - kezdet,
+          ...(hiba?.kod === 'NINCS-KOZOS-NYELV' ? { nincsKozos: { mi: 'nyelv', irany: hiba.irany,
+            sajat: hiba.sajatNyelve ?? null, tars: hiba.tarsNyelve ?? null } } : {}) };
       }
     })();
     t.munka = igeret;
@@ -574,7 +578,7 @@ export async function udpKapuNyitasa(beallitas) {
       // ⭐⭐ D124 ②: felelt, de nincs közös szállításunk — megnevezve, az iránnyal és a teendővel (a `hiba` a mondat).
       if (!a.igeret && a.nincsKozos) {
         eredmenyek.push({ cim: a.tars?.cim ?? a.cim, port: a.tars?.port ?? a.port, cel, ok: false, hiba: a.nincsKozos.uzenet,
-          nincsKozos: { irany: a.nincsKozos.irany, sajat: a.nincsKozos.sajat, tars: a.nincsKozos.tars } });
+          nincsKozos: { mi: 'szallitas', irany: a.nincsKozos.irany, sajat: a.nincsKozos.sajat, tars: a.nincsKozos.tars } });
         continue;
       }
       if (!a.igeret) {

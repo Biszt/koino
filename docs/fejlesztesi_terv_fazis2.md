@@ -6292,6 +6292,17 @@ társanként egyszer); a kör bukása megnevezett (`nincsKozos`, az irány és a
 munkához is átér (`tars.szallitas`). A próba a valódi régi kapuval is (a git-ből). ⚠️ A kopogás nem hitelesített: egy hamis
 „nincs közös” egy kört elvehet (mint egy hamis `FOGLALT`) — a ③ emlékezete ezért nem épülhet egyetlen csomagra.
 
+*Az emlékezet és a kimondás (③, 2026-11-07 — elágazás 243):* `js/csere/nyelvEmlekezet.js` (a szabály) + `<adat>/nyelvek.json`
+(készülék-szintű — a nyelv a programé, nem a koinóé; `fajlTar.js` `nyelvJegyzekTarolo`: sorban ír, és ha nincs változás, nem). A kapu
+a nyelv hiányát is a kör eredményébe teszi (`nincsKozos` — `mi`: `szallitas` | `nyelv`, az iránnyal). Az őrjárat az első menet
+eredményeiből jegyez: társanként (a kötés tábla-aláírója, különben a cím) egy körben egy megfigyelés; **3 egymás utáni kör után 6
+óra szünet** (`NEM_ERTJUK_HATAR`, `NEM_ERTJUK_SZUNET` — mint az M3 (a)), a szünet után egy megfigyelés is újra szünetet ad; a „nem
+felelt” nem nulláz; bármelyik lement munka törli (a családi munka-készítőben — a frissített társ bekopogása is). A rég nem látott
+bejegyzés 7 nap után elévül, a jegyzék legfeljebb 256 társ. A kimondás egy helyen (`nyelvekKepe` — csak a megerősítettek): az
+őrjárat naplója (🚫 a szünet, „N társat most nem hívok”), a lap alsó sávja (`/api/csere-allapot` → `nyelvek`; `alsoSav.js`
+`_nyelvKiirasa`) és a `koino` parancs (a készülék nyelve és szállítása, és a teendő). A próba: `nyelvProba.js` (+2) és egy
+parancssor-próba két valódi „2-es” készülékkel (`KOINO_SZALLITAS` / `KOINO_NYELV` — csak próbának), a frissítéssel együtt.
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem
