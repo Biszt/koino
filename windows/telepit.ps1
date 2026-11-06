@@ -40,11 +40,13 @@ if ($env:OS -ne 'Windows_NT') {
 # ⭐ Ha nem frissítés (a meglévő telepítő fut — pl. nincs hálózat), a futó koinót akkor is leállítja és újraindítja: a felület
 # különben foglalt portot találna. `KOINO_INDITAS=nem`: a telepítő csak frissít és leállít, a programot nem indítja (a próbáknak).
 # ⭐ A KÖLTÖZÉS (2026-11-06): a régi tárból telepített program (`koino_1.1\koino`) folyamatait is leállítja — a régi mappát nem
-# nevezi át és nem törli (az a régi tár; ha már nem kell, kézzel törölhető).
+# nevezi át és nem törli (az a régi tár; ha már nem kell, kézzel törölhető). A régi sor LETÖLTÉSÉT (`koino_1.1-uj`) viszont
+# eltakarítja (lent): a régi sor a régi tárat oda tölti, és az ottani (fagyasztott) telepítő hív ide — utána nincs rá szükség.
 
 $GYOKER = Split-Path -Parent $PSScriptRoot   # a program gyökere: …\koino — vagy a letöltött: …\koino-uj\koino-main
 $UJ_NEV = 'koino-uj'
 $ZIP_NEV = 'koino-main'
+$REGI_TAR_UJ_NEV = 'koino_1.1-uj'   # a RÉGI tár (`koino_1.1`) windowsos sorának letöltése — a költözés maradéka
 $UJBOL = ((Split-Path -Leaf $GYOKER) -eq $ZIP_NEV) -and ((Split-Path -Leaf (Split-Path -Parent $GYOKER)) -eq $UJ_NEV)
 
 # A csomag teljes-e: ezek nélkül a program nem indulhat. (A zip a `windows` mappát a program többi része UTÁN hozza — ha a
@@ -115,6 +117,10 @@ if ($UJBOL) {
 
 # Egy korábbi, félbemaradt letöltés maradéka (a sor a következő bemásoláskor amúgy is eltávolítja).
 Remove-Item -LiteralPath (Join-Path (Split-Path -Parent $GYOKER) $UJ_NEV) -Recurse -Force -ErrorAction SilentlyContinue
+# ⭐ A költözés maradéka: a régi sor letöltése (a régi telepítő, ami ide hívott, onnan fut — a PowerShell a szkriptet előre
+# beolvassa, a mappát nem fogja; a meghívó-próba ezt a hívási láncot méri). Csak a letöltés mappája: a régi program
+# (`koino_1.1\koino`) marad.
+Remove-Item -LiteralPath (Join-Path (Split-Path -Parent $GYOKER) $REGI_TAR_UJ_NEV) -Recurse -Force -ErrorAction SilentlyContinue
 # Ha egy korábbi ablakban fut a koino (innen vagy a régi tár helyéről), leállítjuk: a felület különben foglalt portot találna.
 $leallitva = FutoKoinokLeallitasa $GYOKER
 if ($leallitva) { Write-Host ('· A futó koinót leállítottam (' + $leallitva + ' folyamat) — most újraindul.') }

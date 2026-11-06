@@ -17,7 +17,7 @@
 //     szkripteket, és a sor a cmd-ben ÉS a PowerShellben is egyetlen argumentumként adja át a meghívót a telepítőnek;
 //   · ⭐⭐ D123 (PR7): a telepítő sor a már telepített programot FRISSÍTI — a windowsos sor friss gépen és frissítéskor az ÚJ
 //     telepítőt, hálózat nélkül a meglévőt hívja (a régi letöltés maradékát nem); az új telepítő a régi mappából futó koinót
-//     leállítja (a másikét nem), cserél (a régi a `koino-regi`-be; a régi tár helyéről — `koino_1.1\koino` — futót is leállítja), és a zárolt mappát és a git-tárat nem cseréli; a Termux-sor
+//     leállítja (a másikét nem), cserél (a régi a `koino-regi`-be; a régi tár helyéről — `koino_1.1\koino` — futót is leállítja, a régi tár sorának letöltését — `koino_1.1-uj` — eltakarítja), és a zárolt mappát és a git-tárat nem cseréli; a Termux-sor
 //     a git-tel frissít (a nem követett adat marad; hálózat nélkül kimondja, és a meglévő indul), és a Termux-telepítő a futó régi
 //     koinót leállítja (ahol van `pkill`).
 
@@ -315,15 +315,22 @@ const ujTelepitoFuttatasa = (otthon, telepito, sz) => futtat('powershell.exe',
   ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', telepito, sz], { env: { ...process.env, KOINO_INDITAS: 'nem' }, cwd: otthon });
 
 // ⭐⭐ A csere: a futó régi koino leáll (és a régi tár helyéről futó is — a költözés; a másik mappáé nem), a régi a `koino-regi`-be, az új a helyére, a letöltés mappája
-// eltűnik, és a régi telepítő NEM fut. Rontás: (a) a leállítás kimarad → a régi „koino.js” tovább fut → bukik; (b) a leállítás
+// eltűnik, és a régi telepítő NEM fut. ⭐ A régi tár sorának hívási láncával (a költözés): a letöltött új telepítőt egy, a régi
+// sor letöltésében (`koino_1.1-uj`) álló „régi” telepítő hívja — a végén ennek a mappának is el kell tűnnie (a régi programé —
+// `koino_1.1\koino` — marad). Rontás: (a) a leállítás kimarad → a régi „koino.js” tovább fut → bukik; (b) a leállítás
 // mintája túl tág (csak `koino.js`) → a másik mappáé is leáll → bukik; (c) a régebbi generáció nem törlődik / a régi nem kerül
-// a `-regi`-be → bukik.
-proba('⭐⭐ (Windowson) PR7: a letöltött telepítő leállítja a régi mappából futó koinót (a másikét nem), a régi tár helyéről futót is, cserél (a régi a koino-regi-be), és a helyén folytat', async () => {
+// a `-regi`-be → bukik; (d) a régi sor letöltésének takarítása kimarad → bukik.
+proba('⭐⭐ (Windowson) PR7: a letöltött telepítő leállítja a régi mappából futó koinót (a másikét nem), a régi tár helyéről futót is, cserél (a régi a koino-regi-be), a régi sor letöltését eltakarítja, és a helyén folytat', async () => {
   if (process.platform !== 'win32') { process.stdout.write('    (nem Windows — kihagyva)\n'); return true; }
   const otthon = realpathSync.native(await mkdtemp(join(tmpdir(), 'koino-csere-')));
   const folyamatok = [];
   try {
-    const telepito = await frissitesOtthona(otthon);
+    const ujTelepito = await frissitesOtthona(otthon);
+    // a régi tár sorának letöltése: az ottani „régi” telepítő az újat hívja (mint a fagyasztott telepítő költöztető része)
+    const regiSorLetoltese = join(otthon, 'koino_1.1-uj', 'koino_1.1-main', 'koino', 'windows');
+    await mkdir(regiSorLetoltese, { recursive: true });
+    const telepito = join(regiSorLetoltese, 'telepit.ps1');
+    await writeFile(telepito, "﻿& '" + ujTelepito.replace(/'/g, "''") + "' @args\r\nexit $LASTEXITCODE\r\n");
     const a = spawn(process.execPath, [join(otthon, 'koino', 'koino.js')], { cwd: tmpdir(), stdio: 'ignore', windowsHide: true });
     const r1 = spawn(process.execPath, [join(otthon, 'koino_1.1', 'koino', 'koino.js')], { cwd: tmpdir(), stdio: 'ignore', windowsHide: true });
     const b = spawn(process.execPath, [join(otthon, 'mas', 'koino', 'koino.js')], { cwd: tmpdir(), stdio: 'ignore', windowsHide: true });
@@ -338,6 +345,7 @@ proba('⭐⭐ (Windowson) PR7: a letöltött telepítő leállítja a régi mapp
       regiMegvan: existsSync(join(otthon, 'koino-regi', 'regi.txt')) && !existsSync(join(otthon, 'koino-regi', 'regebbi.txt'))
         && existsSync(join(otthon, 'koino_1.1', 'koino', 'koino.js')),
       letoltesEltunt: !existsSync(join(otthon, WINDOWS_UJ_MAPPA)),
+      regiSorLetolteseEltunt: !existsSync(join(otthon, 'koino_1.1-uj')),
       regiTelepitoNemFutott: (await kapottOlvasasa(otthon)) === null,
       kimondja: /frissült/.test(r.ki) && /leállítottam/.test(r.ki)
     };

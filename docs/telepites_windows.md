@@ -4,7 +4,7 @@
 parancssora már az első szónál, a `yes`-nél megállt. A Windowsnak ezért saját sora van, ugyanazzal a meghívóval. A párja a
 telefonos leírás: [`telepites_telefon.md`](telepites_telefon.md), „A legegyszerűbb út”. Elágazás 232.*
 
-⭐ **2026-11-06: a koino saját tárba költözött** (`github.com/Biszt/koino`, a gépen a `koino` mappa). Ha a régi helyről (`koino_1.1`) futtattad, elég egyszer bemásolni az új sort: a régi helyről futó koinót leállítja, és az újjal indít; az adatod (`koino-adat`) marad. A régi mappa ezután törölhető.
+⭐ **2026-11-06: a koino saját tárba költözött** (`github.com/Biszt/koino`, a gépen a `koino` mappa). Ha a régi helyről (`koino_1.1`) futtattad, elég egyszer bemásolni az új sort: a régi helyről futó koinót leállítja, és az újjal indít; az adatod (`koino-adat`) marad. A régi `koino_1.1` mappa ezután törölhető. (Ha a régi sort másolod be, az is ide költözik; a régi sor letöltését — a `koino_1.1-uj` mappát — a telepítő maga eltakarítja.)
 
 ## Ha meghívót kaptál
 

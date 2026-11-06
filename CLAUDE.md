@@ -28,7 +28,10 @@ A prototípusból a felület bájtra örökölt (5.3) — a `meres/kapuProba.js`
 ⭐⭐ **2026-11-06: a P2P koino SAJÁT TÁRBA költözött** (fent: *Két tár, két program*) — tiszta lappal. A telepítő sorok az új
 címre és mappára mutatnak (`~/koino`, `%USERPROFILE%\koino`; a régi helyről futó koinót a telepítő leállítja), az adat
 (`~/koino-adat`) marad. Az alábbi napló a régi tárban készült: a `koino_1.1`, a `koino/…` útvonalak és a commit-azonosítók oda
-mutatnak.
+mutatnak. ✅ A valódi GitHubról kipróbálva (ideiglenes otthonokban): az új két sor (friss telepítés és frissítés) és a RÉGI két
+sor is — azok a régi tár fagyasztott telepítőjén át ide költöznek. A régi windowsos sor letöltését (`koino_1.1-uj`) az új
+telepítő eltakarítja (a meghívó-próba a régi sor hívási láncával méri). ⚠️ A Termux-telepítő leállító része (`pkill`) csak a
+telefonon próbálható.
 
 **Az állapot:** **1395 önpróba** (64 próba-fájl; a legutóbbi teljes soron mind zöld — 2026-11-06, az új tárban; előtte a
 D123 ① után is) · 360 fájl / 7037,7 KB (⚠️ CR nélkül mérve —
