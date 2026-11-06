@@ -1,0 +1,7 @@
+# a készülék adata (a kulcs, az események) — soha nem a tárba
+koino-adat/
+node_modules/
+*.log
+verzioMeres.esemenyek.json
+# a Claude Code helyi beállításai
+.claude/settings.local.json

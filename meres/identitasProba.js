@@ -1,0 +1,1390 @@
+// meres/identitasProba.js
+
+// Felelősség: bizonyítani, hogy a TAGSÁG-SZÁMÍTÁS (`allapot/identitas.js`) azt csinálja,
+// amit a D56 első lépcsője mond — és hogy a rekurzió nem tud eltörni.
+//
+// ⭐ MIT KELL ITT BIZONYÍTANI? Nem azt, hogy „a meghívás működik" — az triviális volna.
+// Hanem azt a négy dolgot, amin az egész áll:
+//
+//   1. a lánc VISSZAVEZETHETŐ az alapítóig, akármilyen hosszú;
+//   2. aki NEM vezethető vissza, az nem tag — akkor sem, ha aláírt meghívása van;
+//   3. ⭐ a KÖR nem fagyasztja le a programot, és nem is szül tagságot a semmiből;
+//   4. ⭐ a HIÁNY nem vád: „nem ellenőrizhető", nem elutasítás (D19).
+//
+// ⚠️ A 2. és a 3. RONTÁS-PRÓBA: olyan eseményeket gyártanak, amiket a felület sosem
+// írna alá. Épp ez a lényeg — a felület a másik gépen nem véd semmitől, tehát azt kell
+// mérni, hogy a SZÁMÍTÁS áll-e ellen.
+//
+// Futtatás: node meres/mind.js identitas
+
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
+import { esemenyMentese } from '../js/tar/esemenyTar.js';
+import {
+  tagE, tanusithatE, lepcso2E, ujIdentitasNezet, ervenyesTanusitasaim,
+  TANUSITAS_KELL, FELHATALMAZAS_KELL, LEPCSO_BEMONDAS
+} from '../js/allapot/identitas.js';
+// ⭐ D94: a 2. lépcső bemondásának kiadása a művelet-rétegben.
+import { lepcsoBemondasKiadasa, tanusitas as tanusitasMuvelet } from '../js/muveletek.js';
+import { entitasEsemenyei } from '../js/tar/esemenyTar.js';
+// ⭐ D93/6: egy szelet egyeztetett halmaza (a saját eseményei + a hozzá bejelentettek) — amit a csere visz.
+import { egyeztetettEsemenyek } from '../js/csere/szeletEgyeztetes.js';
+import {
+  onalloSzalak, tanusitoiTorlodas, megbizasAllapota, bemutatkozasok
+} from '../js/allapot/jelzesek.js';
+
+const { proba, futtatas } = probaGyujtemeny('A tagság-számítás próbája');
+
+const KOINO = 'proba';
+const mappak = [];
+
+/** Új, üres tár egy eldobható mappában. */
+async function ujTar() {
+  const mappa = await mkdtemp(join(tmpdir(), 'koino-identitas-'));
+  mappak.push(mappa);
+  return esemenyTarNyitasa(KOINO, mappa);
+}
+
+async function ment(tar, ...esemenyek) {
+  for (const e of esemenyek) {
+    const eredmeny = await esemenyMentese(tar, e);
+    if (!eredmeny.mentve) throw new Error('nem menthető: ' + eredmeny.ok);
+  }
+}
+
+// ===================================
+// SEGÉDEK — a két új esemény, ugyanúgy, ahogy a `muveletek.js` írja alá
+// ===================================
+
+/** Az alapító: létrehozza a koinót. A horgonya maga a létrehozó esemény. */
+async function alapito(alapitok = []) {
+  const eember = await ujEember(KOINO);
+  const esemeny = await eember.tesz('KoinoLetrehozas',
+    { nev: 'Próba', leiras: null, alapitok });
+  return { eember, horgony: esemeny.azonosito, esemeny };
+}
+
+/**
+ * ⭐⭐ EGY TELJES ALAPÍTÓ KÖR — `db` fővel, a létrehozóval együtt.
+ *
+ * ⚠️ EZ AZÉRT KELL, MERT EGYETLEN ALAPÍTÓVAL A 2. LÉPCSŐ EL SEM TUD INDULNI: a
+ * pénztárcához három tanúsítás kell, de egy ember csak egyet ad. A `koinoLetrehozas`
+ * ezért nevezhet meg alapítókat, akik a saját `Belepes`-ükkel hivatkoznak rá.
+ */
+async function alapitoKor(db) {
+  const tagok = [];
+  for (let i = 1; i < db; i++) tagok.push(await ujEember(KOINO));
+
+  const letrehozo = await ujEember(KOINO);
+  const letrehozas = await letrehozo.tesz('KoinoLetrehozas',
+    { nev: 'Próba', leiras: null, alapitok: tagok.map((t) => t.szerzo) });
+
+  const esemenyek = [letrehozas];
+  const kor = [{ eember: letrehozo, horgony: letrehozas.azonosito, esemeny: letrehozas }];
+  for (const t of tagok) {
+    const be = await t.tesz('Belepes', { alapitas: letrehozas.azonosito });
+    esemenyek.push(be);
+    kor.push({ eember: t, horgony: be.azonosito, esemeny: be });
+  }
+  return { kor, esemenyek, letrehozas };
+}
+
+/** Egy belépő: megnyitja a saját szeletét. Ez még NEM tagság. */
+async function belepo() {
+  const eember = await ujEember(KOINO);
+  const esemeny = await eember.tesz('Belepes', {});
+  return { eember, horgony: esemeny.azonosito, esemeny };
+}
+
+/**
+ * Meghívás: a meghívott szeletébe kerül, és hozza a meghívó horgonyát.
+ *
+ * ⚠️ A negyedik paraméter a beállítás, a harmadik az IDŐ — ezt elsőre elrontottam, és a
+ * meghívás a saját szeletét nyitotta (`entitas: null`) a meghívottéba kerülés helyett.
+ * A rontás-próbák ettől is „rendben" voltak, a POZITÍV próbák viszont buktak: ⭐ jó
+ * emlékeztető arra, hogy a tiltó próbák önmagukban semmit nem bizonyítanak.
+ */
+function meghivas(meghivo, meghivott, beallitas = {}) {
+  return meghivo.eember.tesz(
+    'Meghivas',
+    {
+      kit: beallitas.kit ?? meghivott.eember.szerzo,
+      sajatBelepes: beallitas.sajatBelepes ?? meghivo.horgony
+    },
+    undefined,
+    { entitas: beallitas.entitas ?? meghivott.horgony }
+  );
+}
+
+// ===================================
+// AZ ALAPESET ÉS A LÁNC
+// ===================================
+
+proba('⭐ AZ ALAPÍTÓ TAG — ő hozta létre a koinót, nem kell hozzá meghívás', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  await ment(tar, a.esemeny);
+
+  const eredmeny = await tagE(tar, KOINO, a.horgony);
+  return eredmeny.igen === true && eredmeny.ellenorizheto === true;
+});
+
+proba('Aki csak belépett, de senki nem hívta be, NEM tag', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const b = await belepo();
+  await ment(tar, a.esemeny, b.esemeny);
+
+  const eredmeny = await tagE(tar, KOINO, b.horgony);
+  return eredmeny.igen === false && eredmeny.ellenorizheto === true;
+});
+
+proba('Akit az alapító behívott, TAG — egy meghívó elég (D56)', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const b = await belepo();
+  await ment(tar, a.esemeny, b.esemeny, await meghivas(a, b));
+
+  const eredmeny = await tagE(tar, KOINO, b.horgony);
+  return eredmeny.igen === true;
+});
+
+proba('⭐ A LÁNC VISSZAVEZET AZ ALAPÍTÓIG: alapító → B → C → D mind tag', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const b = await belepo();
+  const c = await belepo();
+  const d = await belepo();
+  await ment(tar, a.esemeny, b.esemeny, c.esemeny, d.esemeny,
+    await meghivas(a, b), await meghivas(b, c), await meghivas(c, d));
+
+  const nezet = ujIdentitasNezet();
+  const eredmenyek = [
+    await tagE(tar, KOINO, b.horgony, nezet),
+    await tagE(tar, KOINO, c.horgony, nezet),
+    await tagE(tar, KOINO, d.horgony, nezet)
+  ];
+  return eredmenyek.every((e) => e.igen === true);
+});
+
+// ===================================
+// ⚠️ RONTÁS-PRÓBÁK — amit a felület sosem írna alá
+// ===================================
+
+proba('⚠️ RONTÁS: aki NEM tagtól kapott meghívást, NEM lesz tag', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const kivulallo = await belepo();     // ő maga sincs behívva
+  const b = await belepo();
+  await ment(tar, a.esemeny, kivulallo.esemeny, b.esemeny,
+    await meghivas(kivulallo, b));
+
+  const eredmeny = await tagE(tar, KOINO, b.horgony);
+  return eredmeny.igen === false && eredmeny.ellenorizheto === true;
+});
+
+proba('⚠️ RONTÁS: magát senki nem hívhatja be', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const b = await belepo();
+  await ment(tar, a.esemeny, b.esemeny, await meghivas(b, b));
+
+  const eredmeny = await tagE(tar, KOINO, b.horgony);
+  return eredmeny.igen === false;
+});
+
+proba('⚠️ RONTÁS: a MÁSRÓL szóló meghívás nem számít (a `kit` nem a szelet gazdája)', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const b = await belepo();
+  const c = await belepo();
+  // Az alapító meghívása B SZELETÉBE kerül, de C-ről szól — ez nem teheti B-t taggá.
+  await ment(tar, a.esemeny, b.esemeny, c.esemeny,
+    await meghivas(a, b, { kit: c.eember.szerzo }));
+
+  const eredmeny = await tagE(tar, KOINO, b.horgony);
+  return eredmeny.igen === false;
+});
+
+proba('⚠️ RONTÁS: hamis horgonyra hivatkozó meghívás nem számít', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const kivulallo = await belepo();
+  const b = await belepo();
+  // A kívülálló az ALAPÍTÓ horgonyára hivatkozik, mintha az az övé volna.
+  await ment(tar, a.esemeny, kivulallo.esemeny, b.esemeny,
+    await meghivas(kivulallo, b, { sajatBelepes: a.horgony }));
+
+  const eredmeny = await tagE(tar, KOINO, b.horgony);
+  return eredmeny.igen === false;
+});
+
+proba('⭐⭐ RONTÁS: a KÖR nem szül tagságot, és nem fagy le (A hívja B-t, B hívja A-t)', async () => {
+  const tar = await ujTar();
+  const a = await alapito();          // ő csak azért kell, hogy legyen koino
+  const x = await belepo();
+  const y = await belepo();
+  await ment(tar, a.esemeny, x.esemeny, y.esemeny,
+    await meghivas(x, y), await meghivas(y, x));
+
+  const egyik = await tagE(tar, KOINO, x.horgony);
+  const masik = await tagE(tar, KOINO, y.horgony);
+  return egyik.igen === false && masik.igen === false;
+});
+
+proba('⚠️ RONTÁS: a MÁSIK koino meghívása nem számít', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const b = await belepo();
+  const meghivo = await meghivas(a, b);
+  // Ugyanaz az esemény, de másik koinóban kérdezünk rá.
+  await ment(tar, a.esemeny, b.esemeny, meghivo);
+
+  const eredmeny = await tagE(tar, 'masik-koino', b.horgony);
+  return eredmeny.igen === false;
+});
+
+// ===================================
+// ⭐ A HIÁNY NEM VÁD (D19)
+// ===================================
+
+proba('⭐ A HIÁNYZÓ HORGONY: „nem ellenőrizhető", nem elutasítás', async () => {
+  const tar = await ujTar();
+  const b = await belepo();
+  // A belépés eseményét NEM mentjük el — csak kérdezünk rá.
+  const eredmeny = await tagE(tar, KOINO, b.horgony);
+  return eredmeny.igen === false && eredmeny.ellenorizheto === false;
+});
+
+proba('⭐ A HIÁNYZÓ MEGHÍVÓI LÁNC is „nem ellenőrizhető"', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const b = await belepo();
+  const c = await belepo();
+  // B-t behívta A, C-t behívta B — de B belépését nem mentjük el.
+  await ment(tar, a.esemeny, c.esemeny, await meghivas(b, c));
+
+  const eredmeny = await tagE(tar, KOINO, c.horgony);
+  return eredmeny.igen === false && eredmeny.ellenorizheto === false;
+});
+
+// ===================================
+// ⭐⭐ A GYORSÍTÓTÁR — ettől olcsó a gyökérig menő ellenőrzés
+// ===================================
+
+proba('⭐⭐ A GYORSÍTÓTÁR: a második kérdés töredék annyi olvasásból jön ki', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const esemenyek = [a.esemeny];
+
+  // Tíz hosszú lánc: alapító → 1 → 2 → … → 10
+  let elozo = a;
+  const tagok = [];
+  for (let i = 0; i < 10; i++) {
+    const uj = await belepo();
+    esemenyek.push(uj.esemeny, await meghivas(elozo, uj));
+    tagok.push(uj);
+    elozo = uj;
+  }
+  await ment(tar, ...esemenyek);
+
+  const nezet = ujIdentitasNezet();
+  const elso = await tagE(tar, KOINO, tagok[9].horgony, nezet);
+  const elsoOlvasas = nezet.olvasasok;
+
+  // Ugyanaz a kérdés másodszor: a nézetből jön, olvasás nélkül.
+  const masodik = await tagE(tar, KOINO, tagok[9].horgony, nezet);
+  const masodikOlvasas = nezet.olvasasok - elsoOlvasas;
+
+  return elso.igen === true && masodik.igen === true
+      && elsoOlvasas > 10 && masodikOlvasas === 0;
+});
+
+proba('⭐ A tagság BEFAGY: amit egyszer eldöntöttünk, azt nem kérdezzük újra (D47)', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const b = await belepo();
+  const c = await belepo();
+  await ment(tar, a.esemeny, b.esemeny, c.esemeny,
+    await meghivas(a, b), await meghivas(b, c));
+
+  const nezet = ujIdentitasNezet();
+  await tagE(tar, KOINO, b.horgony, nezet);
+  const bUtan = nezet.olvasasok;
+  // C ellenőrzése B-n át vezet — de B már eldőlt, tehát az ő ága nem olvasódik újra.
+  await tagE(tar, KOINO, c.horgony, nezet);
+  const cKoltsege = nezet.olvasasok - bUtan;
+
+  return nezet.igenek.has('tag|' + b.horgony) && cKoltsege < bUtan;
+});
+
+
+// ===================================
+// ⭐⭐ A 2. LÉPCSŐ — a pénztárca kapuja (D56, 9/c 4.3)
+// ===================================
+
+/** Felhatalmazás és tanúsítás — ugyanaz az alak, mint a meghívásé. */
+function allitas(tipus) {
+  return (allito, rola, beallitas = {}) => {
+    const adat = {
+      kit: beallitas.kit ?? rola.eember.szerzo,
+      sajatBelepes: beallitas.sajatBelepes ?? allito.horgony
+    };
+    // ⭐ A TANÚSÍTÁS BEMONDJA, mire támaszkodott (D42-minta, 9/c 4.5) — az alapító körnek
+    // nincs mit bemondania, ezért ott elmarad.
+    if (beallitas.felhatalmazasok) adat.felhatalmazasok = beallitas.felhatalmazasok;
+    // ⭐ A tanúsítás horgonya a SAJÁT szeletébe mutat (9/c 4.5) — a próbák maguk adják meg,
+    // hogy a rontás-eseteket is le lehessen írni.
+    return allito.eember.tesz(tipus, adat, undefined,
+      { entitas: beallitas.entitas ?? rola.horgony, latott: beallitas.latott });
+  };
+}
+const felhatalmazas = allitas('Felhatalmazas');
+const tanusitas = allitas('Tanusitas');
+
+proba('⭐ AZ ALAPÍTÓ KÖR tagjai 2. lépcsősök ÉS tanúsíthatnak (ez a rekurzió gyökere)', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  await ment(tar, ...esemenyek);
+
+  const nezet = ujIdentitasNezet();
+  for (const a of kor) {
+    const lepcso = await lepcso2E(tar, KOINO, a.horgony, nezet);
+    const tanu = await tanusithatE(tar, KOINO, a.horgony, nezet);
+    if (!lepcso.igen || !tanu.igen) return false;
+  }
+  return true;
+});
+
+proba('⚠️⚠️ EGYETLEN ALAPÍTÓVAL A 2. LÉPCSŐ BEFAGY — ezért kell az alapító kör', async () => {
+  const tar = await ujTar();
+  const a = await alapito();          // egyetlen alapító, nincs megnevezett kör
+  const b = await belepo();
+  await ment(tar, a.esemeny, b.esemeny,
+    await meghivas(a, b), await tanusitas(a, b));
+
+  // B tag lett, de a pénztárcához három tanúsító kellene — és csak egy létezik.
+  const tag = await tagE(tar, KOINO, b.horgony);
+  const lepcso = await lepcso2E(tar, KOINO, b.horgony);
+  return tag.igen === true && lepcso.igen === false;
+});
+
+proba('⭐ HÁROM tanúsítás felhatalmazott tanúsítótól → 2. LÉPCSŐS (pénztárca)', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const uj = await belepo();
+
+  const allitasok = [await meghivas(kor[0], uj)];
+  for (let i = 0; i < TANUSITAS_KELL; i++) allitasok.push(await tanusitas(kor[i], uj));
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  const eredmeny = await lepcso2E(tar, KOINO, uj.horgony);
+  return eredmeny.igen === true;
+});
+
+proba('KETTŐ tanúsítás NEM elég a 2. lépcsőhöz', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const uj = await belepo();
+
+  const allitasok = [await meghivas(kor[0], uj)];
+  for (let i = 0; i < TANUSITAS_KELL - 1; i++) allitasok.push(await tanusitas(kor[i], uj));
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  return (await lepcso2E(tar, KOINO, uj.horgony)).igen === false;
+});
+
+proba('⚠️ RONTÁS: aki NEM tanúsíthat, annak a tanúsítása nem számít', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const uj = await belepo();
+
+  // Három olyan „tanúsító", aki maga sincs a 2. lépcsőn.
+  const kamuk = [await belepo(), await belepo(), await belepo()];
+  const allitasok = [await meghivas(kor[0], uj)];
+  for (const k of kamuk) allitasok.push(await tanusitas(k, uj));
+  await ment(tar, ...esemenyek, uj.esemeny, ...kamuk.map((k) => k.esemeny), ...allitasok);
+
+  return (await lepcso2E(tar, KOINO, uj.horgony)).igen === false;
+});
+
+proba('⭐ N FELHATALMAZÁS 2. lépcsősöktől → TANÚSÍTHAT (ha maga is 2. lépcsős)', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const uj = await belepo();
+
+  const allitasok = [await meghivas(kor[0], uj)];
+  for (let i = 0; i < TANUSITAS_KELL; i++) allitasok.push(await tanusitas(kor[i], uj));
+  for (let i = 0; i < FELHATALMAZAS_KELL; i++) allitasok.push(await felhatalmazas(kor[i], uj));
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  const nezet = ujIdentitasNezet();
+  const lepcso = await lepcso2E(tar, KOINO, uj.horgony, nezet);
+  const tanu = await tanusithatE(tar, KOINO, uj.horgony, nezet);
+  return lepcso.igen === true && tanu.igen === true;
+});
+
+proba('⚠️ RONTÁS: aki NEM 2. lépcsős, az N felhatalmazással sem tanúsíthat', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const uj = await belepo();
+
+  // Megkapja a felhatalmazásokat, de tanúsítást NEM — tehát nincs pénztárcája.
+  const allitasok = [await meghivas(kor[0], uj)];
+  for (let i = 0; i < FELHATALMAZAS_KELL; i++) allitasok.push(await felhatalmazas(kor[i], uj));
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  return (await tanusithatE(tar, KOINO, uj.horgony)).igen === false;
+});
+
+proba('⭐⭐ RONTÁS: a ZÁRT VÁLASZTÓTESTÜLET — nem 2. lépcsős felhatalmazása nem számít', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const uj = await belepo();
+
+  // Tanúsítást kap (2. lépcsős lesz), de a felhatalmazások KÍVÜLÁLLÓKTÓL jönnek.
+  const kivulallok = [];
+  for (let i = 0; i < FELHATALMAZAS_KELL; i++) kivulallok.push(await belepo());
+
+  const allitasok = [await meghivas(kor[0], uj)];
+  for (let i = 0; i < TANUSITAS_KELL; i++) allitasok.push(await tanusitas(kor[i], uj));
+  for (const k of kivulallok) allitasok.push(await felhatalmazas(k, uj));
+  await ment(tar, ...esemenyek, uj.esemeny,
+    ...kivulallok.map((k) => k.esemeny), ...allitasok);
+
+  const nezet = ujIdentitasNezet();
+  const lepcso = await lepcso2E(tar, KOINO, uj.horgony, nezet);
+  const tanu = await tanusithatE(tar, KOINO, uj.horgony, nezet);
+  return lepcso.igen === true && tanu.igen === false;
+});
+
+proba('⭐ EMBERENKÉNT EGY felhatalmazás számít (ugyanattól kétszer = egy)', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const uj = await belepo();
+
+  const allitasok = [await meghivas(kor[0], uj)];
+  for (let i = 0; i < TANUSITAS_KELL; i++) allitasok.push(await tanusitas(kor[i], uj));
+  // Ugyanaz az ember N-szer felhatalmazza — ez egynek számít, tehát nem lesz tanúsító.
+  for (let i = 0; i < FELHATALMAZAS_KELL; i++) allitasok.push(await felhatalmazas(kor[0], uj));
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  return (await tanusithatE(tar, KOINO, uj.horgony)).igen === false;
+});
+
+proba('⭐⭐ RONTÁS: a KÖR a 2. lépcsőn sem szül jogot (X tanúsítja Y-t, Y tanúsítja X-et)', async () => {
+  const tar = await ujTar();
+  const a = await alapito();
+  const x = await belepo();
+  const y = await belepo();
+  await ment(tar, a.esemeny, x.esemeny, y.esemeny,
+    await tanusitas(x, y), await tanusitas(y, x),
+    await felhatalmazas(x, y), await felhatalmazas(y, x));
+
+  const egyik = await lepcso2E(tar, KOINO, x.horgony);
+  const masik = await tanusithatE(tar, KOINO, y.horgony);
+  return egyik.igen === false && masik.igen === false;
+});
+
+proba('⭐ A HIÁNYZÓ TANÚSÍTÓI LÁNC is „nem ellenőrizhető", nem elutasítás', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const uj = await belepo();
+
+  const allitasok = [];
+  for (let i = 0; i < TANUSITAS_KELL; i++) allitasok.push(await tanusitas(kor[i], uj));
+  // ⚠️ Az alapító kör belépéseit NEM mentjük el — csak a létrehozást.
+  await ment(tar, esemenyek[0], uj.esemeny, ...allitasok);
+
+  const eredmeny = await lepcso2E(tar, KOINO, uj.horgony);
+  return eredmeny.igen === false && eredmeny.ellenorizheto === false;
+});
+
+
+// ===================================
+// ⭐⭐⭐ A KONTRASZT-JELZÉS (9/c 4.4) — ez a valódi védelem
+// ===================================
+//
+// ⚠️ MIT KELL ITT BIZONYÍTANI? Nem azt, hogy „a jelzés kigyullad" — hanem hogy KÜLÖNBSÉGET
+// TESZ: a becsületes tanúsítóra NÉMA marad, a megvettre pedig megszólal. Egy jelzés, ami
+// mindkettőre kigyullad, rosszabb a semminél — hozzászoknak, és megszűnik jelzés lenni.
+
+proba('⭐ AZ ÖNÁLLÓ SZÁLAK: aki csak belépett, annak nulla; akit behívtak, annak több', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const maganyos = await belepo();
+  const behivott = await belepo();
+  await ment(tar, ...esemenyek, maganyos.esemeny, behivott.esemeny,
+    await meghivas(kor[0], behivott), await tanusitas(kor[1], behivott));
+
+  const a = await onalloSzalak(tar, KOINO, maganyos.horgony);
+  const b = await onalloSzalak(tar, KOINO, behivott.horgony);
+  return a.osszes === 0 && b.osszes === 2;
+});
+
+proba('⭐ AZ ÖNÁLLÓ SZÁLAK KÉT IRÁNYT számolnak: rólam és tőlem', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const uj = await belepo();
+  const masik = await belepo();
+  await ment(tar, ...esemenyek, uj.esemeny, masik.esemeny,
+    await meghivas(kor[0], uj),      // rólam: 1
+    await meghivas(uj, masik));      // tőlem: 1
+
+  const szalak = await onalloSzalak(tar, KOINO, uj.horgony);
+  return szalak.rolam === 1 && szalak.tole === 1 && szalak.osszes === 2;
+});
+
+proba('⭐⭐ A KONTRASZT: a BECSÜLETES tanúsítóra a jelzés NÉMA marad', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const mind = [...esemenyek];
+
+  // A becsületes tanúsító öt olyan embert tanúsít, akiknek van saját életük:
+  // mindegyiket behívta valaki más, és mindegyiket két másik alapító is tanúsította.
+  for (let i = 0; i < 5; i++) {
+    const uj = await belepo();
+    mind.push(uj.esemeny,
+      await meghivas(kor[1], uj),
+      await tanusitas(kor[0], uj),
+      await tanusitas(kor[2], uj),
+      await tanusitas(kor[3], uj));
+  }
+  await ment(tar, ...mind);
+
+  const jelzes = await tanusitoiTorlodas(tar, KOINO, kor[0].horgony);
+  return jelzes.tanusitott === 5 && jelzes.magukbanAllok === 0;
+});
+
+proba('⭐⭐⭐ A KONTRASZT: a MEGVETT tanúsítónál a jelzés MEGSZÓLAL', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const mind = [...esemenyek];
+
+  // A megvett tanúsító húsz ÜRES azonosságot tanúsít: senki más nem állít róluk semmit.
+  for (let i = 0; i < 20; i++) {
+    const hamis = await belepo();
+    mind.push(hamis.esemeny, await tanusitas(kor[0], hamis));
+  }
+  await ment(tar, ...mind);
+
+  const jelzes = await tanusitoiTorlodas(tar, KOINO, kor[0].horgony);
+  return jelzes.tanusitott === 20 && jelzes.magukbanAllok === 20;
+});
+
+proba('⭐ A JELZÉS A TANÚSÍTÓRA néz, nem a tanúsítottra — a frissen érkezett nem gyanús', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const friss = await belepo();
+  await ment(tar, ...esemenyek, friss.esemeny, await meghivas(kor[0], friss));
+
+  // A frissen érkezettnek EGY szála van — de a jelzés nem róla szól, hanem arról, aki
+  // sok ilyet cipel. Aki egyetlen embert hívott be, annál a szám 0 tanúsítás.
+  const rola = await onalloSzalak(tar, KOINO, friss.horgony);
+  const jelzes = await tanusitoiTorlodas(tar, KOINO, kor[0].horgony);
+  return rola.osszes === 1 && jelzes.tanusitott === 0 && jelzes.magukbanAllok === 0;
+});
+
+proba('⭐ A HIÁNY itt sem vád: ismeretlen horgonynál „nem ellenőrizhető"', async () => {
+  const tar = await ujTar();
+  const ismeretlen = await belepo();
+  const szalak = await onalloSzalak(tar, KOINO, ismeretlen.horgony);
+  const jelzes = await tanusitoiTorlodas(tar, KOINO, ismeretlen.horgony);
+  return szalak.ellenorizheto === false && jelzes.ellenorizheto === false;
+});
+
+proba('🔍 9. SZABÁLY: a jelzés ára a GYANÚVAL arányos, nem a koino méretével', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const mind = [...esemenyek];
+
+  // A megvett tanúsító tíz üres azonosságot tanúsít…
+  for (let i = 0; i < 10; i++) {
+    const hamis = await belepo();
+    mind.push(hamis.esemeny, await tanusitas(kor[0], hamis));
+  }
+  // …és MELLETTE ötven olyan e-ember él a koinóban, akihez semmi köze.
+  for (let i = 0; i < 50; i++) {
+    const idegen = await belepo();
+    mind.push(idegen.esemeny, await meghivas(kor[1], idegen));
+  }
+  await ment(tar, ...mind);
+
+  // ⭐ A jelzés a saját láncából és a tanúsítottak szeleteiből dolgozik — az ötven idegen
+  // nem növeli a munkát, és nem is jelenik meg a számban.
+  const jelzes = await tanusitoiTorlodas(tar, KOINO, kor[0].horgony);
+  return jelzes.tanusitott === 10 && jelzes.magukbanAllok === 10;
+});
+
+proba('⛔ A JELZÉS NEM ÍTÉL: a visszatérés csak SZÁMOKAT tartalmaz (D49/b)', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  await ment(tar, ...esemenyek);
+
+  const jelzes = await tanusitoiTorlodas(tar, KOINO, kor[0].horgony);
+  const szalak = await onalloSzalak(tar, KOINO, kor[0].horgony);
+  const mezok = [...Object.keys(jelzes), ...Object.keys(szalak)];
+  // Se „gyanus", se „pontszam", se „rangsor" — csak tények és az ellenőrizhetőség.
+  const tiltott = mezok.some((m) => /gyan|pont|rang|itelet|bizalom/i.test(m));
+  return !tiltott;
+});
+
+
+// ===================================
+// ⭐⭐ A VISSZAVONÁS (9/c 4.5) — a hurok bezárása
+// ===================================
+//
+// ⚠️ MIT KELL ITT BIZONYÍTANI? Csaba döntése (2026-09-06) a **(b)** volt: a visszavonás
+// csak ELŐRE hat. Tehát két dolgot kell egyszerre igazolni, és a kettő ellentmondásnak
+// LÁTSZIK, pedig nem az:
+//
+//   1. aki elveszíti a megbízást, az TÖBBET NEM tanúsíthat;
+//   2. de a MÁR KIADOTT tanúsításai ÉRVÉNYBEN MARADNAK.
+//
+// ⭐ A kettő azért fér meg, mert két KÜLÖN kérdés: a „tanúsíthat-e MOST?" a jelen állapotát
+// nézi, a „volt-e joga, amikor aláírta?" pedig a BEMONDÁST (D42-minta).
+
+const visszavonas = allitas('FelhatalmazasVisszavonasa');
+
+/** Egy tanúsító, aki N felhatalmazással rendelkezik — a próbák közös kiindulása. */
+async function ujTanusito(kor) {
+  const uj = await belepo();
+  const allitasok = [await meghivas(kor[0], uj)];
+  for (let i = 0; i < TANUSITAS_KELL; i++) allitasok.push(await tanusitas(kor[i], uj));
+  const felhatalmazok = [];
+  const jegyek = [];   // a felhatalmazas-esemenyek azonositoi — ezekre hivatkozik a tanusitas
+  for (let i = 0; i < FELHATALMAZAS_KELL; i++) {
+    const f = await felhatalmazas(kor[i], uj);
+    allitasok.push(f);
+    felhatalmazok.push(kor[i]);
+    jegyek.push(f.azonosito);
+  }
+  return { uj, allitasok, felhatalmazok, jegyek };
+}
+
+proba('⭐ A VISSZAVONÁS UTÁN NEM tanúsíthat többet („az utolsó nyer")', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  const elotte = await tanusithatE(tar, KOINO, uj.horgony);
+
+  // Egyetlen felhatalmazó visszaveszi — ezzel N alá esik.
+  await ment(tar, await visszavonas(felhatalmazok[0], uj));
+  const utana = await tanusithatE(tar, KOINO, uj.horgony);
+
+  return elotte.igen === true && utana.igen === false;
+});
+
+proba('⭐⭐ DE A MÁR KIADOTT TANÚSÍTÁSA ÉRVÉNYBEN MARAD — a múlt befagy (D47, Csaba: „b")', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  // Az új tanúsító tanúsít valakit — még a megbízása birtokában.
+  const jelolt = await belepo();
+  const jeloltAllitasok = [
+    await meghivas(kor[0], jelolt),
+    await tanusitas(uj, jelolt, { felhatalmazasok: jegyek }),
+    await tanusitas(kor[1], jelolt),
+    await tanusitas(kor[2], jelolt)
+  ];
+  await ment(tar, jelolt.esemeny, ...jeloltAllitasok);
+  const elotte = await lepcso2E(tar, KOINO, jelolt.horgony);
+
+  // …majd elveszíti a megbízását.
+  await ment(tar, await visszavonas(felhatalmazok[0], uj));
+  const utana = await lepcso2E(tar, KOINO, jelolt.horgony);
+
+  // ⚠️ A jelölt pénztárcája MEGMARAD — enélkül néhány ember összebeszélve becsületes
+  // emberek tömegétől venné el.
+  return elotte.igen === true && utana.igen === true;
+});
+
+proba('⭐ AZ ÚJRA MEGADOTT felhatalmazás megint érvényes (mindkét irányban „az utolsó nyer")', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  await ment(tar, await visszavonas(felhatalmazok[0], uj));
+  const kozben = await tanusithatE(tar, KOINO, uj.horgony);
+
+  await ment(tar, await felhatalmazas(felhatalmazok[0], uj));
+  const vegul = await tanusithatE(tar, KOINO, uj.horgony);
+
+  return kozben.igen === false && vegul.igen === true;
+});
+
+proba('⛔⭐ AZ ŐSZINTE RÉS: a szabály nem kapja el a lejárt megbízást — DE A JELZÉS IGEN', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  // Elveszíti a megbízást…
+  await ment(tar, await visszavonas(felhatalmazok[0], uj));
+
+  // …de a régi felhatalmazásokra hivatkozva tovább tanúsít. A SZABÁLY ezt nem tudja
+  // elkapni: globális sorrend nélkül nem eldönthető, hogy a visszavonás előbb volt-e.
+  const jelolt = await belepo();
+  await ment(tar, jelolt.esemeny,
+    await tanusitas(uj, jelolt, { felhatalmazasok: jegyek }),
+    await tanusitas(kor[1], jelolt), await tanusitas(kor[2], jelolt));
+  const szabaly = await lepcso2E(tar, KOINO, jelolt.horgony);
+
+  // ⭐ A JELZÉS VISZONT KIMONDJA A TÉNYT: kevesebb érvényes felhatalmazása van, mint
+  // amennyi kellene — mégis tanúsított.
+  const allapot = await megbizasAllapota(tar, KOINO, uj.horgony);
+
+  return szabaly.igen === true
+      && allapot.felhatalmazasok === FELHATALMAZAS_KELL - 1
+      && allapot.visszavontak === 1
+      && allapot.tanusitasok === 1;
+});
+
+proba('⛔ RONTÁS: a MÁSRÓL szóló visszavonás nem törli az én felhatalmazásomat', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok } = await ujTanusito(kor);
+  const masik = await belepo();
+  await ment(tar, ...esemenyek, uj.esemeny, masik.esemeny, ...allitasok);
+
+  // A visszavonás az ÉN szeletembe kerül, de MÁSRÓL szól — nem törölheti az enyémet.
+  await ment(tar, await visszavonas(felhatalmazok[0], uj, { kit: masik.eember.szerzo }));
+
+  return (await tanusithatE(tar, KOINO, uj.horgony)).igen === true;
+});
+
+
+// ===================================
+// ⭐⭐ A HORGONY (9/c 4.5 szigorítás) — „tudtad, mégis aláírtad"
+// ===================================
+//
+// ⚠️ CSABA KÉRDÉSE HOZTA ELŐ (2026-09-06): *„azt mondod, hogy aki már egyszer lehetett
+// tanúsító, azt a program mindig fogja engedni tanúsítani?"* — igen, addig így volt. A
+// bemondás önmagában nem elég: a régi felhatalmazásokra hivatkozva bárki tovább
+// tanúsíthatott volna.
+//
+// ⭐ A megoldás nem globális óra, hanem OKSÁGI bizonyíték: a tanúsítás lehorgonyoz a SAJÁT
+// szeletébe, és ezzel elköti, meddig látott. Ha a visszavonás ezen belülre esik, akkor
+// **bizonyíthatóan tudott róla** — és ez a saját aláírásából következik, nem a hiányból.
+
+proba('⛔⛔ A HORGONY ELKAPJA: aki LÁTTA a visszavonást, mégis rá hivatkozott', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  // Az egyik felhatalmazó visszaveszi a megbízást.
+  const vissza = await visszavonas(felhatalmazok[0], uj);
+  await ment(tar, vissza);
+
+  // A tanúsító a VISSZAVONÁSRA horgonyoz — tehát elismeri, hogy látta —, és mégis a régi
+  // felhatalmazásokra hivatkozva tanúsít.
+  const jelolt = await belepo();
+  await ment(tar, jelolt.esemeny,
+    await tanusitas(uj, jelolt, { felhatalmazasok: jegyek, latott: [vissza.azonosito] }),
+    await tanusitas(kor[1], jelolt), await tanusitas(kor[2], jelolt));
+
+  // Csak KETTŐ érvényes tanúsítója marad (a kettő alapító) — a harmadik kiesett.
+  const eredmeny = await lepcso2E(tar, KOINO, jelolt.horgony);
+  return eredmeny.igen === false && eredmeny.ellenorizheto === true;
+});
+
+proba('⭐ DE A BECSÜLETEST NEM BÜNTETI: aki a visszavonás ELŐTTI pontra horgonyzott, számít', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+  await ment(tar, await visszavonas(felhatalmazok[0], uj));
+
+  // A tanúsító a FELHATALMAZÁSRA horgonyzott — vagyis a visszavonás még nem jutott el
+  // hozzá. ⭐ Ez a normális eset egy P2P hálózaton, és nem szabad büntetni érte.
+  const jelolt = await belepo();
+  await ment(tar, jelolt.esemeny,
+    await tanusitas(uj, jelolt, { felhatalmazasok: jegyek, latott: [jegyek[0]] }),
+    await tanusitas(kor[1], jelolt), await tanusitas(kor[2], jelolt));
+
+  return (await lepcso2E(tar, KOINO, jelolt.horgony)).igen === true;
+});
+
+proba('⭐ A HORGONY CSAK ARRA A FELHATALMAZÓRA hat, akitől való', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  // A MÁSODIK felhatalmazó vonja vissza, de a horgony az ELSŐ eseményére mutat —
+  // abból nem következik, hogy a másodikét is látta.
+  await ment(tar, await visszavonas(felhatalmazok[1], uj));
+  const jelolt = await belepo();
+  await ment(tar, jelolt.esemeny,
+    await tanusitas(uj, jelolt, { felhatalmazasok: jegyek, latott: [jegyek[0]] }),
+    await tanusitas(kor[1], jelolt), await tanusitas(kor[2], jelolt));
+
+  // ⭐ A tanúsítás SZÁMÍT: a horgony az első felhatalmazóé, a visszavonás a másodiké —
+  // ebből nem következik, hogy a tanúsító látta. ⚠️ Ez a (b) döntés működés közben: a
+  // bemondott felhatalmazások érvényben maradnak, hacsak nem bizonyított, hogy tudott róla.
+  const eredmeny = await lepcso2E(tar, KOINO, jelolt.horgony);
+  return eredmeny.igen === true;
+});
+
+// ⚠️⚠️ EZ A KETTŐ EGY VALÓDI HIBÁT RÖGZÍT (2026-09-06, kód-átnézés).
+//
+// A horgony-ellenőrzés elsőre felhatalmazónként CSAK A LEGKORÁBBI visszavonást tartotta meg,
+// és azt hasonlította a látott ponthoz. Ettől a **meggondoltam magam** eset — visszavesz,
+// majd újra megad — becsületes tanúsítását is eldobta: a tanúsító a friss felhatalmazásra
+// hivatkozott, becsületesen arra is horgonyzott, mégis „⛔ tudott róla" lett belőle.
+//
+// ⭐ A javított szabály: a visszavonás csak akkor ellentmondás, ha a hivatkozott
+// felhatalmazás UTÁN és a látott ponton BELÜL van:
+//
+//     felhatalmazás sorszáma  <  visszavonás sorszáma  ≤  ameddig látott
+//
+// ⚠️ A `Lattam` (D61) miatt ez nem apróság volt: az elismerés örökre elköti a látást, tehát
+// a hibás alak attól a felhatalmazótól **soha többé** nem engedett volna érvényes
+// hivatkozást — akkor sem, ha ő maga adta vissza a megbízást.
+
+proba('⭐⭐ MEGGONDOLTA MAGÁT: az ÚJRA MEGADOTT felhatalmazásra hivatkozó tanúsítás SZÁMÍT', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  // A felhatalmazó visszaveszi… majd meggondolja magát, és ÚJRA megadja.
+  await ment(tar, await visszavonas(felhatalmazok[0], uj));
+  const ujra = await felhatalmazas(felhatalmazok[0], uj);
+  await ment(tar, ujra);
+
+  // A tanúsító BECSÜLETESEN jár el: az ÚJ jegyre hivatkozik, és arra is horgonyoz.
+  const ujJegyek = [ujra.azonosito, ...jegyek.slice(1)];
+  const jelolt = await belepo();
+  await ment(tar, jelolt.esemeny,
+    await tanusitas(uj, jelolt, { felhatalmazasok: ujJegyek, latott: [ujra.azonosito] }),
+    await tanusitas(kor[1], jelolt), await tanusitas(kor[2], jelolt));
+
+  // ⭐ A két kérdésnek egyet kell mondania: aki MOST tanúsíthat, annak a tanúsítása is
+  // számítson. (A hibás alaknál a `tanusithatE` igent mondott, a `lepcso2E` mégis nemet.)
+  const tanusithat = await tanusithatE(tar, KOINO, uj.horgony);
+  const eredmeny = await lepcso2E(tar, KOINO, jelolt.horgony);
+  return tanusithat.igen === true && eredmeny.igen === true;
+});
+
+proba('⭐ …AKKOR IS, HA KÖZBEN ELISMERTE, hogy látta a visszavonást (a `Lattam` nem bélyeg)', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  // Visszavonás → a tanúsító a bulikörben ELISMERI, hogy látta → a felhatalmazó újra megadja.
+  const vissza = await visszavonas(felhatalmazok[0], uj);
+  await ment(tar, vissza);
+  await ment(tar, await lattam(uj, [vissza.azonosito]));
+  const ujra = await felhatalmazas(felhatalmazok[0], uj);
+  await ment(tar, ujra);
+
+  const jelolt = await belepo();
+  await ment(tar, jelolt.esemeny,
+    await tanusitas(uj, jelolt, { felhatalmazasok: [ujra.azonosito, ...jegyek.slice(1)] }),
+    await tanusitas(kor[1], jelolt), await tanusitas(kor[2], jelolt));
+
+  // ⭐ Nincs olyan visszavonás, ami az ÚJ felhatalmazás UTÁN jött volna — tehát nincs
+  // ellentmondás, és a tanúsítás számít.
+  return (await lepcso2E(tar, KOINO, jelolt.horgony)).igen === true;
+});
+
+
+// ===================================
+// ⭐⭐⭐ A BULI-ELISMERÉS (D61) — ez zárja be a „régi horgony" trükköt
+// ===================================
+//
+// ⚠️ A HORGONY EGYMAGÁBAN NEM ELÉG: aki tudja, hogy figyelik, egyszerűen **elavult
+// horgonyt** választ, vagy egyáltalán nem horgonyoz. Csaba ötlete (a buli) erre a válasz:
+// ha rendszeresen aláírom, hogy **meddig látok**, akkor a SAJÁT LÁNCOM SORRENDJE elárul.
+//
+// ⭐⭐⭐ Mert a saját láncomban van sorrend — a `sorszam`, amit csak én írhatok. Ha egyszer
+// elismertem, hogy egy visszavonást láttam, akkor minden KÉSŐBBI saját eseményem
+// bizonyíthatóan azután keletkezett. **Globális óra nélkül.**
+
+/** A buli-elismerés: „a saját szeletemben eddig látok." */
+function lattam(ki, latott) {
+  return ki.eember.tesz('Lattam', {}, undefined, { entitas: ki.horgony, latott });
+}
+
+proba('⭐⭐⭐ A BULI-ELISMERÉS BEZÁRJA A RÉST: horgony nélkül is elkapjuk', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  // A felhatalmazó visszaveszi a megbízást…
+  const vissza = await visszavonas(felhatalmazok[0], uj);
+  await ment(tar, vissza);
+
+  // …a tanúsító a bulikörben ELISMERI, hogy látta…
+  await ment(tar, await lattam(uj, [vissza.azonosito]));
+
+  // …majd KÉSŐBB tanúsít, és a „régi horgony" trükkel él: egyáltalán nem horgonyoz.
+  const jelolt = await belepo();
+  await ment(tar, jelolt.esemeny,
+    await tanusitas(uj, jelolt, { felhatalmazasok: jegyek, latott: [] }),
+    await tanusitas(kor[1], jelolt), await tanusitas(kor[2], jelolt));
+
+  // ⭐ Mégis elkapjuk: a korábbi elismerése a SAJÁT LÁNCÁBAN előbb van, mint a tanúsítás.
+  const eredmeny = await lepcso2E(tar, KOINO, jelolt.horgony);
+  return eredmeny.igen === false && eredmeny.ellenorizheto === true;
+});
+
+proba('⭐ DE AZ ELISMERÉS UTÁN érkező visszavonásról nem tudhatott — az nem hat rá', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+
+  // Elismeri, hogy a FELHATALMAZÁSIG lát — a visszavonás még nem is létezik.
+  await ment(tar, await lattam(uj, [jegyek[0]]));
+  await ment(tar, await visszavonas(felhatalmazok[0], uj));
+
+  const jelolt = await belepo();
+  await ment(tar, jelolt.esemeny,
+    await tanusitas(uj, jelolt, { felhatalmazasok: jegyek, latott: [] }),
+    await tanusitas(kor[1], jelolt), await tanusitas(kor[2], jelolt));
+
+  // ⚠️ Nem büntetjük: sosem ismerte el, hogy a visszavonást látta.
+  return (await lepcso2E(tar, KOINO, jelolt.horgony)).igen === true;
+});
+
+proba('⭐ A KÉSŐBBI elismerés nem hat a KORÁBBI tanúsításra (a lánc sorrendje számít)', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, felhatalmazok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+  const vissza = await visszavonas(felhatalmazok[0], uj);
+  await ment(tar, vissza);
+
+  // ELŐBB tanúsít (még nem tudott róla), és CSAK UTÁNA ismeri el, hogy látja.
+  const jelolt = await belepo();
+  await ment(tar, jelolt.esemeny,
+    await tanusitas(uj, jelolt, { felhatalmazasok: jegyek, latott: [] }),
+    await tanusitas(kor[1], jelolt), await tanusitas(kor[2], jelolt));
+  await ment(tar, await lattam(uj, [vissza.azonosito]));
+
+  // ⭐ A tanúsítás érvényben marad — ez a (b) döntés: a múlt befagy.
+  return (await lepcso2E(tar, KOINO, jelolt.horgony)).igen === true;
+});
+
+proba('⭐ A JELZÉS MUTATJA, hányszor ismerte el, hogy lát (a ritmusból kilógás ténye)', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(FELHATALMAZAS_KELL + 1);
+  const { uj, allitasok, jegyek } = await ujTanusito(kor);
+  await ment(tar, ...esemenyek, uj.esemeny, ...allitasok);
+  await ment(tar, await lattam(uj, [jegyek[0]]), await lattam(uj, [jegyek[1]]));
+
+  const allapot = await megbizasAllapota(tar, KOINO, uj.horgony);
+  const soha = await megbizasAllapota(tar, KOINO, kor[1].horgony);
+  return allapot.elismeresek === 2 && soha.elismeresek === 0;
+});
+
+
+// ===================================
+// ⭐⭐ A BEMUTATKOZÁS (9/c 4.6, D62) — kölcsönösen, vagy sehogy
+// ===================================
+//
+// ⚠️ MIT KELL ITT BIZONYÍTANI? EGYETLEN dolgot, és az minden más fölött áll:
+//
+//   ⭐⭐ AZ EGYOLDALÚ BEMUTATKOZÁS NEM SZÁMÍT.
+//
+// Mert ha számítana, a támadó **ingyen gyártana sűrűséget** — pont azt, amit a
+// kontraszt-jelzés keres —, és az egész védelem elveszne. A kölcsönösség itt nem
+// udvariasság, hanem a jelzés létfeltétele.
+
+const bemutatkozik = allitas('Bemutatkozas');
+
+proba('⛔⛔ AZ EGYOLDALÚ bemutatkozás NEM számít — enélkül a támadó ingyen gyártana sűrűséget', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const hamis = await belepo();
+  const aldozat = await belepo();
+
+  // A hamis azonosság ötven emberrel „találkozik" — egyoldalúan.
+  const allitasok = [];
+  for (let i = 0; i < 5; i++) allitasok.push(await bemutatkozik(hamis, kor[i]));
+  allitasok.push(await bemutatkozik(hamis, aldozat));
+
+  await ment(tar, ...esemenyek, hamis.esemeny, aldozat.esemeny, ...allitasok);
+
+  // ⭐ A saját szeletében NULLA kölcsönös — hiába írta alá mind a hatot.
+  const sajat = await bemutatkozasok(tar, KOINO, hamis.horgony);
+  // És azoknál sem keletkezett szál, akikről állította.
+  const aldozate = await bemutatkozasok(tar, KOINO, aldozat.horgony);
+
+  return sajat.kolcsonos === 0 && sajat.egyoldalu === 6
+      && aldozate.kolcsonos === 0 && aldozate.egyoldalu === 1;
+});
+
+proba('⭐ A KÖLCSÖNÖS bemutatkozás számít — mindkét fél aláírta', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const anna = await belepo();
+
+  await ment(tar, ...esemenyek, anna.esemeny,
+    await bemutatkozik(kor[0], anna), await bemutatkozik(anna, kor[0]),
+    await bemutatkozik(kor[1], anna), await bemutatkozik(anna, kor[1]));
+
+  const eredmeny = await bemutatkozasok(tar, KOINO, anna.horgony);
+  return eredmeny.kolcsonos === 2 && eredmeny.egyoldalu === 0;
+});
+
+proba('⭐⭐ ÉS EZTŐL ÉLES A KONTRASZT: a valódi embernek sok szála lesz, a hamisnak nem', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const valodi = await belepo();
+  const hamis = await belepo();
+
+  const allitasok = [await meghivas(kor[0], valodi), await meghivas(kor[0], hamis)];
+  // A valódi ember mindenkivel KÖLCSÖNÖSEN bemutatkozik…
+  for (let i = 0; i < 5; i++) {
+    allitasok.push(await bemutatkozik(kor[i], valodi), await bemutatkozik(valodi, kor[i]));
+  }
+  // …a hamis azonosság csak EGYOLDALÚAN próbálkozik.
+  for (let i = 0; i < 5; i++) allitasok.push(await bemutatkozik(hamis, kor[i]));
+
+  await ment(tar, ...esemenyek, valodi.esemeny, hamis.esemeny, ...allitasok);
+
+  const v = await onalloSzalak(tar, KOINO, valodi.horgony);
+  const h = await onalloSzalak(tar, KOINO, hamis.horgony);
+
+  // ⭐ A lánc identitás-eseményein mindkettőnek 1 szála volna (egy meghívó) — a
+  // bemutatkozásokkal a valódié ötre nő, a hamisé marad egy.
+  return v.bemutatkozas === 5 && v.osszes === 5
+      && h.bemutatkozas === 0 && h.osszes === 1;
+});
+
+proba('⭐ AZ EGYOLDALÚ állítás MINDKÉT oldalon FÜGGŐBEN látszik — és egyik oldalon sem számít', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const anna = await belepo();
+  await ment(tar, ...esemenyek, anna.esemeny, await bemutatkozik(kor[0], anna));
+
+  // ⚠️ Ezt elsőre rosszul vártam: azt hittem, az állító oldalán semmi nem látszik. De a
+  // saját láncában ott van, amit ő állított — tehát nála is FÜGGŐBEN van, amíg Anna nem
+  // válaszol. ⭐ Ez helyes: az egyoldalúság mindkettőjük dolga, és egyik oldalon sem
+  // számít szálnak.
+  const annanal = await bemutatkozasok(tar, KOINO, anna.horgony);
+  const alapitonal = await bemutatkozasok(tar, KOINO, kor[0].horgony);
+  return annanal.kolcsonos === 0 && annanal.egyoldalu === 1
+      && alapitonal.kolcsonos === 0 && alapitonal.egyoldalu === 1;
+});
+
+proba('⭐⭐ A FÜGGŐBEN LÉVŐ KÉT IRÁNYA KÜLÖN: Annára VÁR, az alapító a MÁSIKRA vár (2026-09-23)', async () => {
+  // ⛔ MIT MÉR: az `egyoldalu` összeg mindkét oldalon 1 (lásd fent) — és ebből nem derült
+  // ki, KINEK van teendője. Anna viszonozhat; az alapítónak nincs dolga, csak várni.
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const anna = await belepo();
+  await ment(tar, ...esemenyek, anna.esemeny, await bemutatkozik(kor[0], anna));
+
+  const annanal = await bemutatkozasok(tar, KOINO, anna.horgony);
+  const alapitonal = await bemutatkozasok(tar, KOINO, kor[0].horgony);
+  return annanal.radVar === 1 && annanal.masikraVar === 0
+      && alapitonal.radVar === 0 && alapitonal.masikraVar === 1
+      // ⭐ …és Annának a viszonzáshoz a helyes horgonyt adjuk: az alapítóét.
+      && annanal.radVarHorgonyok.length === 1 && annanal.radVarHorgonyok[0] === kor[0].horgony
+      && alapitonal.radVarHorgonyok.length === 0;
+});
+
+proba('⛔⛔ RONTÁS: a bemutatkozó HAMIS horgonyt ír magáról — nem javasoljuk viszonzásra', async () => {
+  // ⛔ AZ ESET: a csaló Annának bemutatkozik, de a `sajatBelepes` mezőbe BÉLA horgonyát
+  // írja. Ha ezt vakon továbbadnánk, a „viszonozd" javaslat rávenné Annát, hogy BÉLÁRÓL
+  // állítson találkozást — akivel talán sosem találkozott. ⭐ A tény (valaki bemutatkozott)
+  // megmarad a számban; javaslat viszont csak ellenőrzött horgonyból lesz.
+  const tar = await ujTar();
+  const { esemenyek } = await alapitoKor(5);
+  const anna = await belepo();
+  const bela = await belepo();
+  const csalo = await belepo();
+  await ment(tar, ...esemenyek, anna.esemeny, bela.esemeny, csalo.esemeny,
+    await bemutatkozik(csalo, anna, { sajatBelepes: bela.horgony }));
+
+  const annanal = await bemutatkozasok(tar, KOINO, anna.horgony);
+  return annanal.radVar === 1 && annanal.radVarHorgonyok.length === 0;
+});
+
+proba('⛔ RONTÁS: a MÁSRÓL szóló bemutatkozás nem ad szálat annak, akinek a szeletébe került', async () => {
+  const tar = await ujTar();
+  const { kor, esemenyek } = await alapitoKor(5);
+  const anna = await belepo();
+  const bela = await belepo();
+
+  // Az esemény Anna szeletébe kerül, de BÉLÁRÓL szól — nem számíthat Annának.
+  await ment(tar, ...esemenyek, anna.esemeny, bela.esemeny,
+    await bemutatkozik(kor[0], anna, { kit: bela.eember.szerzo }),
+    await bemutatkozik(anna, kor[0]));
+
+  return (await bemutatkozasok(tar, KOINO, anna.horgony)).kolcsonos === 0;
+});
+
+// ===================================
+// TAKARÍTÁS
+// ===================================
+
+// ===================================
+// ⭐⭐ D94: A 2. LÉPCSŐ SZÚRÓPRÓBÁVAL — ha a teljes ellenőrzés nem fér a keretbe (2026-10-04)
+// ===================================
+//
+// A keretet (ennyi esemény-olvasás) a próba kicsire veszi, hogy a kis szerkezeten is a szúrópróba döntsön; a
+// választót rögzíti, hogy a próba ne legyen szeszélyes (a valóságban kriptográfiai véletlen — az ellenőrzőé).
+
+/** Rögzített választó (n → 0..n-1), egy mag szerint. */
+function rogzitett(mag) {
+  let x = mag >>> 0;
+  return (n) => { x = (Math.imul(x, 1103515245) + 12345) >>> 0; return (x >>> 8) % n; };
+}
+
+/** A 2. lépcső bemondása: a saját szeletembe, a tanúsításaim azonosítóival. */
+function lepcsoBemondas(ki, tanusitasok) {
+  return ki.eember.tesz(LEPCSO_BEMONDAS, { tanusitasok: tanusitasok.map((t) => t.azonosito) }, undefined,
+    { entitas: ki.horgony });
+}
+
+/**
+ * Egy tanúsító, akinek a jogát a megadott felhatalmazók adják (a felhatalmazásaik azonosítóit a tanúsítás bemondja).
+ * @returns {Promise<{t: Object, esemenyek: Array, felhatalmazasok: Array<string>}>}
+ */
+async function tanusitoFelhatalmazokkal(adok, meghivo) {
+  const t = await belepo();
+  const esemenyek = [t.esemeny, await meghivas(meghivo, t)];
+  const felhatalmazasok = [];
+  for (const a of adok) {
+    const f = await felhatalmazas(a, t);
+    esemenyek.push(f);
+    felhatalmazasok.push(f.azonosito);
+  }
+  return { t, esemenyek, felhatalmazasok };
+}
+
+/**
+ * ⭐ A SZÚRÓPRÓBA VILÁGA: 5 alapító; három tanúsító (az alapítók hatalmazták fel őket); X-et ők tanúsították, és X
+ * bemondta a három tanúsítását. `hamis`: a harmadik tanúsító helyett egy kulcs-gyűrű tanúsítója (a felhatalmazói hamis
+ * 2. lépcsősök: a bemondásukban szereplő tanúsítók semmire nem támaszkodnak). `szemet`: még egy hamis tanúsítás X
+ * szeletében, amit X NEM mondott be. `bemondasNelkul`: X nem mondja be a tanúsításait.
+ */
+async function szuroprobaVilag({ hamis = false, szemet = false, bemondasNelkul = false, gyuruKevesTanusito = false } = {}) {
+  const { kor, esemenyek } = await alapitoKor(5);
+  const osszes = [...esemenyek];
+  /** Egy kulcs-gyűrű tanúsítója: 5 hamis felhatalmazóval, akiknek a bemondása hamis tanúsítókra mutat. */
+  const gyuruTanusito = async () => {
+    const gyuru = [];
+    for (let i = 0; i < FELHATALMAZAS_KELL; i++) {
+      const s = await belepo();
+      const zk = [];
+      for (let j = 0; j < TANUSITAS_KELL; j++) { const z = await belepo(); osszes.push(z.esemeny); zk.push(z); }
+      const tk = [];
+      for (const z of zk) { const tz = await tanusitas(z, s); tk.push(tz); }   // semmire nem támaszkodik
+      // `gyuruKevesTanusito`: a hamis felhatalmazó bemondása csak EGY tanúsítást nevez meg (a következő embernél bukik).
+      osszes.push(s.esemeny, ...tk, await lepcsoBemondas(s, gyuruKevesTanusito ? tk.slice(0, 1) : tk));
+      gyuru.push(s);
+    }
+    const r = await tanusitoFelhatalmazokkal(gyuru, kor[0]);
+    osszes.push(...r.esemenyek);
+    return r;
+  };
+  const tanusitok = [];
+  for (let i = 0; i < TANUSITAS_KELL; i++) {
+    if (hamis && i === TANUSITAS_KELL - 1) { tanusitok.push(await gyuruTanusito()); continue; }
+    const r = await tanusitoFelhatalmazokkal(kor, kor[0]);
+    osszes.push(...r.esemenyek);
+    tanusitok.push(r);
+  }
+  const x = await belepo();
+  osszes.push(x.esemeny, await meghivas(kor[0], x));
+  const tk = [];
+  for (const r of tanusitok) tk.push(await tanusitas(r.t, x, { felhatalmazasok: r.felhatalmazasok }));
+  osszes.push(...tk);
+  if (szemet) {
+    const g = await gyuruTanusito();
+    osszes.push(await tanusitas(g.t, x, { felhatalmazasok: g.felhatalmazasok }));
+  }
+  if (!bemondasNelkul) osszes.push(await lepcsoBemondas(x, tk));
+  const tar = await ujTar();
+  await ment(tar, ...osszes);
+  return { tar, x, tk, tanusitok };
+}
+
+proba('⭐⭐ D94: a keret FÖLÖTT a SZÚRÓPRÓBA dönt — a becsületes szerkezet 2. lépcsős; a kereten belül a teljes ellenőrzés, ugyanazzal az ítélettel', async () => {
+  const { tar, x } = await szuroprobaVilag();
+  const kicsi = ujIdentitasNezet({ keret: 3, valaszto: rogzitett(1) });
+  const szuro = await lepcso2E(tar, KOINO, x.horgony, kicsi);
+  const teljes = await lepcso2E(tar, KOINO, x.horgony, ujIdentitasNezet());
+  return szuro.igen === true && szuro.szuroproba === true && /szúrópróbával/.test(szuro.ok) && kicsi.szuroprobak === 1
+    && teljes.igen === true && !teljes.szuroproba;
+});
+
+proba('⛔⛔ D94: a KULCS-GYŰRŰ TANÚSÍTÓJÁNAK ágát a szúrópróba elkapja — bukás, nem „nem ellenőrizhető” (és a teljes ellenőrzés is nemet mond)', async () => {
+  const { tar, x } = await szuroprobaVilag({ hamis: true });
+  const szuro = await lepcso2E(tar, KOINO, x.horgony, ujIdentitasNezet({ keret: 3, setak: 40, valaszto: rogzitett(7) }));
+  const teljes = await lepcso2E(tar, KOINO, x.horgony, ujIdentitasNezet());
+  return szuro.igen === false && szuro.ellenorizheto === true && /szúrópróba elbukott/.test(szuro.ok)
+    && teljes.igen === false;
+});
+
+proba('⛔ D94: …és ha a hamis felhatalmazó bemondása kevés tanúsítót nevez meg, a következő lépésen bukik', async () => {
+  const { tar, x } = await szuroprobaVilag({ hamis: true, gyuruKevesTanusito: true });
+  const szuro = await lepcso2E(tar, KOINO, x.horgony, ujIdentitasNezet({ keret: 3, setak: 40, valaszto: rogzitett(7) }));
+  return szuro.igen === false && szuro.ellenorizheto === true && /tanúsítót nevez meg/.test(szuro.ok);
+});
+
+proba('⭐⭐ D94: a szeletbe SZÓRT hamis tanúsítás nem buktatja el a becsületest — az út csak a bemondottat követi', async () => {
+  const { tar, x } = await szuroprobaVilag({ szemet: true });
+  const szuro = await lepcso2E(tar, KOINO, x.horgony, ujIdentitasNezet({ keret: 3, setak: 40, valaszto: rogzitett(3) }));
+  return szuro.igen === true && szuro.szuroproba === true;
+});
+
+proba('⭐ D94: BEMONDÁS NÉLKÜL a szúrópróba „nem ellenőrizhető” — nem vád (D19)', async () => {
+  const { tar, x } = await szuroprobaVilag({ bemondasNelkul: true });
+  const szuro = await lepcso2E(tar, KOINO, x.horgony, ujIdentitasNezet({ keret: 3, valaszto: rogzitett(1) }));
+  return szuro.igen === false && szuro.ellenorizheto === false && /bemondás/.test(szuro.ok);
+});
+
+proba('⭐ D94: a bemondás TARTALMA csak az érvényes tanúsítás — a gyűrű tanúsítója kimarad, és kettővel nincs bemondás', async () => {
+  const jo = await szuroprobaVilag({ bemondasNelkul: true });
+  const rossz = await szuroprobaVilag({ hamis: true, bemondasNelkul: true });
+  const joLista = await ervenyesTanusitasaim(jo.tar, KOINO, jo.x.horgony);
+  const rosszLista = await ervenyesTanusitasaim(rossz.tar, KOINO, rossz.x.horgony);
+  return joLista.length === 3 && jo.tk.every((t) => joLista.includes(t.azonosito)) && rosszLista.length === 0;
+});
+
+proba('⭐ D94: a művelet-réteg KIADJA a bemondást (a saját szeletembe) — és ugyanazt másodszor nem', async () => {
+  const { tar, x, tk } = await szuroprobaVilag({ bemondasNelkul: true });
+  const k = { koino: KOINO, kulcspar: x.eember.kulcspar, szerzo: x.eember.szerzo, tar, lancTarolo: null };
+  const elso = await lepcsoBemondasKiadasa(k);
+  const masodik = await lepcsoBemondasKiadasa(k);
+  const szelet = await entitasEsemenyei(tar, KOINO, x.horgony);
+  const b = szelet.filter((e) => e.tipus === LEPCSO_BEMONDAS);
+  const szuro = await lepcso2E(tar, KOINO, x.horgony, ujIdentitasNezet({ keret: 3, valaszto: rogzitett(5) }));
+  return elso.kiadva === true && masodik.kiadva === false && b.length === 1
+    && tk.every((t) => b[0].adat.tanusitasok.includes(t.azonosito)) && szuro.igen === true;
+});
+
+proba('⭐ D94: a TANÚSÍTÁS csak az ellenőrzött 2. lépcsős felhatalmazóit mondja be — a szeletébe szórt idegen felhatalmazás kimarad', async () => {
+  const { kor, esemenyek } = await alapitoKor(5);
+  const r = await tanusitoFelhatalmazokkal(kor, kor[0]);
+  const idegen = await belepo();                         // tag sem, 2. lépcsős sem — mégis felhatalmazza
+  const x = await belepo();
+  const tar = await ujTar();
+  await ment(tar, ...esemenyek, ...r.esemenyek, idegen.esemeny, await felhatalmazas(idegen, r.t), x.esemeny,
+    await meghivas(kor[0], x));
+  const k = { koino: KOINO, kulcspar: r.t.eember.kulcspar, szerzo: r.t.eember.szerzo, tar, lancTarolo: null };
+  const t = await tanusitasMuvelet(k, { kit: x.eember.szerzo, horgonya: x.horgony, sajatBelepes: r.t.horgony });
+  const bemondott = t.adat.felhatalmazasok;
+  return bemondott.length === FELHATALMAZAS_KELL && r.felhatalmazasok.every((f) => bemondott.includes(f));
+});
+
+// ===================================
+// ⭐⭐ D93/6 (E6): A KONTRASZT-JELZÉS BEMENETE A SZELETELT VILÁGBAN (2026-10-04)
+// ===================================
+
+/**
+ * A jelzés világa: az alapító három embert hív be és tanúsít; P1-nek van önálló élete (három embert behív), P2-nek és
+ * P3-nak nincs. A teljes tár, és a szeletek egyeztetett halmazai (amit a csere vinne).
+ */
+async function jelzesVilag() {
+  const a = await alapito();
+  const p = [await belepo(), await belepo(), await belepo()];
+  const esemenyek = [a.esemeny];
+  for (const x of p) esemenyek.push(x.esemeny, await meghivas(a, x), await tanusitas(a, x));
+  for (let i = 0; i < 3; i++) { const q = await belepo(); esemenyek.push(q.esemeny, await meghivas(p[0], q)); }
+  const tar = await ujTar();
+  await ment(tar, ...esemenyek);
+  return { tar, a, p };
+}
+
+proba('⭐⭐ D93/6: a tanúsító azonosság-szeletének egyeztetett halmaza HOZZA a tanúsításait — „kiről állított?” egy szelet', async () => {
+  const { tar, a, p } = await jelzesVilag();
+  const halmaz = await egyeztetettEsemenyek(tar, KOINO, a.horgony);
+  const tanusitasok = halmaz.filter((e) => e.tipus === 'Tanusitas' && e.szerzo === a.eember.szerzo);
+  return tanusitasok.length === 3 && p.every((x) => tanusitasok.some((t) => t.entitas === x.horgony));
+});
+
+proba('⭐⭐ D93/6: a jelzés CSAK SZELETEKBŐL — a tanúsító szelete és a tanúsítottaké elég; ami hiányzik, azt megnevezi (nem vád)', async () => {
+  const { tar, a, p } = await jelzesVilag();
+  // Egy másik készülék: a tanúsító szelete, P1 és P2 szelete — P3-é NINCS meg.
+  const masik = await ujTar();
+  const latott = new Set();
+  for (const k of [a.horgony, p[0].horgony, p[1].horgony]) {
+    for (const e of await egyeztetettEsemenyek(tar, KOINO, k)) {
+      if (latott.has(e.azonosito)) continue;
+      latott.add(e.azonosito);
+      await esemenyMentese(masik, e);
+    }
+  }
+  const t = await tanusitoiTorlodas(masik, KOINO, a.horgony);
+  const sz1 = await onalloSzalak(masik, KOINO, p[0].horgony);
+  const sz2 = await onalloSzalak(masik, KOINO, p[1].horgony);
+  return t.tanusitott === 3 && t.magukbanAllok === 1 && t.ellenorizheto === false
+    && t.hianyzoSzeletek.length === 1 && t.hianyzoSzeletek[0] === p[2].horgony
+    && sz1.tole === 3 && sz1.aktivitas >= 4 && sz2.aktivitas === 1;
+});
+
+// ===================================
+// ⭐⭐ D118/2 (①b): A TANÚSÍTÁS-SZÁM A KOINÓ SZÜLETÉSÉBŐL
+// ===================================
+//
+// Az új alakú koinó (a neve a születés lenyomata) a születésében kettőt mond: egy újonnan jött e-ember két tanúsítással
+// 2. lépcsős. ⭐ A nézet a tárból olvassa ki (a koinó neve a születés azonosítója — egy kérdés). ⚠️ Rontás: ha a nézet a
+// mai állandóval számol (3), bukik; és a kimondott beállítás (a próbák, a mérések) erősebb a születésnél.
+
+/** Egy új alakú koinó alapító körrel (`db` fő), a születésben a megadott szabályokkal. */
+async function ujAlakuAlapitoKor(db, szabalyok) {
+  const tagok = [];
+  for (let i = 1; i < db; i++) tagok.push(await ujEember(''));
+  const letrehozo = await ujEember('');
+  const letrehozas = await letrehozo.tesz('KoinoLetrehozas',
+    { nev: 'Új alakú', leiras: null, alapitok: tagok.map((t) => t.szerzo), ...(szabalyok ? { szabalyok } : {}) });
+  const K = letrehozas.azonosito;
+  letrehozo.koinotValt(K);
+  const esemenyek = [letrehozas];
+  const kor = [{ eember: letrehozo, horgony: K, esemeny: letrehozas }];
+  for (const t of tagok) {
+    t.koinotValt(K);
+    const be = await t.tesz('Belepes', { alapitas: K });
+    esemenyek.push(be);
+    kor.push({ eember: t, horgony: be.azonosito, esemeny: be });
+  }
+  return { K, kor, esemenyek };
+}
+
+proba('⭐⭐ D118/2 (①b): a koinó születése KÉT tanúsítást mond — két tanúsítással 2. lépcsős; a mai (három) koinóban nem, és a kimondott beállítás erősebb',
+  async () => {
+    const eset = async (szabalyok) => {
+      const { K, kor, esemenyek } = await ujAlakuAlapitoKor(4, szabalyok);
+      const mappa = await mkdtemp(join(tmpdir(), 'koino-identitas-'));
+      mappak.push(mappa);
+      const tar = await esemenyTarNyitasa(K, mappa);
+      const ujEe = await ujEember(K);
+      const uj = { eember: ujEe, horgony: null };
+      const be = await ujEe.tesz('Belepes', {});
+      uj.horgony = be.azonosito;
+      await ment(tar, ...esemenyek, be, await meghivas(kor[0], uj), await tanusitas(kor[0], uj), await tanusitas(kor[1], uj));
+      return {
+        sajat: (await lepcso2E(tar, K, uj.horgony)).igen,
+        kimondva: (await lepcso2E(tar, K, uj.horgony, ujIdentitasNezet({ tanusitasKell: 3 }))).igen
+      };
+    };
+    const ketto = await eset({ tanusitasKell: 2 });
+    const mai = await eset(null);
+    return ketto.sajat === true && ketto.kimondva === false && mai.sajat === false && TANUSITAS_KELL === 3;
+  });
+
+export default async function () {
+  const eredmeny = await futtatas();
+  for (const m of mappak) await rm(m, { recursive: true, force: true });
+  return eredmeny;
+}

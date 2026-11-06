@@ -1,0 +1,631 @@
+// js/esemeny/esemeny.js
+
+// Felelősség: egy ESEMÉNY létrehozása (aláírással) és ellenőrzése.
+//
+// A koino adata nem állapot, hanem esemény: „én, ekkor, ezt tettem" — aláírva. Az
+// állapot (mely gondolatok léteznek, ki hova rendelt tudatpontot, mi a szavazás állása)
+// ebből SZÁMÍTÓDIK (D17), nem a szerver állítja.
+//
+// EGY ESEMÉNY KÉT RÉSZBŐL ÁLL:
+//   1. a GONDOLAT (koino, tipus, szerzo, elozo, sorszam, ido, adat) — ezt írjuk alá,
+//   2. a BURKOLAT (azonosito, alairas) — ez a gondolatból SZÁRMAZIK.
+// Az azonosító a gondolat lenyomata, tehát nem külön adat, hanem a gondolat neve. Ezért
+// nem szerepelhet a lenyomatolt részben (önmagára hivatkozna).
+//
+// MIT ÍRUNK ALÁ? Az azonosítót — vagyis a gondolat lenyomatát. Így az aláírás
+// ellenőrzéséhez elég az azonosító, az azonosító pedig igazolja a teljes gondolatot.
+// (Ugyanaz a szerkezet, amit a git használ: a commit neve a gondolata lenyomata, az
+// aláírás pedig arra a névre megy.)
+//
+// Használják: a tár-réteg és minden művelet (gondolat, tudatpont, javaslat, szavazat).
+
+import { szabalyokAlakiHibaja } from './koinoSzabalyok.js';
+import { lenyomat, base64UrlBajtok, bajtokBase64Url } from './kanonikusAlak.js';
+// ⭐ D81: a lánc-gyökér két összegzés — az alakjukat itt nézzük (a fa egy forrás).
+import { osszegzesAlakja } from './osszegzoFa.js';
+// ⭐ D119 (①a): a koinó programja és a koino-verzió kódja egy darab-hivatkozás (a kód-csomag jegyzéke — `tar/kodCsomag.js`).
+import { szovegHivatkozasE } from './szovegDarab.js';
+
+const ALGORITMUS = 'Ed25519';
+
+// A gondolat mezői — EZEK és csakis ezek kerülnek a lenyomatba, ebben a sorrendben
+// (a sorrend valójában mindegy, mert a kanonikus alak úgyis rendez — de a lista
+// rögzítése azért fontos, hogy ne csússzon be véletlenül új mező a lenyomatba).
+//
+// ===== A BURKOLAT BŐVÜLT (2026-08-31, a Szakasz 3 / 3.1 lépése) =====
+//
+// Három mező került be, és MINDHÁROM ugyanazt a hiányt pótolja: ha a tárolást
+// szeleteljük (entitásonként), a készülék már NEM látja egy szerző teljes láncát — tehát
+// amit eddig a lánc végigjárásából tudtunk meg, azt ezentúl AZ ESEMÉNYNEK KELL HOZNIA.
+//
+//   entitas        — ⭐ A SZELET-KULCS. Melyik entitáshoz tartozik ez az esemény?
+//   entitasSorszam — hányadik eseményem EZEN AZ ENTITÁSON (a `sorszam` entitás-szintű párja)
+//   latott         — pár IDEGEN esemény azonosítója, amit már ismertem (horgony az időhöz)
+//   lancGyoker     — ⭐ a szerző ESEMÉNY ELŐTTI naplójának és kiosztásának gyökere (D78, D81; lásd lentebb)
+//
+// ⚠️ MIÉRT A BURKOLATBAN, ÉS NEM AZ `adat`-BAN? Mert a tár-illesztőnek szeletelnie kell,
+// és ehhez NEM SZABAD értenie a domaint. Ma az entitás típusonként más néven lapul az
+// adatban (`adat.entitas`, `adat.erintett`, a szavazatnál pedig csak közvetve, a javaslaton
+// keresztül). Egyetlen, típus-független szabály kell helyette:
+//
+//   ⭐ szelet(e) = e.entitas ?? e.azonosito
+//
+// A `null` jelentése tehát: „ez az esemény a SAJÁT szeletét nyitja" — így a gondolat-
+// létrehozás (ami maga hozza létre az entitást) és a koino-létrehozás is befér a szabályba,
+// külön eset nélkül. *(A saját azonosítót nem lehetne a mezőbe írni: önmagára hivatkozna.)*
+//
+// ⚠️ MIÉRT MOST? Mert a kanonikus alak bővítése KÉSŐBB NEM INGYENES: a régi eseményeket
+// nem lehet újra aláírni (az aláírás a régi bájtokra szól), tehát kétféle eseményalak
+// maradna örökre — és átállás közben két gép ugyanarra a tudásra MÁS ujjlenyomatot
+// számolna, NÉMÁN. A tárban 2026-08-31-én 9 valódi esemény volt.
+//
+// ⚠️ MINDIG JELEN VANNAK (`null`, illetve `[]`), soha nem hiányoznak. A kanonikus alak a
+// hiányzó mezőt kihagyja — ha hol lenne, hol nem, két majdnem-azonos esemény lenyomata
+// magyarázhatatlanul eltérne. Ugyanaz a megfontolás, mint az `elozo: null`-nál.
+//
+// ===== ⏸️ A NEGYEDIK MEZŐ: LEFOGLALT HELY (Csaba döntése, 2026-09-02) =====
+//
+// A `lancGyoker` a szerző EGÉSZ addigi láncára kötne el egyetlen lenyomattal — nagyjából
+// úgy, ahogy az `elozo` az előző eseményre mutat. ⭐ Ettől a kettős lánc bizonyítéka
+// TÚLÉLNÉ az összenyomást: aki elágazik, két különböző gyökeret kötelez el magára, és a
+// két aláírt állítása mond ellent egymásnak.
+//
+// ⚠️ DE MOST MÉG NINCS FOGYASZTÓJA. Ehhez az összegző Merkle-fa kell, ami a Szakasz 4
+// munkája — és egy mező, aminek nincs fogyasztója, ROSSZ DEFINÍCIÓT kap. A kanonikus
+// alakban pedig épp ez a drága hiba.
+//
+// ⭐ EZÉRT: a mező MOST bekerül, de MINDIG `null`. Amit később nem lehet olcsón megtenni,
+// az egy mező HOZZÁADÁSA vagy ELVÉTELE — mert attól kétféle eseményalak lenne, és átállás
+// közben két gép ugyanarra a tudásra MÁS ujjlenyomatot számolna, némán. Egy `null`-t
+// értelmes értékre cserélni NEM ilyen: az csak egy másik érték, mint bármelyik másikban.
+//
+// ===== ✅ ÉS MOST MEGKAPTA AZ ÉRTELMÉT (D78, D81 — 2026-09-27) =====
+//
+// A `lancGyoker` a szerző ESEMÉNY ELŐTTI két gyökerének ÖSSZEGZÉSE: `{ naplo, kiosztas }` —
+// a napló-fáé (az 1..sorszam−1 események azonosítói) és a kiosztás-fáé (entitás → pont; a
+// gyökér összege a kiosztott összeg). ⭐ Nem a lenyomatuk, hanem maguk (D81: a bizonyíték az
+// eseménnyel utazik): így aki az eseményt tartja, a szerző nélkül is ellenőrizni tudja. A
+// pont-esemény ezen felül az adatában hozza az entitása régi értékének bizonyítékát.
+// A `null` marad a régi (D78 előtti) eseményeké, és azé, akinek a saját lánca nem ép.
+// ⭐ És ez pontosan az a csere, amit a 2026-09-02-i döntés olcsónak mondott: egy `null` helyén
+// egy érték — a régi események érvényesek maradnak.
+const TARTALOM_MEZOK = [
+  'koino', 'tipus', 'szerzo', 'elozo', 'sorszam', 'ido',
+  'entitas', 'entitasSorszam', 'latott', 'lancGyoker',
+  'adat'
+];
+
+/**
+ * ⭐ A SZELET-KULCS — melyik entitáshoz tartozik az esemény.
+ *
+ * Ez az egyetlen szabály, amit a tár-illesztőnek ismernie kell a szeleteléshez. Domain-
+ * tudást nem igényel: vagy meg van mondva, vagy az esemény a saját szeletét nyitja.
+ *
+ * @param {Object} esemeny
+ * @returns {string} az entitás azonosítója
+ */
+export function szelet(esemeny) {
+  return esemeny.entitas ?? esemeny.azonosito;
+}
+
+/**
+ * ⭐ EGY SZÜLETÉS SZÜLŐJE (a C 7. pontja, a gyerek-bejelentés): a `GondolatLetrehozas` `szulo`-ja,
+ * vagy '' (a gyökér), ha legfelső szintű. Minden más eseménynél null — az nem születés.
+ *
+ * ⭐ A szülő köre ebből tudja meg, hogy új gondolat született: a születés a SZÜLŐ egyeztetett
+ * halmazában is benne van (a szöveg nélkül — D72). ⚠️ Csak a születés: az áthelyezés (egyezmény)
+ * az új szülőnél még nem hangzik el.
+ *
+ * Használják: tar/fajlTar.js (a mutató), csere/szeletEgyeztetes.js.
+ *
+ * @param {Object} e
+ * @returns {string|null}
+ */
+export function szuleteseSzuloje(e) {
+  if (e?.tipus !== 'GondolatLetrehozas') return null;
+  return typeof e.adat?.szulo === 'string' ? e.adat.szulo : '';
+}
+
+/**
+ * ⭐⭐ D85/1, D85/3 (Csaba, 2026-10-02): HOVA JELENTJÜK BE AZ ESEMÉNYT — a saját szeletén KÍVÜL.
+ *
+ * A gyerek-bejelentés (a C 7. pontja) általánosítása. Egy szelet egyeztetett halmazában a saját
+ * eseményei mellett ott van minden, ami az ő entitásáról DÖNT vagy róla hír — így a tartói akkor is
+ * mindent tudnak, ha a hír egy másik szeletben lakik:
+ *
+ *   · `GondolatLetrehozas` → a szülőjénél ('' = a gyökér) — „új gyereke született";
+ *   · `Javaslat` → MINDEN érintettjénél — a javaslat a saját szeletében él (D85/1), de az érintett
+ *     gondolat nem szavazó tartóinak is ki kell tudniuk számolni, megváltozik-e (D17, D85/3);
+ *   · `Szavazat` → azokban a szeletekben, amelyekre a jogának bizonyítékát hozza (D85/2, T2: az érintett
+ *     gondolat és a rész javaslat-entitása) — vagyis ahol számít. ⚠️ Csak a saját kiosztásában szereplő
+ *     kulcs lehet itt (a kapu ellenőrzi), legfeljebb 64.
+ *   · ⭐ D93/6 (E6, 2026-10-04): az IDENTITÁS-ÁLLÍTÁS (`Meghivas`, `Felhatalmazas`, `FelhatalmazasVisszavonasa`,
+ *     `Tanusitas`, `Bemutatkozas`) — a MÁSIK szeletében él, és a SZERZŐ saját azonosság-szeletébe is bejelentjük
+ *     (`adat.sajatBelepes`): így „kiről állított?” (kit tanúsított, kinek mutatkozott be) egyetlen szelet-kérdés, a
+ *     szerző láncának átfésülése nélkül — a kontraszt-jelzés bemenete. ⚠️ A horgonyt a szerző mondja; a jelzés csak a
+ *     szerző saját állításait számolja (egy idegen horgonyra mutató bejelentés nem hamisít semmit).
+ *   · ⭐ D95/1: a `LezarasiOsszegzes` → az érintettjénél (`adat.entitas`).
+ *
+ * ⛔ Csak azonosító alakú kulcs (D77: amit nem lehet a vonalon kimondani, az megakasztaná a cserét), és a
+ * saját szelete nem (az úgyis az övé). ⭐ Az eseményből MAGÁBÓL olvasható — a tár mutatója más esemény
+ * nélkül számolja ki (mint a szelet-kulcsot).
+ *
+ * Használják: tar/fajlTar.js (a mutató), csere/szeletEgyeztetes.js.
+ *
+ * @param {Object} e
+ * @returns {Array<string>} tár-kulcsok ('' = a gyökér), ismétlés nélkül, rendezve
+ */
+/** ⭐ D93/6: az identitás-állítások — a szerző azonosság-szeletébe is bejelentődnek (`bejelentesHelyei`). */
+export const AZONOSSAG_ALLITASOK = new Set(['Meghivas', 'Felhatalmazas', 'FelhatalmazasVisszavonasa', 'Tanusitas',
+  'Bemutatkozas']);
+
+export function bejelentesHelyei(e) {
+  const helyek = new Set();
+  const sajat = szelet(e);
+  const hozza = (k) => {
+    if (k === '' || (typeof k === 'string' && AZONOSITO_MINTA.test(k) && k !== sajat)) helyek.add(k);
+  };
+  if (e?.tipus === 'GondolatLetrehozas') {
+    hozza(szuleteseSzuloje(e));
+  } else if (e?.tipus === 'Javaslat') {
+    const lista = Array.isArray(e.adat?.erintettek) ? e.adat.erintettek.map((r) => r?.entitas)
+      : [e.adat?.erintett];
+    for (const k of lista) if (typeof k === 'string' && k !== '') hozza(k);
+  } else if (e?.tipus === 'Szavazat') {
+    // ⛔ CSAK lánc-gyökeres szavazatnál: a kapu csak akkor ellenőrzi a bizonyítékot (legfeljebb 64
+    // azonosító, mind a saját kiosztásából — `hozottBizonyitekokOnbizonyitasa`). Gyökér nélkül a bizonyíték nem
+    // számít (`szavazatSajatPontjai`), és bejelentést sem adhat — különben bármennyi, bármilyen szeletbe
+    // be lehetne jelenteni egy szavazatot.
+    const b = e.adat?.bizonyitek;
+    if (e.lancGyoker && typeof e.lancGyoker === 'object' && b && typeof b === 'object' && !Array.isArray(b)) {
+      for (const k of Object.keys(b)) if (k !== '') hozza(k);
+    }
+  } else if (AZONOSSAG_ALLITASOK.has(e?.tipus)) {
+    hozza(e.adat?.sajatBelepes);
+  } else if (e?.tipus === 'LezarasiOsszegzes') {
+    // ⭐ D95/1: a lezárási összegzés a javaslat szeletében él, és az érintettjénél is hír (annak tartói ebből tudják meg
+    // a nagy szeletű rész döntését).
+    hozza(e.adat?.entitas);
+  }
+  return [...helyek].sort();
+}
+
+// ===================================
+// SEGÉD: A LENYOMATOLANDÓ RÉSZ KIEMELÉSE
+// ===================================
+
+/**
+ * Kiveszi az eseményből azt a részt, amit a lenyomat fed.
+ * @param {Object} esemeny
+ * @returns {Object}
+ */
+function tartalomResz(esemeny) {
+  const resz = {};
+  for (const mezo of TARTALOM_MEZOK) {
+    if (esemeny[mezo] !== undefined) resz[mezo] = esemeny[mezo];
+  }
+  return resz;
+}
+
+// ===================================
+// ESEMÉNY LÉTREHOZÁSA
+// ===================================
+
+/**
+ * Létrehoz egy aláírt eseményt.
+ *
+ * @param {Object} leiras
+ * @param {string} leiras.koino - melyik koinóhoz tartozik (D25: több koino egy készüléken)
+ * @param {string} leiras.tipus - pl. 'GondolatLetrehozas'
+ * @param {Object} leiras.adat - a művelet gondolata (típusfüggő)
+ * @param {string|null} leiras.elozo - az előző SAJÁT eseményem azonosítója (az első: null)
+ * @param {number} leiras.sorszam - hányadik a saját láncomban (az első: 1)
+ * @param {number} [leiras.ido] - a szerző órája szerint (alapból: most)
+ * @param {string|null} [leiras.entitas] - a SZELET-KULCS; null = az esemény a saját szeletét nyitja
+ * @param {number} [leiras.entitasSorszam] - hányadik eseményem ezen az entitáson (alap: 1)
+ * @param {Array<string>} [leiras.latott] - idegen események, amiket már ismertem (horgony)
+ * @param {CryptoKeyPair} kulcspar - a saját kulcspár
+ * @returns {Promise<Object>} az aláírt esemény
+ */
+export async function esemenyLetrehozasa(leiras, kulcspar) {
+  console.log('esemenyLetrehozasa - KEZDÉS', { tipus: leiras.tipus, sorszam: leiras.sorszam });
+
+  // ----- A SZERZŐ: a nyilvános kulcs -----
+  // Nem név, nem fiók: a személyazonosság maga a kulcs (D15).
+  const nyersKulcs = await crypto.subtle.exportKey('raw', kulcspar.publicKey);
+  const szerzo = bajtokBase64Url(new Uint8Array(nyersKulcs));
+
+  const gondolat = {
+    koino: leiras.koino,
+    tipus: leiras.tipus,
+    szerzo,
+    elozo: leiras.elozo ?? null,
+    sorszam: leiras.sorszam,
+    // Az idő a SZERZŐ órája — tájékoztató adat, soha nem bizonyíték. A sorrendet a
+    // saját láncban a `sorszam` adja, nem ez.
+    ido: leiras.ido ?? Date.now(),
+
+    // ----- A HÁROM ÚJ MEZŐ (lásd a TARTALOM_MEZOK melletti magyarázatot) -----
+    // Mindhárom MINDIG jelen van, hogy a lenyomat kiszámítható maradjon.
+    entitas: leiras.entitas ?? null,
+    entitasSorszam: leiras.entitasSorszam ?? 1,
+    // A horgony: idegen események, amiket a szerző a sajátja előtt már ismert. Üres tömb
+    // is érvényes — akkor egyszerűen nincs mihez kötni az eseményt (D19: ez jelzés, nem vád).
+    latott: Array.isArray(leiras.latott) ? [...leiras.latott] : [],
+    // ⏸️ LEFOGLALT HELY — a jelentése a Szakasz 4-ben dől el (lásd fent). Addig `null`.
+    lancGyoker: leiras.lancGyoker ?? null,
+
+    adat: leiras.adat
+  };
+
+  // ----- AZ AZONOSÍTÓ: a gondolat lenyomata -----
+  // Ha a gondolatban tört szám vagy más tiltott érték van, ez itt HIBÁT DOB — jobb
+  // most kiderülnie, mint akkor, amikor két gép már nem ért egyet.
+  const azonosito = await lenyomat(gondolat);
+
+  // ----- AZ ALÁÍRÁS: az azonosítóra -----
+  const alairasBajtok = await crypto.subtle.sign(
+    { name: ALGORITMUS },
+    kulcspar.privateKey,
+    new TextEncoder().encode(azonosito)
+  );
+
+  const esemeny = {
+    ...gondolat,
+    azonosito,
+    alairas: bajtokBase64Url(new Uint8Array(alairasBajtok))
+  };
+
+  console.log('esemenyLetrehozasa - VÉGE', { azonosito });
+  return esemeny;
+}
+
+// ===================================
+// ESEMÉNY ELLENŐRZÉSE
+// ===================================
+
+/**
+ * Ellenőriz egy eseményt: valóban az állítólagos szerzőtől való-e, és változatlan-e.
+ *
+ * KÉT DOLGOT NÉZ MEG:
+ *   1. az azonosító tényleg a gondolat lenyomata-e (nem babráltak a gondolatba),
+ *   2. az aláírás a szerző kulcsával készült-e (tényleg ő írta alá).
+ * A kettő együtt: a gondolat egyetlen bájtja sem változhatott a szerző óta.
+ *
+ * FONTOS, MIT NEM NÉZ: hogy a szerző jogosult-e a műveletre, hogy a lánc folytonos-e,
+ * és hogy az idő igaz-e. Azok külön kérdések (tár-réteg, állapot-réteg).
+ *
+ * @param {Object} esemeny
+ * @returns {Promise<{rendben: boolean, ok?: string}>}
+ */
+export async function esemenyEllenorzese(esemeny) {
+  // ----- ALAKI ELLENŐRZÉS -----
+  const alaki = alakiHiba(esemeny);
+  if (alaki) return { rendben: false, ok: alaki };
+
+  // ----- 1. AZ AZONOSÍTÓ A GONDOLAT LENYOMATA-E? -----
+  let ujraszamolt;
+  try {
+    ujraszamolt = await lenyomat(tartalomResz(esemeny));
+  } catch (hiba) {
+    return { rendben: false, ok: 'a gondolat nem hozható kanonikus alakra: ' + hiba.message };
+  }
+  if (ujraszamolt !== esemeny.azonosito) {
+    return { rendben: false, ok: 'az azonosító nem a gondolat lenyomata (a gondolat megváltozott)' };
+  }
+
+  // ----- 2. AZ ALÁÍRÁS A SZERZŐ KULCSÁVAL KÉSZÜLT-E? -----
+  try {
+    const nyilvanosKulcs = await crypto.subtle.importKey(
+      'raw', base64UrlBajtok(esemeny.szerzo), { name: ALGORITMUS }, false, ['verify']
+    );
+    const rendben = await crypto.subtle.verify(
+      { name: ALGORITMUS },
+      nyilvanosKulcs,
+      base64UrlBajtok(esemeny.alairas),
+      new TextEncoder().encode(esemeny.azonosito)
+    );
+    if (!rendben) return { rendben: false, ok: 'az aláírás nem a szerzőé' };
+  } catch (hiba) {
+    return { rendben: false, ok: 'az aláírás nem ellenőrizhető: ' + hiba.message };
+  }
+
+  return { rendben: true };
+}
+
+/**
+ * ⭐ AZ AZONOSÍTÓ ALAKJA (D77, 2026-09-27): egy lenyomat — 43 base64url jel. EGY helyen, mert a
+ * kapu (`alakiHiba`) és a csere vonala (`csere/szeletEgyeztetes.js`, a szelet-kulcs) ugyanezt
+ * kérdezi: ha a kettő eltérne, egy kapun átjutott esemény megint kimondhatatlan kulcsot adna.
+ */
+export const AZONOSITO_MINTA = /^[A-Za-z0-9_-]{43}$/;
+
+/** Azonosító alakú-e (szöveg, 43 base64url jel)? */
+export const azonositoAlaku = (x) => typeof x === 'string' && AZONOSITO_MINTA.test(x);
+
+// ===================================
+// ⭐⭐ D118/2: MELYIK KOINÓÉ EGY ESEMÉNY — A KOINÓ NEVE A SZÜLETÉSE LENYOMATA
+// ===================================
+//
+// ⛔ A LELET (2026-10-24, mérve — `docs/koltozes_atvizsgalas.md` 3.): a koinó neve szabad szöveg volt, és a születését
+// három hely háromféleképp választotta (az állapot az utolsót, a tagság az elsőt, a kapu a saját láncból) — egy kívülálló
+// egyetlen, azonos nevű `KoinoLetrehozas`-szal az alapító (és így minden tag) döntéseit „nem ellenőrizhetővé” tette.
+//
+// ⭐ Az új alak: a születés koinó-mezője ÜRES (önmagát nem nevezheti meg — a lenyomata a tartalmából jön), és a koinó
+// neve a születés AZONOSÍTÓJA; minden más esemény ezt a nevet viszi. Egy második születés így MÁSIK koinó — nincs mit
+// választani. ⚠️ A régi alak (szabad név, a születés koinó-mezője maga a név) csak a próbák kedvéért él: lenyomat-alakú
+// névre soha nem vonatkozik, és a program új koinót csak az új alakban hoz létre.
+
+/** Melyik koinóé az esemény? Az új alakú születésé a saját azonosítója, mindenki másé a koinó-mezője. */
+export function esemenyKoinoja(e) {
+  if (!e || typeof e !== 'object') return undefined;
+  if (e.koino === '' && e.tipus === 'KoinoLetrehozas') return e.azonosito;
+  return e.koino;
+}
+
+/** A koinó születése-e ez az esemény? Lenyomat-nevű koinónál CSAK az, amelyiknek az azonosítója maga a név. */
+export function koinoSzuleteseE(e, koino) {
+  if (!e || typeof e !== 'object' || e.tipus !== 'KoinoLetrehozas') return false;
+  if (azonositoAlaku(koino)) return e.koino === '' && e.azonosito === koino;
+  return e.koino === koino && !azonositoAlaku(e.koino);   // a régi alak (szabad név) — csak a próbákban
+}
+
+// ===================================
+// ⭐⭐ D119 (①a): A KOINO-VERZIÓ — A GYERMEK SZÜLETÉSE A SZÜLŐBEN, A KÓDDAL
+// ===================================
+//
+// Csaba ötlete (CS3, 2026-10-25): minden gyermek a szülőben egy KOINO-VERZIÓ entitással születik — a `kormanyzas.md` 2.
+// szintje (a koino-verzió entitása). Egy legfelső szintű entitás (`GondolatLetrehozas`, `tipus: 'KoinoVerzio'` — a
+// kategória és a gondolattípus mintájára: új esemény-fajta nélkül), a címe a gyermek neve, a gyermek ALÁÍRT születését
+// magába ágyazza, és a kódot (a kód-csomag jegyzékét) is megnevezi. Ettől a szülő rendes cseréje (a gyökér darabjai) és a
+// kézi út a gyermek HÍRÉT is viszi, és a „Kód” fülön a teljes program ellenőrizhető. A feltöltő a gyermek létrehozója; a
+// pontot ugyanúgy rendeli hozzá, mint bármihez (D14 — pont nélkül nincs).
+
+/** A koino-verzió entitás típusa. */
+export const KOINO_VERZIO = 'KoinoVerzio';
+
+/** Koino-verzió létrehozó eseménye-e? */
+export function koinoVerzioE(e) {
+  return !!e && typeof e === 'object' && e.tipus === 'GondolatLetrehozas' && e.adat?.tipus === KOINO_VERZIO;
+}
+
+/**
+ * A koinó születése egy eseménylistából — EGY szabály minden helyen (az állapot, a tagság, a kapu, a belépő tér).
+ * Koinó nélkül: az első új alakú születésé, ha van ilyen, különben a régi alaké. ⚠️ A régi alaknál több is lehet
+ * (ezért volt a lelet): ott a legkisebb azonosító — determinisztikus, de hamisítható; az új alaknál egy lehet.
+ * @param {Array<Object>} esemenyek
+ * @param {string|null} [koino]
+ * @returns {Object|null}
+ */
+export function koinoSzuleteseListabol(esemenyek, koino = null) {
+  let legjobb = null;
+  let ujAlaku = false;
+  for (const e of esemenyek ?? []) {
+    if (!e || e.tipus !== 'KoinoLetrehozas') continue;
+    if (koino !== null ? !koinoSzuleteseE(e, koino) : azonositoAlaku(e.koino)) continue;
+    const uj = e.koino === '';
+    if (koino === null && ujAlaku && !uj) continue;
+    if (!legjobb || (uj && !ujAlaku) || e.azonosito < legjobb.azonosito) legjobb = e;
+    ujAlaku = ujAlaku || uj;
+  }
+  return legjobb;
+}
+
+/**
+ * A lánc-gyökér alakja (D81): `{ naplo, kiosztas }` — két összegzés (`{ l, d, o }`), semmi más; a
+ * napló összeg nélküli, a kiosztás egy összeget (a pontot) visz, és a napló darabja a sorszám − 1.
+ * ⚠️ Csak az ALAK: hogy a gyökerek a szerző láncához illenek-e, azt a bizonyítékok döntik el.
+ */
+export function lancElokepAlakja(x, sorszam) {
+  const osszegzes = (y, hossz) => !!y && typeof y === 'object' && Object.keys(y).length === 3
+    && osszegzesAlakja(y, hossz);
+  return !!x && typeof x === 'object' && !Array.isArray(x) && Object.keys(x).length === 2
+    && osszegzes(x.naplo, 0) && osszegzes(x.kiosztas, 1) && x.naplo.d === sorszam - 1;
+}
+
+/**
+ * ⭐ AZ ALAKI ELLENŐRZÉS ÖNMAGÁBAN — szinkron és olcsó (2026-09-24, 40. mérés).
+ *
+ * ⛔ MIÉRT VÁLT KÜLÖN: a kapu (`esemenyEllenorzese`) ezt is, a drága részt is (lenyomat +
+ * aláírás) elvégzi. ⭐ A CSERE viszont a SAJÁT tárát nézi, amit egyszer már egy kapu
+ * beengedett — ott az aláírás nem változhatott, csak a SZABÁLY: egy régebbi programmal
+ * tárolt esemény ma alakilag érvénytelen lehet (a 2026-08-31-i három új mező előtti alak, vagy
+ * a D77 előtti, nem azonosító alakú `entitas` / `szulo`). Az ilyet a csere ne hirdesse és ne
+ * küldje: *amit egyetlen mai kapu sem enged be, az a mai protokoll számára nem létezik.* Egy
+ * szabály, két hívó — különben elcsúszhatnának.
+ *
+ * @param {Object} esemeny
+ * @returns {string|null} a hiba oka, vagy `null`, ha alakilag rendben van
+ */
+export function alakiHiba(esemeny) {
+  if (!esemeny || typeof esemeny !== 'object') return 'nem objektum';
+  // ⚠️ A HÁROM ÚJ MEZŐ IS KÖTELEZŐ (2026-08-31). Ez szándékos szigor: a kanonikus alak a
+  // hiányzó mezőt kihagyja, tehát egy régi alakú esemény ÖNMAGÁBAN érvényesnek látszana —
+  // és akkor KÉTFÉLE eseményalak élne egymás mellett. Ki lehetne hagyni a mezőket, hogy a
+  // szabály-réteg ne tudjon rájuk támaszkodni. Egy alak van, nem kettő.
+  // (A `null` érvényes érték: az `entitas: null` azt jelenti, „a saját szeletét nyitja".)
+  for (const mezo of [
+    'koino', 'tipus', 'szerzo', 'sorszam', 'ido',
+    'entitas', 'entitasSorszam', 'latott', 'lancGyoker',
+    'azonosito', 'alairas'
+  ]) {
+    if (esemeny[mezo] === undefined) return 'hiányzó mező: ' + mezo;
+  }
+
+  // ----- ⭐⭐ D118/2: A KOINÓ NEVE -----
+  // Az üres koinó-név csak az új alakú születésé (annak a neve a saját lenyomata); és születés nem nevezhet meg
+  // lenyomat-alakú koinót — az egy létező koinó második, hamis születése lenne (a lelet).
+  if (typeof esemeny.koino !== 'string') return 'a koino csak szöveg lehet';
+  if (esemeny.koino === '' && esemeny.tipus !== 'KoinoLetrehozas') return 'üres koinó-név csak a koinó születésén állhat';
+  if (esemeny.tipus === 'KoinoLetrehozas' && azonositoAlaku(esemeny.koino)) {
+    return 'a koinó születése nem nevezhet meg koinót: a koinó neve a születés saját lenyomata';
+  }
+  // ⭐⭐ D118/2 (①b): a koinó SZABÁLYAI a születésben — csak ismert kulcsok, a határokon belül (`koinoSzabalyok.js`).
+  if (esemeny.tipus === 'KoinoLetrehozas') {
+    const hiba = szabalyokAlakiHibaja(esemeny.adat?.szabalyok);
+    if (hiba) return hiba;
+    // ⭐⭐ D118 (②a): a GYERMEK születése a szülő nevét (a születése lenyomatát) és a létrehozó tagsági bizonyítékát hozza
+    // — csak új alakban. Itt az alak; a bizonyítékot a kapu a szülő születésével együtt ellenőrzi (`koinoLanc.js`).
+    const sz = esemeny.adat?.szulo;
+    const t = esemeny.adat?.szuloTagsag;
+    if (sz !== undefined) {
+      if (esemeny.koino !== '' || !azonositoAlaku(sz)) return 'a szülő csak egy új alakú születés neve lehet (a lenyomata)';
+      if (!t || typeof t !== 'object' || Array.isArray(t) || !azonositoAlaku(t.horgony) || !Array.isArray(t.lanc)
+          || t.lanc.length > 1024) {
+        return 'a gyermek születése a létrehozó tagsági bizonyítékát hozza ({ horgony, lanc })';
+      }
+      // ⭐⭐ D119 (Csaba: „(A) Nem költözik”): a létrehozó a születésével költözik, és a beköltözéshez hasonlóan elhagyhat
+      // (KZ3 (A)) — a program a koino-verzió kártyáira tett pontjait magától elhagyja (a kártya a szülő ügye).
+      const el = esemeny.adat?.elhagy;
+      if (el !== undefined && (!Array.isArray(el) || el.length > 1024 || !el.every(azonositoAlaku))) {
+        return 'az elhagyott pontok listája entitás-azonosítók listája';
+      }
+    } else if (t !== undefined) {
+      return 'tagsági bizonyíték csak a szülőt megnevező születésen állhat';
+    } else if (esemeny.adat?.elhagy !== undefined) {
+      return 'elhagyott pont csak a gyermek születésén állhat (a létrehozó a születésével költözik)';
+    }
+    // ⭐⭐ D119 (①a): a koinó PROGRAMJA — a kód-csomag jegyzékének hivatkozása (a kód neve); csak új alakban.
+    const pr = esemeny.adat?.program;
+    if (pr !== undefined && (esemeny.koino !== '' || !szovegHivatkozasE(pr))) {
+      return 'a koinó programja a kód-csomag hivatkozása ({ lenyomat, bajt }) — csak új alakú születésen';
+    }
+    // ⭐⭐ D123 (PR1): a koinó MAGJA — a számítás magjának (a kép és a kapu import-zárványa, `tar/kodCsomag.js` `magJegyzeke`)
+    // hivatkozása: ennek kell egy koinón belül mindenkinél azonosnak lennie; a többi réteg szabadon változhat.
+    const mg = esemeny.adat?.mag;
+    if (mg !== undefined && (esemeny.koino !== '' || !szovegHivatkozasE(mg) || mg.torzs !== undefined)) {
+      return 'a koinó magja a mag-jegyzék hivatkozása ({ lenyomat, bajt }) — csak új alakú születésen';
+    }
+  }
+  // ⭐⭐ D118 (④a): a KÖLTÖZÉS két eseménye — az alakjuk (a bizonyítékot a kapu nézi, a koinó és a szülő születésével).
+  if (esemeny.tipus === 'Kikoltozes') {
+    if (!azonositoAlaku(esemeny.adat?.gyermek)) return 'a kiköltözés a gyermek koinó nevét mondja';
+    if (!azonositoAlaku(esemeny.entitas)) return 'a kiköltözés a saját azonosság-szeletembe szól (a horgonyomhoz)';
+  }
+  if (esemeny.tipus === 'Bekoltozes') {
+    const a = esemeny.adat ?? {};
+    if (esemeny.entitas !== null) return 'a beköltözés a saját szeletét nyitja (ez a horgonyom a gyermekben)';
+    if (!azonositoAlaku(a.szulo) || !azonositoAlaku(a.kikoltozes)) return 'a beköltözés a szülőt és a kiköltözést nevezi meg';
+    if (!a.lanc || typeof a.lanc !== 'object' || !Number.isSafeInteger(a.lanc.sorszam) || a.lanc.sorszam < 1
+        || !azonositoAlaku(a.lanc.azonosito)) {
+      return 'a beköltözés a szülőbeli láncom vágás előtti utolsó eseményét nevezi meg ({ sorszam, azonosito })';
+    }
+    const t = a.szuloTagsag;
+    if (!t || typeof t !== 'object' || Array.isArray(t) || !azonositoAlaku(t.horgony) || !Array.isArray(t.lanc)
+        || t.lanc.length > 1024) {
+      return 'a beköltözés a tagsági bizonyítékomat hozza a szülőből ({ horgony, lanc })';
+    }
+    if (a.elhagy !== undefined && (!Array.isArray(a.elhagy) || a.elhagy.length > 1024 || !a.elhagy.every(azonositoAlaku))) {
+      return 'az elhagyott pontok listája entitás-azonosítók listája';
+    }
+  }
+
+  // ----- A HÁROM ÚJ MEZŐ ALAKJA -----
+  // ⛔ D77 (2026-09-27, Csaba): az `entitas` nem akármilyen szöveg, hanem egy AZONOSÍTÓ — a szelet
+  // kulcsa, és a csere ezt mondja ki a vonalon. Az átnézés mérte: egy kapun átjutott `"x"` kulcs a
+  // társsal folytatott MINDEN cserét megakasztotta (HIBAS-EGYEZTETES).
+  if (esemeny.entitas !== null && !azonositoAlaku(esemeny.entitas)) {
+    return 'az entitas csak azonosító vagy null lehet';
+  }
+  if (!Number.isInteger(esemeny.entitasSorszam) || esemeny.entitasSorszam < 1) {
+    return 'az entitasSorszam csak 1-nél nem kisebb egész lehet';
+  }
+  if (!Array.isArray(esemeny.latott) || esemeny.latott.some((a) => typeof a !== 'string')) {
+    return 'a latott csak azonosítók tömbje lehet';
+  }
+  // ⭐ A lánc-gyökér (D63, D78, D81): a szerző ESEMÉNY ELŐTTI két gyökere — vagy null (a D78 előtti
+  // események, és ha a szerző saját lánca nem ép). ⛔ Pontosan két összegzés, és a napló darabja a
+  // sorszám − 1 (annyi eseménye volt előtte): egy alak van, nem kettő.
+  if (esemeny.lancGyoker !== null && !lancElokepAlakja(esemeny.lancGyoker, esemeny.sorszam)) {
+    return 'a lancGyoker csak a két gyökér (napló, kiosztás) vagy null lehet';
+  }
+
+  // ----- ⛔ D77: A SZÜLETÉS SZÜLŐJE — mert az is szelet-kulcs lesz -----
+  // A gyerek-bejelentés (a C 7. pontja) a születést a SZÜLŐ körében is kimondja (`szuleteseSzuloje`):
+  // a szülő tehát ugyanúgy kulcs a vonalon, mint az `entitas`. Hiányzó vagy `null` szülő: legfelső
+  // szintű gondolat.
+  // ⭐ D89/2: a koinó zártsága csak igaz/hamis lehet (hiányozhat — a régi koinó: zárt).
+  if (esemeny.tipus === 'KoinoLetrehozas' && esemeny.adat?.zart !== undefined
+      && typeof esemeny.adat.zart !== 'boolean') {
+    return 'a koinó zart mezője csak igaz vagy hamis lehet';
+  }
+  if (esemeny.tipus === 'GondolatLetrehozas') {
+    const szulo = esemeny.adat?.szulo;
+    if (szulo !== undefined && szulo !== null && !azonositoAlaku(szulo)) {
+      return 'a gondolat szulo-ja csak azonosító vagy null lehet';
+    }
+  }
+  // ----- ⭐⭐ D119 (①a): A KOINO-VERZIÓ — legfelső szintű, a gyermek születését és a kódját hozza -----
+  // Itt az alak (a beágyazott születésé is); az aláírást és a tagsági bizonyítékot a kapu nézi, a szülő születésével
+  // (`koinoLanc.js` `koinoVerzioEllenorzese`).
+  if (koinoVerzioE(esemeny)) {
+    const a = esemeny.adat;
+    const sz = a.szuletes;
+    if (a.szulo !== undefined && a.szulo !== null) return 'a koino-verzió legfelső szintű entitás (nincs szülője)';
+    if (esemeny.entitas !== null) return 'a koino-verzió a saját szeletét nyitja';
+    if (!azonositoAlaku(a.gyermek) || !szovegHivatkozasE(a.kod)) return 'a koino-verzió a gyermek nevét és a kódját nevezi meg';
+    if (!sz || typeof sz !== 'object' || Array.isArray(sz) || sz.tipus !== 'KoinoLetrehozas' || sz.koino !== ''
+        || sz.azonosito !== a.gyermek || sz.adat?.szulo !== esemeny.koino || sz.szerzo !== esemeny.szerzo) {
+      return 'a koino-verzió a gyermek születését hozza (ennek a koinónak a gyermeke, a feltöltő hozta létre)';
+    }
+    const pr = sz.adat.program;
+    if (!szovegHivatkozasE(pr) || pr.lenyomat !== a.kod.lenyomat || pr.bajt !== a.kod.bajt || pr.torzs !== a.kod.torzs) {
+      return 'a koino-verzió kódja a gyermek születésének programja';
+    }
+    if (a.cim !== sz.adat.nev) return 'a koino-verzió címe a gyermek neve';
+    const h = alakiHiba(sz);
+    if (h) return 'a koino-verzió születése: ' + h;
+  }
+  // ----- ⭐ D93/5: A PROFIL — a koinó kötelező mezői, a Profil esemény, a meghívás tanúsítása -----
+  if (esemeny.tipus === 'KoinoLetrehozas' && esemeny.adat?.profil !== undefined) {
+    const p = esemeny.adat.profil;
+    if (!Array.isArray(p) || p.length > 8 || !p.every((m) => typeof m === 'string' && /^[a-z]{1,32}$/.test(m))) {
+      return 'a koinó profil-mezői: legfeljebb 8 kisbetűs név';
+    }
+  }
+  if (esemeny.tipus === 'Profil' && (!azonositoAlaku(esemeny.adat?.lenyomat) || !azonositoAlaku(esemeny.entitas))) {
+    return 'a Profil esemény a horgonyhoz szól, és a darab lenyomatát hordozza';
+  }
+  if (esemeny.tipus === 'Meghivas' && esemeny.adat?.profil !== undefined && esemeny.adat.profil !== null
+      && !azonositoAlaku(esemeny.adat.profil)) {
+    return 'a meghívás profil-lenyomata csak azonosító alakú lehet';
+  }
+  if (esemeny.tipus === 'TagsagiCsomag' && (!Array.isArray(esemeny.adat?.lanc) || !azonositoAlaku(esemeny.entitas))) {
+    return 'a tagsági csomag a horgonyhoz szól, és a lánc eseményeit hordozza';
+  }
+  // ⭐ D94: a 2. lépcső bemondása — a saját horgonyhoz szól, és a tanúsítások azonosítóit hordozza (1–16, ismétlés nélkül).
+  if (esemeny.tipus === 'LepcsoBemondas') {
+    const t = esemeny.adat?.tanusitasok;
+    if (!azonositoAlaku(esemeny.entitas) || !Array.isArray(t) || !t.length || t.length > 16
+      || !t.every(azonositoAlaku) || new Set(t).size !== t.length) {
+      return 'a 2. lépcső bemondása a horgonyhoz szól, és 1–16 különböző tanúsítás azonosítóját hordozza';
+    }
+  }
+  return null;
+}
+
+// ===================================
+// KÉT ESEMÉNY ÜTKÖZÉSE — A SAJÁT LÁNC ELÁGAZÁSA
+// ===================================
+
+/**
+ * Megnézi, hogy két esemény ELLENTMOND-e egymásnak.
+ *
+ * A koino nem MEGAKADÁLYOZZA a kettős cselekvést, hanem LELEPLEZI (D17/D19). Ha valaki
+ * két különböző eseményt ír alá ugyanarról a pontról a saját láncán — azonos szerző,
+ * azonos sorszám, de más azonosító —, akkor a két aláírás ÖNMAGÁBAN bizonyíték. Nem
+ * kell hozzá bíró: mindkettőt ő írta alá.
+ *
+ * (Ha viszont csak FOLYTATJA a láncát egy újabb sorszámmal, az nem ellentmondás — a
+ * szavazatot például szabad módosítani, ahogy ma is.)
+ *
+ * @param {Object} egyik
+ * @param {Object} masik
+ * @returns {boolean} igaz, ha a kettő elágazás (ellentmondás)
+ */
+export function elagazasE(egyik, masik) {
+  return egyik.szerzo === masik.szerzo
+    && esemenyKoinoja(egyik) === esemenyKoinoja(masik)
+    && egyik.sorszam === masik.sorszam
+    && egyik.azonosito !== masik.azonosito;
+}

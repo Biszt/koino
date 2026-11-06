@@ -1,0 +1,816 @@
+// js/allapot/allapotSzamitas.js
+
+// Felelősség: az aláírt eseményekből KISZÁMOLNI a jelenlegi állapotot — mely entitások
+// léteznek, ki hova rendelt tudatpontot, mik az érvényes küszöbök.
+//
+// EZ A KOINO SZÍVE A FÁZIS 2-BEN. A prototípusban az állapot ÁLLÍTÁS volt: a szerver
+// azt mondta, „ez a gondolat így néz ki", és el kellett hinni. Itt az állapot
+// SZÁMÍTÁS: ugyanabból az eseményhalmazból mindenki ugyanazt kapja (D17). Nincs mit
+// elhinni — utána lehet számolni.
+//
+// A FÜGGVÉNY TISZTA: bemenet az események tömbje, kimenet az állapot. Nincs benne
+// hálózat, nincs benne adatbázis, nincs benne idő-függés (az „idő" is bemenet). Ezért
+// bármikor újraszámolható és bárki által ellenőrizhető.
+//
+// ⭐ MIÉRT NEM KELL GLOBÁLIS SORREND?
+// Mert a koino műveletei „e-emberenként az utolsó nyer" típusúak: hogy ki mennyi
+// tudatpontot rendelt egy entitáshoz, azt a SAJÁT láncának utolsó ilyen eseménye
+// mondja meg. Az „utolsó" pedig a saját láncban egyértelmű (sorszám), függetlenül
+// attól, milyen sorrendben érkeztek meg az események. Így nem kell sem globális
+// sorrend, sem ütközés-feloldó könyvtár (CRDT).
+//
+// ⚠️ DE A FELSOROLÁSOK SORRENDJE MÁS KÉRDÉS (2026-08-28, a Szakasz 2 kézi próbája).
+// Az ÉRTÉKEK sorrend-függetlenek voltak — a LISTÁK viszont nem: az entitások, a
+// kivételek és az ellentmondások a fájlba érkezés sorrendjében jöttek, tehát a csere
+// után a két készülék ugyanazt az öt eseményt ismerte, ugyanazokat az entitásokat
+// számolta ki, de MÁS SORRENDBEN sorolta fel őket. Ma ez csak megjelenítés — a
+// pakli-nézetben viszont látszani fog, és a D17 ígérete az, hogy mindenki ugyanazt látja.
+// Ezért a bemenetet EGY HELYEN, itt rendezzük — lásd `rendezettBemenet`.
+//
+// Használják: koino.js (a parancssori arc) és a javaslat/szavazat számítása.
+
+import { szabalyokErvenyesitese, erintettek, elsoErintett, javaslatEntitasai } from './szabalyok.js';
+import { csomagokKibontasa } from './dontesiCsomag.js';
+import { koinoSzuleteseListabol } from '../esemeny/esemeny.js';
+import { koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
+
+// ===================================
+// A BEMENET RENDEZÉSE — a determinizmus EGYETLEN forrása
+// ===================================
+
+/**
+ * Determinisztikus sorrendbe rakja az eseményeket, mielőtt bármit számolnánk.
+ *
+ * ⭐ MIÉRT ITT, ÉS MIÉRT EGY HELYEN? Mert innen lefelé MINDEN felsorolás ezt a sorrendet
+ * örökli: az entitás-lista, a hozzájárulók, a kivételek, az ellentmondások, a javaslatok.
+ * Ha helyette minden listát külön rendeznénk, előbb-utóbb az egyik lemaradna — és a
+ * kettő némán szétcsúszna. (Ugyanaz a hiba-minta, mint amikor két sorrendnek egymás
+ * tükörképének kellene lennie, de külön van leírva.)
+ *
+ * ⚠️ MIÉRT NEM AZ IDŐ SZERINT? Mert az `ido` a szerző órája — tájékoztató adat, sosem
+ * bizonyíték. Ha a felsorolás sorrendjét az óra döntené el, egy rossz (vagy hazug) óra
+ * átrendezhetné, amit mindenki lát. A `szerzo` + `sorszam` viszont a saját lánc, amit
+ * csak a szerző írhat, és amit nem lehet átírni: EZ a koino egyetlen hamisíthatatlan
+ * sorrendje. Az `azonosito` a végén csak a döntetlent zárja ki (elágazásnál).
+ *
+ * ⚠️ EZ NEM A MEGJELENÍTÉS SORRENDJE. Hogy a felületen mi legyen elöl (pl. a legtöbb
+ * tudatpontot kapott gondolat), az külön kérdés, és a felület dolga — ez itt csak azt
+ * garantálja, hogy KÉT GÉP UGYANAZT A SORRENDET kapja.
+ *
+ * @param {Array<Object>} esemenyek
+ * @returns {Array<Object>} ugyanazok, determinisztikus sorrendben
+ */
+/**
+ * Egy javaslat-entitás megjelenő címe.
+ *
+ * ⭐ Egy érintettnél: amit javasol (az új cím), vagy a művelet neve. Többnél a művelet és a
+ * darabszám — mert egy egyesítésnek nincs „egy" új címe.
+ *
+ * ⚠️ Ez MEGJELENÍTÉS, nem döntés: a végrehajtás mindig az `erintettek` listát olvassa.
+ */
+function javaslatCime(adat) {
+  const kik = erintettek(adat);
+  if (!kik.length) return 'Javaslat';
+  if (kik.length === 1) return kik[0].valtozas?.cim ?? kik[0].muvelet;
+
+  // Több érintett: a művelet(ek) és a darabszám. Ha vegyes, „Csomag"-ként olvasható.
+  const muveletek = [...new Set(kik.map((r) => r.muvelet))];
+  const nev = muveletek.length === 1 ? muveletek[0] : 'Csomag';
+  return nev + ' (' + kik.length + ' entitás)';
+}
+
+export function rendezettBemenet(esemenyek) {
+  return [...esemenyek].sort((a, b) => {
+    if (a.szerzo !== b.szerzo) return a.szerzo < b.szerzo ? -1 : 1;
+    if (a.sorszam !== b.sorszam) return a.sorszam - b.sorszam;
+    return a.azonosito < b.azonosito ? -1 : a.azonosito > b.azonosito ? 1 : 0;
+  });
+}
+
+// ===================================
+// ELÁGAZÁS-FELOLDÁS
+// ===================================
+
+/**
+ * Kiválasztja az érvényes eseményeket, feloldva az elágazásokat.
+ *
+ * ⚠️ TERVEZÉSI DÖNTÉS: ha valaki két különböző eseményt írt alá ugyanarról a pontról
+ * (azonos szerző + azonos sorszám), akkor az azonosító szerint KISEBBET vesszük.
+ *
+ * Miért nem zárjuk ki a csalót? Mert az elágazás nem mindig csalás: ha valakinek két
+ * készüléke van, és mindkettő OFFLINE volt, természetes módon keletkezhet elágazás —
+ * és a hangja elvesztése aránytalan büntetés lenne egy hétköznapi helyzetért.
+ *
+ * Miért determinisztikus a választás? Mert így MINDENKI ugyanazt az állapotot számolja,
+ * és a csalásnak nincs haszna: nem tud két különböző embernek két különböző eredményt
+ * mutatni. Az ellentmondás közben LÁTHATÓ marad (a tár jelzi, lásd esemenyTar.js) —
+ * a koino bejelent, nem büntet (D19).
+ *
+ * @param {Array<Object>} esemenyek
+ * @returns {{ervenyesek: Array<Object>, ellentmondasok: Array<Object>}}
+ */
+export function elagazasokFeloldasa(esemenyek, lancAga = null) {
+  const kulcsSzerint = new Map();      // "szerzo|sorszam" → események
+  for (const e of esemenyek) {
+    // ⭐ D118 (⑤b): a lánc-ág szerint (a koinó képe adja) — a nem költöző ős-eseménye külön ág, nem a gyermekbeli lánca.
+    const kulcs = (lancAga ? lancAga(e) : e.szerzo) + '|' + e.sorszam;
+    if (!kulcsSzerint.has(kulcs)) kulcsSzerint.set(kulcs, []);
+    kulcsSzerint.get(kulcs).push(e);
+  }
+
+  const ervenyesek = [];
+  const ellentmondasok = [];
+
+  for (const [kulcs, ittLevok] of kulcsSzerint) {
+    if (ittLevok.length === 1) {
+      ervenyesek.push(ittLevok[0]);
+      continue;
+    }
+    // Elágazás: determinisztikus választás az azonosító szerint
+    const rendezett = [...ittLevok].sort((a, b) => (a.azonosito < b.azonosito ? -1 : 1));
+    ervenyesek.push(rendezett[0]);
+    ellentmondasok.push({
+      szerzo: rendezett[0].szerzo,
+      sorszam: rendezett[0].sorszam,
+      azonositok: rendezett.map((e) => e.azonosito)
+    });
+  }
+
+  return { ervenyesek, ellentmondasok };
+}
+
+// ===================================
+// IDŐ-MONOTONITÁS A SAJÁT LÁNCBAN (Csaba jóváhagyása, 2026-08-28)
+// ===================================
+//
+// MIÉRT KELL? A döntések lezárása időrendben történik (javaslatSzamitas.js), az `ido`
+// viszont a szerző órája — hazudható. Aki lemaradt egy szavazásról, VISSZADÁTUMOZHATNÁ
+// a szavazatát, hogy még beleférjen a határidőbe.
+//
+// AMIT ELLENŐRIZNI TUDUNK: a saját láncod a tiéd, és sorszámozott. Ha egy NAGYOBB
+// sorszámú eseményed KORÁBBI időt visel, mint az előtte lévő, az önellentmondás —
+// ugyanúgy, mint az elágazás, és ugyanúgy a saját aláírásoddal bizonyítva.
+//
+// ⚠️ MENNYIT ÉR? Csak a saját előző eseményedhez képest köt. Aki friss kulccsal jön
+// (sorszam: 1), vagy régóta nem tett semmit, az szabadon visszadátumoz. Tehát ez
+// DRÁGÍTJA a csalást, nem zárja ki — a teljes válasz a kötegelés (D21, Szakasz 4).
+// Ezt így is mondjuk ki, hogy később ne higgyük megoldottnak.
+//
+// ÉS AMIT NEM TESZÜNK: nem dobjuk el az eseményt. A koino BEJELENT, nem büntet (D19) —
+// az ellentmondás láthatóvá válik, a döntést a közösség hozza meg róla.
+
+/**
+ * Megkeresi azokat az eseményeket, amelyek visszafelé lépnek a saját láncuk idejében.
+ *
+ * @param {Array<Object>} ervenyesek - elágazás-mentesített események
+ * @param {Function} [lancAga] - ⭐ D118 (⑤b): a lánc-ág (a nem költöző ős-eseménye külön ág — a régi ideje nem visszalépés)
+ * @returns {Array<Object>} { szerzo, sorszam, ido, elozoIdo, azonosito }
+ */
+export function idoEllentmondasokKeresese(ervenyesek, lancAga = null) {
+  const szerzonkent = new Map();
+  for (const e of ervenyesek) {
+    const ag = lancAga ? lancAga(e) : e.szerzo;
+    if (!szerzonkent.has(ag)) szerzonkent.set(ag, []);
+    szerzonkent.get(ag).push(e);
+  }
+
+  const talalatok = [];
+  for (const lanc of szerzonkent.values()) {
+    // A lánc sorszám szerint; a hézag (hiányzó sorszám) itt NEM hiba — hálózaton
+    // természetes, hogy nem ismerjük valakinek minden eseményét.
+    const rendezett = [...lanc].sort((a, b) => a.sorszam - b.sorszam);
+    for (let i = 1; i < rendezett.length; i++) {
+      const elozo = rendezett[i - 1];
+      const mostani = rendezett[i];
+      if (mostani.ido < elozo.ido) {
+        talalatok.push({
+          szerzo: mostani.szerzo,
+          sorszam: mostani.sorszam,
+          ido: mostani.ido,
+          elozoIdo: elozo.ido,
+          azonosito: mostani.azonosito
+        });
+      }
+    }
+  }
+  return talalatok;
+}
+
+// ===================================
+// SEGÉD: „AZ UTOLSÓ NYER" NYILVÁNTARTÁS
+// ===================================
+
+/**
+ * Egy olyan tárolót ad, ami kulcsonként MINDIG a szerző láncában legkésőbbi értéket
+ * őrzi meg — függetlenül attól, milyen sorrendben kapja őket.
+ * @returns {{rogzit: Function, ertekek: Map}}
+ */
+function utolsoNyer() {
+  const ertekek = new Map();   // kulcs → { sorszam, ertek, esemeny }
+
+  return {
+    /**
+     * @param {string} kulcs
+     * @param {Object} esemeny - ebből a `sorszam` dönt
+     * @param {*} ertek
+     */
+    rogzit(kulcs, esemeny, ertek) {
+      const meglevo = ertekek.get(kulcs);
+      if (!meglevo || esemeny.sorszam > meglevo.sorszam) {
+        ertekek.set(kulcs, { sorszam: esemeny.sorszam, ertek, esemeny });
+      }
+    },
+    ertekek
+  };
+}
+
+// ===================================
+// MEDIÁN — a küszöbök számítása (D4)
+// ===================================
+
+/**
+ * Egy számsor mediánja. Páros elemszámnál a KISEBBET vesszük — nem átlagolunk, mert
+ * az törtszámot adna, és az eseményekben csak egész szám lehet (a kanonikus alak
+ * szabálya). A medián „matematikailag is szavazás": csak létszámmal billenthető,
+ * szélsőértékkel nem (D4).
+ * @param {Array<number>} szamok
+ * @returns {number|null}
+ */
+export function median(szamok) {
+  if (!szamok.length) return null;
+  const rendezett = [...szamok].sort((a, b) => a - b);
+  const kozep = Math.floor((rendezett.length - 1) / 2);
+  return rendezett[kozep];
+}
+
+// ===================================
+// AZ ÁLLAPOT KISZÁMÍTÁSA
+// ===================================
+
+/**
+ * Kiszámolja a koino jelenlegi állapotát az eseményekből.
+ *
+ * @param {Array<Object>} esemenyek - egy koino összes ismert eseménye
+ * @returns {Object} az állapot
+ */
+export function allapotSzamitasa(esemenyek, beallitas = {}) {
+  console.log('allapotSzamitasa - KEZDÉS', { esemenyDarab: esemenyek.length });
+  // ⭐ B/2 (D75/4): azok az események, amik CSAK az átmeneti tárban vannak — a D14 kivételéhez (lent).
+  const csakAtmeneti = beallitas.csakAtmeneti instanceof Set ? beallitas.csakAtmeneti : null;
+  // ⭐ A szigorú (b) alatt (D97): mely entitások szeletét NEM tartom (a részvételemen kívül) — azoknak a pontjait nem
+  // láthatom (csak a születésük jön el, a szülő vagy a gyökér-darab bejelentéseként), tehát a D14 rájuk sem ítélhet.
+  const nemTartott = typeof beallitas.nemTartott === 'function' ? beallitas.nemTartott : null;
+  // Mely entitásoknak láttuk legalább egy pont-eseményét (a D14 kivétele és a döntés ismerete ugyanez a jel).
+  // ⭐ D119 (A): a jelenből kizárt, de látott ELHAGYOTT pont (a költöző nem hozta — KZ3) is tudás: „ez a költöző 0-t hoz rá”
+  // (`ketReteg.js` adja) — különben az elhagyott entitás a gyermekben „a pontjai ismeretlenek” szellemként maradna.
+  const pontjaIsmert = new Set(beallitas.elhagyottPontok instanceof Set ? beallitas.elhagyottPontok : []);
+
+  // ----- KÉT SZŰRŐ, EGYMÁS UTÁN -----
+  // 1. ELÁGAZÁS: ha valaki két eseményt írt alá ugyanarról a pontról, determinisztikusan
+  //    választunk (a kisebb azonosító).
+  // 2. SZABÁLYOK: a tudatpont-keret és a javaslat-jogosultság — mert amit a SZÁMÍTÁS nem
+  //    ellenőriz, az nem szabály, csak illemtan (szabalyok.js).
+  // Egyik szűrő sem töröl semmit: a kiesett esemény a tárban marad, és a listákban
+  // látható. A koino bejelent, nem büntet (D19).
+  // 0. RENDEZÉS: innen lefelé minden felsorolás ezt a sorrendet örökli, tehát két gép
+  //    ugyanabból a halmazból ugyanazt a LISTÁT is kapja, nem csak ugyanazokat az értékeket.
+  // ⭐ D85 T3: a döntési csomagok belső eseményei is a bemenet részei (azonosító szerint egyszer) — a
+  // csak-G1-tartó így a G2-es rész bemenetét is látja, a G2 szeletének tartása nélkül.
+  const rendezettek = rendezettBemenet(csomagokKibontasa(esemenyek));
+
+  // ⭐⭐ D118 (⑤b): a szerzők LÁNC-ÁGA és a láncon ismert, de a jelenből kizárt sorszámok (a koinó képe adja — `ketReteg.js`):
+  // a nem költöző ős-eseménye külön ág (nem elágazás, nem idő-visszalépés), és a kizárt esemény helye nem hézag.
+  const lancAga = typeof beallitas.lancAga === 'function' ? beallitas.lancAga : null;
+  const ismertSorszamok = beallitas.ismertSorszamok instanceof Map ? beallitas.ismertSorszamok : null;
+  const { ervenyesek, ellentmondasok } = elagazasokFeloldasa(rendezettek, lancAga);
+  const { szamitok, kivetelek, nemEllenorizhetok, tagsagFuggoben } = szabalyokErvenyesitese(ervenyesek,
+    { lancAga, ismertSorszamok });
+
+  // ----- NYERSANYAG-GYŰJTÉS -----
+  const koinoAdatok = { nev: null, leiras: null };
+  // ⭐⭐ D118/2: a koinó születése EGY szabállyal (`koinoSzuleteseListabol` — a tagság, a kapu, a belépő tér ugyanezt
+  // hívja). ⛔ Eddig a rendezett sor UTOLSÓ születése írta felül a koinó adatait — egy második, azonos nevű születés így
+  // a koinó nevét és zártságát is átvette (a lelet).
+  const koinoSzuletes = koinoSzuleteseListabol(szamitok, beallitas.koino ?? null);
+  // ⭐⭐ D118/2 (①b): a koinó SZABÁLYAI a születéséből (ha nincs meg, a mai értékek) — a döntés, a pakli és a parancssor
+  // innen veszi őket.
+  koinoAdatok.szabalyok = koinoSzabalyai(koinoSzuletes);
+  const letrehozasok = new Map();        // entitás azonosító → a létrehozó esemény
+  const pontok = utolsoNyer();           // "szerzo|entitas" → pontszám
+  const ertekJavaslatok = utolsoNyer();  // "szerzo|entitas" → küszöb-négyes
+
+  for (const e of szamitok) {
+    switch (e.tipus) {
+
+      // ----- A KOINO MAGA -----
+      case 'KoinoLetrehozas':
+        if (e !== koinoSzuletes) break;
+        koinoAdatok.nev = e.adat.nev;
+        // ⭐ D90/2: a koinó születése mindenki vállalása — ehhez kell az azonosítója (`vallalas.js`).
+        koinoAdatok.azonosito = e.azonosito;
+        // ⭐ D89/2: zárt, hacsak ki nem mondta, hogy nyílt (a mező nélküli régi koinó is zárt — D89/5).
+        koinoAdatok.zart = e.adat.zart !== false;
+        // ⭐ D93/5: a koinó kötelező profil-mezői (üres: nem vár profilt).
+        koinoAdatok.profil = Array.isArray(e.adat.profil) ? [...e.adat.profil] : [];
+        koinoAdatok.leiras = e.adat.leiras ?? null;
+        koinoAdatok.letrehozo = e.szerzo;
+        koinoAdatok.letrehozva = e.ido;
+        break;
+
+      // ----- ENTITÁS LÉTREHOZÁSA -----
+      // Az entitás AZONOSÍTÓJA a létrehozó esemény azonosítója: az entitás neve is a
+      // gondolatából származik, nem egy kiosztott sorszám.
+      case 'GondolatLetrehozas':
+        letrehozasok.set(e.azonosito, { esemeny: e, toredek: null });
+        break;
+
+      // ----- ⭐⭐ A JAVASLAT IS ENTITÁS (Csaba, 2026-09-06) -----
+      //
+      // *„Kell neki tudatpont, akárcsak a többi entitásnak."*
+      //
+      // Eddig a javaslat csak DÖNTÉS volt (`javaslatSzamitas.js`), nem entitás — így nem
+      // lehetett rá tudatpontot tenni, nem volt küszöbe, nem lehettek gyerekei. A **D27**
+      // viszont kimondja, hogy az általános egyezmény *„teljes értékű entitás… egy entitás
+      // a többi között"*, és ugyanez áll a javaslatra.
+      //
+      // ⭐⭐ ÉS A SZÜLŐJE AZ ÉRINTETT ENTITÁS. Ez nem kényelmi döntés: a **D27/1** szerint
+      // *„az általános javaslat GONDOLATBÓL ágazik ki… onnan örökli a kereteit."* Így lesz
+      // igaz szerkezetileg is, amit eddig külön szabállyal pótoltunk:
+      //
+      //   · a javaslat a gondolata MELLETT jelenik meg (hierarchikus rendezés — magától);
+      //   · az ágazati tudatpont helyesen folyik felfelé;
+      //   · és a **D27/4** hatóköre (a hely határozza meg, lefelé terjed) ugyanezen a
+      //     fa-szerkezeten mérhető.
+      //
+      // ⚠️ A DÖNTÉS-RÉTEG VÁLTOZATLAN: a szavazatokat, küszöböket, státuszt továbbra is a
+      // `javaslatSzamitas.js` számolja. Ez a sor csak annyit mond, hogy a javaslat **létezik
+      // entitásként is** — a kettő ugyanarra az azonosítóra vonatkozik.
+      //
+      // ⭐⭐ D85/5 (T1, 2026-10-02): TÖBB ÉRINTETTNÉL A TÖREDÉKEI AZ ENTITÁSOK — érintettenként egy,
+      // levezetett azonosítóval, a SAJÁT érintettje gyerekeként (a prototípus töredék-modellje). A
+      // csoportnak nincs saját entitása; a döntése a javaslat azonosítója alatt marad.
+      case 'Javaslat':
+        for (const je of javaslatEntitasai(e)) {
+          letrehozasok.set(je.azonosito, { esemeny: e, toredek: je.toredek ? je : null });
+        }
+        break;
+
+      // ----- TUDATPONT-RENDEZÉS -----
+      // „Az utolsó nyer" (e-ember + entitás párra). A tudatpont nem elköltött, hanem
+      // ODARENDELT: bármikor átrendezhető, és az átrendezés csak egy újabb esemény.
+      //
+      // A SZEREP (aktív / passzív) itt dől el, és a döntéshozatalban lesz fontos: a
+      // részvételi arány nevezőjébe csak az AKTÍV tulajdonosok számítanak bele. Aki
+      // passzív figyelő, az nem korlátozza a döntést — ez a modell lényege.
+      case 'TudatpontRendezes':
+        pontjaIsmert.add(e.adat.entitas);
+        pontok.rogzit(e.szerzo + '|' + e.adat.entitas, e, {
+          pont: e.adat.pont,
+          szerep: e.adat.szerep === 'passziv' ? 'passziv' : 'aktiv'
+        });
+        break;
+
+      // ----- ÉRTÉK JAVASLAT (küszöbök) -----
+      case 'ErtekJavaslat':
+        ertekJavaslatok.rogzit(e.szerzo + '|' + e.adat.entitas, e, e.adat.ertekek);
+        break;
+
+      default:
+        // Ismeretlen típus: NEM hiba. Egy régebbi program így fut tovább akkor is, ha
+        // egy újabb változat már ismer olyan eseményt, amit ő nem — csak nem érti.
+        console.log('allapotSzamitasa - ismeretlen esemény-típus, kihagyva:', e.tipus);
+    }
+  }
+
+  // ----- ÖSSZESÍTÉS ENTITÁSONKÉNT -----
+  const entitasok = new Map();
+
+  for (const [entitasAzonosito, { esemeny: letrehozoEsemeny, toredek }] of letrehozasok) {
+    // ⭐ A JAVASLAT MÁS MEZŐKBŐL ÉPÜL, mint a gondolat — de ugyanolyan entitás lesz.
+    // A címe az, amit javasol; a szövege az indoklás; a szülője az érintett entitás.
+    // ⭐ D85/5: a töredék címe és szülője a SAJÁT részéé (a prototípusban is: a töredék típusa az
+    // adott entitás művelete, a szülője az adott entitás).
+    const javaslatE = letrehozoEsemeny.tipus === 'Javaslat';
+    const adat = letrehozoEsemeny.adat;
+
+    entitasok.set(entitasAzonosito, {
+      azonosito: entitasAzonosito,
+      tipus: javaslatE ? 'Javaslat' : (adat.tipus ?? 'Gondolat'),
+      cim: toredek ? javaslatCime({ erintettek: [toredek.resz] })
+        : javaslatE ? javaslatCime(adat) : adat.cim,
+      szoveg: javaslatE ? (adat.indoklas ?? null) : (adat.szoveg ?? null),
+
+      // ----- ⭐ A BESOROLÁS (Szakasz 5.4) -----
+      // A kategória és a gondolattípus ÖNÁLLÓ ENTITÁS (saját tudatponttal, javaslattal,
+      // küszöbökkel) — itt csak a rájuk mutató hivatkozás áll. A feloldásuk a
+      // megjelenítés dolga (`pakli.js`), nem az állapoté.
+      //
+      // ⚠️ A `cim` MINDEN típusnál a megjelenő név: a kategóriának is az a neve. Így nincs
+      // párhuzamos `nev` mező, amit külön kellene karbantartani — a felület fordít, ha a
+      // kártya mást vár.
+      ikon: letrehozoEsemeny.adat.ikon ?? null,
+      gondolatTipus: letrehozoEsemeny.adat.gondolatTipus ?? null,
+      kategoriak: Array.isArray(letrehozoEsemeny.adat.kategoriak)
+        ? [...letrehozoEsemeny.adat.kategoriak]
+        : [],
+      // ⭐⭐ A JAVASLAT SZÜLŐJE AZ ÉRINTETT ENTITÁS (D27/1: „gondolatból ágazik ki").
+      // Ettől kerül a gondolata mellé a hierarchikus rendezésben — külön szabály nélkül —,
+      // és ettől folyik helyesen felfelé az ágazati tudatpont.
+      szulo: toredek ? toredek.resz.entitas : javaslatE ? elsoErintett(adat) : (adat.szulo ?? null),
+      // ⭐ D85/5: a töredék tudja, melyik csoporté (a döntés a csoport azonosítója alatt van) és
+      // hányadik — a prototípus `toredekCsoportId` / `toredekSorszam` / `toredekDarab` mezői.
+      ...(toredek ? { toredek: { csoport: letrehozoEsemeny.azonosito, sorszam: toredek.sorszam,
+        darab: toredek.darab } } : {}),
+      meret: letrehozoEsemeny.adat.meret ?? 0,       // D26: a tárolási vállalás mértéke
+      // ⭐⭐ D119 (①a): a koino-verzió a gyermeket és a kódot nevezi meg (a születés a létrehozó eseményben marad).
+      ...(adat.tipus === 'KoinoVerzio' ? { koinoVerzio: { gyermek: adat.gyermek, kod: adat.kod } } : {}),
+      szerzo: letrehozoEsemeny.szerzo,
+      letrehozva: letrehozoEsemeny.ido,
+      osszesPont: 0,
+      hozzajarulok: new Map(),                        // szerző → pont
+      kuszobok: null
+    });
+  }
+
+  // ----- TUDATPONTOK BEÍRÁSA -----
+  // ⭐ MENET KÖZBEN A KIOSZTÁSI FŐKÖNYVET IS VEZETJÜK — az entitás létezésétől
+  // függetlenül. Ez a D42 bemondott összegének forrása (lásd `szetosztottPontok`).
+  const kiosztasok = new Map();
+  // ⭐ D92/5: melyik ALÁÍRT pont-esemény adja a szerző pontját (a nyertes) — az össz-pont szúrópróbája ehhez köti a
+  // levelet (`osszPont.js`). Külön főkönyv, mint a kiosztás: az entitás `hozzajarulok`-ja az ujjlenyomat része, és az
+  // egyezmény végrehajtása esemény nélkül is visz át pontot (annak itt nincs saját eseménye — D19: kimondjuk).
+  const pontEsemenyek = new Map();
+
+  for (const [kulcs, bejegyzes] of pontok.ertekek) {
+    const [szerzo, entitasAzonosito] = kulcs.split('|');
+    if (bejegyzes.ertek.pont > 0) {
+      kiosztasok.set(kulcs, bejegyzes.ertek.pont);
+      pontEsemenyek.set(kulcs, bejegyzes.esemeny.azonosito);
+    }
+
+    const entitas = entitasok.get(entitasAzonosito);
+    if (!entitas) continue;                           // olyan entitásra mutat, amit nem ismerünk
+    if (bejegyzes.ertek.pont <= 0) continue;          // a 0 pont = elvette a pontját
+
+    entitas.hozzajarulok.set(szerzo, {
+      pont: bejegyzes.ertek.pont,
+      szerep: bejegyzes.ertek.szerep
+    });
+    entitas.osszesPont += bejegyzes.ertek.pont;
+  }
+
+  // ----- KÜSZÖBÖK: A TULAJDONOSOK MEDIÁNJA (D4) -----
+  // Csak azoknak az érték javaslata számít, akiknek VAN tudatpontja az entitáson —
+  // a küszöböt azok szabják meg, akik felelnek érte.
+  const kuszobNevek = ['elfogadasiKuszob', 'reszveteliKuszob', 'minimumDontesiIdo', 'maximumDontesiIdo'];
+
+  for (const [kulcs, bejegyzes] of ertekJavaslatok.ertekek) {
+    const [szerzo, entitasAzonosito] = kulcs.split('|');
+    const entitas = entitasok.get(entitasAzonosito);
+    if (!entitas || !entitas.hozzajarulok.has(szerzo)) continue;
+
+    if (!entitas._ertekek) entitas._ertekek = [];
+    entitas._ertekek.push(bejegyzes.ertek);
+  }
+
+  for (const entitas of entitasok.values()) {
+    if (entitas._ertekek && entitas._ertekek.length) {
+      entitas.kuszobok = {};
+      for (const nev of kuszobNevek) {
+        entitas.kuszobok[nev] = median(
+          entitas._ertekek.map((ertek) => ertek[nev]).filter((sz) => typeof sz === 'number')
+        );
+      }
+      entitas.kuszobErtekelokSzama = entitas._ertekek.length;
+    }
+    delete entitas._ertekek;
+  }
+
+  // ----- KÖZÖSSÉGI FELEJTÉS: NINCS 0 PONTOS ENTITÁS -----
+  // Domain-invariáns, ami a prototípusban is él: aminek nincs gazdája, az nem létezik.
+  // A D14 szerint ez nem takarítás, hanem ALAPÁLLAPOT: „ami fontos a közösségnek, arra
+  // rakjanak tudatpontot" — amire senki nem rak, azt a koino elfelejti.
+  // ⭐ A szülőket a TÖRLÉS ELŐTT jegyezzük fel — utána már nem olvashatók ki. (Ugyanez a
+  // lépés a prototípusban is megvan: „a törlés UTÁN már nem olvasható ki".)
+  const eredetiSzulok = new Map();
+  for (const [azonosito, entitas] of entitasok) eredetiSzulok.set(azonosito, entitas.szulo ?? null);
+
+  const elfelejtettek = [];
+  for (const [azonosito, entitas] of entitasok) {
+    if (entitas.osszesPont <= 0) {
+      // ⭐⭐ B/2 (D75/4): A D14 CSAK A TARTÓS TÁRRA VONATKOZIK. Ha az entitást csak az átmeneti tárból
+      // ismerjük (pl. a szülője köréből jött a születése), és egyetlen pont-eseményét sem láttuk, akkor a
+      // „nincs pontja” és a „nem tudjuk, van-e” két különböző dolog (D19) — nem tűnik el, hanem jelölve marad.
+      // ⚠️ Ha akár egy pont-eseményét is látjuk, a 0 pont tudás: ott a D14 áll.
+      // ⭐⭐ ÉS A NEM TARTOTT SZELET IS (a 72. mérés terepen, 2026-10-09): a telefon a laptop új gondolatának csak a
+      // születését kapta meg (a gyökér-darabján át), a pontjait nem — a D14 ezért eltüntette, és a `pont` sem találta
+      // meg: a szigorú (b) alatt egy új gondolatot nem lehetett felvenni. A D14 tehát csak a TARTOTT szeletre ítél.
+      if ((csakAtmeneti?.has(azonosito) || nemTartott?.(azonosito)) && !pontjaIsmert.has(azonosito)) {
+        entitas.pontokIsmeretlenek = true;
+        continue;
+      }
+      elfelejtettek.push(azonosito);
+      entitasok.delete(azonosito);
+    }
+  }
+
+  // ----- ⭐⭐ ÉS A GYEREKEK FELKERÜLNEK A NAGYSZÜLŐHÖZ (2026-09-07) -----
+  // A prototípus `entitasTorleseEllenorzese`-je pontosan ezt teszi: a 0 pontos entitás
+  // törlésekor **minden gyerekének átírja a `szuloId`-ját a törölt entitás szülőjére**
+  // („KASZKÁD" — de nem törlés, hanem FELKERÜLÉS). ⛔ A koino eddig nem tette meg, és ez
+  // mérhető kár volt: a gyerekek egy nem létező szülőre mutattak, ezért az ág-összesítés
+  // ott MEGSZAKADT (`if (!szulo) continue`), a hierarchikus rendezés pedig elveszítette
+  // őket. *A gondolat nem tűnhet el csak azért, mert a szülőjét elfelejtették.*
+  // ----- AZ ÁG TELJES MÉRETE (D26) -----
+  // Tájékoztató adat: mekkora az egész ág, ha valaki az egészet akarná. A VÁLLALÁS
+  // ettől függetlenül csak arra az egy entitásra szól, amire pontot tettél.
+  szerkezetIgazitasa(entitasok, eredetiSzulok);
+
+  const allapot = {
+    koino: koinoAdatok,
+    entitasok,
+    // ⚠️ A KÉT SZŰRŐ EREDMÉNYE — EGYETLEN FORRÁSBÓL.
+    // A döntéshozatal (javaslatSzamitas.js) EZT kapja, nem a nyers eseményeket. Ha ott
+    // külön oldanánk fel az elágazást vagy külön ellenőriznénk a szabályokat, a két
+    // változat előbb-utóbb szétcsúszna, és két gép ugyanabból a halmazból MÁS döntésre
+    // jutna — épp az, amiért az egész épül.
+    szamitok,
+    ellentmondasok,
+    // Visszafelé lépő idő a saját láncban (lásd fentebb) — jelzés, nem büntetés
+    idoEllentmondasok: idoEllentmondasokKeresese(ervenyesek, lancAga),
+    // ⭐⭐ MEDDIG ISMEREM KINEK A LÁNCÁT — a felszabadítás bizonyítékához (lásd lentebb).
+    lancVegek: lancVegekSzamitasa(szamitok),
+    // ⭐ A NYERS ÉRTÉK JAVASLATOK: "szerző|entitás" → küszöb-négyes. ⚠️ A KÜLÖNVÁLÁSHOZ
+    // kell: a különválók saját küszöb-elképzelései átvándorolnak az új ágra, a maradókéi
+    // pedig újraszámolódnak nélkülük — *ezért térhetnek el a két ág küszöbei.*
+    ertekJavaslatok: new Map([...ertekJavaslatok.ertekek].map(([k, b]) => [k, b.ertek])),
+    // ⭐⭐ A KIOSZTÁSI FŐKÖNYV: "szerző|entitás" → pont, FÜGGETLENÜL attól, hogy az entitás
+    // létezik-e még. Ez a D42 bemondott összegének forrása — ugyanaz, amit a szabály-réteg
+    // számol a láncból. ⚠️ Külön kell az entitások `hozzajarulok` térképétől: az arra
+    // válaszol, hogy „ki tartja EZT a gondolatot", ez pedig arra, hogy „mit mondtam ki a
+    // saját láncomban". *Két kérdés, két válasz.*
+    kiosztasok,
+    // ⭐ D93/1: a döntés eseményei, amiknek a szerzője nem ellenőrizhető tag — nem számítanak, de kimondjuk (D19).
+    tagsagFuggoben,
+    // ⭐ D92/5: "szerző|entitás" → a nyertes pont-esemény azonosítója (az össz-pont szúrópróbájához).
+    pontEsemenyek,
+    // Szabályt sértő események (keret, jogosultság) — szintén jelzés, nem büntetés (D19)
+    kivetelek,
+    // ⚠️ A HARMADIK KATEGÓRIA: az esemény SZÁMÍT, csak valamit nem tudtunk ellenőrizni
+    // (hézagos lánc, még meg nem érkezett létrehozó esemény). ⭐ Eddig a szabály-réteg
+    // előállította, de az állapot eldobta — pedig épp ez a D19 lényege: *bejelent, nem
+    // bíráskodik*. Amit nem adunk tovább, arról a felület sem tud beszélni.
+    nemEllenorizhetok,
+    elfelejtettek,
+    esemenyDarab: esemenyek.length,
+    szamitoDarab: szamitok.length
+  };
+
+  console.log('allapotSzamitasa - VÉGE', {
+    entitas: entitasok.size,
+    elfelejtett: elfelejtettek.length,
+    ellentmondas: ellentmondasok.length,
+    idoEllentmondas: allapot.idoEllentmondasok.length,
+    kivetel: kivetelek.length
+  });
+  return allapot;
+}
+
+// ===================================
+// SEGÉD: AZ ÁG MÉRETE
+// ===================================
+
+/**
+ * MINDEN entitás ág-méretét kiszámolja: az entitás és összes leszármazottja együtt
+ * (D26 — tájékoztató adat).
+ *
+ * ===== ⚠️ MIÉRT ÍRTUK ÁT (2026-09-03, mérésből) =====
+ *
+ * A régi változat entitásonként végigment az ÖSSZES entitáson, rekurzívan — vagyis
+ * négyzetes volt. **Mérve: 7 767 entitásnál ~60 millió lépés, 4,6 másodperc.** Ez tette
+ * lassúvá az egész állapotszámítást, és semmi köze nem volt a skálázási szerkezethez:
+ * közönséges hiba volt egy közönséges függvényben.
+ *
+ * ⭐ AZ ÚJ VÁLTOZAT EGY MENETBEN, LEVELEKTŐL FELFELÉ dolgozik: minden entitás **egyszer**
+ * adja hozzá a saját ág-méretét a szülőjéhez, és a szülő akkor lép tovább, ha már minden
+ * gyereke beszámolt. Egy bejárás, rekurzió nélkül.
+ *
+ * ⭐⭐ ÉS EZZEL EGY REJTETT VESZÉLY IS ELTŰNT: a régi, rekurzív változatot egy KÖRBE
+ * mutató szülő-lánc (A szülője B, B szülője A — áthelyezési egyezmények után nem
+ * elképzelhetetlen) **végtelen rekurzióba** vitte volna. Itt a körben lévő entitások
+ * egyszerűen sosem érik el a „minden gyerekem beszámolt" állapotot, tehát kimaradnak —
+ * nincs se összeomlás, se végtelen ciklus.
+ *
+ * @param {Map} entitasok - azonosító → entitás (helyben kap `agMeret` mezőt)
+ */
+/**
+ * ⭐⭐ MEDDIG ISMEREM KINEK A LÁNCÁT? — szerzőnként az utolsó pont (2026-09-08).
+ *
+ * MIRE VALÓ? A **felszabadítás bizonyítékához**. Ha egy törlési döntés lezárult `T`-kor, és
+ * a döntés minden jogosult szavazójától van olyan eseményem, aminek az ideje `T` UTÁN van,
+ * akkor **egyikük sem tud már visszamenőleg beszavazni**: egy határidőn belüli időbélyeg a
+ * saját láncukban **visszafelé lépő idő** lenne, amit a koino felsorol
+ * (`idoEllentmondasok`). ⭐ *Ez bizonyíték, nem valószínűség.*
+ *
+ * ⚠️ A `max` ideje kell, nem az utolsó sorszámé: ha valakinél VAN idő-ellentmondás, a
+ * nagyobb sorszámú eseménye korábbi időt viselhet. A maximum az óvatos válasz — azt mondja
+ * meg, meddig látjuk BIZONYOSAN a láncát.
+ *
+ * @param {Array<Object>} esemenyek - elágazás-mentesített, szabály-szerint számító események
+ * @returns {Map<string, {sorszam: number, ido: number}>}
+ */
+function lancVegekSzamitasa(esemenyek) {
+  const vegek = new Map();
+  for (const e of esemenyek) {
+    const eddigi = vegek.get(e.szerzo);
+    if (!eddigi) { vegek.set(e.szerzo, { sorszam: e.sorszam, ido: e.ido }); continue; }
+    if (e.sorszam > eddigi.sorszam) eddigi.sorszam = e.sorszam;
+    if (e.ido > eddigi.ido) eddigi.ido = e.ido;
+  }
+  return vegek;
+}
+
+/**
+ * ⭐ A SZERKEZET ÚJRAIGAZÍTÁSA, miután entitások TŰNTEK EL.
+ *
+ * Két lépés, mindig együtt: az árvák felkerülnek a legközelebbi élő felmenőhöz, és az
+ * ág-méretek újraszámolódnak. ⚠️ A **harmadik fázis** (`szerkesztesiVegrehajtas.js`) is
+ * ezt hívja a `Torles`/`Egyesites` után — így a felejtés és a törlés UGYANAZT a szerkezetet
+ * hagyja maga után, nem kétfélét.
+ *
+ * @param {Map} entitasok - a megmaradt entitások (helyben módosul)
+ * @param {Map} eredetiSzulok - azonosító → szülő, MÉG az eltűnés előtti állapotból
+ */
+export function szerkezetIgazitasa(entitasok, eredetiSzulok) {
+  arvakFelkerulese(entitasok, eredetiSzulok);
+  agMeretekSzamitasa(entitasok);
+}
+
+/**
+ * ⭐⭐ AZ ÁRVÁK FELKERÜLÉSE — a prototípus törlési kaszkádja (2026-09-07).
+ *
+ * Ha egy entitást elfelejtettek (0 tudatpont, D14), a gyerekei **nem tűnnek el vele**:
+ * a **legközelebbi még létező felmenőhöz** kerülnek. Ha nincs ilyen, a gyökérre.
+ *
+ * ⚠️⚠️ ÉS EGY KÜLÖNBSÉGTÉTEL, AMI A PROTOTÍPUSBAN NEM LÉTEZHETETT: a hiányzó szülő itt
+ * KÉTFÉLE lehet. Ha ISMERTÜK és elfelejtették → felkerülés. Ha SOHA NEM LÁTTUK (a
+ * létrehozó eseménye még nem érkezett meg) → **nem nyúlunk hozzá**: az hiány, nem tény
+ * (D19). Különben egy lemaradt készüléken a fél pakli a gyökérre ugrana, és a hiányzó
+ * esemény megérkezésekor visszaugrana — vagyis két gép mást mutatna ugyanarról.
+ *
+ * @param {Map} entitasok - azonosító → entitás (helyben módosul a `szulo` mezője)
+ * @param {Map} eredetiSzulok - azonosító → szülő, MÉG A FELEJTÉS ELŐTTI állapotból
+ */
+function arvakFelkerulese(entitasok, eredetiSzulok) {
+  /** A legközelebbi LÉTEZŐ felmenő — az elfelejtetteken átlépve. */
+  const legkozelebbiLetezo = (azonosito) => {
+    const latott = new Set();
+    let jaro = azonosito;
+    while (jaro !== null && !entitasok.has(jaro)) {
+      // ⛔ Kör-őr: elvileg nem lehet, de egy kör itt végtelen ciklus lenne.
+      if (latott.has(jaro)) return null;
+      latott.add(jaro);
+      // ⚠️ Csak az ELFELEJTETT szülőn lépünk át. Amit sosem ismertünk, ott megállunk.
+      if (!eredetiSzulok.has(jaro)) return undefined;
+      jaro = eredetiSzulok.get(jaro) ?? null;
+    }
+    return jaro;
+  };
+
+  for (const entitas of entitasok.values()) {
+    if (entitas.szulo === null || entitasok.has(entitas.szulo)) continue;
+    const uj = legkozelebbiLetezo(entitas.szulo);
+    if (uj === undefined) continue;             // nem ismerjük — hiány, nem tény (D19)
+    entitas.szulo = uj;
+  }
+}
+
+function agMeretekSzamitasa(entitasok) {
+  // ----- 1. SZÜLŐ → HÁNY GYEREKE VAN (egyetlen menet) -----
+  const hatralevoGyerek = new Map();
+  for (const e of entitasok.values()) {
+    e.agMeret = e.meret;                       // mindenki a sajátjával indul
+    hatralevoGyerek.set(e.azonosito, 0);
+  }
+  for (const e of entitasok.values()) {
+    if (e.szulo && hatralevoGyerek.has(e.szulo)) {
+      hatralevoGyerek.set(e.szulo, hatralevoGyerek.get(e.szulo) + 1);
+    }
+  }
+
+  // ----- 2. A LEVELEKTŐL FELFELÉ -----
+  const sor = [];
+  for (const e of entitasok.values()) {
+    if (hatralevoGyerek.get(e.azonosito) === 0) sor.push(e);
+  }
+
+  while (sor.length) {
+    const e = sor.pop();
+    if (!e.szulo) continue;
+
+    const szulo = entitasok.get(e.szulo);
+    if (!szulo) continue;                      // a szülő nem létezik (elfelejtették)
+
+    szulo.agMeret += e.agMeret;
+
+    const maradt = hatralevoGyerek.get(szulo.azonosito) - 1;
+    hatralevoGyerek.set(szulo.azonosito, maradt);
+    if (maradt === 0) sor.push(szulo);
+  }
+}
+
+// ===================================
+// SEGÉD: EGY E-EMBER SZÉTOSZTOTT PONTJAI
+// ===================================
+
+/**
+ * Megmondja, egy e-ember mennyi tudatpontot osztott ki összesen.
+ *
+ * MIÉRT KELL? Mert mindenkinek UGYANANNYI tudatpontja van (nem elkölthető, csak
+ * szétosztható), és ezt ellenőrizni kell: aki többet oszt ki, mint amennyije van,
+ * az szabálysértő eseményt írt alá — és ez, mint minden más, BIZONYÍTHATÓ.
+ *
+ * ⛔⛔ ÉS A SAJÁT LÁNCBÓL SZÁMOL, NEM AZ ÉLŐ ENTITÁSOKBÓL (2026-09-07, mérve).
+ *
+ * Eddig az élő entitások `hozzajarulok` térképeit összegezte — és ez **nem ugyanaz**, mint
+ * amit a szabály-réteg számol a D42 bemondott összegéhez. A kettő szétvált abban a
+ * pillanatban, amikor egy entitás **eltűnhetett úgy, hogy pont volt rajta** (törlési
+ * egyezmény). ⚠️ A következmény mérve: a bemondott összeg 100 lett, a láncból 200 —
+ * *„a bemondott összeg ellentmond a saját láncának"* —, vagyis a készülék **következő
+ * tudatpont-eseménye elbukott**, és onnantól semmi újat nem tudott létrehozni.
+ *
+ * ⭐ A helyes jelentés: *„mennyit mondtam ki a SAJÁT láncomban"* — ez a D42 kérdése, és ez
+ * egyetlen eseményből ellenőrizhető. Hogy az entitás létezik-e még, az **más kérdés**.
+ * *Két kérdésnek nem lehet egy válasza.*
+ *
+ * @param {Object} allapot
+ * @param {string} szerzo
+ * @returns {number}
+ */
+export function szetosztottPontok(allapot, szerzo) {
+  let osszeg = 0;
+  for (const [kulcs, pont] of allapot.kiosztasok ?? []) {
+    if (kulcs.slice(0, kulcs.lastIndexOf('|')) === szerzo) osszeg += pont;
+  }
+  return osszeg;
+}
+
+/**
+ * ⚠️ MI AZ, AMI ELAKADT? Az entitások, amikre van pontom, de már NEM LÉTEZNEK.
+ *
+ * Ez a törlési egyezmény utóélete: a gondolat megszűnt, a pontom viszont a keretemben
+ * marad, amíg magam vissza nem veszem — mert a tudatpont-rendezés ALÁÍRT esemény, és
+ * senki nem írhat alá helyettem (D15).
+ *
+ * ⛔⛔ CSAK A TÖRLÉS SZÁMÍT ELAKADÁSNAK — az `allapot.torlesek` listát nézzük, nem a
+ * tágabb `elfelejtettek`-et. Három eset van, és csak az első elakadás:
+ *
+ *   · **TÖRÖLTÉK** (elfogadott törlési egyezmény) → a pontom a semmin ül: elakadt;
+ *   · **BEOLVASZTOTTÁK** (egyesítés) → a pontom ÁTMENT az elnyelőbe; ha „visszavenném",
+ *     a következő számításnál a forrás már 0 ponttal jönne létre, és az egyesítés **nem
+ *     találná meg a pontjaimat** — vagyis a felszabadítás ELVENNÉ, amit megőrizni akar;
+ *   · **SOSEM LÁTTUK** (a létrehozó eseménye nem érkezett meg) → hiány, nem tény (D19):
+ *     a pont továbbra is értelmes, csak nem látjuk, mire.
+ *
+ * @param {Object} allapot
+ * @param {string} szerzo
+ * @returns {Array<{entitas: string, pont: number}>}
+ */
+export function elakadtPontok(allapot, szerzo) {
+  // ⭐ A TÖRLÉS MELLÉ A DÖNTÉS JELE IS KELL — melyik egyezmény, és mikor született. A
+  // megülepedés ebből tudja meg, hogy UGYANARRÓL a döntésről van-e szó: ha egy késve
+  // érkező szavazat átírja a lezárás idejét, a `megszuletett` változik, és az óra újraindul.
+  const torlesek = new Map();
+  for (const t of allapot.torlesek ?? []) torlesek.set(t.entitas, t);
+
+  const lista = [];
+  for (const [kulcs, pont] of allapot.kiosztasok ?? []) {
+    if (pont <= 0) continue;
+    const hatar = kulcs.lastIndexOf('|');
+    if (kulcs.slice(0, hatar) !== szerzo) continue;
+    const entitas = kulcs.slice(hatar + 1);
+    if (allapot.entitasok.has(entitas)) continue;
+    // nem törölték — beolvadt (a pont átment) vagy sosem láttuk (hiány, nem tény)
+    if (!torlesek.has(entitas)) continue;
+    const t = torlesek.get(entitas);
+    lista.push({
+      entitas, pont,
+      allas: t.allas ?? (t.javaslat + '|' + t.megszuletett),
+      // ⭐ A BIZONYÍTÉKHOZ: mikor zárult a döntés, és kik voltak a gazdái — vagyis kik
+      // fordíthatnák még meg egy késve érkező, de határidőn belüli szavazattal.
+      lezarult: t.megszuletett ?? null,
+      gazdak: t.gazdak ?? []
+    });
+  }
+  return lista;
+}
+
+// ⚠️ ITT ÁLLT AZ `aktivTulajdonosok` — KIVÉVE 2026-09-18-án, egy átnézés nyomán.
+//
+// A fejléce azt mondta: *„ez a függvény a felületnek való"* — ⛔ **a felület sem hívta**,
+// és rajta kívül senki. *Ugyanaz a csapda, amit az `identitas.js`-nél és a `jelzesek.js`-nél
+// már egyszer kijavítottunk: ahol egy felirat mást mond, mint amit a kód tesz, ott
+// előbb-utóbb valaki a feliratot hiszi el.*
+//
+// ⭐ A döntéshozatal nevezőjét a `javaslatSzamitas.js` számolja, a LEZÁRÁS pillanatáig
+// feldolgozott eseményekből — az a hely, ahol ez a kérdés valóban eldől.

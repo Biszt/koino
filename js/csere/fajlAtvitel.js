@@ -1,0 +1,582 @@
+// js/csere/fajlAtvitel.js
+
+// Felelősség: A BÁJTOK ÁTVITELÉNEK LOGIKÁJA — szeletelés, folytatás, lezárás.
+// ⚠️ **Hálózatot nem importál** (1. szabály), tehát vonal nélkül mérhető.
+//
+// ===== ⭐ CSABA NÉGY DÖNTÉSE (2026-09-13), ÉS ITT MIND A NÉGY LÁTSZIK =====
+//
+//   1. **A kérelmező kezdeményez** — ő tudja, mire vár. Ez a lap ezért az ő oldaláról
+//      írja le a folyamatot: *hol tartok, mit kérjek legközelebb.*
+//   2. **64 KB-os szelet**, és ⭐ a folytatáshoz **nem kell új gépezet**: a részleges fájl
+//      **mérete maga az állapot** — abból következik, hol folytassuk.
+//   3. **3 egyidejű átvitel irányonként, társanként legfeljebb egy** — hogy egy lassú társ
+//      ne foglalhassa le az egész készüléket.
+//   4. **A ritkábbat előbb** (ez a `fajlKerelem.js`-ben dőlt el), és ⛔ *„ki mennyit adott"
+//      mérleg NINCS* — az rangsor lenne (D18/2, D48).
+//
+// ===== ⛔⛔ ÉS A LEZÁRÁS SZABÁLYA, AMI MINDENT EGYBEN TART =====
+//
+// A részleges fájl **ideiglenes néven** áll, és csak akkor kerül a végleges
+// (lenyomat-)nevére, ha a bájtjai **tényleg azt adják ki**. *Így egy megszakadt vagy
+// meghamisított letöltés soha nem hagy hátra hamis fájlt* — és a csatornát továbbra sem
+// kell megbízhatóvá tenni (3. szabály). ⭐ Ez nem új szabály: ugyanaz, ami az esemény
+// azonosítójánál is áll — **a név maga a bizonyíték**.
+//
+// Használják: `vonal.js` (a szeletek küldése/fogadása) és a `koino.js`.
+
+// ⭐ EGY SZELET MÉRETE (Csaba döntése). Elég nagy ahhoz, hogy a nyugta-forgalom
+// elhanyagolható legyen, és elég kicsi ahhoz, hogy egy megszakadt átvitelnél **keveset
+// veszítsünk**. ⚠️ A UDP-darab ennél jóval kisebb — a szelet úgyis darabokra bomlik alatta.
+export const SZELET_MERET = 64 * 1024;
+
+// ⭐ HÁNY EGYIDEJŰ ÁTVITEL (Csaba döntése). ⚠️ A társankénti korlát a fontosabb: enélkül
+// egy lassú társ lefoglalhatná mind a hármat, és a munka nem terülne szét.
+export const EGYIDEJU_ATVITEL = 3;
+export const TARSANKENT = 1;
+
+// ===================================
+// ⭐⭐⭐ A TÜRELEM: AMENNYIT AZ ALTERNATÍVA HIÁNYA INDOKOL (D68, Csaba 2. válasza)
+// ===================================
+//
+// ⛔⛔ MI VOLT A BAJ: a UDP-vonal **30 000 ms**-ig küzdött EGYETLEN 1000 bájtos darabért,
+// és ez a szám **honnan sem jött** — se a vonalból, se a feladatból. ⚠️ Csaba döntése
+// (2026-09-14) nem az volt, hogy vigyük le egy kisebb fix számra: *„az ugyanolyan varázsszám
+// lenne"* — hanem hogy **függjön attól, hány forrásból szerezhető be ugyanaz.**
+//
+// ⭐ AZ ELV, EGY MONDATBAN: *a türelem annyi legyen, amennyit az alternatíva hiánya indokol.*
+//
+//   · **egy forrás** → ha feladom, a fájl **nem jön meg** (amíg új forrás nem akad),
+//     tehát érdemes kitartani;
+//   · **sok forrás** → a következő próbálkozás egy **másik vonalon** megy, tehát a váltás
+//     olcsóbb, mint a küzdelem.
+//
+// ⭐⭐ ÉS AMIÉRT A FELADÁS TÉNYLEG OLCSÓ: **a részleges fájl megmarad, és a mérete maga az
+// állapot** — a következő próbálkozás onnan folytatja, ahol abbamaradt. *A feladás itt nem
+// adatvesztés, hanem társ-váltás.*
+//
+// ⛔ AZ ALSÓ KORLÁT NEM DÍSZ: egy 800 ms oda-visszájú (műholdas, mobil) vonalon az
+// újraküldési idő önmagában 1–2 másodperc. Ha ez alá mennénk, **a lassú vonalon soha semmi
+// nem jönne át** — és a 9. szabály szerint a lassú vonal **alapeset, nem kivétel**.
+//
+// ⚠️ NEM állapot-befolyásoló állandók (D66): ha nálam más a türelem, **ugyanazt az állapotot
+// számoljuk** — csak máskor váltok társat.
+export const TURELEM_MAX = 30000;   // egyetlen forrásnál: nincs hova menni
+export const TURELEM_MIN = 5000;    // ennyi egy lassú vonalon is néhány próbálkozás
+
+/**
+ * ⭐ Mennyit küzdjünk EGY forrással, ha ennyi forrás van összesen?
+ *
+ * ⚠️ Az ismeretlen forrásszám (0, `null`, hibás) a **legóvatosabb** választ adja: ha nem
+ * tudunk alternatíváról, akkor nincs alternatíva. *A hiány nem ok a türelmetlenségre (D19).*
+ *
+ * @param {number} forrasok - hány társnál van meg ez a fájl
+ * @returns {number} ezredmásodperc
+ */
+export function turelemForrasokbol(forrasok) {
+  const n = Number.isFinite(forrasok) && forrasok > 0 ? Math.floor(forrasok) : 1;
+  return Math.max(TURELEM_MIN, Math.round(TURELEM_MAX / n));
+}
+
+// ===================================
+// 1. HOL TARTOK, ÉS MIT KÉRJEK?
+// ===================================
+
+/**
+ * A következő kérés egy fájlhoz — a részleges méretből.
+ *
+ * ⭐ NINCS SZELET-NYILVÁNTARTÁS: a szeletek rögzített méretűek és sorrendben érkeznek,
+ * tehát a meglévő bájtok száma **megmondja**, hol folytassuk. *A fájl tartalma az igazság,
+ * nem egy mellette vezetett napló.*
+ *
+ * @param {number} eddigiMeret - hány bájt van meg (0, ha még semmi)
+ * @returns {{eltolas: number, meret: number, index: number}}
+ */
+export function kovetkezoKeres(eddigiMeret) {
+  const eddig = Number.isInteger(eddigiMeret) && eddigiMeret > 0 ? eddigiMeret : 0;
+  return {
+    eltolas: eddig,
+    meret: SZELET_MERET,
+    // ⚠️ Az index csak naplózáshoz és emberi olvasáshoz kell — a protokoll az ELTOLÁST
+    // használja, mert az akkor is helyes, ha a szelet-méret egyszer változna.
+    index: Math.floor(eddig / SZELET_MERET)
+  };
+}
+
+// ===================================
+// ⭐⭐⭐ TÖBB FORRÁSBÓL EGY FÁJL — A MUNKAMEGOSZTÁS (D68 / 6., 2026-09-15)
+// ===================================
+//
+// ⛔ MIÉRT KELL EGYÁLTALÁN: mert mérve MEGÉRI (29. mérés) — ha a társak feltöltése a szűk
+// keresztmetszet (az otthoni, aszimmetrikus vonalakon ez a tipikus), három forrás **×2,7**.
+// ⚠️ De ha a MI letöltésünk a szűk, a haszon **×1,0**: ilyenkor a párhuzamosság semmit nem
+// ad. *A gépezetnek ezért kell olcsónak lennie — nem nyerünk vele mindig.*
+//
+// ⭐⭐ MUNKALOPÓ, NEM ELŐRE KIOSZTOTT. Nem osztjuk fel a fájlt N egyenlő részre: van egy
+// közös „mi hiányzik még" halmaz, és minden forrás **azt kéri, ami épp szabad**. ⛔ Előre
+// kiosztott tartományoknál **a leglassabb forrás szabná meg a végét** (a többi rég végzett
+// és állna) — márpedig a források soha nem egyforma gyorsak. *Ugyanaz az elv, mint a
+// türelemnél: ne várjunk arra, aki nem halad.*
+//
+// ⚠️ EZ FUTÁSIDEJŰ ÁLLAPOT, NEM LEMEZRE ÍRT NAPLÓ. Az elvégzett munkát a **szelet-fájlok**
+// őrzik (`reszlegesSzeletek`) — ez itt csak azt tartja számon, min dolgozik ÉPP valaki.
+// *Ha a program leáll, semmi nem vész el: a mappa listája megmondja, hol tartunk.*
+
+/**
+ * ⭐ Hány forrástól kérjük EGYSZERRE ugyanazt a fájlt?
+ *
+ * ⛔ A 9. szabály kérdése („mit csinál egymilliárdnál?"): a szeletszám fájlonként korlátos
+ * (2 MB / 64 KB = 32), de a **források számának is** felülről korlátosnak kell lennie —
+ * különben egy nagy koinóban egyetlen fájlért száz kapcsolat nyílna. ⚠️ A 29. mérés szerint
+ * a haszon 5 forrásig még nőtt (×2,6), de laposodik: a `3` a `EGYIDEJU_ATVITEL`-lel is
+ * összhangban van. *Nem állapot-befolyásoló állandó (D66): szabadon hangolható.*
+ */
+export const FORRASONKENT_EGY_FAJLRA = 3;
+
+/**
+ * Munkamegosztás egy fájl szeleteire, több forrás között.
+ *
+ * ⚠️ A `kovetkezo()` AZÉRT aszinkron, mert **várakoznia kell tudni**: amíg az első válasz
+ * meg nem érkezik, nem tudjuk a fájl méretét, tehát azt sem, hány szelet van. Ilyenkor a
+ * többi forrás nem kiléphet (az elveszítené őket), hanem vár. *A méretet a `FAJLSZELET`
+ * üzenet `teljes` mezője mondja meg — ez ma is benne van, nem új adat a vonalon.*
+ *
+ * @param {number[]} megvanEltolasok - ami a lemezen már megvan (`reszlegesSzeletek`)
+ */
+export function ujMunkamegosztas(megvanEltolasok = []) {
+  let teljes = null;                         // amíg null: még nem tudjuk a fájl méretét
+  const megvan = new Set(megvanEltolasok);
+  const folyamatban = new Set();
+  const varakozok = [];
+
+  // A lezárás joga egyszer adható ki — lásd `lezarasEnyem` lentebb.
+  let lezarva = false;
+  let lezarasEredmeny = null;
+  const lezarasVarok = [];
+
+  const ebreszt = () => { while (varakozok.length) varakozok.shift()(); };
+
+  /** A legkisebb eltolás, amit sem nem tudunk, sem nem kér épp valaki. */
+  const szabadEltolas = () => {
+    // ⚠️ Amíg a méret ismeretlen, CSAK EGY forrás indulhat — és a legkisebb hiányzóval,
+    // hogy a válasz egyben a méretet is elhozza.
+    //
+    // ⛔⛔ ENNEK MÉRHETŐ ÁRA VAN, ÉS KI KELL MONDANI: az ELSŐ szelet mindig **sorosan**
+    // jön, mert addig nem tudjuk, hány szelet van. Nyolc szeletnél ez az idő nyolcada,
+    // tehát a három forrás elméleti ×3-a helyett ×2,3 a plafon — *és a 29. mérés valódi
+    // kóddal mért ×2,0-ja ebből is áll.* ⚠️ A mérő-oldali utánzat ezt nem fizette meg
+    // (ő vaktában osztott szeletet), ezért mutatott ×2,7-et.
+    //
+    // ⏸️ Megkerülhető lenne — a felderítés (`FAJLOK` válasz) megmondhatná a méretet, vagy
+    // spekulatívan indulhatnánk —, de mindkettő új viselkedés: az egyik új mezőt tesz a
+    // vonalra (6. szabály), a másik fölösleges kérést egy rövid fájlnál. *A mai ár ismert
+    // és korlátos; a megkerülés ára nem.*
+    if (teljes === null) {
+      if (folyamatban.size > 0) return null;
+      let e = 0;
+      while (megvan.has(e)) e += SZELET_MERET;
+      return e;
+    }
+    for (let e = 0; e < teljes; e += SZELET_MERET) {
+      if (!megvan.has(e) && !folyamatban.has(e)) return e;
+    }
+    return null;
+  };
+
+  const keszEgesz = () => {
+    if (teljes === null) return false;
+    for (let e = 0; e < teljes; e += SZELET_MERET) if (!megvan.has(e)) return false;
+    return true;
+  };
+
+  return {
+    /** A `FAJLSZELET` `teljes` mezőjéből — az első válasz megmondja, mekkora a fájl. */
+    meretMegvan(t) {
+      if (teljes === null && Number.isInteger(t) && t >= 0) {
+        teljes = t;
+        ebreszt();                            // ⭐ innentől a többi forrás is kaphat munkát
+      }
+    },
+
+    get teljesMeret() { return teljes; },
+    keszEgesz,
+
+    /**
+     * A következő szelet, amit ez a forrás elhozhat — vagy `null`, ha nincs több dolga.
+     * @returns {Promise<number|null>} eltolás
+     */
+    async kovetkezo() {
+      for (;;) {
+        if (keszEgesz()) return null;
+        const e = szabadEltolas();
+        if (e !== null) { folyamatban.add(e); return e; }
+        // ⛔ Nincs szabad szelet, DE dolgozik még valaki: várunk. Ha ő elbukik, a szelete
+        // visszakerül, és mi visszük tovább. *Ettől nem vész el munka egy néma társnál.*
+        if (folyamatban.size === 0) return null;
+        await new Promise((t) => varakozok.push(t));
+      }
+    },
+
+    /** Megvan a szelet — a lemezen is. */
+    kesz(eltolas) {
+      folyamatban.delete(eltolas);
+      megvan.add(eltolas);
+      ebreszt();
+    },
+
+    /** Nem sikerült (a forrás elnémult vagy hibázott) — más elviheti. */
+    elengedi(eltolas) {
+      folyamatban.delete(eltolas);
+      ebreszt();
+    },
+
+    /** ⚠️ Egy forrás kilépett: ha ő volt az utolsó dolgozó, a várakozókat el kell engedni. */
+    kilep() { ebreszt(); },
+
+    // ===== ⛔⛔ KI ZÁRJA LE A FÁJLT? =====
+    //
+    // Több forrásnál ez nem magától értetődő: **mindegyik ág látja**, hogy minden szelet
+    // megvan. Ha mind lezárna, a második már „nincs részleges fájl"-t kapna — *hibának
+    // látszana az, hogy valaki más volt gyorsabb.* ⭐ Ezért a lezárás joga **egyszer adható
+    // ki**, és a többi ág megvárja az eredményt, hogy ugyanazt mondhassa.
+    lezarasEnyem() {
+      if (lezarva) return false;
+      lezarva = true;
+      return true;
+    },
+
+    lezarasKesz(eredmeny) {
+      lezarasEredmeny = eredmeny;
+      while (lezarasVarok.length) lezarasVarok.shift()();
+    },
+
+    /** ⚠️ Csak akkor hívható, ha valaki már elkezdte a lezárást — különben nem jönne válasz. */
+    async lezarasraVar() {
+      if (lezarasEredmeny) return lezarasEredmeny;
+      await new Promise((t) => lezarasVarok.push(t));
+      return lezarasEredmeny;
+    }
+  };
+}
+
+// ===================================
+// ⭐⭐ A KÖZÖS MUNKA JEGYZÉKE — a UDP-s több forrás (D114 / T1, 2026-10-19)
+// ===================================
+//
+// ⛔ MIÉRT KELL: a D69/2 óta a fájl a randevún jön (`udpVonal.js` `fajlRandevu`), társanként egy munkában — és a kapu
+// munkái PÁRHUZAMOSAK. Ha ugyanaz a fájl két társnál is megvan, és a kör mindkettőt eléri, a két randevú egymástól
+// függetlenül, SAJÁT munkamegosztással hozta: a 79. mérésen minden szelet kétszer jött (16 a 8 helyett, ×1,0 a közös munka
+// ×1,6-ja helyett), és a két ág a lezárásért versenyzett (a második „hiányzó szelet”-et vagy kivételt kapott).
+//
+// ⭐ A JEGYZÉK: lenyomatonként EGY munkamegosztás a folyamatban — minden fájl-hozatal (a randevú, a kérelem törzse) ezt
+// kapja; az első ág nyitja (a lemezen lévő szeletekből), az utolsó kilépő zárja. Ettől a több forrás MAGÁTÓL megvan, amikor
+// egyszerre több tartóval dolgozunk, és egy ágnál a régi viselkedés marad. ⭐ És itt áll Csaba 3. döntése (2026-09-13): „3
+// egyidejű átvitel irányonként” — a UDP-n a társanként egy magától teljesül (egy társsal egy munka), az összesen 3 itt:
+// egy ág csak szabad helyre lép be (`belep` → null), a kérelem törzse (`kotelezo` — egy kapcsolat, sorban) a helyet
+// foglalja, de nem várakozik rá.
+//
+// A jegyzék a RÉSZTVEVŐKET is tudja (`adott`, `adok`): kik adtak szeletet ehhez a próbálkozáshoz — a rossz szelet helyi
+// tanulságának (29/c — `romlottJegyzes`) ennyi kell, és csak ennyi (nem rangsor: D18/2, D48).
+//
+// ⚠️ Futásidejű, folyamaton belüli állapot. Két folyamat (egy kézi `kerelem torzs` egy futó őrjárat mellett) versenyét nem
+// zárja ki — ritka, és a lezárás ott is ellenőriz (a név maga a bizonyíték).
+
+/**
+ * @param {Object} [beallitas]
+ * @param {number} [beallitas.osszesen] - egyszerre legfeljebb ennyi ág (kapcsolat) hoz fájlt
+ */
+export function kozosMunkaJegyzek({ osszesen = EGYIDEJU_ATVITEL } = {}) {
+  const fajlok = new Map();          // lenyomat → { munkaIgeret, agak, adok: Set }
+  let futo = 0;
+
+  /** Az ág végzett ezzel a fájllal (akár sikerrel, akár nem) — az utolsó kilépő a bejegyzést is zárja. */
+  const kilep = (lenyomat) => {
+    const f = fajlok.get(lenyomat);
+    futo = Math.max(0, futo - 1);
+    if (!f) return;
+    f.agak--;
+    if (f.agak <= 0) fajlok.delete(lenyomat);
+  };
+
+  return {
+    /**
+     * Egy ág belép egy fájlhoz: a közös munkamegosztás — vagy null, ha nincs szabad hely (a fájl a következő körre marad).
+     * ⚠️ A bejegyzés SZINKRON jön létre (a lemez olvasása előtt): két egyszerre belépő ág így ugyanazt a munkát kapja.
+     * @param {string} lenyomat
+     * @param {Function} megvanEltolasok - async () → a lemezen már meglévő szeletek eltolásai
+     * @param {Object} [b] - `kotelezo`: a hely foglal, de a korlát nem tartja vissza
+     * @returns {Promise<Object|null>} a munkamegosztás
+     */
+    async belep(lenyomat, megvanEltolasok, { kotelezo = false } = {}) {
+      if (!kotelezo && futo >= osszesen) return null;
+      futo++;
+      let f = fajlok.get(lenyomat);
+      if (!f) {
+        f = { agak: 0, adok: new Set(), munkaIgeret: (async () => ujMunkamegosztas(await megvanEltolasok()))() };
+        fajlok.set(lenyomat, f);
+      }
+      f.agak++;
+      try {
+        return await f.munkaIgeret;
+      } catch (hiba) {
+        kilep(lenyomat);
+        throw hiba;
+      }
+    },
+
+    kilep,
+
+    /** Egy forrás szeletet adott ehhez a próbálkozáshoz. */
+    adott(lenyomat, forras) {
+      if (typeof forras === 'string' && forras) fajlok.get(lenyomat)?.adok.add(forras);
+    },
+
+    /** Akik ehhez a próbálkozáshoz szeletet adtak (a bukott lezárás tanulságához). */
+    adok(lenyomat) { return [...(fajlok.get(lenyomat)?.adok ?? [])]; },
+
+    /** Dolgozik-e épp valaki ezen a fájlon? */
+    fut(lenyomat) { return fajlok.has(lenyomat); },
+
+    /** Hány ág hoz most fájlt (a próbáknak és a naplónak). */
+    get futo() { return futo; }
+  };
+}
+
+/**
+ * A kapott szelet elfogadható-e?
+ *
+ * ⛔⛔ HÁROM DOLGOT NÉZÜNK MEG, ÉS MINDHÁROM EGY-EGY TÁMADÁST ZÁR KI:
+ *
+ *   · **rossz eltolás** → a társ nem oda küld, ahol tartunk (vagy összekeveredtek a
+ *     válaszok) — a fájl így csendben elromlana;
+ *   · **túl nagy szelet** → egy kérés végtelen adatot hozhatna be;
+ *   · **a korlát túllépése** → a lemezünket töltenék meg (`FAJL_KORLAT`).
+ *
+ * ⚠️ EGYIK SEM VÁD, csak elutasítás: a lezárás úgyis újra lenyomatol.
+ *
+ * @returns {{rendben: boolean, ok?: string}}
+ */
+export function szeletEllenorzes(kertEltolas, eltolas, hossz, korlat) {
+  // ⚠️⚠️ AZ ELSŐ PARAMÉTER JELENTÉSE MEGVÁLTOZOTT (2026-09-15, D68 / 6.): korábban az
+  // „eddigi méret" volt, mert a szeletek **sorrendben** jöttek, és a méret megmondta, hol
+  // tartunk. Több forrásnál ez elesik — a 3. szelet megjöhet az 1. előtt. ⭐ Ezért most azt
+  // nézzük, hogy a válasz **arra jött-e, amit KÉRTÜNK**. *Ugyanaz a védelem, szigorúbb
+  // alapon: a kérés a mi állításunk, az „eddigi méret" viszont feltevés volt a sorrendről.*
+  if (eltolas !== kertEltolas) {
+    return { rendben: false, ok: 'nem arra érkezett, amit kértünk (' + eltolas
+      + ' ≠ ' + kertEltolas + ')' };
+  }
+  if (!Number.isInteger(hossz) || hossz < 0 || hossz > SZELET_MERET) {
+    return { rendben: false, ok: 'érvénytelen szelet-hossz: ' + hossz };
+  }
+  if (Number.isInteger(korlat) && kertEltolas + hossz > korlat) {
+    return { rendben: false, ok: 'a fájl túllépné a felső méretkorlátot' };
+  }
+  return { rendben: true };
+}
+
+// ===================================
+// 2. ⭐ MIT KÉRJEK, ÉS KITŐL? — a munka elosztása
+// ===================================
+
+// ===================================
+// ⭐⭐⭐ A ROSSZ SZELET HELYI TANULSÁGA (D68 / 6., Csaba jóváhagyásával 2026-09-15)
+// ===================================
+//
+// ⛔⛔ A BAJ, KIMONDVA: a lenyomat a **teljes fájlra** szól, tehát ha egy társ hamis
+// szeletet ad, a lezárás elbukik — ⛔ **de nem tudjuk, MELYIK szelet volt rossz**, és így
+// azt sem, ki adta. Az egészet eldobjuk, és kezdhetjük elölről. *Egy rosszindulatú társ
+// így olcsón ismételtethet, újra és újra.*
+//
+// ⭐ HÁROM VÁLASZ LÉTEZETT, és Csaba az ELSŐT választotta (a tervben mindhárom ára ki van
+// mondva): a másik kettő vagy **új adatot tesz a láncra** (szeletenkénti lenyomat: egy
+// 2 MB-os fájlnál ~1,4 KB, négyszerese egy teljes eseménynek — a 6. szabály KEMÉNY fele
+// tiltja), vagy **minden meglévő fájl-hivatkozást érvénytelenítene** (Merkle-fa: megváltozna
+// a fájl-lenyomat számítása).
+//
+// ⭐⭐ EZ ITT A KIEGÉSZÍTÉS: ha a lezárás elbukott, **feljegyezzük, kik adtak szeletet**
+// ehhez a próbálkozáshoz, és a következő körben **mást választunk**.
+//
+// ⛔⛔ ÉS AMI EZT NEM TESZI RANGSORRÁ — három korlát, mindegyik szándékos:
+//
+//   1. **FÁJLONKÉNTI**, nem társankénti. Nem azt mondjuk, hogy „ez a társ rossz", hanem
+//      hogy *„ehhez a fájlhoz ezek a források nem váltak be"*. *Nincs globális mérleg, és
+//      nincs „ki mennyit adott" (D18/2, D48).*
+//   2. **NEM VÁD.** A résztvevők közül **legfeljebb egy** adott hamis bájtot; a többi
+//      ártatlan, és ezt nem tudjuk szétválasztani. *Ezért nem is mondjuk ki róluk semmit.*
+//   3. ⭐ **ELFELEJTHETŐ, sőt: ha nem marad forrás, EL IS FELEJTJÜK.** Különben egy fájl,
+//      amit csak egyetlen társ birtokol, egyetlen bukás után **soha többé** nem jönne meg —
+//      *a védekezés elvágná az utat az adathoz, amit védeni akar.*
+//
+// ⚠️ A jegyzet **helyi megfigyelés, nem esemény** (3. szabály): sosem terjed, és semmit
+// nem dönt el a koinóban — csak azt, hogy MI kitől kérünk legközelebb.
+
+/**
+ * Kiket válasszunk ehhez a fájlhoz — a bukott forrásokat kerülve, ha van kit helyettük.
+ *
+ * @param {Array<string>} tarsak - akikről tudjuk, hogy megvan nekik
+ * @param {Object} [romlott] - címke → időpont (a fájl jegyzetéből)
+ * @returns {Array<string>}
+ */
+export function valaszthatoForrasok(tarsak, romlott) {
+  const lista = Array.isArray(tarsak) ? tarsak : [];
+  const kerulendo = new Set(Object.keys(romlott ?? {}));
+  if (!kerulendo.size) return lista;
+
+  const maradek = lista.filter((t) => !kerulendo.has(t));
+  // ⛔ HA NEM MARADT SENKI, FELEJTÜNK. *Egy bukás nem zárhatja el véglegesen az utat.*
+  return maradek.length ? maradek : lista;
+}
+
+/**
+ * Egy bukott letöltés feljegyzése: kik adtak szeletet ehhez a fájlhoz?
+ *
+ * ⚠️ Új jegyzetet ad vissza (nem írja át a kapottat) — ugyanaz a minta, mint a
+ * `birtoklasBeolvasztasa`-nál: a tárolás a hívó dolga.
+ *
+ * @param {Object} jegyzet
+ * @param {string} lenyomat
+ * @param {Array<string>} tarsak - a próbálkozásban RÉSZT VETT források
+ * @param {number} [mikor]
+ * @returns {Object} az új jegyzet
+ */
+export function romlottJegyzes(jegyzet, lenyomat, tarsak, mikor = Date.now()) {
+  if (typeof lenyomat !== 'string' || !Array.isArray(tarsak) || !tarsak.length) {
+    return jegyzet ?? {};
+  }
+  const uj = { ...(jegyzet ?? {}) };
+  const elem = { ...(uj[lenyomat] ?? {}) };
+  const romlott = { ...(elem.romlott ?? {}) };
+
+  for (const t of tarsak) {
+    if (typeof t === 'string' && t) romlott[t] = mikor;
+  }
+
+  uj[lenyomat] = { ...elem, romlott };
+  return uj;
+}
+
+/**
+ * ⭐ A fájl megjött — a tanulság tárgytalan, a jegyzet törlődik.
+ *
+ * *Erre a „felejtés" szóval szoktunk hivatkozni: a bukás helyi és ideiglenes tudás volt,
+ * és amint a fájl megvan, semmit nem ér.*
+ */
+export function romlottFelejtes(jegyzet, lenyomat) {
+  if (!jegyzet?.[lenyomat]?.romlott) return jegyzet ?? {};
+  const uj = { ...jegyzet };
+  const { romlott, ...tobbi } = uj[lenyomat];
+  uj[lenyomat] = tobbi;
+  return uj;
+}
+
+// ===================================
+// ⭐⭐ D114 (T2 (B), Csaba, 2026-10-19: „Aktívan, korlátosan”): A FORRÁSOK GYŰJTÉSE
+// ===================================
+//
+// A közös munka (fent) akkor ad több forrást, ha a tartók épp egy körbe esnek. Az aktív gyűjtés ezt nem bízza a véletlenre:
+// a BEFEJEZETLEN (tehát több szeletes — az egyszeletes az első válasszal lezárul) hiányzó fájlok további ismert tartóit a kör
+// céljai közé veszi — körönként legfeljebb `AKTIV_FORRAS_KOR`-at, egy fájlhoz a körben már szereplőkkel együtt legfeljebb
+// `FORRASONKENT_EGY_FAJLRA`-t, a sorrend a hívóé (a ritkább előbb). Ez adja vissza, amit a TCP-kor tudott: ott a terv maga
+// választotta a forrásokat. Ára tartónként egy kopogás és egy csere; a teher a tartók között oszlik meg (D109 keretük).
+
+/** Egy körben legfeljebb ennyi tartót hívunk a fájlok miatt. */
+export const AKTIV_FORRAS_KOR = 2;
+
+/**
+ * A befejezetlen fájlok további tartói — a kör céljai.
+ * @param {Array<string>} lenyomatok - a befejezetlen hiányzók, a hívó sorrendjében
+ * @param {Object} jegyzet - a birtoklás jegyzete (`birtoklasBeolvasztasa`)
+ * @param {Set<string>} korben - a körben már szereplő társak nevei (tábla-aláírók)
+ * @param {Object} [b] - `kor`, `fajlonkent`
+ * @returns {Array<{alairo: string, cim: string, port: number, lenyomat: string}>}
+ */
+export function aktivForrasok(lenyomatok, jegyzet, korben, { kor = AKTIV_FORRAS_KOR, fajlonkent = FORRASONKENT_EGY_FAJLRA } = {}) {
+  const ki = [];
+  const valasztott = new Set();
+  for (const lenyomat of Array.isArray(lenyomatok) ? lenyomatok : []) {
+    if (ki.length >= kor) break;
+    const elem = jegyzet?.[lenyomat];
+    if (!elem) continue;
+    // A legfrissebb hír előbb; akitől ez a fájl már romlottan jött, azt kerüljük, ha van más (29/c).
+    const tarsak = Object.keys(elem.tarsak ?? {}).sort((a, b) => (elem.tarsak[b] ?? 0) - (elem.tarsak[a] ?? 0));
+    const jok = valaszthatoForrasok(tarsak, elem.romlott);
+    let hely = fajlonkent - jok.filter((t) => korben.has(t)).length;
+    for (const t of jok) {
+      if (ki.length >= kor || hely <= 0) break;
+      if (korben.has(t) || valasztott.has(t)) continue;
+      const m = typeof elem.cimek?.[t] === 'string' ? elem.cimek[t].match(/^(.+):(\d{1,5})$/) : null;
+      if (!m) continue;
+      ki.push({ alairo: t, cim: m[1], port: Number(m[2]), lenyomat });
+      valasztott.add(t);
+      hely--;
+    }
+  }
+  return ki;
+}
+
+/**
+ * Az átvitel-terv: melyik fájlt melyik társtól kérjük.
+ *
+ * ⭐ A SORREND MÁR KÉSZ (a `ritkasagSzerint` adja: vállaltak előre, azon belül a ritkább).
+ * Ez a függvény csak **elosztja** a munkát, két korláttal:
+ *
+ *   · legfeljebb `EGYIDEJU_ATVITEL` összesen,
+ *   · és **társanként legfeljebb `TARSANKENT`** — ⭐ ez a fontosabb: enélkül egy lassú
+ *     társ lefoglalná mind a hármat, és a munka nem terülne szét.
+ *
+ * ⚠️ AKIRŐL NEM TUDJUK, KINÉL VAN MEG, azt kihagyjuk — nem kérdezünk vaktában. A következő
+ * buli úgyis megmondja (D19: a hiány nem hiba, csak még nem tudjuk).
+ *
+ * @param {Array<Object>} sorrend - a `ritkasagSzerint` eredménye
+ * @param {Object} jegyzet - lenyomat → { tarsak: { címke: időpont } }
+ * @param {Object} [beallitas]
+ * @returns {Array<{lenyomat: string, tars: string}>}
+ */
+export function atvitelTerv(sorrend, jegyzet, beallitas = {}) {
+  const osszesen = beallitas.osszesen ?? EGYIDEJU_ATVITEL;
+  const tarsankent = beallitas.tarsankent ?? TARSANKENT;
+  const fajlonkent = beallitas.fajlonkent ?? FORRASONKENT_EGY_FAJLRA;
+
+  const terv = [];
+  const tarsTerhelese = new Map();
+  let kapcsolatok = 0;
+
+  for (const h of sorrend ?? []) {
+    if (kapcsolatok >= osszesen) break;
+
+    // ⚠️ A társak sorrendje determinisztikus (címke szerint), hogy két futás ugyanazt adja.
+    const tarsak = Object.keys(jegyzet?.[h.lenyomat]?.tarsak ?? {}).sort();
+    // ⭐ ÉS AKIKKEL EZ A FÁJL MÁR ELBUKOTT — ha van kit helyettük választani.
+    const valaszthato = valaszthatoForrasok(tarsak, jegyzet?.[h.lenyomat]?.romlott);
+
+    // ⭐⭐ TÖBB FORRÁS EGY FÁJLHOZ (D68 / 6., 2026-09-15) — mérve megéri (29. mérés):
+    // ha a társak feltöltése a szűk keresztmetszet, három forrás **×2,7**.
+    //
+    // ⛔ AZ `osszesen` MOSTANTÓL A KAPCSOLATOKAT SZÁMOLJA, nem a fájlokat — ez a valódi
+    // erőforrás. ⭐ És a sorrend dönt: az ELSŐ fájl (a legritkább, a `ritkasagSzerint`
+    // szerint) kapja meg a forrásokat, a maradék kapcsolat megy a következőre.
+    // *Ez a „legrövidebb feladat előbb": egy KÉSZ fájl ér valamit, a félkész nem —
+    // azt a bulin sem ajánlhatjuk fel.*
+    const valasztott = [];
+    for (const t of valaszthato) {
+      if (valasztott.length >= fajlonkent) break;
+      if (kapcsolatok + valasztott.length >= osszesen) break;
+      if ((tarsTerhelese.get(t) ?? 0) >= tarsankent) continue;
+      valasztott.push(t);
+    }
+    if (!valasztott.length) continue;   // senki nem ér rá (vagy nem tudjuk, kinél van meg)
+
+    // ⭐ A TERV MEGMONDJA A TÜRELMET IS — mert itt tudjuk, hány forrás van (D68).
+    // *A vonal ezt nem tudhatja: ő csak csomagokat lát (1. szabály).*
+    terv.push({
+      lenyomat: h.lenyomat,
+      tarsak: valasztott,
+      forrasok: tarsak.length,
+      turelem: turelemForrasokbol(tarsak.length)
+    });
+    for (const t of valasztott) tarsTerhelese.set(t, (tarsTerhelese.get(t) ?? 0) + 1);
+    kapcsolatok += valasztott.length;
+  }
+
+  return terv;
+}

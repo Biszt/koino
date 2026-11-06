@@ -1,0 +1,294 @@
+/* felulet/css/components/koinoKartya.css */
+
+/* A BELÉPŐ TÉR kártyája (Szakasz 5.6).
+
+   ⚠️ EZ AZ EGYETLEN CSS-FÁJL A `felulet/`-BEN, AMI NEM A PROTOTÍPUSBÓL JÖTT — és nem
+   feledékenységből: a prototípusban a „koino" mint fogalom nem létezett, tehát nincs mit
+   átemelni. ⭐ Ezért viszont KIZÁRÓLAG a meglévő stílusváltozókat használja
+   (`base/variables.css`), hogy a tér ugyanabban a világban legyen, mint a pakli. */
+
+/* ⚠️⚠️ EZT A BÖNGÉSZŐ MONDTA MEG, nem az érvelés: a `hidden` attribútum csak a böngésző
+   alap-stíluslapján állít `display: none`-t, amit BÁRMELYIK osztály-szabály felülír. A
+   `.koino-sav { display: flex }` miatt a tér sávja a pakli mellett is látszott, pedig a
+   HTML-ben ott volt a `hidden`. Egy helyen zárjuk le, hogy a váltás megbízható legyen. */
+[hidden] { display: none !important; }
+
+.koino-kartya {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 0 auto .75rem;
+  max-width: 44rem;
+  color: var(--color-text);
+}
+
+/* ⭐ Ahol éppen állunk — a tér ebből látszik egy pillantásra. */
+.koino-kartya--aktiv {
+  border-color: var(--color-primary);
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+.koino-kartya__nev {
+  font-family: var(--font-display);
+  font-size: var(--text-lg, 1.25rem);
+  margin: 0 0 .25rem;
+}
+
+/* ⚠️ A HIÁNY LÁTSZIK, DE NEM VÁD (D19): halványabb és dőlt, nem piros. */
+.koino-kartya__nev--ismeretlen {
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+
+.koino-kartya__leiras {
+  margin: 0 0 .5rem;
+  font-size: var(--text-sm, .9rem);
+  opacity: .85;
+}
+
+/* ----- A HÁROM SZÁM ----- */
+
+.koino-kartya__szamok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem .75rem;
+  margin: .5rem 0;
+  font-size: var(--text-sm, .9rem);
+}
+
+.koino-kartya__szam {
+  background: var(--color-surface-offset);
+  border-radius: 4px;
+  padding: .15rem .5rem;
+  /* A `title` magyarázatot ad — jelezzük, hogy van mit elolvasni. */
+  cursor: help;
+}
+
+.koino-kartya__szam strong { color: var(--color-primary); }
+
+.koino-kartya__labjegyzet {
+  margin: .5rem 0 0;
+  font-size: var(--text-xs, .8rem);
+  color: var(--color-text-faint);
+}
+
+/* ----- ⭐⭐ D118 (⑥): A CSALÁDFA — a szülő, a gyermekek, a költözéseim -----
+   A nevek gombok (oda lépünk); a készüléken nem ismert szülő halványan és dőlten (D19: hiány, nem vád). */
+
+.koino-kartya__csalad {
+  margin: .5rem 0 0;
+  font-size: var(--text-sm, .9rem);
+}
+
+.koino-kartya__csalad-sor { margin: .15rem 0; }
+
+.koino-kartya__csalad-sor--koltozes { color: var(--color-text-faint); }
+
+.koino-kartya__csalad-nev {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--color-primary);
+  text-decoration: underline dotted;
+  cursor: pointer;
+}
+
+.koino-kartya__csalad-nev:disabled {
+  color: var(--color-text);
+  text-decoration: none;
+  cursor: default;
+}
+
+.koino-kartya__csalad-nev--ismeretlen {
+  color: var(--color-text-faint);
+  font-style: italic;
+  text-decoration: none;
+  cursor: default;
+}
+
+/* ----- AZ ALSÓ SÁV ----- */
+
+.koino-kartya__sav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-top: .75rem;
+  padding-top: .6rem;
+  border-top: 1px solid var(--color-divider);
+}
+
+.koino-kartya__allas {
+  font-size: var(--text-sm, .9rem);
+  opacity: .85;
+}
+
+.koino-kartya__belepes {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: 6px;
+  padding: .4rem .9rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.koino-kartya__belepes:hover:not(:disabled) { background: var(--color-primary-hover); }
+
+.koino-kartya__belepes:disabled {
+  background: var(--color-surface-offset-2);
+  color: var(--color-text-faint);
+  cursor: default;
+}
+
+/* ===== ⭐ A HÁZ (D100, H2): A PAKLI KOINÓS JELEI =====
+   A kártyák bájtra a prototípuséi; ezeket a jeleket a `koinoPakli.js` teszi rájuk a kirajzolás után.
+   ⚠️ A hiány látszik, de nem vád (D19): halvány és dőlt, nem piros. */
+
+/* A nem tartott kártya (amit csak láttam — az átmeneti tárból vagy egy kérelem válaszából): szaggatott keret. */
+.pakli-kartya--nem-tartott .pakli-kartya__belso {
+  border-style: dashed;
+}
+
+/* Az ágazati pont forrásának jele (✓ ellenőrizve · ≈ bemondás · +? részleges · ? ismeretlen). */
+.pakli-kartya__forras {
+  font-style: italic;
+  color: var(--color-text-faint);
+  cursor: help;
+}
+
+.pakli-kartya__forras--ellenorzott {
+  font-style: normal;
+  color: var(--color-primary);
+}
+
+/* ⭐ D116 (Csaba, 2026-10-23): a leszármazottak (▾) és a testvérek (↔) ismert száma a tudatpont-sor számainak stílusában
+   (`pakli-kartya__ikon-elem`), és mellettük a FELDERÍTETLEN rész („+N”) — halványan, mint a forrás jele (D19: nem vád). A
+   `koinoFelderitetlen.js` teszi rá; a magyarázat a `title`-ben. */
+.pakli-kartya__koino-szam { cursor: help; }
+.pakli-kartya__felderitetlen {
+  margin-left: 3px;
+  font-size: 0.9em;
+  font-style: italic;
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+
+/* ⭐ D116: a nem ismert testvérek száma a testvér-jelző alatt (a képernyő jobb szélén, mint a kacsacsőrök — nem gomb). */
+.koino-testver-hiany {
+  position: fixed;
+  right: 1rem;
+  top: calc(50% + 4.2rem);
+  transform: translateY(-50%);
+  z-index: 150;
+  padding: 2px 8px;
+  border: 1px dashed rgba(200, 192, 181, 0.8);
+  border-radius: var(--radius-full);
+  background: rgba(247, 243, 236, 0.7);
+  color: var(--color-text-faint);
+  font-family: var(--font-body);
+  font-size: var(--text-xs, .8rem);
+  font-style: italic;
+  cursor: help;
+}
+
+/* ⭐ D116: ugyanez a Struktúra csomópontjain (SVG — a csomópont koordinátáiban). */
+.koino-struktura-hiany {
+  font-size: 9px;
+  font-style: italic;
+  fill: #6b5f52;
+  cursor: help;
+}
+
+/* ===== ⭐ AZ ALSÓ SÁV NE TAKARJON (Csaba, 2026-10-23) =====
+   A prototípus egysoros sávra hagyott helyet (~4 rem); a telefonon a sáv több sorba törik, és a pakli alját (a gyökér
+   kártyát) meg a kártya menüjét eltakarta. Az `alsoSav.js` a sáv VALÓDI magasságát a `--koino-also-sav` változóba teszi:
+   a pakli alja ennyi helyet hagy, a menük a sáv FÖLÖTTI részre igazodnak (a kártya menüje a kártya rétegében nyílik — a sáv
+   alatt —, ezért nem elég a z-index). */
+.pakli-wrapper,
+.fooldal-tartalom {
+  padding-bottom: calc(var(--koino-also-sav, 4rem) + var(--space-4));
+}
+@media (min-width: 768px) {
+  .pakli-wrapper { padding-bottom: calc(var(--koino-also-sav, 4rem) + var(--space-6)); }
+}
+.hamburger-menu-panel {
+  top: calc((100vh - var(--koino-also-sav, 0px)) / 2);
+  max-height: calc(100vh - var(--koino-also-sav, 0px) - var(--space-6));
+}
+@supports (height: 100dvh) {
+  .hamburger-menu-panel {
+    top: calc((100dvh - var(--koino-also-sav, 0px)) / 2);
+    max-height: calc(100dvh - var(--koino-also-sav, 0px) - var(--space-6));
+  }
+}
+
+/* ⭐ (2026-10-23) a Tudatpontok lapozása: a „További” gomb a lista alatt */
+.koino-tovabb {
+  display: block;
+  margin: var(--space-3) auto 0;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-offset);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm, .9rem);
+  cursor: pointer;
+}
+.koino-tovabb:disabled { opacity: .6; cursor: default; }
+
+/* A betöltés az állapot-sorban: az őrjárat hozza, amit a pakli még nem ismer (H1). */
+.allapot.betoltes {
+  font-style: italic;
+}
+
+/* ===== ⭐ AZ ALSÓ SÁV KOINÓS TÖBBLETE: A CSERE (2026-10-15) =====
+   A prototípus info-elemének stílusa (`foOldal.css`) — csak gombként: kattintásra azonnal frissít. */
+.also-sav__csere {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.also-sav__csere:hover,
+.also-sav__csere:focus-visible {
+  opacity: 1;
+  text-decoration: underline dotted;
+}
+
+/* ===== ⭐ D101: A TUDÁS HATÁRA A MODÁLOK ALJÁN =====
+   A program mondja ki (`koinoMegjegyzes`), a `koinoModalok.js` írja a modál listája alá.
+   ⚠️ Mint a forrás jele: halvány és dőlt, nem piros — a hiány nem vád (D19). */
+.koino-megjegyzes {
+  margin: .75rem 0 0;
+  font-size: .85rem;
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
+/* ⭐ D101 ③: a Struktúra kész nézetében a megjegyzés a vászon TETEJÉRE kerül (a súgó-sor alul, abszolút pozícióban ül —
+   a normál folyamban a vászon alá csúszna, nem látszana). ⭐ D101 ④: a Síkidomban ugyanígy, csak a bal felső
+   betöltés-jelző alá. */
+.struktura-modal__nezet > .koino-megjegyzes,
+.sikidom-modal__nezet > .koino-megjegyzes {
+  position: absolute;
+  top: var(--space-2, .5rem);
+  left: 0;
+  right: 0;
+  max-width: none;                                     /* a bekezdések közös szélessége (~65ch) itt a bal szélre szorítaná */
+  margin: 0;
+  padding: 0 1rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.sikidom-modal__nezet > .koino-megjegyzes {
+  top: calc(var(--space-4, 1rem) + 1.75rem);
+}

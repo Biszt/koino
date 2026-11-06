@@ -1,0 +1,106 @@
+﻿/* felulet/css/main.css */
+
+/* ⭐ A PROTOTÍPUS CSS-e VÁLTOZATLANUL. Ez a fájl csak a betöltési sorrendet adja meg —
+   minden stílus-fájl bájtra ugyanaz, mint a `frontend/css/` alatt.
+
+   ⚠️ A prototípus `main.css`-e 35 fájlt importál; itt csak az van, ami a KÁRTYÁKHOZ kell.
+   A többi a modal-parkkal együtt jön (5.5). Egy hiányzó CSS néma törést okozna, ezért
+   érdemes tudni, mi van benne és mi nincs. */
+
+/* ===== ALAPOK ===== */
+@import './base/variables.css';
+@import './base/base.css';
+
+/* ===== A KÁRTYA-RÉTEG ===== */
+@import './components/pakli.css';
+/* ⭐ A TESTVÉR-JELZŐ (D100, a ház): a prototípusból, bájtra változatlanul — a `Pakli.js`-szel jött. */
+@import './components/testverJelzo.css';
+@import './components/hamburgerMenu.css';
+@import './components/fejlesztesreVar.css';
+@import './components/szovegSzerkeszto.css';
+/* ⭐ A SZERKESZTŐ ESZKÖZTÁRA (5.7) — a prototípusból, bájtra változatlanul. */
+@import './components/eszkoztar.css';
+
+@import './components/kartya/kartya.css';
+@import './components/kartya/gondolatKartya.css';
+@import './components/kartya/kategoriaKartya.css';
+@import './components/kartya/gondolatTipusKartya.css';
+@import './components/kartya/javaslatKartya.css';
+@import './components/kartya/egyezmenyKartya.css';
+@import './components/kartya/kartyaFulsav.css';
+@import './components/kartya/szavazasFul.css';
+
+@import './components/szoveg/szovegMezoMegjelenito.css';
+@import './components/modals/modal.css';
+@import './components/modals/szerepValasztoModal.css';
+@import './components/modals/hozzajarulokModal.css';
+@import './components/modals/ertekEloszlasModal.css';
+@import './components/modals/kuszobErtekMezok.css';
+@import './components/modals/tudatpontModal.css';
+@import './components/modals/reszletekModal.css';
+@import './components/modals/ertekJavaslatModal.css';
+
+/* ⭐ A JAVASLAT-MODAL és az entitás-kereső mező (5.8) — a prototípusból, változatlanul. */
+@import './components/entitasKeresoMezo.css';
+@import './components/modals/javaslatModal.css';
+
+/* ⭐ D101 (a maradék modálok, 5.8) — a prototípusból, változatlanul. */
+@import './components/modals/tudatpontokModal.css';
+@import './components/modals/kategoriaModal.css';
+@import './components/modals/gondolatTipusModal.css';
+@import './components/modals/rendezesModal.css';
+@import './components/modals/strukturaModal.css';
+@import './components/modals/sikidomModal.css';
+@import './components/modals/keresesModal.css';
+@import './components/modals/ertesitesiBeallitasModal.css';
+@import './components/modals/ertesitesekModal.css';
+/* ⭐⭐ D122 — a „Meghívóim” ablak, a prototípusból, változatlanul (a koinós többlet a `koinoMeghivas.css`-ben). */
+@import './components/modals/meghivoModal.css';
+/* ⭐⭐ D122 — a profil-űrlap a regisztrációs űrlap stílusával, a prototípusból, változatlanul. */
+@import './components/regisztracioForm.css';
+
+/* ⭐ AZ ALSÓ SÁV (2026-10-15) — a prototípus főoldalának stílusa, bájtra változatlanul (a sáv, a vissza/előre gombok,
+   az infók). */
+@import './components/foOldal.css';
+
+/* ⚠️ A BELÉPŐ TÉR (5.6) — az EGYETLEN nem örökölt CSS: a prototípusban a „koino" mint
+   fogalom nem létezett, tehát nincs mit átemelni. Csak a meglévő változókra épül. */
+@import './components/koinoKartya.css';
+@import './components/koinoFelderites.css';
+@import './components/koinoKoltozes.css';
+@import './components/koinoVerzio.css';
+@import './components/koinoTorzs.css';
+@import './components/koinoCsatlakozas.css';
+@import './components/koinoMeghivas.css';
+@import './components/koinoBelepes.css';
+
+/* ===== A LAP VÁZA — ami a prototípus főoldalán nem volt =====
+   ⭐ 2026-10-15 óta a fő menü és az infók a prototípus alsó sávjában ülnek (`foOldal.css`); a felső fejléc megszűnt.
+   Ami itt maradt: a tér sávja, az állapot-sor és a „További kártyák”. */
+
+.koino-sav {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+  padding: 0 1rem .75rem;
+}
+
+.koino-sav label { font-size: .85rem; opacity: .8; }
+
+.allapot {
+  padding: .25rem 1rem .75rem;
+  font-size: .85rem;
+  opacity: .75;
+}
+
+.allapot.nem { color: #c1121f; opacity: 1; }
+
+.tovabb-sav { padding: 1rem; text-align: center; }
+
+/* ⭐ Az alsó sáv fix: ami a lap alján áll, ne csússzon alá (a pakli-wrapper ezt maga is megteszi — a prototípusé). */
+#ter,
+.tovabb-sav:has(> button:not([hidden])) {
+  /* ⭐ (2026-10-23) a sáv valódi magassága (`alsoSav.js` — telefonon több sorba törik) */
+  padding-bottom: calc(var(--koino-also-sav, 4rem) + var(--space-4));
+}

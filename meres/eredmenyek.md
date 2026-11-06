@@ -1,0 +1,5552 @@
+# Képesség-mérés — a Szakasz 1 tervezése előtt
+
+*Mérve: 2026-08-26. Eszköz: [`kepessegProba.html`](kepessegProba.html) (eldobható mérőoldal).*
+
+> **Miért mértünk tervezés előtt?** Mert négy tervezési döntés múlt rajta, és a projekt
+> visszatérő tanulsága, hogy az ilyet nem saccoljuk meg.
+
+## A mérés eredménye (Chrome 148 alapú böngésző, Windows, 8 mag)
+
+### 1. Aláírás — a kulcs-réteg alapja (D15)
+
+| Mit | Eredmény | Miért számít |
+|---|---|---|
+| **Ed25519 a WebCryptóban** | ✅ **TÁMOGATOTT natívan** | **nem kell külső kripto-könyvtár** |
+| Aláírás | **0,031 ms** (~32 800/mp) | a mindennapi művelet ára gyakorlatilag nulla |
+| Ellenőrzés | **0,058 ms** (~17 200/mp) | ez a fontos: minden esemény ellenőrzendő |
+| **10 000 esemény ellenőrzése** | **0,58 mp** | a **D17 determinisztikus újraszámítása gyakorlatban is megy** |
+| Nyilvános kulcs | **32 bájt** | a D21 „mindenki tárolja a saját lapját, ~1 KB" számítása **tartható** |
+| Aláírás mérete | **64 bájt** | |
+| SHA-256 (1 KB) | 0,005 ms | a Merkle-fához (Szakasz 4) bőven elég |
+| *ECDSA P-256 (tartalék)* | *támogatott, de lassabb (0,12 ms) és nagyobb kulcs (65 bájt)* | **nem kell** |
+
+### 2. Tárolás — a helyi tár
+
+| Mit | Eredmény |
+|---|---|
+| IndexedDB | ✅ működik (írás + visszaolvasás) |
+| Becsült kvóta | **2,48 GB** |
+| Tartós tárolás (`persist`) | ⚠️ **nincs bekapcsolva** — kérni kell |
+
+### 3. Hálózat — előretekintés a Szakasz 2-re
+
+| Mit | Eredmény |
+|---|---|
+| WebRTC (`RTCPeerConnection`) | ✅ elérhető |
+| Adatcsatorna (`DataChannel`) | ✅ létrehozható |
+| WebSocket (jelzéshez) | ✅ elérhető |
+
+## Amit ez a Szakasz 1 tervére jelent
+
+1. **Nulla külső függőség a kriptográfiához.** Az Ed25519 natív — se npm-csomag, se
+   ellátási-lánc kockázat, se letöltendő könyvtár. Egy P2P programnál, aminek a lényege,
+   hogy **nem kell megbízni senkiben**, ez több, mint kényelem.
+2. **A determinisztikus állapotszámítás (D17) reális.** Egy koino teljes története
+   újraszámolható másodpercek alatt: 10 000 aláírt esemény ellenőrzése **fél másodperc**.
+   *(A prototípus dev adatbázisában ~15 600 tudatpont-hozzárendelés van — nagyságrendileg
+   ez az a méret, amiről beszélünk.)*
+3. **A tár bőven elég** a tartalmi réteghez (2,5 GB).
+4. ⚠️ **A kulcs elveszhet — és ez nem elméleti.** A böngésző alapból **kiürítheti** a tárat
+   (a tartós tárolás nincs bekapcsolva). Ebből két kötelező elem következik a Szakasz 1-be:
+   - `navigator.storage.persist()` kérése **rögtön a kulcs létrehozásakor**;
+   - a kulcs **kimenthetősége** (és a D15 több-tanús helyreállítása így nem
+     „ritka határeset", hanem a mindennapi működés része).
+
+## Amit még meg kell mérni
+
+- **MOBIL böngésző** (különösen iOS/Safari): az Ed25519-támogatás és a tárolási kvóta ott
+  szűkebb lehet. A mérőoldal ugyanaz — csak el kell érni a telefonról.
+- ✅ ~~**Nagyobb adathalmaz**~~ — **MEGMÉRVE 2026-08-31**, lásd a következő szakaszt.
+
+---
+
+# SKÁLA-MÉRÉS — az S1 lépés (2026-08-31)
+
+*Eszköz: [`skalaMeres.js`](skalaMeres.js) · Node v22.16.0 · win32 · `--expose-gc`*
+
+> **Miért mértünk tervezés előtt (megint)?** Mert a [skálázási terv](../../docs/skalazas_terv.md)
+> három falat nevez meg, és **csak kettő volt mérve**. A harmadik — hogy a globális lenyomat
+> megtakarítása mérettel elpárolog — **számítás** volt. A projekt visszatérő tanulsága, hogy
+> az ilyet nem saccoljuk meg.
+
+**A szintetikus tár valódi:** valódi Ed25519 kulcsok, valódi aláírások, valódi kanonikus
+alak, valódi lánc, betartott tudatpont-keret (**a kivételek száma minden méretnél 0** —
+tehát valódi terhelést mérünk, nem egy szűrő sebességét). ⚠️ **Feltevés benne:** az
+esemény-keverék (60% tudatpont · 25% gondolat · 10% szavazat · 5% javaslat/érték) és a
+200 esemény/fő. Ha a valódi használat más, ezt kell először átírni.
+
+## Az eredmény *(a skála-mérésé — az ébredés-mérés lentebb)*
+
+| esemény | e-ember | fájl | **B/esemény** | betöltés | `allapotSzamitasa` | heap | **ÁLLÁS B/fő** | **1 kör ára** | ebből hasznos | **1 mentés** |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 000 | 5 | 469 KB | 480 | 5 ms | 9 ms | 0,9 MB | 170 | 2,6 KB | 20,05% | 6,4 ms |
+| 10 000 | 50 | 4,6 MB | 478 | 40 ms | 84 ms | 7,4 MB | 164 | 16,8 KB | 2,56% | 42 ms |
+| 20 000 | 100 | — | 478 | — | 280 ms | — | — | 32,7 KB | — | 103 ms |
+| 40 000 | 200 | — | 478 | — | 1 166 ms | — | — | 64,6 KB | — | 178 ms |
+| 60 000 | 300 | — | 477 | — | 1 770 ms | — | — | 96,4 KB | — | 263 ms |
+| **100 000** | **500** | **45,4 MB** | **476** | **595 ms** | **4 615 ms** | **72,5 MB** | **163** | **160,1 KB** | **0,27%** | **495 ms** |
+
+## Négy megállapítás
+
+### 1. ✅ A terv „C" állítása IGAZOLVA — a globális lenyomat nem ment meg
+
+A lenyomat **egyik méretnél sem egyezett**, tehát minden kör visszaesett a részletes
+ÁLLÁS-ra. És a kör ára **egyenesen arányos a koino méretével**:
+
+| | 1 000 | 10 000 | 100 000 |
+|---|---|---|---|
+| egy kör ára **egyetlen** eltérő eseményért | 2,6 KB | 16,8 KB | **160,1 KB** |
+| ebből hasznos adat | 20,05% | 2,56% | **0,27%** |
+| egy hasznos bájtra jutó forgalom | 5 B | 39 B | **372 B** |
+
+> ⭐ **Ez volt eddig számítás; most mérés.** A D35 megtakarítása kis közösségi hatás:
+> 100 000 eseménynél **372 bájt forgalom megy egyetlen hasznos bájtért**.
+
+### 2. ⭐⭐ A LEGKORÁBBI FAL NEM A TÁROLÁS, HANEM A BEÍRÁS — és ez nem volt a tervben
+
+Az `esemenyMentese` minden mentésnél végigolvassa és -elemzi az **egész** fájlt
+(`tar.betolt()`), a `lancVege` pedig még egyszer. Nincs gyorsítótár. Ezért **egy mentés ára
+a tár méretével nő** — és N esemény beírása **négyzetes**:
+
+| tár mérete | egy mentés | N esemény beírása ezen az úton |
+|---|---|---|
+| 1 000 | 6,4 ms | 3 mp |
+| 10 000 | 42 ms | 3,5 perc |
+| 100 000 | **495 ms** | **~6,9 óra** |
+
+> ⚠️ **Fél másodperc EGY esemény elmentése egy 100 000 eseményes koinóban** — és egy csere
+> több eseményt hoz. Ez **jóval a 43,5 GB-os tárolási fal ELŐTT** teszi használhatatlanná a
+> koinót. **A terv rossz falat nevezett meg elsőnek.**
+
+### 3. ⭐ ÚJ LELET: az `allapotSzamitasa` is négyzetes — de ez KÜLÖNÁLLÓ, JAVÍTHATÓ hiba
+
+Nem a skálázási szerkezetből következik, hanem egy konkrét függvényből:
+[`agMeretSzamitasa`](../js/allapot/allapotSzamitas.js:416) **minden entitásnál végigmegy az
+összes entitáson**, rekurzívan — 7 767 entitásnál ez ~60 millió lépés.
+
+| | 1 000 | 10 000 | 40 000 | 100 000 |
+|---|---|---|---|---|
+| `allapotSzamitasa` | 9 ms | 84 ms | 1 166 ms | **4 615 ms** |
+
+**A javítás szokásos és olcsó:** egyszer felépíteni egy „szülő → gyerekek" mutatót (O(n)),
+és egy utó-bejárással kiszámolni az összes ág-méretet (O(n)). ⚠️ **Felírva, még nincs
+megcsinálva.**
+
+### 4. ✅ A terv becsült számai tartják magukat
+
+| Amit a terv becsült | Amit a mérés ad |
+|---|---|
+| 435 B / esemény *(9 valódi eseményből)* | **476–480 B** — a terv **alábecsülte**, +10% |
+| 162 B / e-ember az ÁLLÁS-ban *(50 fővel)* | **163 B** 500 fővel — ⭐ **kiválóan tartja** |
+
+## Amit ez a tervre jelent
+
+> ⛔ **ELŐBB EGY KORLÁT, AMI A MÉRÉS ÉRTELMEZÉSÉRE VONATKOZIK** (Csaba, 2026-08-31).
+> A mérés után kézenfekvőnek látszott a következtetés: *„javítsuk a két rövidítést, indítsuk
+> az első koinót a mai szerkezettel, és cseréljük később."* **Ez nem járható** — a D21/D22
+> már kizárta: *„az első kiadás is milliárdra képes program, csak kevesebb emberrel"*, és
+> *„a szeletelés nem »később, ha a méret kikényszeríti«"*.
+> ⭐ **Tehát az alábbi javítások KARBANTARTÁSOK, nem mérföldkövek.** Részletek:
+> [`skalazas_terv.md`](../../docs/skalazas_terv.md) **0. szakasz**.
+
+1. **A lépés-sorrend változik** — de nem a javítások felé, hanem az **illesztés** felé. A
+   mérés legfontosabb szerkezeti tanulsága ugyanis nem a lassúság, hanem hogy a tár-illesztő
+   **`betolt()`** művelete az **összes** eseményt adja vissza: akármilyen tárolót teszünk
+   mögé, a felület kényszeríti a teljes betöltést. ⚠️ **A gyorsítótár ezt nem javítja meg —
+   csak gyorsabbá teszi a rossz kérdést.**
+2. **A 100 000 esemény nem sok.** 500 e-ember, 200 esemény fejenként — ez egy **falu vagy egy
+   iskola**, nem egy ország. A fal tehát nem „valamikor a milliárd felé", hanem **belátható
+   közelségben** van.
+3. **A 2. és 3. lelet külön kezelendő:** a 3. egy mai hiba, ami a mai koinóban is javítható,
+   a szeletelés kivárása nélkül.
+
+---
+
+# A 3.2 UTÁN — a két fal ledőlt (2026-09-03)
+
+*Ugyanaz a mérő, ugyanazok a méretek, a **kérdezhető tár-illesztő** és a javított
+**ág-méret** után. ⚠️ Az esemény közben nagyobb lett (478 → 611 B a 3.1 négy új mezőjétől),
+tehát ez az összevetés még **konzervatív** is.*
+
+| | 10 000 | 25 000 | 50 000 | 100 000 |
+|---|---|---|---|---|
+| `allapotSzamitasa` **előtte** | 84 ms | — | — | **4 615 ms** |
+| `allapotSzamitasa` **utána** | **45 ms** | 114 ms | 261 ms | **502 ms** |
+| `esemenyMentese` (1 db) **előtte** | 42 ms | — | — | **495 ms** |
+| `esemenyMentese` (1 db) **utána** | **2,1 ms** | 1,1 ms | 1,0 ms | **1,4 ms** |
+| tár megnyitása *(új tétel)* | 54 ms | 164 ms | 329 ms | 859 ms |
+
+## ⭐⭐ Amit ez mond
+
+**A görbe alakja változott meg, nem csak a szám.**
+
+- **`allapotSzamitasa`:** tízszeres adatra **tizenegyszeres idő** — lineáris. Korábban
+  ugyanez **ötvenötszörös** volt. *(Az ok egy közönséges hiba volt egy közönséges
+  függvényben: az `agMeretSzamitasa` entitásonként végigment az összes entitáson. Az új,
+  levelektől felfelé összegző változat egy menetben dolgozik — és mellesleg egy rejtett
+  veszélyt is megszüntet: egy körbe mutató szülő-lánc a régi, rekurzív változatot végtelen
+  rekurzióba vitte volna.)*
+- **`esemenyMentese`: LAPOS.** 2,1 → 1,1 → 1,0 → 1,4 ms — **nem nő a tár méretével.**
+  Vagyis a beírás **már nem négyzetes**: ami 100 000 eseménynél ~6,9 óra lett volna, az most
+  ~2 perc. *(Az ok: a mentés eddig `tar.betolt()`-tel kereste a kettősséget és az
+  elágazást; most azonosító és lánc-pont szerint kérdez, ami O(1).)*
+
+⚠️ **És egy tétel, ami nem tűnt el, csak áthelyeződött: a tár megnyitása.** A mutatót
+megnyitáskor építjük fel, tehát a fájl beolvasása oda került. **Futásonként egyszer**
+történik, nem műveletenként — de becsületesen külön mérjük, mert enélkül a „betöltés
+595 → 13 ms" javulás félrevezető lenne.
+
+⭐ **A következő mélység** (ha egyszer kell): lemezre írt index, hogy a megnyitás se
+olvassa végig a fájlt. **A hívók változtatása nélkül** cserélhető — pontosan ezért volt
+fontos, hogy a 3.2 az *illesztést* rendezte, ne csak a sebességet.
+
+---
+
+# ÉBREDÉS-MÉRÉS — a „buli" ablaka (2026-09-03)
+
+*Eszköz: [`ebredesProba.js`](ebredesProba.js) `fut` üzemmód · Android telefon, Termux, Node ·
+azonos wifi, a laptop `figyel`-t futtat.*
+
+> **Miért ez volt a legsürgősebb ismeretlen?** Mert az összehangolt ablak (buli) terve azon
+> áll, hogy a készülékek egyszerre ébrednek — és ⚠️ az Android „Doze" módja **kötegeli** az
+> ébresztéseket, felfüggeszti az alkalmazásokat, és meg is ölheti a folyamatot. Erről nem
+> szabad emlékezetből dönteni.
+
+## Az eredmény
+
+| szünet | ébredés csúszása | csere | idő |
+|---|---|---|---|
+| 1 perc | **0 mp** | 1/3 társ · 610 B | 149 ms |
+| 5 perc | **0 mp** | 1/3 társ · 610 B | 554 ms |
+| **60 perc** | **0 mp** | 1/3 társ · 610 B | 339 ms |
+| ~~240 perc~~ | ⚠️ **ÉRVÉNYTELEN** | *a mérés közben megnyitottuk a Termuxot* | |
+
+⚠️ **A négyórás lépés elromlott, és ezt jelöljük, nem hallgatjuk el.** A mérés közben a
+Termuxot megnyitottuk (az előző kimenet kimásolásához), amitől a rendszer **aktívnak vette
+a folyamatot** — így az eredmény nem arról szólna, amiről akartuk. **A négyórás alvás
+kérdése tehát NYITVA MARADT.**
+
+⭐ **De az egyórás lépés önmagában is elég ahhoz, hogy a munka folytatódjon** (Csaba
+döntése): ötperces ablaknál a kérdés úgyis az, hogy öt percet bír-e — és bír egy órát is.
+
+*(A 3-ból 1 társ azért, mert kettő IPv6-cím, amire ezen a wifin nincs útvonal — `ENETUNREACH`,
+azonnali, nem lassít. ⭐ Mellékesen ez is mérés: **egy elérhetetlen társ nem dönti el a
+kört**, ahogy a D33 kívánja.)*
+
+## ⭐ Amit ez jelent
+
+**Egy óra alvás után NULLA másodperc csúszás, és a csere azonnal ment.** Ez három dolgot mond:
+
+1. **A Doze nem ütemezte át az ébredést** — sem öt percnél, sem egy óránál.
+2. **A wifi rádió visszatért**, és a koino ébredés után **azonnal tudott dolgozni** (339 ms).
+3. **A folyamat túlélt** több mint egy órát.
+
+⭐ **Az ötperces ablak ára is kijött:** egy csendes kör **610 bájt**, tehát 288 kör naponta
+≈ **176 KB/nap**. Elhanyagolható — a befogadási aggály (D35) a csendes esetre **nem áll**.
+
+## ⚠️ Amit ez NEM bizonyít — és ezt ki kell mondani
+
+**A Termux valószínűleg tartós értesítést és részleges ébrentartót használ**, amíg fut benne
+egy munkamenet. Vagyis lehet, hogy nem „egy háttérben alvó alkalmazást" mértünk, hanem egy
+**előtér-szolgáltatást**.
+
+⭐ **Ez a koino szempontjából nem baj, hanem TERVEZÉSI KÖVETKEZTETÉS:** az androidos koino is
+így fog futni — **előtér-szolgáltatásként, látható értesítéssel**. Ilyen feltételek mellett az
+ötperces ablak **tartható**. ⚠️ De az eredmény **nem általánosítható** egy szokásos,
+háttérben alvó alkalmazásra.
+
+**További korlátok, tisztességből:** egy készülék, egy Android-verzió, egy wifi; a töltés és a
+képernyő állapota nem volt rögzítve (a Doze akkumulátoron agresszívabb); és a **négyórás lépés
+még hátravan** — az „app standby" korlátai hosszabb tétlenség után lépnek életbe.
+
+---
+
+# A HAMIS SZIGET MÉRÉSE — a Szakasz 4 jelzései (D49)
+
+*Mérve: 2026-09-05. Eszköz: [`szigetMeres.js`](szigetMeres.js). Terv:
+[`docs/szakasz4_terv.md`](../../docs/szakasz4_terv.md).*
+
+> **Miért mérünk?** Mert a Szakasz 4 tervezésében három nap alatt KÉT javaslat bukott meg,
+> és mindkettőt a **számolás** buktatta ki, nem a megérzés. A harmadik irány (horgony,
+> táguló kör, jelzések) már túl összetett a fejben-ellenőrzéshez.
+
+## 1. A növekedés — és a megmaradási csapda
+
+1500 valódi ember, 12 alapító egyetlen körben, induló keret 60, `k = 5`, támadó nélkül.
+
+| Szabály | 30. kör | 97. kör | mikor állt meg |
+|---|---|---|---|
+| **A** — puszta darabszám (nincs keret) | 841 | **1499** | nem állt meg |
+| **B** — keret (D44) | 104 | **104** | ⛔ **a 24. körben, véglegesen** |
+
+⛔ **A „B" nem lassult, hanem elfogyott.** Az alapítók 720 egységnyi kerete: 720 → 474 →
+239 → 138 → 83 → … → **0**. Amikor nulla, senki nem tud tanúsítani, tehát senki nem tud
+belépni — soha többé. **Ez a megmaradási bizonyítás futás közben** (szakasz4_terv 5.1).
+
+⭐ **És hova ment a keret?** Megszámolva: **79%-a olyanokra, akik MÁR tagok** (elismerés),
+és csak **21%** olyanra, aki még kívül van (támogatás). Egy 12 fős találkozón a tagok
+132-szer tanúsítják egymást, és csak 36-szor a három vendéget. **Ez adja a súlyát az
+elismerés/támogatás szétválasztásnak** (Csaba, 2026-09-04).
+
+## 2. ⛔ A horgony-kör nem tágul egyetlen alapítói klikkből
+
+A horgony-feltétel `m` olyan horgony-tanút kér, akik **egymást nem ismerik**. Egy klikkben
+mindenki ismer mindenkit → **az egész alapítás egyetlen független csoportnak számít** →
+soha senki nem válik horgonnyá. Mérve: a horgonyok száma 30 körön át **végig 12**.
+*(Nyitott kérdés: AK16.)*
+
+## 3. ⭐⭐ A JELZÉSEK — és a legfontosabb eredmény
+
+Leggyengébb szabály (A), 8 megtévesztett ember, 30 kör → **843 valódi tag, 880 bejutott
+hamis azonosság**. Ez a D49 helyzete: a minimum szándékosan alacsony, a hamisak bejutnak —
+a kérdés, hogy **látszanak-e**.
+
+| Jelzés | valódi átlag | hamis átlag |
+|---|---|---|
+| hányan tanúsították | 82 | **447** |
+| hány FÜGGETLEN körből | 5,44 | 4 |
+| tanúk összefonódása | 0,53 | **0,99** |
+| tanúk megállapodottsága | 94 | **225** |
+
+⭐ **A sziget nem attól látszik, hogy szegény, hanem hogy TÚL GAZDAG.**
+
+### És a döntő szám: kit kapna el, és kit jelölne meg tévesen?
+
+| Jelzés | legjobb küszöb | hamis elkapva | ⚠️ becsületes tévesen |
+|---|---|---|---|
+| hányan tanúsították | ≥ 184 | 80% | **0%** |
+| tanúk összefonódása | ≥ 0,83 | **99%** | 7% |
+| tanúk megállapodottsága | ≥ 142 | 69% | **0%** |
+| ⛔ kevés független kör | ≤ 4 | 100% | ⛔ **31%** |
+
+⛔ **AZ ÖSZTÖNÖS JELZÉS A LEGROSSZABB.** A *„kevés kapcsolata van, tehát gyanús"* a
+becsületes tagok **harmadát** is megjelölné — és az eloszlásból látszik, kiket: **56
+valódi embernek egyetlen köre van, 53-nak kettő, 66-nak három; hamisnak egynek sem.**
+Ezek a frissen érkezettek, az egy társaságban élők, a magányosak — **pontosan azok,
+akikért a befogadás-gondolat szól** (D49/c).
+
+> ⭐⭐ **A jó jelzés nem azt kérdezi, „elég beágyazott-e", hanem azt, hogy „nem túl sok-e,
+> túl egyforma-e".**
+
+### Egy negyedik jelzés, amit nem is terveztünk
+
+**Mind a 880 hamis azonosságnál pontosan 4 a független körök száma**, míg a valódiaknál
+1-től 5+-ig szóródik. **880 egyforma érték nem természetes eloszlás** — a valódi emberek
+szórnak, a gyár bélyegez. ⭐ És ez a koinóról szóló **összesített** jelzés, nem egy
+emberről: épp az, amit a D49/c harmadik védőkorlátja kér.
+
+## ⚠️ Amit ez NEM bizonyít
+
+**Ez EGY támadó, és ostoba.** Mindent túlteljesít: tömegesen tanúsít, mindenkit
+mindenkivel összeköt. Aki tudja, hogy nézzük, az **visszafogja magát** — tíz tanúsítás
+hamisanként, szórt értékek, kevés összefonódás. ⛔ **Ha a jelzés csak a hangosat fogja meg,
+akkor a csendest hitelesítjük vele.** A következő mérés egy **óvatos támadó** legyen.
+
+**További korlátok, tisztességből:** egy véletlen-mag; a „földrajz" egy kör, a találkozók
+szabályos méretűek; és a modellben nincs kulcs, aláírás, esemény és hálózat — ez
+**gráf-kísérlet, nem koino-kísérlet**.
+
+## 4. ⭐⭐ AZ ÓVATOS TÁMADÓ — és a szorítás két jelzés között
+
+*Ugyanaz a világ, de a támadó tudja, hogy nézzük a jelzéseket: pontosan `k` tanúsítást
+szerez azonosságonként, véletlenszerű tanúktól, és a hamisak nem tanúsítják tömegesen
+egymást.*
+
+**Ugyanúgy 880 hamis azonosság jutott be** — a szabály nem állította meg. **De a jelzések
+elkapták, csak az ELLENKEZŐ irányból:**
+
+| Jelzés | hangos támadó | óvatos támadó |
+|---|---|---|
+| hányan tanúsították | ≥ 184 → 80% / 0% téves | **≤ 5 → 100% / 1% téves** |
+| tanúk összefonódása | ≥ 0,83 → 99% / 7% téves | **≤ 0,3 → 98% / 0% téves** |
+| tanúk megállapodottsága | ≥ 142 → 69% / 0% téves | **≤ 37 → 100% / 1% téves** |
+| ⛔ kevés független kör | ≤ 4 → 100% / **31% téves** | ≤ 5 → 100% / **41% téves** |
+
+> ⭐⭐ **A TÁMADÓ NEM TUD EGYSZERRE MINDKETTŐ LENNI.** Ha keveset tanúsít, feltűnik, hogy
+> az azonosságait **pontosan `k`-an** ismerik, és a tanúik maguk is ismeretlenek
+> (megállapodottság **6** a **96** helyett). Ha sokat tanúsít, hogy ezt elfedje, **csak a
+> saját hamisaiból** meríthet — és attól az összefonódás **0,99**-re szalad.
+>
+> **A szorítás abból jön, hogy a megtévesztett emberek száma valóban véges.** Nyolc
+> emberrel nem lehet 880 azonosságot úgy körülvenni, hogy természetesnek látsszon.
+
+⛔ **Az ösztönös jelzés KÉTSZER bukott meg.** A *„kevés kapcsolata van, gyanús"* a hangos
+támadónál 31%, az óvatosnál **41%** becsületes tagot jelölne meg tévesen.
+
+## 5. Két mérés, ami NEM sikerült — és ezt is fel kell írni
+
+**A torlódás-jelzés megbukott.** *„A 8 legtöbbet tanúsító ember részesedése az összes
+tanúsításból":* támadó nélkül **2%**, támadóval is **2%**. Oka: a támadó a **saját
+hamisait is használja tanúnak**, és ezzel felhígítja a megtévesztettek súlyát. Megépítve,
+megmérve, nem működik.
+
+**És egy hamis siker, amit majdnem elhittünk.** Az óvatos támadó első változata azt kapta
+feladatul, hogy a tanúi **egyáltalán ne ismerjék egymást** — ettől nem tudott összeszedni
+`k`-t, és **0 hamis jutott be**. Ez nem védelem volt, hanem rossz támadó: egy valódi ember
+tanúi **53%-ban** ismerik egymást, tehát a nulla összefonódás **feltűnőbb** lenne, nem
+kevésbé. ⚠️ *Az óvatos támadó nem a függetlenséget maximalizálja, hanem átlagosnak látszik.*
+
+## 6. ⚠️ A KÖVETKEZŐ TÁMADÓ FOG DÖNTENI
+
+Az óvatos azért lepleződött le, mert az azonosságai **túl csupaszok** voltak. De semmi nem
+akadályozza meg abban, hogy **egy egész hamis társadalmat építsen**: a 880 azonosságot
+egymással is realisztikusan összekösse, klikkekbe rendezze, átlagosan 80 tanúsítást adjon
+mindegyiknek. **Ez mind ingyen van neki, hiszen mind az övé.**
+
+Akkor **mind a négy személyes jelzés normálisnak látszana** — és egyetlen dolog maradna,
+ami elárulja: **hogy ez az egész társadalom mindössze nyolc élen lóg a valódi világon.**
+
+⭐ Vagyis a **szerkezet** — ugyanaz a következtetés, mint a szakasz4_terv 5.1/c-ben, csak a
+másik irányból. Ha az „alapos" támadó átmegy a jelzéseken, akkor a jelzések önmagukban nem
+elegendők, és a **horgony visszakerül a középpontba**.
+
+## 7. ⛔⛔ AZ ALAPOS TÁMADÓ — a jelzések összeomlanak, és a horgony-kört elfoglalja
+
+*A harmadik támadó egész hamis TÁRSADALMAT épít: a szigeten belül is „találkozókat tart",
+helyi csoportokban, ugyanolyan alakúra, mint a valódi világ. Ez ingyen van neki, hiszen
+minden azonosság az övé.*
+
+### A személyes jelzések elvesztették az erejüket
+
+| Jelzés | valódi | hamis | legjobb küszöbbel |
+|---|---|---|---|
+| hányan tanúsították | 84,1 | 65,2 | 65% hamis / ⛔ **45% becsületes tévesen** |
+| hány független körből | 5,4 | **7,5** | 48% / 17% — ⚠️ a hamisaknak TÖBB van |
+| tanúk összefonódása | 0,53 | 0,36 | 66% / 10% |
+| tanúk megállapodottsága | 96,0 | 87,1 | 94% / ⛔ **75% becsületes tévesen** |
+
+⛔ **Egyik sem használható.** Az eloszlások átfednek; nincs olyan küszöb, ami a szigetet
+elkapja anélkül, hogy a becsületes tagok jelentős részét is megjelölné.
+
+### ⛔⛔ És a horgony-kört a támadó ELFOGLALJA
+
+| Támadó | valódi horgony | **hamis horgony** |
+|---|---|---|
+| hangos | 20 | ⛔ **880** |
+| óvatos | 20 | 6 |
+| alapos | 20 | ⛔ **880** |
+
+**Két külön baj, és mindkettő végzetes:**
+
+1. **A valódi horgony-kör NEM NŐTT — végig 20 maradt**, vagyis pontosan az alapítók,
+   négy különálló alapítói kör mellett is. Egyetlen becsületes ember sem vált horgonnyá 30
+   kör alatt: a helyi találkozókon **sosem kerül össze három ember három egymást nem ismerő
+   körből**. A hétköznapi ember a saját környékén találkozik.
+2. **A hamisak viszont MIND horgonnyá váltak.** A támadó **célzottan** választ: keres négy
+   alapítót négy különböző körből, akik egymást nem ismerik, megtéveszti őket — és onnantól
+   minden azonossága teljesíti a „három független horgony-tanú" feltételt. A hamis
+   horgonyok pedig újabb hamis horgonyokat szülnek.
+
+> ⛔⭐ **A SZABÁLY PONTOSAN FORDÍTVA MŰKÖDIK, MINT AHOGY TERVEZTÜK: nehéz a becsületesnek
+> és könnyű a támadónak.**
+>
+> Az ok mély, és túlmutat ezen a szabályon: a *„több, egymást nem ismerő körből ismerjenek"*
+> követelmény azt jutalmazza, aki **tudatosan hálózatot épít** — és a támadó a világ
+> legtudatosabb hálózatépítője. A hétköznapi ember nem stratégiázik, csak él a maga körében.
+
+⚠️ **És ezzel a szerkezeti jelzés is értelmét vesztette:** a „hány külön út vezet a
+horgonyoktól idáig" mérés a hamisaknál 30-at adott (a korlátot), a valódiaknál 11,1-et —
+de nem azért, mert a hamisak jobban kötődnek a valódi világhoz, hanem mert **a horgonyok
+nagy része már ők maguk voltak.** A sziget önmagához képest mérte a távolságot.
+
+### ⚠️ Két saját mérési hiba, felírva
+
+- **Először 8-as korláttal mértem** a diszjunkt utakat — épp annyival, ahány megtévesztett
+  ember volt. Így „nincs különbség" jött ki, holott a korlát rejtette el.
+- **A `hamisHorgony` oszlop végig ott volt a mérőeszközben**, a saját figyelmeztetésemmel
+  együtt (*„ha igen, a mérce elveszett"*) — de a jelzés-módban nem írattam ki, ezért három
+  mérésen át nem vettem észre.
+
+## 8. HOL TARTUNK A MÉRÉS UTÁN
+
+- ✅ **A keret-szabály (D44) áll**: a friss belépő kerete nulla, tehát a sziget nem
+  hitelesíti önmagát azonnal.
+- ⛔ **A gazdaság önmagában nem véd** (5.1/c) — mérve is.
+- ⛔ **A személyes jelzések egy alapos támadó ellen nem védenek** — és az ösztönös
+  („kevés kapcsolata van") háromszor mérve a legrosszabb: 31%, 41%, 45% téves megjelölés.
+- ⛔ **A horgony-szabály ebben az alakjában elbukott**: a becsületesnek nehéz, a támadónak
+  könnyű, és a kört elfoglalja.
+
+▶️ **Amit ez nem dönt le:** a **D49** iránya (feltárás tiltás helyett) áll — de kiderült,
+hogy **amit feltárunk, azt még nem találtuk meg.** A jelzés nem lehet sem személyes
+statisztika, sem a mai horgony-távolság.
+
+## 9. ⭐⭐⭐ A BEMUTATKOZÁSOK TENGERE — és a satu bezárul
+
+*Csaba ötlete, 2026-09-05: „bemutatkozás jelöléseket intéznek egymás felé, amit mérünk. A
+nem létező e-emberek mindig szigeteket alkotnak, a létező e-emberek pedig beolvadnak a
+bemutatkozások tengerébe."*
+
+### Miért más ez, mint minden eddigi
+
+Minden korábbi jelzés **egy kitüntetett ponthoz** mért („milyen messze vagy a
+horgonyoktól") — és a támadó ezt úgy verte meg, hogy **elfoglalta a horgonyokat**, vagyis
+magát a mérőoszlopot. Ez nem ponthoz mér, hanem a **tengerhez**; azt nem lehet elfoglalni,
+mert nincs benne kitüntetett hely.
+
+⭐⭐ **És ami ezt lehetővé tette: ez a mérés SZUBJEKTÍV** („tőlem nézve"). Ilyet két nappal
+korábban elvetettünk, mert készülékenként más eredményt ad. De az akkor volt igaz, amikor a
+mérés **döntött**. A **D49** óta nem dönt, csak megmutat — **egy jelzés lehet szubjektív.**
+*(Vagyis a D49 nyitotta ki az ajtót e mérés előtt; ezt előre nem lehetett látni.)*
+
+**A mérés:** én elindulok véletlen sétákkal a saját kapcsolataim mentén, te a tieid mentén
+— **találkozunk-e valahol?** (200 séta, 10 lépés, irányítatlan gráf, 5 kérdező.)
+
+### Az eredmény, támadónként és a megtévesztettek száma szerint
+
+*„hamis elkapva / becsületes tévesen megjelölve", `k = 5`, 1500 fős világ.*
+
+| megtévesztett | hangos | óvatos | **alapos** |
+|---|---|---|---|
+| 5 | 100% / 0% | 100% / 0% | **100% / 0%** |
+| 8 | 100% / 0% | 100% / 0% | **100% / 0%** |
+| 20 | 77% / 36% | 97% / 6% | **100% / 0%** |
+| 60 | 5% / 2% | 93% / 16% | **100% / 0%** |
+| 150 | értelmetlen | 92% / 45% | **100% / 0%** |
+
+⭐⭐ **Minél ALAPOSABB a támadó, annál jobban működik a jelzés.** Aki minden más jelzést
+átugrott, azt ez fogja meg a legtisztábban, **még 150 megtévesztett emberrel is**: minél
+sűrűbb belül a hamis társadalom, annál kisebb az esély, hogy egy séta épp a kifelé vezető
+kevés élre lép.
+
+### ⭐⭐⭐ ÉS EZZEL A SATU BEZÁRUL
+
+A két jelzés-család **pontosan egymás hiányát fedi le**:
+
+- **A személyes statisztika** a *ritka* szigetet fogja meg. Az óvatos támadó azonosságait
+  pontosan `k`-an tanúsítják — ez **150 megtévesztett embernél is 100% / 0%**, mert ez a
+  szám nem attól függ, hány embert vett meg.
+- **A tenger-jelzés** a *sűrű* szigetet fogja meg — mert a sűrűség csapdába ejti a sétákat.
+
+> ⭐⭐⭐ **A támadó nem tud egyszerre sűrű és ritka lenni.** Ha élethű társadalmat épít, hogy
+> a statisztikát megverje, azzal bezárja magát a saját tengerébe. Ha ritka marad, hogy a
+> séták kijussanak, akkor az azonosságai csupaszak, és a statisztika elkapja.
+
+## 10. ⚠️ AMIT EZ NEM BIZONYÍT — és egy saját hiba
+
+**A modell világa először ROSSZ volt, és majdnem félrevezetett.** Az első mérés magonként
+0% és 46% közt szórta a téves megjelölést. Az ok nem a jelzés volt, hanem hogy a szimulált
+világ egy **kör**, ahol mindenki csak a szomszédaival találkozik — abban nincs is tenger,
+csak egy hosszú part, és két becsületes ember a kör átellenes pontjairól sosem ér össze.
+⭐ **10% „távoli találkozó"** (elköltözik valaki, más városban van rokona, utazik) — és az
+ingadozás **eltűnt**: négy különböző maggal egyaránt 100% / 0%.
+
+⚠️ **De ez egyben feltétel is:** a jelzés azon áll, hogy a valódi társas háló **„kis világ"**
+— van benne néhány távoli él. Egy **teljesen elszigetelt** közösségnél (falu, ahonnan senki
+nem jár ki) a jelzés gyengébb lenne. Ezt külön mérni kell.
+
+**További korlátok, tisztességből:**
+
+- ez **gráf-kísérlet, nem koino-kísérlet**: nincs benne kulcs, aláírás, esemény, hálózat;
+- a **bemutatkozás** még nincs külön modellezve — a meglévő tanúsítási gráfon mértünk. Egy
+  sűrűbb, olcsóbb bemutatkozás-réteg **elvileg csak erősítené**, de ez feltevés, nem mérés;
+- a séta paraméterei (200 séta, 10 lépés) **első választás**, nincsenek hangolva;
+- **150 megtévesztett ember** ~19%-a a közösségnek — ott már nem Sybil-támadásról van szó,
+  hanem elfoglalt közösségről, és minden szám elveszti az értelmét.
+
+⭐ **Amit viszont megad, és eddig semmi nem adott meg:** a számítás **helyi és korlátos**
+(400 séta × 10 lépés ≈ 4000 lépés, a közösség méretétől függetlenül), tehát **átmegy a
+9. szabályon** — nem kíván élő lekérdezést és nem kíván globális számot.
+
+---
+
+# 11. ⭐⭐ A MEGHÍVÁSOS BELÉPÉS MÉRÉSE — védelem ÉS ár (2026-09-06)
+
+*Eszköz: [`meghivasMeres.js`](meghivasMeres.js). Csaba kérése: „mi mekkora védelmet, és
+mekkora árat követel." A 2026-09-06-i beszélgetés hat változatát méri, **ugyanabban a
+világban**, tehát a számok összevethetők.*
+
+> ⚠️ **Ez más világ, mint a 3–10. szakaszé.** Ott a tanúsítás volt az egyetlen él. Itt
+> **két külön él** van: a **bemutatkozás** (kölcsönös, ingyenes, sok, HELYI — ezen fut a
+> séta) és a **meghívás** (irányított, kevés, LÁNC-esemény — ez dönt a tagságról).
+> A régi mérések ezért érvényben maradnak, nem cserélik le egymást.
+
+**A világ:** 1500 valódi ember egy körön · 20 alapító · 30 kör · 10% távoli találkozó ·
+4 mag átlagolva. A támadó a 8. körtől körönként 40 hamis azonosságot próbál bevinni, és a
+legtöbb bemutatkozású, teljes körű tagokat téveszti meg.
+
+## 11.1 ⛔ AZ ELSŐ EREDMÉNY: A MEGHÍVÁSI SZÁM NEM VÉDELEM, HANEM ÁRCÉDULA
+
+**3 megtévesztett valódi tag mellett**, korlátlan meghívás-számmal:
+
+| változat | valódi tag | HAMIS BENT | önellátó lett |
+|---|---|---|---|
+| V1 — nyílt (nincs kapu) | 1467 | **880** | a 0. hamistól |
+| V2 — 1 meghívó | 1466 | **880** | az 1. hamistól |
+| V2b — 1 meghívó, jogosítással | 1447 | **880** | soha (mindig kellett valódi) |
+| V3 — 2 meghívó + jogosítás | 1430 | **880** | soha |
+| V4 — 3 meghívó | 1237 | **880** | a 3. hamistól |
+| V5 — 5 meghívó | 693 | **0** | — |
+
+*(880 = a támadó MINDEN próbálkozása sikerült: 22 kör × 40.)*
+
+⭐⭐ **A fal pontosan ott van, ahol a megtévesztettek száma eléri a kívánt meghívó-számot** —
+és ezt külön megmértük: az öt-meghívós szabály **4 megtévesztettnél 0 hamisat** enged be,
+**5-nél 880-at** (és az 5. hamistól önellátó). Nincs átmenet, nincs lejtő: **kapcsoló**.
+
+> ⛔ **Amit ez kimond:** `n` meghívó nem azt jelenti, hogy a támadónak `n`-szer nehezebb.
+> Azt jelenti, hogy **`n` valódi tagot kell megvennie — EGYSZER**, és utána korlátlan. Ez
+> ugyanaz a *„fizess egyszer, arass örökké"* alakzat, ami ellen a D44 keret-szabálya
+> született (4.1) — csak most meghívásokkal.
+
+## 11.2 ⚠️ AZ ÁR — és egy fontos pontosítás a D48-hoz képest
+
+A szigorú kapu nem véd, viszont **fizettetni fizettet**: az öt-meghívós szabálynál 30 kör
+alatt **693 tag** lett az 1467 helyett, és **451 valódi ember maradt kívül**, pedig
+találkozott tagokkal. Az átlagos várakozás **9,7 kör**.
+
+⭐ **DE: ez lassúság, nem befagyás.** 60 körre nyújtva ugyanez **1308 tag** és már csak 94
+kívülálló. ⚠️ **Ez lényeges különbség a D48-hoz képest:** a keretes tanúsítás **104 főnél
+megállt, örökre** (a megmaradási csapda), a meghívásos kapu viszont **nem áll meg, csak
+lassít**. A meghívás tehát nem esik a D48 csapdájába — mert nem elfogyó készlet, hanem
+ismételhető cselekvés.
+
+## 11.3 ⭐⭐ A LEGMEGLEPŐBB: A JOGOSÍTÁS ELREJTI A SZIGETET
+
+A séta-jelzés, **csupasz** hamisak ellen (a hamisak nem mutatkoznak be egymásnak):
+
+| változat | hamis elkapva | becsületes tévesen |
+|---|---|---|
+| V2 — 1 meghívó | **100%** | **0%** |
+| V4 — 3 meghívó | **100%** | **0%** |
+| V2b — 1 meghívó, **jogosítással** | 91% | ⚠️ **16%** |
+| V3 — 2 meghívó + **jogosítás** | 90% | ⚠️ **11%** |
+
+**A magyarázat a mérésből jön, nem feltevésből:** a jogosítás miatt a hamisak **nem tudnak
+meghívót kiállítani** (nincs elég bemutatkozásuk régebbi tagoktól), tehát **minden egyes
+hamisat egy valódi, megtévesztett ember hív be** — ezt az „önellátó: soha" oszlop
+bizonyítja. Így minden hamis **egy valódi emberen lóg**, a sétái bejutnak a tengerbe, és
+**pont úgy néz ki, mint egy frissen érkezett becsületes ember.**
+
+Jogosítás nélkül viszont a hamisak egymást hívják be, a sziget **leszakad** a valódi
+világról — és onnantól **tökéletesen látszik**.
+
+> ⭐⭐ **A tanulság általánosabb a szabálynál:** *minden feltétel, ami arra kényszeríti a
+> támadót, hogy minden hamis azonosságot egy valódi emberhez kössön, egyben EL IS REJTI
+> azt.* Ez a 8/c mérés mondatának pontos megismétlődése: *„ha a jelzések csak a hangosat
+> fogják meg, akkor a csendest hitelesítjük velük."* **Egy teljesítendő küszöb egyben
+> hitelesítő pecsét is.**
+
+⭐ **És a satu áll:** ha a támadó **melegít** (a hamisak egymásnak is bemutatkoznak, hogy
+ne legyenek csupaszak), a séta **mind a hat változatnál 99–100% / 0%**-ot ad. Sűrűn is
+látszik, csupaszon is — **köztes csak akkor van, ha valódi emberek mögé bújik**, és annak
+ára van (lásd 11.4).
+
+## 11.4 ⭐ AMI TÉNYLEG KORLÁTOZ: A KIADHATÓ MEGHÍVÓK SZÁMA
+
+Ha egy tag **legfeljebb 10 meghívót** állíthat ki életében (3 megtévesztett mellett):
+
+| változat | HAMIS BENT (korlátlan → korlát 10) | valódi tag |
+|---|---|---|
+| V2 — 1 meghívó, jogosítás nélkül | 880 → **880** ⛔ | 1466 |
+| V2b — 1 meghívó + jogosítás | 880 → **17** | 1457 |
+| V3 — 2 meghívó + jogosítás | 880 → **2** | 1389 |
+| V4 — 3 meghívó | 880 → **0** | 1248 |
+
+⭐ **A korlát az egyetlen dolog, ami a kárt ténylegesen behatárolja** — a kár nagyságrendje
+`megtévesztett × korlát` lesz a korlátlan helyett.
+
+⛔ **De önmagában nem elég:** a jogosítás nélküli V2-nél **semmit nem ér** (880 marad),
+mert a bejutott hamisak **friss korlátot kapnak**, és exponenciálisan hívják egymást. A
+korlát tehát csak azzal együtt véd, ami megakadályozza, hogy **egy frissen belépő azonnal
+hívhasson**.
+
+⭐⭐ **És egy szerkezeti előny, ami eddig elkerülte a figyelmünket:** a kiadott meghívók
+száma **a saját láncból ellenőrizhető** — pontosan a **D42** mintája (bemondott összeg, és
+a hazugságnak a saját aláírt eseményei mondanak ellent). Vagyis a *„legfeljebb ennyi
+meghívó"* **objektív szabály lehet**, szemben a bemutatkozás-számmal, ami helyi és
+ellenőrizhetetlen.
+
+## 11.5 ⚠️ AMIT EZ A MÉRÉS NEM BIZONYÍT — és egy saját hiba
+
+⚠️⚠️ **A KORLÁTOS MÉRÉS ELŐSZÖR HAMIS SIKERT MUTATOTT.** Az első változat minden
+ismerősnek kiállított meghívót, ezért korláttal a becsületes tagok az **első körben
+elpazarolták a keretüket** olyanokra, akik úgysem érték el a küszöböt — és onnantól senki
+nem hívhatott. A mérés „tökéletes védelmet" mutatott (0 hamis mindenhol), ami valójában
+**befagyott koino** volt (V5: 20 tag az 1467-ből). ⭐ *A tanulság ugyanaz, mint a
+kör-alakú világnál: a jó eredmény gyanús, amíg meg nem nézzük, mitől jó.*
+
+**További korlátok, tisztességből:**
+
+- ez **gráf-kísérlet, nem koino-kísérlet**: nincs benne kulcs, aláírás, esemény, hálózat;
+- ⚠️ **a támadó nem tud versenyezni a becsületes belépőkkel** a megtévesztett emberek
+  meghívó-keretéért — a modellben a becsületesek hívnak előbb. Ezért a **11.4 korlátos
+  számai optimisták**; egy megvett ember a valóságban a támadót szolgálná ki előbb;
+- a séta paraméterei (200 séta, 10 lépés) a korábbi mérésből örököltek, nincsenek hangolva;
+- a kis mintás sorokat (2 és 17 hamis) **nem szabad a jelzés-táblázatban olvasni** — ott a
+  küszöb-kereső túlilleszt;
+- a világ „kis világ" (10% távoli találkozó) — **egy teljesen elszigetelt közösségnél a
+  séta-jelzés gyengébb lenne.**
+
+## 11.3/b ⭐⭐ ÉS MIÉRT ANNYI? — a HÍD, ami a séta számait megmagyarázza
+
+*Csaba kérdése (2026-09-06): „érdekes, hogy 100%-ban fel lehet deríteni a hamis
+regisztrációkat — hogy is működik ez?" A válasz nem a séta ügyessége, hanem a sziget
+alakja — és ezt külön megmértük, hogy ne feltevés maradjon.*
+
+⭐ **A séta nem azt méri, hogy valaki hamis-e, hanem hogy MEDDIG ÉR EL a tengerben.**
+
+| változat | hamis bent | híd-élek a valódi világhoz | ebből hamis, akinek van valódi ismerőse |
+|---|---|---|---|
+| V2 — 1 meghívó | 880 | ⭐ **1** | **1 (0%)** |
+| V4 — 3 meghívó | 880 | 6 | 3 (0%) |
+| V1 — nyílt | 880 | 880 | 880 (100%) |
+| V2b — 1 meghívó + jogosítás | 880 | 880 | 880 (100%) |
+| V3 — 2 meghívó + jogosítás | 880 | 1760 | 880 (100%) |
+
+> ⭐⭐ **A V2-nél a 880 hamis azonosság EGYETLEN bemutatkozáson lóg.** A támadó azért
+> építette így, mert ez a legolcsóbb: az első hamisat még egy megtévesztett ember hívja be,
+> onnantól viszont **a hamisak hívják egymást, ingyen**. Egy tízlépéses séta pedig
+> gyakorlatilag soha nem talál rá arra az egy élre — tehát a sziget lakói **sehol nem érnek
+> össze senkivel**. Innen a 100% / 0%.
+
+⚠️ **Vagyis a 100% nem a jelzés érdeme, hanem a támadó spórolásáé.** Ugyanez a jelzés
+**91% / 16%**-ra esik, amint minden hamis kap egy valódi ismerőst (V2b) — mert akkor
+**pontosan úgy néz ki, mint egy frissen érkezett becsületes ember**, akinek még egy
+ismerőse van. A séta a **leszakadást** látja, nem a hamisságot.
+
+⛔ **És a rossz hír: a leszakadás megszüntetése OLCSÓ.** A V2b-ben a 880 híd-él **három
+megtévesztett emberből** indul — fejenként ~293 bemutatkozás. A támadónak tehát nem kell
+több embert megvennie, csak többször kell ugyanazokat használnia.
+
+⭐ **Ami viszont ebből következik, és még nincs megmérve:** három ember, fejenként ~293
+bemutatkozással olyanok felé, akiknek nincs más ismerősük — ez **torlódás**, és épp a
+megtévesztett emberek oldalán feltűnő, nem a hamisakén. Ezt a jelzést a
+[`szigetMeres.js`](szigetMeres.js) már számolja a tanúsítási világban; a meghívásosban
+**még nem**. Ez a következő mérés.
+
+## 11.6 ⭐⭐⭐ A TORLÓDÁS — és a satu bezárul a meghívásos világban is
+
+*Csaba kérése (2026-09-06): mérjük meg azt a jelzést, amit a 11.3/b rése kikövetelt.*
+
+⭐ **A gondolat:** ha a támadó minden hamisat egy-két valódi emberhez köt (és ezzel elrejti
+őket a séta elől), akkor **azok a valódi emberek** viszik el az egészet. Nem a hamisat
+nézzük, hanem **akin lóg**.
+
+**Mérve (3 megtévesztett, „zsákutca" = akinek rajtam kívül 3-nál kevesebb ismerőse van):**
+
+| változat | séta (elkapva / tévesen) | a megtévesztett zsákutcái | ⚠️ a legrosszabb becsületes |
+|---|---|---|---|
+| V2 — 1 meghívó | **100% / 0%** | 0 | 0,3 |
+| V4 — 3 meghívó | **100% / 0%** | 0 | 0,3 |
+| V2b — 1 meghívó + jogosítás | 91% / 16% | ⭐ **293** | **0,3** |
+| V3 — 2 meghívó + jogosítás | 90% / 11% | ⭐ **587** | **0,3** |
+
+> ⭐⭐⭐ **A SATU BEZÁRUL, ÉS A TÁMADÓ MINDHÁROM ÚTJA FEDVE VAN:**
+>
+> - **a hamisak egymást hívják** (a legolcsóbb) → a sziget **leszakad** → a séta **100%**;
+> - **a hamisak néhány valódi emberen lógnak** → a séta megvakul (91%), de az a néhány
+>   ember **293–587 zsákutca-ismerőst** cipel, szemben a legrosszabb becsületes **0,3**-mal;
+> - **a hamisak egymást melegítik** (sűrű sziget) → a séta megint **99–100% / 0%**.
+
+⚠️ **A küszöb NEM részletkérdés, és ezt majdnem elrontottam.** Az első mérésnél a zsákutca
+azt jelentette, hogy „rajtam kívül **nincs** ismerőse" — ezzel a V3 jelzése **0** volt, mert
+ott minden hamis **két** valódi emberhez kötődik, tehát egyiknek sem „zsákutcája". A
+küszöböt 3-ra emelve a V3 jelzése **587** lett. *Egy jelzés, ami egyetlen küszöbön áll vagy
+bukik, törékeny — több küszöbbel kell mérni.*
+
+## 11.7 ⛔ ÉS A KELLEMETLEN EREDMÉNY: AMI MŰKÖDIK, AZT A D49/c TILTJA
+
+**A koino-szintű alak nem működik.** A „8 legtöbb bemutatkozású ember részesedése"
+támadóval **1–3%**, támadó nélkül **1%** — vagyis **nincs jelzés**. Ez az az alak, ami a
+**D49/c 3. védőkorlátjával** megférne (*„az összesített nézet a koinóról szóljon, ne
+emberekről"*).
+
+⛔ **Ami működik, az személyre szóló** — és ráadásul **egy becsületes emberre** mutat: arra a
+megtévesztettre, akit a támadó felhasznált. Ez két védőkorlátot is súrol: a D49/c
+1. pontját (*nincs személyre szóló gyanú-pontszám*) és a 2.-at (*a jelzés tájékoztat, nem
+jogosít*).
+
+⚠️ **És egy határeset, amit a modell NEM tartalmaz:** egy tanár, aki harminc diákot fogad
+be, átmenetileg **harminc zsákutca-ismerőst** cipelne — pontosan úgy, mint egy megtévesztett
+ember. *(A modellben ez nem jön elő, mert a becsületesek nem csinálnak tömeges beléptetést.)*
+⭐ A különbség idővel derül ki: a diákok **megismerik egymást**, tehát megszűnnek zsákutcák
+lenni; a hamisak nem. **Ezt külön kell mérni, mielőtt bárki ilyen jelzést beépít.**
+
+## 11.8 ⭐ AZ ISMÉTLŐDÉS — Csaba ötlete, és amit a mérés mondott (2026-09-06)
+
+> *„Egy kollégával kétszáz nap alatt kétszázszor találkozol; egy pályaudvari átutazóval
+> egyszer."* — a jelzés csak a **sokszor ismételt** bemutatkozást vegye figyelembe.
+
+### ⚠️ ELŐSZÖR A MÉRÉS BUKOTT MEG, NEM AZ ÖTLET
+
+Az első futás **100% hamis elkapva / 81–89% becsületes tévesen** volt — használhatatlan.
+Az ok a **modellben** volt: a világ csupa **egyszeri találkozásból** állt (a találkozók
+véletlen embereket hívnak egy környékről), tehát *„a sokszor ismételt él"* fogalma **üres**
+volt, és a szűrő mindenkit leszakított.
+
+⭐ **Ezért került a modellbe az ÁLLANDÓ TÁRSASÁG** (`allandoKorok`): család, munkahely,
+osztály — nyolc fő, körönként 50% eséllyel összejön, és **mindenki kettőhöz tartozik**
+(enélkül a sok-találkozású gráf szétesne külön szigetekre, és a séta a saját társaságában
+ragadna). ⚠️ *Ez a világ bővítése, tehát a 11.1–11.7 számai a régi világra érvényesek;
+a kettőt nem szabad összekeverni.*
+
+### Az eredmény — állandó társaságokkal, 3 megtévesztett
+
+| változat | séta szűrő nélkül | ⭐ csak a ≥3× ismételt élen | kitartó támadó ellen |
+|---|---|---|---|
+| V2 — 1 meghívó | **100% / 0%** | 100% / ⚠️ 17% | 100% / 17% |
+| V4 — 3 meghívó | **100% / 0%** | 100% / ⚠️ 34% | 100% / 34% |
+| V2b — 1 meghívó + jogosítás | 88% / 11% | ⭐ **100% / 9%** | 100% / 9% |
+| V3 — 2 meghívó + jogosítás | 90% / 15% | ⭐ **100% / 13%** | 100% / 14% |
+
+⭐⭐ **Ahol a séta vak volt, ott az ismétlődés megjavítja:** a V2b és a V3 — vagyis épp az a
+két eset, ahol a támadó minden hamisat egy valódi emberhez köt — **88–90%-ról 100%-ra** megy,
+és a téves megjelölés is **csökken** (11% → 9%, 15% → 13%).
+
+⛔ **De ahol a séta tökéletes volt, ott ront:** a V2 és a V4 **0%-ról 17%-ra, illetve
+34%-ra** rontja a téves megjelölést. Az ok kézenfekvő: a szűrő leszakítja azokat, akiknek
+**még nincs ismétlődő kapcsolatuk** — a frissen érkezettet és a magányost. Pontosan az a
+kör, akikért a D49/c 2. védőkorlátja szól.
+
+> ⭐ **Ebből az következik, hogy az ismétlődés nem HELYETTESÍTI a sima sétát, hanem egy
+> MÁSIK LENCSE.** Hogy a kettő együtt (mindkettőn leszakadt = erős jelzés) jobb-e
+> bármelyiknél külön, az **még nincs megmérve.**
+
+### ❓ ÉS EGY SZÁM, AMIT NEM TUDOK MEGMAGYARÁZNI
+
+A **kitartó támadó** — aki minden körben újra jelöli a bemutatkozásait, hogy az élei
+„sokszor ismételtnek" látszódjanak — **semmit nem nyert vele** (17% → 17%, 9% → 9%,
+13% → 14%). Ez ellentmond a várakozásnak: ha a jelölés puszta bejegyzés, a támadónak fel
+kellene tudnia pörgetni a számlálót.
+
+⚠️ **Nem tudom, miért nem nyert, és ezért ezt a sort NEM szabad védelemként olvasni.** A
+11.3/b esetében is előbb megmértük a hidat, és csak utána mondtuk ki az okot; itt ez a
+diagnosztika **még hiányzik**. Amíg nincs meg, a helyes olvasat: *a modell így viselkedett,
+az okát nem ismerjük.*
+
+## 11.9 ⭐⭐ MIÉRT NEM NYERT A KITARTÓ TÁMADÓ? — a rejtély megoldva
+
+*A 11.8-ban nyitva hagytunk egy számot: a kitartó támadó (aki minden körben újra jelöli a
+bemutatkozásait) semmit nem nyert. Két gyanút mértünk meg.*
+
+| | kitartó NÉLKÜL | ⭐ KITARTÓ támadóval |
+|---|---|---|
+| a híd-élek átlagos súlya | **1** | **12,5–23** |
+| ebből átmegy a ≥3-as szűrőn | **0%** | ⭐ **95–100%** |
+| a megtévesztett szomszédai közül hamis | 28–56% | 28–56% (**erős élen: 31–64%**) |
+
+⛔ **H1 megdőlt:** a hidak **nem maradnak gyengék** — a kitartó támadó sikeresen felpörgette
+a számlálót, az élei 95–100%-ban átmennek a szűrőn. Tehát *nem azért* bukott meg, mert nem
+sikerült neki.
+
+⭐⭐ **H2 IGAZOLVA — és ez a szakasz egyik legszebb eredménye:** a megtévesztett ember
+szomszédságának **28–56%-a hamis**, az **erős élein pedig 31–64%-a**. Vagyis amikor a séta
+átlép a hídon, a következő lépésnél **31–64% eséllyel visszaesik a szigetbe**. Tíz lépésen
+át ez újra és újra megtörténik, tehát a séta **nem jut ki a tengerbe**.
+
+> ⭐⭐⭐ **A TÁMADÓ SAJÁT TÖMEGE VERI MEG.** Ahhoz, hogy a hamisai kapcsoltnak látszódjanak,
+> mindet néhány emberre kell aggatnia — de ettől **azoknak az embereknek a környezete válik
+> szigetté**, és a séták onnan sem tudnak kijutni. **Minél több hamisat akar elrejteni,
+> annál erősebb a csapda.** Ugyanaz az alakzat, mint a satu: *a támadó nem tud egyszerre
+> sok és láthatatlan lenni.*
+
+⚠️ **A korlát, amit ez NEM mond meg:** a mérés **3 megtévesztett emberrel** futott, tehát
+fejenként ~293 hamis jutott. Ha a támadónak **sok** megtévesztett embere volna (mondjuk
+száz, fejenként 9 hamissal), azok környezete nagyrészt valódi maradna, és a séták kijutnának.
+⭐ **A védelem tehát a „hamis / megtévesztett ember" ARÁNYON áll, nem a darabszámon** — és
+ezt külön kell megmérni.
+
+## 11.10 ⭐⭐⭐ A KÉT LENCSE EGYÜTT — és a válasz Csaba mércéjére
+
+> **Csaba mércéje (2026-09-06):** *„ha nem növeli meg annyival a támadó lebukási esélyét,
+> akkor ne bonyolítsunk."*
+
+*Mindkét lencse UGYANAZON a világon, UGYANAZOKRA a párokra fut, hogy az ÉS/VAGY összevethető
+legyen. „elkapva / tévesen".*
+
+| változat | 1. lencse (sima séta) | 2. lencse (≥3× ismételt él) | ⭐ MINDKETTŐ (ÉS) | BÁRMELYIK (VAGY) |
+|---|---|---|---|---|
+| V1 — nyílt | 89% / 11% | 100% / 18% | **89% / 3%** | 100% / 27% |
+| V2 — 1 meghívó | 100% / 0% | 100% / 17% | **100% / 0%** | 100% / 17% |
+| V2b — 1 meghívó + jogosítás | 89% / 10% | 100% / 9% | ⭐ **89% / 1%** | 100% / 17% |
+| V3 — 2 meghívó + jogosítás | 89% / 8% | 100% / 13% | ⭐ **89% / 1%** | 100% / 20% |
+| V4 — 3 meghívó | 100% / 0% | 100% / 34% | **100% / 0%** | 100% / 34% |
+
+⭐⭐ **A második lencse NEM azzal érdemli ki a helyét, hogy többet kap el, hanem azzal, hogy
+CSENDESEBBÉ teszi a jelzést a becsületeseken.** Az „ÉS" olvasat a téves megjelölést
+**8–11%-ról 1–3%-ra** viszi — nyolcszoros-tízszeres javulás —, miközben az elkapás a
+gyengébb lencse szintjén marad (89%).
+
+Ez pontosan a projekt saját mércéje: *egy jelzés akkor ér valamit, ha a szigetre kigyullad,
+a becsületes közösségre viszont NEM.* A **VAGY** olvasat ezzel szemben mindent elkap (100%),
+de 17–34%-ot tévesen jelöl — ⚠️ **ez rosszabb a semminél**, mert hozzászoknak, és megszűnik
+jelzés lenni.
+
+> ✅ **A válasz Csaba mércéjére: MEGÉRI a bonyolítás — de nem úgy, ahogy vártuk.** Nem a
+> lebukási esélyt növeli (az marad 89–100%), hanem **a hamis riasztást csökkenti a
+> tizedére**. A koinóban ez fontosabb: a téves jelölés a magányost és a frissen érkezettet
+> érinti.
+
+⚠️ **Amit nem tudunk:** miért marad 11% a szigetből észrevétlen az „ÉS" olvasatnál — ezek
+azok a hamisak, amiket az egyik lencse átenged. A 11.9 alapján a gyanú az, hogy ezek a
+legkorábban létrehozott, legjobban beágyazott azonosságok, de **ez feltevés, nem mérés.**
+
+## 11.11 ⭐⭐⭐ A REJTŐZKÖDŐ TÁMADÓ ÉS A HÁROM LENCSE (2026-09-06)
+
+*Csaba kifogása a 11.10-re: „az »ÉS« olvasat 11%-os vakfoltja — ez nem tetszik." Két
+válasz született rá: egy **jobb támadó** (mert a régi számok kedvezőbbek voltak a
+valóságnál) és egy **harmadik lencse**.*
+
+### ⚠️ ELŐBB A SAJÁT MODELLEM JAVÍTÁSA: A REJTŐZKÖDŐ TÁMADÓ
+
+Eddig a támadó a **költségét** optimalizálta: a saját hamisait használta meghívónak, mert
+az ingyen van — és ettől a szigete **leszakadt**, tehát a séta tökéletesen látta. ⚠️ Ez
+kedvezőbb kép a valóságnál: egy okosabb támadó a **láthatatlanságát** optimalizálja, és
+**mindig valódi (megtévesztett) embereket használ**, akkor is, ha a szabály nem
+kényszeríti rá. Ez neki **semmivel nem kerül többe** — a megtévesztettek megvannak.
+
+⛔ **És tényleg működik:** az első lencse (sima séta) a V2-nél **100% / 0%-ról
+71% / 22%-ra**, a V4-nél **100% / 0%-ról 89% / 14%-ra** romlik. *A korábbi „tökéletes"
+számok tehát az olcsó támadót írták le, nem a legokosabbat.*
+
+### Az eredmény — három lencse, két támadó (`allandoKorok=1`, 3 megtévesztett)
+
+*„elkapva / tévesen". Az 1. és 2. lencsénél a KEVÉS a gyanús, a 3.-nál a SOK.*
+
+| változat | 1. séta | 2. ismétlés | 3. torlódás | ⭐ 2 A 3-BÓL | MIND A 3 |
+|---|---|---|---|---|---|
+| **olcsó támadó** | | | | | |
+| V2 — 1 meghívó | 100% / 0% | 100% / 17% | 100% / 0% | **100% / 0%** | 100% / 0% |
+| V2b — + jogosítás | 89% / 10% | 100% / 9% | 100% / 9% | **100% / 2%** | 89% / 0% |
+| V4 — 3 meghívó | 100% / 0% | 100% / 34% | 100% / 0% | **100% / 0%** | 100% / 0% |
+| **⭐ rejtőzködő támadó** | | | | | |
+| V2 — 1 meghívó | ⛔ 71% / 22% | 100% / 17% | 100% / 14% | **100% / 8%** | 71% / 0% |
+| V2b — + jogosítás | ⛔ 73% / 14% | 100% / 9% | 100% / 9% | ⭐ **100% / 2%** | 73% / 0% |
+| V3 — 2 + jogosítás | 78% / 8% | 100% / 13% | 100% / 25% | **100% / 6%** | 78% / 0% |
+| V4 — 3 meghívó | 89% / 14% | 100% / 34% | 100% / 22% | **100% / 12%** | 89% / 1% |
+
+> ⭐⭐⭐ **A VAKFOLT BEZÁRUL — a „2 a 3-ból" olvasattal: 100% elkapva, 0–12% tévesen**,
+> **mindkét támadó ellen**. Az egyhangúság („mind a 3") ennél rosszabb: kevesebbet kap el
+> (71–89%), cserébe majdnem nulla tévedésért.
+
+⭐ **Miért működik:** a rejtőzködő támadó **a séta ellen véd, de a másik kettőt ezzel
+kinyitja.** Ha minden hamisat valódi emberre aggat, akkor (a) azok az emberek
+zsákutca-tömeget cipelnek → a **torlódás** meglátja, és (b) a hamisak nem tudnak
+ismétlődő találkozásokat felmutatni → az **ismétlődés** meglátja. *Ugyanaz a satu-alakzat:
+amivel az egyik lencse elől rejtőzik, azzal a másik kettő elé lép.*
+
+### ⛔ ÉS A LEGFONTOSABB KORLÁT — mindkét megmaradó lencse UGYANAZON az arányon áll
+
+⚠️ **Ez a mérés 3 megtévesztett emberrel futott, fejenként ~293 hamissal.** Mind a torlódás
+(*„egy csapatnyi zsákutcát cipel"*), mind az ismétlődés-csapda (11.9 H2: *„a megtévesztett
+környezete elhamisodik"*) **abból él, hogy kevés ember hordoz sok hamisat**.
+
+⛔ **Ha a támadónak sok megtévesztett embere volna, fejenként kevés hamissal, mindkét lencse
+gyengülne — egyszerre.** Vagyis a két „független" lencsének **közös töréspontja** van, és a
+100%-ot addig nem szabad elhinni, amíg ezt meg nem mértük. *(Következik: 11.12.)*
+
+## 11.12 ⭐⭐ AZ ARÁNY-PRÓBA — a félelmem NEM igazolódott
+
+*A 11.11 végén azt írtam, hogy mindkét megmaradó lencse ugyanazon az arányon áll (kevés
+ember hordoz sok hamisat), tehát közös töréspontjuk lehet. **Megmértük, és tévedtem.***
+
+**Rejtőzködő támadó, 3 → 20 → 50 megtévesztett emberrel** (a hamisak száma változatlanul
+880, tehát fejenként 293 → 44 → 18 jut):
+
+| lencse | 3 megtévesztett | 20 megtévesztett | 50 megtévesztett |
+|---|---|---|---|
+| 1. séta | 71–89% / 14–22% | ⛔ **39–68% / 25–57%** | ⛔ **48–68% / 39–51%** |
+| 2. ismétlés | **100% / 9–34%** | **100% / 9–34%** | **100% / 9–34%** |
+| 3. torlódás | **100% / 9–25%** | **100% / 9–25%** | **100% / 9–25%** |
+| ⭐ 2 a 3-ból | **100% / 2–12%** | **100% / 4–18%** | **100% / 7–23%** |
+
+⛔ **A SÉTA AZ, AMI ÖSSZEOMLIK** — 50 megtévesztettnél 48–68% elkapva és 39–51% tévesen,
+vagyis érdemben használhatatlan. *A „bemutatkozások tengere" önmagában tehát NEM a válasz;
+a sok kis híd feloldja a szigetet a tengerben.*
+
+⭐⭐ **De a másik két lencse meg sem rezdült.** És az ok, amit rosszul gondoltam:
+
+> **A torlódás-jelzésnek nem NAGY számra van szüksége, hanem arra, hogy a becsületes
+> alapvonal NULLA legyen.** A legrosszabb becsületes tag **0,3** zsákutca-ismerőst cipel —
+> tehát a 18 ugyanolyan feltűnő, mint a 293. A jelzés nem a mérettől él, hanem a
+> **kontraszttól**.
+
+⭐ **Az ismétlődés pedig azért nem gyengül, mert nem is az aránytól függ:** a hamisnak
+egyszerűen **nincsenek ismétlődő találkozásai** valódi emberekkel, akárhányan hordozzák.
+
+### Amit ez a három mérés együtt mond
+
+- ⛔ **A séta a leggyengébb láncszem**, nem a legerősebb — pedig eddig ő volt a főszereplő.
+- ⭐ **A torlódás a legerősebb**, és a legolcsóbb is: nem kell hozzá séta, csak a saját
+  ismerőseim ismerőseinek darabszáma.
+- ⭐⭐ **A „2 a 3-ból" olvasat mindhárom támadó-változat és mindhárom arány mellett
+  100% / 2–23%** — ez az egyetlen alak, ami eddig minden próbát kiállt.
+
+⚠️ **És ami MÉG NINCS megmérve:** a **rejtőzködő ÉS kitartó** támadó **sok megtévesztettel**
+— vagyis a három képesség együtt. Ott a 11.9 H2-mechanizmusa (a megtévesztett környezete
+elhamisodik) gyengül, miközben a kitartó a súlyokat felpörgeti. **Ez a legrosszabb eset, és
+ez a következő futás.**
+
+## 11.13 ⛔⛔ A LEGROSSZABB ESET — és amit szét kell szedni belőle
+
+*A három támadói képesség EGYÜTT: rejtőzködő (valódi emberekre aggat) + kitartó (minden
+körben újrajelöl) + **50 megtévesztett** ember.*
+
+| lencse | 3 megtévesztett, rejtőzködő | ⛔ **a legrosszabb eset** |
+|---|---|---|
+| 1. séta | 71–89% / 14–22% | **43–74% / 31–61%** |
+| 2. ismétlés | **100% / 9–34%** | ⛔ **77–85% / 41–55%** |
+| 3. torlódás | **100% / 9–25%** | ⭐⭐ **100% / 9–25%** |
+| 2 a 3-ból | **100% / 2–12%** | ⛔ **82–95% / 21–38%** |
+| mind a 3 | 71–89% / 0–1% | 37–63% / 1–8% |
+
+### ⛔ AMIT VISSZA KELL VONNOM
+
+**A 11.11–11.12-ben azt írtam, hogy a „2 a 3-ból" olvasat minden próbát kiállt. NEM állja
+ki.** A legrosszabb esetben **82–95%-ra esik, 21–38% téves megjelöléssel** — mert a
+többségi szavazás **két megromlott lencsét** is beleszámol, és azok **lehúzzák** az
+egyetlen épet.
+
+> ⚠️ **A tanulság általánosabb a számnál:** *egy erős jelzés és két gyenge ÖSSZEVONÁSA
+> rosszabb, mint az erős jelzés egyedül.* A többségi olvasat csak addig jó, amíg a tagjai
+> egyenként is jók.
+
+### ⭐⭐ AMI VISZONT ÁLL, ÉS EGYEDÜL ÁLL: A TORLÓDÁS
+
+**100% / 9–25%, mind a hét eddigi támadó-változat és mindhárom arány mellett** — ez az
+egyetlen jelzés, amit semmi nem tört el.
+
+És a szerkezeti oka egyszerű: a támadónak **a hamisait valakikhez kötnie kell**, és bárkihez
+köti, azoknál **feltűnő lesz a zsákutca-tömeg** — mert a becsületes alapvonal **0,3**.
+⭐ **Nem tud olyan embert találni, akinél ez ne látszana**, hacsak nem szerez annyi valódi
+embert, hogy fejenként csak 1–2 hamis jusson — de az már nem Sybil-támadás, hanem
+**elfoglalt közösség**, és ott minden szám elveszti az értelmét.
+
+### ⛔ ÉS AMI ÖSSZEOMLOTT: A SÉTA — vagyis a D50 főszereplője
+
+A **séta** (a „bemutatkozások tengere") a **leggyengébb** láncszemnek bizonyult: sok
+megtévesztett embernél **43–74% / 31–61%**. A sok kis híd **feloldja a szigetet a
+tengerben** — és ezt nem lehet paraméterrel megjavítani, mert épp a jelzés lényege
+(„összeérünk-e?") válik igazzá a támadóra is.
+
+⚠️ **Ez a D50 és a 8/d satu-érv felülvizsgálatát kívánja.** A tenger-gondolat nem hibás —
+csak nem ő a védelem, hanem a **kontraszt-jelzés**, ami olcsóbb is nála: nem kell hozzá
+séta, se élő kapcsolat, csak az ismerőseim ismerőseinek darabszáma. ⭐ És a **D55**
+(nyíltság) pontosan ezt teszi helyben kiszámíthatóvá.
+
+### ⏳ A határ, amit nem mértünk
+
+880 hamis / 50 megtévesztett = fejenként **18**. Ha valaki **500** valódi embert szerezne
+meg, fejenként 2 hamissal, a 0,3-as alapvonal mellett a kontraszt elvékonyodna. ⚠️ De 1500
+fős közösségben az 500 ember **a közösség harmada** — ott a D18/0 értelmében már nem
+Sybil-védelemről beszélünk. **A mért tartomány (3–50, azaz 0,2–3%) a valódi fenyegetés
+tartománya.**
+
+---
+
+# 12. ⭐⭐⭐ A KÉT LÉPCSŐ ÉS A LÁNC ALAKJA (2026-09-06)
+
+*Csaba szerkezete (D56–D59) és az állítása: „nem lenne annyira szerteágazó és mély, mivel
+nincsen szabad tanúsítgatás, ezért »középre« fognak mutatni a láncok, ahol meg már
+összefutások lesznek." — Eszköz: [`meghivasMeres.js`](meghivasMeres.js) `LEPCSO=1` móddal.*
+
+## 12.1 ⚠️ ELŐBB KÉT SAJÁT HIBA, MERT AZ ELSŐ FUTÁS ÉRVÉNYTELEN VOLT
+
+**(1) Mindenki felhatalmazott mindenkit**, akivel találkozott — ettől **1428 lett tanúsító
+az 1429-ből**, vagyis a mérendő mechanizmus **abban a világban nem is létezett**. A
+lánc-alak száma (296 ős) így értelmetlen volt.
+⭐ **Javítás:** egy 2. lépcsős **három** embert hatalmaz fel, és nem véletlenszerűen, hanem
+**akit a legjobban ismer** (a legtöbbször találkoztak — az ismétlődés-súly, ami Csaba
+korábbi ötletéből már a modellben volt).
+
+**(2) A 20 000 fős világ első futása „0,5 mélységet" adott** — csodálatos szám, ami
+valójában azt jelentette, hogy **a közösség fel sem nőtt**: 11 159 tagból csak 118 jutott a
+2. lépcsőre, tehát szinte mindenki alapító volt vagy egy lépésre tőle.
+⚠️ *A jó szám ugyanolyan gyanús, mint a rossz, amíg nem nézzük meg, mitől jó.*
+
+## 12.2 ⭐⭐⭐ AZ EREDMÉNY: A GYÖKÉRIG MENŐ ELLENŐRZÉS OLCSÓ
+
+*Az ős-halmaz = hány KÜLÖNBÖZŐ embert kell megnézni, ha mindenkit csak egyszer nézünk meg
+(gyorsítótár). Ez a valódi ár — nem a 3^mélység.*
+
+| közösség | ős-halmaz (átlag / legrosszabb) | mélység (átlag / max) | tanúsítók aránya |
+|---|---|---|---|
+| 1 500 | **17,7** / 62 | 2,9 / 5 | 23% |
+| 6 000 | **30,1** / 99 | 3,7 / 7 | 23% |
+| 20 000 | **40,7** / 171 | 4,3 / 8 | 24% |
+
+⭐⭐ **A növekedés LOGARITMIKUS, és feltűnően egyenletes: kettőzésenként ≈ +6 ős és
+≈ +0,37 szint.** *(1500→6000: +12,4 ős két kettőzésre; 6000→20000: +10,6 ős 1,74
+kettőzésre — vagyis 6,2 és 6,1 kettőzésenként.)*
+
+> ⭐⭐⭐ **Ha ez a vonal tartja magát, egymilliárd e-embernél ≈ 136 embert kell megnézni,
+> ≈ 10 szint mélyen.** Ez **semmi** — és Csabának igaza lett: *„a láncok középre mutatnak,
+> ahol már összefutások lesznek."*
+
+⚠️ **Ez EXTRAPOLÁCIÓ három pontból, 15 kettőzésen át.** A modell szerkezete (földrajz,
+találkozó-méret, 3 felhatalmazás fejenként) végig ugyanaz volt; egy valódi milliárdos
+közösség máshogy is alakulhat. **A vonal biztató, de nem bizonyíték.**
+
+## 12.3 ⭐ MIT JELENT EZ A D59-RE (a mélység-korlát)
+
+A **D59** azért született, hogy a rekurzió korlátos legyen. ⭐ **A mérés szerint magától is
+korlátos** — a gyorsítótár és a láncok összefutása elvégzi a munkát.
+
+- **A determinizmust nem a korlát adja:** ha mindenki a **gyökérig** ellenőriz, akkor is
+  mindenki ugyanoda jut — sőt **jobban**, mert nincs `D` paraméter, amiben eltérhetnének.
+- **A korlát haszna más lett:** ha valakinek **hiányoznak szeletek**, kevesebbet kell
+  látnia. Vagyis **adat-elérhetőségi tartalék**, nem számítási szükség.
+
+▶ **Javaslat:** menjen az ellenőrzés a **gyökérig** (Csaba ösztöne), és a `D` maradjon
+**elhagyható biztonsági szelep**. ⚠️ *A döntés Csabáé: a korlát BIZTOSAN olcsó, a mérés
+csak VALÓSZÍNŰSÍTI, hogy nem kell.*
+
+## 12.4 ⛔ ÉS AMI NEM JAVULT: A PÉNZTÁRCA KAPUJA UGYANOLYAN ALAKÚ
+
+**Minden hamis azonosság megkapta a pénztárcát** (1500-nál 880/880, 20 000-nél 2080/2080).
+Az ok: a megtévesztett emberek **tanúsítók is**, és egy megvett tanúsító **korlátlanul
+tanúsíthat**.
+
+> ⛔ **A 2. lépcső kapuja tehát ugyanaz az alakzat, mint az 1.-é (11.1): nem véd, hanem
+> ÁRAT SZAB** — *„vegyél meg három tanúsítót"*.
+
+⭐ **Ez nem cáfolja a D56-ot** — a D11 célja teljesül, mert a pénz drágább lett a
+tagságnál. De azt jelenti, hogy **a védelem itt is a jelzés**, nem a kapu: egy tanúsító,
+aki 293 embert tanúsított, akiknek **nincs más tanúsítójuk**, pontosan az a **kontraszt**,
+amit a 11.13-ban 100%-osnak mértünk. ⏳ *A tanúsítói torlódás mérése hátra van.*
+
+## 12.5 ⭐⭐⭐ A VISSZACSATOLÁS — és a törvény, ami kijött belőle
+
+*Csaba szerkezetének utolsó darabja: a felhatalmazás **visszavonható**. Ha a közösség
+látja, hogy egy tanúsító üres azonosságokat tanúsít, elveszi tőle a megbízást.*
+
+### ⚠️ ELŐBB EGY SAJÁT HIBA: ROSSZ GRÁFON MÉRTEM
+
+Az első változat a **bemutatkozási** gráfban kereste a mintát (`zsakutcaIsmerosok`) — de a
+megvett tanúsító **nem mutatkozik be** a hamisaknak, csak **tanúsítja** őket. A jelzés így
+**egyszer sem szólalt meg** (0 visszavonás, 880 hamis pénztárca).
+
+⭐ **A helyes kérdés:** *„azok közül, akiket TANÚSÍTOTTAM, hánynak nincs önálló élete a
+közösségben?"* A becsületes tanúsító olyanokat tanúsít, akikkel találkozott — azoknak van
+saját ismeretségük; a megvett tanúsító **üres azonosságokat**.
+
+### Az eredmény
+
+| | visszacsatolás nélkül | ⭐ visszacsatolással (2 kör késés) |
+|---|---|---|
+| hamis azonosság **pénztárcával** | 880 | **120** |
+| visszavont megbízás | — | **3** |
+| valódi 2. lépcsős | 1404 | **1404** |
+| tanúsítók | 333 | **330** |
+
+⭐⭐ **A kár 86%-kal csökken, és a visszavont három megbízás pontosan a három megvett
+tanúsítóé** — egyetlen becsületes sem veszítette el a szerepét, a hitelesítettek köre
+változatlan.
+
+### ⭐⭐⭐ ÉS A TÖRVÉNY: a kár = a támadó üteme × az ébredés ideje
+
+*Ugyanaz a világ, csak a közösség reakcióideje változik:*
+
+| a közösség ébredése | hamis pénztárca | visszavont megbízás |
+|---|---|---|
+| **azonnal** (0 kör) | **40** | 3 |
+| 2 kör | 120 | 3 |
+| 5 kör | 240 | 3 |
+| 10 kör | 440 | 3 |
+
+A támadó körönként 40 azonosságot próbál — és a kár **pontosan** `40 × (késés + 1)`.
+
+> ⭐⭐⭐ **Tökéletesen LINEÁRIS, nem exponenciális: a hurok mindig bezárul.** A támadó nem
+> tud elszaladni; csak annyit nyer, amennyi ideig a közösség nem néz oda. És a
+> **felismerés minden esetben megtörtént** (3 visszavonás mindig) — csak az **időzítés**
+> változott.
+
+### ⭐ Amit ez a TERVEZÉSRE mond
+
+Mivel a kár az **ébredés idejével** arányos, a gépi segítség értéke **az ÉSZREVÉTELBEN**
+van, nem a döntésben:
+
+- ⭐ **a program azonnal mutassa meg a jelzést** — ez olcsó, biztonságos, és a D49-cel
+  összefér (tényt mutat, nem ítéletet);
+- ⭐ **a döntés maradhat emberi** (D46: bizonytalanra jelölés + gondolat), mert ha a
+  felismerés azonnali, akkor a késés már csak a **megbeszélés** ideje, nem a felfedezésé.
+
+⚠️ **Amit ez a mérés NEM tartalmaz:** a támadó nem reagál a visszavonásra (nem szerez új
+tanúsítót a régiek helyett). Egy kitartó támadó **újra és újra** megvásárolna hármat — és
+akkor a kár nem egyszeri 120, hanem **ciklusonként** ennyi. Ezt külön kell mérni.
+
+---
+
+## 13. A FELSZABADÍTÁS MEGÜLEPEDÉSE — hány „tiszta buli" kell? (2026-09-08)
+
+**A kérdés (Csaba):** *„ne időhöz kössük, hanem a bulik számához… és mégjobb lenne ezt az
+értéket méréssel meghatározni."* A kódban addig egy tippelt `3` állt.
+
+**A mérés:** `node meres/felszabaditasMeres.js` — N készülék, T társ, körönként
+kölcsönös csere az ébren lévőkkel. Egy „késő" készülék tart egy határidőn belüli szavazatot,
+és `alvasKorok`-ig nem ébred. A hiba a **KORAI** felszabadítás: a hír a felszabadítás UTÁN ér
+hozzánk. *(A késői nem hiba: addig csak a keretből hiányzik a pont.)*
+
+### Az eredmény — 50 készülék, 3 társ, 200 ismétlés
+
+| ébrenlét | a késő alszik | a hír terjedése (medián / 90%) | K=2 | K=3 | K=6 | K=8 |
+|---|---|---|---|---|---|---|
+| 100% | 0 kör | 1 / 2 | **0%** | 0% | 0% | 0% |
+| 100% | 5 kör | 1 / 2 | 100% | 100% | 11% | **0%** |
+| 100% | **20 kör** | 1 / 2 | 100% | 100% | 100% | **100%** |
+| 60% | 0 kör | 2 / 4 | 27,5% | 15,5% | 1,5% | 0,5% |
+| 60% | 5 kör | 2 / 4 | 100% | 100% | 65,5% | 14,5% |
+| 30% | 0 kör | 6 / 12 | 82,5% | 68,5% | 35% | 16,5% |
+| 30% | **20 kör** | 5 / 11 | 100% | 100% | 100% | **100%** |
+
+*(200 készülék / 6 társ mellett a terjedés medián 1 kör, és 100%-os ébrenlétnél már K=2-nél
+0% a korai — a hálózat mérete nem rontja el, sőt.)*
+
+### ⛔⛔ AMIT A MÉRÉS MEGCÁFOLT
+
+> **A buli-szám a HÁLÓZAT terjedési idejét méri — nem azt, hogy a döntésben érintett emberek
+> megszólaltak-e.**
+
+- ✅ **A hálózat lassúsága ellen véd, és olcsón**: ha mindenki ébren van, **K=2** már 0%-ra
+  viszi a korai felszabadítást (200 fősnél is).
+- ⛔ **Az ALVÓ készülék ellen viszont SEMMILYEN véges szám nem véd**: 20 kör alvásnál K=8
+  mellett is **100%** a korai felszabadítás. És ez nem a modell hibája, hanem a helyzeté —
+  a mi számlálónk fut, miközben a másik ember telefonja ki van kapcsolva.
+
+⭐ **A tanulság nem az, hogy melyik szám a jó, hanem hogy ROSSZ DOLGOT SZÁMOLUNK.** A
+kockázat nem „a hálózat lassú", hanem *„van, aki még nem szólalt meg, pedig még
+megszólalhat."*
+
+### ⭐⭐ AMIT EHELYETT ÉRDEMES MÉRNI — javaslat
+
+A döntés választóköre **ismert** (az érintett entitás tulajdonosai — a saját eseményeinkből
+kiszámoljuk). A megülepedés akkor teljes, ha **minden jogosult szavazó láncát ismerjük a
+lezárás utáni pontig**: aki ezután írt alá bármit, az már nem tud visszamenőleg beszavazni —
+egy határidőn belüli időbélyeg a saját láncában **visszafelé lépő idő** lenne, amit a koino
+már ma is felsorol (`idoEllentmondasok`).
+
+⭐ Ez nem valószínűség, hanem **bizonyíték** — és pont abból áll, amit a csere úgyis
+megmond (`ALLAS`: szerzőnként a legnagyobb sorszám), illetve amit a `Lattam` esemény (D61)
+kifejezetten aláír.
+
+⚠️ Akitől semmi nem érkezett a lezárás óta, arról továbbra sem tudunk semmit — ott marad a
+buli-szám mint **másodlagos, olcsó heurisztika**. *De a fő jel a láncok vége legyen, ne a
+körök száma.*
+
+---
+
+## 14. AZ ALAPÉRTÉK SÚLYA — számít-e a hallgató tulajdonos? (2026-09-11)
+
+`node meres/kuszobMeres.js`
+
+**A kérdés** Csaba felvetéséből jött, az alkotmány (D64) elhalasztása után: *„A fontosabb
+ügyek súlyosabbá tételét elegendő az ALAPÉRTÉK meghatározásával elérni. Pl. a pénz esetében
+alap 2/3-os érték javaslatok, amik módosíthatók, de attól lesz nehéz, hogy a program
+használatában **passzív** e-emberek érték javaslatai teszik nehézzé a döntési keretek
+módosítását."*
+
+⚠️ „Passzív" itt **nem** a `szerep: 'passziv'` mező, hanem a program használatában passzív
+tömeg: tulajdonos, de sosem nyúl a küszöbökhöz.
+
+### Az eredmény
+
+N tulajdonos egy gondolaton, közülük **egy** ad be érték javaslatot, a többi hallgat.
+Az alapérték 51.
+
+| tulajdonos | a hangos értéke | **MA érvényes** | Csaba modellje szerint |
+|---:|---:|---:|---:|
+| 2 | 90 | **90** | 51 |
+| 3 | 90 | **90** | 51 |
+| 9 | 90 | **90** | 51 |
+| 21 | 90 | **90** | 51 |
+| 9 | 20 | **20** | 51 |
+| 21 | 20 | **20** | 51 |
+
+⛔⛔ **A hallgató tulajdonos MA NEM SZÁMÍT.** A `kuszobokItt` (`javaslatSzamitas.js`) a
+**beadott érték javaslatokon** megy végig, nem a tulajdonosokon — tehát az `ALAP_KUSZOBOK`
+**nem súly, hanem tartalék**: csak akkor él, ha *senki* nem szólt. **Huszonegy tulajdonos
+küszöbét egyetlen ember állítja**, mindkét irányban (a mérés felfelé és lefelé is nézi,
+hogy ne legyen vak).
+
+### ⭐ Mit jelent ez
+
+⚠️⚠️ **ELŐSZÖR TÚL SZÉLESRE VETTEM, ÉS CSABA KIJAVÍTOTTA (ugyanaznap):** azt írtam, hogy az
+egész küszöb-rendszert át kellene állítani (a medián a teljes tulajdonosi körön, a hallgatók
+az `ALAP_KUSZOBOK`-kal). ⛔ **Nem ez a terv.** Csaba pontosítása:
+
+> *„A »normál entitások« érték javaslatai rendszerét nem kell módosítani, hanem majd a
+> jövőben az igazán fontos, **programot vagy pénzt módosító** ügyek kapnának alap érték
+> javaslatot (**67% részvétel, 67% támogatottság**) **mindenkitől**. Ezek a **program által
+> megírt javaslatok** lennének, amit egy e-ember indít, és rak is rá tudatpontot."*
+
+⭐ Vagyis a változás **nem a küszöb-rendszeré, hanem EGY JAVASLAT-FAJTÁÉ**: a hétköznapi
+entitás marad, ahogy van, és csak a **sablonból született, program- vagy pénz-ügyű** javaslat
+viszi magával a saját döntési keretét — úgy, hogy **mindenki alapból 67/67-et tart**, amit
+egyenként felül lehet írni saját érték javaslattal.
+
+⭐⭐ **A mérés ettől nem lesz kevesebb — ez a mérés a FUNDAMENTUMA:** a 14. mérés azt mondja
+ki, hogy **a koinóban ma SEHOL nincs olyan mechanizmus, hogy egy hallgató ember „tart" egy
+alapértéket**. Tehát a szűk változat is ugyanezt a kódrészt kívánja (`kuszobokItt`), csak
+**javaslat-fajtára kapuzva** — nem repó-szinten.
+
+⭐⭐⭐ **És ami szép benne: ez ENTRENCHMENT MENEKÜLŐÚTTAL.** A 67/67 nem beégetett
+állandó, amit csak programozó mozdíthat (mint a `KATEGORIA_KORLAT`), és nem is új gépezet
+(mint az alkotmány): **a közösség el tudja mozdítani — de csak úgy, ha az emberek fele
+tényleg bead egy másik értéket.** *A menekülőút pontosan olyan nehéz, mint amit véd.*
+
+### ⚠️ Amit el kell dönteni, mielőtt kód lesz belőle
+
+- ⚠️⚠️ **„Mindenkitől" — kitől pontosan?** A koino **minden tagjától** (`identitas.js`), vagy
+  annak az entitásnak a tulajdonosaitól, ahol a javaslat áll? Program- és pénz-ügynél a
+  „mindenki" a természetes olvasat — és ⭐ **akkor ez ugyanaz a globális választókör, amit a
+  D65 és a globális passzív/aktív ötlet is kíván**. *Három oldalról ugyanaz a mechanizmus.*
+- ⛔⛔ **67% RÉSZVÉTEL egymilliárdnál = 670 millió szavazó.** A 9. szabály próbája: a
+  globális alkotmánynál Csaba **szándékosan** választotta a majdnem-elérhetetlent
+  (*„ez fogja adni a súlyát"*) — itt viszont a pénz **kereteinek** módosításáról van szó, és
+  ha az gyakorlatilag lehetetlen, a keret **örökre befagy**. *A „nehéz" és a „lehetetlen"
+  két különböző terv.* ⭐ **És a saját globális passzív/aktív ötleted a válasz rá:** ha a
+  témában passzívvá nyilvánítottak kimaradnak a nevezőből, a 67% azok közt mérődik, akik
+  **kérték, hogy számítsanak** — így lesz nehéz anélkül, hogy lehetetlen lenne.
+- ⚠️ **A „program által megírt javaslat" két dolgot hoz egyszerre:** kötött **mezőkészletet**
+  (amit a számítás ellenőrizni tud) **és** kötött **döntési keretet** (a 67/67). Ma a keret
+  mindig a CÉL entitásból jön; itt a **sablonból** jönne. Új tengely, de kicsi.
+- ⏸️ **És az évek óta néma tulajdonos**: ha az alapérték súlyt kap, az is szavaz, aki rég
+  elhagyta a koinót. A néma készülék problémáját egyszer már megoldottuk
+  (`allapot.lancVegek`, 13. mérés).
+
+⚠️ *Csaba kimondta, hogy ez még nem kiforrott: „most még nincs kiforrva a fejemben a legjobb
+megoldás, csak ötletelek." Ez a szakasz tehát **irány**, nem terv.*
+
+---
+
+## 15. A PROGRAM-VERZIÓ MINT AZ ÁLLAPOT BEMENETE (2026-09-11)
+
+`node meres/verzioMeres.js ir` → a `szabalyok.js` állandójának átírása → `… olvas`
+
+**A kérdés** a „hogyan lehetne dinamikus a program" beszélgetésből jött. A koino alapmondata
+*„ugyanazokból az eseményekből ugyanaz jön ki"* (D17) — de a `TUDATPONT_KERET`, a
+`KATEGORIA_KORLAT` és az `ALAP_KUSZOBOK` a **programban** van, nem az eseményekben. ⭐ Ez a
+mérés azt dönti el, hogy ez **elméleti aggodalom-e vagy mérhető kár**.
+
+**A bemenet mindkét oldalon BÁJTRA UGYANAZ:** 8 aláírt esemény — négy gondolat, egyenként
+2000 tudatponttal (összesen 8000). Csak a **programot** cseréltük alatta.
+
+| | keret = 10 000 | keret = 5 000 |
+|---|---:|---:|
+| létező entitás | **4** | **2** |
+| összes tudatpont | **8000** | **4000** |
+| kivétel (kihagyott esemény) | 0 | **2** |
+| **állapot-ujjlenyomat** | `taeExu20HCLplFGwbhixvpo1HnLXUlajbrOWkD1GA3c` | `H_ZcH6Z4oP4HNtWKMU8MIJGv0zsU2ublnvzz_gySc30` |
+
+### ⛔⛔ Az eredmény: a koino KETTÉHASAD, és egyik gép sem tudja
+
+Nem „kicsit mást mutat": a második készüléken **a gondolatok fele nem létezik**, és a rájuk
+tett tudatpont sincs sehol. A kivétel-indok a saját naplójában is becsületes
+(*„a bemondott összeg túllépi a keretet (6000 / 5000)"*) — ⚠️ **csak épp nem igaz**: a szerző
+nem lépte túl a keretet, az olvasó programja ismer más keretet.
+
+⛔ **És a csere ezt nem veszi észre.** A csere a **lánc** ujjlenyomatát veti össze (ki hány
+eseményt írt alá), nem az **állapotét**. A két készülék tökéletesen szinkronban lesz —
+ugyanaz a 8 esemény mindkettőnél —, miközben **mást számol belőle**. *A csere azt méri, hogy
+ugyanazt TUDJUK-e; nem azt, hogy ugyanazt SZÁMOLJUK-e.*
+
+### ⭐ Mit bizonyít ez
+
+1. **A D65 aggodalma nem elméleti.** A program verziója **ma is bemenete az állapotnak**, és
+   az eltérés **csendes**.
+2. ⭐⭐ **A javítás iránya megerősítve:** ami **paraméter** (szám, amit a közösség dönt), az az
+   **eseményekbe** tartozik; ami **gépezet** (algoritmus, képesség-lista), az a **programba**.
+   A leltár szerint (`js/` 54 konstans) mindössze **hat** befolyásolja az állapotot:
+   `TUDATPONT_KERET` · `ALAP_KUSZOBOK` · `KATEGORIA_KORLAT` · `MEGHIVO_KELL` ·
+   `TANUSITAS_KELL` · `FELHATALMAZAS_KELL`. ⭐ Az utolsó három a **D57/b és D60** szerint
+   amúgy is mediánná válna — vagyis a valódi új munka **három szám**.
+3. ⚠️ **A többi 48 konstans ártalmatlan** (portok, időzítések, `MAX_DARAB`, a felfedezés): a
+   3. szabály szerint sosem terjednek és semmit nem döntenek el — eltérésnél legfeljebb
+   lassabb, de **az állapot ugyanaz**. *(Az `ONALLO_KUSZOB` is ide tartozik: a `jelzesek.js`-t
+   a döntés-réteg nem importálja.)*
+4. ⭐ **És egy külön tétel, amit ez a mérés hozott ki:** a cserének **szabály-lenyomatot** is
+   össze kellene vetnie, nem csak lánc-lenyomatot. Az állapot-ujjlenyomat **már létezik**
+   (`osszehasonlitas.js`) — ma csak kézzel, az `ujjlenyomat` paranccsal használjuk.
+
+⚠️ **Amit ez a mérés NEM mond meg:** hogy a szabály-lenyomat mennyibe kerülne egy csere-körben
+(ma egy „nincs újdonság" kör 334 bájt), és hogy eltérésnél mit tegyen a készülék a
+bejelentésen túl. *Az külön döntés — a koino bejelent, nem bíráskodik (D19).*
+
+### ⭐⭐ Megismételve a szabályokkal a születésben (2026-10-24, D118/2 — a költözés ①b)
+
+`node meres/verzioMeres.js ir` → az `ALAP_SZABALYOK.tudatpontKeret` átírása 5000-re (`koinoSzabalyok.js`, `.bak`
+másolattal) → `… olvas`
+
+Az ①b óta a koinó szabályai a **születésében** állnak, és a program az új születésbe **mindet** kiírja (`teljesSzabalyok`).
+A mérés ugyanazt a láncot két koinóban gyártja le — a szerző az alapító (ő tag, a D93/1 szerint is számít; a régi mérés
+születés és tagság nélkül ma semmit nem számolna): egy **régi alakúban** (a születésnek nincs `szabalyok` mezője) és egy
+**új alakúban** (minden szabály a születésben). 9 esemény mindkettőben, bájtra ugyanaz a két olvasásnál.
+
+- **A régi alakú koinó** kettéhasad, mint 2026-09-11-én: a 10 000-es program 4 entitást és 8000 pontot lát
+  (`aG7q5KVL…pOPF7q0`), az 5000-es 2 entitást, 4000 pontot és 2 kivételt (`cR8XvHFi…zXszxo`).
+- **Az új alakú koinó** NEM hasad: mindkét program a születés 10 000-es keretével számol, 4 entitás, 8000 pont, 0 kivétel,
+  és az ujjlenyomat **bájtra ugyanaz** (`hBcJaJ-u…Vc2Y5fQ`).
+- ⛔ **A mérés egy hibát is talált:** az első megismétléskor az új alakú koinó is kettéhasadt (2 entitás, „túllépné a
+  tudatpont-keretet (6000 / 5000)”) — a `pontEsemenyMerlege` MÁSODIK keret-vizsgálata (a számított összegre) még a program
+  állandóját nézte; az első (a bemondott összegre) már a koinóét. Javítva, és a próbája hézagos lánccal méri ezt az ágat
+  (`szabalyProba.js` — a rontás, a régi feltétel, bukik).
+
+⭐ **Amit bizonyít:** a szabály a koinóhoz kötött, a program-állandó csak a régi alakú (és a még meg nem érkezett)
+születésnél dönt. ⛔ Ezért az `ALAP_SZABALYOK` soha nem változhat: egy régi alakú koinót különben két program két
+állapotra számolna — egy új szabály új koinó (a költözés, KZ4). A szabályok ára a születésben **+206 bájt** (427 → 633), egyszer koinónként.
+
+---
+
+## 16. A FÁJL-ÁTVITEL SEBESSÉGE AZ ÁTFÚRT RÉSEN (2026-09-13)
+
+`node meres/resSebessegMeres.js`
+
+A randevú (5.7 / C) megépítésekor egy szerkezeti tulajdonság látszott, amit **meg kellett
+mérni, nem megbecsülni**: a UDP-vonal **egyszerre egy darabot tart úton** (stop-and-wait,
+`udpVonal.js`), és egy darab 1000 bájt.
+
+```
+  mérés                          méret        idő      sebesség
+  ──────────────────────────────────────────────────────────────
+  TCP (helyben)                  64 KB       13 ms    4923 KB/s
+  UDP-rés (helyben)              64 KB       22 ms    2909 KB/s
+  TCP (helyben)                 256 KB       24 ms   10667 KB/s
+  UDP-rés (helyben)             256 KB       75 ms    3413 KB/s
+
+  UDP-rés (+1 ms/csomag)         64 KB     2606 ms      25 KB/s
+  UDP-rés (+5 ms/csomag)         64 KB     2781 ms      23 KB/s
+```
+
+### Amit ez megmond
+
+1. ⭐ **Helyben a rés alig lassabb:** 2909 vs. 4923 KB/s — a pajzsfúrás önmagában nem drága.
+   *A randevú tehát nem „vészmegoldás", hanem teljes értékű út.*
+2. ⛔⛔ **De a késleltetés összeomlasztja:** már **1 ms/csomag** mellett is **25 KB/s** —
+   **116-szoros** esés. Egy valódi internetkapcsolaton (10–50 ms) ez a nagyságrend a mérvadó,
+   nem a helyi szám.
+3. ⭐⭐ **És a szelet mérete ezen NEM segít.** A 64 KB ~87 darabra bomlik, és 87 darab az
+   87 oda-vissza — akár egy szeletben van, akár nyolcban. *A szűk keresztmetszet a vonal
+   ablaka, nem a szelet.*
+
+### ⚠️ Amit ez a mérés NEM mond meg
+
+- **A +1 és a +5 ms közti különbség eltűnt** (25 vs. 23 KB/s), pedig ötszörös a késleltetés.
+  Ez a mérés **határa**, nem eredmény: ezen a szinten valószínűleg a `setTimeout` felbontása
+  és az újraküldési óra dominál, nem a bevitt késleltetés. *Valódi hálózaton kell újramérni.*
+- Hogy **mennyivel javítana egy ablak** — ahhoz meg kellene építeni.
+
+### ⏸️ A következmény, ha egyszer sorra kerül
+
+A **vonalnak ablak kell** (több darab úton egyszerre), nem a szeletnek más méret.
+
+### ⭐⭐ KITERJESZTVE (2026-09-14): VESZTESÉG, INGADOZÁS, LASSÚ VONAL — a D67 alapvonala
+
+*A **D67** szerint a vonalnak **veszteségre reagáló ablakot** kell kapnia. ⛔ Veszteség-választ
+viszont nem lehet becsületesen megépíteni olyan műszerrel, ami **soha nem veszít csomagot** —
+az ugyanaz a csapda lenne, mint a vak próba. Ezért a műszer nőtt először, nem a vonal.*
+
+**Amit a lap mostantól tud:** állítható **csomagvesztés** · **ingadozó** késleltetés (ettől a
+csomagok sorrendet is cserélnek) · **magvas véletlen** (ugyanaz a mag → ugyanaz a
+veszteség-minta, hogy az „ablak előtt / ablak után" **mérés** legyen, ne szerencse) · és a
+**küldött csomagok száma**, a tökéletes vonalhoz viszonyítva.
+
+```
+  mérés                            méret        idő      sebesség
+  ──────────────────────────────────────────────────────────────────────────────
+  UDP-rés (helyben)                64 KB       23 ms    2783 KB/s    182 csomag
+  UDP-rés (+1 ms)                  64 KB     2649 ms      24 KB/s    182 csomag
+  UDP-rés (1 ms ± 5 ms szórás)     64 KB     2709 ms      24 KB/s    182 csomag
+  UDP-rés (1 ms ± 20 ms szórás)    64 KB     3436 ms      19 KB/s    182 csomag
+  UDP-rés (1 ms, 1% vesztés)       64 KB     3241 ms      20 KB/s    185 csomag  x1.0
+  UDP-rés (1 ms, 5% vesztés)       64 KB     5808 ms      11 KB/s    198 csomag  x1.1
+  UDP-rés (1 ms, 15% vesztés)      64 KB    17042 ms       4 KB/s    246 csomag  x1.4
+  UDP-rés (200 ms -> 400 ms oda-vissza)  8 KB   5490 ms    1 KB/s     59 csomag  x2.0
+  UDP-rés (400 ms -> 800 ms oda-vissza)  8 KB  10940 ms    1 KB/s     89 csomag  x3.0
+```
+
+#### ⭐⭐⭐ A legfontosabb lelet: a LASSÚ vonalon MI pazarolunk
+
+A `x` oszlop a tökéletes vonalhoz viszonyít. ⭐ Késleltetésnél és ingadozásnál **x1,0** — a
+vonal lassú, de **nem pazarol**. ⛔⛔ **400 ms oda-visszánál x2,0, 800 ms-nál x3,0** — vagyis
+minden darab **két-háromszor** megy ki, és ez **önhiba**: a `UJRAKULDES_KOZ` **fix 300 ms**
+rövidebb, mint az oda-vissza, tehát **újraküldünk olyat, ami éppen ÚTON van.**
+
+⭐ *Ez a szám a D67 második darabjának (mért RTT) a bizonyítéka — és nem érv, hanem mérés.*
+⚠️ Műholdas, mobil- és zsúfolt vonalakon a 400–600 ms hétköznapi, tehát ez nem szélsőség.
+
+#### ⚠️ ÉS AMIT A MÉRÉS CÁFOLT — a saját állításomat
+
+A kiterjesztés jegyzetébe azt írtam, hogy a vonal *„20 próbálkozás után FELADJA — ez egy
+lassú vagy lyukas vonalon idő előtti feladás"*. ⛔ **Nem adta fel:** sem 15% veszteségnél,
+sem 800 ms oda-visszánál. Az `ismetles` számláló **darabonként nullázódik**, és a nyugta
+mindig megérkezett a 20. próbálkozás előtt. *A kár nem a feladás, hanem a megsokszorozott
+forgalom — és ezt csak azért tudjuk, mert megmértük ahelyett, hogy elhittük volna.*
+
+#### ⛔ Két SAJÁT műszer-hiba, felírva
+
+1. **A késleltetett küldések túlélték a foglalat bezárását** — 400 ms-nál a mérés
+   `ERR_SOCKET_DGRAM_NOT_RUNNING`-gal **összeomlott**. ✅ Javítva (órák nyilvántartása +
+   zárás-jelző). *A műszert is meg kell mérni.*
+2. ⚠️ **Az első csomag-oszlopom HAZUDOTT:** a „×1,4"-et újraküldésnek olvastam, pedig a
+   **base64 (+33%) és a nyugták** adták. ✅ Javítva: a viszonyítás mostantól a **mért**
+   alapvonal (ugyanaz a fájl tökéletes vonalon), nem egy számolt ideál. *Egy rossz
+   viszonyítási pont magabiztos, kerek és hamis számot ad.*
+
+#### ⏸️ És egy tétel, ami ebből a mérésből nőtt ki
+
+⚠️ **A base64-adó láthatóvá vált:** 64 KB-ból **182 csomag** lesz (~87 adat + ~87 nyugta),
+pedig 1000 bájtos darabokkal 65 elég volna. A fájl-szelet ugyanis `base64`-ként utazik a
+JSON-ban (`vonal.js:279`) — **+33% minden bájton**. Kis eseményeknél ez ár nélküli kényelem,
+**nagy fájloknál valódi teher** (D67, 6. pont).
+
+ ⭐ És ez a
+`udpVonal.js`-ben marad, a fájl-átvitel **egyetlen sorának változtatása nélkül** — mert az
+átvitel a kapcsolatot **kapja**, nem ő nyitja (1. szabály).
+
+---
+
+## 17. ⭐⭐⭐ A PAJZSFÚRÁS MEGISMÉTELVE EGY MÁSIK HÁLÓZAT-PÁRON (2026-09-13, 22:38)
+
+*Terepmérés. Csaba a telefonnal a szomszédban, a fejlesztői gép itthon. A kérdés az volt,
+hogy átmegy-e a **TCP**-pajzsfúrás két valódi hálózat között — ⛔ **arra a kérdésre ez a
+mérés NEM válaszolt** (lásd lentebb), de közben megismételte a 2026-08-29-i UDP-eredményt
+egy **teljesen másik hálózat-páron**, és három hiányt hozott felszínre.*
+
+### Az eredmény
+
+```
+az én oldalam (itthon)                  a telefon (a szomszédban)
+────────────────────────────────────    ────────────────────────────────────
+⭐ KÍVÜLRŐL ÍGY LÁTSZOM:                 ⭐ KÍVÜLRŐL ÍGY LÁTSZOM:
+   31.46.250.205:54013                     5.187.186.127:7373
+   (a router ÁTÍRTA a portot)              (a router MEGTARTOTTA)
+
+⭐ A PAJZS ÁTFÚRVA — mindkét irány.      ⭐ A PAJZS ÁTFÚRVA — mindkét irány.
+  236 kopogás, 5 válasz, 237 348 ms       1 kopogás, 1 válasz, 190 ms
+
+CSERE A RÉSEN                           CSERE A RÉSEN
+  ✓ 0 új esemény, 1 kör, 807 bájt         ✓ 0 új esemény, 1 kör, 1,4 KB
+```
+
+### ⭐⭐ A legfontosabb szám: 190 ms — és amit a 237 másodperc jelent
+
+A két idő **nem ugyanazt méri**. A 237 másodperc az én oldalamon **nem a fúrás ára volt,
+hanem a várakozásé** — addig kopogtam egyedül, amíg a másik fél el nem indult. Abban a
+pillanatban, hogy a telefon kiszólt, a rés **az első kopogásra** összeért: **190 ms**.
+
+⭐⭐⭐ **Ez a pajzsfúrás valódi költsége, és ez az érv a BULI mellett.** A fúrás nem lassú és
+nem bizonytalan — **egyidejűséget** kíván. Ha a két készülék tudja, mikor keresse a másikat,
+ez két tized másodperc; ha nem tudja, órákig kopognak egymás mellett — *ahogy ezen az estén
+négy órán át tettük is.*
+
+### ⭐ Amit megismételt (és ezzel megerősített)
+
+A 2026-08-29-i mérés (232 ms, illetve 83 ms) **egy másik hálózat-páron** történt. Ez a mérés
+ugyanazt adta **más szomszéddal, más wifin, hónapokkal később**: két hétköznapi hálózat
+összeér, **továbbító nélkül, port-továbbítási szabály nélkül, szolgáltató nélkül az útban**.
+*Az akkori siker tehát nem szerencse volt.*
+
+### ⛔⛔ ÉS AMIT EZ A MÉRÉS NEM BIZONYÍT — a TCP kérdése NYITVA MARAD
+
+A TCP-fúróval indultunk, és **négy órán át nem ment**. ⚠️ **Ez nem cáfolat**, és pontosan
+tudjuk, miért nem:
+
+- a routerem az IPv4-es portot **minden foglalatnál átírja, más-más számra**
+  (mérve: **25787 → 6119 → 33905 → 54013**);
+- a UDP-fúró ezt **megméri a saját fúró-foglalatáról** (`ba9ce7b`), és ezért talált célba;
+- ⛔ a **TCP-fúrónak nincs ilyen mérése** — a tükör `udp4`-re van drótozva —, tehát a másik
+  fél a `7373`-ra kopogott, ahol nincs rés.
+
+⭐ Vagyis a nagy kérdés — *„megkapjuk-e ingyen a TCP negyven évnyi csiszolását?"* — továbbra
+is **eldöntetlen**, és a mai nap megmondta, **mi kell hozzá**: a TCP-fúrónak meg kell tudnia
+a saját külső TCP-portját.
+
+⚠️⚠️ **És egy kemény kérdés, amit előbb kell megmérni, mint bármit megépíteni:**
+**célfüggetlen-e a routerem TCP-leképezése?** A UDP-re ez **mérve igen** volt (2026-08-29,
+két tükörrel) — TCP-re **nem tudjuk**. ⛔ Ha TCP-n **kapcsolatonként** ad új külső portot,
+akkor a portot **elvi okból nem lehet előre megtudni**, és a TCP-pajzsfúrás ezen a vonalon
+**nem lehetséges** — semmilyen programmal. *Ez a mérés olcsó (két tükör, két különböző cél),
+és megspórolhat egy fölösleges építést.*
+
+### ⛔ Három hiány, amit ez az este hozott felszínre
+
+1. ⛔⛔ **Az ideiglenes IPv6-cím nem adható ki előre.** A telefon „privacy" címe **négy óra
+   alatt háromszor** cserélődött (`…4642:…621` → `…3f0d:…99e6` → `…1d80:…e12`). Egy előre
+   megbeszélt cím **a kimondás pillanatában elavulhat**. ⭐ *Eddig a randevút azért terveztük,
+   mert a fúrás egyidejűséget kíván; most kiderült, hogy a **cím érvényessége** miatt amúgy is
+   kötelező lenne.*
+2. ⛔ **A tükör `udp4`-re van drótozva** (`pajzsfuro.js:167`, `kulsoCim`). Ezért IPv6-on a
+   fúró **vak**: nem tudja megmondani, mit adjunk át a másiknak. Négy óra ment el erre.
+3. ⚠️ **A fúró nem mondja meg, melyik SAJÁT címéről szól ki.** Két globális IPv6 mellett az
+   OS választ, és ha nem azt adtuk meg a másiknak, a rés **a másik címhez** nyílik — a
+   csomagok némán elvesznek, **tökéletes szimmetriában**, ami elfedi az okot. A javítás egy
+   `localAddress` a `connect()`-ben, és **ugyanannak a címnek a kiírása** átadásra.
+
+### ⚠️ Egy mérési bizonytalanság, felírva
+
+Ugyanarra a csere-körre az egyik oldal **807 bájtot** mondott, a másik **1,4 KB-ot**. A két
+szám **nem ugyanazt számolja** (küldött vs. teljes forgalom). Nem hiba, de a **6. szabály**
+miatt — az adat-csomag mérete **kemény** korlát — tudni kell, melyik a mérce.
+
+---
+
+## 18. ⭐⭐⭐ CÉLFÜGGETLEN-E A ROUTER TCP-LEKÉPEZÉSE? (2026-09-13)
+
+`node meres/tcpLekepezesMeres.js [helyi port]`
+
+*A 17. mérés nyitva hagyta a TCP-pajzsfúrás kérdését, és Csaba döntése az volt, hogy **előbb
+a mérés, ne az építés**: „Enélkül ha megépítjük a TCP külső-port felderítést, lehet, hogy egy
+elvi falnak építünk."* ⛔ **A fal nincs ott.**
+
+### A kérdés, és miért eldöntő
+
+- **célfüggetlen** leképezés → ugyanaz a helyi port MINDEN célpont felé UGYANAZT a külső
+  portot kapja. A tükörtől kapott szám tehát **egy harmadik félre is érvényes**, vagyis
+  bemondható → a TCP-fúrásnak van értelme.
+- **cél-függő** leképezés → minden célponthoz új külső port jár. A tükör válasza **csak a
+  tükörre igaz**, a társra nem → a TCP-pajzsfúrás **lehetetlen, semmilyen programmal**.
+
+### Az eredmény
+
+```
+1. KONTROLL — UDP (erről tudtuk: célfüggetlen)
+  10 tükör felelt, mind:  31.46.250.205:6251
+
+2. ELŐSZŰRÉS — TCP, RÖPKE portról (csak elérhetőség)
+  nextcloud  ✓ 31.46.250.205:63543
+  antisip    ✓ 31.46.250.205:63598
+  dus        ✓ 31.46.250.205:63600      (a többi 14 néma vagy elutasít)
+
+3. A MÉRÉS — TCP, mindig a 7373-es HELYI portról
+  nextcloud  ✓ 31.46.250.205:63539
+  antisip    ✓ 31.46.250.205:63539
+  dus        ✓ 31.46.250.205:63539
+
+  UDP: ⭐ CÉLFÜGGETLEN      TCP: ⭐ CÉLFÜGGETLEN
+```
+
+### ⭐⭐ Amit ez megmond
+
+1. ⭐⭐⭐ **A TCP-leképezés célfüggetlen** — három **különböző cég, három különböző IP**, és
+   mindhárom **ugyanazt** a külső portot látja. *A TCP-pajzsfúrásnak tehát van értelme, és a
+   17. mérés bukása valóban csak azon múlt, hogy a fúró nem kérdezi meg a saját portját.*
+2. ⭐ **A port átíródik, de KISZÁMÍTHATÓAN:** 7373 → 63539. Nem az a baj, hogy más szám —
+   hanem az volt, hogy **nem kérdeztük meg**.
+3. ⭐⭐ **És a mérés bizonyítottan nem vak:** a **röpke** portokról három **különböző** szám
+   jött (63543 · 63598 · 63600), a **rögzített** portról **háromszor ugyanaz**. *A mérés
+   tehát érzékeny a helyi portra, és érzéketlen a célpontra — pontosan ez a célfüggetlenség.*
+
+### ⚠️ Amit ez a mérés NEM mond meg
+
+- **Nem bizonyítja, hogy a NEGYEDIK kapcsolat is ugyanazt a portot kapja.** Három egymás
+  utáni kapcsolat tartotta a leképezést; ez erős jel, nem tétel. *A fúrásnál ezért a mérésnek
+  ugyanabban a menetben kell megtörténnie, mint a kopogásnak.*
+- **A társ oldaláról semmit** — a 17. mérés szerint az ő routere megtartja a portot, de az
+  egy másik hálózat.
+- **Nem méri, hogy a rés valóban átfúrható-e TCP-vel.** Ez elvi akadályt zárt ki, nem sikert
+  igazolt. *A választ egy újabb terepmérés adja meg.*
+
+### ⛔ Két SAJÁT mérési hibát fogott meg ez a lap — felírva
+
+1. ⛔⛔ **Az első futás IPv6-on kapott választ, és a kód IPv4-nek olvasta.** A `pajzsfuro.js`
+   `stunbolCim`-je **vakon négy bájtot olvas IPv4-ként**, a család-bájt megnézése nélkül —
+   így a nextcloud IPv6-válaszából `32.1.76.77` lett, ami valójában a **saját `2001:4c4d…`
+   címem első négy bájtja**. *A mérés nem hazudott volna nagyobbat, ha kitalálja a számot.*
+   ✅ Itt javítva (család-bájt + `family: 4`), ⏸️ **de a `pajzsfuro.js`-ben még benne van.**
+2. ⛔⛔ **A második futáson mind az öt tükör `EADDRINUSE`-szal bukott** — mert egy válasz
+   nélkül elakadt kapcsolat `SYN_SENT`-ben **fogva tartja a rögzített helyi portot**. *Ez a
+   kép a routerről szólt volna, pedig a MI sorrendünk volt rossz.* ✅ Megoldás: **előszűrés
+   röpke portról** (ki felel egyáltalán?), és a rögzített portot csak a beszédesekre költjük.
+
+⭐ *Mindkettő ugyanaz a tanulság, sokadszor: a mérőeszközt is meg kell mérni. Az első két
+futás „eredménye" magabiztos és hamis volt.*
+
+---
+
+## 19. ⭐⭐⭐ A TCP-PAJZSFÚRÁS ÁTMEGY KÉT VALÓDI HÁLÓZAT KÖZÖTT (2026-09-13, 23:34)
+
+*Ez a Szakasz 2 utolsó nyitott kérdése, és a napló szerint **soha korábban nem mértük meg**:
+a 2026-08-29-i és a mai 17. mérés egyaránt **UDP**-vel ment. A válasz: **IGEN**.*
+
+```
+⭐ KÍVÜLRŐL ÍGY LÁTSZOM TCP-N: 31.46.250.205:63517   (a helyi 7373-esről, nextcloud szerint)
+   ⚠ A router átírta a portot (7373 → 63517) — ezért KELL bemondani.
+
+  23:30:23 → 1. próbálkozás…      ✗ némán eldobták
+  …  (15 próbálkozás, amíg a másik fél a RÉGI számomra kopogott)
+  23:34:08 → 16. próbálkozás…
+     ⭐ ÁTFÚRVA a 16. próbálkozásra! (11474 ms)
+
+⭐ A PAJZS ÁTFÚRVA — most jön a csere ugyanezen a kapcsolaton.
+Csere kész — kaptam 0 új eseményt, küldtem 0 (1 kör)
+```
+
+| | Gép (itthon) | Telefon (a szomszédban) |
+|---|---|---|
+| **külső TCP-cím** | `31.46.250.205:63517` | `5.187.186.127:7373` |
+| a NAT viselkedése | **átírja** a portot | **megtartja** a portot |
+| **átfúrva TCP-vel** | ⭐ a 16. próbálkozásra (11 474 ms) | ⭐⭐ **az 1.-re, 76 ms** |
+| **a csere a résen** | ✓ 1 kör | ✓ 1 kör |
+
+⭐⭐ **A 76 MS A VALÓDI SZÁM, ugyanúgy, mint a 17. mérésnél.** A telefon azért fúrt át az
+**első** próbálkozásra, mert a másik oldal addigra már folyamatosan kopogott — a rés készen
+állt, csak a helyes szám hiányzott. *A gép 16 próbálkozása nem a fúrás ára volt, hanem a
+rossz címé és a várakozásé.*
+
+⚠️ **És egy mellékes lelet a telefon naplójából: az ANDROID ALTATÁSA látszik.** A 13 mp-esre
+tervezett próbálkozások közül kettő **218 843 ms** és **100 667 ms** lett — a készülék aludt,
+és az óra megnyúlt. *Ez nem a hálózat lassúsága; ez az, amiért a buli-szám mérésénél is az
+alvó készülék volt a legnehezebb eset (13. mérés).*
+
+### ⭐⭐⭐ Amit ez eldönt
+
+1. ⭐⭐⭐ **A TCP-pajzsfúrás MŰKÖDIK két hétköznapi hálózat között** — továbbító nélkül,
+   port-továbbítási szabály nélkül, egyik routeren sem állítottunk be semmit. ⭐ **És a koino
+   cseréje átment rajta**, ugyanazon a kapcsolaton.
+2. ⭐⭐ **A TCP negyven évnyi csiszolása elérhető** — ablak, torlódás-vezérlés, újraküldés —,
+   **ott, ahol a router célfüggetlen.** ⛔⛔ **DE EBBŐL NEM LETT „az ablakot nem kell
+   megépíteni": Csaba a mérés után az ELLENKEZŐJÉT döntötte** — lásd a lap alján.
+3. ⭐ **A 18. mérés helyesnek bizonyult a gyakorlatban is:** a célfüggetlen leképezés miatt a
+   tükörtől kapott szám **a társra is érvényes volt** — a fúrás pontosan arra a portra ért be.
+
+### ⛔⛔ ÉS AMIT A MÉRÉS KÖZBEN ÉLŐBEN MEGMUTATOTT: A SZÁM NEM ADHATÓ KI ELŐRE
+
+A külső TCP-portom **három futáson át három különböző szám volt**:
+
+```
+63539  (a 18. mérés)        63495  (próba-futás)        63517  (az éles fúrás)
+```
+
+⛔ A társ az **első tizenöt próbálkozás alatt a RÉGI számomra kopogott** — ezért a néma
+eldobások. A siker abban a percben jött, amikor a **friss** számmal indult újra.
+
+⭐⭐⭐ **Ez a BULI (randevú) harmadik, egymástól független igazolása egy estén:**
+
+- az ideiglenes **IPv6-cím** négy óra alatt háromszor cserélődött (17. mérés),
+- a külső **UDP-port** foglalatonként más (17. mérés),
+- és most a külső **TCP-port** futásonként más (19. mérés).
+
+*A címet tehát nem lehet előre megbeszélni — csak a találkozás pillanatában átadni. A buli
+nem kényelem, hanem működési feltétel.* ⭐ És a fúró mostantól **magától kimondja** a saját
+számát (18. mérés nyomán), tehát a bulinak már van mit átadnia.
+
+### ⚠️ Amit ez a mérés NEM mond meg
+
+- **Egy hálózat-pár.** Az egyik oldal port-átíró, a másik port-megtartó. ⏸️ **Két port-átíró
+  NAT között** (pl. két CGNAT) újra kell mérni — ott nehezebb.
+- **A számcsere kézi volt.** A fúrás sikerült, de a portokat mi írtuk át egymásnak; a buli
+  ezt fogja elvégezni, és az még nincs megépítve.
+- **Nem mértük a sebességet** a TCP-résen — csak azt, hogy a csere lefut rajta.
+
+### ⛔⛔⛔ ÉS A DÖNTÉS, AMIT EZ A HÁROM MÉRÉS EGYÜTT HOZOTT (Csaba, 2026-09-13)
+
+> *„Ez egy nagyon fontos különbség, ami nekem azt mondja, hogy az UDP-ét kell használnunk, és
+> nem ússzuk meg a munkát. De ez nem baj, ha ettől lesz készülék- és router-független."*
+
+⭐⭐⭐ **A mérés tehát NEM azt döntötte el, hogy melyik a gyorsabb, hanem hogy melyik az,
+AMELYIK MINDENHOL MŰKÖDIK.** A különbség nem sebességbeli, hanem szerkezeti:
+
+- ⭐ **UDP: egy foglalat = egy leképezés.** A fúró **abból a foglalatból** méri meg a portját,
+  amellyel kopogni fog — a szám tehát **biztosan igaz**, amíg a foglalat él. *Ez a modellből
+  következik, nem a router jóindulatából.*
+- ⚠️ **TCP: minden kapcsolat külön kapcsolat.** Csak azért osztoznak egy leképezésen, mert ez
+  a router **célfüggetlen** (18. mérés). ⛔ Egy cél-függő NAT mögött a TCP-fúrás **elvi okból
+  lehetetlen** — semmilyen programmal.
+
+⛔⛔ **ÉS ITT A 9. SZABÁLY SZÓL:** *„ez mit csinál egymilliárd e-embernél?"* — egymilliárdnál
+**nem lehet előfeltétel, hogy a router célfüggetlen legyen.** Ami a 19. mérésben sikerült, az
+ezen az egy vonalon sikerült; a 9. szabály szerint a verzió-eltéréshez hasonlóan a
+**router-eltérés is alapállapot, nem kivétel**.
+
+⭐ **Következmény, kimondva:** a **UDP-vonal ABLAKÁT MEG KELL ÉPÍTENI** (16. mérés: a mai
+stop-and-wait 1 ms/csomag késleltetésnél **25 KB/s**). ⏸️ Az ablak a `udpVonal.js`-ben marad,
+és a fájl-átvitel **egyetlen sorának változtatása nélkül** — mert az átvitel a kapcsolatot
+**kapja**, nem ő nyitja (1. szabály).
+
+⭐ **A TCP-út nem vész el, csak lefokozódik:** marad **alkalmi gyorssáv** ott, ahol a vonal
+engedi (a `tcpLekepezesMeres.js` meg tudja mondani, hogy engedi-e). *Az 1. szabály — a
+szállítás cserélhető marad — épp ezt teszi olcsóvá: kettő megtartása nem két gépezet, mert a
+`parbeszed` mindkettőn változatlanul fut.*
+
+---
+
+## 20. ⭐⭐⭐ AZ ABLAK — a UDP-vonal nagyságrendet ugrott (2026-09-14, D67 / 3. darab)
+
+*A **D67** négy darabja közül ez a harmadik. ⚠️ És **nem ebben a sorrendben kezdtük**: előbb
+a mért RTT-vel próbálkoztam (1. darab), amit a mérés **megbuktatott** — lásd lentebb.*
+
+### Amit a vonal kapott
+
+- ⭐ **Csúszóablak**: egy helyett **`ABLAK` = 16** darab lehet egyszerre úton.
+- ⭐⭐ **Gyors újraküldés**: ha egy **későbbi** darabot már nyugtáztak, az **bizonyíték**,
+  hogy a korábbi elveszett — a hálózat ugyanis továbbvitte azt, ami utána indult. *Nem kell
+  megvárni az órát.* ⚠️ Három ilyen jel után lépünk, mert a **sorrend-csere** önmagában még
+  nem vesztés (ugyanaz a szám, amit a TCP is használ, és ugyanazért).
+- ⛔ **A fogadó puffer korlátos lett**: az `ABLAK`-on túli darabot **nem tároljuk és nem is
+  nyugtázzuk**. *Ez korábban korlát nélküli térkép volt — egy gyors vagy rosszindulatú társ
+  határtalanul növelhette a memóriánkat. Ma is defekt volt, nem csak skálázási kérdés.*
+
+### ⭐⭐ Az eredmény: mindenütt nagyságrend
+
+```
+  vonal                         előtte        ablakkal      szorzó
+  ──────────────────────────────────────────────────────────────────
+  +1 ms                        24 KB/s       460 KB/s        19x
+  +5 ms                        23 KB/s       294 KB/s        13x
+  1 ms ± 20 ms szórás          19 KB/s       212 KB/s        11x
+  1 ms, 1% vesztés             20 KB/s       370 KB/s        18x
+  1 ms, 5% vesztés             11 KB/s       346 KB/s        31x
+  1 ms, 15% vesztés             4 KB/s        53 KB/s        13x
+  400 ms oda-vissza             1 KB/s        10 KB/s        10x
+  800 ms oda-vissza             1 KB/s         5 KB/s         5x
+```
+
+⭐ És a **csere** (4 esemény, ötször futtatva, vesztéssel):
+
+```
+  vesztés     régi (stop-and-wait)   1. darab (mért RTT)      ABLAKKAL
+  ─────────────────────────────────────────────────────────────────────
+    0%              9 ms                   8 ms                 8 ms
+   10%            875 ms                1153 ms               870 ms
+   30%           4173 ms              7393 ms, 1 BUKÁS        2552 ms
+   50%          10403 ms              ⛔ mind az 5 BUKÁS      4235 ms
+```
+
+### ⛔⛔⛔ ÉS A LEGFONTOSABB TANULSÁG: A SORRENDEMET A MÉRÉS CÁFOLTA
+
+Azt terveztem, hogy **a mért RTT-vel kezdünk** (1. darab), mert annak volt a legerősebb
+bizonyítéka (a lassú vonalon ×2,0 és ×3,0 pazarlás). ⭐ Meg is építettem, és **a lassú vonalat
+meg is javította** (×3,0 → ×1,0). ⛔⛔ **De erős veszteségnél ELROMLOTT tőle a vonal:** 30%-nál
+egy bukás, 50%-nál mind az öt.
+
+⭐⭐⭐ **Az ok szerkezeti, nem hangolási:** a visszalépő újraküldési idő 100 → 200 → … →
+12 800 ms-ig nőtt egy olyan vonalon, aminek a **mért** oda-vissza ideje **1 ms**. ⚠️ **És ez
+pontosan az, amit a TCP is csinál** — csak ott ártalmatlan, mert a TCP a veszteségek nagy
+részét **nem az órából** tudja meg, hanem a **sorrenden kívüli nyugtákból**. ⛔ Stop-and-wait
+mellett viszont **az óra az EGYETLEN veszteség-jel**, tehát egy óvatos óra végzetes.
+
+⭐ **Vagyis az ablak nem gyorsítás, hanem ELŐFELTÉTEL:** ő adja a második veszteség-jelet, és
+attól lesz a konzervatív óra ritka tartalék ahelyett, hogy a fő út lenne. *A mért RTT ezután
+jöhet — most már biztonságosan.*
+
+⚠️ **A 1. darab kódját visszavettük** (Csaba döntése), hogy az ablak tiszta lappal épüljön.
+A mérése viszont megmarad: **így tudjuk, hogy a sorrend számít.**
+
+### ⚠️ Amit ez a mérés NEM mond meg
+
+- **A pazarlás nem tűnt el, sőt:** ×1,4–1,7 vesztés és szórás mellett (a gyors újraküldés
+  néha feleslegesen lép), és a lassú vonalon **változatlanul ×2,0 / ×3,0** — *mert az
+  újraküldési idő még mindig a beégetett 300 ms.* ⏸️ Ezt a D67 1. darabja fogja elvenni.
+- **Az ablak fix 16.** ⏸️ A **4. darab** (veszteségre feleződő ablak) teszi alkalmazkodóvá —
+  addig egy zsúfolt vonalon mi is lehetünk a baj.
+- **Helyben nem gyorsult** (2133 vs. 2667 KB/s): ott nincs mit átfedni, az ablak csak
+  könyvelés. *A haszon ott van, ahol a vonalnak hossza van.*
+
+### ⭐ Három új önpróba, és a rontás-próba
+
+`csereProba.js`: **több darab megy ki egyetlen nyugta nélkül** · **a nyugta helyet csinál** ·
+**az ablakon túli darabot nem nyugtázzuk**. ⚠️ A próbák **bábu-foglalatot** használnak, nem
+valódi hálózatot — így pontosan megszámolható, hány darab ment ki nyugta előtt; valódi
+hálózaton ezt csak találgatni lehetne. ⭐ **Rontás-próbával igazolva:** `ABLAK = 1`-re
+állítva (a régi stop-and-wait) az első próba **azonnal bukik**.
+
+---
+
+## 21. ⭐⭐ A MÉRT ÚJRAKÜLDÉSI IDŐ — az ablak tetején (2026-09-14, D67 / 1. darab)
+
+*A **D67** 1. darabja, **másodszorra**. Először az ablak ELŐTT próbáltuk (20. mérés), és a
+mérés megbuktatta; most az ablak tetején épült meg — és most már fizet.*
+
+### Az eredmény
+
+```
+  vonal                    stop-and-wait    ablak      ablak + mért RTT
+  ─────────────────────────────────────────────────────────────────────
+  +1 ms                        24 KB/s     460 KB/s        454 KB/s
+  1 ms, 1% vesztés             20 KB/s     370 KB/s        582 KB/s
+  1 ms, 15% vesztés             4 KB/s      53 KB/s         78 KB/s
+  400 ms oda-vissza (8 KB)      1 KB/s      10 KB/s         10 KB/s   (×3,0 → ×1,9)
+  400 ms oda-vissza (64 KB)        ~2 KB/s      —           22 KB/s   (×1,4)
+
+  csere 4 eseménnyel, ötször futtatva (átlag):
+   10% vesztés                 875 ms      870 ms           51 ms
+   30% vesztés                4173 ms     2552 ms         1028 ms
+   50% vesztés               10403 ms     4235 ms        25127 ms
+```
+
+### ⭐ Amit a darab hozott
+
+1. ⭐⭐⭐ **PONTOS MINTÁK KARN HELYETT.** A klasszikus gond, hogy nem tudni, melyik küldésre
+   felel a nyugta — a régi válasz erre Karn szabálya (*újraküldöttből ne mérj*). ⭐ Mi
+   **megszüntettük a kétértelműséget**, ahogy a QUIC: minden újraküldés **sorszámot** visz
+   (`k`), a nyugta **visszamondja**, tehát **minden nyugta pontos minta**. ⭐ **És ez nem
+   kerül bájtot a szokásos esetben** (6. szabály): az **első** küldésen nincs `k`, és a `k`
+   nélküli nyugta épp azt jelenti, hogy az elsőre felel. *A többletbájt csak ott van, ahol
+   amúgy is baj van.*
+2. ⭐ **A visszalépést a nyugta feloldja** — ha most jutott át forgalom, az út él, nincs mit
+   kímélni. *A TCP is a nyugtánál állítja vissza az óráját.*
+3. ⭐ **A vak óra csak a legrégebbi darabot szondázza.** Mérés nélkül minden óra puszta tipp;
+   abból **egy szonda elég, kilenc nem** (×1,9 pazarlás volt belőle). ⚠️ Mért óra esetén ez
+   már nem áll — ott az óra **bizonyíték** az adott darabról —, és a rászűkítés nélkül 15%
+   veszteségnél 430 → **8177 ms**-ra romlott a fájl-átvitel. *Ugyanaz a szabály két
+   helyzetben ellentétesen helyes.*
+4. ⛔ **A kezdőérték 1000 → 300 ms.** Az RFC 1 másodpercet mond — a TCP megteheti, mert a
+   **kézfogásból** már van mintája, mielőtt adatot küldene. A mi vonalunknak nincs külön
+   kézfogása: **az első darab maga a kézfogás**. *Egy vak tipp ezerszeres tévedése minden
+   további duplázásba beleszorzódik.*
+5. ⛔⛔ **ÉS EGY ELVI ELLENTMONDÁS, AMIT A MÉRÉS MUTATOTT MEG:** a visszalépő óra 3,2
+   másodperces várakozásokig nőtt, miközben a 30 mp-es feladási keretből alig maradt. *Egy
+   olyan várakozás, ami után nem fér bele újabb próbálkozás, nem türelem, hanem **garantált
+   bukás türelemnek öltözve**.* ✅ Mostantól az RTO sosem több a **maradék keret negyedénél**.
+
+### ⛔ ÉS AMIT NYÍLTAN KI KELL MONDANI: 50% VESZTESÉGNÉL LASSABB, MINT A RÉGI
+
+**10 403 → 25 127 ms.** ⚠️ Bukás nincs, de ez **2,4-szeres romlás** egy ponton, miközben
+0–30% között 4–17-szeres a javulás.
+
+⭐ **Az ok nem hiba, hanem a viselkedés ára:** a régi kód **soha nem lépett vissza** — 300
+ezredmásodpercenként hajtotta a vonalat, akármi volt. Ez gyorsabb egy véletlenszerűen
+vesztő vonalon, és pontosan az a viselkedés, ami egy **torlódott** vonalon a bajt okozza.
+⛔ 50% csomagvesztés = **75% oda-vissza bukás**: ez nem egészséges vonal.
+
+⏸️ **És van szerkezeti ok remélni, hogy javul:** ma az óra **és** az ablak is a torlódásra
+reagál (visszalépéssel), vagyis **átfedik egymást**. A **D67 / 4. darabja** (veszteségre
+feleződő ablak) veszi át a torlódás-választ — utána az óra megengedheti magának, hogy
+kevésbé legyen türelmes. *Ez nem ígéret, hanem a következő mérés kérdése.*
+
+### ⚠️ Ami nyitva marad
+
+- **A lassú vonal indulási lökete:** 8 KB-nál ×1,9, de 64 KB-nál már **×1,4** — *a löket
+  elolvad, ha van mit átvinni.* ⏸️ Teljesen a kézfogásból nyert kezdő RTT szüntetné meg (a
+  pajzsfúrás **már megmérte**: a terepmérésen 76 ms).
+- **A ×1,5–1,8 pazarlás veszteség és szórás mellett** — a gyors újraküldés néha fölöslegesen
+  lép. ⏸️ A 4. darab után újramérendő.
+
+---
+
+## 22. ⭐⭐ AZ ALKALMAZKODÓ ABLAK — AIMD (2026-09-14, D67 / 4. darab)
+
+*A D67 utolsó darabja. ⭐ És a legfontosabb, amit meg kell érteni róla: **ez a darab
+SZÁNDÉKOSAN LASSÍT** bizonyos vonalakon — mert nem a sebességről szól, hanem arról, hogy
+**ne mi legyünk a baj**.*
+
+### A szabály
+
+- **siker** → az ablak **lassan nő** (+1 darab körönként),
+- **vesztés** → **felére csökken**, azonnal.
+
+⚠️ **Az aszimmetria a lényeg, nem mellékhatás:** így a vonalat megosztó felek **egyensúlyba
+kerülnek** egymással ahelyett, hogy a legagresszívabb vinné el az egészet. ⛔ **Egy
+vesztés-esemény = egy felezés**: egy elveszett körben több darab is hiányozhat, és ha
+mindegyikre feleznénk, egyetlen zavar a földbe döngölné az ablakot.
+
+### Az eredmény — és a két irány
+
+```
+  vonal                     ablak+RTT (21.)    +AIMD (22.)     csomag
+  ─────────────────────────────────────────────────────────────────────
+  +1 ms                        454 KB/s        593 KB/s      182 → 182
+  1 ms ± 20 ms szórás          234 KB/s        221 KB/s      294 → 292
+  1 ms, 1% vesztés             582 KB/s        287 KB/s      253 → 198  (×1,4 → ×1,1)
+  1 ms, 5% vesztés             356 KB/s        104 KB/s      281 → 226  (×1,5 → ×1,2)
+  1 ms, 15% vesztés             78 KB/s         39 KB/s      332 → 254  (×1,8 → ×1,4)
+
+  csere 4 eseménnyel (átlag):   10%  51 → 203 ms · 30%  1028 → 2108 ms
+```
+
+⭐⭐ **A csomag-oszlop a lényeg:** veszteséges vonalon **egyharmaddal kevesebb csomagot**
+küldünk (×1,8 → ×1,4). *A lassulás nem ár nélküli veszteség — pontosan az a forgalom tűnt
+el, amivel a torlódást etettük volna.*
+
+⚠️ **És ez megfelel az elméletnek:** a veszteség-alapú torlódás-vezérlés átbocsátása a
+veszteséggel fordítottan, a gyök szerint romlik. ⛔ **Egy VÉLETLENSZERŰEN vesztő** (nem
+torlódott) vonalon ez **túlreagálás** — de a küldő **nem tudja megkülönböztetni** a kettőt,
+és a tévedés két iránya nem egyenrangú: *aki tévedésből visszafog, lassabb lesz; aki
+tévedésből hajt, összeomlást okoz másoknak is.*
+
+### ⛔⛔ ÉS EGY VALÓDI HIBÁT A MÉRÉS AZONNAL KIDOBOTT
+
+Az első futásnál `1 ms ± 20 ms` szórásnál, **nulla veszteség mellett** a sebesség
+**234 → 106 KB/s**-ra esett. ⭐ Az ok: a **sorrend-csere** hármas „előrébb járó" nyugtát ad,
+amit a gyors újraküldés vesztésnek olvas — *a vonal nem volt torlódott, csak rendetlen.*
+
+⭐⭐⭐ **És a bizonyíték ingyen megvolt, az 1. darabból:** a nyugta **visszamondja, melyik
+küldésre felel**. Ha az **ELSŐ** küldésre jön nyugta egy olyan darabra, amit közben
+újraküldtünk, akkor az eredeti **megérkezett** — tehát nem veszett el, csak késett, és a
+felezés **téves volt**. ✅ Ilyenkor visszaadjuk az ablakot (`tevesFelezes`), és a szórás-sor
+visszaállt **221 KB/s**-ra. *Ugyanaz a mechanizmus, ami a pontos RTT-mintát adta, itt a téves
+torlódás-jelet is kiszűri — egy mező, két haszon.*
+
+### ⭐ Két új önpróba, rontás-próbával
+
+`csereProba.js`: **az ablak feleződik vesztéskor** (hét felszabadult hely után is legfeljebb
+kettő új darab indul — *felezés nélkül mind a hét indulna*) · **az ablak nő, ha minden
+átmegy** (száz sikeres nyugta után ~21 darab van úton, **nem 64** — az additív növekedés
+lassan tapogat). ⭐ Mindkettő **bukik**, ha a felezést vagy a növelést kikapcsoljuk.
+
+⚠️ **A felezés-próba első változata NULLA új darabot várt, és emiatt bukott** — pedig a kód
+jó volt: a vesztés csak a **harmadik** jelre bizonyított, tehát az első két nyugta még a
+régi, tág ablakkal szabadít helyet. *A várakozásom volt rossz, nem a mérés tárgya.*
+
+### ⏸️ Ami nyitva marad
+
+- **Nincs lassú indítás** (slow start): az ablak 16-ról indul, nem 1-ről duplázva. ⭐ Rövid
+  cseréknél ez előny, nagy fájlnál a 64-es plafon elérése lassabb. ⏸️ Méréssel eldönthető.
+- **A véletlen vesztés és a torlódás megkülönböztetése** — ehhez ütem-alapú vezérlés
+  kellene (a BBR iránya). ⏸️ Más nagyságrendű munka; ma nem indokolt.
+- **A lassú vonal indulási lökete** (×1,9 nyolc kilobájtnál) változatlan — az a kezdő RTO-é,
+  nem az ablaké.
+
+---
+
+## 23. ⭐⭐⭐ A MŰSZER MEGTANUL TORLÓDNI — és rögtön kimutat egy bajt (2026-09-14)
+
+*A következő lépés a **késleltetés-alapú torlódás-jel** lenne (a véletlen vesztés és a
+torlódás megkülönböztetése). ⛔ De a műszerünk **torlódást egyáltalán nem tudott
+szimulálni**: a késleltetés állandó volt, nem függött attól, hány darab van úton. Így csak a
+**hízelgő felét** tudtuk volna megmérni.*
+
+### A modell: egy kiszolgáló, egy sor
+
+A szűk keresztmetszet másodpercenként `savszelesseg` darabot visz át; a többi **sorban áll**
+(ettől nő a késleltetés), és ha a sor megtelik, a csomag **elveszik**. ⭐ *Ez a torlódás — és
+itt a küldő MAGA okozza, nem a vonal zaja.*
+
+### ⛔⛔ ÉS AZ ELSŐ FUTÁS AZONNAL KIMUTATOTT EGY BAJT
+
+```
+  UDP-rés (2000 darab/mp, 5 ms)    64 KB    197 ms   325 KB/s   182 csomag  sor: 13
+  UDP-rés (500 darab/mp, 5 ms)     64 KB    260 ms   246 KB/s   182 csomag  sor: 14
+  UDP-rés (500 darab/mp, 8-as sor) 64 KB    323 ms   198 KB/s   210 csomag  sor:  8  14 torlódásos
+```
+
+⭐⭐⭐ **A `sor:` oszlop a lelet: 13–14.** Az ablak 16 — vagyis a küldő **majdnem a teljes
+ablakával teletömi a szűk keresztmetszet sorát**, és **egyetlen csomag sem vész el**. ⛔ Az
+AIMD ezért **soha nem is értesül róla**: nincs vesztés, tehát nincs felezés.
+
+⚠️ **Ez a „bufferbloat", és nem a mi sebességünket rontja, hanem MINDENKI MÁSÉT:** aki
+ugyanazon a szűk keresztmetszeten osztozik velünk, a mi 14 darabunk mögé áll be. *A koino
+szabálya erre világos — „ne mi legyünk a baj" —, és ma megszegjük.*
+
+⭐ **És a harmadik sor bizonyítja, hogy a torlódásos ELDOBÁS ága is él** (14 eldobás, 6,7%
+vesztés): ha a puffer kicsi, a 16-os ablak **túlcsordítja**. *Egy méretlen ág olyan, mint egy
+vak próba — ezért került külön sorba.*
+
+### ⏸️ Ez a KÖVETKEZŐ LÉPÉS MÉRCÉJE
+
+A késleltetés-alapú jel akkor lesz jó, ha:
+
+- ⭐ **a `sor:` oszlop 13–14-ről 1–2-re esik** — vagyis nem tömjük tele a vonalat,
+- ⭐ **a véletlenül vesztő sorok NEM romlanak** (1%/5%/15%: ma 287/104/39 KB/s) — ott nincs
+  torlódás, tehát nem szabad visszafogni,
+- ⚠️ és a torlódásos sor **nem lesz lassabb** annál, amit ma mérünk.
+
+*A cél tehát nem a sebesség, hanem hogy a két helyzetet a vonal MEGKÜLÖNBÖZTESSE.*
+
+⭐⭐⭐ **ÉS A DÖNTÉS MEGSZÜLETETT ERRE — D68 (Csaba, 2026-09-14):** a jel a **késleltetés**
+legyen, a **fájl-átvitel engedékeny** (a csere nem), és ⭐⭐ **a REDUNDANCIA teszi
+megfizethetővé**: ha ugyanazt több társ is hozza, a visszafogás **nem állítja meg a munkát** —
+*ez a ritka tulajdonság, ami a MÉRETTEL JAVUL.*
+
+⛔⛔ **DE A KÖVETKEZŐ MÉRÉS NEM EZ, HANEM A MŰSZERÉ: VERSENGŐ FOLYAM.** Ma az `udpParos()`
+**egyetlen** folyamot enged a szűk keresztmetszeten át — vagyis a fenti mérce **fele
+méretlen**: nem tudjuk megmérni, hogy **eleget engedünk-e** másnak, és hogy minket
+**kiéheztet-e** egy veszteség-alapú versenytárs. *Egy méretlen ág olyan, mint egy vak próba —
+és épp ezt mondtuk ki két bekezdéssel feljebb.*
+
+⚠️ **És egy modellezendő kockázat:** mobilvonalon az oda-vissza idő attól is ingadozik, aminek
+semmi köze a sorbanálláshoz (rádiós ütemezés, cellaváltás, link-szintű újraküldés) — ott a
+késleltetés-jel **fölöslegesen is visszafoghat**. *Romlás, nem törés (a bukás módja itt a
+lényeg), de mérni kell.*
+
+---
+
+## 24. ⭐⭐⭐ A MŰSZER MEGTANUL VERSENGENI — és megméri a KÁRT, amit másnak okozunk (2026-09-14)
+
+**Kérdés:** a 23. mérés kimutatta, hogy teletömjük a szűk keresztmetszet sorát (`sor: 13–14`)
+— de hogy ez **mekkora kár másnak**, az addig **következtetés** volt, nem mérés. És a
+fordítottja is méretlen maradt: ha egy veszteség-alapú szomszéd tolja a vonalat,
+**kiéheztet-e minket**? ⛔ *A D68 mércéjének mindkét fele hiányzott.*
+
+**Futtatás:** `node meres/resSebessegMeres.js` · a műszer:
+[`resSebessegMeres.js`](resSebessegMeres.js) `udpParos({ idegen })`
+
+### A műszer, amivel készült
+
+Az `udpParos()` eddig **egyetlen** folyamot engedett a szűk keresztmetszeten át. Most kapott
+egy második, **„idegen" terhelést**, ami **ugyanazt a sort** tölti — kétféle szomszéd, mert a
+két kérdés kétfélét kíván:
+
+- **`egyenletes`** — állandó ütem (50 csomag/mp, mint egy hívás). ⭐ Ő a **sértett fél**: nem
+  tud visszafogni, tehát amit elszenved, az a **mi kárunk**.
+- **`moho`** — ablakot tart, és csak **vesztésre** fog vissza (mint bárki TCP-je). ⭐ Ő a
+  **versenytárs**: mellette a **mi** átbocsátásunk a lelet.
+
+⭐⭐ **És a sorbanállás kódja EGY helyre került** (`sorbaAll`), mert mostantól két forgalom
+használja. *Ha két helyen állna, nem versengés lenne, hanem két külön vonal — épp azt nem
+mérnénk, ami a kérdés.* ⚠️ Az idegen **nem küld valódi csomagot**, csak **foglalja** a szűk
+keresztmetszetet; a sor nem tudja, ki tette bele a csomagot.
+
+### 1. ⛔⛔ ÁRTUNK-E MÁSNAK? — IGEN, ÉS MOST MÁR SZÁMBAN IS
+
+```
+  UDP-rés + HÍVÁS a vonalon       256 KB      915 ms     280 KB/s    716 csomag  sor: 27
+      ↳ idegen folyam:             30 csomag     átlag 12.8 ms    csúcs 44 ms
+      ↳ ugyanez ÜRES vonalon:      32 csomag      átlag 2.0 ms     csúcs  2 ms
+```
+
+⭐⭐⭐ **A hívás késleltetése 2,0 → 12,8 ms (átlag), a csúcsa 2 → 44 ms.** Hatszoros átlag,
+**huszonkétszeres csúcs** — miközben mi egyetlen csomagot sem veszítünk, tehát az AIMD **nem
+tanul semmit**. *Ez a bufferbloat ára, immár nem érvben, hanem ezredmásodpercben.*
+
+⚠️ **És a szám a valóságban rosszabb:** a mérés egy **0,9 másodperces** átvitelt mutat egy
+gyors helyi vonalon. Otthon a feltöltés lassabb, a fájl nagyobb, és **három egyidejű átvitel**
+fut (Csaba 3. döntése) — ott a hívás nem 44 ms-ot vár, hanem sokszor annyit.
+
+⭐ **A viszonyítás azért kellett, mert enélkül a 12,8 ms semmit nem mondana:** az üres vonalon
+mért **2,0 ms** a vonal sajátja (a szolgálati idő), a különbség a MI sorunk.
+
+### 2. ⭐⭐ KIÉHEZTETNEK-E MINKET? — MA NEM: PONTOSAN FELEZÜNK
+
+```
+  UDP-rés + MOHÓ szomszéd         256 KB     1819 ms     141 KB/s    796 csomag  sor: 32  28 torlódásos
+      ↳ idegen folyam:            534 csomag     átlag 34.6 ms    csúcs 63 ms  ⛔ 0.4% eldobva
+  UDP-rés (ugyanez, EGYEDÜL)      256 KB      912 ms     281 KB/s    716 csomag  sor: 27
+```
+
+⭐ **281 → 141 KB/s**, vagyis a mai, veszteség-alapú vonalunk **felezi a sávot** egy
+TCP-szerű szomszéddal. *Ez az AIMD ígérete, és teljesül: aszimmetrikus szabály → egyensúly.*
+
+⛔⛔ **ÉS EZ A SZÁM A D68 VALÓDI ÁRCÉDULÁJA.** A késleltetés-alapú jel ismert gyengéje, hogy
+egy mohó szomszéd mellett **visszahúzódik** — vagyis ennek a 141 KB/s-nak a megépítés után
+**romlania fog**. ⭐ *Pontosan ezért kellett MOST megmérni: ez az alapvonal, amihez a
+„mennyit fizettünk az udvariasságért" kérdés mérhető lesz.* ⚠️ És a D68 szerint ez a romlás
+**megengedhető a fájl-átvitelnél** (scavenger), mert a redundancia pótolja — a **cserénél
+nem**.
+
+### ⏸️ Amit ez a mérés MÉG NEM tud
+
+- ⚠️ **A mobilvonal ingadozása** (rádiós ütemezés, cellaváltás) még nincs modellezve — ott a
+  késleltetés-jel **fölöslegesen is visszafoghat**. *Romlás, nem törés, de mérni kell.*
+- ⚠️ **Két koino-folyam egymás mellett** (a 3 egyidejű átvitel esete) nincs külön sorban: ma
+  az idegen szomszéd vagy hívás, vagy TCP-szerű — nem egy másik koino.
+- ⚠️ **A minta mérete határt szab:** 64 KB-os átvitelnél a hívásnak mindössze **9 csomagja**
+  fért bele, ezért mennek a versengő sorok **256 KB-tal** (~30–50 minta). *Kilenc mintából
+  nem szabad átlagot mondani — ezt a mérés maga tanította meg.*
+
+### ⏭️ Innen a D68 következő lépése
+
+A mérce **mindkét fele megvan**. A jel alakja (Vegas / LEDBAT / CDG) most már **méréssel**
+dönthető el, és a cél számokban: `sor:` **27 → 1–2**, a hívás késleltetése **12,8 → ~2 ms**,
+⛔ **anélkül**, hogy a véletlenül vesztő sorok romlanának (1%/5%/15%) — és tudva, hogy a
+mohó-szomszéd melletti **141 KB/s** az, amiből engedünk.
+
+---
+
+## 25. ⛔⛔⛔ A NÉMA HOLTPONT — amit egy „szeszélyes" próba mondott el (2026-09-14)
+
+**A jel:** a 30%-os csomagvesztésű UDP-csere önpróbája **6 futásból 1-szer** bukott — és nem
+csak ma: `git stash`-sel visszaállított, **D67 előtti** kódon is 5-ből 1-szer. ⚠️ *A szakasz
+szabálya szerint egy néha bukó próba nem szeszélyes, hanem igazat mond — csak nem feltétlenül
+arról, amiről hisszük.*
+
+**Műszer:** a bukás **nem-esemény** (teljes csend), tehát naplóból nem látszik. Kellett egy
+lap, ami **minden csomagot feljegyez** (irány, tartalom eleje, idő) és bukásnál kiírja az
+utolsó harmincat, mindkét oldalról — majd ezt 200–300 kísérleten át ismétli.
+
+### ⛔ Két magyarázatomat a mérés cáfolta, mielőtt a harmadikhoz eljutottam
+
+1. *„a lezárt kapcsolat figyelője okozza"* → az **utóhang** bevezetése után is megmaradt.
+2. *„a D67-es visszalépő óra túlnő a tétlenségi órán, tehát emeljük a határidőt 15 000 ms-ra"*
+   → **ugyanúgy bukott**. 15 másodperc teljes csendhez 7–8 egymás utáni vesztés kellene
+   ugyanabból a darabból (0,3^7 ≈ 0,02%) — ez a 3%-ot nem magyarázza.
+
+*Mindkettő érvelés volt, nem mérés. A harmadik nekifutás már a csomag-naplóból indult.*
+
+### ⭐⭐⭐ A mechanizmus, ahogy a napló megmutatta
+
+```
+     0 ms  B KULD-ELVESZETT  {"sz":1,"a":"LENYOMAT…"}     ← B első darabja
+   302 ms  B KULD-ELVESZETT  (újraküldés)
+   909 ms  B KULD-ELVESZETT  (újraküldés)
+   910 ms  B KULD            {"sz":2,"a":"CIMEK…"}        ← a MÁSODIK darab kiment
+   910 ms  A KULD-ELVESZETT  {"ny":2}                     ← …de a nyugtája elveszett
+  2120 ms  B KULD-ELVESZETT  (a sz:1 újra — a sz:2 NEM!)
+  4533 ms  B KULD-ELVESZETT  (a sz:1 újra, 4,8 mp múlva)
+        …és innentől CSEND, amíg a társ tétlenségi órája le nem jár
+```
+
+Három dolog esett egybe, és **egyenként mindhárom helyes volt**:
+
+- a kapcsolat **első** darabja sorozatban elveszett, ezért `srtt` **null** maradt (nincs
+  mintánk) — az óra **vak**;
+- a **vak óra szándékosan csak a LEGRÉGEBBI darabot szondázza** (a 21. mérés döntése:
+  *„mérés nélkül minden óra tipp, abból egy elég, kilenc nem"*), tehát a mögötte álló,
+  már kiküldött darab **meg sem mozdult**;
+- a **visszalépés** közben 300 → 600 → 1200 → 2400 → **4800 ms**-ra nőtt.
+
+⛔⛔ **És ekkor a két őr ELLENTMONDOTT egymásnak:** a mi újraküldésünk 4,8 másodpercig
+hallgatott, a társ **tétlenségi órája** viszont 5 másodperc. *Egy türelem, ami túléli a másik
+fél türelmét, nem türelem, hanem néma bukás.* ⚠️ Ugyanaz a hibafajta, amit a `maradek / 4`
+korlátnál már egyszer kimondtunk — csak ott a saját feladási keretünkkel ütközött, itt a
+**másik fél** türelmével.
+
+### ✅ A javítás: két korlát, mindkettő a meglévő elv kiterjesztése
+
+1. ⭐ **A visszalépés megáll, ha hallottuk a társat.** A kód már kimondta, hogy *„a nyugta
+   bizonyítja, hogy az út él"* — ez **minden tőle érkező csomagra** igaz. ⚠️ De csak a
+   **duplázást** állítjuk meg, az RTO-t nem nullázzuk: a beérkező adat a MÁSIK irányról szól,
+   a torlódás lehet aszimmetrikus. *„Amíg hallom őt, nem ritkítok tovább — de nem is sietek."*
+2. ⭐ **Az RTO sosem több a tétlenségi óra harmadánál.** Ez a **szimmetrikus** esetre kell,
+   amikor egyik fél sem beszél (mindkettő a saját első darabjára vár). A másik fél
+   **ugyanazt a programot futtatja** (a D66 óta ez a koino azonosságából következik), tehát a
+   saját óránkból következtethetünk az övére: így legalább **három szondát** hall.
+
+### A mérés, ami a javítást igazolja
+
+```
+  állapot                                   tétlenségi óra     bukás
+  ─────────────────────────────────────────────────────────────────────
+  eredeti kód                                    5 000 ms      3 / 200   (1,5%)
+  + „hallottam azóta" feloldás                   5 000 ms      2 / 200
+  + a társ türelmének korlátja                   5 000 ms      1 / 300   (0,33%)
+  ugyanaz, az ÉLES órával                       10 000 ms      0 / 300
+```
+
+⭐⭐ **És ezért lett az önpróba határideje is 10 000 ms**: ez a `csereUdpResen` **éles
+alapértéke**, tehát a próba mostantól **azt méri, amit élesben futtatunk**. Az 5000 ms
+önkényes volt (a gyors bukásért választva), és mérve **túl szűk**. *Nem lazítás — a mérce
+igazítása a valódi üzemhez.*
+
+⚠️ **A D67 számai nem romlottak tőle** (három ismételt futás): 1% / 5% / 15% vesztés mellett
+**~300 / 104–110 / 31–35 KB/s** a korábbi 287 / 104 / 39 ellenében — a 15%-os sor a mérés
+szórásán belül, de érdemes szemmel tartani.
+
+⏸️ **Amit ez a mérés nem old meg:** a vak óra rászűkítése a legrégebbi darabra **marad**
+(a 21. mérés szerint nélküle 15% vesztésnél 430 → 8177 ms-ra romlott a fájl-átvitel) — tehát
+a „mögötte álló darab áll" tulajdonság megmaradt, csak a némaság ideje lett korlátos.
+
+---
+
+## 26. ⭐⭐⭐ A JEL ALAKJA: VEGAS vagy LEDBAT? — a mérés döntött (2026-09-15, D68 / 2. lépés)
+
+**Kérdés:** a D68 szerint a torlódás jele legyen a **késleltetés** — de melyik alakban?
+Csaba 1. válasza: *„méréssel dőljön el"*. Két jelölt épült meg, paraméterként
+(`torlodasJel`), hogy **ugyanazon a műszeren, ugyanazokon a helyzeteken** fussanak.
+
+- **Vegas** — a jel a sorban álló darabok **becsült száma** (`ablak × (RTT − minRtt) / RTT`),
+  a küszöb α=2 / β=4 **darab**. ⭐ A küszöb tehát **skálafüggetlen** — a 9. szabály szerint ez
+  a legfontosabb tulajdonsága: *„két darab a sorban" egy 1 ms-os és egy 400 ms-os vonalon
+  ugyanazt jelenti.*
+- **LEDBAT** — a sorbanállási késleltetést tartja egy **cél** alatt. ⛔ A klasszikus 100 ms-os
+  cél **varázsszám** lenne (tilos), ezért nálunk a cél a `minRtt`-hez viszonyul.
+
+### ⛔⛔ Előbb két MŰSZER-HIBÁT kellett megtalálni — mindkettő a jelet fojtotta
+
+1. **A `Date.now()` ezredmásodperc-felbontású**, a helyi vonalon mért oda-vissza idők viszont
+   0–2 ms-ban mozognak. `minRtt` gyakran **0** lett, és akkor a „sorbanállás" a teljes mért
+   időnek látszott. ✅ A minták azóta `performance.now()`-val készülnek (mikroszekundum,
+   beépített, nulla függőség). *A jel a felbontás alatt dolgozott: nem torlódást mért, hanem
+   kerekítést.*
+2. ⭐⭐ **A késleltetés-utánzat `setTimeout`-ja Windowson ~15,6 ms-os kvantálást ad.** Mérve,
+   a jel belső állapotából: egy „+1 ms-os" vonalon `minRtt = 1,8 ms`, a friss minták minimuma
+   viszont **15–31 ms**. ⛔ Vagyis az a vonal nem 1 ms-os volt, hanem **ingadozó, 15 ms-os** —
+   és a jel ezt **helyesen** olvasta sorbanállásnak: 591 → 131 KB/s. *Ez nem a jel hibája,
+   hanem a műszeré.* ✅ A „gyors vonal" sor azóta `kesleltetes: 0` (ott nincs időzítő).
+
+⭐ **És egy harmadik, a jel bemenetén:** először az `srtt`-ből (simított **átlag**) számoltuk a
+sorbanállást, ami a zajt is beépíti. Mostantól az utolsó **8 minta MINIMUMA** a bemenet:
+*a torlódás tartósan emel, a zaj csak szór — a minimum az, ami a kettőt szétválasztja.*
+
+⚠️⚠️ **Mindhármat úgy találtuk meg, hogy a jel kiadta a belső állapotát** (`jelAllapot()`:
+ablak, minRtt, friss, srtt). *A jel alakját nem lehet a végeredményből megítélni — két
+különböző ablak-pálya ugyanazt a sebességet adhatja. Ha nem látjuk, mit csinál, csak
+találgatunk.*
+
+### A mérés (két egybehangzó futás)
+
+```
+  helyzet                           nincs          vegas          ledbat
+  ──────────────────────────────────────────────────────────────────────────
+  szűk vonal + HÍVÁS            281/280 KB/s   227/250 KB/s   273/268 KB/s
+    ↳ a hívás késleltetése       10,9/12,0 ms    3,1/3,9 ms     5,8/6,9 ms
+    ↳ a sor mélysége                 27/27          14/16          22/23
+  5% véletlen vesztés            107/105 KB/s     76/50 KB/s     59/59 KB/s
+  MOHÓ szomszéd mellett          113/134 KB/s     56/75 KB/s    146/38 KB/s
+  gyors vonal, egyedül          4830/4830 KB/s 4923/4741 KB/s 4741/4571 KB/s
+  ingadozó vonal (±20 ms)        239/240 KB/s   210/231 KB/s   207/137 KB/s
+```
+
+### ✅ A DÖNTÉS: VEGAS — és az indok mérésből, nem ízlésből
+
+1. ⭐ **A fő célt ő teljesíti legjobban:** a mellettünk futó hívás késleltetése
+   **12 → 3 ms** (az üres vonal 2,0 ms!), a csúcsa 45 → 19–21 ms. A LEDBAT ugyanitt csak
+   6–8 ms-ig jut.
+2. ⭐ **Az ára a legkisebb ott, ahol számít:** a fő helyzetben −11…−19%, a **gyors, üres
+   vonalon nulla** (4923 vs. 4830 KB/s — nincs mit kímélni, és nem is fog vissza).
+3. ⭐⭐ **Az ingadozó (mobil-szerű) vonalon stabil** (−4…−12%), míg a LEDBAT ott **43%-ot** is
+   veszíthet. *Ez a D68 kimondott kockázata volt — a Vegas jobban viseli.*
+4. ⭐⭐⭐ **A küszöbe darabszám, nem ezredmásodperc** — a 9. szabály próbáján ez az egyetlen,
+   ami átmegy magyarázat nélkül. A LEDBAT célját viszonyítani kellett, és az maga is tipp.
+
+⛔ **Az ára, kimondva:** a **véletlenül vesztő** vonalon −30…−50% (ott nincs torlódás, tehát
+a visszafogás téves), a **mohó szomszéd** mellett pedig feleannyit kapunk. ⭐ *A D68 ezt
+tudatosan vállalja: a fájl-átvitel háttérmunka, és a REDUNDANCIA pótolja — a cseréé nem.*
+
+### ⛔⛔ ÉS EGY CÉL, AMI NEM TELJESÜLT — a mérés megmondta, miért
+
+A D68 célja `sor:` **27 → 1–2** volt. A Vegas **14–16**-ra vitte. ⚠️ Szigorúbb küszöbbel
+(α=1, β=2) sem lett kevesebb: a sor **maradt 14**, csak az ár nőtt (250 → 209 KB/s).
+
+⭐⭐⭐ **Az ok szerkezeti: a `sor:` oszlop a CSÚCSOT méri, azt pedig nem az ablak nagysága
+szabja meg, hanem hogy LÖKETBEN küldünk.** Tizenhat darab egyszerre indul, és a sor abban a
+pillanatban telik meg — akármekkora is az ablak átlagban.
+
+⏭️ **Vagyis a `sor: 1–2`-höz ÜTEMEZÉS kell** (a D68 (d) pontja: a darabokat elosztva küldeni
+az oda-vissza idő alatt), nem szigorúbb küszöb. *Amit korábban „félmegoldásnak" neveztünk,
+az valójában a hiányzó másik fele — és ezt csak a mérés mondta meg.*
+
+---
+
+## 27. ⭐⭐ A SZÉTVÁLASZTÁS ÉS AZ ÜTEMEZÉS — és amit az utóbbiról a mérés mondott (2026-09-15)
+
+**A D68 3. és 4. lépése.** A 26. mérés eldöntötte a jel alakját (Vegas), de két dolog maradt:
+a jel **élesben ki volt kapcsolva**, és a `sor:` oszlop 14–16 maradt a remélt 1–2 helyett.
+
+### ✅ 3. lépés: a szétválasztás — a fájl enged, a csere nem
+
+⭐ A jel **nem a hívó dolga**: a fájl-út magával hozza (`fajlUdpResen`, `fajlRandevu` →
+`vegas`), a csere szintén (`csereUdpResen` → `nincs`). *Ugyanaz az érv, mint a javaslathoz
+tartozó szavazatnál: ha a hívóra bíznánk, az egyik út megtenné, a másik elfelejtené.*
+
+⭐⭐ **És mérhetővé is tettük:** a használt jel **visszakerül az eredménybe** (`torlodasJel`),
+tehát nem naplósor, hanem megfigyelhető tény — egy új önpróba ezen méri, hogy a két forgalom
+**tényleg külön jelet kap**, és rontás-próba (a szétválasztás elmosása) buktatja.
+
+⚠️ **A kiszolgáló oldalnak is kell** — a torlódást a **küldő** okozza, és a 64 KB-os
+szeleteket a kiszolgáló küldi. *Ha csak a kérőre tennénk, épp az maradna vezérlés nélkül,
+aki a vonalat tölti.*
+
+⛔ **A TCP-út nem a mi dolgunk:** ott a kernel torlódás-vezérlése (CUBIC) hajt. Ez a D67
+utáni döntéssel összefér — a TCP „alkalmi gyorssáv", a fő út a UDP.
+
+### ⛔⛔ 4. lépés: az ütemezés — MEGÉPÜLT, ÉS A MÉRÉS SZERINT ALAPBÓL KI MARAD
+
+```
+  változat                        KB/s    sor    hívás átlag    csúcs
+  ────────────────────────────────────────────────────────────────────
+  sem jel, sem ütem            271/275     27    11,5 ms        45 ms
+  csak ÜTEMEZÉS                280/279  17/18    10,4/11,3      24/27
+  csak JEL (vegas)             233/233     14     3,0 ms        18/19
+  jel + ütemezés               263/226  15/15     4,6/3,4       19/19
+```
+
+⭐ **Az ütemezés önmagában dolgozik**: a csúcsot 45 → 24–27 ms-ra viszi, a sort 27 → 17–18-ra,
+és **nem lassít** (280 KB/s). ⛔ **De a jel mellett nem ad hozzá mérhetőt:** a Vegas a csúcsot
+már 18–19-re vitte, az átlagot 3,0-ra — a kettő együtt az átlagot **rontotta** (3,4–4,6), a
+sebességet pedig ingadozóbbá tette.
+
+### ⭐⭐⭐ ÉS A LELET, AMI EZT MEGMAGYARÁZZA: A SOR ALSÓ HATÁRÁT AZ ÓRA SZABJA MEG
+
+A `sor: 1–2` cél **nem hangolás kérdése ezen a gépen, hanem mérhetetlen**:
+
+```
+  sor_alsó_határ  ≈  az óra ébredési köze / a vonal szolgálati ideje
+                  ≈  15,6 ms (Windows setTimeout) / 2 ms (500 csomag/mp)  ≈  8 csomag
+```
+
+Egy ébredés alatt a vonal ~8 csomagnyi időt kiszolgál — ennél kisebb löketet **nem lehet
+kirajzolni** anélkül, hogy a vonal kihasználatlan maradjon. ⚠️ És ezt **élőben is megmértük**:
+egy fix, 4-es löket-plafonnal a saját ütemezésünk **megfojtotta a vonalat** (247 → 179 KB/s).
+✅ A javítás az volt, hogy a kredit-plafon az **ablakhoz igazodik** (`ablak / 2`), nem fix szám.
+
+⏸️ **A koino célkészüléke viszont a TELEFON** (Termux/Android), ahol az óra ~1 ms-os — ott az
+ütemezés várhatóan fizet, és a `sor: 1–2` is elérhető. ⛔ **De bekapcsolni csak MÉRÉS után
+szabad**, és a mérés parancsa készen áll: `node meres/resSebessegMeres.js`, az
+„AZ ÜTEMEZÉS" szakasz. *A kód marad, a paraméter él (`utemezes: true`) — a kikapcsolás mért
+döntés, nem feledékenység.*
+
+### Mi változott élesben ezzel
+
+⭐ **A fájl-átvitel mostantól engedékeny** (Vegas), a csere nem. A mellettünk futó hívás
+késleltetése **11,5 → 3,0 ms**, a csúcsa **45 → 18 ms** — az ára a fájl-átvitelen
+**271 → 233 KB/s** (−14%), amit a D68 tudatosan vállal: *háttérmunka, és a redundancia
+pótolja.*
+
+---
+
+## 28. ⭐⭐ A TÜRELEM: AMENNYIT AZ ALTERNATÍVA HIÁNYA INDOKOL (2026-09-15, D68 / 5. lépés)
+
+**A D68 utolsó előtti tétele, Csaba 2. válasza.** A UDP-vonal **30 000 ms**-ig küzdött
+**egyetlen 1000 bájtos darabért** — akkor is, ha ugyanaz a fájl tíz másik társnál megvolt.
+⚠️ A döntés nem egy kisebb fix szám volt (*„az ugyanolyan varázsszám lenne"*), hanem hogy
+**függjön attól, hány forrásból szerezhető be ugyanaz**.
+
+### A szabály, és ami elvileg alátámasztja
+
+```
+  turelem(n) = max(5 000 ms, 30 000 ms / n)        n = hány társnál van meg
+```
+
+| források | türelem | miért |
+|---|---|---|
+| 1 | 30,0 mp | ha feladom, a fájl **nem jön meg** — nincs hova menni |
+| 2 | 15,0 mp | |
+| 4 | 7,5 mp | |
+| 6+ | 5,0 mp | ⛔ az alsó korlát: egy **800 ms oda-visszájú** vonalon ennyi is csak néhány próbálkozás |
+| 0 / ismeretlen | 30,0 mp | ⚠️ *ha nem tudunk alternatíváról, akkor nincs alternatíva* (D19) |
+
+⭐⭐ **És amiért a feladás tényleg olcsó:** a részleges fájl megmarad, és **a mérete maga az
+állapot** — a következő próbálkozás onnan folytatja. *A feladás itt nem adatvesztés, hanem
+társ-váltás.*
+
+### ⭐ A szétválasztás: a vonal nem tudhatja, hány forrás van
+
+A számítás a **fájl-rétegben** él (`fajlAtvitel.js`: `turelemForrasokbol`), a vonal pedig
+**paraméterként kapja** (`beallitas.feladasIdo`). ⛔ A vonal csak csomagokat lát — azt, hogy
+*érdemes-e még küzdeni ezzel a társsal*, csak az tudja, aki a birtoklás-jegyzetet ismeri.
+*Ugyanaz a szétválasztás, mint mindenhol: a vonal nem tud a koinóról (1. szabály).*
+
+⚠️ **A randevúnál (átfúrt rés) marad a teljes türelem** — ott **nincs másik forrás**: a
+pajzsfúrás egyetlen társsal nyitott rést, oda nem lehet „átváltani".
+
+### ⛔⛔ ÉS EGY VAK PRÓBÁT A RONTÁS-PRÓBA BUKTATOTT LE — HETEDSZER UGYANAZ
+
+Az első parancssor-próbám a kiírt *„türelem: 30,0 mp · 1 forrás"* sort nézte. ⛔ A bekötést
+kivéve (a `tcpNyito` harmadik paraméterét elhagyva) **a kiírás változatlan maradt**, mert az a
+**kiszámolt** értékből jön. *Azt mértem, hogy kiszámoltuk — nem azt, hogy használjuk.*
+
+✅ A javított próba **viselkedést mér**: hat (nem válaszoló) forrásnál a türelem az alsó
+korlát, tehát a bukásnak **~5 másodperc alatt** meg kell jönnie. Ha a szám nem jutna el a
+vonalig, a vonal alapértéke (30 mp) szólna — és az a próba időkorlátjába ütközne. ⭐ A
+rontás-próba ezt most **buktatja**.
+
+⭐ **Négy modul-próba is őrzi a szabályt:** monoton csökken · van alsó korlát · az ismeretlen
+forrásszám a legóvatosabb választ adja · és **a terv viszi magával** (`forrasok` + `turelem`
+minden tervelemben).
+
+### ⚠️ És egy hazudó felirat, amit ez a munka talált
+
+A `fajlok` parancs még mindig azt írta: *„A bájtok szállítása még nem épült meg: egy kép ma
+csak azon a készüléken van meg, ahol beszúrták."* ⛔ **2026-09-13 óta nem igaz** (felderítés →
+kérelem → átvitel → randevú), és 2026-09-14 óta az őrjárat magától is elhozza. ✅ Javítva.
+*Ugyanaz a csapda, amit az `Allaspont`-nál kimondtunk: ahol egy felirat mást mond, mint amit
+a kód tesz, ott előbb-utóbb valaki a feliratot hiszi el.*
+
+---
+
+## 29. ⭐⭐⭐ TÖBB FORRÁSBÓL EGY FÁJL: MENNYIT HOZ? — mérés az építés ELŐTT (2026-09-15, D68 / 6.)
+
+**A D68 utolsó tétele.** ⛔⛔ És a terv kimondottan azt írta elő, hogy **az első lépés ne az
+építés legyen, hanem a mérés**: *„a válasz nem triviálisan »háromszor«: a szűk keresztmetszet
+gyakran a saját letöltésünk, és akkor a párhuzamosság semmit nem hoz, csak bonyolít."*
+
+### ⭐⭐ Amit a KÓD mondott meg, még a mérés előtt: a protokoll már tudja
+
+A `FAJLKEREK` üzenet **hordozza az `eltolas`-t**, és a kiszolgáló
+(`fajlSzeletekKiszolgalasa`) **állapotmentes**: a kérő mondja meg, honnan kér, ő onnan küld
+egy szeletet. ⭐ *Vagyis a több forrás nem protokoll-kérdés, hanem kliens-oldali szerkezeté* —
+és ezért volt a mérés egyáltalán elvégezhető építés nélkül: a **kiszolgáló a valódi éles kód**,
+csak a kérő oldalát utánozza a mérő (memóriában gyűjt, és a végén **újra lenyomatol**).
+
+### A műszer: KÉT sor, egymás után
+
+⛔ Enélkül a mérés hazudna. Ha három foglalatnak három független sora van, a párhuzamosság
+**automatikusan** háromszoros sávot kap — és a „×3" a műszerből jönne, nem a valóságból.
+Ezért a `udpParos` mostantól két sorbanállást modellez:
+
+1. **a FORRÁS feltöltése** — foglalatonként külön (minden társnak saját vonala van),
+2. **a MI letöltésünk** — ⛔ **közös**: minden forrás ugyanabba a csövünkbe érkezik.
+
+### Az eredmény (512 KB, +10 ms, munkalopó felosztás)
+
+| eset | 1 forrás | 2 forrás | 3 forrás | 5 forrás |
+|---|---|---|---|---|
+| **(A) a FORRÁS a szűk** (200/s, letöltés bő) | 123 KB/s | 246 — **×2,0** | 328 — **×2,7** | |
+| **(B) a MI LETÖLTÉSÜNK a szűk** (közös 200/s) | 132 KB/s | | 129 — **×1,0** | |
+| **(C) aszimmetrikus** (forrás 150/s, letöltés 600/s) | 99 KB/s | 157 — ×1,6 | 191 — **×1,9** | 255 — **×2,6** |
+
+⭐⭐⭐ **A VÁLASZ TEHÁT NEM EGY SZÁM, HANEM EGY ARÁNY: a haszon pontosan addig tart, amíg a
+források EGYÜTT be nem töltik a saját letöltésünket.** Az (A) sor a felső határ (majdnem
+lineáris), a (B) az alsó (**semmi**), és a valóság a kettő között van.
+
+⭐ **És az otthoni vonal az (A) felé húz:** az aszimmetrikus kapcsolatokon a **feltöltés** a
+szűk — egy társ feltöltése tipikusan töredéke a mi letöltésünknek. *Ez a D68 redundancia-érve
+számokkal: nem csak a türelem lesz olcsóbb, hanem a sebesség is nő.*
+
+### ⛔⛔ ÉS KÉT MAGYARÁZATOMAT A MÉRÉS CÁFOLTA — a hiba a MŰSZERBEN volt
+
+A (C) sor elsőre **×1,8-nál megállt**, pedig a letöltésünk négyszer bővebb a forrásénál.
+Két magyarázatot adtam, és **mindkettőt megmértem**:
+
+- *„a Vegas fogja vissza őket, mert mind a közös sor késleltetését látja"* → ⛔ **cáfolva**:
+  `torlodasJel: 'nincs'` mellett **ugyanaz a ×1,8**;
+- *„a szemcse durva: 8 szelet nem osztható háromfelé"* → ⛔ **cáfolva**: 1 MB-on (16 szelet,
+  5/6/5) **ugyanaz a ×1,8**.
+
+⭐⭐⭐ **A valódi ok a műszerben volt: a sor DARABSZÁM-alapú, nem bájt-alapú** — tehát egy
+~50 bájtos **nyugta** ugyanannyiba kerül benne, mint egy 1000 bájtos adat-darab. Egy forrásnál
+ez sosem számított (a két irány külön soron ment); ⛔ **a közös letöltő sornál viszont
+uralkodik**: a saját nyugtáink ott versengtek a beérkező szeletekkel, és a 600/s-ből
+**effektíve 300/s** maradt az adatnak. *Ez számszerűen pontosan a ×1,8-at adja.*
+
+✅ A javítás a kérdéshez szabott: a közös vonal a **letöltési irány** modellje, tehát csak a
+forrás felől jövő forgalomra vonatkozik (a nyugta a mi feltöltő irányunkon megy, ami húszszor
+kisebb — a késleltetés természetesen rá is vonatkozik). Utána a (B) sor **×0,9 → ×1,0** lett,
+a (C) pedig ×1,8 → **×1,9 (3 forrás) és ×2,6 (5 forrás)**.
+
+⚠️ *Harmadszor ugyanaz a lecke ebben a szakaszban: **a műszert is meg kell mérni**. És a
+sorrend számít — ha elfogadtam volna az első ×1,8-at, a döntés egy műszer-hibán állna.*
+
+### ⚠️ Amit ez a mérés NEM mond meg
+
+- **A rossz szelet** kérdését (a terv 2. döntési pontja) — az nem sebesség, hanem bizalom.
+- **A tárolás szerkezetét**: a mérő memóriában gyűjt, az éles kódnak lemezen kellene
+  (a mai elv — *„a részleges fájl mérete maga az állapot"* — sorrendet feltételez).
+- **A valódi hálózatot**: itt a szűk keresztmetszet modell, nem mért vonal.
+- És hogy **hány forrás az optimum**: a (C) sor 5 forrásnál még nőtt, de a 9. szabály szerint
+  a források számának felülről korlátosnak kell lennie.
+
+### ✅ És a műszer-változtatás a korábbi sorokat NEM mozdította el
+
+*Ez nem feltevés, hanem ellenőrzés:* a teljes lap újrafuttatva a 16–28. mérés minden szakaszát
+a rögzített értékeken adta vissza (Vegas mellett a hívás **12,3 → 3,5 ms**, csúcs **44 → 19**;
+az ütemezés `sor: 27 → 17`, csúcs `45 → 25`). ⭐ Ennek szerkezeti oka van: a közös sor csak
+akkor létezik, ha a hívó **kér** ilyet (`kozosSav`), és azt egyedül a több-forrás szakasz teszi.
+
+---
+
+## 29/b. ✅ ÉS MEGÉPÜLT — a valódi kód számai, és amit a mérő-utánzat elrejtett (2026-09-15)
+
+A 29. mérés az **építés előtt** futott, ezért a kérő oldalát egy **mérő-oldali utánzat**
+játszotta (memóriában gyűjtött, és vaktában osztotta a szeleteket). ⭐ A megépítés után az
+utánzatot **le kellett cserélni a valódi `fajlHozatala`-ra** — *két igazság nem lehet: ha a
+mérő mást csinál, mint az éles út, akkor nem azt mérjük, amit futtatunk.*
+
+⛔ **És a csere azonnal kisebb számokat adott** (512 KB, +10 ms):
+
+| eset | utánzat (29.) | **a valódi kód** |
+|---|---|---|
+| (A) a forrás a szűk, 3 forrás | ×2,7 | **×2,0** |
+| (C) aszimmetrikus, 3 forrás | ×1,9 | **×1,7** |
+| (C) aszimmetrikus, 5 forrás | ×2,6 | **×2,1** |
+| (B) a mi letöltésünk a szűk | ×1,0 | **×1,0** |
+
+⭐⭐⭐ **AZ OK SZERKEZETI, ÉS KI KELL MONDANI: az ELSŐ SZELET MINDIG SOROSAN JÖN.** A fájl
+méretét a `FAJLSZELET` üzenet `teljes` mezője mondja meg — ⛔ amíg az meg nem érkezett, nem
+tudjuk, hány szelet van, tehát **csak egy ág indulhat**. Nyolc szeletnél ez az idő nyolcada,
+vagyis a három forrás elméleti ×3-a helyett **×2,3 a plafon**. *Az utánzat ezt nem fizette
+meg — ő tudta előre a méretet, mert a mérő adta neki.*
+
+⏸️ Megkerülhető lenne (a felderítés megmondhatná a méretet, vagy spekulatívan indulhatnánk),
+⚠️ de mindkettő **új viselkedés**: az egyik új mezőt tesz a vonalra (6. szabály), a másik
+fölösleges kérést egy rövid fájlnál. *A mai ár ismert és korlátos; a megkerülésé nem.*
+
+### ⛔ Egy valódi hibát a saját kódomban a mérés talált: O(N²) a lemezen
+
+A `reszlegesIras` a beírás után **a teljes részleges méretet adta vissza** — az pedig
+végigstatolja az ÖSSZES eddigi szeletet. Nyolc szeletnél 36, tizenhatnál 136 fájl-művelet,
+⚠️ **egy senkinek nem kellő visszatérési értékért** (a `fajlHozatala` nem használta).
+✅ Kivéve: a (C) sor 3 forrásnál **×1,5 → ×1,7**, a (C/1) **×0,9 → ×1,3**.
+
+### ⭐⭐⭐ ÉS A LEGFONTOSABB ÚJ LELET: JEL NÉLKÜL A TÖBB FORRÁS RONT
+
+A (C/1) kontroll-sor — ugyanaz a vonal, `torlodasJel: 'nincs'` — három forrással **×0,9…×1,3**
+között ingadozik, és a szeletek eloszlása **6/1/1**: ⛔ **két ág gyakorlatilag megbénul.**
+
+⭐ Az ok: a három agresszív (veszteség-alapú) ág **ugyanazt a közös sort tölti**, tehát
+egymással versengenek — torlódásos vesztés, újraküldés, kaotikus eloszlás. Vegas mellett
+ugyanez **×1,7**, kiegyensúlyozott 3/2/3 eloszlással.
+
+⭐⭐ **Ez a D68 (a késleltetés-alapú jel) független igazolása:** eddig azzal érveltünk, hogy
+*másoknak* ne ártsunk. Most kiderült, hogy **magunknak is árt** a hiánya — mert a több forrás
+óta a saját ágaink is egymás szomszédai. *A jel nem udvariasság, hanem működési feltétel.*
+
+### Amit ez a menet még megépített
+
+- **A részleges fájl szeletenként** (`reszleges/<lenyomat>/<eltolas>`) — „mi van meg?" = a
+  mappa listája. ⭐ Az elv megmarad (*a tartalom az állapot*), csak a hossz helyett a lista
+  mondja meg. ⚠️ A régi, egyfájlos alak eldobható helyi adat: a `readdir` `ENOTDIR`-je üres
+  listát ad, és a letöltés elölről kezdődik.
+- **A munkalopó munkamegosztás** (`ujMunkamegosztas`) — nem előre kiosztott tartományok,
+  mert *a leglassabb forrás szabná meg a végét*. Egy bukott ág szelete **visszakerül**.
+- **A lezárás joga egyszer adódik ki** — különben a második ág „nincs részleges fájl"-t
+  kapna, és *hibának látszana, hogy más volt gyorsabb*.
+- **12 új önpróba, hat rontás-próbával igazolva**: a kizárólagosság · a lezárás-jog · az
+  elengedés (⭐ **időkorláttal, hogy a beragadás is BUKÁS legyen**, ne végtelen várakozás) ·
+  a bekötés (a `munka` átadása az éles úton) · a fájlonkénti forrásszám · a szelet-lista.
+- ⭐ **És a bekötés próbája VISELKEDÉST mér, nem feliratot:** a jel a `bajt` oszlop —
+  munkamegosztás nélkül mindkét ág a TELJES fájlt hozná, és a mennyiség megkétszereződne.
+  *A 28. mérés vak próbája épp az volt, hogy a kiírt számot néztem.*
+
+---
+
+## 29/c. ⭐⭐ A ROSSZ SZELET HELYI VÁLASZA — és egy hiba, amit megint a mérés talált (2026-09-15)
+
+**A D68 / 6. utolsó darabja, Csaba jóváhagyásával.** ⛔ A baj: a lenyomat a **teljes fájlra**
+szól, tehát egy hamis szelet az egészet elbuktatja, és **nem tudjuk, melyik volt** — a lezárás
+eldobja a részlegest, és kezdhetjük elölről. *Egy rosszindulatú társ így olcsón ismételtethet.*
+
+⭐ **A választott válasz az 1. (a tervből): nem teszünk új adatot a láncra.** A másik kettő
+vagy a **6. szabály kemény felébe** ütközne (szeletenkénti lenyomat: 2 MB-nál ~1,4 KB, egy
+teljes esemény négyszerese), vagy **minden meglévő fájl-hivatkozást érvénytelenítene**
+(Merkle-fa). ⭐⭐ A kiegészítés **helyi tanulság**: ha a lezárás elbukott, feljegyezzük, kik
+adtak szeletet, és a következő körben **mást választunk**.
+
+### ⛔⛔ Három korlát, ami ezt nem engedi rangsorrá válni
+
+1. **Fájlonkénti**, nem társankénti — nem azt mondjuk, hogy *„ez a társ rossz"*, hanem hogy
+   *„ehhez a fájlhoz ezek nem váltak be"*. *Nincs globális mérleg (D18/2, D48).*
+2. **Nem vád:** a résztvevők közül **legfeljebb egy** adott hamis bájtot, és ezt nem tudjuk
+   szétválasztani. Ezért nem is mondunk róluk semmit.
+3. ⭐ **Ha nem marad forrás, FELEJTÜNK.** Különben egy fájl, amit csak egy társ birtokol,
+   egyetlen bukás után **soha többé** nem jönne meg — *a védekezés vágná el az utat ahhoz az
+   adathoz, amit védeni akar.* És amint a fájl megjön, a jegyzet törlődik.
+
+### ⛔⛔⛔ ÉS A MÉRÉS EGY VALÓDI HIBÁT TALÁLT A SAJÁT MEGOLDÁSOMBAN
+
+Először **a kijelölt forrásokat** jegyeztem fel — azokat, akiknek a terv szólt. ⛔ Mérve
+(kézi forgatókönyv, hamis kiszolgálóval) ez **használhatatlan**: egy 20 KB-os, **egyszeletes**
+fájlnál a hamis forrás hozta az egyetlen szeletet, a másik ág **semmit** — mégis **mindkettő**
+megjelölve. Így a következő körben nem maradt választható forrás, a felejtés-szabály
+visszaadta mindkettőt, és a hamis **újra sorra került**: *a kép soha nem jött meg.*
+
+✅ A javítás: **csak azokat jegyezzük fel, akik ténylegesen adtak szeletet** (`szeletek > 0`).
+Utána a 2. kör elkerüli a hamis forrást, és a kép **bájtra azonosan** megérkezik.
+
+⚠️ **A jelölés így is közelítés, és ezt kimondjuk:** több szeletnél több forrás kerül a
+listára, pedig legfeljebb egy volt hamis. *Ez nem pontatlanság, hanem a modell határa.*
+
+### ⭐ Egy lelet, ami mellékesen derült ki: valódi koino NEM tud hamis bájtot adni
+
+A kiszolgáló `blob.olvas`-a **újra lenyomatol**, tehát a lemezen megrontott fájlt **ki sem
+adja** — a hamis szelet csak **szándékosan módosított programmal** állítható elő. ⭐ Ezért a
+próbához külön meg kellett írni a támadót: egy kézzel írt kiszolgáló, ami a fájl-protokollt
+beszéli és szemetet küld. *Jó hír a modellről, és egyben a próba feltétele.*
+
+### A próbák (7 új, ÖT rontás-próbával igazolva)
+
+⭐ A parancssor-próba **viselkedést mér**: valódi `csere` paranccsal, hamis és jó forrással —
+az 1. kör bukik és jegyez, a 2. kör **elkerüli a hamisat**, a kép megjön, a jegyzet kitisztul.
+⛔ A rontás-próbák: a kerülés kikapcsolása · a felejtés kikapcsolása · a bekötés kivétele ·
+a `romlott` **mező** elnémítása (⭐ *szöveg-illesztés helyett mező — egy átfogalmazott
+hibaüzenet némán kikapcsolná a választ*) · és a fenti hiba visszacserélése — **mind buktat**.
+
+---
+
+## 30. ⭐⭐⭐ MENNYIT ÉR AZ ÖSSZEHANGOLT ABLAK? — a „buli" (2026-09-15)
+
+`node meres/buliMeres.js` · A fázis-2 terv három darabot ír elő az `orjarat`-hoz:
+**(1)** igazítsa a kört a **percfordulóhoz** · **(2)** a kör elején **kopogjon minden
+társra** · **(3)** **ismételje a kört, amíg van újdonság**.
+
+⛔ A **(2) indoka már terepen mérve van** (2026-08-30: *„nincs full cone"* — 14 146 kopogás
+alatt a laptop semmit nem kapott attól, akinek ő maga nem küldött). ⚠️⚠️ **Az (1) és a (3)
+viszont SZÁMÍTVA volt, nem mérve** — a terv szó szerint kimondja: *„a nemzedék-számítás
+levezetett, nem mért"*. Ez a mérés azt a kettőt méri meg.
+
+### Miért kellett ÚJ műszer
+
+A `felszabaditasMeres.js` az ébrenlétet **körönkénti érmedobással** modellezi
+(`veletlen() < ebrenlet`) — ⛔ és ez pontosan azt rejti el, ami itt a kérdés: hogy az
+ébrenlét **IDŐBEN HOL VAN**. *Két készülék attól találkozik, hogy az ablakaik átfednek, nem
+attól, hogy mindkettő „ébren volt aznap" — egy független érmedobás beépíti a válaszba, amit
+mérni akarunk.*
+
+### ⚠️ És egy dolog, ami nélkül a mérés FEKETÉBBRE festette volna a mai állapotot
+
+A mai kód `setTimeout(perc * 60 * 1000)`-t hív a kör **után**, tehát a csere ideje
+hozzáadódik: minden készülék köze kicsit más. ⭐ **Fix közzel a találkozás determinisztikus
+lenne — vagy mindig, vagy SOHA**; a valóságban viszont a fázisok lassan **egymásba
+vándorolnak**. A modellbe ezért került be a **sodródás** (~3 mp/kör), és a mai sor rögtön
+96%-ra ugrott a sodródás nélküli 73%-ról. *A becsületes mérés a saját állításomat gyengítette.*
+
+### Az eredmény (100 készülék, 30 mp-es ablak, 5 perces ütem, 200 futás)
+
+**Sűrű gráf — 14 társ (a D33 szerinti nagyságrend):**
+
+| változat | elér | mindenkihez | medián idő |
+|---|---|---|---|
+| **(a) MA:** nincs igazítás, egy menet | 100% | 96% (12 órán 100%) | 8,9 perc |
+| (b) igazítva, egy menet | 100% | 100% | 5,3 perc |
+| ⭐ **(c) igazítva + ismételt menet** | 100% | 100% | **0,3 perc** |
+| (d) nincs igazítás + ismételt menet | 100% | 96% | 8,6 perc |
+
+**Ritka gráf — 3 társ (a kis családi koino, D22), 12 óra:**
+
+| változat | elér | mindenkihez | medián idő |
+|---|---|---|---|
+| ⛔ **(a) MA** | 89% | **3%** | 601 perc |
+| (b) igazítva, egy menet | 100% | 100% | 15,3 perc |
+| ⭐ **(c) igazítva + ismételt menet** | 100% | 100% | **0,3 perc** |
+| ⛔ (d) nincs igazítás + ismételt menet | 89% | **3%** | 601 perc |
+
+### ⭐⭐⭐ A LELET: AZ IGAZÍTÁS ÉS AZ ISMÉTLÉS EGYÜTT MŰKÖDIK, KÜLÖN ALIG
+
+- **az ismétlés ÖNMAGÁBAN semmit nem ér** (a → d: 8,6 vs 8,9 perc; ritkán 3% vs 3%);
+- **az igazítás önmagában** sűrűn ×1,7, ritkán viszont **a működés feltétele**;
+- ⭐ **a kettő EGYÜTT ×30 (sűrű) és ×2000 (ritka)**.
+
+*Az ok szerkezeti, és pontosan az, amit a terv jósolt: **az igazítás teremti meg a nagy,
+egyszerre ébren lévő csoportot; az ismétlés pedig ezen a csoporton belül terjeszti a hírt
+nemzedékenként.** Egyik a másik előfeltétele — nem két független javítás, hanem egy szerkezet
+két fele.*
+
+### ⭐⭐⭐ ÉS A 9. SZABÁLY PRÓBÁJA: A MÉRETTEL A MAI MEGOLDÁS ROMLIK, AZ ÚJ NEM
+
+**1000 készülék, 14 társ, 2 óra:**
+
+| változat | mindenkihez | medián idő |
+|---|---|---|
+| ⛔ **(a) MA** | **64%** | **70,3 perc** |
+| (b) igazítva, egy menet | 100% | 10,3 perc |
+| ⭐ **(c) igazítva + ismételt menet** | 100% | **0,3 perc** |
+
+⛔ A mai sor **100 → 1000 készüléknél 8,9 → 70,3 percre romlik** (és 96% → 64%), mert a hír
+ablakonként **egy lépést** tesz, tehát az idő a hálózat átmérőjével nő. ⭐⭐ A (c) sor
+**változatlanul 0,3 perc** — a nemzedékenkénti terjedés logaritmikus, nem lineáris.
+
+*A 9. szabály kérdésére (**„mit csinál egymilliárd e-embernél?"**) tehát a mai válasz az,
+hogy „egyre lassabban", az újé pedig az, hogy „ugyanannyi idő alatt". Ez nem hangolás
+kérdése — a kettő más nagyságrendben nő.*
+
+### ⛔⛔ ÉS A KRITIKUS ESET A RITKA GRÁF — vagyis a KIS KOINO
+
+Sűrű hálózatban (14 társ) a mai állapot is eljut mindenkihez, csak lassabban — ott az
+igazítás kényelem. ⛔ **Három társnál viszont a hír a futások 97%-ában SOHA nem ér körbe**,
+és ahol mégis, ott 10 óra alatt. *A D22 szerint épp a kis családi közösség az egyik cél —
+tehát ez nem sarokeset, hanem alapeset.*
+
+⚠️ **És a saját várakozásomat is cáfolta a mérés:** azt hittem, az igazítás mindenhol
+előfeltétel. Sűrű gráfban nem az — a sodródás elvégzi helyette, csak lassan és
+kiszámíthatatlanul.
+
+### ⚠️ Amit ez a mérés NEM mond meg
+
+- A **kopogást** (2. darab): az NAT-kérdés, terepméréssel igazolva, itt nem modellezzük.
+- Az **adat-árat**: a terv számolja (~7 MB/nap 5 perces ütemnél, 14 társsal).
+- A **randevút**: hogy a kiszámítható ablak mennyit ér a fájl-átvitelnek — az egyidejűség
+  ott **működési feltétel**, nem sebesség-kérdés.
+- Az **alvó telefont**: a modell ébren lévő készülékkel számol (a terv is kimondja, hogy
+  „a flotta gerince asztali gép legyen").
+
+### ✅ ÉS MEGÉPÜLT — az (1) és a (3) darab (2026-09-15)
+
+- ⭐ **Az igazítás:** a várakozás a **fal órájához** igazodik (`Math.ceil(most / kozMs) * kozMs`),
+  nem a kör végéhez. ⭐⭐ *Üzenetváltás nélkül működik:* mindenki ugyanahhoz a **külső ponthoz**
+  igazodik, nem kell megbeszélni és nem kell jelzőpont (2. szabály). ⚠️ Az órára támaszkodunk,
+  és ezt kimondjuk: percekben eltérő óráknál az ablakok nem fednek át — a koino ettől nem
+  romlik el (marad a mai sodródás), csak nem élvezi a hasznot. *Romlás, nem törés (D19).*
+- ⭐ **Az ismétlés:** a kör addig fut, amíg egy menet hoz új eseményt. A szokásos eset **egy
+  menet** (nincs újdonság → azonnal megállunk), tehát az ár csak akkor merül fel, amikor
+  tényleg történt valami. ⛔ A `MENET_KORLAT = 5` **biztonsági szelep**: egy hibás vagy
+  rosszindulatú társ minden menetben „újdonságot" adhatna, és az ablak sosem érne véget.
+
+⛔⛔ **ÉS EGY VAK PRÓBÁT A RONTÁS-PRÓBA BUKTATOTT LE — NYOLCADSZOR UGYANAZ.** Az ismétlés
+próbája először **rögtön indította** az őrjáratot, és a rontás (az ismétlés kivétele) **nem
+buktatta**. ⭐ Az ok: az őrjárat azóta a **percfordulóhoz igazít**, tehát a második ablak akár
+2 másodperc múlva is jöhetett — két kör futott a 12 másodpercben, és a hír a MÁSODIK körben
+jutott át. *A próba az igazítást mérte, nem az ismétlést.* ✅ A javítás: a percforduló **után**
+indítunk, így a próba idejébe biztosan egy kör fér. *Amit mérni akarunk, azt egyedül kell hagyni.*
+
+### ⏸️ ÉS A (2) DARAB NEM ÉPÜLT MEG — kimondva, nem elhallgatva
+
+A *„kopogjon a kör elején minden társra"* **UDP-kérdés**: a NAT-rést a pajzsfúrás nyitja
+(`pajzsfuro.js`), az őrjárat viszont ma **TCP-vel** cserél (`csereVonalon` → `connect`).
+⛔ Vagyis ez nem egy sor, hanem **a UDP-út bekötése az őrjáratba** — önálló munka, és a
+mérése is terepmérés (két hálózat). *Az indoka viszont megvan: „nincs full cone" (2026-08-30).*
+
+### ⛔⛔⛔ ÉS CSABA KÉRDÉSE EGY VALÓDI HIÁNYT TALÁLT A SAJÁT JAVÍTÁSOMBAN
+
+*„Ez akkor most azt jelenti, hogy a mostani rendszer nem skálázható végtelenig?"* — és a
+válasz kimérve **igen, volt egy pont, ahol nem**. A terjedés ALAKJA logaritmikus, ⛔ **de én
+tettem bele egy beégetett `MENET_KORLAT = 5`-öt, ami a mérettel nem nő.**
+
+**Hány menet kell egy ablakban?** (a legjobb eset: mindenki ébren, egy ablakban — tehát
+**alsó korlát**)
+
+| készülék | társ | menet (átlag) | legrosszabb | elég az 5? |
+|---|---|---|---|---|
+| 100 | 14 | 2,7 | 3 | ✔ |
+| 1 000 | 14 | 3,7 | 4 | ✔ |
+| 10 000 | 14 | 4,3 | 5 | ✔ |
+| 100 000 | 14 | 5,0 | 5 | épp ✔ |
+| **1 000 000** | 14 | **6,0** | 6 | ⛔ **NEM** |
+| ⛔ **1 000** | **3** | **7,8** | 9 | ⛔ **NEM** |
+| ⛔ **100 000** | 3 | **12,3** | 13 | ⛔ **NEM** |
+
+⛔⛔ **A ritka gráf itt is a kritikus:** három társnál már **ezer készüléknél** kevés az öt.
+
+### ✅ A JAVÍTÁS: A KORLÁT NE SZÁM LEGYEN, HANEM AZ ABLAK
+
+A menetek addig futnak, amíg **van újdonság** ÉS **még tart az ablak** (a következő
+percfordulóig). Ettől
+
+- a korlát **a mérettel együtt nő** — ahány menet belefér, annyi fut;
+- a **rosszindulat ellen ugyanúgy véd** (az ablak véges, tehát a ciklus véges);
+- és **nincs benne varázsszám**: az ablak hosszát az e-ember úgyis megadja (`perc`).
+
+⭐ *Ugyanaz az elv, mint a türelemnél (28. mérés): a határt ne találjuk ki, hanem abból
+következzen, ami amúgy is adott.* A `MENET_PLAFON = 1000` csak a legvégső szelep.
+
+**Belefér-e?** (számítás, nem mérés — egy csere mérve 189 ms, 2026-08-30):
+egymilliónál 6 menet × 14 társ × 0,19 s ≈ **16 s**; ritka gráfon 100 000 főnél
+12,3 × 3 × 0,19 ≈ **7 s**. ⭐ Egy 30 másodperces ablakba mindkettő belefér — *de ez
+számítás: valódi vonalon a csere lassabb, és nem mindenki van ébren.*
+
+⚠️ **És amit kimondunk: a korlát-javítást a FENTI MÉRÉS igazolja, nem parancssor-próba.**
+A 6+ menetes lánc próbához hat figyelő kellene; a parancssor-próbák azt mérik, hogy az
+ismétlés egyáltalán fut (és a rontás buktatja). *Amit nem mértünk, arról ezt írjuk le.*
+
+---
+
+## 31. ⭐⭐ TÚLÉLI-E A BEMONDOTT UDP-CÍM A BULI-KÖZT? — az őrjárat UDP-re állítása előtt (2026-09-17)
+
+`node meres/udpLekepezesMeres.js [várakozások mp] [helyi kezdőport]`
+
+### Miért most
+
+⛔ **Az `orjarat` ma is TCP-n fut** — a UDP-vonal (ablak, RTT, AIMD, Vegas, randevú) egyetlen
+éles hívója a kézi `pajzsfuro` parancs. Csaba 2026-09-13-án a UDP-t választotta fő útnak; a
+végrehajtás maradt el. Az átállítás előtt egy kérdés **szerkezetet** dönt el: az őrjárat
+5 percenként ébred, közben a foglalat hallgat — **igaz marad-e a bulin bemondott külső
+UDP-cím a következő bulin?** Ha nem, minden ablak elején újra át kell adni, vagy életjel kell
+(az 5. szabály széle).
+
+⭐ **Egy készülék elég hozzá.** Több foglalat egyszerre indul, megkérdezi a külső portját,
+**hallgat** (20 / 60 / 150 / 330 mp), és újra kérdez; mellette egy **kontroll**, ami 15
+mp-enként kérdez (ha az is mozdul, a vonal változott, nem a csend okozta).
+
+### Az eredmény — a fejlesztő otthoni vonala
+
+| csend | előtte → utána | |
+|---|---|---|
+| 20 mp | 9867 → 9867 | ✓ |
+| 60 mp | 9890 → 9890 | ✓ |
+| 150 mp | 9869 → 9869 | ✓ |
+| **330 mp** | **9936 → 9936** | ✓ |
+| kontroll | végig 9937 | ✓ |
+
+- ⭐⭐ **A külső port 330 mp csendet is túlélt** — vagyis ezen a vonalon egy bulin bemondott
+  UDP-cím az alapértelmezett 5 perces ütem mellett **életjel nélkül** is igaz marad.
+- ⭐ **Célfüggetlen**: három tükör (google ×2, cloudflare) ugyanazt a portot látta (9954).
+- ⭐ **A router átír, de kiszámíthatóan**: a helyi 7380 → 9954, 7381 → 9867 **mindkét futásnál,
+  percek különbséggel** is. *Ebből az is következik, hogy a „port ugyanaz maradt" itt jelentheti
+  azt is, hogy a leképezés lejárt, és ugyanazt a számot kapta vissza — a koinónak a kettő
+  egyenértékű: a bemondott szám igaz.*
+
+### ⛔ Egy vak lépést a saját mérőmben az első futás mutatott meg
+
+Volt benne egy „újranyitás" lépés (bezárni, ugyanarról a helyi portról újra megnyitni) — és
+**semmit nem mért**: a router nem tudja, hogy a program bezárta a foglalatot, neki csak a csend
+számít, tehát egy másodperc után magától értetődően ugyanazt adta. Kivettem; a kérdést a
+hallgató foglalatok teszik fel helyesen.
+
+### ⚠️ És egy mellék-lelet: a KÜLSŐ IP IS VÁLTOZIK
+
+A 17–19. mérésnél (2026-09-13) a vonal **31.46.250.205** volt, ma **31.46.250.22**. ⭐ *A
+negyedik független igazolása, hogy a cím nem adható ki tartósan — csak a találkozáskor.* Egy
+bulin bemondott cím napokra nem, percekre igen.
+
+### ⛔ Amit NEM mond meg
+
+- **EGY vonal** (otthoni router). ⏸️ **A mobilhálózat (CGNAT) a döntő eset** — és ⭐ ahhoz sem
+  kell második készülék: a telefonon, **mobil adattal, wifi nélkül** ugyanez a parancs. A
+  CGNAT-ok leképezése tipikusan rövidebb életű.
+- **Hosszabb buli-közt** (pl. 30 perc) — a parancs első érvével mérhető.
+- **A szűrést** (kinek engedi be a csomagot a router) — az a pajzsfúrás kérdése, azt a két
+  készülékes terepmérés méri.
+
+---
+
+## 32. ⭐⭐⭐ A PAJZSFÚRÁS ÁTMEGY KÉT PORT-ÁTÍRÓ NAT KÖZÖTT — terepmérés (2026-09-17, 18:00)
+
+*Ez a 19. mérés kimondott hiánya volt: „két port-átíró NAT között (pl. két CGNAT) újra kell
+mérni". A szomszéd telefonja **mobil adaton** (szolgáltatói NAT), a laptop **otthoni routeren**.*
+
+| | otthoni router (laptop) | mobil, szolgáltatói NAT (telefon) |
+|---|---|---|
+| helyi port | 7373 | 7373 |
+| kívülről | **31.46.250.22:31573** | **130.43.209.249:36557** |
+| a port átírva | ✔ | ✔ |
+
+⭐⭐ **ÁTMENT: 1 kopogás, 190 ms** (a laptop oldalán; a telefon 52 kopogása a várakozásé volt,
+mert 51 mp-cel korábban indult). **Mindkét irány működik**, továbbító nélkül, port-továbbítási
+szabály nélkül. ⭐ **És a csere is végigfutott a résen**: 5 kör, 31 KB, a telefon **2 új
+társ-címet tanult**.
+
+⭐ *Vagyis a pajzsfúrás nem a router célfüggetlenségén bukik el attól, hogy MINDKÉT oldal
+átírja a portot — a UDP-modellből következően a leképezés a foglalathoz tartozik, és a
+STUN-nal megmért szám egy harmadik félre is érvényes volt.*
+
+### ⛔ ÉS EGY LELET, AMI A KÖVETKEZŐ MUNKÁT ÉRINTI: A FÚRÓT NEM SZABAD ÚJRAINDÍTANI
+
+A telefon ugyanarról a helyi portról **futásonként más külső portot** kapott
+(7380 → 31602, majd 31514; a fúró 7373 → 36557). ⚠️ Tehát a bemondott szám **csak addig
+érvényes, amíg az a foglalat él** — ha a program újraindul, a társ a semmibe kopog.
+⭐ *Ez a buli-szerkezet melletti újabb érv: a címet a találkozás pillanatában kell átadni.*
+
+### ⚠️ ÉS AMI 0 ESEMÉNYT HOZOTT — a kapu jól működött
+
+A laptop 45 eseményt küldött, a telefon **0 újat vett át**. ⭐ Az ok nem a rés: helyben, két
+folyamattal megismételve **ugyanez jött ki**. A laptop `sajat` koinójában **9 esemény** áll
+**2026-08-29-ből**, vagyis a Szakasz 3 (2026-09-03) kanonikus alakja ELŐTTI formátumban —
+hiányzik belőlük az `entitas` mező, ezért az `esemenyMentese` **minden készüléken elutasítja**
+(„hiányzó mező: entitas"). *A régi adat nem törik be a mai koinóba — ez a 3. szabály
+gyakorlatban.*
+
+⏸️ **Egy kisebb pazarlás, feljegyezve:** a telefon **körönként újra kérte ugyanazt a 9
+eseményt** (5 kör × 9 = 45), mert egyik sem került a tárába. A csendes kör szabálya leállította,
+tehát nem végtelen — de egy elutasított eseményt ugyanabban a cserében nem kellene újra kérni.
+
+### ⏸️ Amit ez a menet NEM mért meg
+
+- **A mobil leképezés ÉLETTARTAMA** (31. mérés a mobilon) — a szomszéd elment, mielőtt lefutott
+  volna. ⭐ A koino fent van a telefonján: `node meres/udpLekepezesMeres.js`, 6 perc.
+- **Két MOBIL készülék egymás közt** (ugyanazon szolgáltató CGNAT-ja mögül) — ott a fúrásnak a
+  közös NAT-on kellene visszafordulnia (hairpinning), és ez gyakran tiltott.
+- **A rés sebessége** valódi vonalon.
+
+---
+
+## 33. ⚠️ MENNYIBE KERÜL A FRISS CÍM A VONALON? (2026-09-18, a terjesztés megépítésekor)
+
+*A `CIMEK` üzenet mostantól **friss UDP-címeket** is visz (`udp` mező, `kor` másodpercben).
+A 6. szabály szerint az új mezőt a **bájtokon** kell megnézni, nem a mappa méretén.*
+
+Két üres tár, „nincs újdonság" kör, oda-vissza együtt:
+
+| | a kör mérete | a friss címek ára |
+|---|---|---|
+| friss cím nélkül | **386 bájt** | — |
+| 1 friss címmel | 480 bájt | +94 |
+| **10 friss címmel** | **1346 bájt** | **+960** |
+
+⛔⛔ **EGY CÍM ~96 BÁJT KÖRÖNKÉNT (oda-vissza), és ez sok.** Tíz címmel a „nincs újdonság"
+kör **megháromszorozódik**. ⚠️ Napi léptékben, 14 társsal, 5 perces ütemmel: **1,5 MB → 5,4 MB
+naponta** — *egy mobilos e-embernek ez érezhető* (D35: a csere ára befogadási kérdés).
+
+⏸️ **AMI EBBŐL KÖVETKEZIK, ÉS MÉRÉST KÍVÁN:** hány friss cím kell ahhoz, hogy a kör összeérjen?
+A jegyzék korlátja ma **10** (a `CIM_KORLAT`-hoz igazítva), de ez **nem mért szám** — a
+`buliMeres.js` kiterjesztése tudná megmondani, és addig ez a legdrágább új tétel a vonalon.
+⭐ *Két olcsóbb irány is nyitva áll: kevesebb címet küldeni (a legfrissebbeket), vagy rövidebb
+mezőneveket használni (~20%).*
+
+---
+
+## 34. ⭐⭐⭐ HÁNY FRISS CÍM KELL? — és a válasz NEM a szám (2026-09-18)
+
+`node meres/buliMeres.js [készülék] [társ]` — az utolsó szakasz.
+
+### A kérdés és a modell
+
+A 33. mérés szerint egy friss cím **~96 bájt körönként**, tíz címmel a kör 386 → 1346 bájt.
+Tehát nem mindegy, hány utazik. ⭐ **A modell a legrosszabb esetet nézi:** egy ablak, és
+**mindenki külső címe megváltozott** a buli-köz alatt — kivéve a **horgonyokat**, akiknek a
+címe érvényes maradt (nyitott kapu / postaláda, vagy a leképezés túlélte a csendet).
+⭐⭐ **És a kopogáshoz elég az egyik oldal tudása:** aki kopog, annak a címét a másik a
+csomagból látja (`latlak`). *A találkozás maga is címcsere.*
+
+### Az eredmény — a hír hány %-át éri el, egy ablakon belül
+
+**Sűrű gráf (100 készülék, 14 társ):**
+
+| horgony | K=0 | K=1 | K=3 | K=5 | K=10 |
+|---|---|---|---|---|---|
+| **0%** | **1%** | **1%** | **1%** | **1%** | **1%** |
+| 2% | 20% | 32% | 22% | 25% | 25% |
+| 5% | 58% | 65% | 57% | 60% | 56% |
+| **20%** | 99% | 100% | 100% | 98% | 100% |
+| 50% | 100% | 100% | 100% | 100% | 100% |
+
+**⛔ Ritka gráf (100 készülék, 3 társ — a KIS KOINO, D22):**
+
+| horgony | K=0 | K=1 | K=3 | K=5 | K=10 |
+|---|---|---|---|---|---|
+| 0% | 1% | 1% | 1% | 1% | 1% |
+| 5% | 11% | 7% | 11% | 11% | 8% |
+| 20% | 62% | 61% | 60% | 66% | 61% |
+| 50% | 95% | 97% | 99% | 97% | 97% |
+
+### ⛔⛔ A LELET: NEM A CÍM-SZÁM DÖNT, HANEM A HORGONYOK ARÁNYA
+
+A sorokon belüli ingadozás (32% vs 22%) a **szórás**, nem tendencia — 60 futás mellett ±5
+pont. ⭐ **A K oszlopok gyakorlatilag egyformák, a sorok viszont nagyságrendet ugranak.**
+
+Két ok, és mindkettő szerkezeti:
+
+1. ⭐ **A találkozás maga is címcsere** — az első kapcsolat után a címet nem kell terjeszteni.
+2. ⛔⛔ **Horgony nélkül SEMMI nem indul el** (0% sor: 1%, vagyis csak a hír gazdája tudja).
+   *A terjesztésnek kell egy pont, ahonnan induljon.*
+
+⭐⭐⭐ **EBBŐL KÖVETKEZIK, HOGY AZ „ÉJJELI ŐRSÉG" NEM DÍSZ, HANEM FELTÉTEL** — vagy legalábbis
+valami, ami ugyanezt adja: **postaláda, nyitott kapu, vagy olyan vonal, amin a leképezés
+túléli a csendet**. *(A laptop ilyen volt, a telefon nem — 31. mérés.)* ⛔ És a **kis koino**
+itt is a kritikus eset: három társnál még 20% horgony mellett is csak 62%.
+
+### ⏸️ A JAVASLAT, ami ebből adódik (Csaba döntése)
+
+⭐ **A SAJÁT friss címünk menjen mindig** (ez EGY bejegyzés: +94 bájt körönként) — ettől leszünk
+megtalálhatók. ⏸️ **Mások címének továbbítása viszont a mérés szerint alig ad hozzá**, és
+tízszer ennyibe kerül: a korlát **10-ről 3-ra (vagy 0-ra) vihető**, amíg valódi hálózaton
+mást nem mutat. *Az olcsóbb megoldás nem feladás: a horgony adja a terjedést, nem a lista.*
+
+### ⚠️ A MODELL HATÁRAI — amit ez a mérés NEM mond meg
+
+- A terjesztést **azonosító–cím kötésként** modellezi; a valódi lista **névtelen**, tehát a
+  kopogás a jegyzék MINDEN friss címére megy — ez **többet érhet**, mint amit itt mértünk
+  (idegen, nem szomszéd címére is kopoghatunk).
+- **Egy ablak, legfeljebb 10 menet, mindenki ébren** — legjobb eset.
+- A horgony címét **végig érvényesnek** veszi.
+- ⛔⛔ **ÉS EGY FELTEVÉSE ÜTKÖZIK A 2026-08-30-I TEREPMÉRÉSSEL** (felismerve 2026-09-18, a
+  horgony-kérdés átbeszélésekor): a *„kopogáshoz elég az egyik oldal tudása"* csak akkor igaz,
+  ha a kopogás **átjut** a fogadó routerén. A „nincs full cone" mérés szerint (UDP, 14 146
+  kopogás) a router csak attól enged be, akinek maga is küldött. ⭐ Vagyis az a horgony, akinek
+  csak a **leképezése** élte túl a csendet, egy **új címmel** ébredőt nem enged be — a modell
+  horgonya valójában csak a **nyitott ajtó** lehet. ⚠️ A mobil NAT szűrését nem mértük.
+
+---
+
+## 35. ⭐⭐⭐ A KÖTÉS-HÁLÓ — összefüggő marad-e, ha a telefonok hálózatot váltanak? (2026-09-18)
+
+`node meres/kotesMeres.js` · *(`KOINO_VALTAS=8` → napi 8 hálózatváltás)*
+
+### A kérdés — Csaba ötlete
+
+*„minden készülék 2-3 készülékkel tartana fent egy olyan energiatakarékos kapcsolatot, ami
+lehetővé tenné, hogy elcsípjük a címváltást úgy, hogy még a régivel kapcsolatban vagyunk… a
+csoportok nem szigetek lennének, hanem hálózatba rendezve."* — és a cél: **működjön akkor is,
+ha a közösségnek csak mobiltelefonja van.**
+
+⭐ **A kötés** (két készülék rendszeresen szól egymásnak, mielőtt a router órája lejárna) a
+**csendből jövő** címváltást megszünteti: a leképezés nem évül el, és a szűrő is nyitva marad a
+két fél között. ⛔ A **hálózatváltást** (wifi ↔ mobil, IP-csere, router-újraindulás) viszont nem
+vészeli át: új cím, és a társak routere eldobja a kopogást. **A modell kérdése: ki hozza vissza
+a leszakadtat, és egyben marad-e a háló?**
+
+### A modell
+
+5 perces buli-ablakok, 3 nap · K = 3 kötés (legfeljebb 5 — 9. szabály) · az új társ **véletlen
+sétával** jön a meglévő kötéseken (globális címjegyzék nélkül) · napi 4 hálózatváltás
+készülékenként, és ilyenkor **minden kötés elvész**. A mentés a következő ablakban:
+**hirdetőtábla** (a leszakadt kifelé kiírja az új címét, a régi társai kifelé kiolvassák) vagy
+**nyitott ajtó** (egy horgonyon át indul a séta).
+
+### Az eredmény (napi 4 hálózatváltás)
+
+- ⛔⛔ **MENTÉS NÉLKÜL A HÁLÓ EGY NAP ALATT SZÉTESIK — mérettől függetlenül.** Átlagosan 93%
+  leszakadva, a 3. nap végén **100%**; a legnagyobb összefüggő darab 10 készüléknél 15%, 1000-nél
+  7%. *Hiába tart mindenki kötést: minden hálózatváltás kivesz egy készüléket, és vissza semmi
+  nem hozza.* ⭐ Csaba megérzése (*„az nem segít azokon, akik leszakadtak"*) ezzel számot kapott.
+- ⭐⭐⭐ **A HIRDETŐTÁBLA MÉRETTŐL FÜGGETLENÜL MŰKÖDIK:** 10 és 1000 készüléknél is ~1% leszakadva,
+  99% egy darabban, a visszaállás mediánja **5 perc** (egy ablak). ⭐ Az 1% maga a szerkezeti
+  alsó határ: napi 4 váltás × 5 perc ≈ 20 perc/nap. Ha minden második olvasás bukik: 2–3%, a
+  95%-os visszaállás 25 perc.
+- ⛔ **A NYITOTT AJTÓ A NAGY KOINÓBAN ELÉG, A KICSIBEN NEM:** 1000 készüléknél már 5% horgony is
+  ~1%-ot ad, **10 készüléknél** viszont 5% mellett **58% leszakadva** (a futások ~60%-ában
+  egyetlen horgony sincs), 20% mellett 10%. *A nyitott ajtó szerencse kérdése — a kis koinó
+  (D22) épp ezen bukik el.*
+- Napi 8 váltásnál ugyanez a kép: a tábla 2–5%, mentés nélkül 97%.
+
+### ⭐⭐ ÉS A MÉHSEJT (Csaba első képe) — hány lépés bárhonnan bárhová?
+
+| készülék | méhsejt | méhsejt + 1 véletlen | sétával növesztett |
+|---|---|---|---|
+| 100 | 7,7 | 3,2 | 3,1 |
+| 1 000 | 23,2 | 4,6 | 4,6 |
+| 10 000 | 78,6 | 6,3 | 5,9 |
+| 100 000 | **198,7** | 7,9 | **7,6** |
+
+⭐ A méhsejt a méret **gyökével** nő, a véletlen háló a **logaritmusával**. Kivetítve (becslés,
+nem mérés) egymilliárdra: **méhsejt ~20 000 lépés, véletlen ~14**. ⚠️ *A beszélgetésben ~30-at
+mondtam — a mérés szerint kevesebb.* ⭐⭐ **És a méhsejt megmenthető:** egyetlen véletlen
+távoli társ készülékenként ugyanoda hozza, mint a teljesen véletlen háló *(⚠️ ott a kötésszám
+4, nem 3)*. Csaba a véletlen hármat választotta (2026-09-18).
+
+### ⭐ A LELET
+
+**Csak-mobilos közösségben a kötések ÖNMAGUKBAN nem tartják egyben a hálót — a mentés nem
+kényelem, hanem feltétel.** A mentések közül pedig **csak a hirdetőtábla nem függ a mérettől és a
+szerencsétől**: a nyitott ajtó a nagy koinóban bőven elég, a családi koinóban nem.
+
+### ⚠️ AMIT EZ A MODELL NEM MOND MEG
+
+- **A hirdetőtábla mindig elérhető és egy ablak alatt olvasható** — valódi táblán (web vagy DHT)
+  ezt mérni kell; az (e) sor csak a félig bukó olvasást mutatja.
+- **A horgony terhelése korlátlan** — kedvező feltevés.
+- **Nincs benne az alvó/kikapcsolt telefon, az otthoni wifi** (helyi felfedezés — a családi
+  koinót ez segítené) **és a kézi kurbli.**
+- **Nincs benne az akkumulátor** — az életjel gyakorisága a router órájából jön (31. mérés), és a
+  mobil óra **még nincs megmérve**.
+
+---
+
+## 36. ⭐⭐⭐ A DHT MINT HIRDETŐTÁBLA — a VALÓDI BitTorrent DHT-n (2026-09-19)
+
+`node meres/dhtMeres.js [kor] [körök] [szünet]` · `tesz` + `keres` két készülékhez ·
+`KOINO_DHT_BELEPOK=nincs` · `KOINO_DHT_UJKULCS=1` · `KOINO_DHT_KERDESIDO=…`
+
+### A kérdés
+
+A 35. mérés szerint a kötés-háló a hálózatváltást csak **hirdetőtáblával** éli túl, és a modell
+feltételezte, hogy a tábla **egy 5 perces ablak alatt** írható és olvasható. Csaba a **DHT-t**
+választotta (2026-09-19: gazda nélküli tábla). Igaz-e a feltevés a valódi hálón?
+
+### A műszer — és hogy a mért kód a valódi
+
+`js/csere/dht.js`: BEP 5 (iteratív keresés, tömör címek) + BEP 44 (aláírt, változtatható
+bejegyzés), **függőség nélkül**, csak-olvasó kliensként (BEP 43). A mérés ezt a kódot hívja,
+nem utánzatot (29/b tanulsága). A bejegyzés **~200 bájt** (három társnak titkosított cím
+nagyságrendje), a só `koino-meres`, a kulcs **külön mérő-kulcs**, nem a koino-azonosságé.
+
+### Az eredmény (a fejlesztő otthoni vonala, NAT mögül; 2 mp kérdésidő)
+
+- **Belépőkkel, gyorsítótár nélkül (az első futás):** ha a feltevés sikerült (3/5), a
+  visszakeresés **mindig** megtalálta — az első érvényes találat **2,5–3,4 mp**, 6 gépről,
+  **0 hamis**. ⛔ **De 2 körben a feltevés már az indulásnál elakadt:** a 4 közismert belépőből
+  egy felelt, a többi néma maradt (valószínűleg korlátoztak — egymás után sokszor kérdeztük őket).
+  *A 2. szabály kockázata, mérve: aki csak a belépőkön áll, azon múlik.*
+- ⭐⭐ **BELÉPŐ NÉLKÜL, csak az 50 megjegyzett géppel: 5/5** — tárolta 7/8 gép, a feltevés
+  ~11 mp, a teljes keresés ~11 mp. ⚠️ Az első találat itt **0,1 mp** volt — de ez túl kedvező:
+  minden kör UGYANAZT a célszámot használta, és a megjegyzett gépek között ott voltak épp a
+  tárolói. *Egy visszatérő társnál valósághű, egy első keresésnél nem.*
+- ⭐⭐⭐ **BELÉPŐ NÉLKÜL, MINDEN KÖR ÚJ KULCCSAL: 5/5** — tárolta 7–8 gép, a feltevés mediánja
+  **17,6 mp**, a teljes keresés mediánja **18,9 mp**, 0 hamis. ⚠️ Az első találat (0,2–2,4 mp)
+  itt is kedvező, mert a kereső ugyanazzal a gyorsítótárral indul, mint a feltevő; egy másik
+  készüléknél az első futás **2,5–6 mp**-e a valósághűbb.
+- A kérdések **kb. fele-kétharmada néma** (lejár), és az idő nagy része ezekre várás.
+
+### ⭐ A LELET
+
+**A 35. mérés feltevése áll: a DHT egy ablakon belül írható és olvasható** — a feltevés és a
+keresés is **~20 mp**, az ablak 5 perc. ⭐⭐ **És a 2. szabály itt kézzelfogható:** a közismert
+belépők korlátoznak és elnémulnak, **a megjegyzett gépekkel viszont belépő nélkül is 10/10**.
+*A belépő a kurbli: egyszer kell, utána a készülék a saját emlékezetéből indul — és a társak
+is átadhatják egymásnak a megismert DHT-gépeket.*
+
+### ⛔⛔ AMIT AZ ÉPÍTÉS ÉS A MÉRÉS KÖZBEN A RONTÁS-PRÓBÁK TALÁLTAK
+
+1. ⛔⛔ **A keresés időkorlátja csak VÁLASZRA ellenőrződött.** Ha egyetlen válasz sem jön (egy
+   várakozás nem jár le, vagy egy ág elfelejt léptetni), a keresés **örökre állt** — két
+   rontás-próba nem bukott, hanem **beragadt**. *A nem-esemény, a legrosszabb hibafajta
+   (25. mérés).* ✅ Saját óra: az időkorlát akkor is lezár, ha semmi nem történik.
+2. ⚠️ **Egy hazudó felirat:** a keresés akkor is „kész"-t mondott, ha **egyetlen** gép felelt
+   és a jelöltek elfogytak (mérve: „7 kérdés, 1 felelt, vége: kesz"). ✅ „Kész" csak nyolc
+   felelő géppel; különben „nincs-tobb-jelolt".
+3. ⚠️⚠️ **És egy próba, ami a hazudó feliratra épült:** a néma gépes önpróba `ok === 'kesz'`-t
+   kért, és a javítás után **néha** bukott — helyesen: néma gépekkel a keresés becsületesen
+   kevesebb mint nyolc felelővel ér véget. *A próba a régi címkét mérte, nem a viselkedést.*
+   ✅ Most azt méri, ami a lényeg: megtalálja, és az időkorlát ELŐTT ér véget.
+4. ⚠️ **Az első halott-belépős próba vak volt:** a keresés a másik belépőn át már végzett,
+   mire a halottra lejárt a várakozás. ✅ A valódi eset a néma gép a legközelebbiek KÖZÖTT.
+
+⭐ **17 önpróba, ÖT rontás-próbával igazolva** — az aláírás-ellenőrzés kikapcsolása · a
+jelöltek felvételének kikapcsolása · a só kihagyása az aláírt bájtokból · a `find_node`-tartalék
+elrontása · és a lejárat letiltása: **mind buktat**, beragadás nélkül. A BEP 44 hivatalos
+tesztvektorai (bittorrent.org) **bájtra** egyeznek.
+
+### ⚠️ AMIT EZ A MÉRÉS NEM MOND MEG
+
+- **Egy vonal, egy gép** (otthoni NAT). ⏸️ **Mobil adatról** és **két készülék között** a
+  `tesz` + `keres` párossal mérhető — ez a következő terepmérés.
+- **Mennyi ideig marad fent** egy bejegyzés (a BEP 44 szerint a tárolók néhány óra után
+  elengedhetik): ⏸️ `node meres/dhtMeres.js keres` órák múlva megmondja (a mérő-kulcs
+  megmarad, és kiírja, hány perce tették fel).
+- **Csak IPv4.** Az IPv6 DHT (`nodes6`) nincs megépítve.
+- **Az adatvédelem** (D6): ma a mérő-kulcs nyilvános, a só ismert. Élesben a bejegyzést **nem
+  az azonossági kulccsal** tesszük fel, és a tartalom a társaknak titkosított — ⏸️ ezt a
+  beépítéskor kell megtervezni.
+
+### ✅✅✅ 36/b. — MOBILNETRŐL ÉS KÉT HÁLÓZAT KÖZÖTT IS (2026-09-19, terepmérés)
+
+A szomszéd telefonja (Termux, **mobil adat, wifi nélkül** — a képernyőn 4G jel), Csaba futtatta.
+
+- **`kor 3` a telefonon, üres emlékezettel, a közismert belépőkkel: 3/3.** Feltéve 7/7, 7/7,
+  7/8 gépre, 17–25 mp alatt; a visszakeresés mindháromszor megtalálta — az első körben
+  **4,5 mp** alatt jött az első érvényes találat, utána 0,2–0,3 mp (a megjegyzett gépek hatása);
+  a teljes keresés ~19 mp. **0 hamis.** A felelő és a néma gépek aránya ugyanaz, mint az
+  otthoni vonalon — **a szolgáltató nem fojtja el a DHT-forgalmat**.
+- ⭐⭐⭐ **KÉT HÁLÓZAT KÖZÖTT:** a telefon mobilnetről feltett egy bejegyzést (`tesz`, 7/8
+  tároló, 19,2 mp), a **laptop az otthoni vonalról megtalálta** (`keres <kulcs>`): ugyanaz a
+  sorszám, **4 perccel** a feltevés után, **5 érvényes, 0 hamis**, az első találat **2,6 mp**,
+  a teljes keresés 22,8 mp. ⚠️ Ez az „első keresés" esete: a laptop megjegyzett gépei között
+  nem voltak ennek a célszámnak a tárolói.
+- A belépők ezúttal elsőre engedtek — a 36. mérés elakadása valószínűleg a sok egymás utáni
+  futásnak szólt.
+
+⭐ **A LELET: a DHT mint hirdetőtábla mobilnetről és két hálózat között ugyanúgy működik, mint
+egy gépen — ez volt az egyetlen mérés, ami az építést befolyásolta volna.** ⏸️ Hátra: a
+bejegyzés **élettartama** (`keres` órák múlva) — és a mobil leképezés élettartama és szűrése
+(a kötés-hálóhoz), amik a DHT-t már nem érintik.
+
+### ✅ 36/c. — A BEJEGYZÉS ÉLETTARTAMA: 6,6 óra után is megvan (2026-09-19, 19:40)
+
+A telefon mobilnetről 13:04-kor feltett bejegyzését a laptop **6,6 órával később, újraírás
+nélkül** is megtalálta: **3 érvényes, 0 hamis**, az első találat 2,1 mp, a keresés 24,6 mp.
+⭐ A tárolók száma lassan fogy: **7** (feltevéskor) → **5** (4 perc múlva) → **3** (6,6 óra
+múlva). *Vagyis a tábla nem percekben, hanem órákban felejt — az újraírás órás ütemben is
+bőven elég, és a hálózatváltáskori kiírás addig biztosan fent marad, amíg a társak kiolvassák.*
+⚠️ Egy mérés, egy bejegyzés — a pontos felejtési görbéhez több kell.
+
+---
+
+## 31/b. ⭐⭐⭐ A MOBIL LEKÉPEZÉS ÉLETTARTAMA — mobilnetről (2026-09-19, 17:59, terepmérés)
+
+`node meres/udpLekepezesMeres.js` · a szomszéd telefonja, **mobil adaton** (4G), Csaba futtatta.
+
+- **Célfüggetlen:** ugyanarról a foglalatról (7380) három tükör (google-1, google-2,
+  cloudflare) **ugyanazt** látja: `130.43.210.126:61396`. *A bemondott port egy harmadik félre
+  is igaz — ahogy otthon (18., 31.) és a 32. mérésnél.*
+- ⭐⭐⭐ **A LEKÉPEZÉS 330 MP CSENDET IS TÚLÉLT:** 20 · 60 · 150 · 330 mp hallgatás után
+  **mind a négy foglalat ugyanazon a külső porton** szólalt meg; a 15 mp-enként kérdező
+  kontroll végig ugyanaz. *A korábbi „150 és 330 mp között elévül" (31. mérés, telefon) nem ez
+  a hálózat volt — ezen a mobil szolgáltatón legalább 5,5 perc.*
+- ⚠️ Mellékes megfigyelés: az egymás után nyitott foglalatok (7380…7385) **egymás utáni**
+  külső portot kaptak (61396…61401). A 32. mérésnél ugyanennél a szolgáltatónál újraindításkor
+  **más** szám jött — tehát erre NEM szabad építeni, csak feljegyezzük.
+
+### ⭐ A LELET — és ami a kötés-hálónak következik belőle
+
+**Ezen a mobil hálózaton egy 5 perces buli-köz életjel nélkül is átvészelhető.** A kötés-háló
+életjelének tehát nem kell sűrűbbnek lennie, mint maga a buli: *ha a társak a percfordulós
+ablakban amúgy is szólnak egymásnak, az ablak MAGA tartja életben a leképezést* — külön
+ébredés nélkül. ⚠️ **A 330 mp alsó korlát, nem a határ** (hosszabb csendet ez a futás nem
+mért), és **egy szolgáltató egy mérése** — más szolgáltatónál más lehet; ezért marad az elv:
+*a gyakoriság mindenhol a mért órából jön, nem beírt számból.*
+
+⏸️ **Hátra:** hosszabb csend (`udpLekepezesMeres.js 900`) · és a **mobil SZŰRÉS** (beengedi-e
+az idegent, amíg a leképezés él) — ahhoz a telefon és a laptop kell egyszerre.
+
+---
+
+## 36/d. ⛔⛔ A MOBIL SZŰRÉS — A MOBIL NAT NEM ENGEDI BE AZ IDEGENT (2026-09-19, 21:46, terepmérés)
+
+A szomszéd telefonja **mobil adaton** (wifi ki), a laptop otthon. Meglévő parancsokkal, új kód nélkül.
+
+**1. A próba (idegen kopog):** a telefon a **semmibe** fúrt
+(`pajzsfuro 192.0.2.1 7373 7373` — a TEST-NET címen senki nem felel), így a leképezése élt
+(`130.43.210.126:61389`), de rést **csak a 192.0.2.1 felé** nyitott. A laptop
+(`31.46.250.22:49921`) **180 kopogást** küldött 3 percen át a telefon bemondott címére —
+⛔ **egyetlen válasz sem jött** — és a telefon képernyője szerint (556 saját kopogás alatt) **egyetlen idegen kopogás sem érkezett hozzá**, vagyis a csomag nem a visszaúton veszett el, hanem be sem jutott. *(A fúró bárki kopogására felel, nem csak a céljáéra; ha
+egyetlen kopogás átjut, a telefon `HALLAK`-ja a laptophoz visszaér, mert a laptop routere
+már nyitott rést a telefon felé.)*
+
+**2. Az ellenpróba (kölcsönös kopogás):** hogy ne a rossz cím legyen a magyarázat, a telefon
+újraindult a **laptop** címére (`pajzsfuro 31.46.250.22 49921 7373`), a laptop változatlanul a
+telefon **régi** címére kopogott — ✅ **azonnal átment** (a telefon oldalán **1 kopogás, 292 ms**): kopogás mindkét irányból, `HALLAK`
+mindkét irányból, és a **csere is végigfutott a résen** (5 kör, 38,8 KB).
+⭐ *Vagyis a cím jó volt, az út él — az egyetlen különbség az, hogy a telefon kopogott-e a
+laptopra. Ez a SZŰRÉS, tisztán elválasztva.*
+
+### ⭐ A LELET
+
+- ⛔⛔ **Ezen a mobil szolgáltatón egy telefon NEM lehet nyitott ajtó.** A leképezés
+  célfüggetlen (31/b) és 330 mp-et túlél, de a **szűrés** csak attól enged be, akinek a telefon
+  maga is küldött — ugyanúgy, mint az otthoni router (2026-08-30). *A „port-korlátozott kúp"
+  alak: a szám mindenkinek igaz, az ajtó csak az ismerősnek nyílik.*
+- ⭐ **Következmény a kötés-hálóra: a kapcsolatot csak KÖLCSÖNÖS kopogás nyithatja** — tehát
+  az **új** társ elérése (a hálózatváltás után is!) mindkét fél egyidejű fúrását kívánja. Ehhez
+  kell a két dolog, amit már terveztünk: a **buli** (az egyidejűség) és a **hirdetőtábla** (a
+  friss cím, amire kopogni kell). *A 35. mérés „nyitott ajtó" mentése csak-mobilos közösségben
+  tehát nem áll rendelkezésre — a tábla nem kényelem, hanem az egyetlen út.*
+- ⭐ **Mellékes, de hasznos:** a telefon **ugyanazt a külső portot** kapta vissza (61389), amikor
+  ~8 perccel később ugyanarról a helyi portról újraindult; a laptop szintén (49921). *A
+  leképezés a HELYI foglalathoz kötődik, és amíg él, az újraindítás nem változtatja meg.* ⚠️ A
+  32. mérésnél ugyanennél a szolgáltatónál újraindításkor más port jött — ott valószínűleg
+  közben elévült. Erre tehát nem építünk, csak feljegyezzük.
+
+### ⚠️ AMIT EZ A MÉRÉS NEM MOND MEG
+
+Egy szolgáltató, egy készülék, egy este. Más mobil szolgáltató szűrhet lazábban — de a
+tervezésnek a **szigorú** esetet kell kiszolgálnia (9. szabály: a router-eltérés alapállapot).
+⏸️ **Két mobil egymás közt** (hairpinning ugyanazon a szolgáltatón) továbbra is méretlen.
+
+---
+
+## 37. ⭐⭐⭐ A HIRDETŐTÁBLA ÉLESBEN — a cím átmegy a valódi DHT-n, titkosítva (2026-09-20)
+
+`node koino.js tabla kiir <cím> <port>` · `… tabla olvas` — két adat-mappa egy gépen,
+a **valódi BitTorrent DHT-n** (nem hamis hálózat).
+
+### Az eredmény
+
+- ⭐ **KIÍRÁS: 22,1 mp, 8 tároló gép.** Az egyik készülék a MÁSIK rekeszébe írta a címét
+  (`203.0.113.7:41777`) — aláírva a saját tábla-kulcsával, a tartalom titkosítva.
+- ⭐ **KIOLVASÁS: 22,9 mp**, és a cím **kibontva, hibátlanul** megjött.
+- ⭐⭐ **A teljes lánc végigment:** tábla-kulcs → közös titok (X25519, küldés nélkül) →
+  AES-GCM titkosítás → Ed25519 aláírás → DHT (BEP 44) → vissza, kibontva.
+
+### ⭐ A LELET
+
+**Az „automatizált kurbli" működik: a leszakadt készülék KIFELÉ kiírja az új címét, a társa
+KIFELÉ kiolvassa — és közben egyetlen idegen sem tudja, mit olvas.** A 35. mérés modellje
+ezzel valódi alapot kapott: a tábla, ami ott ~1%-os leszakadást adott, élesben is ~22 mp,
+vagyis az 5 perces ablakba **bőven belefér**.
+
+### ⛔ AMIT A MÉRÉS NEM MOND MEG
+
+- **Egy gép, két adat-mappa** — a DHT-út valódi, de a két „készülék" ugyanazon a vonalon
+  van. ⏸️ Két valódi mobil még hátra van (a terv 4. lépése).
+- **Egy bejegyzés, egy alkalom.** A 36/c. szerint a bejegyzés 6,6 órát túlél; a tábla
+  felejtési görbéje ezzel együtt is csak közelítés.
+- ⚠️ **A 22 mp a KERESÉS ideje, nem a kiírásé:** a DHT-ben a művelet nagy része a rekeszhez
+  legközelebbi gépek megtalálása. *Ezért olcsóbb ritkán írni (csak címváltáskor), mint
+  gyakran.*
+
+### ⭐⭐ ÉS AMIT A SZERKEZET AD INGYEN — a rekeszt meg sem lehet találni
+
+A rekesz „sója" a **két nyilvános titkosító-kulcsból** számítódik, a DHT-beli cél pedig a
+kulcs és a só lenyomata. ⛔ Egy kívülálló tehát **nem tudja kiszámolni, hol keresse** — még
+akkor sem, ha a tábla-kulcsunkat valahonnan megszerezte. *Nem azért nem olvassa el, mert
+megtiltjuk, hanem mert nem találja meg.* ⚠️ A tartalmat ettől függetlenül a titkosítás védi:
+két külön őr, két külön kérdésre.
+
+---
+
+## 38. ⚠️ MIBE KERÜL A KÖR A TÁBLA UTÁN? (2026-09-20, a 33. mérés folytatása)
+
+Két készülék egy gépen, `figyel` + `csere`, **nincs újdonság** (üres kör) — ez a napi
+forgalom alapegysége (D35, 6. szabály).
+
+| a kör tartalma | bájt |
+|---|---|
+| ⛔ **RÉGEN: tíz idegen cím** (33. mérés) | **1346** |
+| ⭐ **MA: 3 idegen cím + saját + tábla-kulcs + 3 DHT-gép** | **931** |
+| csak a tábla-kulccsal (üres jegyzékek) | 762 |
+| tábla-kulcs nélkül, üres jegyzékekkel | 550 |
+
+### ⭐ A LELET — a tábla ÁRÁT a cím-korlát kifizette
+
+- **A tábla-kulcs 212 bájt körönként** (106 irányonként: két 43 karakteres kulcs + a mezők).
+  ⚠️ Ez több, mint amennyit becsültem (~90) — *a mérés megint pontosabb volt az érvelésnél.*
+- ⭐⭐ **De a teljes kör MÉGIS olcsóbb lett: 1346 → 931 bájt**, mert Csaba (d) döntése
+  (mások címéből 3 megy, nem 10) ennél többet szabadított fel. *A hirdetőtábla tehát nem
+  drágítja a napi forgalmat — a helyére költözött annak, amiről a 34. mérés kimutatta, hogy
+  nem számít.*
+- Napi szinten, 5 perces ütemmel, 14 társsal: **5,4 MB → 3,8 MB**.
+
+### ⏸️ AMI OLCSÓBB LEHETNE (ha egyszer szűkös lesz)
+
+A tábla-kulcs **minden körben** utazik, pedig a társ az első találkozás után már tudja.
+⭐ Olcsóbb alak: a kulcs helyett egy rövid **ujjlenyomat** menne (kb. 20 bájt), és a teljes
+kulcs csak akkor, ha a másik nem ismeri fel. ⛔ Ez viszont protokoll-bonyolítás (ki kérdez,
+ki felel, mi történik, ha az egyik fél elveszítette a jegyzékét) — *ma a 931 bájt kevesebb,
+mint ami tegnap volt, tehát nem kell megvenni ezt a bonyolultságot.*
+
+---
+
+## 39. ⭐⭐⭐ A HIRDETŐTÁBLA TEREPEN — KÉT VALÓDI TELEFON (2026-09-21, 19:30–20:12)
+
+**Ez a 35. és 37. mérés hiányzó darabja:** eddig a táblát csak modellben (35.) és **egy
+gépen** (37.) mértük. Most két valódi telefon, Termux + Node, a friss `main`-ről
+(`5e832b8`, 680 önpróba).
+
+| | „A" telefon | „B" telefon |
+|---|---|---|
+| szerep | **elvitt** (ő váltott hálózatot) | **maradó** (ő figyelt) |
+| kulcs | `UPkUZ4an_99W4vPc8` | `dqowl2V7_D29X0_wE` |
+| tábla-kulcs (rekesz) | `ApZHO1qsoIyk…` | `35oykowL4itc…` |
+| induló cím | `192.168.233.98` | `192.168.233.14` |
+| globális IPv6 a mobilon | **van** (`2a00:1110:…`) | nincs |
+
+Mindkettőn `orjarat 1` futott (1 perces ablak — a mérés miatt, az alapérték 5).
+
+### ⭐⭐⭐ A FŐ EREDMÉNY: A TÁBLA VÉGIGVITTE A CÍMET, KÉZI BEAVATKOZÁS NÉLKÜL
+
+A „B" telefon naplója, a hálózatváltás után:
+
+```
+20:09:35  0/4 társ — 0 új esemény, 0 bájt            ← a társ elnémult
+20:10:05  ⭐ a táblán megvan egy néma társ új címe:
+          5.187.184.117:7373 (az ő órája szerint 1 perce írta ki)
+```
+
+- **A** magától észrevette, hogy megváltozott a címe, és **kiírta a táblára** — miközben
+  már úton volt, kézi parancs nélkül.
+- **B** magától észrevette, hogy a társ **elnémult**, és **kiolvasta a tábláról az ÚJ
+  címét** — egy vadonatúj, nyilvános címet (`5.187.184.117`), aminek semmi köze a korábbi
+  `192.168.233.98`-hoz.
+- ⭐ **Elnémulástól a megtalálásig 30 MÁSODPERC.** *(A 35. mérés modellje 5 perces ablakkal
+  számolt; itt 1 perces ablaknál a teljes visszatalálás jóval egy percen belül volt.)*
+
+⭐ **És a kiírás ára élesben, TELEFONRÓL:** `19:54:28 az új címemet kiírtam a táblára
+(1 társ rekeszébe, **8 tároló**)` — **ugyanannyi tároló, mint a 37. mérésen** (laptopról).
+*A telefon nem gyengébb tábla-résztvevő.*
+
+⚠️⚠️ **PONTOSÍTÁS, mert könnyű összekeverni:** ez a 8 tárolós kiírás a **„B" (maradó)**
+telefoné, és **még a váltás ELŐTT** történt — akkor, amikor a közös hálózaton először
+megtudta a saját külső címét. ⛔ A **váltás utáni** kiírás az „A" telefoné volt, és arról
+**csak közvetett tudásunk van**: „B" olvasata szerint *„az ő órája szerint 1 perce írta ki"*.
+**Az „A" oldali tároló-szám ISMERETLEN** — a naplójához nem fértünk hozzá. *Ezt a számot a
+következő mérésnek kell elhoznia.*
+
+### ⛔ AMI NEM SIKERÜLT: A RÉS NEM NYÍLT MEG
+
+```
+20:11:24  1 friss címre kopogtam, egyik rés sem nyílt meg
+20:12:06  1 friss címre kopogtam, egyik rés sem nyílt meg
+```
+
+A cím megvolt, a kopogás elment — de a rés nem nyílt, tehát a váltás után létrehozott
+gondolat (`ie-mAD_2 „Atjott a valtas utan"`) **nem jött át**. A 3. szakasz nem teljesült.
+
+⚠️⚠️ **ÉS KÉT MAGYARÁZAT VAN, AMIT EBBŐL A NAPLÓBÓL NEM LEHET SZÉTVÁLASZTANI:**
+
+1. **A másik fél nem kopogott vissza.** A rés csak **kölcsönös** kopogásra nyílik. „A"
+   kötés-jegyzékében „B" **régi, hotspotos címe** (`192.168.233.14`) állt — az kívülről
+   használhatatlan. Neki is ki kellett volna olvasnia a tábláról „B" címét; hogy megtette-e,
+   azt csak **az ő naplója** mondaná meg.
+2. **Két mobil NAT nem tud egymásba fúrni.** Ez a **32. mérés** kimondott, máig nyitott
+   kérdése (*„két mobil készülék egymás közt, hairpinning"*).
+
+⛔ **A kettő közül NEM választunk, mert nincs rá adat.** Az „A" telefon naplójához a mérés
+közben megszűnt a hozzáférés. *Egy mérés, aminek a döntő fele hiányzik, nem ad választ — és
+ezt kimondani többet ér, mint a valószínűbbet megtippelni.*
+
+### ⏭️ AMIT LEGKÖZELEBB MÁSKÉNT KELL CSINÁLNI
+
+- ⭐ **A 0. szakaszt NEM kell újra:** a kötés mindkét telefon lemezén megmaradt
+  (`kotesek.json`), tehát a következő alkalom **rögtön a hálózatváltással kezdhet**.
+- ⛔⛔ **MINDKÉT telefon naplója kell**, és főleg a **távozóé**: kiolvassa-e a tábláról a
+  maradó címét. Enélkül a rés-kérdés megválaszolhatatlan.
+- Ha a távozó megtalálja a maradót, és a rés **mégsem** nyílik, akkor az a **32. mérés
+  hiányzó darabja, negatív eredménnyel** — és akkor a két mobil NAT esete nem elméleti
+  aggály, hanem mért tény.
+
+### ⚠️ HÁROM MELLÉKLELET, MIND A TEREPRŐL
+
+1. ⛔ **A HELYI FELFEDEZÉS CSAK ÖNMAGÁT TALÁLTA MEG.** A `felfedez 5` egyetlen választ
+   kapott: a **saját** mobilnetes címét (`10.91.173.90`, ami a `cimek` szerint a saját
+   felülete). A társ válasza sosem ért át — *ezen a hálózaton a broadcast/multicast nem megy
+   át a két készülék között, csak visszahurkolódik.* A két telefon így **kézi `tars`-szal**
+   találkozott (`192.168.233.98` ↔ `192.168.233.14`), és onnantól minden ment.
+2. ⛔⛔ **ÉS EGY FELIRAT FÉLREVEZETETT — ENGEM IS.** A felfedezés ezt írta: *„+ 0 új társ a
+   listán (**1 már ismerős volt**)"* — pedig a valóság az volt, hogy *„1-et KISZŰRTEM, mert
+   a SAJÁT címem"*. A szűrő jól működött (`kapottCimekBeolvasztasa` → `sajatCimekKiszurese`),
+   de a szöveg két különböző dolgot mond ugyanannak. ⭐ Ez tíz percnyi rossz irányt okozott
+   a terepen: arra jutottam, hogy a telefon **felvette magát társnak** — a `tars torol`
+   cáfolt meg (*„Nem volt a listán"*). ⏸️ **Javítandó:** a felirat mondja meg külön, hogy
+   *már ismert* vagy *saját cím volt*.
+3. ⭐ **A rés a közös hálózaton 36–98 ms alatt nyílt** (`rés nyílt: …:7373 (36 ms)`,
+   `(67 ms)`, `(98 ms)`) — ugyanaz a nagyságrend, mint a 17. (190 ms) és 19. (76 ms) mérésen.
+   *Telefonon sem drágább.*
+
+---
+
+## 40. ⚠️ A KÉT MOBIL NAT — ELMARADT, DE HAT LELETET HOZOTT (2026-09-24, 19:55–20:45)
+
+*A 39. mérés megismétlése lett volna, két mobilnettel (a [forgatókönyv](../../docs/terepmeres_mobil.md)
+🅱️ változata). ⛔ **A két mobil NAT közötti rést NEM mértük meg:** az „A" telefon mobilnete
+nem működött (feltöltőkártyás — *„a bankos mobil alkalmazást se akarja megnyitni"*). Ami
+mégis kiderült, az alább.*
+
+| | „A" telefon (Csabáé) | „B" telefon (a szomszédé) |
+|---|---|---|
+| tábla-kulcs (rekesz) | `SbjQHYMA63Vd…` — **új**, nem a 39-es „A" | `35oykowL4itc…` — **a 39-es „B"** |
+| kulcs | `3Wf7CJIW…` | `dqowl2V7…D29X0_wE` |
+| a program | `e747be3` (695 önpróba) | `e747be3` |
+| wifis cím | `192.168.1.144` | `192.168.1.36` |
+| kötés a mérés előtt | 0 | 1 — a 39-es „A" (`ApZHO…`), **258 018 mp** (~72 óra) óta néma |
+
+⚠️ Mivel az „A" új készülék volt, a 0. szakasz (ismerkedés) **kellett**: kézi `tars`
+mindkét irányban, majd `orjarat 1 2>&1 | tee` mindkét telefonon (a 39. mérés tanulsága: a
+napló most **fájlban** van).
+
+### ✅ AMI MŰKÖDÖTT: A KÖTÉS ÉS A KIÍRÁS
+
+```
+A:  20:09:22 1 társsal van kötésem (a tábla-kulcsuk alatt)
+A:  20:09:47 az új címemet kiírtam a táblára (1 társ rekeszébe, 8 tároló)
+B:  20:08:14 1 társsal van kötésem (a tábla-kulcsuk alatt)
+B:  20:09:33 az új címemet kiírtam a táblára (2 társ rekeszébe, 14 tároló)
+```
+
+⭐ A B **20:40:15-kor újra kiírt** (2 rekesz, 14 tároló) — hálózatváltás NÉLKÜL. A kiírás
+csak akkor fut, ha a mért külső cím megváltozott, tehát a B-nek új leképezést adott a router.
+*A napló nem mondja meg, mire változott — valószínűleg a portja (a fúró körönként új
+foglalatot nyit, lásd 32. mérés).* Az „eseményre, nem órára" szabály így is ritka írást adott:
+**két kiírás 36 perc alatt.**
+
+### ⭐⭐ A DHT EGY HÁROMNAPOS BEJEGYZÉST IS MEGŐRZÖTT
+
+A B minden néma-körben kereste a 39-es „A" rekeszét — és megtalálta:
+
+```
+20:08:38 a táblán megvan egy néma társ új címe: 5.187.184.117:7373 (az ő órája szerint 4320 perce írta ki)
+…
+20:32:05 a táblán megvan egy néma társ új címe: 5.187.184.117:7373 (az ő órája szerint 4343 perce írta ki)
+```
+
+- ⭐ **4343 perc = 72,4 óra**, újraírás nélkül. Eddig a leghosszabb mért élettartam **6,6 óra**
+  volt (36/c). *A BEP 44 szerint a tárolók néhány óra után elengedhetik (lásd 36.) — a valódi
+  DHT-n ezt a bejegyzést három napig többen is megtartották.*
+- ⚠️ **De nem mindig:** a 3 napos bejegyzés **7 olvasásból 5-ször** jött meg (20:26:10-kor
+  és 20:39:01-kor nem). A friss, 8 tárolós „A"-bejegyzés **3-ból 3-szor**.
+- ⚠️ *A két „nincs" melyik társé volt, azt a napló NEM mondta meg* — az időrendből
+  következtetve a régié (a friss mindkét alkalommal fél percen belül megjött). → **javítva**, lent.
+
+### ⚠️ A RÉS: HELYI CÍMEN IGEN, NYILVÁNOSON SOHA
+
+```
+A:  20:11:04 rés nyílt: 192.168.1.36:7373 (4173 ms)
+A:  20:19:01 rés nyílt: 192.168.1.36:7373 (1393 ms)
+    … és minden körben: „1–3 friss címre kopogtam, egyik rés sem nyílt meg"
+```
+
+- A **helyi** címre (a kötésben álló `192.168.1.36`) a rés megnyílt — ⚠️ de **1,4–4,2 mp**
+  alatt, a 39. mérés 36–98 ms-ával szemben.
+- A **friss címekre** (a cserén terjedő nyilvános címek) **egyszer sem**. ⭐ A két telefon
+  egy routeren van, tehát egymás nyilvános címe a SAJÁT külső címünk, más porttal — ez a
+  2026-09-22-i NAT-javítás esete, és a rés itt csak akkor nyílna, ha a router **visszafordítja**
+  a forgalmat saját maga felé (*hairpinning*). ⚠️ *Következtetés, nem mérés:* a napló nem
+  írja ki, melyik címre kopogott — de a két telefon mindvégig egy wifin volt, és a helyi rés
+  közben megnyílt, tehát a társ ott volt. *Ez a router valószínűleg nem tud hairpinninget* —
+  a javítás előre kimondott ára, most először terepen.
+
+### ⚠️ A CSERE: KÖRÖNKÉNT 35 KB, NULLA ÚJ ESEMÉNNYEL
+
+A napló minden körben ezt mutatta: `1/5 társ — 0 új esemény, 35.2 KB` · `átvettem 0,
+továbbadtam 10`. ⭐ **A kapu elutasítási okát a részletes napló adta meg** (kézi `csere`,
+`KOINO_NAPLO=1`):
+
+| Irány | Mi jött | Mi lett vele |
+|---|---|---|
+| A → B | **9 esemény** | mind `ELUTASÍTVA — hiányzó mező: entitas` |
+| B → A | **2 esemény** | mind `marMegvolt` — az „A"-nál **már megvolt** |
+
+- **Az A → B 9:** az „A" telefon **2026-08-29-i**, a Szakasz 3 (09-03) ELŐTTI alakú eseményei
+  (a laptopon ugyanez a 9 áll: 7 a laptopé, 2 az „A"-é). *A 32. mérés már feljegyezte ezt a
+  pazarlást* — egy elutasított eseményt a csere körönként újra elkér. A kapu jól dönt (3.
+  szabály); a pazarlás marad.
+- ⭐ **A B → A 2 ÚJ LELET:** az „A" körönként **újra elkér két eseményt, amelyek már
+  megvannak nála**. Ez nem az elutasítás esete — a mentés „már megvolt"-ot mond. ✅ **Az oka
+  megvan, és javítva — lásd 40/b.**
+- ✅ **A mérést ez NEM akasztotta volna meg:** a kapu nem kéri az elődöt (`esemenyMentese`
+  — aláírás, azonosító, elágazás), tehát egy ÚJ esemény a régi hézag mellett is bemegy.
+
+### ⛔ 20:22 UTÁN: AZ „A" MOBILNET NÉLKÜL — ÉS A PROGRAM EZT NEM MONDTA KI
+
+Az „A" 20:22-kor kikapcsolta a wifit — a mobilnet nem működött, vagyis **offline** lett. A
+napló ettől kezdve:
+
+```
+A:  20:22:46 0/6 társ — 0 új esemény, 0 bájt
+A:  20:22:56 egy néma társ nincs a táblán
+A:  20:25:01 egy néma társ nincs a táblán
+B:  20:26:36 a táblán megvan egy néma társ új címe: 31.46.251.115:47928 (az ő órája szerint 17 perce írta ki)
+```
+
+⛔⛔ **KÉT HALLGATÓ HELY, mindkettő ugyanabból a fajtából, mint a 39. mérés „már ismerős"
+felirata:**
+
+1. **„egy néma társ nincs a táblán"** — pedig az „A" **egyetlen DHT-gépet sem ért el**.
+   A társ közben kint volt (a B mindvégig megtalálta a friss bejegyzéseket). *A felirat a
+   HÁLÓZAT hírét a TÁRS hírének adta ki.*
+2. **Az „A" nem írta ki az új címét — és erről egy szót sem szólt.** A kiírás csak akkor fut,
+   ha a külső cím mérése (STUN, a fúró foglalatán) sikerül; ha nem, a fúró jelzi
+   (`SAJAT-CIM-NEM-MEGY`) — ⛔ **de az őrjárat ezt a jelzést eldobta.** Ezért a B csak a
+   RÉGI, otthoni címet találta meg (`31.46.251.115:47928`), és 20:29-től arra kopogott.
+
+✅ **Mindkettő javítva ugyanaznap** — próbával és rontás-próbával (lásd a CLAUDE.md-t):
+- a táblaolvasás a keresés **válaszszámát** is nézi: ha senki nem felelt → *„a tábla NEM
+  ÉRHETŐ EL (N kérdés, egyik DHT-gép sem felelt)"*; ha feleltek, de nincs rajta → *„nincs a
+  táblán (N DHT-gép felelt)"* — és **megnevezi a társat**;
+- az őrjárat kiírja: *„nem tudom megmérni a saját külső címemet (…) — amíg ez így van, új
+  címet sem írhatok a táblára"*, **sorozatonként egyszer**, és szól, ha a mérés újra megy.
+
+### ⚠️ A KÖRÖK KÖZÖTT PERCEK MARADTAK KI
+
+„Kör 1 percenként" helyett több helyen **3–5 perces** szünet: A `20:13:06 → 20:16:40`,
+`20:25:01 → 20:29:52`; B `20:13:06 → 20:16:43`, `20:20:14 → 20:24:33`, `20:40:15 → 20:45:17`.
+*Oka nyitott.* Két gyanú, és a napló nem választja szét őket: *(1)* az Android
+visszafogja a háttérben/elsötétült képernyővel futó Termuxot (→ legközelebb **„Acquire
+wakelock"**); *(2)* a kör maga hosszú: a B társ-listáján 6 cím állt, és egy halott TCP-cím
+10 mp várakozás. ⚠️ A 20:13–20:16-os szünet **mindkét** telefonon egyszerre volt — ez közös
+okra utal.
+
+### ⚠️ ÉS AZ ÖNPRÓBÁK A TELEFONOKON: NÉGY IDŐZÍTÉS-ÉRZÉKENY BUKÁS
+
+| Futás | Bukott (695-ből) |
+|---|---|
+| A, wifin | `parancssor`: *A TÜRELEM ELJUT A VONALIG* · *A KÖTÉS MEGSZÜLETIK A BULIN* |
+| B, wifi nélkül | `dht`: *NÉMA gépek…* — `eltelt 10450 ms (keret 6000) · feltevés: idokorlat, tárolta=4 · keresés: megvan=true` |
+| B, wifin | `parancssor`: *AZ ŐRJÁRAT A FAL ÓRÁJÁHOZ IGAZODIK* |
+
+⭐ **Mind a négy más próba, mindegyik egyszer**, és mind a négy fix, a laptophoz szabott
+időkeretet használ (1,5 mp induló folyamatra · 14 mp egy 12 mp-es ablakra · 6 mp a DHT-re ·
+1 mp tűrés a kör végi kiírásra). A laptopon **mind zöld**, és a `dht` próba **8 mag teljes
+terhelése mellett is 3/3**. *Az időzítésre utal, nem programhibára — de BIZONYÍTANI nem
+lehet: a négyből három csak annyit mond, hogy „BUKOTT".* ⏸️ **Javítandó:** nevezzék meg,
+melyik feltételük nem teljesült, és mennyi idő telt el (ahogy a `dht` próba már teszi).
+
+### ⏭️ AMI KÖVETKEZIK
+
+- ⭐ **A kötés MINDKÉT telefonon megmaradt** (`kotesek.json`) — a következő két mobilos
+  alkalom **rögtön a hálózatváltással** kezdhet.
+- ⭐ **A telefon + laptop változathoz (0/b.) nem kell a szomszéd** — amint az „A" mobilnete
+  működik, egyedül is mérhető, és az dönti el a legfontosabbat: *kiolvassa-e a TÁVOZÓ is a
+  táblát, visszakopog-e, átmegy-e a gondolat.*
+- A két mobil NAT (32. mérés nyitott pontja) egy **második működő mobilnettel**.
+
+---
+
+## 40/b. ✅ A KÉT SZIVÁRGÁS EGY OKBÓL — JAVÍTVA: 33,1 KB → 1022 bájt körönként (2026-09-24)
+
+*A 40. mérés két pazarlása (körönként 9 elutasított és 2 „már megvolt" esemény) ugyanabból
+a gyökérből nőtt ki.*
+
+⛔ **AZ OK:** a csere a SAJÁT tárát hirdette az állásában — benne a 2026-08-31-i alakváltás
+előtti eseményekkel, amelyeket a régi program beengedett, a mai kapu viszont nem. Ebből két
+kör-ismétlés lett:
+
+1. **A társ elkérte és eldobta őket** — a hiány nála örökre megmaradt, tehát a következő
+   körben újra elkérte.
+2. **A tükörképe:** a régi események miatt az egyik lánc 1..4-nek látszott, a társé 3,4 +
+   hézag 1,2-nek. Az ujjlenyomat örökre eltért, a „nyilvánvaló hiány" üres volt — és a
+   `hianyokSzamitasa` erre a lánc közepén rejtett elágazás elleni ágával felelt: **a teljes
+   tartományt** kérte el (a 3,4-et), körönként. *A számítás megállási érve azt feltételezi,
+   hogy amit az egyik fél hirdet, azt a másik el is tudja tárolni — ez sérült.*
+
+⭐ **A JAVÍTÁS EGY SZABÁLY:** az állás ÉS a válasz csak **alakilag érvényes** eseményt lát
+(`csereLatoEsemenyek` — ugyanaz az `alakiHiba`, amit a kapu is használ, most már külön,
+szinkron függvényként). *Amit egyetlen mai kapu sem enged be, az a mai protokoll számára nem
+létezik.* ⚠️ Az aláírást nem ellenőrizzük újra: a tárba csak kapun át kerül esemény, és az
+aláírás szabálya nem változott, csak az alaké.
+
+⭐⭐ **MÉRVE — próbában és valódi vonalon:**
+
+```
+A terepi helyzet próbában (régi alakú Anna 1,2 + Béla 1..7; érvényes Anna 3,4), három kör:
+  régi kód:     kör 1–3: régi kapott marMegvolt 2 · új kapott elutasítva 9 · egyezik: NEM
+  javított kód: kör 1–3: régi kapott marMegvolt 0 · új kapott elutasítva 0 · egyezik: IGEN
+
+A laptop VALÓDI adatával (a 9 régi + 2 érvényes esemény), TCP-n, `figyel` + `csere`:
+  régi kód:     küldtem 45 (5 kör, 31 ms, 33.1 KB)     ← terepen 35 KB
+  javított kód: küldtem 0  (1 kör, 20 ms, 1022 bájt)
+```
+
+⭐ **Körönként ~33-szor kevesebb**, és ⭐ a kör **egyetlen** oda-vissza lett az öt helyett. A
+terepen percenkénti körrel ez napi **~50 MB → ~1,5 MB** egy mobilon (D35).
+
+⭐ **4 új próba** (a hirdetés · a tükörképe · *„a próba nem vak"*: egy ÚJ, érvényes esemény a
+régi hézag mellett is átmegy · a válasz sem küldi el a régit) — **és a rontás mind buktat**:
+az állás szűrőjének kivétele hármat, a válaszé egyet.
+
+⏸️ **AMIT EZ NEM OLD MEG:** egy RÉGEBBI változatú társ továbbra is hirdeti a régi eseményeit,
+és a mai kapu továbbra is eldobja. *Ez frissítéssel megszűnik; a két telefonon a következő
+mérés előtt úgyis frissítünk.*
+
+⚠️ **ÉS EGY SZESZÉLYES FUTÁS A LAPTOPON:** a javítás után az első teljes önpróba-futás **1
+bukást** mutatott (701-ből), a következő **négy** mind zöld volt. ⛔ *Hogy melyik próba
+bukott, NEM tudjuk — a kimenetet nem mentettem el, csak az összesítő sort.* Ez ugyanaz a
+lecke, mint a telefonokon: egy bukás, ami nem nevezi meg magát, és aminek a nyomát nem
+őrizzük meg, nem vizsgálható. ⏸️ *Legközelebb a teljes futás kimenete fájlba megy.*
+
+---
+
+## 41. ⛔⛔ A HOSSZÚ KÖR ELVISZI A KOPOGÁST (2026-09-25, a laptopon)
+
+*A 40. mérésen a körök között 3–5 perces szünetek voltak. Kérdés: mennyi egy kör, ha a
+társ elnémult — és mit tesz ez a kopogással?*
+
+**A beállítás** (ideiglenes adatmappa, a valódi `koino-adat` érintetlen): **5 halott TCP-társ**
+(`10.255.255.1–5:7373`, nem routolható — a kapcsolódás csak az időkorlátnál adja fel, ahogy egy
+telefon régi wifis címe) és **2 néma kötés** (a valódi DHT-n keresi őket). `orjarat 1`, 6 perc.
+
+```
+  · 12:16:31 2 friss címre kopogtam, egyik rés sem nyílt meg      ← indulás: 12:16:25
+  · 12:17:21 0/5 társ — 0 új esemény, 0 bájt                     ← TCP-kör: 50 mp
+  · 12:17:43 egy néma társ (LyJNctOl…) nincs a táblán (22 DHT-gép felelt)
+  · 12:17:47 egy néma társ (ujdjB6Hh…) nincs a táblán (1 DHT-gép felelt)
+  ⭐ 12:18:27 az új címemet kiírtam a táblára (2 társ rekeszébe, 15 tároló)
+  · 12:19:06 2 friss címre kopogtam, …                            ← a 12:17 és 12:18 kimaradt
+  · 12:19:56 0/5 társ …   · 12:20:15 … · 12:20:37 …
+  · 12:21:06 2 friss címre kopogtam, …                            ← a 12:20 kimaradt
+  · 12:21:56 0/5 társ …   · 12:22:14 … · 12:22:31 …
+```
+
+⭐ **Egy kör: kopogás 6 mp + TCP-kör 50 mp (5 × 10 mp, egymás után) + táblaolvasás 17–40 mp
+(néma kötésenként 4–22 mp) ≈ 90–97 mp**; az első körben a táblaírással **122 mp**. ⛔ A kör
+UTÁN alszik a következő percfordulóig — tehát **a kopogás csak minden második percfordulón fut**
+(12:19, 12:21, 12:23), az elején kettőt is kihagyott.
+
+⛔⛔ **A KÖVETKEZMÉNY A LÉNYEG:** a rés csak **egyidejű** kopogásra nyílik (36/d.). Két ilyen
+állapotú készülék, ha az egyik páros, a másik páratlan percben kopog, **soha nem kopog
+egyszerre** — és ez nem véletlen, hanem **stabil állapot**, amibe beleragadnak. ⚠️ És épp akkor
+áll elő, amikor a legnagyobb szükség van a résre: hálózatváltás után a társ néma, ettől hosszú
+a kör. *Kívülről ugyanúgy néz ki, mint „a két mobil NAT fal" — a két mobilos mérés e nélkül nem
+adhat megbízható választ.*
+
+⚠️ Az alapértelmezett 5 perces ütemben egy 97 mp-es kör még belefér; de a társlista nem
+korlátos (*„a koino nem felejt el senkit magától"*), 30 halott cím már 5 perc.
+
+⏸️ **Döntésre vár (Csaba):** *(a)* a kopogás SAJÁT ütemben, minden percfordulón, a kör többi
+részétől függetlenül (+ a halott TCP-címek párhuzamos próbálása) · *(b)* csak a kör
+rövidítése/korlátozása, garancia nélkül. **Átmeneti tanács terepre:** `orjarat 5`.
+
+### ⛔ ÉS EGY HARMADIK HALLGATÓ HELY, AMIT A 40. MÉRÉS NAPLÓJA REJTETT
+
+A 40. mérésen az „A" telefon kétszer kiírta: `rés nyílt: 192.168.1.36:7373` — utána nem jött
+`csere a résen` sor, viszont jött ez: *„3 friss címre kopogtam, egyik rés sem nyílt meg"*.
+⛔ **Ellentmondás, és a kódban megvan az oka, két rétegben:** az összegző sor a **sikeresen
+lezárult cseréket** számolja, nem a megnyílt réseket; és a résen futó csere hibáját
+(`ATFURT-MUNKA-BUKOTT`) **az őrjárat eldobja** — ugyanúgy, mint a 2026-09-24-én javított két
+jelzést. *Vagyis a közös wifin a rés megnyílt, a csere rajta ismeretlen okból elbukott, és a
+program ezt elhallgatta.* ⏸️ Javítandó a kopogás ütemezése előtt: két mobil között csak a rés
+létezik, és ha azon a csere elbukik, a gondolat akkor sem megy át, ha a NAT-ok engednék.
+
+---
+
+## 41/b. ✅ AZ EGYOLDALÚ RÉS — itthon reprodukálva, és javítva (2026-09-25)
+
+*A D69 („UDP mindenhol") első lépcsője: miért bukott el a 40. mérésen a csere a megnyílt résen?*
+
+⭐ **A GYANÚ A 40. MÉRÉS NAPLÓJÁBÓL:** a kötésnek csak az egyik oldalán volt kopogható cím. Az
+„A" a B-t a saját TCP-körében hívta (`192.168.1.36:7373`) — nála a kötés PORTTAL áll. A B az
+A-t csak bekopogóként ismerte (`bejött valaki`) — az ilyen kötés szándékosan PORT NÉLKÜL áll
+(a TCP forrásportja pillanatnyi), és a `kopogasCeljai` a port nélkülit kihagyja. **Vagyis a B
+soha nem kopogott az A-ra.** Az A kopogott, a B fúrója visszaszólt (`HALLAK`) → „rés nyílt" —
+de a B csak annak indít cserét, akit célként ismer. Az A cseréje 10 mp múlva elbukott.
+
+⛔ **ELSŐ PRÓBÁLKOZÁS — NEM REPRODUKÁLT, és a miért tanulságos:** a gépen belül minden cím
+`127.0.0.1`, és a fúró az azonos CÍMRŐL, más portról érkező kopogót a már ismert célnak veszi
+(a mobil portváltása miatti szabály, 32. mérés) — a B „felismerte" az A-t a halott célja
+alapján. *Egy hurok-címes próba itt vak lett volna.* ⭐ A második próbában a B célja más
+címen volt (`10.255.255.9`), ahogy terepen:
+
+```
+A:  ⭐ 13:05:04 rés nyílt: 127.0.0.1:7612 (1016 ms)
+A:  ✗ 13:05:14 rés nyílt (127.0.0.1:7612), de a csere a résen elbukott: A másik fél nem válaszol (10000 ms)
+A:  · 13:05:14 1 friss címre kopogtam, 1 rés nyílt meg, de a csere egyiken sem ment végig
+B:  · 13:05:09 1 friss címre kopogtam, egyik rés sem nyílt meg
+    → a hír NEM ment át
+```
+
+⭐⭐ **Pontosan a 40. mérés mintája** — és már az új feliratokkal, amelyek kimondják.
+
+✅ **A JAVÍTÁS (`pajzsfuro.js`, `bekopogoFogadas`):** aki a kopogási ablakunkban ISMERETLENKÉNT
+kopog be, azt a fúró felveszi célnak, azonnal visszakopog rá, és a válaszára ugyanúgy „átfúrt"
+lesz, mint egy ismert cél — a csere mindkét oldalon elindul. Ablakonként legfeljebb 3 ilyen
+(`BEKOPOGO_KORLAT`), és csak a befejezés előtt. *Az UDP-postaláda első darabja: amit a
+TCP-kapu tesz, csak a kopogási ablakon belül.* Ugyanaz a helyzet utána:
+
+```
+B:  · 13:06:51 ismeretlen kopogott be (127.0.0.1:7611) — visszakopogok, és vele is cserélek
+B:  ⭐ 13:06:51 rés nyílt: 127.0.0.1:7611 (1022 ms)
+B:  ✓ 13:06:51 csere a résen 127.0.0.1:7611 — 2 új esemény, küldtem 0 (2 kör, 3.6 KB)
+    → a hír ÁTMENT · és a B kötésében az A mostantól PORTTAL áll (127.0.0.1:7611)
+```
+
+⭐ **A kötés ettől öngyógyító:** a következő körtől a B magától kopog az A-ra, a kapcsolat
+szimmetrikus lesz.
+
+⭐ **A láthatóság is javítva (`koino.js`):** a résen futó munka bukása (`ATFURT-MUNKA-BUKOTT`)
+most kiíródik, és az összegző sor megkülönbözteti a „nem nyílt rés"-t a „megnyílt, de a csere
+elbukott"-tól.
+
+**2 új parancssor-próba:** az egyoldalú rés is cserét hoz (a terepi helyzet, a hurok-cím
+csapdáját kikerülve) · és egy hamis társ, aki a kopogásra visszaszól, de cserélni nem hajlandó
+— a naplónak ki kell mondania.
+
+⏸️ **Terepen még NINCS mérve.** A következő terepmérés (egy wifin is, két telefonnal) mutatja
+meg, hogy élesben is végigmegy-e. → ✅ **Megmérve a 42. mérésen.**
+
+---
+
+## 42. ⭐ TELEFON A SZOMSZÉD WIFIJÉN, LAPTOP OTTHON — KÉT ROUTER, MOBILNET NÉLKÜL (2026-09-25, 13:51–16:41)
+
+*A forgatókönyv 🅰️ változata, mobilnet helyett a szomszéd wifijével: két külön otthoni router.
+A laptop oldalát Claude futtatta (`orjarat 1`), a telefon (Csabáé, `3Wf7CJIW…`, tábla-kulcs
+`SbjQHYMA…`) `orjarat 2`-vel ment. A program: `a29b8cc` (703 önpróba), vagyis a 41/b.
+javítással.*
+
+**Az ismerkedés** otthon, kézi `tars`-szal, csak a telefonon (a laptop a bekopogótól tanult):
+laptop 13:57:16 kötés, 13:57:29 kiírás (8 tároló); telefon 13:58:51 kiírás (3 rekesz, 23 tároló).
+13:59 körül a telefon átment a szomszédhoz.
+
+### ✅⭐⭐ A TÁVOZÓ KIOLVASTA A MARADÓ CÍMÉT — a 39. mérés hiányzó fele, igennel
+
+```
+T:  14:07:49 a táblán megvan egy néma társ új címe: 31.46.251.115:15478 (az ő órája szerint 11 perce írta ki)
+T:  14:43:32 … 31.46.251.115:15478 (46 perce) · 14:54:09 … (57 perce) · 16:23:12 … (146 perce)
+```
+
+⭐ A telefon a szomszéd wifijéről **négyszer** megtalálta a laptop otthoni nyilvános címét. *A 39.
+mérés nyitott kérdése („kiolvassa-e a TÁVOZÓ is a táblát?") ezzel eldőlt: **igen, a program ezen
+az oldalon jól működik.***
+
+### ⛔⛔ A TELEFON ÚJ CÍME VISZONT NEM KERÜLT A TÁBLÁRA — és ezért nem nyílt rés
+
+```
+T:  14:08:30 a tábla NEM ÉRHETŐ EL (4 kérdés, egyik DHT-gép sem felelt) — nem tudom, hol van SbjQHYMA…
+T:  14:08:30 az új címemet kiírtam a táblára (3 társ rekeszébe, 0 tároló)      ← 0 tároló!
+L:  14:00:43 … 16:24:39  a táblán megvan egy néma társ új címe: 31.46.251.115:15425 (… 2 → 146 perce)
+```
+
+⛔ A kiírás **0 tárolót** ért el (a DHT abban a percben nem felelt a telefonnak), a program mégis
+kiírtnak vette, és **2 és fél órán át nem próbálta újra**. A laptop így végig a telefon RÉGI,
+otthoni címét olvasta (`15425`), és nem kopoghatott a szomszéd felé. *A 2026-09-21-i nyitott
+kérdés („a 0 tárolós kiírás is kiírtnak számít") itt mért kárt okozott — és ez a rés
+elmaradásának valódi oka, nem a routerek.* ✅ **Javítva:** kiírtnak csak az számít, amit
+legalább egy tároló átvett; különben a következő kör újra próbálja, és a napló kimondja.
+
+### ⛔ A TELEFON KÖREI 15–20 PERCESEK LETTEK — az Android elaltatta
+
+```
+T:  14:08:30 → 14:27:56 → 14:42:52 → 14:52:23 → 15:05:39 → 15:14:06 → … → 16:20:30
+L:  percre pontosan, végig (:06 kopogás, :16 TCP-kör, kétpercenként táblaolvasás)
+```
+
+⛔ A telefon a zsebben elaludt: egy kétperces őrjárat helyett negyedóránként ébredt. *Egy alvó
+őrjárat nem kopog, nem ír, nem cserél — kívülről ez is „nem nyílt rés"-nek látszik.* ✅
+**Javítva:** Termuxban az őrjárat maga kéri az ébren tartást (`termux-wake-lock`), kilépéskor
+elengedi, és ha nem sikerül, kimondja. ⏸️ *Telefonon még nincs kipróbálva.*
+
+### ⚠️ A TELEFON ÖNMAGÁVAL IS KÖTÖTT
+
+A telefon társlistáján a **saját** wifis címe állt: 13:56:41-kor felhívta önmagát (`bejött valaki
+(::ffff:192.168.1.144)` — a saját naplójában), és a jegyzékbe önmaga került (`SbjQHYMA…`) — minden
+körben önmagát kereste a táblán. ✅ **Javítva:** a TCP-kör nem hívja a saját címét (pontos
+cím+port pár), a kötés-feljegyzés nem köt saját kulccsal, és a régi saját kötést induláskor
+kitakarítjuk. ⚠️ *A kötés-őrt külön próba nem méri* (a próbában már a hívás sem jön létre) — ez a
+második védvonal a többi útra.
+
+### ⭐⭐ HAZAÉRVE: A RÉS MEGNYÍLT, ÉS A CSERE A RÉSEN VÉGIGMENT — először terepen, az őrjáraton belül
+
+```
+T:  16:30:00 ismeretlen kopogott be (192.168.1.134:7373) — visszakopogok, és vele is cserélek
+T:  16:30:00 rés nyílt: 192.168.1.134:7373 (379 ms)
+T:  16:30:00 csere a résen 192.168.1.134:7373 — 0 új esemény, küldtem 0 (1 kör, 1.6 KB)
+L:  16:30:01 rés nyílt: 192.168.1.144:7373 (1024 ms)
+L:  16:30:01 csere a résen 192.168.1.144:7373 — 0 új esemény, küldtem 0 (1 kör, 1.6 KB)
+L:  16:36:02 rés nyílt … (2057 ms) · csere a résen … (1 kör, 1.7 KB)
+```
+
+⭐⭐ **A 41/b. javítás terepen is működik** — *„ismeretlen kopogott be — visszakopogok"* —, és ez
+az első alkalom, hogy a csere az őrjáraton belül, élesben, a résen ment végig. Egy wifin
+(helyi cím).
+
+### ⚠️ ÉS EGY ÚJ ESET: A RÉS MEGNYÍLT, DE A MÁSIK „MÁR ÁTFÚRTNAK" TARTOTTA
+
+```
+L:  16:37:00 rés nyílt: 192.168.1.144:7373 (376 ms)
+L:  16:37:10 rés nyílt (192.168.1.144:7373), de a csere a résen elbukott: A másik fél nem válaszol (10000 ms)
+```
+
+⚠️ A telefon visszaszólt a kopogásra, de cserét nem indított. *Valószínű ok:* az előző körének
+foglalata még nyitva volt (a munkák lezárására várt), és abban a laptop már „átfúrt" volt — új
+cserét tehát nem kezdett. ⭐ Ezt a körönként nyitott foglalat szerkezete okozza: **a válaszoló
+fél „nyitva van, de nem szolgál ki".** ⏭️ Az állandó UDP-kapu (D69/3) oldja meg, ahol minden
+bejövő cserét kiszolgálunk.
+
+### ⏭️ A KÖVETKEZŐ
+- ⭐ **D69/3: egyetlen, a futás alatt nyitva maradó UDP-foglalat**, ami bármikor fogad kopogást és
+  cserét (UDP-postaláda) — a TCP-kör kivétele (D69/2) csak utána, mert ma az ismételt menet és
+  a postaláda csak TCP-n létezik.
+- A telefon + laptop mérés **megismétlése** a mai javításokkal: a 0 tárolós kiírás újrapróbálása
+  és az ébren tartás élesben.
+
+## 43. ✅⭐⭐ A D69/2 TEREPEN: TELEFON A SZOMSZÉDBAN, LAPTOP OTTHON — CSAK UDP, MINDKÉT OLDAL A TÁBLÁRÓL TALÁL (2026-09-26, 13:02–13:42)
+
+*A forgatókönyv 🅰️ változata, mobilnet helyett újra a szomszéd wifijével (két külön router). A
+program: `c890731` (704 önpróba — a telefonon is, 13:0x-kor). A laptop oldalát Claude futtatta
+Git Bash-ben (`orjarat 1 | tee -a`), a telefont Csaba (`orjarat 1 | tee ~/orjarat-T.log`,
+Termux). A telefon sorai a képernyőképekről átírva.*
+
+⚠️ **Előtte két zavar, a méréstől függetlenül:** egy félbehagyott, visszagörgetett másik session
+12:26-kor őrjáratot indított a laptopon, és valószínűleg a telefonon is (régi kóddal, 12:33-kor
+táblát írt) — a Termuxot teljesen újraindítottuk („Exit"). A laptop őrjáratát a Claude-session
+újraindulása egyszer leállította (13:01) — újraindítva, a napló folytatva.
+
+### ✅ A1 — ISMERKEDÉS OTTHON (kézi `tars`, csak a telefonon)
+
+```
+L:  13:10:54 ismeretlen kopogott be (192.168.1.124:7373) — visszakopogok, és vele is cserélek
+L:  13:10:54 rés nyílt: 192.168.1.124:7373 (51 ms)
+L:  13:10:54 csere a résen 192.168.1.124:7373 — 0 új esemény, küldtem 0 (1 kör, 1.2 KB)
+T:  13:10:53 rés nyílt: 192.168.1.134:7373 (10 ms) · csere a résen … (1 kör, 1.2 KB)
+```
+
+⭐ **Az otthoni router HAIRPINNINGEL** (új adat — eddig nem volt rá mérésünk): 13:13-tól a két
+készülék a **nyilvános** címen át is cserélt, a routeren át önmaga felé fordulva.
+
+```
+L:  13:13:01 rés nyílt: 31.46.251.115:14378 (624628 ms)
+L:  13:13:01 csere a résen 31.46.251.115:14378 — 0 új esemény, küldtem 0 (1 kör, 1.4 KB)
+L:  13:13:02 2/2 társ — 0 új esemény
+```
+
+### ✅⭐⭐ A2–A3 — A VÁLTÁS: MINDKÉT OLDAL A TÁBLÁRÓL TALÁLT, ÉS A RÉS KÉT ROUTER KÖZÖTT NYÍLT
+
+```
+T:  13:18:00 nem tudom megmérni a saját külső címemet (getaddrinfo ENOTFOUND stun.l.google.com) — …
+T:  13:18:06 a tábla NEM ÉRHETŐ EL (200 kérdés, egyik DHT-gép sem felelt) — nem tudom, hol van GjG6BL69…
+T:  13:19:00 a saját külső címem mérése újra megy: 5.187.184.117:7373
+T:  13:19:31 a táblán megvan egy néma társ új címe: 31.46.251.115:14369 (az ő órája szerint 17 perce írta ki)
+L:  13:20:22 a táblán megvan egy néma társ új címe: 5.187.184.117:7373 (az ő órája szerint 0 perce írta ki)
+T:  13:20:38 az új címemet kiírtam a táblára (2 társ rekeszébe, 13 tároló)
+T:  13:20:59 ismeretlen kopogott be (31.46.251.115:14369) — visszakopogok, és vele is cserélek
+T:  13:20:59 rés nyílt: 31.46.251.115:14369 (179155 ms)
+L:  13:21:00 rés nyílt: 5.187.184.117:7373 (242 ms)
+L:  13:21:00 csere a résen 5.187.184.117:7373 — 0 új esemény, küldtem 0 (1 kör, 1.4 KB)
+```
+
+⭐⭐ **A 39. mérés nyitott kérdése mindkét oldalról igennel zárult, és most csak UDP-n:** a távozó
+(T) kiolvasta a maradót, a maradó (L) a távozót, a rés megnyílt, a csere végigment — utána
+**percre pontosan** folytatódott (13:21 … 13:37), sötét képernyővel is.
+- ⭐ A **„179155 ms"** a mérés legtanulságosabb száma: a telefon 13:18 óta kopogott a laptop
+  nyilvános címére, **és nem jutott át**, amíg a laptop ki nem kopogott a telefon ÚJ címére — azt
+  pedig csak a tábláról tudhatta meg. *Az otthoni router tehát cím-függően szűr: a tábla itt nem
+  kényelem volt, hanem az egyetlen út.*
+- ⭐ A telefon a szomszéd routerén **megtartotta a portját** (`5.187.184.117:7373`).
+- ⚠️ A laptop 13:20:22-kor már olvasta azt, amit a telefon 13:20:38-kor „kiírtnak" jelentett: a
+  kiírás sor a TELJES feltevés végén jön (~16 mp), a bejegyzés az első tárolókon már korábban ott
+  volt. *Nem hiba — de a naplósor időpontja a feltevés vége, nem a kezdete.*
+- ✅ **Az ébren tartás él** (`Ébren tartást kértem (termux-wake-lock)`): a 42. mérés 15–20 perces
+  körei helyett percenkénti kör, a telefon a szomszédban hagyva. *A D69/2 ÁRA terepen is látszik: a
+  kör kopogása ~1 mp (13:21:00 → 13:21:01), elérhetetlen céllal ~6 mp — a 41. mérés 90–97 mp-e
+  helyett.*
+- ✅ Hazaérve (13:38–13:40) a telefon a helyi induló címen újra összeért (`rés nyílt:
+  192.168.1.134:7373 (248236 ms)`; közben új helyi IP-t kapott: .124 → .144).
+
+### ⛔⛔ A4 — A GONDOLAT: A SZÁLLÍTÁS ÁTVITTE, DE KÉT PROGRAMHIBA KIDERÜLT
+
+**1. hiba — a futó őrjárat nem látja, amit MÁSIK folyamat ír a tárba:**
+
+```
+L:  13:26:13 (második ablak) gondolat "Atjott a laptoprol a szomszedba (43. meres)" → Létrejött: qq4f9zUo
+L:  13:27:00 … 13:30:01 csere a résen 5.187.184.117:7373 — 0 új esemény, küldtem 0      ← négy körön át
+L:  13:30:31 (az őrjárat újraindítva)
+L:  13:30:32 csere a résen 5.187.184.117:7373 — 0 új esemény, küldtem 2 (2 kör, 4.6 KB)
+T:  (második ablak) gondolat "Atjott a szomszedbol (43. meres)" → xGedjwiw; az őrjárat újraindítva
+T:  13:35:52 csere a résen 31.46.251.115:14369 — 0 új esemény, küldtem 2 (2 kör, 4.6 KB)
+L:  13:35:53 csere a résen 5.187.184.117:7373 — 2 új esemény, küldtem 0 (2 kör, 4.6 KB)
+```
+
+⛔ Az `esemenyTarNyitasa` (`fajlTar.js`) a tárat **indításkor egyszer** olvassa a memóriába, és
+utána csak a SAJÁT `hozzafuz()`-jeit látja. Amit a második ablak parancsa (vagy a `felulet`, ami
+szintén külön folyamat) a fájlhoz fűz, azt a futó őrjárat **soha** nem adja tovább. *A 4.
+szabály-hiány tankönyvi esete: a réteg kész, az éles út nem hívja — és egyetlen önpróba sem
+futtatott két folyamatot ugyanazon a táron.* ⭐ Újraindítás után **mindkét irányban átment**
+(`küldtem 2` / `2 új esemény`) — a szállítás rendben van.
+⚠️ **És a mélyebb kérdése:** ha egy készüléken két folyamat ír a SAJÁT láncba (az őrjárat
+automatikus felszabadítása + egy kézi parancs), mindkettő a saját, elavult lánc-végéből számol —
+**elágazás** születhet a saját láncunkban.
+
+✅ **Javítva (ugyanaznap):** a tár kapott egy `frissit()` műveletet — csak a fájl új végét olvassa
+(ahol legutóbb abbahagyta), a már ismertet azonosító szerint kihagyja, a félig írt sort megvárja.
+Hívja: minden munka eleje (`resMunkaKeszito`), minden saját esemény írása (`esemenytTeszek` — ez
+az elágazás esélyét a milliszekundumos résre szűkíti, de nem zárja ki), és az állapot bemenete
+(`koinoEsemenyei` — a felület sem mutat elavult képet). Két próba: a tár-szintű (két tár-példány
+egy fájlon) és egy parancssor-próba a terep alakjában (a postaláda fut, MÁSIK folyamat ír, a
+vendég a cserén megkapja). ⚠️ Rontás-próba: kikapcsolt `frissit()`-tel pontosan ez a kettő bukik.
+
+**2. hiba — egy elvetett pont-esemény után a szerző MINDEN további pont-eseménye elbukik:**
+
+```
+L:  node koino.js  →  GONDOLATOK (még nincs)
+    ⚠ nem számít: TudatpontRendezes — hiányzik vagy hibás a bemondott összeg (adat.kiosztva)   (×4)
+    ⚠ nem számít: TudatpontRendezes — a bemondott összeg ellentmond a saját láncának (bemondva 400, a láncából 100)
+```
+
+⚠️ A kiváltó ok ártatlan: ez a teszt-koino (`sajat`, 2026-08-28) **régi alakú** eseményeket
+hordoz (`TartalomLetrehozas` a 09-06-i átnevezés előttről, `kiosztva` nélküli pont-események a
+D42 előttről) — ezeket a szabály-réteg joggal elveti. ⛔ **De a művelet (`muveletek.js`,
+`sajatKiosztott`) beleszámolja őket a bemondott összegbe, a szabály (`szabalyok.js`) nem** — a
+kettő „ugyanaz a szabály" kommenttel él egymás mellett, és egy elvetett esemény után **végleg**
+elválnak. Így egyetlen rossz pont-esemény a szerző **összes későbbi** pont-eseményét
+érvényteleníti, és vele minden új gondolatát (D14: 0 tudatpontú entitás nincs). *Ugyanaz a lecke,
+mint a „két sorrend tükörképe": ami két helyen „ugyanaz", annak egy forrásból kell jönnie.*
+
+✅ **Javítva (ugyanaznap):** az ítélet egy exportált függvényben él (`pontEsemenyMerlege`,
+`szabalyok.js`), és a szabály-réteg meg a `sajatKiosztott` is ezt hívja. Próba a
+`szabalyProba.js`-ben: a VALÓDI művelet a VALÓDI táron, egy kézzel aláírt régi alakú esemény után
+(a próba-segéd saját összegzése egy harmadik másolat lett volna). ⚠️ Rontás-próba: a régi
+`muveletek.js`-szel bukik. ⚠️ *A két terepi gondolat már így marad (az esemény nem írható át) — de
+ezen a koinón a következő pont-esemény már számít.*
+
+### ⚠️ MELLÉKLELETEK
+
+- **A „nincs újdonság" csere a résen terepen 1,2–1,7 KB** (1 kör). A CLAUDE.md 6. szabályának
+  **334 bájtja elavult** (TCP-n mérték); a napló D69/2-bejegyzésének ~480-a helyi mérés volt.
+- **Ugyanaz a két készülék otthon percenként NÉGYSZER cserélt:** két címen érték el egymást
+  (helyi + nyilvános, a hairpinning miatt), és mindkettő a saját körében is kopogott. A kopogás-kör
+  csak a munka után tudja, hogy a két cím ugyanaz a társ — ⭐ a tábla-kulcs erre is felel (Csaba
+  (a) döntése, 2026-09-26: a hozzárendelést a munka végén kapott tábla-kulcs erősítse meg).
+- A telefon egy régi kötése (`3SoykowL…`, 146 344 mp néma) minden körben tábla-olvasást kap
+  („nincs a táblán") — ártalmatlan, de a kötés-jegyzék takarítása ezt nem veszi ki, amíg a
+  korláton belül van.
+
+### ⏭️ A KÖVETKEZŐ
+- ✅ ~~A két hiba javítása~~ — kész, ugyanaznap (lásd fent); 707 önpróba.
+- ✅ **Döntve: EGY ÍRÓ (D70, Csaba) — megépült, lásd a 43/b.-t.** A kérdés volt: egy készüléken
+  hány folyamat írhat a saját láncba (a felszabadítás és a kézi parancsok) — egy író, vagy
+  zárolás? ⛔ A tét: a saját láncban két esemény
+  ugyanazon a sorszámon **ELÁGAZÁS** — az állapot-számítás azonosító szerint az egyiket tartja meg
+  (D19: nem büntet), a **másik tettünk csendben elvész**, és az ellentmondás mindenkinél látható
+  marad (a `lancEllenorzese` szövege szerint „csalás, és bizonyított"). *Egy becsületes e-ember a
+  saját két ablaka miatt.*
+- A 🅱️ változat (két mobil) — a kimondott feltevés (két cél-függő NAT) még mindig nincs mérve.
+
+## 43/b. ⛔⛔ A SAJÁT LÁNC VERSENYE — mérve, és a D70 (egy író) előtte–utána (2026-09-26, a laptopon)
+
+*Csaba döntése a 43. mérés nyitott kérdésére: **egy író** — „szerkezeti tisztaság fontosabb, mint a
+munka spórolás". Előbb a mérés: valóban születik-e elágazás, ha egy készüléken több folyamat ír?*
+
+**1. Valódi folyamatok, egyszerre indítva** (egy adat-mappa, kézi `gondolat` parancsok):
+
+```
+6 egyszerre, a frissit()-es program:        0 elágazás (13 esemény)
+20 egyszerre, a frissit()-es program:       0 · 0 · 0 elágazás (41 esemény, háromszor)
+20 egyszerre, a 43. mérés ELŐTTI program:   1 · 0 · 0 elágazás — ⭐ a mérés látja
+```
+
+⭐ **A hiba valós, de ritka és véletlenszerű** — a Node indulása szétszórja a parancsokat, a rés
+néhány milliszekundum. *Erre próbát építeni nem lehet: a véletlenre épülne.*
+
+**2. A determinisztikus alak** (két tár-példány ugyanazon a mappán, ugyanazzal a kulccsal,
+egyszerre három-három gondolat — `iroProba.js`):
+
+```
+író NÉLKÜL:  7 esemény, 1 elágazás   ×3 (háromból háromszor)
+ÍRÓVAL:      7 esemény, 0 elágazás   ×3
+```
+
+⭐ A próba **mindkét sort megköveteli** — ha a helyzet egyszer író nélkül sem ágazna el, a próba
+nem mérne semmit, és ezt kimondaná.
+
+**3. ⛔ A mérés közben egy MÁSODIK hiba — a `frissit()` egyidejű hívása:** a verseny-mérés
+naplójában *„sérült sor, kihagyva"* jelent meg, íróval is. Két frissítés ugyanonnan olvasott, és
+mindkettő hozzáadta a saját hosszát a jelhez — a jel túlfutott:
+
+```
+3 egyszerre, 5 eseményes farok:     [0,5,0] → 1 ✓ · [5,0,0] → 1 ✓ · [5,0,0] → 0 ✗ (elveszett)
+8 egyszerre, 200 eseményes farok:   tízből tízszer: a következő esemény ELVESZETT
+```
+
+✅ A frissítések sorba állnak, a jel a saját kezdőpontjából számolódik. ⚠️ A próba (`tarProba.js`)
+első alakja (5 esemény, 3 hívás) **a hibás kódon is átment** — vak volt; a 200/8-as alakkal a
+hibás kód háromból háromszor bukik, a javított háromból háromszor zöld.
+
+**4. A csatorna, amin az író dolgozik** (Windows, névvel ellátott cső): a második hallgató
+`EADDRINUSE`-t kap · a kliens a futóhoz csatlakozik · az első halála után a kliens `ENOENT`-et
+kap, és új hallgató indulhat. ⭐ **A csatorna maga a zár** — nincs elavult jelzőfájl.
+✅ **Androidon is** (fájl-foglalat + önellenőrzés): a telefonon a `3a6af6c` teljes próbasora
+**714/714 zöld** (2026-09-26, 17:04) — benne az író öt próbája és a parancssori verseny.
+
+**5. ⛔ A bekötés első futása ELAKADT:** az íróvá lett kézi parancs soha nem lépett ki — a nyitott
+csatorna életben tartotta a folyamatot. ✅ A csatorna nem tartja életben (`unref`); amíg a folyamat
+másért él (őrjárat, felület), kiszolgál.
+
+### ⏭️ A KÖVETKEZŐ
+- ✅ ~~A telefonon a friss `main` és a teljes próbasor~~ — 714/714 zöld.
+- ⭐ Az (a) döntés folytatása: a kopogás-kör hozzárendelése a tábla-kulccsal (a négyszeres csere)
+  — Csaba döntése szerint új sessionben.
+
+---
+
+## 44. ⛔ AZ AZONOS IP-JŰ IDEGEN A KÖR KÖNYVELÉSÉBEN — a délelőtti kísérlet próbává (2026-09-26 este, a laptopon)
+
+*Az (a) döntés folytatásának 1. lépése: előbb a mérés. A kísérlet (napló, 2026-09-26 délelőtt)
+most próba (`udpKapuProba.js`), és a hibát a próba nevezi meg.*
+
+**A helyzet:** az A egy NÉMA célra kopog, akitől a B-t várja (kötésből jött cél — a tábla-aláírója
+ismert). Közben a C, egy IDEGEN ugyanarról az IP-ről (egy család több készüléke egy router mögött),
+bekopog az A-hoz. A C munkája a végén megmondja, ki volt (a hamis munka a próbában egy
+névjegyzékből, a valódi a csere `kapottTablaKulcs`-ából).
+
+**1. Ma** (4 mp-es kör, a néma célra kopogunk; a néma cél egy kapott csomagot sem válaszol):
+
+```
+az idegen 300 ms-nál kopog be:   ok=true, sikeres=1 · a felelő port az IDEGENÉ · várt B, a munka szerint C
+                                 a néma cél 1 kopogást kapott · a kör 1325 ms után véget ért
+az idegen 1500 ms-nál kopog be:  ok=true, sikeres=1 · ugyanígy · 2 kopogás · a kör 2523 ms
+```
+
+⛔ **Két hiba, nem egy:** a néma célt sikeresnek könyveli, ÉS abbahagyja a kopogtatását — a kör
+„mindenki hallott" állapotba jut, és a határidő előtt véget ér.
+
+**2. Három változat a kapun** (ideiglenesen, `.bak`-ból visszaállítva):
+
+```
+a) a harmadik lépcső KI („kézenfekvő javítás"):   az új próba zöld · ⛔ a PORTVÁLTÁS-próba BUKIK
+b) a munka végén a tábla-aláíró felülbírálja:       mind a 10 zöld
+c) rossz javítás — az idegen elhallgattatása:      ⛔ az új próba BUKIK (és két régi is)
+```
+
+⭐⭐ **Az a) a lényeg:** cím szintjén a portváltás és az azonos IP-jű idegen **ugyanaz a helyzet**
+(halott/néma port + egy másik kapu ugyanarról az IP-ről) — a két próba egymás tükörképe, és csak
+az választja el őket, KIVEL dolgozott a munka. A portváltás-próba ezért most a várt aláírót is
+hordozza, és megköveteli, hogy a munka a B-vel menjen. A c) miatt a próba azt is megköveteli, hogy
+az idegennel a munka lefusson (postaláda): *a javítás nem lehet a bekopogó elhallgattatása.*
+
+**3. ⭐⭐ A b) vázlattal a KOPOGÁS nem javul:**
+
+```
+az idegen 300 ms-nál:   ok=false (helyes) · a néma cél 1 kopogást kapott · a kör 1326 ms
+az idegen 1500 ms-nál:  ok=false (helyes) · 2 kopogás · a kör 2519 ms
+```
+
+A könyvelés a munka VÉGÉN javítható — a kopogás viszont a munka ELEJÉN áll le (a HALLAK-nál). Ha a
+valódi B csak késve felelne, ebben a körben már nem kopognánk rá. ⏸️ **Ez a (i) döntési kérdés
+második fele** — a próba szándékosan nem dönti el.
+
+**4. ⚠️ Egy következmény a (i)-hez:** a tábla-aláíró csak a KÖTÉSBŐL jött célnál ismert. A friss
+UDP-címekből és az induló címekből jött célnál nincs várt társ — ott a munka végén derül ki
+először, ki felelt, tehát ott a b) sem tud mit összevetni.
+
+**5. Az ISMERT HIBA jel** (`probaFuttato.js`): a próba a javításig bukik, de a sort nem pirosítja be
+— külön sorban, néven nevezve látszik (`714 rendben · 1 ismert hiba nyitva`). ⛔ Szigorú, mindkét
+irányban, rontás-próbával mérve: ha az ismert hiba próbája ÁTMEGY (a b) vázlattal kipróbálva), az
+bukás (*„a hiba eltűnt — vedd le a jelet"*, kilépési kód 1); ha KIVÉTELT dob, az is bukás.
+
+### ⏭️ A KÖVETKEZŐ
+- ✅ ~~A 2. lépés: a négyszeres csere mérése helyben~~ — lásd a 45.-öt.
+- A 3. lépés: a (i)–(iii) döntési kérdések Csabának — a (i)-be a 3. és a 4. pont lelete is.
+
+---
+
+## 45. ⭐⭐ A NÉGYSZERES CSERE = A CÍMEK × AZ IRÁNYOK — helyben szétszedve, terepen megerősítve (2026-09-26 este)
+
+*Az (a) döntés folytatásának 2. lépése. A 43. mérésen otthon a telefon és a laptop percenként
+NÉGYSZER cserélt. A kérdés: miből jön a négy, és mennyibe kerül?*
+
+**Az eszköz:** [`negyszeresCsereMeres.js`](negyszeresCsereMeres.js) — két valódi őrjárat egy gépen
+(eldobható adat-mappák, DHT és tükör nélkül, semmi nem megy ki a gépből). A két tényezőt külön
+kapcsolja: a **címek** (a társ a hurok-címen ÉS a helyi címen — a hairpinning utánzata —, vagy
+csak az egyiken), és az **irányok** (a B órája eltolható `--import`-tal: a két kör ablaka így nem
+esik egybe, mint két valódi készüléknél). Az első ablak a bemelegítés, utána 5 ablak (fél
+percesek) az állandósult „nincs újdonság" állapot.
+
+**1. Helyben — a szorzótábla:**
+
+```
+egy cím,    csúszás nélkül:    1 csere / ablak   (1 · 1 · 1 · 1 · 1)   ~1,0 KB / ablak
+egy cím,    15 mp csúszás:     2 csere / ablak   (2 · 2 · 2 · 2 · 2)   ~2,1 KB
+két cím,    csúszás nélkül:    2 csere / ablak   (2 · 2 · 2 · 2 · 2)   ~2,3 KB
+két cím,    15 mp csúszás:     4 csere / ablak   (4 · 4 · 4 · 4 · 4)   ~4,8 KB   ← a 43. mérés otthoni esete
+két cím,     2 mp csúszás:     4 csere / ablak   (4 · 4 · 4 · 4 · 4)   ~4,6 KB
+```
+
+Egy „nincs újdonság" csere helyben 0,9–1,2 KB (két címnél a nagyobb, mert a hirdetett címlista
+hosszabb). A B naplója minden sorban ugyanannyi cserét mutat, mint az A-é (egy csere = egy-egy sor).
+
+**2. ⭐ Terepen, ugyanaznap este — mindkét oldal naplójával** (a laptop otthon végig; a telefon
+18:46-tól a szomszéd wifijén, 19:21-től újra otthon; `orjarat 1` mindkettőn, a laptopét Claude
+futtatta, a telefonét Csaba — `tee ~/orjarat-szomszed.txt`):
+
+```
+A SZOMSZÉDBAN — EGY élő cím (a telefon: 5.187.184.117:7373 · a laptop: 31.46.251.115:43079)
+T 18:46:42  indul · 18:47:07 a tábláról megvan a laptop címe · 18:47:54 kiírja a sajátját
+L 18:49:25  a tábláról megvan a telefon új címe (2 perce írta ki)
+T 18:49:59  rés nyílt: 31.46.251.115:43079 (119337 ms) — két perce kopogott rá, hiába
+18:50 … 19:19   minden percben PONTOSAN KÉT csere (a laptopon 30-ból 30-szor, a telefonon ugyanígy):
+   L xx:00 = T xx:58–59   a laptop köre  — rés 17–519 ms · 1,5 KB (néha 1,3 / 1,7)
+   L xx:01 = T xx:00      a telefon köre — rés 18–346 ms · 1,3 KB
+
+OTTHON — a telefon hazaér (19:20 körül hálózatot vált)
+T 19:21:00  rés nyílt: 192.168.1.134:7373 — a laptop HELYI címén (az induló címek közül)
+19:21 … 19:40   percenként KÉT csere, mind a helyi címen (19:21 és 19:22: egy-egy)
+   a NYILVÁNOS út (hairpinning) 19 perc alatt EGYSZER SEM nyílt meg: a laptop kopogott a telefon
+   nyilvános címére (…:43110 — „1/2 társ"), a telefon a laptopéra (…:43079 — „1/3 társ")
+```
+
+⭐⭐ **Az irányok terepen nem olvadnak össze magától — és most látszik, miért:** a telefon órája
+~1–2 mp-cel késik a laptopéhoz képest (a laptop xx:00-s köre a telefon naplójában xx:58–59-kor
+érkezik). A telefon köre így az első csere VÉGE után indul. *Helyben 2 mp csúszás is elég a
+szétváláshoz — terepen tehát a „két irány = két csere" a szokásos eset, nem a kivétel.*
+
+⚠️ **A címek tényezője viszont nem biztos:** a 43. mérésen az otthoni router nyilvános útja 10
+perc kopogás után megnyílt (`624628 ms`), és négy csere lett; ma 19 perc alatt sem. *Hogy miért
+(a router a visszaforduló csomagot hol a nyilvános, hol a helyi feladóval adja tovább?), azt ez a
+mérés nem dönti el — csak azt, hogy a hairpinning nem minden nap ugyanaz.* A két cím így nem
+állandó ár, hanem alkalmi — az irány viszont minden percben ott van.
+
+⭐ **És az otthoni router cím szerint szűr** (a 43. mérés 179 mp-e után most másodszor): a telefon
+két percig kopogott a laptop nyilvános címére, és a rés csak akkor nyílt meg, amikor a laptop a
+tábláról megtudta a telefon új címét, és ő is kikopogott. A laptop külső portja közben **43079**
+(a router átírta a 7373-at), a telefoné a szomszédban **7373** maradt.
+
+**3. Mit jelent ez:**
+- A négy **két független tényező** szorzata, és mindkettőt mérve láttuk: a **címek száma** (×2, ha
+  a második út megnyílik — ez a (ii) kérdés) és az **irányok száma** (×2 — ez a (iii) kérdés). Az egyik nélkül 2 marad,
+  mindkettő nélkül 1.
+- ⭐ **Az ár:** egyperces körrel egy készüléknek egy társsal ma **~6,5 MB/nap** (helyben, négy
+  cserével; terepen a nagyobb cserékkel ~8), egy címen két iránnyal ~4 MB/nap (terepen mérve),
+  ablakonként egy cserével **~1,4 MB/nap** (helyben) — a két tényező megszüntetése **közel az ötödére**
+  viszi le az adatot. Ötperces körrel ugyanez 1,3 → 0,3 MB/nap.
+- ⚠️ A két tényező **nem ugyanaz a kérdés**: a címeké a hozzárendelésé (ugyanaz a társ-e, a
+  tábla-kulcs mondja meg — a munka VÉGÉN), az irányoké az ütemé (két kör, egy ablak — ha az egyik
+  csere már megvolt, kell-e a másik?).
+
+**4. ⚠️ Mellékleletek:**
+- **A bemelegítésben két címen az események KÉTSZER utaznak:** a két párhuzamos csere ugyanazt a 3
+  eseményt vitte át (2 × 3,8 KB), és a B **6 „új esemény"-t** jelentett. A tár tiszta maradt (3 sor,
+  3 különböző esemény), tehát kár nincs, csak dupla
+  forgalom és egy félrevezető szám a naplóban.
+- **A „ismeretlen kopogott be" felirat ISMERT társra is kiíródik** (helyben a 2 és 15 mp-es
+  csúszásnál: a B-re, akire az A is kopog — csak épp nem az utolsó 15 mp-ben). A felirat a kapu
+  `BEKOPOGO-CEL` jelzéséből jön, ami azt jelenti: *„most nem mi kezdtük"*, nem azt, hogy
+  *„nem ismerem"*. A terepi napló olvasásakor ez félrevezet (terepen is: a telefon percenként
+  kiírja a laptopról).
+- **Egy lassú tábla-írás egy egész ablakot elvitt** (a nyitott *„a kopogás saját üteme"* első
+  terepi mérése): hazaérve a telefon 19:21:06-tól 19:22:14-ig írt a táblára, és a 19:22-es köre
+  kimaradt — a kör sorban megy (kopogás → tábla → háztartás → várakozás a következő ablakra).
+- A telefon egy régi, néma kötése (`35oykowL…`) minden körben tábla-olvasást kap (*„nincs a
+  táblán"*) — ugyanaz, mint a 43. mérésen; a 3 célból így percenként egy sikeres.
+
+### ⏭️ A KÖVETKEZŐ
+- ✅ ~~A 3. lépés: a (i)–(iii) döntési kérdések Csabának~~ — döntve: **D71** (Csaba elfogadta a
+  javaslatokat); az (i) és a (ii) megépült, lásd a 46.-ot.
+- ✅ ~~A telefon naplója~~ — megjött, fent a 2. pontban (a hazaérkezéssel együtt).
+
+---
+
+## 46. ⭐⭐ D71 (ii) — A CÍMEK TÉNYEZŐJE ELTŰNT: két címen is egy csere (2026-09-26 este, a laptopon)
+
+*A 45. mérés eszközével (`negyszeresCsereMeres.js`), a D71 (i) és (ii) után: a kötés megjegyzi a
+társ címeit, a kör egy csoportként, rang szerint, sorban hívja őket, és amint az egyiken elérte,
+a többit kihagyja.*
+
+```
+                                        a 45. mérés (előtte)     a D71 (ii) után
+két cím,  csúszás nélkül                2 · 2 · 2 · 2 · 2        1 · 1 · 1 · 1 · 1   (kétszer mérve)
+két cím,  2 mp csúszás                  4 · 4 · 4 · 4 · 4        2 · 2 · 2 · 2 · 2
+két cím,  15 mp csúszás                 4 · 4 · 4 · 4 · 4        2 · 2 · 2 · 2 · 2
+egy cím,  15 mp csúszás (kontroll)      2 · 2 · 2 · 2 · 2        2 · 2 · 2 · 2 · 2
+```
+
+⭐ **A címek tényezője eltűnt, az irányoké maradt** — az a (iii)-é. Minden csere a hurok-címen megy
+(a rang: a gépen belüli cím előbb, mint a helyi háló — *mindkét oldalon ugyanaz az út*). Egyperces
+körrel két címen, egy iránnyal ~1,5 MB/nap (előtte ~3,2).
+
+⚠️ **A bemelegítés még két csere:** az első találkozáskor mindkét cím névtelen induló cím, tehát
+mindkettőn lemegy a csere (az események ma is kétszer utaznak, 2 × 3,8 KB). A kötés EZUTÁN tudja,
+hogy a két cím egy társ — *a tanulás ára egyszeri*.
+
+⛔⛔ **A MÉRŐESZKÖZ HIBÁJA, AMIT ITT FOGTUNK MEG:** az első futás `0 · 1 · 1 · 1 · 1`-et adott. A
+nyers naplóval megismételve minden ablakban volt csere — az üres ablakot a MÉRÉS okozta: ha a két
+gép néhány másodperccel egy ablak-határ előtt indult, az első kör (két menettel) átnyúlt a
+határon, és a program a KÖVETKEZŐ ablakig várt, tehát abban az ablakban nem volt kör. *Ugyanaz a
+jelenség, mint a telefon kimaradt köre a 68 mp-es tábla-írás után (45.).* A 45. mérésen véletlenül
+nem jött elő. ✅ Az eszköz ma a számolást csak azután kezdi, hogy mindkét gép lezárta az első
+körét.
+
+**A kapu és a kötés próbái** (mind rontás-próbával, ágankénti bukással): az első cím felel → a
+másodikra rá sem kopogunk, és a könyvelés *„kihagyva"*-t mond · az első néma → egy kopogás-köz után
+a második · az első címen más felel → a második · a kötés legfeljebb három címet jegyez meg · a
+régi (egy címes) bejegyzésből is lista lesz · a csoport a helyi címmel elöl · két helyi cím között a
+RANG dönt · a korlát társakat számol · a kihagyott cím az induló címek könyvelésében nem kudarc.
+
+### ⏭️ A KÖVETKEZŐ
+- ✅ ~~**(iii)** előbb a mérés~~ — lásd a 47.-et.
+- A telefon frissítése, és egy otthoni terepi kör: a kötés megtanulja-e a helyi és a nyilvános utat
+  (ha a hairpinning épp megnyílik), és utána egy csere megy-e.
+
+---
+
+## 47. ⭐⭐⭐ EGY CSERE ABLAKONKÉNT — és ami közben kiderült: a mai kör a hírt csak a következő ablakban adja tovább (2026-09-26 éjjel, szimuláció)
+
+*A D71 (iii) előtti mérés (Csaba: „csak a mérés után"). Eszköz: [`iranyokMeres.js`](iranyokMeres.js)
+— esemény-szimuláció a kör valódi szerkezetével: mindenki a SAJÁT órája szerinti ablak-határon
+kezd (0–2 mp csúszás, terepen ~1–2 mp-et mértünk), egy csere 0,3–1,5 mp, egy pár között egyszerre
+egy fut, az ismételt menet a kód szerint (csak ha a kör SAJÁT cseréi hoztak újat), a kapu közben
+bárkit kiszolgál. A hír az ablak előtt születik; 20 futás, magvas véletlennel.*
+
+**A négy változat:** MA · V1 — ha ebben az ablakban már volt csere a társsal, kihagyjuk (szó
+szerint) · V2 — csak ha azóta nem tudtunk meg semmi újat (nincs mit mondanunk), és az ismételt
+menet „akinek van mit mondanom" · V3 — a V2, és aki újat tanul (bármilyen cserében, a kapuja
+szolgálta ki is), maga továbbadja, még az ablakon belül, NAT-biztosan (csak akivel ebben az
+ablakban már volt csere).
+
+```
+                     a hír mindenkihez (medián · p90)                      nyugalomban, csere/pár/ablak
+N=50,   K=3    MA 63 · 121 mp   V1 182 · 241   V2 63 · 64     V3 4,9 · 5,2    MA 1,32 · V1–V3 1,00
+N=300,  K=3    MA 124 · 182     V1 302 · 361   V2 123 · 181   V3 7,0 · 7,7    MA 1,32 · V1–V3 1,00
+N=1000, K=3    MA 182 · 182     V1 362 · 421   V2 182 · 183   V3 7,8 · 8,2    MA 1,33 · V1–V3 1,00
+N=1000, K=5    MA 122 · 122     V1 242 · 242   V2 122 · 122   V3 5,6 · 6,1    MA 1,33 · V1–V3 1,00
+N=1000, K=3,   csúszás nélkül:  MA 182 · V1 421 · V2 182 · V3 7,1 mp            MA 1,00 · V1–V3 1,00
+```
+
+⭐ **A (iii) kérdésre a válasz:**
+- ⛔ **A V1 (szó szerint) kétszer lassít** (2–3 ablak → 4–7): kiüti az ismételt meneteket — a 30.
+  mérés leckéje, most a kör valódi szerkezetén.
+- ✅ **A V2 nem lassít** (minden esetben a mai idő), és a pár ablakonként pontosan EGY cserét csinál
+  (ma 1,32 véletlen csúszással; terepen — egy konkrét pár ~1–2 mp-es eltérésével — 2, 45. mérés).
+
+⭐⭐⭐ **ÉS AMI KÖZBEN KIDERÜLT — a V3:** a mai kód csak akkor ismétel, ha a kör SAJÁT cseréi hoztak
+újat. Amit a kapu egy **bekopogótól** tanul, miután a saját köre véget ért, az a **következő
+ablakig vár** — ezért kell ma 2–3 ablak (egyperces körrel 2–3 perc), mire egy hír mindenkihez
+eljut. ⭐ Ha aki újat tanul, maga továbbadja (V3), a hír **5–8 másodperc** alatt ér körbe — N=1000
+mellett is —, ugyanazzal az egy cserével nyugalomban. *A 30. mérés modellje ezt nem láthatta: ott
+az ablakon belül az összefüggő csoport feltételezve kiegyenlítődött.* A NAT-biztos alak (csak akivel
+ebben az ablakban már beszéltünk) ugyanolyan gyors: a hír az ablak elején terjed, amikor a párok
+épp frissen beszéltek.
+
+⚠️ **Egy csapda, amit a mérés maga mutatott meg:** a „mit tud már a társ tőlem" pillanatkép a
+csere KEZDETI állapota (kivéve, ha épp tőle tanultam). Az első változat a csere VÉGÉN rögzítette —
+ha közben mástól tanultam, azt hitte, a társ azt is tudja, és a V2 lassabbnak látszott a mainál
+(3–5 ablak). *A valódi építésnél ugyanez a csapda: a lenyomatot a csere elejéről kell venni.*
+
+⚠️ **Amit a szimuláció nem mér:** a hálózati hibát, a néma kötést, a NAT-rés nyitását, és a
+saját új eseményt a kör közepén (ma az is a következő körig vár — V3-ban a keletkezése is
+indíthatna továbbadást).
+
+### ⏭️ A KÖVETKEZŐ
+- ✅ ~~Döntési kérdés Csabának: V2 vagy V3?~~ — Csaba (2026-09-26 éjjel): az entitások a
+  tudatpont-tulajdonosok szerint terjedjenek, és *„végtelenig lehessen skálázni"* → a V2 és a V3 az
+  **S3–S4 (entitásonkénti tár és csere) után**, arra épülve. Lásd a 48.-at.
+
+---
+
+## 48. ⭐ AZ S3–S4 ALAPVONALA — az S1 újra, a mai programon (2026-09-26 éjjel)
+
+*A skálázási terv S4 mérése (*„1 eltérés 100 000 esemény közt → hány bájt"*) az S1-ben már lefutott
+(2026-08-31); azóta a kód változott (alaki szűrés, új mezők, UDP), ezért újra: `skalaMeres.js`,
+500 e-ember, magvas generálás.*
+
+```
+esemény  | megnyitás | betölt+számítás | ÁLLÁS/fő | ÁLLÁS összeállítása | 1 eltérés cseréje | hasznos
+   1 000 |      —    |      12 ms      |  170 B   |          —          |      2,7 KB       |  ~20 %
+  10 000 |      —    |      94 ms      |  164 B   |          —          |       17 KB       |  3,5 %
+ 100 000 |   813 ms  |     878 ms      |  163 B   |   239 ms / csere    |    160,2 KB       |  0,35 %
+```
+
+⭐ **A 2026-08-31-i kép áll:** a koino-szintű lenyomat egyik méretnél sem egyezik, ha egy esemény
+eltér — minden kör a teljes, szerzőnkénti ÁLLÁS-ra esik vissza, és egy hasznos bájtra 100 000
+eseménynél **286 bájt forgalom** jut. ⚠️ **Két szám, ami a tervet érinti:** (1) az ÁLLÁS-t **minden
+csere újra összeállítja az ÖSSZES eseményből** (239 ms 100 000-nél) — nem csak a bájt, a számítás
+is a koinóval nő; (2) **egy esemény ma átlag 611 B** (a 08-31-i 476 helyett — az új mezők), tehát a
+tárolási becslések ~30%-kal nőnek. ✅ A mentés lapos (1 ms) — az S2/a óta.
+
+⭐ **A „végtelen" próbája (Csaba, 2026-09-26) ezen a táblán:** a csere ára, az ÁLLÁS összeállítása,
+a megnyitás és az állapot-számítás mind a KOINO méretével nő — egyik sem attól, amivel a készülék
+foglalkozik. Ez az S3–S4 kiindulópontja: [`docs/szeleteles_terv.md`](../../docs/szeleteles_terv.md).
+
+## 49. ⭐⭐ AZ ENTITÁSONKÉNTI TÁR ALAKJA — a szelet-fájlok elbuknak, egy adatfájl + a mutató nyer (2026-09-27, a laptopon)
+
+*A szeletelési terv B lépése (S3) előtt: `szeletTarMeres.js`, a 48. mérés generátorával (100 000
+esemény, 500 e-ember, magvas), Windows, Node 22. A kérdés: a terv szerinti szeletenkénti fájlok,
+vagy más alak? — ⚠️ mert a tárat NÉGY kérdés éri (szelet, azonosító, szerző lánca, lánc-pont), és a
+jegyzék csak az elsőre felel.*
+
+```
+                                           | szeletenként egy fájl      | egy adatfájl + mutató (D73)
+szeletek / fájlok                          | 28 825 fájl                | 1 fájl + mutato.json (8,5 MB)
+szétválogatás (egyszeri)                   | 25,6–27,8 s                | nincs
+megnyitás                                  | 22–28 ms (csak a jegyzék) ¹ | 129–169 ms külön folyamatban ²
+egy szelet eseményei                       | 0,7–0,9 ms                 | 0,84 ms (fájl megnyitással)
+TELJES betöltés (a C 9. pontjáig ez kell)  | 18,1–20,0 s (párh. 4,8–5,2) | 416 ms
+azonosító / szerző szerinti kérdés         | külön mutató kell ³         | a mutatóból
+több folyamat közti frissítés              | új változás-napló kell      | a mai frissit() (egy fájl vége)
+```
+
+¹ a jegyzék a szerző és az azonosító szerinti kérdésre nem felel · ² a D73 előtti megnyitás (minden
+test a memóriában) 689–759 ms; a mérés-folyamaton belül, az első megnyitás 100 000 teste mellett
+227 ms · ³ azonosító-vödrök (9,7 MB) + szerzőnkénti lánc-fájlok (10,4 MB), eseményenként két
+további írás. ⭐ Egy fájlművelet ára Windowson: hozzáfűzés 0,36–0,57 ms, egy kis fájl beolvasása
+~0,7 ms, egy `stat` 0,07 ms (28 825 fájl végigkérdezése 2,0–2,2 s).
+
+⭐ **A lelet:** a szeletenkénti fájlok a MEGNYITÁST gyorsítanák, de a C lépés 9. pontjáig a
+hétköznapi út (az állapot-számítás, a csere ÁLLÁS-a) MINDENT kér — és az szelet-fájlokból
+**18–20 s** a 0,4 helyett. ⭐ **Csaba döntése (D73): egy adatfájl + a mutató pillanatképe.** A mutató
+az esemény teste nélkül tartja a sor helyét, az azonosítót, a szerzőt, a sorszámot és a szeletet;
+a testek kérésre jönnek (a képből nyitott tár a megnyitás után **0 testet** tart). Egy szelet
+lenyomata test nélkül 0,05 ms.
+
+⚠️ **Építés közben mért javítás:** a képből nyitás elsőre 260–350 ms volt; a fázisok szerint a
+térképek építése vitte (170–200 ms), abból a „szerző|sorszám" térkép 100 000 szöveg-kulcsa ~80 ms-ot.
+Ezt csak az elágazás-keresés kérdezi, szerzőnként — most az első kérdéskor épül, szerzőnként
+(→ 129–169 ms). ⚠️ Az első, kép nélküli megnyitás 741–836 ms (a fájl + a kép megírása, ~65 ms):
+egyszeri, és minden olyan megnyitásnál, ahol ezer fölötti esemény jött a kép óta.
+
+⏸️ **Nem mérve:** a telefonon (Android, f2fs/ext4) a fájlonkénti ár valószínűleg kisebb — de a
+döntést a teljes betöltés aránya (≈45×) hozta, nem egy konstans. Érdemes a telefonon is lefuttatni.
+
+## 50. ⭐⭐⭐ A TARTOMÁNY-EGYEZTETÉS ÁRA — egy eltérés 100 000 közt: 160,2 KB → 4,0 KB (2026-09-27, hálózat nélkül)
+
+*A szeletelési terv 5./C 6. pontja: ugyanaz a kérdés, mint a 48.-é (*„1 eltérés 100 000 esemény
+közt → hány bájt"*), ugyanazon a generátoron — de a mai szerzőnkénti ÁLLÁS helyett a tartomány-
+egyeztetéssel (`js/csere/tartomany.js`, D74: a tartomány lenyomata a rendezett azonosítók hash-e;
+16 részre osztás, 32 azonosító alatt lista). `tartomanyMeres.js`; a bájt az üzenetek JSON-hossza.*
+
+```
+                                        |  10 000 esemény       |  100 000 esemény      | a mai csere (48.)
+1 eltérés, egyetlen halmazként          |  3,0 KB · 5 üzenet    |  4,0 KB · 5 üzenet    | 17 KB / 160,2 KB
+1 eltérés, két szinten (szelet → belül) |  4,3 KB               |  4,7 KB               |
+   · a szelet-jelek (3107 / 28 825)     |  4,0 KB · 4 üzenet    |  4,4 KB · 5 üzenet    |
+   · az eltérő szelet belül             |  256 B · 2 üzenet     |  256 B · 2 üzenet     |
+nincs eltérés                           |  58 B · 1 üzenet      |  58 B · 1 üzenet      | 334 B (TCP-n)
+egy szelet, 1 eltérés (medián / legn.)  |  164 B / 1,3 KB (28)  |  164 B / 1,2 KB (60)  |
+```
+
+⭐ **A lelet:** a forgalom tízszeres koinóra 3,0 → 4,0 KB — **logaritmikusan nő** (a felosztások
+száma, log16), nem a koinóval; 100 000 eseménynél **40-szer kevesebb**, mint a mai csere. És a
+leggyakoribb eset, a „nincs újdonság", egyetlen 58 bájtos üzenet.
+
+⚠️ **Amit a szám nem tartalmaz:** (1) az üzenetek keretét a vonalon (a UDP-darabolás, a nyugták —
+a 43. mérés szerint egy „nincs újdonság" kör a résen ma 1,2–1,7 KB, ennek zöme a keret és a
+címjegyzék); (2) a két szintű alak első szintjét a **társankénti emlékezet** (a 8. pont) a
+hétköznapi esetben megspórolhatja: ha tudom, mely közös szeleteink változtak az utolsó cserénk óta,
+csak azokat kell egyeztetni. (3) ⚠️ Egy legfeljebb 32 azonosítós tartományban az eltérő fél a TELJES
+listáját küldi — ezért a legnagyobb szelet (28, illetve 60 esemény) egy eltérése is ~1,2 KB. A
+lista-küszöb hangolható, és nem állapot-befolyásoló.
+
+## 51. ⭐⭐⭐ A SZELETENKÉNTI CSERE A VONALON — egy eltérés 100 000 közt 9,8 KB (2026-09-27, gépen belüli UDP-rés)
+
+*A C 7–8. pontja után: a valódi párbeszéd (`vonal.js` → `parbeszed`, a `csereUdpResen`-en át) két
+tár között, a gépen belüli UDP-résen — a keretekkel, a nyugtákkal, a fájl-körrel és a
+címjegyzékkel együtt. `csereMeres.js`, a 48. mérés generátorával; a B tárból egy esemény hiányzik.*
+
+```
+                     |  10 000 esemény                    |  100 000 esemény
+1 eltérés            |  5,8 KB · 565 ms · 7 egyeztető üz. |  9,8 KB · 3 585 ms · 8 egyeztető üz.
+nincs újdonság       |  484 B · 32 ms · 0 egyeztető üz.   |  484 B · 253 ms · 0 egyeztető üz.
+(a régi csere, 48.)  |  17 KB (csak a logika)             |  160,2 KB (csak a logika)
+```
+
+⭐ **A lelet:** egy eltérés a vonalon, minden kerettel együtt **9,8 KB** — a régi csere a keret
+NÉLKÜL 160,2 KB volt. A „nincs újdonság" kör 484 B, és egyetlen egyeztető üzenet nélkül zárul (a
+két nyitó lenyomat egyezik). 100 000-nél **két** szelet tér el: a hiányzó esemény saját szelete,
+és — mert születés — a szülőjéé is (a gyökér), ahol a születése elhangzik (a C 7. pontja).
+
+⚠️ **Az idő:** az első csere 100 000-nél 3,6 s, mert egy folyamat ELŐSZÖR számolja ki mind a 28 825
+szelet halmazát (minden test betöltése, az alaki szűrés, a lenyomat); a második csere már a
+gyorsítótárból megy (253 ms). Egy hosszan futó őrjáratnál ez egyszeri; a kézi `csere` parancs
+minden indításkor megfizeti. ⭐ A (b) után (a 9. pont) a halmaz a saját érdeklődés — ez az ár is
+azzal lesz arányos.
+
+## 52. ⭐⭐ AZ ÖSSZEGZŐ MERKLE-FA ÁRA — a bizonyíték logaritmikus, egymilliárdnál ~2 KB (2026-09-27 este, a laptopon)
+
+*A D78 megépítésének első lépése után: `js/esemeny/osszegzoFa.js` (a napló-fa és az állapot-fa),
+`osszegzoFaMeres.js`. A kulcsok és az esemény-azonosítók valódi hosszúak (43 jel).*
+
+```
+NAPLÓ-FA (a szerző lánca)   |  bizonyíték        |  ellenőrzés  |  hozzáfűzés  |  bizonyíték ELŐÁLLÍTÁSA
+n = 1 000                   |  10 lépés,   692 B |  0,7 ms      |  42 µs       |     42 ms
+n = 10 000                  |  14 lépés,   966 B |  0,6 ms      |  36 µs       |    339 ms
+n = 100 000                 |  17 lépés, 1 175 B |  0,6 ms      |  35 µs       |  3 633 ms
+(számolva, ~69 B/lépés)     |  10⁶: 20 lépés ≈ 1,4 KB · 10⁷: 24 ≈ 1,6 KB · 10⁹: 30 ≈ 2,0 KB
+
+ÁLLAPOT-FA (a kiosztás)     |  mélység (átlag / legmélyebb a mintában, log₂ n)  |  bizonyíték  |  változás ellenőrzése
+n = 100                     |   8,2 / 15  (6,6)                                  |    665 B    |  0,9 ms
+n = 1 000                   |  10,9 / 15  (10,0)                                 |    865 B    |  1,0 ms
+n = 10 000                  |  14,8 / 22  (13,3)                                 |  1 145 B    |  1,4 ms
+n = 100 000                 |  17,9 / 22  (16,6)                                 |  1 380 B    |  1,5 ms
+
+A TELJES kiosztás-lista (a teljes ellenőrzéshez, D78 pontosítás): 100 entitás 8,3 KB ·
+1 000 entitás 82,9 KB · 10 000 entitás (a keret határa, 1 pont mindegyiken) 829 KB
+Egy esemény a lancGyoker-rel: +41 bájt
+```
+
+⭐ **A lelet:** minden, ami a VONALON utazik, logaritmikus — egy bizonyíték 10⁵ elemnél ~1,2–1,4 KB,
+egymilliárdnál a mért lépés-mérettel ~2,0 KB (a becslés 57 bájt/lépés volt, a mérés ~69: a D78
+„~1,6 KB"-ja így 2,0 KB). Az ellenőrzés 1 ms körül van, a méret szinte nem számít. A szerző a
+folytatáshoz 5–6 csúcsot tárol (~0,5 KB), egy hozzáfűzés ~35–42 µs. Az állapot-fa átlagos mélysége
+log₂ n + ~1,5 (a véletlen kulcs-utak közös előtagjai), a legmélyebb út a mintában 22.
+
+⚠️ **Amit a mérés kiderített:**
+- **A napló-bizonyíték ELŐÁLLÍTÁSA lineáris** a szerző saját láncával (a testvér-részfákat újraszámolja):
+  10⁴ eseménynél 0,34 s, 10⁵-nél 3,6 s (a telefonon a korábbi mérések szerint 3–5×). Ez a szerző SAJÁT
+  adata, nem a koino mérete — de logaritmikussá tehető: ha a szerző a fa belső csomópontjait is
+  megtartja. ⏭️ A `lancGyoker` beépítésénél (a szerző gyorsítótára) jön.
+- **A teljes kiosztás-lista a keret határán 829 KB** — a jellemző eset (néhány tucat–néhány száz
+  entitás) néhány KB–néhány tíz KB. Korlátos (a keret), de nem apró: a „ki és mikor kéri le" döntés
+  ezért fontos.
+
+## 53. ⭐ AZ ESEMÉNY MÉRETE A LÁNC-GYÖKÉRREL ÉS A BIZONYÍTÉKKAL — a D81 ára (2026-09-27 este)
+
+*A D81 után (a bizonyíték az eseménnyel utazik): `esemenyMeretMeres.js`. Valódi aláírt események,
+43 jeles azonosítókkal; a pont-esemény bizonyítéka a szerző kiosztás-fájából (20 kulcs átlaga).*
+
+```
+                                   |  gondolat  |  pont-esemény  |  a bizonyíték (lépés)
+lánc-gyökér nélkül (null)          |    647 B   |     558 B      |   —
+kiosztás    10 entitáson           |    799 B   |   1 145 B      |   4,7
+kiosztás   100 entitáson           |    802 B   |   1 370 B      |   7,8
+kiosztás 1 000 entitáson           |    804 B   |   1 606 B      |  11,2
+kiosztás 10 000 entitáson (keret)  |    806 B   |   1 863 B      |  14,7
+```
+
+⭐ **A lelet:** a lánc-gyökér (a két gyökér összegzése) eseményenként **+~155 B**; a pont-esemény a
+bizonyítékkal **1,15–1,86 KB** — logaritmikus a szerző SAJÁT kiosztásával, a koino méretétől független.
+
+⚠️ **A becslés alatta maradt:** a D81 +~110 B-ot és 100 entitásnál ~1,2 KB-os pont-eseményt mondott;
+a mérés +~155 B és 1,37 KB (a JSON mezőnevei és a 43 jeles lenyomatok). Ez az ára annak, hogy egy
+pont-esemény a szerző nélkül is ellenőrizhető, és a hazug bemondás hézagos láncnál is bizonyítottan
+elbukik.
+
+## 54. ⭐ A SZAVAZAT MÉRETE A JOGÁNAK BIZONYÍTÉKÁVAL — a D85/2 (T2) ára (2026-10-02, a laptopon)
+
+*A D85/2 T2 után (a szavazat a saját kiosztás-fájából bizonyítja, hogy a leadás pillanatában pontja
+volt az érintett gondolaton ÉS a javaslaton): `esemenyMeretMeres.js` (az 53. mellé). Egy érintettnél két
+bizonyíték; valódi aláírt események, 20 kulcspár átlaga.*
+
+```
+                                   |  szavazat  |  a két bizonyíték nélkül
+lánc-gyökér nélkül (null)          |    553 B   |   —
+kiosztás    10 entitáson           |  1 656 B   |  ~710 B
+kiosztás   100 entitáson           |  2 139 B   |  ~710 B
+kiosztás 1 000 entitáson           |  2 623 B   |  ~710 B
+kiosztás 10 000 entitáson (keret)  |  3 108 B   |  ~710 B
+```
+
+⭐ **A lelet:** a két bizonyíték **+0,9–2,4 KB** szavazatonként, logaritmikus a szavazó SAJÁT
+kiosztásával (a koino méretétől független). Több érintettnél részenként +ennyi (minden jogosult részre
+két bizonyíték).
+
+⚠️ **A becslés alatta maradt:** a T2 döntésekor „kb. 1 KB-tal nagyobb” szavazatot mondtam; a mérés
+100 kiosztott entitásnál +1,4 KB, a keret szélén +2,4 KB. ⭐ Az ára annak, hogy a szavazati jog a
+javaslat pont-eseményei nélkül is eldönthető (a szigorú (b) alatt a gondolat nem szavazó tartóinál), és
+mindenhol ugyanaz. ⏸️ Ha szűkös lesz: a két bizonyíték közös felső szakasza összevonható (több-kulcsos
+bizonyíték) — ma nem kell.
+
+## 55. ⭐ A DÖNTÉSI CSOMAG MÉRETE — a T3 (a2) ára (2026-10-03, a laptopon)
+
+*A D85 T3 után (a több érintettes döntés bemenete a lezárás után egy csomagban jut el minden érintett
+szeletébe): `dontesiCsomagMeres.js`. Egyesítés (G1 + G2); a G2-nek N tulajdonosa van, a felük a G1-en is;
+mindegyik egyszer átrendezte a pontját; minden ötödik küszöböt javasolt; a felük szavazott. Valódi
+műveletek, valódi aláírt események (lánc-gyökérrel, bizonyítékkal). A csomag-korlát 4 MB (a vonal
+sorkorlátjának fele).*
+
+```
+    N | a koino eseményei | a csomag (válogatva)       | válogatás nélkül          | csomag-esemény | tulajdonosonként
+   10 |                53 |     28 esemény,     29,7 KB |     38 esemény,    37,0 KB |              1 | 3,0 KB
+  100 |               431 |    226 esemény,    272,2 KB |    326 esemény,   345,5 KB |              1 | 2,7 KB
+ 1000 |              4211 |   2206 esemény,  2 538,0 KB |   3206 esemény, 3 270,5 KB |              1 | 2,5 KB
+10000 |             42011 |  22006 esemény, 25 977,6 KB |  32006 esemény, 33 301,8 KB |              7 | 2,6 KB
+```
+
+⭐ **A lelet:** a csomag **lineáris a döntés résztvevőivel** (~2,5–3 KB tulajdonosonként), a koino
+méretétől független — a „végtelen” próbáját kiállja. A válogatás (a felülírt régi pont- és
+küszöb-események nélkül) itt 22–30%-ot spórol (tulajdonosonként egy átrendezésnél; több átrendezésnél
+többet). 1000 résztvevőig egy csomag-esemény elég, felette darabolva megy (a csomagok uniója a bemenet).
+*(A mérés után a csomagba az érintettek létrehozó eseménye is bekerült — érintettenként ~0,8 KB.)*
+
+⚠️ **A mérés alsó becslés:** a tulajdonosok kiosztása itt 1–3 entitás; egy sok entitáson pontot tartó
+szavazó eseménye nagyobb (53–54.: pont +~0,7 KB, szavazat +~1,5 KB) — a valódi ár tulajdonosonként
+inkább 3–5 KB.
+
+⚠️ **Egy kockázat, amit ki kell mondani:** a csomag MINDEN érintett szeletébe
+eljut. Aki egy kis gondolatot egy nagyon népszerűvel javasol egyesíteni, az a kis gondolat tartóira a nagy
+gondolat teljes tulajdonosi körét küldi (10 000 tulajdonosnál ~26 MB) — és ehhez csak annyi kell, hogy
+mindkettőn legyen pontja (ez olcsó). Ez erősítés: kis ráfordítással nagy terhet tesz másokra.
+⭐ **Csaba döntése (2026-10-03, „legyen a (B)”):** a csomag NEM a gondolat szeletébe kerül, hanem a
+TÖREDÉKÉBE — a rész szavazói (pontjuk van a töredéken, D85/2) magától kapják; a gondolat nem szavazó tartója
+csak akkor kéri el, ha a SAJÁT része valamikor igent mondott (különben az ÉS miatt a gondolata nem
+változhatott, és ezt a saját adatából tudja). És minden csomag csak azt hozza, ami a cél-szeletből hiányzik
+(a nagy gondolat tartói nem kapják vissza a saját adatukat).
+
+## 56. ⭐ A JAVASLAT MÉRETE A JOGÁNAK BIZONYÍTÉKÁVAL — a (B) előfeltétele (2026-10-03, a laptopon)
+
+*A (B) építése közben derült ki: a javaslattevő jogosultságát (minden érintetten van pontja) a szabály-réteg
+a javaslattevő láncából olvasta — a csak-G1-tartónál ez a lánc hézagos (a G2-es pont a G2 szeletében van),
+és a javaslat tévesen kiesett volna. A T2 mintájára a javaslat is hozza a bizonyítékát, érintettenként egyet
+a saját kiosztás-fájából: `esemenyMeretMeres.js`, egy kételemű egyesítés.*
+
+```
+Lánc-gyökér nélkül (null):  javaslat (2 érintett)  681 B
+Kiosztás    10 entitáson:   javaslat átlag        1784 B
+Kiosztás   100 entitáson:   javaslat átlag        2267 B
+Kiosztás  1000 entitáson:   javaslat átlag        2751 B
+Kiosztás 10000 entitáson:   javaslat átlag        3236 B
+```
+
+⭐ **A lelet:** érintettenként +0,5–1,2 KB (a lánc-gyökér ~150 B egyszer), logaritmikusan a javaslattevő
+kiosztásával — ugyanaz az ár, mint a szavazat egy bizonyítékáé (54.). A javaslat ritka esemény (egy
+döntéshez egy), ezért ez a 6. szabály mércéjén elhanyagolható; cserébe a jogosultság hézagos láncnál is
+eldönthető, mindenhol ugyanúgy.
+
+## 57. ⭐ A CSERE TITKOSÍTÁSÁNAK ÁRA — a ② (D89/1, 2026-10-03, a laptopon)
+
+*`titkositasMeres.js`: ugyanaz a forgalom a gépen belüli UDP-résen NYÍLTAN (a ② előtti alak) és TITKOSÍTVA
+(ahogy most élesben fut), a dróton utazó bájtok a nyugtákkal; mindkét oldal tábla-kulcsot cserél, ahogy az
+őrjárat. 2000 esemény a tárban.*
+
+**Előbb a mérés (az építés előtt, a szerkezetből számolva):** a csomagonkénti, bináris titkosítás egy
+eltérésnél +6–12%, egy 200 KB-os fájlnál +2–4%; az üzenetenkénti, szöveges (base64 a JSON-ban) +35–42%, a
+fájlnál +33% — ⛔ elvetve. ⛔ És a KÜLÖN, JSON-os kézfogás (két lépés) **692 B** lett volna munkánként, miközben
+egy gépen belüli „nincs újdonság” csere 484 B: a kézfogás többe került volna, mint maga a csere. ⭐ Ezért lett
+a kézfogás egy 33 bájtos bináris csomag irányonként, a hitelesítés (a tábla-kulcs aláírása) pedig a `CIMEK`-be
+került, ami úgyis megy. *(Az első becslésem — „+15–25%” — ezt nem látta.)*
+
+**Utána (a megépített út, valódi forgalom):**
+
+```
+  1 eltérés:       nyíltan    6960 B (42 csomag) · titkosítva    7978 B (44 csomag) · többlet +1018 B (+14,6%)
+  nincs újdonság:  nyíltan     750 B (8 csomag)  · titkosítva    1156 B (10 csomag) · többlet  +406 B (+54,1%)
+  200 KB-os fájl:  nyíltan  281593 B (562 csomag) · titkosítva  292083 B (564 csomag) · többlet +10490 B (+3,7%)
+```
+
+⭐ **A „nincs újdonság” +406 B-ja három részből áll:** a kézfogás 2 × 33 B (66 B), csomagonként ~18 B (jel,
+számláló, GCM-címke — itt 8 csomag, 144 B), és a tábla-kulcs aláírása a `CIMEK`-ben (~2 × 98 B). A terepi
+„nincs újdonság” csere (1,2–1,7 KB, 43. mérés — a fájl-kérelemmel és a címjegyzékkel) így várhatóan **+24–34%**.
+Tábla-kulcs nélkül (a gépen belüli csupasz csere) 484 → 684 B (`csereProba.js`).
+
+⚠️ **Amit kimondunk:** a „nincs újdonság” relatív ára a legnagyobb, mert ott a kézfogás és az aláírás a
+forgalom nagy része. ⏸️ Ha egyszer szűkösnek bizonyul, a következő lépcső a kötött társaknál az aláírás
+kiváltása (a két tábla-kulcs közös titka a kulcs-származtatásban) — ma nem kell. A fájloknál a többlet ~4%.
+
+## 58. ⭐ A BEP 5 A VALÓDI BITTORRENT-DHT-N — a G hash-elhelyezésének közege (D91, 2026-10-03, a laptopon)
+
+*`dhtTarsMeres.js`: 3 vakított téma (`cimjegyzek.js`) bejelentése (`announce_peer`), MEGISMÉTLÉS NÉLKÜL; utána a
+megadott időpontokban mindig egy FRISS kliens keresi meg őket (`get_peers`). A saját bejegyzést a véletlen port
+azonosítja.*
+
+```
+  BEJELENTÉS 1: 8/8 gép tárolta · 17.1 mp · 41 kérdés (20 felelt) · ki 5,3 KB, be 5,1 KB
+  BEJELENTÉS 2: 8/8 gép tárolta ·  7.2 mp · 29 kérdés (17 felelt) · ki 4,1 KB, be 4,4 KB
+  BEJELENTÉS 3: 5/8 gép tárolta · 13.3 mp · 32 kérdés (15 felelt) · ki 4,4 KB, be 3,7 KB
+     0 perc múlva: 3/3 téma megvan · keresésenként  5.1 mp, 14 kérdés, 2,8 KB
+     5 perc múlva: 3/3 téma megvan · keresésenként  6.7 mp, 16 kérdés, 2,9 KB
+    15 perc múlva: 2/3 téma megvan · keresésenként  4.0 mp, 13 kérdés, 2,3 KB
+    30 perc múlva: 2/3 téma megvan · keresésenként  4.7 mp, 14 kérdés, 2,7 KB
+    60 perc múlva: 0/3 téma megvan · keresésenként 13.4 mp, 22 kérdés, 3,5 KB
+   120 perc múlva: 0/3 téma megvan
+   180 perc múlva: 0/3 téma megvan
+```
+
+⭐ **A lelet:** egy bejelentés **~8–10 KB** (7–17 mp), egy keresés **~2,3–3,5 KB** (4–14 mp) — és ⛔ **a háló a
+bejelentést 30 és 60 perc között elfelejti** (15–30 percnél már egy téma hiányzik). A DHT-ra bízott hirdetést tehát
+~15–20 percenként meg kell ismételni: **egy téma ~0,65 MB/nap** (72 × 9 KB). ⭐ A gyökér-darabokra (készülékenként
+egy-két téma) ez elmegy; ⛔ a SZELETENKÉNTI közvetlen kereséshez nem (100 vállalt szeletnél ~65 MB/nap) — ott a fa és
+a raj (D91/1) a fő út, a DHT legfeljebb kevés, kiválasztott témára.
+
+## 59. ⭐ A RAJ KIALAKULÁSA — szimuláció (D91, 2026-10-03, a laptopon)
+
+*`rajMeres.js`: N készülék (2000 és 5000), átlag 20 vállalás, Zipf-népszerűség; a tartók korlátos listában (`L`)
+ismerik egymást, a lista a „kitől kaptam” úton és a cserében (körönként 25%) frissül; körönként `c` lemorzsolódás
+és ugyanannyi új készülék. Mérve: szeletenként a tartók hány %-a van a legnagyobb összefüggő darabban.*
+
+```
+N = 5000, 60 kör, lemorzsolódás 5%/kör (a 100+ tartós szeletek):
+  csak a legfrissebb L (N = 2000):  L=4 →  5,6% · L=6 →  9,8% · L=8 → 18,8%   — SZÉTESIK
+  véletlen L:                        L=4 → 71,5% · L=6 → 99,0% · L=8 → 99,0%
+  fele friss, fele véletlen:         L=4 →  8,9% · L=6 → 86,0% · L=8 → 99,7%
+  (0,5%/kör lemorzsolódásnál a véletlen és a fele-fele L ≥ 6-tól ~100%; az árva tartó mindenhol ≤ 0,2%)
+```
+
+⭐ **A lelet:** ha a lista csak a legutóbb látott tartókat tartja, a nagy rajok **klikkekre esnek szét** (az
+összefésülés ugyanazokat a friss bejegyzéseket terjeszti) — a véletlen elem a kulcs (a skálázási terv 4.2/b „kellenek
+véletlen társak is” mondata, most számokkal). ⭐ **A választás: L = 8, fele friss / fele véletlen** (a friss fele a
+címek frissességét őrzi) — `tarsak.js`. ⚠️ **A határa:** a szimuláció feltételezi, hogy bármely két tartó közvetlenül
+cserélhet; NAT mögött ez csak a kötéseken, a postaládákon és (a D-vel) a kérelem továbbadásán át megy.
+
+## 60. ⭐ A KÉRELEM ÚTJA A NAT-VALÓSÁGBAN — szimuláció (a D pillér átvizsgálása, 2026-10-03, a laptopon)
+
+*`kerelemMeres.js`: N készülék, mindegyiknek K kötése (véletlen gráf), a buliban 70% él, f arányuk fogadóképes
+(bárki eléri, aki tudja a címét); egy szeletnek T tartója van, λ eséllyel a kérő 2 lépéses környékén. A kérő minden
+tartó címét ismeri (a G legjobb esete). Utak: KÖZVETLEN (a tartó a kötésem vagy fogadóképes), ELÁRASZTÁS a
+kötés-hálón h ugrásig (azonosítóval), VÉLETLEN SÉTA, és KOPOGTATÁS (randevú a DHT-n, mindkét fél kopog — a pár
+`lyuk` eséllyel fúrható). Alap: N = 20 000, K = 3, f = 10%, T = 3, λ = 0. 3000 kérelem cellánként.*
+
+```
+T (λ = 0):        közvetlen   elárasztás h=1..5 (+közvetlen)          üzenet h=1..5
+  1                  7,1%      7,1   7,1   7,1   7,1   7,2%            2  7 14 24 37
+  3                 20,5%     20,5  20,5  20,5  20,6  20,6%            2  7 14 24 38
+  10                52,5%     52,5  52,5  52,5  52,6  52,8%
+  30                89,4%     89,4  89,4  89,5  89,6  89,8%
+λ (T = 3):  0       20,5%     20,5  20,5  20,5  20,6  20,6%
+            0,3     34,3%     34,3  51,6  51,6  51,6  51,7%
+            0,6     50,0%     50,0  74,0  74,1  74,1  74,1%
+f (T = 3):  0        0,1%      0,1   0,1   0,1   0,3   0,4%
+            0,25    43,7%     43,7  43,7  43,7  43,8  43,8%
+N (T = 3):  50      27,2%     27,2  38,8  51,9  62,9  72,2%            2  7 14 23 33
+            100000  20,9%     20,9  20,9  20,9  20,9  20,9%            2  7 14 24 38
+K (T = 3):  5       19,7%     19,7  19,7  20,1  21,1  23,5%            3 17 53 156 442
+séta (w = 3, T = 10, λ = 0,3, közvetlen nélkül): 42,9 67,3 68,0 68,7 68,9%  (elárasztás: 49,7 77,5 77,6 77,6 77,7%)
+KOPOGTATÁS (T = 3):  lyuk 0,3 → 59,4% · 0,5 → 75,8% · 0,8 → 92,9%   (közvetlen: ~20%)
+  fogadóképes nélkül (f = 0): lyuk 0,3 → 51,5% · 0,5 → 72,0% · 0,8 → 91,6%   (közvetlen: 0%)
+  + elárasztás h = 2: ugyanannyi (λ = 0); λ = 0,3 mellett 75,8 → 83,2%
+```
+
+⭐ **A lelet:** ⛔ az elárasztás a kötés-hálón nagy koinóban **szinte semmit nem ad** (K = 3, 70% élő: a kérelem alig
+terjed — 5 ugrás ~38 üzenet; K = 5-nél 442 üzenet, ugyanannyi siker); csak közösségi érdeklődésnél (λ) és kis
+koinóban segít, ott is **2 ugrásig**. A közvetlen elérés a fogadóképesek arányán áll (f = 0-nál 0,1%). ⭐⭐ **A döntő
+a rés nyitása a tartóhoz**: a kopogtatással (a tartó tudja, hogy kérnek tőle, és a buliban ő is kopog) T = 3-nál
+20% → 76% (fele fúrható pár), fogadóképes gép nélkül is 72%. ⚠️ **A határa:** a valódi fúrható arány terepmérés (az
+otthon ↔ mobil rés megy, a mobil ↔ mobil — 🅱️ — mérve még nincs); a kötés-háló véletlen gráf (a valódi
+közösségibb, ott a λ nagyobb); a tartó ránézésének késését nem modellezi. → [`d_kerelmezes_atvizsgalas.md`](../../docs/d_kerelmezes_atvizsgalas.md).
+
+## 62. ⭐ AZ ÖSSZ-PONT BIZONYÍTÉKA — a súlyozott szúrópróba ára (D92/5, 2026-10-03, a laptopon)
+
+*`osszPontMeres.js`: az X tartója egy állapot-fát épít X részfájáról — levelenként egy szerző saját pontja (az
+aláírt pont-esemény azonosítójával) és egy gyerek bemondott össz-pontja; a gyökér összege az össz-pont. A kérdező a
+gyökér bemondása UTÁN k véletlen egységet választ (`allapotSulyozottKeresese` / `allapotSulyozottEllenorzese`); egy
+szerzői levélhez az aláírt pont-eseményt is elkéri (53. mérés: ~1,37 KB). A fejléc magja a létrehozó esemény (~0,8 KB).*
+
+```
+n szerző (+10 gyerek) │ építés  │ minta: bizonyíték │ + pont-esemény │ fejléc k=0 │ k=4      │ k=8      │ k=16
+  1                   │    8 ms │       489 B       │      509 B     │  0,86 KB   │  2,85 KB │  4,84 KB │  8,82 KB
+  100                 │   43 ms │       726 B       │    1 534 B     │  0,86 KB   │  6,85 KB │ 12,85 KB │ 24,83 KB
+  1 000               │  471 ms │     1 006 B       │    2 246 B     │  0,86 KB   │  9,64 KB │ 18,41 KB │ 35,96 KB
+  10 000              │ 7024 ms │     1 245 B       │    2 594 B     │  0,87 KB   │ 11,00 KB │ 21,14 KB │ 41,40 KB
+lebukás (elméleti | mérve):  f = 10%: k=4 34|34%  k=8 57|56%  k=16 81|81%
+                             f = 30%: k=4 76|78%  k=8 94|96%  k=16 100|99%
+a fa egy változása: 0,53 ms (100 szerző) · 0,70 ms (1 000) · 0,85 ms (10 000) — logaritmikus
+egy minta ellenőrzése (1 000 szerző): 0,86 ms (az aláírás-ellenőrzés nélkül)
+```
+
+⭐ **A lelet:** egy minta a bizonyítékkal és az aláírt pont-eseménnyel **0,5–2,6 KB**, a fejléc k = 4 mintával
+**3–11 KB**, k = 8-cal **5–21 KB** — logaritmikusan nő a szerzők számával. A lebukás pontosan az elméleti
+1 − (1 − f)^k. ⚠️ **A tartó terhe:** a fa egy változása logaritmikus (< 1 ms), de a nulláról építés 10 000 szerzőnél
+7 s — a tartó a fát **folyamatosan tartja karban** (minden új pont-esemény egy változás), nem kérésenként építi. ⭐
+**A következmény a felületre:** egy 20 kártyás lap mind k = 8-cal ~100–400 KB volna — ezért a pakli a KIVÁLASZTOTT
+ágat ellenőrzi (k = 8), a testvérek közül a legfelsőket k = 4-gyel, a többit bemondásként (és ezt kimondja); a
+már megvolt pont-eseményt nem kéri el újra.
+
+## 63. ⭐ A TAGSÁGI LÁNC A SZELETELT VILÁGBAN — a meghívási fa mélysége és a bizonyíték mérete (az E átvizsgálása, 2026-10-03)
+
+*`tagsagMeres.js`: a koinó meghívással nő (D56: egy meghívó elég); három növekedési mód — `egyenletes` (véletlen
+meglévő tag hív), `aktiv` (preferenciális: aki sokat hívott, többet hív), `friss` (mindig a legutóbbi 20 belépett
+közül hív valaki — lánc-szerű). Egy lépés a bizonyítékban: a tag `Belepes`-e + a `Meghivas` (valódi aláírt események,
+a lánc-gyökérrel): 521 + 716 = **1237 B**. A gyorsítótár: M véletlen tag ellenőrzése, a közös ősök egyszer.*
+
+```
+mélység (átlag / 95% / max) · a bizonyíték (átlag / 95%):
+N          │ egyenletes              │ aktív                  │ friss (lánc-szerű)
+1 000      │  7,4 / 11 / 13   9/13 KB │ 4,2 / 7 / 11   5/8 KB  │     47,7 /    91 /    96      58/110 KB
+100 000    │ 12,0 / 18 / 25  14/22 KB │ 6,4 / 10 / 17  8/12 KB │  4 807,6 / 9 114 / 9 604   5 822/11 036 KB
+1 000 000  │ 13,4 / 19 / 29  16/23 KB │ 8,2 / 13 / 23 10/16 KB │ 47 593,8 / 90 280 / 95 043  57 633/109 323 KB
+a gyorsítótár (N = 1 000 000), ténylegesen megnézett lépés tagonként:
+  egyenletes: M=10 → 12,9 · M=100 → 9,1 · M=1000 → 6,8 · M=10000 → 4,7
+  aktív:      M=10 →  6,5 · M=100 → 5,4 · M=1000 → 4,0 · M=10000 → 3,0
+  friss:      M=10 → 9 465 · M=100 → 952 · M=1000 → 104 · M=10000 → 16,4
+```
+
+⭐ **A lelet:** természetes növekedésnél a meghívási lánc **logaritmikus** (egymillió tagnál átlag 13 lépés, ~16 KB;
+aktív hívókkal 8, ~10 KB), és a gyorsítótárral tagonként 3–7 lépést kell ténylegesen megnézni. ⛔ **A lánc-szerű
+növekedésnél LINEÁRIS** (egymillió tagnál ~47 600 lépés, ~57 MB) — ezt egy támadó szándékosan is előállíthatja, és ez
+sérti a „végtelent”. ⭐ A válasz a meglévő szabályokban van: több meghívás lehet, a legrövidebb lánc számít, és a D59
+mélység-korlátja (`D`) felülről korlátossá teszi a bizonyítékot — a mélyen ülő becsületes tag egy közelebbi tag
+(ingyenes) meghívásával rövidít. → [`e_identitas_atvizsgalas.md`](../../docs/e_identitas_atvizsgalas.md).
+⚠️ *(2026-10-19, a 78. mérés:)* a 64-es korlátot innen az ÁTLAGGAL mértük („~10^29–10^30 tagnál éri el”); a korlát viszont
+a LEGMÉLYEBB tagnál dönt — a 64-et a legmélyebb tag már ~1,3·10^11 tagnál eléri. → **D113**: 256.
+
+## 64. ⭐ A ZÁRT KOINÓ KAPUJA A DRÓTON — a személy és a tagsági csomag a kézfogásban (D93/3, 2026-10-04, a laptopon)
+
+*`zartKapuMeres.js`: egy „nincs újdonság” csere a gépen belüli UDP-résen, titkosítva, tábla-kulccsal (ahogy az
+őrjárat), és a dróton ténylegesen utazó bájtok (a nyugtákkal együtt). A tagsági csomag valódi: aláírt belépések és
+meghívások lánca az alapítóig. A kapu utánzat (az ítéletet a próbák mérik) — itt csak a forgalom a kérdés.*
+
+```
+nyílt (nincs kapu) — a mérce                                   1671 B    13 csomag
+zárt, ismert társ (a tábla-kulcsáról)                          1671 B    13 csomag     +0 B
+zárt, első találkozás, csomag nélkül                           2159 B    19 csomag   +488 B
+zárt, első találkozás, csomaggal (mélység 1, 1,8 KB)           4318 B    23 csomag  +2647 B
+zárt, első találkozás, csomaggal (mélység 5, 5,5 KB)           8619 B    29 csomag  +6948 B
+zárt, első találkozás, csomaggal (mélység 13, 12,9 KB)        17353 B    45 csomag +15682 B
+zárt, első találkozás, csomaggal (mélység 30, 28,6 KB)        35856 B    77 csomag +34185 B
+zárt, első találkozás, csomaggal (mélység 64, 60,1 KB)        72862 B   141 csomag +71191 B
+kölcsönös első találkozás (2 × mélység 13)                    32871 B    73 csomag +31200 B
+```
+
+⭐ **A lelet:** a hétköznapi csere (a kapu a társat a tábla-kulcsáról ismeri) **bájtra ugyanannyi, mint a nyílt** — a
+kapu ára csak az első találkozáskor jelentkezik, társanként egyszer: csomag nélkül +488 B (a személyes aláírás, a
+horgony és egy kör), csomaggal a lánc mélységével arányosan (~1,1 KB lépésenként a dróton). Egymillió tagnál (a 63.
+mérés szerint ~13 lépés) ~16 KB; a mélység-korlátnál (64) ~71 KB — ez a felső határ. ⭐ Ha minden cserén menne a
+személy (a D93/3 első olvasata), a „nincs újdonság” csere ~+0,4–0,5 KB-tal (~30%-kal) drágult volna — ezért kér a kapu
+csak akkor, ha nem ismeri a társat (alappillérek, elágazás 57).
+
+## 65. ⭐ A 2. LÉPCSŐ BIZONYÍTÉKA — az ős-háló zárványa, a korlátozott mélység és a szúrópróba (D93/4 → D94, 2026-10-04)
+
+*`lepcsoMeres.js` (szimuláció, aláírás nélkül — a darabszám a kérdés; egy esemény ~1 KB): 2. lépcsős, akinek 3
+tanúsítása van különböző tanúsítóktól; a tanúsítás jogát N = 5 bemondott felhatalmazás adja különböző 2. lépcsősöktől
+(emberenként egyet adhat; a tanúsító SAJÁT 2. lépcsője nem feltétel — D47, `tanusitoJoga`); 7 alapító. Az új 2.
+lépcsős a tanúsítóit `egyenletes` (véletlen) vagy `helyi` módon (a legutóbbi 20 tanúsító közül) kapja; az egyetlen
+felhatalmazását súlyozott sorsolással adja (a bizalom koncentrálódik). A minta a legutóbbi 2. lépcsősökből (a
+legmélyebbek).*
+
+```
+a teljes bizonyíték (a zárvány): ember átlag / max · esemény ≈ KB · a 2. lépcsősök %-a
+N          │ egyenletes                          │ helyi (lánc-szerű)
+1 000      │    213 /    305 ·     1 005 KB · 21% │    384 /    420 ·     1 844 KB · 38%
+10 000     │  1 361 /  1 912 ·     6 590 KB · 14% │  4 253 /  4 442 ·    20 760 KB · 43%
+100 000    │ 10 448 / 13 350 ·    50 890 KB · 10% │ 45 041 / 45 218 ·   220 507 KB · 45%
+1 000 000  │ 59 255 / 86 797 ·   289 088 KB ·  6% │454 123 /454 283 · 2 222 021 KB · 45%
+korlátozott mélység (csak D szintig; a mélyebb bemondás), esemény:  D = 1: ~37 · D = 2: ~560 · D = 3: 5 700–8 200
+szúrópróba — egy véletlen út az alapítókig (lépés, átlag / 95%), és 8 út ≈ esemény (lépésenként 2N + 6 = 16):
+N          │ egyenletes             │ helyi
+1 000      │  2,9 /  5 ·    377     │  4,3 /  7 ·    545
+10 000     │  4,5 /  7 ·    575     │  8,1 / 12 ·  1 038
+100 000    │  6,0 /  9 ·    762     │ 12,9 / 18 ·  1 649
+1 000 000  │  6,9 /  9 ·    886     │ 16,9 / 24 ·  2 164
+```
+
+⛔ **A lelet:** a 2. lépcső TELJES bizonyítéka (minden tanúsítás és felhatalmazás az alapítókig) **nem logaritmikus,
+hanem közel lineáris** — egymillió 2. lépcsősnél egyenletes növekedéssel ~59 000 ember és ~290 MB, lánc-szerűvel a
+2. lépcsősök 45%-a (~2,2 GB). A tagság lánca egy szülős (a legrövidebb lánc választható — 63. mérés); itt minden
+lépcsőn 3 × N kötelező szülő van, és a zárvány szétterül. ⭐ A **korlátozott mélység** konstans (D = 1: ~37 esemény), de
+a mélyebb szint bemondása ingyen hamisítható (egy 8 kulcsos gyűrű elég), D = 2–3 pedig 0,6–8 MB. ⭐ A **szúrópróba**
+(néhány véletlen út a gyökérig; lépésenként az ember 3 tanúsítása és a választott tanúsító N felhatalmazása, a
+horgonyokkal) **logaritmikus**: egymillió 2. lépcsősnél 8 út ≈ 890–2 160 esemény (~0,9–2,2 MB), egyszer személyenként.
+→ **D94** (Csaba, 2026-10-04: az (A), a szúrópróba). ⚠️ *Az első kiírásban a modell egy lépést N + 3 eseménynek vett (csak
+a választott tanúsítást), és a tanúsító saját 2. lépcsőjét is kötelezettségnek — az út ára így ~0,4–0,9 MB-nak látszott;
+a javított szám a fenti (a döntés előtt ezt mondtam, a döntés alapja — logaritmikus vs lineáris — nem változott).*
+
+## 66. ⭐ EGY KÉSZÜLÉK TERHE A SZIGORÚ (b) ALATT — és a tömeges entitás (a B/3 átvizsgálása, 2026-10-04, a laptopon)
+
+*`szigoruMeres.js` (szimuláció): N tag, mindenki k entitásra tesz pontot (k egyenletes 3..20); az entitást „a gazdag
+gazdagodik” szabály választja (0,3 eséllyel új vagy véletlen entitás, különben a pont-tartók számával arányosan). A
+szigorú (b) szerint egy készülék a vállalt szeleteit tartja (D75, D86) — a szelet MINDEN eseményét, a többi pont-tartóét
+is —, és a D93/1 óta a szerzőik tagságát is ellenőrizni kell. Egy esemény ~0,55 KB; a tagsági bizonyíték szerzőnként
+~1,2 KB × a lánc mélysége (63. mérés). A KÉT FOKÚ vállalás (a skálázási terv 4.6): 1000 eseménynél nagyobb szeletből csak
+a születés, a saját pont és 8 minta.*
+
+```
+N          a legnépszerűbb   │ tárolt esemény / készülék   │ szerzők tagsága        │ a mai „mindent tárol”
+           entitás tartói    │ (medián · 95% · max)         │ (medián · 95% · max)    │
+1 000          194 (19,4%)   │   447 ·  1 159 ·   1 642     │   346 ·    658 ·    769 │    12 884 (~7 MB)
+10 000       1 051 (10,5%)   │ 1 367 ·  4 074 ·   7 151     │ 1 283 ·  3 274 ·  4 970 │   130 981 (~70 MB)
+100 000      5 407 (5,4%)    │ 2 966 · 11 561 ·  35 879     │ 2 911 · 10 958 · 29 336 │ 1 322 856 (~711 MB)
+1 000 000   26 750 (2,7%)    │ 3 047 · 36 957 · 100 820     │ 3 040 · 36 341 · 95 456 │ 13 227 344 (~7,1 GB)
+a 95% tagsági bizonyítéka: ~6 · 38 · 154 · 571 MB (megosztás nélkül)
+KÉT FOKÚ vállalás (1000 esemény fölött összegző), tárolt esemény · szerzők (95%):
+   10 000: 4 nagy szelet, a készülékek 35%-a tart ilyet → 2 839 · 2 832  (~33 MB tagság)
+  100 000: 42 nagy szelet, 61%                         → 2 445 · 2 427  (~34 MB)
+1 000 000: 361 nagy szelet, 60%                         → 2 305 · 2 286  (~36 MB)
+```
+
+⭐ **A lelet:** a szigorú (b) a tárolást drámaian csökkenti (egymillió tagnál 7,1 GB helyett a készülékek 95%-ánál ~20 MB),
+⛔ **de a farok a népszerű entitások miatt ~√N szerint nő** (a 95% 1 159 → 36 957 esemény három nagyságrend alatt), és a
+D93/1 miatt a vállalt szeletek szerzőinek tagsági bizonyítéka is kell — ez a 95%-nál ~570 MB (a láncok megosztásával
+kevesebb, de ugyanígy nő). A teljes vállalás tehát a „végtelen” próbáján elbukik. ⭐ A **két fokú vállalás** (a nagy szelet
+pont-tartója a gyökeret, a saját eseményeit és mintákat tart; a teljes halmazt az önkéntes) **konstans**: a koinó méretétől
+függetlenül ~2 300–2 800 esemény és ~2 300 szerző tagsága a 95%-nál. → [`b3_szigoru_atvizsgalas.md`](../../docs/b3_szigoru_atvizsgalas.md).
+
+## 67. ⭐ A LEZÁRÁSI ÖSSZEGZÉS ÁRA — a nagy szeletű érintett döntése az összegző tartónak (D95/1, 2026-10-05, a laptopon)
+
+*`osszegzesMeres.js`: a három fa valódi (`osszegzoFa.js`) — a beszámított szavazatok állapot-fája (az összegek: támogat ·
+ellenez · tartózkodik), a lezáráskori aktív tulajdonosok állapot-fája, és az érték javaslatok érték szerint rendezett
+naplója (a medián a középső index). Az események mérete az 53–54. mérésből (a szavazat a bizonyítékaival ~2,14 KB, a
+pont-esemény ~1,37 KB, az érték javaslat ~0,8 KB), a tagsági csomag a 63.-ból. k = 8 minta fánként.*
+
+```
+résztvevő │ fejléc │ egy minta (bizonyíték + esemény): szavazat · tulajdonos · napló │ k = 8 mintával │ + a minták szerzőinek tagsága
+  1 000   │ 0,6 KB │ 2,93 KB · 2,20 KB · 1,46 KB                                     │     59 KB      │ +216 KB (gyorsítótár nélkül)
+ 10 000   │ 0,6 KB │ 3,27 KB · 2,46 KB · 1,67 KB                                     │     66 KB      │ +288 KB
+100 000   │ 0,6 KB │ 3,58 KB · 2,71 KB · 1,93 KB                                     │     72 KB      │ +336 KB
+a teljes tartó fa-építése a nulláról (két állapot-fa + napló): 1 s · 20 s · 244 s (a valóságban a karbantartó lépésenként vezeti)
+```
+
+⭐ **A lelet:** egy nagy szeletű érintett döntésének ellenőrizhető átadása az összegző tartónak **~60–70 KB**, logaritmikusan
+nő a résztvevők számával; a minták szerzőinek tagsága gyorsítótár nélkül +0,2–0,3 MB (a már ismert szerzőké ingyen).
+Döntésenként EGYSZER — a mai „mindent tárol” (a szelet minden eseménye) helyett. A szelet MOSTANI összegzésének mintái a
+62. mérés szerint k = 8-cal 5–21 KB.
+
+## 68. ⭐ A „NINCS ÚJDONSÁG” CSERE A SZIGORÚ (b) ALATT — a részvétel a saját halmaz (a bekapcsolás átvizsgálása, 2026-10-06, a laptopon)
+
+*`reszvetelMeres.js`: két tár, mindkettő n szeletet vállal, ebből egy hányad közös és egyező, a többi csak az egyiké. A
+valódi párbeszéd (`csereUdpResen`) a gépen belüli UDP-résen, titkosítva. A részvétel a saját halmaz (ahogy a bekapcsolás
+után volna), illetve összevetésül csak a közös szeletek (ha mindkét fél tudná, mi a közös).*
+
+```
+  n │ átfedés 10% │ 50%      │ 90%     │ 100%  │ csak a közös (bármely átfedésnél)
+ 50 │  17,0 KB    │ 13,0 KB  │  6,3 KB │ 702 B │ 702 B
+200 │  58,0 KB    │ 42,1 KB  │ 25,0 KB │ 702 B │ 702 B
+1000│ 298,4 KB    │ 216,5 KB │ 92,5 KB │ 702 B │ 702 B
+```
+
+⭐ **A lelet:** ha a részvétel a saját vállalásból jön, és a két fél mást vállal, a nyitó lenyomat soha nem egyezik, és a
+párbeszéd MINDEN cserén végigfuttatja az első szintet a nem közös szeleteken is (a tartomány-egyeztetés a sok eltérésnél a
+listákig bomlik, az ELTÉRŐ és a RÉSZVÉTEL üzenet a nem közös kulcsokat sorolja): a hétköznapi „nincs újdonság” csere
+**6–300 KB** a 702 B helyett — a vállalt szeletek számával lineárisan nő. ⛔ A szigorú (b) így NEM kapcsolható be: előbb a
+két félnek a KÖZÖS halmazt kell ismernie (a nyitó lenyomat csak azon fusson). A darabos gyökérnél (D95/4) ugyanezt a
+NYITÁS jele oldja meg (a darabokat a társ a tábla-aláíróból számolja) — a vállalt szeleteknél ilyen számítható szabály
+nincs. A bekapcsolás átvizsgálása: [`docs/bekapcsolas_atvizsgalas.md`](../../docs/bekapcsolas_atvizsgalas.md).
+
+⭐ **És a D97/1 után (2026-10-08, a laptopon — ugyanaz a mérés, a közös halmazzal):** az első találkozáskor a két fél
+kicseréli a részvételi halmazát (szeletenként 8 jeles ujjlenyomat, mindkét irányban): **2,9 / 7,0 / 28,3 KB** 50 / 200 /
+1000 vállalt szeletnél (az átfedéstől függetlenül); utána a „nincs újdonság” csere minden esetben **1,3 KB** (0 egyeztető
+üzenet) — a 6–300 KB helyett. A többlet a tábla-kulcsos alapcseréhez (~1,15 KB) képest ~150 B (a nyitás `pv` és a CÍMEK
+`kz` jele). A halmaz változása csak a változást viszi (a próba szerint a teljes lista ~2 KB-tal drágább már 200 szeletnél).
+
+## 69. ⭐ A RAJ A KÖRBEN — hány kör alatt ér el egy változás egy szelet minden tartójához? (D97/2, 2026-10-09, szimuláció)
+
+*`rajKorMeres.js`: N = 2000 készülék, S = 20 000 szelet (Zipf-népszerűség, a tartók száma szeletenként medián 3, 90% 12, max
+1859), készülékenként átlag V = 50 vállalt szelet; minden készülék szeletenként legfeljebb L = 8 tartót ismer (a
+raj-jegyzék, D91); körönként K = 3 rögzített kötés-társ és R raj-társ; egy csere a két fél KÖZÖS szeleteit hozza szinkronba
+(D97/1). 400 követett változás, 120 kör. Magvas véletlen.*
+
+```
+stratégia                                │ csere/kör │ minden tartóhoz: medián · 90% · 99% │ 10 körön │ 30 körön │ 120 körön
+csak a kötés-társak (K = 3)              │     3     │   —   ·  —  ·  —                    │   0,3%   │   0,3%   │   0,3%
++ 2 raj-társ, átfedés szerint, forgatva  │     5     │  20   ·  55 ·  —                    │  29,5%   │  68,3%   │  96,0%
++ 4 raj-társ, átfedés szerint, forgatva  │     7     │  10   ·  28 ·  —                    │  50,7%   │  92,8%   │  96,0%
++ 2 raj-társ, véletlen                   │     5     │  24   ·  62 ·  98                   │  23,5%   │  57,5%   │ 100,0%
++ 2 raj-társ, forgatva, tartók sorban    │     5     │  21   ·  48 ·  71                   │  25,3%   │  71,3%   │ 100,0%
++ 1 raj-társ, a VÁLTOZOTT előre          │     4     │   2   ·   8 ·  17                   │  95,8%   │ 100,0%   │ 100,0%
++ 2 raj-társ, a VÁLTOZOTT előre          │     5     │   1   ·   4 ·   9                   │ 100,0%   │ 100,0%   │ 100,0%
++ 4 raj-társ, a VÁLTOZOTT előre          │     7     │   1   ·   2 ·   5                   │ 100,0%   │ 100,0%   │ 100,0%
+```
+
+⭐ **A lelet:** (1) a kötés-társakkal a szigorú (b) alatt a vállalt szeletek gyakorlatilag NEM frissülnek (0,3%); (2) az
+átfedés szerinti raj-választás („aki a legtöbb szeletemet tartja”) szeletenként mindig ugyanazt a tartót adja — a tartók
+gráfja szétesik, a változások 4%-a soha nem ér körbe; (3) a döntő a **„VÁLTOZOTT ELŐRE”**: aki egy szeletben újat tud meg,
+annak tartóit sorra felkeresi — járványszerűen terjed, R = 2-vel medián 1, 99%-ban 9 kör alatt minden tartóhoz (a lépések
+a tartók számával logaritmikusan nőnek). 5000 készüléken, 50 000 szeleten ugyanez: átfedés szerint 94% (120 körön), a
+„változott előre” R = 2-vel medián 1, 90% 4, 99% 10 kör. ⭐ Ezért a D97/2 a „változott előre + forgatás (tartók sorban)”
+szabállyal épült.
+
+## 70. ⭐ A TÁRSANKÉNTI EMLÉKEZET FELSŐ HATÁRA — mennyi a változott közös szeletek megkeresése? (a ⑧ átvizsgálása, 2026-10-09, a laptopon)
+
+*`tarsEmlekezetMeres.js`: két tár, n közös szelet (mindkettő mindet vállalja, a közös halmaz — D97/1 — már ismert); a B
+tárba v közös szeletbe egy-egy új esemény kerül. A valódi párbeszéd (`csereUdpResen`) a gépen belüli UDP-résen,
+titkosítva. ⭐ Új műszer a párbeszédben (`uzenetMeres`): üzenet-típusonként a kiküldött nyílt bájtok (mindkét fél), így
+látszik, mennyi az ELSŐ SZINT (a `SZELETEK` — a „szelet:lenyomat” párok tartomány-egyeztetése), amit a társankénti
+emlékezet (F) megspórolhatna.*
+
+```
+   n │ v = 0  │ v = 1                       │ v = 5                        │ v = 20
+  50 │ 1,3 KB │  5,1 KB (első szint 1,3 KB) │ 10,3 KB (első szint  2,1 KB) │ 28,8 KB (első szint  4,5 KB)
+1000 │ 1,3 KB │  6,3 KB (első szint 2,3 KB) │ 14,9 KB (első szint  6,5 KB) │ 45,6 KB (első szint 19,1 KB)
+5000 │ 1,3 KB │  7,7 KB (első szint 3,6 KB) │ 21,2 KB (első szint 12,4 KB) │ 70,4 KB (első szint 43,8 KB)
+```
+
+*(Az összeg a vonal bájtja, az „első szint” nyílt JSON-bájt. Az esemény maga változásonként ~0,6 KB, a második szint
+— a változott szeleten belül — ~0,25 KB; a NYITAS 768 B és a CIMEK 122 B minden cserén ott van.)*
+
+⭐ **A lelet:** ha a közös szeletek közül néhány változott, a forgalom legnagyobb része az első szint — az, hogy MELYIK
+szelet tér el: a nyílt forgalom 25–62%-a, változásonként 1000 szeletnél ~1 KB, 5000-nél ~2,2 KB (a felosztások száma
+miatt logaritmikusan nő; a lista-küszöb alatti tartományokban a teljes, 87 jeles párok utaznak). Ha a két fél tudná, hol
+tartott a legutóbbi cseréjükön, a változott szeletek listája változásonként ~0,1 KB volna. A mai alak a „végtelen” elvét
+nem sérti, csak drágább. A ⑧ átvizsgálása: [`docs/f_a_atvizsgalas.md`](../../docs/f_a_atvizsgalas.md).
+
+⭐ **És a D98/1 után (2026-10-09, a laptopon — ugyanaz a mérés, emlékezettel és nélküle; a második csere végén mindkét fél
+feljegyzi a tára állását, a harmadik a változott szeletekről szól):** emlékezettel a változott közös szeletek cseréje
+**nem függ a szeletek számától** — egy változás 3,8 KB (50, 1000 és 5000 szeletnél is; nélküle 5,3 · 6,5 · 8,0 KB), öt
+változás 8,0–8,5 KB (nélküle 10,0 · 16,0 · 21,5 KB), húsz 25,8 KB (nélküle 27,3 · 46,8 · 73,5 KB); az egyeztető üzenetek
+száma 7 (nélküle 8–9). A változott szeletek útja (VALTOZOTT + VALTOZOTTPAROK) változásonként ~0,15 KB nyíltan. ⚠️ Emlékezet
+nélkül (az első találkozáskor) a VALTOZOTT üres kérdése +64 B. A „nincs újdonság” 1,3 KB maradt.
+
+## 71. ⭐ A LÁNC-KÖR ÁRA — a szerzők lánca a cserében (D98/2–4, 2026-10-09, a laptopon)
+
+*`lancKorMeres.js`: egy szerző n eseményes lánca (gondolatok és pontok, a valódi műveletekkel — lánc-gyökérrel); egy tartó
+a fejet és még k eseményt tart, és a lánc-körben kérdez (`lancEllenorzes.js`). Bájt = a LANCKEREK és a LANCVALASZ
+JSON-hossza (a vonal keret nélkül); idő = a szerző válasza (első és második kérdés), és összevetésül a tagsági
+bizonyítékok gyorsítótár nélkül (a régi `naploBizonyitek` útja).*
+
+```
+     n │ kérdezve      │ kérdés │ válasz │ a szerző (első · második) │ gyorsítótár nélkül a bizonyítékok
+   100 │ fej + 1       │ 253 B  │ 582 B  │  11 ms ·  4 ms            │    3 ms
+   100 │ fej + 8       │ 610 B  │ 3,8 KB │  30 ms · 22 ms            │   28 ms
+  1000 │ fej + 1       │ 255 B  │ 785 B  │ 104 ms ·  6 ms            │   50 ms
+  1000 │ fej + 8       │ 619 B  │ 5,4 KB │ 147 ms · 42 ms            │  406 ms
+  5000 │ fej + 1       │ 257 B  │ 990 B  │ 529 ms ·  9 ms            │  246 ms
+  5000 │ fej + 8       │ 627 B  │ 6,8 KB │ 555 ms · 31 ms            │ 1874 ms
+```
+
+⭐ **A lelet:** a lánc-kör egy kérdezett eseményre ~0,6–0,8 KB választ visz, és ez a lánc hosszával logaritmikusan nő
+(egy tagsági bizonyíték ⌈log₂ n⌉ lépés); egy cserében legfeljebb 3 szerző × (fej + 8 esemény), tehát a felső határ ~20 KB
+— és csak abban a cserében, ami nem ért véget a nyitásnál (a „nincs újdonság” csere nem drágul). A LANCKEREK maga ~60 B (a saját
+szerzői kulcs) üres kérdéssel. ⭐ A szerző oldala a részfa-gyorsítótárral (D98/4) a második kérdéstől 9–42 ms — nélküle a
+8 bizonyíték 5000-nél 1,9 s (O(n) a bizonyítékonként); az első kérdés ideje a lánc visszafelé bejárása (a testek
+betöltése), ami folyamatonként egyszeri.
+
+## 72. ⭐⭐ TEREPEN A VÉGLEGES SOR UTÁN: LAPTOP OTTHON, TELEFON A SZOMSZÉD WIFIJÉN — zárt koinó, szigorú (b) (2026-10-09, 20:13–20:50)
+
+*A program: `ae4e0ae` (1042 önpróba; a telefonon a frissítés után az `alap` és a `fa` csoport — 142 próba — zöld). Új,
+ZÁRT koinó (`KOINO_AZONOSITO=terep`, a laptop az alapító), mindkét gép a régi adat-mappájával (a 13 napos, még a `sajat`
+koinóban kötött kötés és a tábla-kulcsok), mindkettő `orjarat 1`, „alap” módban (a szigorú (b)). A laptop oldalát Claude
+futtatta (napló fájlba; 20:39-től `KOINO_UZENETMERES=1` — a saját kiküldött üzenetek nyílt bájtjai típusonként), a telefont
+Csaba (Termux, `tee ~/orjarat-T.log`; a napló bemásolva).*
+
+### ✅ A TÁBLÁN ÁT, OTTHONI ISMERKEDÉS NÉLKÜL — a régi kötés másik koinóban is talál
+
+```
+L:  20:13:53 1 címre kopogtam, egyik rés sem nyílt meg           (a telefon régi helyi címe)
+T:  20:24:25 a táblán megvan egy néma társ új címe: 31.46.251.79:40967 (az ő órája szerint 10 perce írta ki)
+T:  20:25:42 az új címemet kiírtam a táblára (2 társ rekeszébe, 14 tároló)
+L:  20:26:26 a táblán megvan egy néma társ új címe: 84.2.81.146:7373 (az ő órája szerint 2 perce írta ki)
+L:  20:27:00 rés nyílt: 84.2.81.146:7373 (218 ms)
+T:  20:26:59 rés nyílt: 31.46.251.79:40967 (58575 ms)
+```
+
+⭐ Mindkét gép címe megváltozott a 43. mérés óta (a laptopé ugyanazon a gépen 31.46.251.115 → .79, a szomszédé
+5.187.184.117 → 84.2.81.146), a telefon a szomszéd routerén megtartotta a 7373-at. A kötés a tábla-kulcshoz kötött, nem a
+koinóhoz: az új koinóban is talált. ⚠️ Ugyanaz, mint a 43.-ban: a telefon egy percig kopogott hiába (58575 ms), amíg a
+laptop ki nem olvasta az ÚJ címét a tábláról — az otthoni router cím-függően szűr, a tábla itt az egyetlen út.
+
+### ✅ A ZÁRT KOINÓ KAPUJA TEREPEN (D93/3)
+
+A nem tag telefon csak a koinó születését kapta meg, a laptop csak a belépését vette át (20:27:00: „1 új esemény, küldtem
+1”). 20:34:00-kor a laptopról meghívtam (`meghiv`), a meghívás átment, 20:34:32-kor a telefon kiadta a tagsági csomagját; a
+`tagsag` a telefonon: „✔ tag — tag hívta be (1. szint)”. ✅ A lánc-kör (D98/2) a laptopon a telefon láncát (a belépését)
+ellenőrizte (`lancellenorzes.json`).
+
+### ⛔ 1. LELET — A HOSSZAN FUTÓ VENDÉG 10 PERCIG NEM VETTE ÉSZRE A MEGKAPOTT SZÜLETÉST (javítva)
+
+20:27–20:33 között a laptop minden körben „küldtem 1”-et írt (5,4–5,9 KB körönként a ~2 helyett). Az ok: a telefon
+őrjárata a „nem ismerem a koinó születését” választ 10 percig megjegyezte (`koinoSzuletese`) — a cserében megkapott
+születést addig nem tette a párjai közé, és a laptop újraküldte. Helyben nem jött elő, mert ott a vendég minden cserét új
+folyamatban futtatott. ✅ Javítva: a „nincs” emlék a tár változásakor elévül; parancssor-próba (a vendég `figyel`-je egy
+folyamat, a második cserén a gazda nem küld semmit — a régi kóddal „küldtem 1”).
+
+### ⭐ A „NINCS ÚJDONSÁG” CSERE TEREPEN — és percenként kettő
+
+```
+L:  20:41:00 csere a résen 84.2.81.146:7373 — 0 új esemény, küldtem 0 (1 kör, 2.4 KB)
+        (nyíltan küldtem: NYITAS 423 B, CIMEK 221 B, FAJLOK 29 B)
+L:  20:41:02 csere a résen 84.2.81.146:7373 — 0 új esemény, küldtem 0 (1 kör, 1.8 KB)      (a telefon kezdeményezte)
+T:  20:41:59 … (1 kör, 1.8 KB)  ·  20:42:01 … (1 kör, 2.3–2.8 KB)
+```
+
+Egy „nincs újdonság” csere 1,8–2,8 KB a vonalon (a kezdeményező többet mér — a kopogás és a kézfogás az övé), nyíltan
+oldalanként ~0,67 KB. A 43. mérés 1,2–1,7 KB-jához képest a titkosítás (+~0,4 KB, 57.) és a gyökér-darab jele (+~0,1 KB)
+adja a különbséget — a várt nagyság. ⚠️ Percenként KÉT csere megy (mindkét irányból egy-egy, a 45. mérés tényezője — a
+(iii) döntés felezné): párosan ~4,5 KB/perc, ~6,5 MB/nap.
+
+### ⛔ 2. LELET — A SZIGORÚ (b) ALATT AZ ÚJ GONDOLATOT NEM LEHETETT FELVENNI (javítva)
+
+A laptop 20:34-kor gondolatot írt; a születése 20:35:00-kor a telefon gyökér-darabján át megérkezett („1 új esemény”), a
+pontjai nem (a telefon a szeletet nem vállalja). A telefonon: `GONDOLATOK (még nincs)`, és a `pont LsAtzEz7 5` → „Nincs
+ilyen azonosító”. Az ok: a D14 („a 0 pontos entitás nem létezik”) a NEM TARTOTT szeletre is ítélt — a telefon egyetlen pontját
+sem láthatta, tehát „0”-nak vette. ✅ Javítva (a D75/4 általánosítása): a D14 csak a tartott (vállalt) szeletre ítél; a többi
+„pontjai ismeretlenek” jelzéssel látszik, és vállalható. Parancssor-próba: az „alap” vendég a cserén csak a születést kapja,
+látja, pontot tesz rá, és a következő cserén mindkét irányban átjön a szelet (rontással mind a négy feltétel bukik).
+
+### ⚠️ AMI NYITVA MARADT
+
+- **A két irány ütközése** (20:49:59): a két gép egy másodpercen belül egyszerre kezdeményezett (a laptop 20:39-es
+  újraindítása óta ilyen közel jár a két kör) — „Várt üzenet: NYITAS, érkezett: CIMEK”, a laptop oldalán „nem válaszol
+  (10000 ms)”; 10 mp múlva magától helyreállt (`foglalt` → újra). Mérendő helyben (két őrjárat, egymáshoz igazított
+  körrel); a (iii) döntés (egy csere ablakonként) megszüntetné.
+- **A néma kötés keresése** a telefonon percenként (`egy néma társ (35oykowL…) nincs a táblán (5–8 DHT-gép felelt)`) — egy
+  régi, rég nem látott kötés (valószínűleg a 40. mérés másik telefonja); minden keresés néhány KB DHT-forgalom. A régóta
+  néma kötést ritkábban kellene keresni (visszalépő ütem).
+
+### ✅ A MÁSODIK FÉL (21:48–23:18, a javítások után — `61f783e`, a telefon is frissítve)
+
+- **A vállalás terepen** (22:26): a telefonon a laptop gondolata most „pontjai ismeretlenek” jelzéssel látszott, a `pont
+  LsAtzEz7 5` sikerült, és a következő cserén a szelet mindkét irányban átjött (a telefonon „összes pont: 105 ·
+  hozzájárulók: 2”) — **a változott szelet útján** (a laptop bontása: `VALTOZOTTPAROK 110 B`, `TARTOMANYOK 190 B`,
+  `ESEMENY 780 B`, és a lánc-kör: `LANCKEREK 252 B`, `LANCVALASZ 259 B`; a csere 8,0 KB). ⚠️ A telefon ennél a cserénél
+  „0 új esemény”-t írt ki, holott az esemény megérkezett — a második vállalásnál (23:09:59) már helyesen „1 új”; helyben nem
+  jön elő. Egyszeri; nyitva.
+- ⭐ **A szöveg (a törzs, D84/1) a vállalás ELŐTT átjött:** egy szöveges gondolat (`H3VLG5Xb`) születése után a telefon
+  állapota már a szövegét is kiírta, miközben „nem tartod” és „pontjai ismeretlenek” állt mellette — a telefon elkérte a
+  látott gondolat szöveg-darabját, és a laptop (a vállaló) kiadta. A vállalás után a szelet is átjött („1 új esemény”, 8,3 KB).
+- **Az ütközés** még kétszer (22:28:59, 22:30:59): a frissítés óta a telefon köre :59-kor, a laptopé :00-kor indult — egy
+  másodpercre egymástól.
+- **A hazaút** (23:15–23:17): a telefon kiesett a szomszéd hálózatából (a laptop cseréje 23:15:10-kor elbukott), és
+  23:17:00-kor már az otthoni hálózatról kopogott be (`192.168.1.124:7373`, 13 ms) — két perc kiesés, beavatkozás nélkül.
+
+## 73. ✅⭐ TEREPEN A D99-CEL: EGY CSERE PERCENKÉNT, ÜTKÖZÉS NÉLKÜL — és a fordított irány (2026-10-10, 17:46–21:35)
+
+*Ugyanaz a felállás, mint a 72.-ben (laptop otthon, telefon a szomszéd wifijén, a zárt `terep` koinó, „alap” mód), a
+program: `d11e7eb` (a D99 — mindkét gépen). A laptop naplója fájlban (`KOINO_UZENETMERES=1`), a telefoné képernyőképen.*
+
+- **A D99 terepen:** 114 percben pontosan EGY csere percenként, egyetlen percben kettő (21:22 — a telefon új gondolata
+  után a kör az újdonság miatt ismételt egy menetet); a 72. mérésen minden percben kettő. Három óra alatt egyetlen
+  „elbukott” vagy „foglalt” sor sincs (a 72.-en háromszor akadt el). ⚠️ Ezen az estén a laptop köre járt elöl (a telefon
+  órája szerint :59-kor kopogott), és a telefon köre a még futó munkát számolta be — a második csere így nem indult el.
+- **A tábla megint dolgozott:** a laptop külső címe ismét változott (31.46.251.177:35731), a telefon a táblán megtalálta.
+- **A fordított irány:** a telefon a szomszédban szöveges gondolatot írt (21:21); a születése 21:22:01-kor a laptop
+  gyökér-darabján át megjött („1 új esemény”), a szövege (64 bájt) 21:25:01-kor — a VÁLLALÁS ELŐTT („fájlok a résen:
+  1 megjött”), ahogy a 72.-ben a másik irányban. A laptop 21:33-kor vállalta (`pont MaqGt1l5 5`): a 21:34:01-es csere
+  (8,6 KB) a változott szelet útján ment (`VALTOZOTT 75 B`, `VALTOZOTTPAROK 110 B`, `TARTOMANYOK 180 B`, `ESEMENY 892 B`),
+  a lánc-körrel (`LANCKEREK 258 B`, `LANCVALASZ 454 B`), és a laptopon „összes pont: 105 · hozzájárulók: 2”.
+- **A hazaút:** a telefon 21:20 körül az otthoni hálózatra váltott; a laptop 21:23–21:24-ben hiába kopogott, 21:25:01-kor a
+  helyi címén (`192.168.1.124`) újra összeért — két perc kiesés, beavatkozás nélkül (mint a 72.-ben).
+
+⭐ **A lelet:** két külön router mögött (PC és mobil) a koino a szigorú (b) alatt, zárt koinóban, mindkét irányban
+működik: a táblán át találnak egymásra (a változó címek ellenére), a csak születéséből ismert gondolat látszik, a szövege
+már vállalás előtt átjön, a vállalás után a szelet a változott szelet útján (a társankénti emlékezettel) mozdul, a
+lánc-ellenőrzés lefut, és a „nincs újdonság” forgalom a D99-cel percenként egy csere (~2,4 KB). ⏸️ A két mobilnetes
+telefon közötti rés (két cél-függő NAT) még méretlen — Csaba a közeljövőben intéz hozzá telefonokat.
+
+## 74. ⭐⭐ A LEGJOBB-ELŐSZÖR BEJÁRÓ ÁRA a szigorú (b) alatt — szimuláció (D101, M1: „előtte mérés”, 2026-10-11)
+
+*`node meres/bejaroMeres.js [N ...]` — magvas véletlen, 3 ismétlés átlaga. A kérdés: a D101 közös bejárója (az
+„ágazati pont szerint csökkenő” sor a fejléc-kérdéssel — a lapos ágazati rendezés, a Struktúra, a Síkidom alapja) hány
+kérelmet és hány percet kér egy FRISS készüléken (a koinóból semmit nem tart), egy 20 kártyás oldalhoz és egy B = 200 /
+500 / 2000 csomópontos Struktúrához? A modell a program mai menete: az őrjárat T percenként köröz, egy körben minden célhoz
+egy munka, egy munka EGY függő kérelmet visz (`tarshozIllo`), a függők legfeljebb 16-an; a tartó 30% eséllyel közvetlenül
+elérhető, különben a kopogtató témáján (≤ 20 perc) látja a kérelmet; körönként 70% eséllyel él; egy entitás tartói 1 +
+Poisson(2) készülék, egy gyerek tartója 50% eséllyel a szülőé is. A fa: előnyben részesítő kapcsolódás, Pareto-pontok —
+a csomópontok 67%-a levél.*
+
+Egy oldal (k = 20) és egy 200 csomópontos Struktúra, N = 2000 / 20 000 / 200 000 entitásnál, 1 perces körrel (5 perces
+körrel a „ma” és a G nagyjából másfélszeres, a H ötszörös — a körök száma ugyanaz):
+
+- **A — ma:** oldal 80–114 perc (~55–64 kérelem), Struktúra-200 390–460 perc. A B = 2000 a korláton belül nem ér véget.
+- **B — több kérelem egy kapcsolaton:** ugyanaz, mint az A — ⭐ **a kapcsolatonkénti kérelemszám NEM a szűk
+  keresztmetszet**: a kérelmek úgyis más-más tartóhoz mennek.
+- **C — B + a fejléc bemondja a gyerekszámot:** a levélre nem kell kérni — a kérelmek 10–60%-a elmarad, az idő alig
+  változik.
+- **D — C + bővebb függő-korlát (64):** a Struktúra ideje kb. a felére esik (167–245 perc), több előre kért kérelemmel.
+- **E — D + a tartó „mélyen” felel (4 szintig, amit tart):** kevés javulás (a véletlen tartók ritkán tartják a gyereket is).
+- **⭐ G — D + a tartó MAGA jár be legjobb-először, amit tud** (X alatt a legjobb 50 a saját tudásából — egy csomópont
+  gyerekeit akkor ismeri, ha a szeletét tartja): oldal **29–34 perc, 44–54 kérelem** (az A harmada), Struktúra-200 94–116
+  perc.
+- **F — egy „mindent” tartó (D83/2) a kötések között** (a kis, családi koinó): oldal 6–8 perc — a késés 1 kör, de a
+  sorrend szintjei így is egymás után jönnek.
+- **⭐ H — F + G:** oldal **1 kör** (1 / 5 perc), Struktúra-200 1–3 kör, Struktúra-2000 19–29 perc.
+
+**A folytatás (`utan`) hiánya:** a lapos oldalból és a 200–500-as Struktúrából semmi nem marad ki; a 2000-esből 55 (N =
+2000) és 107 (N = 20 000), 200 000-nél 0 — ahol egy szülőnek 50-nél több gyereke van.
+
+⭐ **A lelet:** a bejáró idejét a KÉRÉSENKÉNTI KÉSÉS (a NAT mögötti tartó kopogtatása) szorozva a sorrend SZINTJEIVEL
+dönti el — nem a kapcsolatonkénti kérelemszám. Két dolog segít igazán: (1) ha egy kérelemre több szint jön — a tartó maga
+jár be, amit tud (G: az idő és a kérelemszám harmada); (2) ha a közelben van egy jól ellátott („mindent”) tartó — akkor egy
+oldal egyetlen körben megjön (H). ⭐ Egy oldal ideje és kérelemszáma NEM függ a koinó méretétől (N = 2000-től 200 000-ig
+ugyanaz) — a 9. szabály rendben. ⚠️ Egy friss készülék nagy koinóban, jól ellátott tartó nélkül, G-vel is fél óra alatt
+kap meg egy oldalt, egy 200-as Struktúrát másfél óra alatt — a lap tehát fokozatosan tölt (a ház csendes újrakérdezése),
+és a „mindent” tartók (D83/2, önkéntesek) értéke a felületen ezzel lesz mérhető. ⚠️ Az ára: egy oldal ~0,7–1,4 MB (a G-vel —
+a válaszonkénti 50 fejléc és a minták); egy kisebb `n` a bejárónál ezt csökkentené.
+
+**⚠️ PÓTLÁS (2026-10-11, a D102 után — a J3 próbája ott, ahol számíthat):** a „B — több kérelem egy kapcsolaton” változatot
+csak véletlen tartókkal mértem; ott valóban nem számít (G és „G1 — G, kapcsolatonként 1 kérelem” ugyanaz). ⛔ De ha
+EGYETLEN jól ellátott tartó kapja a kérelmeket (a kis, családi koinó — H), a kapcsolatonkénti 1 kérelem („H1”) mindent
+sorba állít: egy oldal 1 kör helyett 6, egy 200-as Struktúra 2–3 perc helyett 46–85 perc (1 perces körrel; 5 percessel
+10–15 helyett 230–425 perc), egy 2000-es 19–29 helyett 176–447 perc. ⭐ A J3 („nem kell”) tehát a nagy, szétszórt
+koinóra igaz, a kicsire nem — a döntés újra Csabáé.
+
+
+**⛔ JAVÍTÁS (2026-10-18, a 77. mérés lelete):** a szimuláció bejárója ugyanazt a csomópontot két úton is a kupacba tehette
+(a tartó saját bejárása, és egy későbbi fejléc-válasz, ha a szülő kibontása visszavonódott), és a „kiadott B” a
+MÁSODPÉLDÁNYOKAT is számolta — a G és a H változat (és a H1, G1) így kevesebb valódi csomóponthoz mérte az időt (egy
+K = 50-es lista ~24 különböző csomópont volt). A javítás: a kiadás a már kiadottat átlépi. Újramérve (1 perces körrel,
+N = 2000 / 20 000 / 200 000): az **A, a D és az F nem változott** (azokban nem volt kettőzés); a **G** egy oldala **38–40
+perc** (29–34 helyett), a 200-as Struktúrája **153–168 perc** (94–116 helyett), a 2000-ese 582–1613 perc; a **H** egy oldala
+1 perc (változatlan), a 200-asa **6–8 perc** (1–3 helyett), a 2000-ese 19–79 perc (19–29 helyett); a **H1** egy oldala 16–19
+perc, a 200-asa 91–191 perc (46–85 helyett). ⭐ **A sorrend nem változott** — a G harmada–fele az A-nak, a „mindent” tartó a
+döntő, és a kapcsolatonkénti 1 kérelem (H1) egy jól ellátott tartónál továbbra is sokszoros lassulás —, tehát a **D102
+döntései (J1, J2, J3 (A), J4) állnak**; az abszolút idők viszont rosszabbak: egy friss készülék nagy koinóban, „mindent”
+tartó nélkül egy oldalt ~40 perc alatt, egy 200-as Struktúrát ~2,5 óra alatt kap meg (5 perces körrel ~45–50 perc / ~4,3–4,9 óra).
+## 75. ⭐⭐ A KERESŐ-RÉTEG ÁRA — szimuláció (D105, K6: „előbb mérés”, 2026-10-16)
+
+*`node meres/keresoMeres.js [N ...] [--prozai] [--B=256] [--T=512]` — magvas véletlen. A kérdés: a D105 kereső-rétege
+(hash a DHT-n, két kulcs szavanként, tag-tulajdonosok, osztódó fiók) mit kíván egy készüléktől, és mit ad a kérdezőnek —
+N = 10 000 · 100 000 · 1 000 000 gondolatnál (fejenként 10, M = N / 10 készülék)? A modell: a cím 2–8 szó (átlag 5); 20%
+rövid szó (1–2 jel, nem kerül indexbe); ~4,7% gyakori szó a prózai arány felével — a koino_1.1 magyar dokumentációjából
+mérve (44 fájl, 250 ezer szó: „nem” 2,14% · „egy” 1,13% · „csak” 0,59% · „két”, „kell”, „hogy” ~0,45% …; `--prozai`: a teljes
+arány és 30% rövid szó); a többi tartalmi szó: tő (Zipf–Mandelbrot, 500 ezer tő) + toldalék (45% nincs; gyakori ragok és
+képzők), a tövek 15%-a igekötővel. Egy fiók = a kulcsot tartalmazó címek; a régiók a gyökér-darab mintájára (a kulcs
+lenyomata, m mélység, ~512 bejegyzés / régió), egy készülék a ±1 legszélesebbjét tartja. Az árak az 58. és a 63. mérésből,
+a késés a 74. mérés modellje (a tartó körönként 70% eséllyel él, 30% eséllyel közvetlenül elérhető, különben ≤ 20 perc a
+kopogtató témáján).*
+
+**A kulcsok (K2):** címenként (A) 3,84–3,86 · (C) 7,04–7,08 kulcs — a (C) ×1,83 bejegyzés. Különböző fiók egymillió
+gondolatnál (A) 1,18 millió · (C) 1,22 millió.
+
+**⛔ K7 — A GYAKORI SZAVAK, MÉRVE:** a legnagyobb fiók (a „nem”) a címek **5,1–5,2%-a** minden méretnél (prózai aránnyal
+10,2–10,5%) — vagyis a koinóval LINEÁRISAN nő; a legnagyobb négybetűs szóeleje-fiók ~3%. Osztódás nélkül egy készülék
+LEGNAGYOBB terhe (C): 943 · 5603 · **53 299 bejegyzés (~31 MB)** — az átlag 1,7 · 8 · **61-szerese**; prózai aránnyal
+egymilliónál 102 915 (~60 MB). ⭐ Osztódással (B = 256): 863 · 1452 · **2443 (~1,4 MB)** — az átlag 1,6 · 2,1 · 2,8-szerese
+(prózai aránnyal 3,1); a 99% 837 · 1239 · 1656. ⭐ **A K7 kell, és működik:** a teher nem nő a koinóval. A maradék szórás a
+darabok „rögeiből” jön (egy darab 128–256 bejegyzés, egy régió ~860): a legtöbbet tartó készülék aránya csak az extrém érték
+módjára, lassan nő (a régiók számával, logaritmikusan). A darab mérete paraméter: B = 128-cal a legtöbb 2,2×, 64-gyel 1,9×
+— de a teljesség romlik (a tőre keresésnél „legalább 10 találat” 91% → 88% → 86%, a két szavas teljes válasz 96% → 93% →
+89%). ⭐ **B = 256 marad** (a legtöbbet tartó készülék is ~1,4 MB).
+
+**K2 — a tőre keresés:** ha a kérdező a tövet írja be („park”), a tővel kezdődő szavú címekből (A) átlagosan **45% · 40% ·
+31%** jön meg, (C) **95% · 79% · 55%** (egy darabot kérdezve egy osztódott fiókból; kettővel 95 · 86 · 63%). „Legalább 10
+találat, vagy mind”: (A) 47 · 58 · 72%, **(C) 96 · 94 · 91%** (kettővel 96 · 95 · 94%). A háromjeles tő (a kérdések ~8%-a)
+mindkettőnél csak a pontos alakot kapja. ⭐ A magyar toldalékolás miatt az egész szavas kulcs a találatok több mint felét
+elveszíti; a (C) megéri a kétszeres tárolást. A „teljes” válasz a gyakori tőnél nagy koinóban minta (a K7 szerint) — a
+felületnek ezt ki kell mondania.
+
+**Két szavas kérdés** (egy valódi cím két tartalmi szava): a ritkább szó fiókja 100 · 99,5 · **95,8%-ban** ≤ 256 — a
+kérdés egy helyről teljes választ kap (a tartó a másik szóra helyben szűr); a ritkább fiók mérete medián 1–2.
+
+**A tartók és a késés:** régiónként (C) átlag 7,8 · 9,8 · 12,2 tartó (az alsó 1%: 3–5), üres régió nincs. Az első válasz
+1 perces körrel medián **1 perc**, 90% 4,6 · 3,4 · 2,9 perc, 99% 14,1 · 12,2 · 10,6 perc; 5 perces körrel medián 5, 90%
+6,9–8,7, 99% 14,6–18,2 perc; válasz nélkül (12 körön belül) 0%. ⭐ A kereső nem „gépelés közbeni”, de nem is lassú: a
+legtöbb kérdésre egy körön belül jön válasz (a régió ~10 tartója közül mindig van közvetlenül elérhető).
+
+**A felajánlás (K4):** gondolatonként ~7 régió, ~7 bejegyzés → ~90 KB (felső becslés: DHT-keresés + kopogtatás
+régiónként; a közvetlenül elérhető tartónál a kopogtatás elmarad).
+
+**K3 — a tagság a tartónál:** a tartó a RÉGIÓJA bejegyzéseinek tulajdonosait látja, nem az egész koinóét: ~860 bejegyzés,
+~1240 különböző szerző egymilliónál. ⛔ A gyorsítótárnak ennél nagyobbnak kell lennie: 1024 szerzővel egymilliónál 30
+naponként a 64%-uk újra bizonyítékot kíván (~490 KB/nap), **4096-tal 5,4%** (~41 KB/nap; 100 ezernél 4,3%, 10 ezernél
+1,9%). Az új tartó ELSŐ kitöltése: 454 · 851 · 1241 szerző — ~3,5 · 8,8 · 16,1 MB, ha minden lánc külön jön; ⭐ a közös
+ősökkel (a meghívási fa teteje egyszer jön) egymilliónál **~8,4 MB**, és egy új szerző utána ~4 lépés (~5 KB). Egyszeri,
+de egy telefonon nem kicsi — a ④-ben a háttérben, a tagsági kísérők gépével és a függő-jegyzék korlátaival kell jönnie,
+nem egyszerre.
+
+**A megújítás (K5, 30 nap):** „soros” újítóval **~15–17 KB/nap/készülék** (ha minden tartó újítana, a háromszorosa); a
+tartó oldalán beérkező (bejegyzések + az új szerzők bizonyítéka) 16 · 35 · 59 KB/nap; ehhez jön a régió hirdetése a DHT-n
+(**~650 KB/nap** — 58. mérés) — **ez a kereső-réteg legnagyobb állandó tétele**, ugyanannyi, mint a gyökér-darabé.
+
+⭐ **A lelet:** a D105 alakja kiállja a próbát. A K7 (az osztódó fiók) nélkül a gyakori szó fiókja a koinóval lineárisan nő
+(egymilliónál ~31 MB egy készüléken) — vele egy készülék terhe ~0,5 MB átlagosan, ~1,4 MB a legtöbbet tartónál, és nem
+függ a koinó méretétől (a „végtelen” rendben). A K2 (C) a magyar toldalékolás miatt kétszer annyi találatot hoz, mint az
+egész szó. Két paraméter a mérésből: a darab B = 256, és a tartó tagság-gyorsítótára a régiója szerzőinél nagyobb (4096).
+⚠️ A határai: a szóeloszlás szintetikus (a gyakori szavak arányát a koino_1.1 magyar szövegéből mérve, a tövek és a
+toldalékok modellből — a tőváltozás, a hangrend kimarad); a „tő-találat” a tő minden toldalékos alakja (a véletlen tövek
+ritkán előtagjai egymásnak — elhanyagolva); a késés a 74. mérés modellje, nem terep; a régiók tartóinak egymás közti
+cseréje (a raj) nincs külön mérve.
+
+## 76. ⭐⭐ MENNYIBE KERÜL EGY KÉRÉS KISZOLGÁLÁSA? (D108 — a kiszolgálási keret előtt, 2026-10-17, a laptopon)
+
+*`kiszolgalasMeres.js` — egy szintetikus koinó a memóriában (120 tag-szerző, a gondolatok egy fában, mindegyiken a szerzője
+pontja és fele eséllyel egy másiké), a kiszolgáló valódi függvényeivel; a beolvasás nincs benne (49. mérés: 100 000 esemény
+~0,4 s). A kérdés: a kiszolgálási keret (D108) mekkora legyen — mennyibe kerül egy-egy kéréstípus, és mennyit kér a
+becsületes használat.*
+
+```
+gondolat / esemény        az állapot   a gyökér fejlécei mélyen (n = 50)      egy szint (melegen)     egy szelet
+                          (ma minden    hidegen      melegen    válasz        idő      válasz          medián / max
+                          fejléc-kérés)
+   500 /   1 486            6,5 ms      45 ms        1,8 ms     34 + 8 KB     3 ms     5 + 12 KB       1,6 / 5,1 KB
+ 2 500 /   6 479           43 ms        48 ms        3,6 ms     35 + 9 KB     7 ms     5 + 8 KB        1,6 / 4,7 KB
+10 000 /  25 172          164 ms        57 ms       18 ms       35 + 7 KB    19 ms     6 + 8 KB        1,6 / 5,2 KB
+50 000 / 124 866          937 ms       184 ms      150 ms       35 + 7 KB   155 ms     7 + 8 KB        1,6 / 6,3 KB
+```
+
+A mai kérésenkénti felső határokból (~550 B/esemény): egy szelet ≈ 2,1 MB (+ a tagsági kísérők ≈ 0,5 MB), egy törzs
+64 × 2 MB = 128 MB; egy 16-os sorozat szeletből ≈ 34 MB, törzsből ≈ 2 GB.
+
+⭐ **A lelet — két külön dolog.** (1) A VÁLASZOK kicsik és korlátosak (a fejlécek ~35–45 KB, egy szint ~13–19 KB, egy szelet
+~1,6 KB) — kivéve a törzset és a nagy szeletet: ott a MB-ok. (2) ⛔ A SZÁMÍTÁS a tárral nő: minden fejléc-kérelem a teljes
+állapotot újraszámolja (`kepetKeszit`, gyorsítótár nélkül — ~7,5 µs eseményenként), és a válasz maga is a teljes
+entitás-halmazon számol össz-pontot és gyerek-jegyzéket. Egy „alap” készüléknél a tár kicsi; egy „mindent” tartónál 125 000
+eseménynél ~1,1 s CPU kérésenként (+ a beolvasás) — a „végtelen” megsértése a kiszolgáló oldalán, és egy mohó kérő ezzel
+terheli legjobban, nem a bájtokkal. ⭐ A becsületes használat ehhez képest kicsi: egy pakli-navigáció egy új készüléken
+~50–100 KB (képek nélkül), egy felderítés (3 szint × legjobb 10) ~0,5 MB a szövegekkel. A döntési kérdések (KK1–KK6):
+[`kiszolgalasi_keret_atvizsgalas.md`](../../docs/kiszolgalasi_keret_atvizsgalas.md).
+
+⚠️ A határai: a koinó szintetikus (egyenletes szerzők, egy-két pont gondolatonként, javaslatok nélkül — a döntés-számítás
+itt olcsó); a beolvasás és a vonal (titkosítás, UDP) nincs benne; a képek mérete a koinótól függ.
+
+⭐⭐ **A KK1 UTÁN (D109 ①, 2026-10-17 — ugyanaz a mérés, a kiszolgáló képével):** a kiszolgáló a képét (az állapot, a
+fejléc-kép: az össz-pontok, a gyerek-jegyzék, a csomópontonként lustán rendezett gyereklisták) a tár állása szerint
+gyorsítótárban tartja, és a fejléc-válasz LUSTA ÖSSZEFÉSÜLÉSSEL jár be (csomópontonként csak a következő legjobb gyerek ül a
+kupacban). Egy kérés ára így:
+
+```
+gondolat / esemény        a kép (változásonként egyszer)     egy kérés: a gyökér mélyen   egy szint
+   500 /   1 486              1,4 ms                          1,4 ms                       0,1 ms
+ 2 500 /   6 479              2,6 ms                          0,6 ms                       0,1 ms
+10 000 /  25 172             16,9 ms                          0,5 ms                       0,1 ms
+50 000 / 124 866            131 ms                            0,6 ms                       0,2 ms
+LAPOS (50 000 legfelső szintű): kép nélkül 128 ms / kérés → a képpel 0,7 ms (a kép egyszer 54 ms)
+```
+(+ az állapot újraszámolása, ha a tár változott — változásonként egyszer, nem kérésenként.) ⭐ Egy kérés ára a tárral nem nő:
+a kérésszám (KK2) mérce lehet.
+
+## 77. ⭐⭐ A FELDERÍTÉS ÁRA — szimuláció (D108/1, „előbb a mérés”, 2026-10-18)
+
+*`node meres/bejaroMeres.js --felderites [N ...]` — a 74. mérés modellje (javítva — lásd ott), 3 ismétlés átlaga. A
+felderítés egy ág pillanatképe: a legjobb-először sor első K csomópontja (a fejléc-fázis — a mai menet: a tartó maga jár be,
+G; és egy „mindent” tartóval, H), és ha a törzs is kell, a K csomópont mindegyikéhez egy TÖRZS-kérelem a saját tartóihoz
+(⛔ a törzset csak a vállaló adja — D84/1: csomópontonként más-más készülék, nagyrészt NAT mögött). A függők ≤ 64, egy
+tartónak körönként ≤ 64 kérelem; a perc a kör végéig számol. Egy FRISS készüléken (semmit nem tart).*
+
+```
+                      1 perces kör                                  5 perces kör
+G (a mai menet)
+  K = 50    fejléc 48–55 perc, 1,3–1,5 MB;  törzs: mind 43–55 perc     fejléc 68 perc;     törzs: mind 60–68 perc
+  K = 200   fejléc 153–154 perc, 3,7–5,8 MB; törzs: fele 15–16, mind 64–65 perc, ~145 készülék
+                                                                     fejléc 257–258 perc; törzs: fele 27–28, mind 93–97 perc
+  K = 1000  fejléc 683–840 perc, 8–21 MB;   törzs: mind 208–219 perc, ~650–690 készülék
+                                                                     fejléc 938–1185 perc; törzs: mind 338–350 perc
+H („mindent” tartó a kötések közt)
+  K = 50    fejléc 1 perc;  törzs 0 perc                               5 perc;  0 perc
+  K = 200   fejléc 8 perc, 4,8–5,3 MB;  törzs: mind 3 perc             40 perc; mind 15 perc
+  K = 1000  fejléc 33–40 perc, 9–23 MB; törzs: mind 15 perc            165–200 perc; mind 75 perc
+```
+
+⭐ **A lelet:** (1) a felderítés fejléc-fázisa ugyanaz, mint egy K-s Struktúra — a mai menettel egy friss készüléken K = 200
+**2,5–4,3 óra**, K = 1000 **11–20 óra**; ⭐ a koinó méretétől nem függ (20 000 és 200 000 entitásnál ugyanaz). (2) **A törzs
+nem a szűk keresztmetszet:** a törzs-kérelmek egymástól függetlenek (nem szintenként jönnek), ezért K = 200-nál csak ~1–1,5
+órát tesznek hozzá, pedig ~145 különböző készüléket érintenek — a fele 15–28 perc alatt megjön. (3) Egy „mindent” tartóval
+minden percekre rövidül; ⚠️ ott a KISZOLGÁLÁSI KERET szab határt (a szimuláció nem modellezi): egy társnak óránként ≤ 750
+kérés és ≤ 25 MB (KK5) — egy 1000-es törzses felderítés így legalább 80 perc. (4) A bájt: a fejléc-fázis ~8–30 KB
+csomópontonként (a minták), a törzs a tartalomtól függ (szöveg ~1–5 KB, egy fájl ≤ 2 MB). ⚠️ A modell egyszerűsít: a törzs a
+fejlécek UTÁN indul (a valóságban mehet egyszerre), a tartók 1 + Poisson(2) készülék, és a tartó-tippet (D111) nem ismeri.
+⭐ A javaslat (a felderítés átvizsgálása, F4): K = 200 alapból, csak fejléc, a törzs bekapcsolható.
+
+## 78. ⭐⭐ A TAGSÁGI LÁNC FARKA — a legmélyebb tag, nem az átlag (a D106 (A) a `MELYSEG_KORLAT`-ra, 2026-10-19)
+
+*`node meres/lancFarokMeres.js` — a 63. mérés két természetes növekedése, csak a mélység: `egyenletes` (véletlen
+meghívó — véletlen rekurzív fa) és `aktív` (a hívó súlya 1 + a meghívottjai száma — sík-rendezett rekurzív fa). A
+szimuláció 10^8 (egyenletes) / 10^7 (aktív) tagig a fa MAGASSÁGÁT adja; a farkat a PONTOS eloszlás méri (a k-adik tag
+mélysége Bernoulli(1/j)-k összege — 10^7-ig k-ról k-ra), és a Hwang-féle közelítés vetíti ki (a pontossal 5%-on belül
+egyezik); a magasság a tételekből (egyenletes: e·ln n − 1,5·ln ln n + O(1); aktív: 1,7956·ln n + O(1)), az O(1) tag a
+szimulációból, óvatosan (a legnagyobb). A dróton a 64. mérés műszere (`zartKapuMeres.js`, +256-os mélység).*
+
+```
+a szimuláció (átlag / 95% / 99,99% / a legmélyebb):
+  egyenletes  10^6: 13,2 / 19 / 27 / 33   10^7: 15,4 / 21 / 30 / 36   10^8: 17,8 / 24 / 33 / 40
+  aktív       10^6:  7,5 / 12 / 19 / 21   10^7:  9,1 / 14 / 21 / 26
+a farok (egyenletes, 10^7 tag; a tagok hányada L-nél mélyebben — pontosan / Hwang / egy szimulált fa):
+  L = 25: 0,922% / 0,884% / 0,399%    L = 30: 0,032% / 0,031% / 5,3e-5    L = 35: 4,9e-6 / 4,9e-6 / 1,0e-7
+a legmélyebb tag:   10^10 (az emberiség)   10^11 (×10)   2^128 (a koinó saját határa)
+  egyenletes                ~57               ~63           ~234   (átlag ~88)
+  aktív                     ~38               ~43           ~156
+a korlátok — hol éri el a legmélyebb tag · a koinó határán a tagok hányada a korlátnál mélyebben (egyenletes):
+  L =  64   egyenletes ~1,3·10^11, aktív ~1,6·10^16   ·   98,9%
+  L = 128   egyenletes ~3,0·10^21, aktív ~4,7·10^31   ·   2,7·10^-5 (~9·10^33 tag)
+  L = 256   egyenletes ~1,2·10^42, aktív ~4,3·10^62   ·   ~10^-48 (senki)
+a korlátnál ülő tag első találkozása a zárt kapun (csomaggal, a dróton):
+  mélység 64: a csomag 60,1 KB, 72 862 B   ·   mélység 256: a csomag 237,6 KB, 282 457 B (társanként egyszer)
+a 2. lépcső szúrópróbájának útja (a 65. mérés, helyi növekedés; átlag / 95% / a leghosszabb):
+  10^3: 4,3 / 7 / 9   10^4: 8,1 / 12 / 16   10^5: 12,9 / 18 / 24   10^6: 16,9 / 24 / 27   → évtizedenként ~+4 / ~+6
+```
+
+⛔ **A lelet:** a 64-es korlátot eddig az ÁTLAGHOZ mértük (63. mérés → „~10^29–10^30 tagnál éri el” — a D106 is ezt
+mondta), de az átlag ott éri el a korlátot, ahol a tagok FELE már túl van rajta. A korlát a LEGMÉLYEBB tagnál dönt (aki
+mélyebben ül, nem tag, amíg egy közelebbi tag be nem hívja): véletlen meghívónál a fa magassága ~e·ln n (az átlag ~2,7-
+szerese), és a 64-et a legmélyebb tag már **~1,3·10^11** tagnál eléri — az emberiség ~13-szorosánál, a D106 (B) tízszeres
+tartalékán épp csak túl; a koinó saját határán a tagok ~99%-a mélyebben ülne. A 128-at ~3·10^21-nél (ott a tagok
+~0,003%-ának kellene rövidítenie), a **256-ot a koinó határáig sem** (~234; aktív meghívóknál ~156). A 2. lépcső
+szúrópróbájának útja ugyanezt a korlátot használja, és a helyi növekedésnél évtizedenként ~4–6 lépéssel nő (kivetítve a
+koinó határán ~150 / ~210). ⭐ Az ára a természetes tagnál nem változik (13–30 lépés, 16–37 KB); a korlátnál ülőé ~240 KB
+(a dróton ~280 KB, társanként egyszer) — 32 ilyen egy tagsági válaszban (~7–11 MB, a profillal több) a vonal 8 MB-os
+sor-korlátjába nem fér biztosan, ezért a válasz bájt-korlátot kap. ⚠️ Egy szimulált fa farka erősen ingadozik (egyetlen futás
+~2×; az átlagos mélység szórása ~0,6) — a farkat ezért a pontos eloszlás méri. → **D113** (Csaba, 2026-10-19: „(A) 256”).
+
+## 79. ⛔ KÉT EGYIDEJŰ MUNKA UGYANARRA A FÁJLRA — a mai élő út, közös munkamegosztás nélkül (a UDP-s több forrás átvizsgálása, 2026-10-19, a laptopon)
+
+*`node meres/resSebessegMeres.js`, a „TÖBB FORRÁSBÓL EGY FÁJL” szakasz (D) sora — a 29/b műszere (a valódi
+`fajlHozatala` és kiszolgáló a UDP-utánzaton, forrásonként külön vonal, 200 darab/mp, 10 ms), egy 512 KB-os fájl
+(8 szelet). A mai élő úton a randevú (`fajlRandevu` → `fajlUdpResen`) NEM ad közös munkamegosztást, a kapu munkái viszont
+párhuzamosak: ha a fájl két társnál is megvan, és a kör mindkettőt eléri, két ág hozza egymástól függetlenül. Mellette a
+29/b sorai a mai kóddal.*
+
+```
+a 29/b sorai ma (közös munkával):
+  (A) a forrás a szűk        1 forrás 4129 ms · 2 forrás ×1,6 (4/4) · 3 forrás ×2,0 (3/2/3)
+  (B) a mi letöltésünk a szűk 1 forrás 3918 ms · 3 forrás ×1,0
+  (C) aszimmetrikus (4×)     1 forrás 5132 ms · 2 ×1,5 · 3 ×1,7 · 5 ×2,0
+(D) két forrás, a (A) vonalán:
+  közös munkával            2637 ms   ×1,6   szeletek 4/4
+  közös munka NÉLKÜL (5×)   4163–4197 ms   ×1,0   szeletek 8/8 — 16 a 8 helyett, mind az ötször
+     a két ág lezárása:     kész / kész (1×) · kész / „hiányzó szelet” (3×) · ⛔ kivétel: ENOENT egy szelet
+                            olvasásakor (1× — a másik ág lezárása közben eldobta a részleges mappát)
+```
+
+⛔ **A lelet:** a mai élő úton két egyidejű munka ugyanarra a fájlra **minden szeletet kétszer hoz** (kétszeres forgalom —
+és a két tartó kiszolgálási keretéből is kétszer), **sebességben semmit nem nyer** (×1,0 a közös munka ×1,6-ja helyett),
+és a lezárásért versenyez: az öt futásból négyszer a második ág bukásnak könyvelte, egyszer kivétellel szállt el (a
+fájl megvan, de a második ág „nem jött át”-ot mond, és a részleges mappába utólag írt szeletei árván maradhatnak).
+Romlott lezárást (a nem atomi szelet-írás olvasását) öt futás nem hozott — a lehetősége áll, a gyakorisága kicsi. ⭐ A 29/b
+haszna a mai kóddal is áll (×1,6–2,0, ha a forrás a szűk). → a UDP-s több forrás átvizsgálása
+([`udp_tobb_forras_atvizsgalas.md`](../../docs/udp_tobb_forras_atvizsgalas.md)), T1: a közös munka lenyomatonként.
+
+## 80. ⭐⭐ A KOPOGÁS ÜTEME — hány percforduló marad ki egy valódi őrjárat körében? (41., 45. — „a kopogás saját üteme”, 2026-10-19, a laptopon)
+
+*`node meres/korUtemMeres.js [perc] [port] [--friss]` — egy valódi őrjárat (`orjarat 1`, 8 perc) a VALÓDI DHT-n:
+egy friss készülék egy koinóval, két néma kötéssel (valódi tábla-kulcs, halott cím) és három halott induló címmel;
+`--friss`: az egyik kötés két perce hallgatott el (mint egy hálózatváltás után — a tábláról minden ablakban keresi). A kör
+kezdetét a `csere.json` adja; egy percforduló kimaradt, ha utána 5 mp-en belül nem indult kör. A régi kód a `079d115`
+változata (`KOINO_UTEM_JS`).*
+
+```
+                                                        percfordulók · kimaradt
+régi kód                                                   8 · 1   (az első: az új cím kiírása a táblára 34 mp)
+régi kód, frissen elnémult kötéssel                        8 · 1   (az első: a tábla-olvasás + a kiírás 29 mp-ig)
+új kód: a tábla és a házimunka a HÁTTÉRBEN                 8 · 0
+új kód, frissen elnémult kötéssel                          8 · 1   (15:18:00 — a kör 6 mp-cel a forduló ELŐTT indult)
+új kód + a csúszás tűrése, frissen elnémult kötéssel       8 · 0   (a háttér 1 körön át dolgozott — a kopogás ment)
+a tábla munkái: egy néma kötés keresése 4–25 mp · az új cím kiírása 30–55 mp (8–16 tároló) · a címjegyzék (háttérben) 41–50 KB
+```
+
+⛔ **A lelet — két ok, nem egy:** (1) a tábla és a házimunka a kopogás után SORBAN futott: az induló (és a hálózatváltás
+utáni) kör az új címét írja ki a táblára (30–55 mp), és a következő percforduló kimaradt — épp akkor, amikor a társnak a
+legnagyobb szüksége van ránk (a 41. mérés TCP-köre azóta kikerült, a D99 visszalépő üteme a régóta hallgató kötések
+keresését ritkította — a kiírás maradt). (2) ⛔ A kopogás az ablak VÉGÉIG tart, ha a kör a fordulóhoz közel indul (vagy egy
+forgalmas kör ismételt menetei kitöltik az ablakot) — és a régi kör a következő ablakot ilyenkor a következő percre tette:
+a háttér nélkül is elveszett egy forduló. ⭐ A javítás mindkettőre: a tábla és a házimunka egy HÁTTÉR-munka (egyszerre egy,
+a kör nem várja meg), és ha a kör legfeljebb 3 mp-cel csúszott túl a saját ablakán, a következő AZONNAL indul (a társ a
+fordulótól 6 mp-ig kopog). A parancssor-próbák determinisztikusan mérik mindkettőt (egy 9 mp-es háttérrel és egy halott
+címmel, 6 mp-es ablakokkal — a rontásuk 10–15 mp-es köröket ad). → a kopogás saját üteme (D115).
+
+## 81. ⭐ AZ ÖSSZ-DARAB A VONALON — mennyibe kerül a felderítetlen rész jele? (D116, 2026-10-22, a laptopon)
+
+*`node meres/darabMeres.js [gondolatok ...]` — valódi aláírt eseményekből egy véletlen fa (≤ 8 szint, ≤ 8 testvér,
+gondolatonként 1–3 szerző pontja), a gyökérre három fejléc-kérdés a kérelem saját függvényeivel (a vonal ugyanezeket a
+JSON-üzeneteket küldi), 20 futás átlaga (a minta-helyek véletlenek). A régi kód: `KOINO_KOD=<git archive 15afaf3 koino/js>`;
+a minta-számok: `KOINO_MINTA=kd,kg,td,tg` (a kiválasztott és a testvérek darab és gyerek szerinti mintái).*
+
+```
+                                            60 gondolat                       400 gondolat
+                                     régi    D116 (2,1,1,1)            régi    D116 (2,1,1,1)
+a gyökér szintje (egy szinten, 20)   3,2 KB   4,8 KB                    2,8 KB   5,0 KB
+a gyökér-gondolat mélyen (50)       47,4 KB  51,6 KB                   46,5 KB  52,3 KB
+egy első szintű ág mélyen (50)       3,4 KB   3,5 KB                   41,9 KB  45,0 KB
+ebből a FEJLECEK (a lista)          +0,5–0,6 KB (az `ad` mezők)
+a 400-as fa mélyen, más minta-számokkal: 0,0,0,0 → 49,5 · 2,1,0,0 → 50,3 · 2,1,1,1 → 54,0 (egy másik futás) · 4,2,2,1 → 54,9–57,0 KB
+a minta-gyerekek születése, ami külön utazott: mélyen 0,5–2, egy szinten 1,6–1,9 (a többi a listában áll)
+```
+
+⭐ **A lelet:** a lista maga alig nő (+0,5 KB — tételenként egy szám); a többlet a MINTÁKÉ. ⚠️ Darab-minta nélkül is +3 KB a
+mély kérésen: a három összegű fa bizonyítékai nagyobbak (minden testvér-csomópont három számot visz). Egy darab- vagy gyerek-minta
+0,6–0,9 KB (a bizonyítéka, és ha a gyerek nincs a listában, a születése). ⭐ A választás: a kiválasztott 2 + 1, a legfelső 3
+testvér 1 + 1 — a mély kérés +9–12%, a gyökér egy szintje +1,6–2,2 KB; a tét kisebb, mint az össz-ponté (8 és 4 minta): a darab a
+nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
+
+---
+
+## 89. ⭐ A SZÁMÍTÁS MAGJÁNAK STABILITÁSA — milyen gyakran változik az, ami egy koinóban mindenkinél azonos kell legyen? (D123, a program rétegei, 2026-11-06, a laptopon)
+
+*`magMeres.js` (a terv: `docs/program_retegek_atvizsgalas.md` 5. szakasz — „mérés előtte: a mag stabilitása”). A mag a koinó képének
+(`ketReteg.js`) és a kapunak (`esemenyTar.js`) az import-zárványa — a mérés a program SAJÁT függvényével számolja
+(`kodCsomag.js` `magJegyzeke`), commitonként a git-ből. Ahol a mag neve változott, fájlonként megnézi, hogy csak komment és szóköz
+változott-e (egy mérési, nem teljes JS-elemzővel — a kétes eset kód). A 88. szám a BEP 5 mérésnek fenntartva
+(`bep5_utak_atvizsgalas.md` 5.).*
+
+```
+A MAG STABILITÁSA — 36 commit a koino/ alatt, ff60542 óta (a ketReteg.js bevezetése)
+  a kezdeti mag (ff60542): 17 fájl, 378.3 KB
+  a mai mag: 17 fájl, 405.1 KB
+  a mag fájljait érintő commit: 4 · a mag neve változott: 4 (ebből csak komment / szóköz: 0)
+
+  KÓD    2026-10-24 fd8475d A költözés ④a: a ki- és a beköltözés eseménye, a tagság öröklése (D118/3, /6, KZ3)
+  KÓD    2026-10-25 47795ee A költözés ⑤b: a szerző LÁNCA a koinóban
+  KÓD    2026-10-25 6d079c3 D119 ①a: a koino-verzió kártya a program oldalán — és D119/A
+  KÓD    2026-10-29 18bf1c4 D120: a törzs-határ — a nagy törzs elemenként, kérésre
+```
+
+⭐ **A lelet:** a mag ritkán változik, és amikor igen, kóddal: 36 commitból 4, mind új esemény-alak vagy a költözés számítása — csak
+kommentet érintő változás egy sem; 10-29 óta (egy hét, ~20 commit) egyszer sem. A mag mérete is stabil (17 fájl; a 17 fájl
+ugyanaz). → **D123 ①:** a mag neve a fájlok BÁJTJAIT köti (a kommentet is) — a téves „más számítás” riasztás ritka lesz, a kommentet
+szűrő lenyomat pedig egy elemzőn múlna, és egy téves szűrés a kimaradó változás felé (a veszélyes irányba) billentene. ⚠️ A felső
+becslés: a mérés azt nézi, változott-e a mag KÓDJA, azt nem, hogy egy esemény-halmaz KÉPE változott-e (a négyből kettő az esemény
+alakját bővítette — egy régi koinó képét nem érintette volna).
+
+---
+
+## 87. ⛔⭐ MEGTALÁLJA-E A MEGHÍVÓ A BELÉPŐ CETLIJÉT? — BEP 5 és BEP 44 a valódi DHT-n (a belépő megtalálása, 2026-11-04, a laptopon — a helyi rész)
+
+*`dhtTalalatMeres.js` (a terv: `docs/belepo_megtalalasa_atvizsgalas.md` 5. szakasz). A kiváltó lelet: a terepen (2026-11-04 este)
+a laptop nem találta a mobilneten lévő belépő BEP 5 bejelentését. Itt egy gépen, két szerepben (két folyamat, friss kliensekkel):
+4 téma; a kiíró BEP 5-tel bejelent (a felismerő porttal) és BEP 44-gyel aláírt bejegyzést tesz ki (a kulcspár a kódból — mint egy
+meghívó titkából); a kereső két friss klienssel, sorban keres. ⏸️ A két készülékes rész (a kiíró mobilneten) még hátravan.*
+
+```
+  (előtte, egy gyors próba — 4 véletlen téma, a kiírás után friss klienssel:)
+  5 mp után:  BEP 44 3/4 megvan · BEP 5 0/4 megvan
+  60 mp után: BEP 44 4/4 megvan · BEP 5 1/4 megvan
+
+  23:13:45 KIÍRÁS 1: BEP 5 8/8, 8/8, 8/8, 8/8 · BEP 44 8/8, 7/8, 8/8, 8/8 gép tárolta · 105,5 mp · 111,6 KB
+           ellenőrző keresés: BEP 5 3/4 · BEP 44 4/4 témán látom a saját cetlimet
+  23:16:03 ( 0. perc)  BEP 5: A ●●●· B ●●●·   BEP 44: A ●●●● B ●●●●   · ellenpróba: (senki)
+  23:19:18 ( 4. perc)  BEP 5: A ●●●· B ●●●·   BEP 44: A ●●●● B ●●●●   · ellenpróba: (senki)
+  23:22:09 ( 7. perc)  BEP 5: A ●●●· B ●●●·   BEP 44: A ●●●● B ●●●●   · ellenpróba: 31.200.249.244:31929
+    BEP 5  — egy kliens (A): 75% · két kliens (A∪B): 75% · egy keresés átlag 7,0 mp, 4,5 KB
+    BEP 44 — egy kliens (A): 100% · két kliens (A∪B): 100% · egy keresés átlag 15,9 mp, 7,5 KB
+  a BEP 5 cetli ezekről a címekről jött: 31.46.251.159:46822 31.217.176.37:46822 190.104.120.166:46822
+```
+
+⛔ **A lelet:**
+- **A BEP 5 témánként dől el:** egy téma vagy mindig megvan, vagy soha — a kiírás „8/8 gép tárolta” akkor is, ha egyetlen keresés
+  sem kapja vissza. **A második (friss) kliens nem segít** (75% → 75%): a keresés ugyanoda ér, ahol a cetli nincs. Az első próbán 4
+  témából 0, egy perc múlva 1 volt meg.
+- ⛔⛔ **A BEP 5 HAMISÍT:** a mi (csak itt használt) portunkon a laptop valódi címe MELLETT két idegen IP is visszajött — gépek, amik a
+  bejelentést elfogják, és a saját címükkel szolgálják ki. A meghívó ilyen címre hiába kopogna; a 2026-11-04-i terep „zaja”
+  (31.200.249.x — bármilyen témára) ugyanennek a tábornak a része: a BitTorrent DHT-t figyelő gépek, amik a kulcstérben
+  „közelinek” adják ki magukat (a keresés ~14 kérdés után „célba ér”).
+- ⭐ **A BEP 44 (aláírt bejegyzés) megtalálható:** 100% (a gyors próbán 5 mp után 3/4, egy perc múlva 4/4); hamisítani nem lehet (az
+  aláírás a kulcspáré), és a tartalma titkosítható. Ára: egy keresés ~16 mp, ~7,5 KB (a BEP 5 7 mp, 4,5 KB). A hirdetőtábla
+  (2026-09-20) ezen az úton olvasta a terepen megbízhatóan a társak címét.
+- Az ellenpróba-téma (az M3 (b)) keveset szűr: a zaj címei egy /24-en belül forognak (31.200.249.x, más-más porttal), a pontos
+  címre szűrő ellenpróba ritkán találja el ugyanazt; a kudarc-számláló (M3 (a)) a járható út.
+- Az ellenőrző keresés (a kiíró látja-e a saját cetlijét) működik — de BEP 5-nél a „látom” nem jelenti, hogy más is látja.
+
+→ A belépő cetlije BEP 44-re költözzön (a meghívó titkából származó kulcspárral — „a meghívó rekesze”); ⚠️ és a koinó többi BEP 5
+útja (a címjegyzék — D91: a gyökér-darab hirdetése, a kopogtatók, a kereső-régió társai) ugyanettől szenved — külön átvizsgálás.
+
+
+⭐ **A két készülékes rész — a terep (2026-11-05 este, laptop otthoni wifin + egy mobilnetes telefon a CGNAT mögött):** a belépő a
+meghívó rekeszébe (BEP 44) 17:30:08-kor írt, a meghívó a valódi DHT-n 17:32:20-kor megtalálta (a meghívó kora szerinti kétperces
+keresés első-második menete), a rés 17:33:00-kor az első próbára nyílt, 17:33:07-kor tag — cím beírása nélkül. A BEP 5 zaja a terepen
+is jelen volt (20 percenként két „kérő”, mindig más cím; az M3 (a) 3 kör után kidobta). Részletek: `docs/belepo_megtalalasa_atvizsgalas.md` 9.
+
+---
+
+## 86. ⭐ A TÖRZS-HATÁR HATÁSA — mit hoz el a nem vállaló a kártyák kódjából? (D120, a 85. megismételve, 2026-10-29, a laptopon)
+
+`node meres/csaladCsereMeres.js 1 2 3` — ugyanaz a menet, mint a 85.-é (B minden gyermekbe költözött, a kártyákra nem tett
+pontot), a D120 megépülte után.
+
+- **A kártyák kódja a nem vállaló B-nél:** k = 2 és 3 mellett **29,5 KB** (a jegyzék — a gyermekek ugyanazzal a programmal
+  születtek, egy jegyzék), **2 csere** — a D120 előtt 6,5 MB és 9 csere (randevúnként 50 fájl), alapból a kiszolgálási kerettel
+  a harmadik cserétől „később”.
+- **A „nincs újdonság” családi csere:** változatlan (k = 1: 2,3 KB · 2: 4,4 · 3: 6,7 KB); az első csere is (k = 3: 30,9 KB).
+- **A hivatkozás ára:** a fájlos törzsű esemény +~13 B (`"torzs":N`); fájl nélkül 0 (a mező elmarad).
+- **A határ fölötti fájl ára a letöltőnél:** egy szelet (≤ 64 KB) egyszer — az első szelet mondja meg a méretet, a letöltő ott
+  megáll, és a méretet megjegyzi (a következő kör már nem kéri). ⚠️ A 64 KB-nál kisebb fájl egész az első szeletben jön — a
+  valódi határ (1 MB) mellett ilyen nem fordul elő; a próbák kicsi határánál (3000 B) igen.
+
+⭐ **Amit mutat:** a kártya vállalása marad a kód forrása (a vállaló és a költöző teljesen hozza), a tag a böngészéshez a
+jegyzéket kapja — a „Kód” fülön a fájllista és a méret, a kód kérésre. A 6. szabály szerint ez a helyes: a program egyszer
+jön, az adat minden nap utazik.
+
+---
+
+## 85. ⭐ A CSALÁDI CSERE ÁRA — mennyibe kerül, hogy egy csere a családot cseréli? (D119 ③, M1, 2026-10-26, a laptopon)
+
+`node meres/csaladCsereMeres.js [k ...]` — a megépült kódon: két készülék, egy k koinós család (a szülő és k − 1 gyermek,
+koino-verzió kártyával), B a szülő tagja és minden gyermekbe beköltözött; A postaládát futtat a SZÜLŐRE, B a szülőre nyitva
+cserél, amíg egy csere semmit nem hoz. A bájtok a résen, titkosítva, a kézfogás nélkül (a kimenet „csere a résen” sorai).
+
+- **A nyitás `cs` jele** (nyílt, a `NYITAS`-ban, irányonként egyszer): k = 1: 8 B · 2: 53 B · 5: 191 B · 16: 697 B · 64: 2,9 KB —
+  koinónként +46 B (a koinó neve).
+- **A „nincs újdonság” családi csere:** k = 1: **2,3 KB** (1,0 s) · k = 2: **4,4 KB** (2,5 + 1,9; 1,05 s) · k = 3: **6,7 KB**
+  (1,35 s) · k = 5: **11,8 KB** (2,9 + 4 × 2,2; 1,8 s). ⭐ Koinónként ~2,2 KB és ~200 ms — lineáris, ugyanaz, mintha minden
+  koinó külön cserélne (a mérce: egy koinó cseréje), csak egy kopogással és egy munkában.
+- **Az első csere** (A minden koinóba írt egy gondolatot): k = 5: 63 KB, 2,3 s — minden új gondolat megjött.
+- ⚠️ **A kártyák kódja:** a nem vállaló B a kártyák kódját is elhozta (6,5 MB, 9 cserében — randevúnként ≤ 50 fájl); alapból a
+  kiszolgálási keret (társanként ~150 kérés / óra) a harmadik csere után „később”-t mond — ezért a mérés a postaládának nagy
+  keretet ad (`KOINO_KERET`). Lásd lent (Csabánál).
+
+⭐ **Amit mutat:** a családi kör nem drágítja a cserét: a teher a közös koinók számával lineárisan nő (a készülék maga
+választotta őket — 9. szabály), a nyitás jele elhanyagolható. ⏸️ **Csabánál:** a kártya kódját a fájl-igény MINDEN látott
+entitásra kéri (a ①b óta — a 84. mérés leírása szerint csak a „Kód” fület megnyitónak és a költözőnek utazna).
+
+---
+
+## 84. ⭐ A KÓD-CSOMAG MÉRETE — mennyi a teljes program a koino-verzió kártyán? (D119, M2', 2026-10-25)
+
+`node meres/kodCsomagMeres.js [régi-commit]` — a git által követett `koino/` fájlok, sorvég nélkül (a 6. szabály mércéje).
+
+- **A teljes program:** 331 fájl, **6407 KB**; fájlonként tömörítve 2103 KB, egyben tömörítve **1865 KB** (a CLAUDE.md régi
+  „tar.gz ~80 KB” adata elavult volt — javítva). Kiterjesztés szerint: js 5777 KB, md 381, css 197, html 51.
+- **A jegyzék** (útvonal → a fájl lenyomata): **28,5 KB** (tömörítve 13,6 KB). **A legnagyobb fájl** a `koino.js`, 532 KB — a
+  fájl-korlát (2 MB) alatt.
+- **Egy új verzió** csak az új és a változott fájlokat viszi (a fájlok tartalom-címzettek): a ④b (`d20af3c`) óta 25 fájl,
+  **1,4 MB**; két nap (`3e46844`) óta 53 fájl, **2,5 MB** — a nagy fájlok (a `koino.js`, a parancssor-próbák) szinte minden
+  verzióban változnak.
+
+⭐ **Amit mutat:** a koino-verzió kártya maga kicsi (a jegyzék lenyomata az eseményben, a jegyzék ~29 KB darab); a kód
+(~6,4 MB, egy új verzióval ~1–2,5 MB) TÖRZS — csak annak utazik, aki a „Kód” fület megnyitja vagy költözik, a vállalóktól (a
+D84/1 törzs-útja). ⏸️ A fájlonkénti tömörítés a kétharmadát spórolná meg — a fájl-átvitel ma nem tömörít (külön kérdés).
+
+## 83. ⭐ A KÉT RÉTEG ÁRA — mennyibe kerül a múlt a gyermek képében? (D118, a költözés ③, 2026-10-24, a laptopon)
+
+`node meres/ketRetegMeres.js [N ...]` — a megépült kódon (`ketReteg.js` `koinoKepe`). *(A ③ előtt a 76. mérés számaival
+számoltunk: egy állapot-számítás ~9 µs eseményenként; a múlt rétege egy ilyen a múlt eseményein, és a múlt csak bővül → a
+talaj gyorsítótárban. Ez a mérés azt nézi, igaz-e.)*
+
+**A bemenet:** egy szülő N eseménnyel (4 tag, gondolatok ponttal, minden 20. gondolaton egy lezárt javaslat); a gyermek a
+létrehozó (egy a négyből) költözésével, ~1% saját eseménnyel. A nemzedék-sorban ugyanannyi múlt-esemény 1, 2, 4 ősre osztva.
+
+- **N = 1000:** szülő nélkül 14 ms · a gyermek először 12 ms (24 rögzített döntés) · másodszor 6 ms · 1/2/4 ős: 11 / 14 / 16 ms.
+- **N = 5000:** szülő nélkül 19 ms · a gyermek először 51 ms (117 rögzített) · másodszor 22 ms · 1/2/4 ős: 35 / 46 / 78 ms.
+- **N = 20 000:** szülő nélkül 173 ms · a gyermek először 284 ms (465 rögzített) · másodszor 103 ms · 1/2/4 ős: 195 / 236 /
+  286 ms.
+
+⭐ **Amit mutat:** a gyermek első képe ~1,6× a szülő nélküliének (a múlt egyszer kiszámolódik, aztán a jelen); a
+gyorsítótárból a múlt ingyen van, és a jelen kisebb, mint a szülő egész képe (a szerkezet mindenkié, de a súly csak a
+költözőé — kevesebb pont, kevesebb élő entitás). ⚠️ **A nemzedékekkel enyhén nő** (4 ősnél 1,5×): minden szint jelene az
+összes fölötte lévő ős SZERKEZETÉT újra beolvassa (a létrehozásokat — hogy egy pont bármikor visszahozhassa őket). Nemzedékenként
+lineáris, és a múlt képe szintenként gyorsítótárban van, tehát csak akkor fizetjük, ha a múlt bővül. ⏸️ Ha egyszer száz
+nemzedék lesz: a szerkezetet elég volna a legmélyebb szinten egyszer összegyűjteni — mérés után. A 9. szabály szerint a teher
+ott áll, ahol a többi: a szigorú (b) alatt a készülék tárában csak a vállalt szeletei múltja van.
+
+---
+
+## 82. ⭐ A KÖLTÖZÉS ÁRA — mekkora a ki- és a beköltözés, és a születések lánca? (D118, a költözés ④, 2026-10-24)
+
+`node meres/koltozesMeres.js` — a ④a formátumán. *(A számozás a terv szerinti: a 82. a ④-é, a 83. — a két réteg — előbb
+készült el.)*
+
+- **A kiköltözés** (`Kikoltozes`, a szülőben): **544 B**.
+- **A beköltözés** (`Bekoltozes`): a tagsági bizonyítékkal nő, ~1 KB lépésenként (lépésenként egy belépés és egy meghívás) —
+  1 lépés **1,7 KB**, 4 lépés **4,7 KB**, 13 lépés **13,8 KB** (a 63. mérés szerint 1 millió tagnál ~13 lépés). Egyszer,
+  költözőnként.
+- **A gyermek születése:** az alapítótól 0,8 KB (az ő lánca üres), egy mélyen ülő tagtól ugyanannyi, mint a beköltözése.
+- **A születések lánca** (a csatlakozó első cseréje, a születés-szelet): ~0,8 KB nemzedékenként — 1 / 2 / 4 / 8 / 16
+  nemzedék: 0,6 / 1,4 / 3,1 / 6,3 / 12,8 KB. Lineáris, és egyszer jön.
+- **Egy szelet örökölt múltja** a vonalon és a lemezen ugyanannyi, mint a szülőben volt (az események átírás nélkül jönnek —
+  D118/1); a költöző első kitöltése a vállalt szeletei múltja.
+
+⭐ **Amit mutat:** a költözés ára a költöző saját láncával arányos (a 9. szabály szerint — nem a koinó méretével), a születések
+lánca a nemzedékek számával — mind egyszeri. A legnagyobb tétel a mély tag beköltözése (~14 KB 1 millió tagnál) — egy
+rövidebb lánc (egy közelebbi meghívó) kisebb; a mező a tagsági csomag mintáját követi (D113: ≤ 1024 esemény).
+

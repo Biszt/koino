@@ -1,0 +1,19 @@
+/* felulet/css/components/koinoMeghivas.css */
+
+/* Felelősség: ⭐⭐ D121, D122 — a meghívás a lapon (koinós többlet): a prototípus „Meghívóim” ablaka köré (a meghívó szövege
+   egy sor — a listában a rövid kód látszik, a 📋 az egészet másolja; a magyarázó sor), a belépő várakozása, és a profil-űrlap szövegei. A
+   színek a lap meglévő változóiból (`base/variables.css`). */
+
+.koino-meghivo-magyarazat { margin: 0; font-size: var(--text-sm, 0.85em); color: var(--color-text-muted); line-height: 1.4; }
+
+/* ⭐ M8 / B5 (a): a meghívó sorában a belépés állása (jelentkezett-e a rekeszben, hány kopogás; igazolta-e) — saját sorban */
+.koino-meghivo-allas { flex-basis: 100%; font-size: 0.8em; opacity: 0.85; line-height: 1.3; }
+.koino-meghivo-allas--var { opacity: 0.6; }
+
+/* a belépő várakozása (a csatlakozás ablakában) */
+.koino-meghivas__leiras { font-size: 0.85em; opacity: 0.85; margin: 0; line-height: 1.4; }
+.koino-meghivas__tag { margin: 0; font-size: 1em; }
+
+/* a profil-űrlap (a regisztrációs űrlap stílusával — `regisztracioForm.css`) */
+.koino-profil__leiras { margin: 0 0 8px; font-size: 0.85em; opacity: 0.85; line-height: 1.4; }
+.koino-profil { margin-top: 4px; }

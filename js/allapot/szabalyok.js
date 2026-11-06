@@ -1,0 +1,873 @@
+﻿// js/allapot/szabalyok.js
+
+// Felelősség: EGY HELYEN eldönteni, mely események SZÁMÍTANAK — és melyek nem.
+//
+// ⭐ MIÉRT VAN EZ A RÉTEG (2026-08-28, Csaba jóváhagyásával)?
+//
+//   „Amit a számítás nem ellenőriz, az nem szabály, csak illemtan."
+//
+// A prototípusban a szerver volt a kapuőr: ő döntötte el, ki mit tehet. Itt NINCS kapuőr.
+// A felület ellenőrzései a saját készülékünkön futnak — a másik gép felülete viszont
+// semmitől nem véd meg. Mérve (2026-08-28), kézzel aláírt eseményekkel:
+//
+//   - egy TELJESEN IDEGEN kulcs (0 tudatpont) javaslatot tehetett más gondolatára,
+//     megszavazhatta magának, és az EGYEZMÉNY megszületett (1/1 = 100%);
+//   - kézzel aláírva 999 999 tudatpont is átment, holott a keret 10 000.
+//
+// Ez nem két hiba volt, hanem egy HIÁNYZÓ RÉTEG. Ez a fájl az.
+//
+// ===== KÉT ALAPELV =====
+//
+// 1. NEM TÖRLÜNK ÉS NEM BÜNTETÜNK. A szabálysértő esemény a tárban marad, és a kivételek
+//    listájában LÁTHATÓ lesz. A koino BEJELENT, nem bíráskodik (D19). Ez nem engedékenység:
+//    az esemény a szerző aláírásával van ellátva, tehát maga a BIZONYÍTÉK — eldobni épp
+//    azt jelentené, hogy elveszítjük.
+//
+// 2. A DÖNTÉS DETERMINISZTIKUS, ÉS NEM FÜGG AZ IDŐTŐL. Mindkét szabály a SAJÁT LÁNCBAN
+//    dől el (sorszám szerint), amit csak a szerző írhat — így nem hamisítható, és nem is
+//    változik meg később attól, hogy mi történik máshol. Ugyanabból az eseményhalmazból
+//    mindenki ugyanazokat a kivételeket kapja (D17).
+//
+// Használják: allapotSzamitas.js (és rajta keresztül minden számítás).
+
+import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
+import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
+import { koinoSzuleteseListabol, esemenyKoinoja } from '../esemeny/esemeny.js';
+// ⭐ D93/1: a tagság (egy forrás — `tagsag.js`).
+import { tagsagiIndex, szerzoTagsaga } from './tagsag.js';
+
+/** A döntés eseményei — csak az ellenőrzött tag szerzőé számít (D93/1). */
+export const TAGSAG_KELL = new Set(['TudatpontRendezes', 'Javaslat', 'Szavazat', 'ErtekJavaslat', 'Allasfoglalas']);
+
+// ===================================
+// A TUDATPONT-KERET
+// ===================================
+//
+// Mindenkinek UGYANANNYI tudatpontja van: nem elkölthető, csak szétosztható és bármikor
+// átrendezhető. Ez itt lakik, EGY példányban — a művelet-réteg és a felület is innen
+// veszi, hogy ne csúszhasson szét kétféle igazságra.
+// ⭐⭐ D118/2 (①b): ez a MAI érték — a koinó a születésében mást mondhat (`koinoSzabalyok.js`); a számítás onnan veszi.
+export const TUDATPONT_KERET = ALAP_SZABALYOK.tudatpontKeret;
+
+// ⭐ Hány kategóriába sorolható EGY gondolat? A prototípus is hármat engedett
+// (`Maximum 3 különböző kategória rendelhető egy gondolathoz`), és a korlát ott
+// Mongoose-validátorban élt. A P2P koinóban nincs szerver, ami visszautasítsa — ezért a
+// korlát a SZÁMÍTÁSBAN van (2. szabály lent), és a felület nem tudja kijátszani.
+// ⭐ D118/2 (①b): a mai érték — a koinó születése mást mondhat.
+export const KATEGORIA_KORLAT = ALAP_SZABALYOK.kategoriaKorlat;
+
+// A koino entitás-típusai (Gondolat · Kategoria · GondolatTipus). ⚠️ Ezek NEM külön
+// esemény-fajták: mindegyiket ugyanaz a `GondolatLetrehozas` esemény hozza létre, és az
+// `adat.tipus` különbözteti meg őket (ezért van az `allapotSzamitas.js`-ben
+// `?? 'Gondolat'` alapérték). *Az esemény neve történeti; a típust az adat mondja meg.*
+// ⚠️ Itt korábban egy `ENTITAS_TIPUSOK` lista is állt — a bevezetése óta SEMMI nem
+// olvasta (2026-09-19, mérve), ezért kivéve. *Egy lista, amit senki nem néz, nem szabály.*
+
+// ===================================
+// ⭐⭐ AZ ÉRINTETT ENTITÁSOK — TÖBB, NEM EGY (2026-09-07)
+// ===================================
+//
+// A prototípus `javaslat.js`-e így írja le: **`erintettEntitasok` egy TÖMB**, és minden
+// eleme `{ entitasId, entitasTipus, muvelet, modositasAdatok }`. ⭐⭐ Vagyis **a MŰVELET
+// ENTITÁSONKÉNTI**, nem javaslatonkénti — ez teszi lehetővé az egyesítést (két forrás, egy
+// eredmény) és a `Csomag` javaslatot (vegyes műveletek egy döntésben).
+//
+// A koino eddig EGY `erintett`-et ismert. Ez a fájl mostantól **mindkét alakot** olvassa.
+//
+// ⚠️⚠️ EGY MEZŐT SZÁNDÉKOSAN NEM VESZÜNK ÁT: az `entitasTipus`-t.
+//
+// A prototípusnak kellett, mert a Mongo-hivatkozás polimorf: a `refPath` abból tudja meg,
+// melyik kollekcióban keresse. ⭐ A koinóban viszont **a típus magában az entitásban van**
+// (`allapotSzamitas.js`) — ha az eseménybe is beírnánk, az egy MÁSODIK, aláírt, de
+// **hazudható** forrás lenne ugyanarról. *Ahol egy igazságnak két helye van, ott előbb-utóbb
+// két igazság lesz.* Ezt jelenti a „módosítsd, amit kell": a logikai kapcsolat átjön, a
+// tárolási kényszer nem.
+//
+// ⚠️ A RÉGI ESEMÉNYEK ÉRVÉNYESEK MARADNAK. Az aláírás a régi bájtokra szól — nem lehet
+// újraírni őket, és nem is szabad. A régi alak (`adat.erintett` + `adat.muvelet` +
+// `adat.valtozas`) ezért egy elemű listaként olvasódik be.
+
+/** A négy SZERKESZTÉSI művelet — a prototípus enumja. */
+export const JAVASLAT_MUVELETEK = ['Torles', 'Modositas', 'Egyesites', 'Athelyezes'];
+
+// ⭐⭐ ÉS AZ ÖTÖDIK, AMI NEM SZERKESZTÉSI: az `Allaspont` (2026-09-10).
+//
+// Az ÁLTALÁNOS javaslat (D27) ugyanabban a `Javaslat` eseményben utazik, de **nem
+// változtat entitást** — az egyezmény MAGA az álláspont. Az érintett-eleme a **helyet**
+// nevezi meg (D27/1: „gondolatból ágazik ki"), a `valtozas.cim` pedig magát az álláspontot.
+//
+// ⚠️ MIÉRT NEM `Modositas`-ként adjuk be? Mert az **hazugság lenne a saját eseményünkben**:
+// azt mondaná, „írd át ennek a gondolatnak a címét", és csak a `fajta` mező akadályozná meg,
+// hogy végre is hajtódjon. *Ahol egy mező mást mond, mint amit teszünk, ott előbb-utóbb
+// valaki a mezőt hiszi el.* ⭐ És egy gyakorlati következménye is van: a `TILTOTT_MUVELETEK`
+// a SZERKESZTÉSRŐL szól (egyezményt nem lehet átírni, kategóriát nem lehet áthelyezni) —
+// egy álláspontot viszont **bármi alatt** fel lehet vetni, egy egyezmény alatt is. Külön
+// kivétel nélkül megoldja, hogy a művelet neve más.
+//
+// ⛔ Ezért NEM tesszük bele a `JAVASLAT_MUVELETEK`-be sem: az a lista azt mondja meg, mi
+// hajtódik VÉGRE. Az `Allaspont` sosem hajtódik végre — a harmadik fázis a `fajta` alapján
+// amúgy is átugorja az általánost (`szerkesztesiVegrehajtas.js`).
+export const ALLASPONT_MUVELET = 'Allaspont';
+
+/** A három állásfoglalás (D27) — ⭐ EZ AZ EGYETLEN FORRÁS; a `muveletek.js` innen importálja. */
+export const ALLASOK = ['csatlakozik', 'tiltakozik', 'utkozik'];
+
+// ===================================
+// ⛔⛔ MELYIK MŰVELET MELYIK TÍPUSON — a prototípus tiltásai (2026-09-07)
+// ===================================
+//
+// A prototípus `javaslatService.js`-e három tiltást mond ki, entitás-típusonként:
+//
+//   1. „Egyezményre csak áthelyezési vagy törlési javaslat indítható."
+//   2. „Kategóriát és gondolattípust nem lehet áthelyezni."
+//   3. „Gondolattípust nem lehet egyesíteni — csak törölni vagy módosítani."
+//
+// ⭐ ÉS ITT LÁTSZIK, MIÉRT VOLT HELYES AZ `entitasTipus`-t KIHAGYNI az eseményből: a
+// szabály a VALÓDI típusra vonatkozik, nem a bemondottra. A koino az entitás számított
+// típusát nézi (a létrehozó eseményéből), tehát ezt a szabályt **nem lehet hazudni**. A
+// prototípusban a bemondás azért volt elég, mert a rossz típus rossz kollekciót jelentett,
+// és a keresés amúgy is elbukott — vagyis ott is a valódi típus döntött, csak kerülőúton.
+//
+// ⚠️ EGY LEKÉPEZÉS KELLETT HOZZÁ. A prototípus négy célt ismer: `Gondolat`, `Kategoria`,
+// `GondolatTipus`, `Egyezmeny`. A koinóban a szerkesztési egyezmény **ugyanaz az entitás**,
+// mint a szerkesztési javaslat (azonos azonosító, más státusz — Csaba, 2026-09-07), tehát a
+// típusa `Javaslat`. Az „Egyezmeny" sort ezért a `Javaslat` viszi — és ez ⭐ **egy fokkal
+// többet is véd**: a szavazás alatt álló javaslat szövegét sem lehet átírni, pedig épp arról
+// szavaznak. *(Az `Egyezmeny` kulcs itt marad arra az esetre, ha az általános egyezmény
+// önálló típust kap.)*
+const TILTOTT_MUVELETEK = {
+  // Az egyezmény a KÖZÖSSÉG DÖNTÉSE: a szövegét nem lehet utólag átírni (az meghamisítaná,
+  // mire szavaztak), és nem lehet beolvasztani máshova. Elmozdítani vagy visszavonni igen.
+  Javaslat: ['Modositas', 'Egyesites'],
+  Egyezmeny: ['Modositas', 'Egyesites'],
+  // A kategória és a gondolattípus BESOROLÁS, nem a fában lógó gondolat — nincs értelmes
+  // „új szülője".
+  Kategoria: ['Athelyezes'],
+  GondolatTipus: ['Athelyezes', 'Egyesites']
+};
+
+/** Egyesíteni CSAK ezeket lehet (a prototípus: „Gondolatot Gondolattal, Kategóriát Kategóriával"). */
+const EGYESITHETO_TIPUSOK = ['Gondolat', 'Kategoria'];
+
+/**
+ * A javaslat SZÁRMAZTATOTT fajtája — a prototípus `javaslatTipus` mezőjének megfelelője.
+ *
+ * ⚠️ A koinóban ez NEM tárolt mező, hanem **számítás**: az érintettek műveleteiből
+ * következik. A prototípusnak azért kellett külön oszlop, mert a Mongo szerint kellett
+ * végrehajtót választani; itt viszont egy második, aláírt, de **hazudható** forrás lenne
+ * ugyanarról — ugyanaz az érv, mint az `entitasTipus`-nál.
+ *
+ * @param {Array<{muvelet: string}>} kik
+ * @returns {string|null} 'Torles' | 'Modositas' | 'Egyesites' | 'Athelyezes' | 'Csomag'
+ */
+export function javaslatFajtaja(kik) {
+  if (!kik.length) return null;
+  const elso = kik[0].muvelet;
+  return kik.every((r) => r.muvelet === elso) ? elso : 'Csomag';
+}
+
+/**
+ * Egy javaslat-esemény érintettjei, EGYSÉGES alakban — akármelyik korban íródott.
+ *
+ * @param {Object} adat - a `Javaslat` esemény `adat` mezője
+ * @returns {Array<{entitas: string, muvelet: string, valtozas: Object|null}>}
+ */
+export function erintettek(adat) {
+  // ----- AZ ÚJ ALAK: lista -----
+  if (Array.isArray(adat?.erintettek)) {
+    return adat.erintettek
+      .filter((r) => typeof r?.entitas === 'string')
+      .map((r) => ({
+        entitas: r.entitas,
+        muvelet: r.muvelet ?? 'Modositas',
+        valtozas: r.valtozas ?? null
+      }));
+  }
+
+  // ----- A RÉGI ALAK: egyetlen érintett a legfelső szinten -----
+  if (typeof adat?.erintett === 'string') {
+    return [{
+      entitas: adat.erintett,
+      muvelet: adat.muvelet ?? 'Modositas',
+      valtozas: adat.valtozas ?? null
+    }];
+  }
+
+  return [];
+}
+
+/**
+ * Az ELSŐ érintett — a javaslat „gazdája".
+ *
+ * ⭐ MIÉRT KELL KIEMELNI EGYET? Mert két dolognak egyetlen értékre van szüksége:
+ *
+ *   · a **szelet-kulcs** (hova kerül az esemény a tárban) — az csak egy lehet;
+ *   · a **szülő**: a prototípus szerint *„a javaslat MINDIG az érintett entitás gyereke"*.
+ *
+ * ⚠️ A prototípus ezt töredékenként oldja meg (`Csomag` javaslatnál minden töredéknek saját
+ * szülője van). Amíg a töredék nincs megépítve, **az első érintett az elsődleges** — és ez
+ * a szabály itt van kimondva, nem szétszórva a hívókban.
+ *
+ * @returns {string|null}
+ */
+export function elsoErintett(adat) {
+  return erintettek(adat)[0]?.entitas ?? null;
+}
+
+// ===================================
+// ⭐⭐ A TÖREDÉKEK (D85/5, T1 — Csaba, 2026-10-02)
+// ===================================
+//
+// A prototípus egy több gondolatot érintő javaslatot TÖREDÉKEKRE bont: érintettenként egy külön
+// javaslatot (`javaslatService.js`, `toredekCsoportId` · `toredekSorszam` · `toredekDarab`), és
+// mindegyik a SAJÁT érintettje gyereke — így minden érintett gondolat alatt megjelenik.
+//
+// ⭐ A koinóban egy aláírt `Javaslat` esemény van (a döntés érintettenkénti RÉSZEI 2026-09-07 óta
+// számítottak), és a töredék ENTITÁS is számított: esemény nélkül, LEVEZETETT azonosítóval — ahogy
+// a különvált ág is (`szerkesztesiVegrehajtas.js`). Erre kerül a pont, ez a kártya, ez lép
+// egyezmény-fázisba (D85/4).
+// ⛔ T1: több érintettnél a CSOPORTNAK NINCS saját entitása — a szavazók a töredékekre tesznek
+// pontot, így a csoport pont nélkül születne, és a D14 azonnal elfelejtené. A csoport döntése (az
+// ÉS) számított marad (`javaslatSzamitas.js`), a javaslat azonosítója alatt.
+
+/**
+ * Egy töredék levezetett azonosítója. ⚠️ SZINKRON (az állapot-számítás szinkron), és a `fajta`
+ * címke miatt nem ütközhet más levezetéssel (a különváláséval sem).
+ *
+ * @param {string} javaslat - a `Javaslat` esemény azonosítója (a csoport)
+ * @param {string} entitas - az érintett entitás
+ * @returns {string} 43 jeles azonosító
+ */
+export function toredekAzonosito(javaslat, entitas) {
+  return lenyomatSzinkron({ fajta: 'toredek', javaslat, entitas });
+}
+
+/**
+ * Egy `Javaslat` esemény ENTITÁSAI: egy érintettnél maga a javaslat, többnél a töredékei.
+ *
+ * ⭐ EZ AZ EGYETLEN FORRÁS arra, hogy egy javaslatból mely entitás(ok) lesz(nek): az állapot, a
+ * szabály-réteg, a döntés és a művelet (a kezdő pont) mind innen veszi.
+ *
+ * @param {Object} javaslatEsemeny
+ * @returns {Array<{azonosito: string, resz: Object, sorszam: number, darab: number, toredek: boolean}>}
+ */
+export function javaslatEntitasai(javaslatEsemeny) {
+  const kik = erintettek(javaslatEsemeny?.adat);
+  if (kik.length <= 1) {
+    return [{ azonosito: javaslatEsemeny.azonosito, resz: kik[0] ?? null, sorszam: 1, darab: 1, toredek: false }];
+  }
+  return kik.map((resz, i) => ({
+    azonosito: toredekAzonosito(javaslatEsemeny.azonosito, resz.entitas),
+    resz, sorszam: i + 1, darab: kik.length, toredek: true
+  }));
+}
+
+// ===================================
+// ⛔⛔ EGY PONT-ESEMÉNY MÉRLEGE — A SZABÁLY ÉS A MŰVELET KÖZÖS FORRÁSA (2026-09-26, 43. mérés)
+// ===================================
+//
+// ⛔ EZ A FÜGGVÉNY EGY TEREPEN MÉRT HIBÁBÓL SZÜLETETT. A művelet-réteg (`muveletek.js`,
+// `sajatKiosztott`) eddig a SAJÁT másolatát futtatta ennek a szabálynak, „ugyanaz a szabály"
+// kommenttel — de a másolat csak a keret-túllépést hagyta ki, az ELVETETT bemondást nem. Egy
+// régi (bemondás nélküli) pont-esemény után a művelet beleszámolta azt, amit a szabály nem, és
+// onnantól a szerző MINDEN új pont-eseménye *„ellentmond a saját láncának"* lett — vele minden
+// új gondolata is (D14). Mérve: 43. mérés, „bemondva 400, a láncából 100".
+//
+// ⭐ Ezért az ítélet EGY helyen él, és a kettő ugyanezt hívja. *Ami két helyen „ugyanaz", az
+// előbb-utóbb két igazság lesz.*
+
+/**
+ * ⭐ D81: a pont-esemény SAJÁT bizonyítéka — az előző összeg (a lánc-gyökér kiosztás-összegzéséből) és
+ * az entitás régi értéke (a bizonyíték végpontjából; ha a végpont nem ez az entitás, a régi érték 0).
+ * ⚠️ A kapu ellenőrizte, hogy a bizonyíték a gyökérhez illik (`pontEsemenyOnbizonyitasa`) — a szabály
+ * a tárban lévőt hiszi el, mint az aláírást. Ha az esemény nem hordozza, null.
+ * @returns {{osszeg: number, regi: number}|null}
+ */
+export function onbizonyitas(e) {
+  const gyoker = e.lancGyoker;
+  const b = e.adat?.bizonyitek;
+  if (!gyoker || typeof gyoker !== 'object' || !Array.isArray(gyoker.kiosztas?.o) || !b || typeof b !== 'object') return null;
+  const osszeg = gyoker.kiosztas.o[0];
+  const vp = b.vegpont;
+  const regi = vp && vp.kulcs === e.adat.entitas && Array.isArray(vp.osszegek) ? vp.osszegek[0] : 0;
+  if (!Number.isSafeInteger(osszeg) || !Number.isSafeInteger(regi)) return null;
+  return { osszeg, regi };
+}
+
+/**
+ * ⭐ D85/2 (T2): a szavazat SAJÁT bizonyítéka — a leadás pillanatában melyik entitáson mennyi pontja
+ * volt a szavazónak (a hozott bizonyítékok végpontjaiból; ha a végpont nem az a kulcs, ott 0 — ez a
+ * hiány bizonyítéka). ⚠️ A kapu ellenőrizte, hogy a bizonyítékok a gyökérhez illenek
+ * (`hozottBizonyitekokOnbizonyitasa`) — a számítás a tárban lévőt hiszi el, mint az aláírást.
+ * Lánc-gyökér nélküli (régi) szavazatnál null: ott a jog a pont-eseményekből dől el.
+ * @returns {Map<string, number>|null}
+ */
+export function szavazatSajatPontjai(e) {
+  return hozottSajatPontok(e);
+}
+
+/**
+ * ⭐ A hozott bizonyítékokból kiolvasott saját pontok — a szavazaté (T2) és a javaslaté (a javaslattevő
+ * jogosultsága, D85 T3 előfeltétele) ugyanaz az alak. Lánc-gyökér nélkül null.
+ * @returns {Map<string, number>|null}
+ */
+export function hozottSajatPontok(e) {
+  if (!e?.lancGyoker || typeof e.lancGyoker !== 'object') return null;
+  const pontok = new Map();
+  const b = e.adat?.bizonyitek;
+  if (!b || typeof b !== 'object' || Array.isArray(b)) return pontok;
+  for (const [kulcs, bi] of Object.entries(b)) {
+    const vp = bi?.vegpont;
+    const pont = vp && vp.kulcs === kulcs && Array.isArray(vp.osszegek) ? vp.osszegek[0] : 0;
+    pontok.set(kulcs, Number.isSafeInteger(pont) ? pont : 0);
+  }
+  return pontok;
+}
+
+/**
+ * Egy `TudatpontRendezes` esemény megítélése a szerző eddig ELFOGADOTT állásához képest.
+ *
+ * ⚠️ Tiszta függvény: az `allas`-t nem módosítja — elfogadáskor a hívó veszi át az új értéket.
+ *
+ * @param {Object} e - a pont-esemény
+ * @param {{osszeg: number, pontok: Map<string, number>}} allas - az eddig elfogadott állás
+ * @param {boolean} folytonos - hézagtalanul ismerjük-e a láncot eddig a pontig
+ * @returns {{elvetve?: string, jelzes?: string, entitas?: string, pont?: number, ujOsszeg?: number}}
+ *   `elvetve`: nem számít (indoklással) · `jelzes`: számít, de nem ellenőrizhető (D19)
+ */
+export function pontEsemenyMerlege(e, allas, folytonos, keret = TUDATPONT_KERET, hozott = false) {
+  const pont = e.adat?.pont;
+  const kiosztva = e.adat?.kiosztva;
+
+  if (!Number.isInteger(pont) || pont < 0) {
+    return { elvetve: 'a tudatpont csak nemnegatív egész szám lehet' };
+  }
+
+  // ----- ⭐⭐ D118 (④a, KZ3): A HOZOTT PONT-ESEMÉNY -----
+  // Az ős láncából jött pont-esemény a gyermek jelenében: a bemondása (és az önbizonyítása) a SZÜLŐ keretéről és kiosztásáról
+  // szól — a gyermekben a költöző elhagyhatott belőle (KZ3 (A)), és a keret más lehet. Itt a számított összeg dönt.
+  if (hozott) {
+    const regiH = allas.pontok.get(e.adat.entitas) ?? 0;
+    const ujOsszegH = allas.osszeg - regiH + pont;
+    if (ujOsszegH > keret) {
+      return { elvetve: 'a hozott pont túllépné a gyermek keretét (' + ujOsszegH + ' / ' + keret
+        + ') — KZ3: a beköltözéskor el kell hagyni belőle' };
+    }
+    return { entitas: e.adat.entitas, pont, ujOsszeg: ujOsszegH };
+  }
+
+  // ----- ⭐ A BEMONDOTT ÖSSZEG (D42) -----
+  // A pont-esemény magával viszi, mennyi a szerzőnek ÖSSZESEN kiosztva ezután.
+  if (!Number.isInteger(kiosztva) || kiosztva < 0) {
+    return { elvetve: 'hiányzik vagy hibás a bemondott összeg (adat.kiosztva)' };
+  }
+
+  // ⭐⭐ EZ A D42 LÉNYEGE: EGYETLEN ESEMÉNYBŐL ELDŐL, a lánc többi része nélkül.
+  // Szeletelt tárban ez az EGYETLEN mód a keret ellenőrzésére — teljes láncot soha
+  // többé nem fogunk látni.
+  // ⭐ D118/2: a keret a koinóé (a születéséből — a hívó adja; ha nem tudja, a mai érték).
+  if (kiosztva > keret) {
+    return { elvetve: 'a bemondott összeg túllépi a keretet ('
+      + kiosztva + ' / ' + keret + ')' };
+  }
+
+  // ----- ⭐⭐ D81: AZ ESEMÉNY SAJÁT BIZONYÍTÉKA — a lánc ismerete nélkül -----
+  //
+  // Ha a pont-esemény a lánc-gyökerét és az entitása régi értékének bizonyítékát hordozza (a kapu
+  // ellenőrizte, hogy illik), a bemondás a szerző SAJÁT ALÁÍRT előző állapotával is összevethető —
+  // hézagnál is. ⭐ Ez az, amit a D42 egymagában nem tudott: ott a hézag után csak jelezni lehetett.
+  const sajat = onbizonyitas(e);
+  if (sajat && kiosztva !== sajat.osszeg - sajat.regi + pont) {
+    return { elvetve: 'a bemondott összeg ellentmond a saját aláírt előző állapotának (D81: bemondva '
+      + kiosztva + ', az előképből ' + (sajat.osszeg - sajat.regi + pont) + ')' };
+  }
+
+  // A tudatpont ÁTRENDEZHETŐ: ami ezen az entitáson már ott van, az nem „új"
+  // kiadás. Ezért a régi értéket kivonjuk, mielőtt az újat hozzáadnánk.
+  const regi = allas.pontok.get(e.adat.entitas) ?? 0;
+  const ujOsszeg = allas.osszeg - regi + pont;
+
+  // ----- ⭐⭐ A BEMONDÁS ÖSSZEVETÉSE A SAJÁT LÁNCÁVAL -----
+  //
+  // ITT VÁLIK A HALLGATÁS ÁTADHATÓ BIZONYÍTÉKKÁ. Aki elhallgat egy pont-eseményt,
+  // annak a bemondott összege nem stimmel a többi SAJÁT, ALÁÍRT eseményével — és
+  // akkor két saját állítása mond ellent egymásnak. Ma a bizonyíték egy HIÁNY
+  // (kétértelmű: támadás vagy lemaradás?) és nem átadható; így viszont odaadom a két
+  // eseményt, és bárki ellenőrzi.
+  //
+  // ⚠️ DE CSAK AKKOR BIZONYÍTÉK, HA HÉZAGTALANUL ISMERJÜK A LÁNCOT. Hézag után a
+  // MI számításunk a hiányos — nem ő hazudott. Ilyenkor jelzünk, nem büntetünk (D19).
+  let jelzes = null;
+  if (kiosztva !== ujOsszeg) {
+    if (folytonos) {
+      return { elvetve: 'a bemondott összeg ellentmond a saját láncának (bemondva '
+        + kiosztva + ', a láncából ' + ujOsszeg + ')' };
+    }
+    // ⭐ D81: ha az esemény saját bizonyítéka igazolta a bemondást, a hézag a MI lemaradásunk — nem jelzés.
+    if (!sajat) {
+      jelzes = 'a bemondott összeg (' + kiosztva
+        + ') nem egyezik a számítottal (' + ujOsszeg + '), de a láncában hézag van';
+    }
+  }
+
+  // ⭐ D118/2: itt is a koinó kerete (a 15. mérés megismétlése találta meg, hogy ez az ág még a program állandóját nézte).
+  if (ujOsszeg > keret) {
+    return { jelzes, elvetve: 'túllépné a tudatpont-keretet (' + ujOsszeg + ' / '
+      + keret + ')' };
+  }
+
+  return { jelzes, entitas: e.adat.entitas, pont, ujOsszeg };
+}
+
+// ===================================
+// A SZABÁLYOK ÉRVÉNYESÍTÉSE
+// ===================================
+
+/**
+ * Szétválogatja az eseményeket: melyik SZÁMÍT, és melyik nem (indoklással).
+ *
+ * @param {Array<Object>} esemenyek - elágazás-mentesített események (lásd allapotSzamitas)
+ * @returns {{szamitok: Array<Object>, kivetelek: Array<Object>, nemEllenorizhetok: Array<Object>}}
+ */
+/**
+ * Leszármazottja-e `entitas` az `os`-nek — vagy maga az `os`?
+ *
+ * ⛔ Kör-őrrel: egy kör itt végtelen ciklus lenne. ⚠️ Csak a LÉTREHOZÁSKORI szülőkkel
+ * dolgozik (áthelyezés utáni állapotot nem lát) — ez tudatos: a szabály-réteg a
+ * **számítás előtt** fut, tehát nem tudhat a végrehajtás eredményéről.
+ */
+function leszarmazottE(entitas, os, szulok) {
+  const latott = new Set();
+  let jaro = entitas;
+  while (typeof jaro === 'string') {
+    if (jaro === os) return true;
+    if (latott.has(jaro)) return false;
+    latott.add(jaro);
+    jaro = szulok.get(jaro) ?? null;
+  }
+  return false;
+}
+
+export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
+  // ⭐⭐ D118 (⑤b): a koinó képe adja — a láncok a lánc-ág szerint (a nem költöző ős-eseménye külön ág), és a láncon ismert,
+  // de a jelen rétegből kizárt sorszámok (a költöző hozott tagsági csomagja, az ős születése, az elhagyott pontja) nem hézagok.
+  const lancAga = typeof beallitas.lancAga === 'function' ? beallitas.lancAga : (e) => e.szerzo;
+  const ismertSorszamok = beallitas.ismertSorszamok instanceof Map ? beallitas.ismertSorszamok : null;
+  /** A [tol, ig) sorszámok mind ismertek-e a szerző láncán (csak a jelen réteg hagyta ki őket)? */
+  const ismertHezag = (szerzo, tol, ig) => {
+    const ism = ismertSorszamok?.get(szerzo);
+    if (!ism || ig <= tol) return false;
+    for (let s = tol; s < ig; s++) if (!ism.has(s)) return false;
+    return true;
+  };
+  // ⭐⭐ D118/2 (①b): a koinó SZABÁLYAI a születéséből (a bemenetben van — a koinó születése mindenki vállalása, D90/2);
+  // ha nincs meg, a mai értékek.
+  const koinoSzul = koinoSzuleteseListabol(esemenyek);
+  const koinoSzabalyok = koinoSzabalyai(koinoSzul);
+  // ⭐ D118 (④a): a koinó neve (a lenyomat-nevűé) — ami más koinóé a bemenetben, az az ősök hozott eseménye.
+  const koinoNeve = koinoSzul && koinoSzul.koino === '' ? koinoSzul.azonosito : null;
+  const kivetelek = [];
+  const nemEllenorizhetok = [];
+  const kiesettek = new Set();   // az azonosítók, amik nem számítanak
+  // ⭐ D93/1: a döntés eseményei, amiknek a szerzője NEM ELLENŐRIZHETŐ tag — nem számítanak, de nem is vádak: amint a
+  // tagsági bizonyíték megérkezik (a tagsági csomag, a lánc eseményei), számítanak (D19).
+  const tagsagFuggoben = [];
+
+  // ----- ⭐ AZ ENTITÁSOK TÍPUSA (a típus-alapú tiltásokhoz) -----
+  //
+  // Csak a LÉTREHOZÓ eseményből olvassuk ki — nem kell hozzá a teljes állapot-számítás,
+  // és nem is szabad: ez a réteg fut előbb. ⚠️ Ha a létrehozó eseményt még nem ismerjük,
+  // a típus ISMERETLEN marad — és az nem vád, hanem hiány (D19).
+  const entitasTipusok = new Map();
+  // ⭐ ÉS A SZÜLŐK — az állásfoglalás hatóköréhez (D27/4). Ugyanabból a forrásból: a
+  // létrehozó eseményből. ⚠️ A javaslat/egyezmény szülője az ELSŐ ÉRINTETT entitás.
+  const szulok = new Map();
+  for (const e of esemenyek) {
+    if (e.tipus === 'GondolatLetrehozas') {
+      entitasTipusok.set(e.azonosito, e.adat?.tipus ?? 'Gondolat');
+      szulok.set(e.azonosito, e.adat?.szulo ?? null);
+    } else if (e.tipus === 'Javaslat') {
+      // ⚠️ A javaslat azonosítója a DÖNTÉSÉ (az egyezményé is) — az állásfoglalás hatóköre ehhez
+      // kötődik, ezért több érintettnél is bejegyezzük (a szülője az első érintett).
+      entitasTipusok.set(e.azonosito, 'Javaslat');
+      szulok.set(e.azonosito, elsoErintett(e.adat));
+      // ⭐ D85/5: a töredékek is entitások — a saját érintettjük gyerekei.
+      for (const je of javaslatEntitasai(e)) {
+        if (!je.toredek) continue;
+        entitasTipusok.set(je.azonosito, 'Javaslat');
+        szulok.set(je.azonosito, je.resz.entitas);
+      }
+    }
+  }
+
+  /** Egy eseményt kivételnek jelöl — de nem dob el semmit (D19). */
+  const kivetel = (esemeny, ok) => {
+    kiesettek.add(esemeny.azonosito);
+    kivetelek.push({
+      azonosito: esemeny.azonosito,
+      szerzo: esemeny.szerzo,
+      tipus: esemeny.tipus,
+      sorszam: esemeny.sorszam,
+      ok
+    });
+  };
+
+  /**
+   * ⚠️ NEM KIVÉTEL, HANEM JELZÉS: az esemény SZÁMÍT, csak valamit nem tudtunk ellenőrizni.
+   *
+   * Miért kell ez a harmadik kategória? Mert a szeletelt/hálózati működésben a HIÁNY a
+   * normális átmeneti állapot. Ha a nem-ellenőrizhetőt kivételnek vennénk, minden becsületes
+   * embert büntetnénk minden lemaradásért — épp azt a hibát követnénk el, amit a D18/5
+   * elhalványulás-javaslatánál Csaba már egyszer elutasított.
+   */
+  const nemEllenorizheto = (esemeny, ok) => {
+    nemEllenorizhetok.push({
+      azonosito: esemeny.azonosito,
+      szerzo: esemeny.szerzo,
+      tipus: esemeny.tipus,
+      sorszam: esemeny.sorszam,
+      ok
+    });
+  };
+
+  // ----- SZERZŐNKÉNT, A SAJÁT LÁNC SORRENDJÉBEN -----
+  // A saját láncot csak a szerző írhatja, és a sorszám egyértelmű sorrendet ad. Ezért
+  // minden szabály itt dől el — nem az események beérkezési sorrendjében, és nem az
+  // órán, amit hazudni lehet.
+  const szerzonkent = new Map();
+  const lancok = new Map();              // ⭐ D118 (⑤b): lánc-ág → események (a tagság szerzőnként marad)
+  for (const e of esemenyek) {
+    if (!szerzonkent.has(e.szerzo)) szerzonkent.set(e.szerzo, []);
+    szerzonkent.get(e.szerzo).push(e);
+    const ag = lancAga(e);
+    if (!lancok.has(ag)) lancok.set(ag, []);
+    lancok.get(ag).push(e);
+  }
+
+  // ----- ⭐ D80: A BIZONYÍTOTT ELLENTMONDÁSOK — szerzőnként a legkorábbi vádpont -----
+  // Az `Ellentmondas` eseményt a KAPU ellenőrizte (a tartalma önmagát igazolja — `ellentmondas.js`),
+  // ahogy az aláírást is: a szabály a tárban lévőt hiszi el. ⭐ Nem ítélet, hanem determinisztikus
+  // lépés: aki a bizonyítékot látja, ugyanazt számolja (D17).
+  // ⚠️ Az ELÁGAZÁS bizonyítéka (D82) itt nem szerepel: nincs vádpontja, és a két ágát a kapu már
+  // bevette (`esemenyTar.js`) — a választást az `elagazasokFeloldasa` teszi, mindenhol ugyanúgy.
+  const vadpontok = new Map();
+  for (const e of esemenyek) {
+    if (e.tipus !== 'Ellentmondas') continue;
+    const { kit, vadpont } = e.adat ?? {};
+    if (typeof kit !== 'string' || !Number.isSafeInteger(vadpont) || vadpont < 1) continue;
+    if (!vadpontok.has(kit) || vadpont < vadpontok.get(kit)) vadpontok.set(kit, vadpont);
+  }
+
+  // ----- ⭐⭐ D93/1: A DÖNTÉSBEN CSAK AZ ELLENŐRZÖTT TAG SZÁMÍT -----
+  // A pont, a javaslat, a szavazat, az érték javaslat és az állásfoglalás csak akkor, ha a szerző tagsága a bemenetből
+  // bizonyítható (`tagsag.js` — ugyanaz a szabály, mint az `identitas.js`-ben). ⛔ Különben a kulcs ingyen van, és egy
+  // támadó annyi tudatpont-keretet és szavazatot gyárt, ahány kulcsot. ⚠️ A „nem tag” sem vád, hanem várakozás: P2P-n a
+  // „nem tag” és a „még nem láttam a bizonyítékát” ugyanaz (D19) — a meghívás lehet, hogy csak még nem ért ide. Ezért
+  // mindkettő FÜGGŐBEN marad (az okával), és amint a bizonyíték megérkezik, számít.
+  const tidx = tagsagiIndex(esemenyek);
+  const tagsagok = new Map();
+  for (const [szerzo, lanc] of szerzonkent) {
+    if (!lanc.some((e) => TAGSAG_KELL.has(e.tipus))) continue;
+    const r = szerzoTagsaga(tidx, szerzo);
+    tagsagok.set(szerzo, r);
+    if (r.igen) continue;
+    for (const e of lanc) {
+      if (!TAGSAG_KELL.has(e.tipus)) continue;
+      kiesettek.add(e.azonosito);
+      tagsagFuggoben.push({ azonosito: e.azonosito, szerzo: e.szerzo, tipus: e.tipus, sorszam: e.sorszam, ok: r.ok });
+    }
+  }
+
+  for (const lanc of lancok.values()) {
+    const rendezett = [...lanc].sort((a, b) => a.sorszam - b.sorszam);
+    const pontok = new Map();            // entitás → a szerző jelenlegi pontja rajta
+    let osszeg = 0;                      // mennyit osztott ki eddig összesen
+
+    // ⭐ ISMERJÜK-E A LÁNCOT HÉZAGTALANUL EDDIG A PONTIG?
+    // Ez dönti el, hogy egy eltérő bemondás BIZONYÍTOTT ellentmondás-e, vagy csak a mi
+    // lemaradásunk. Amint egyszer hézag támad, onnantól a lánc többi részéről sem
+    // állíthatunk semmit — ezért nem áll vissza igazra.
+    let folytonos = true;
+    let vartSorszam = 1;
+
+    for (const e of rendezett) {
+      if (e.sorszam !== vartSorszam && !ismertHezag(e.szerzo, vartSorszam, e.sorszam)) folytonos = false;
+      vartSorszam = e.sorszam + 1;
+      // ⭐ D93/1: ami a tagság miatt már kiesett, azt a többi szabály nem nézi (nem könyveljük, nem vádoljuk kétszer).
+      if (kiesettek.has(e.azonosito)) continue;
+
+
+      // ===== 1. SZABÁLY: A TUDATPONT-KERET =====
+      // ⭐ Az ítélet a `pontEsemenyMerlege`-ben él — a művelet-réteg UGYANAZT hívja (lent).
+      if (e.tipus === 'TudatpontRendezes') {
+        // ⛔ D79/D80: a bizonyított ellentmondástól a szerző pont-eseményei nem számítanak.
+        const vadpont = vadpontok.get(e.szerzo);
+        if (vadpont !== undefined && e.sorszam >= vadpont) {
+          kivetel(e, 'bizonyított ellentmondás a saját láncában (D80) — a ' + vadpont
+            + '. eseményétől a pontjai nem számítanak');
+          continue;
+        }
+        // ⭐ D118 (④a): az ős eseménye a gyermek jelenében HOZOTT (a koinó a születése neve — a jelen bemenetében egyedül az övé).
+        const hozott = koinoNeve !== null && esemenyKoinoja(e) !== koinoNeve;
+        const merleg = pontEsemenyMerlege(e, { osszeg, pontok }, folytonos, koinoSzabalyok.tudatpontKeret, hozott);
+        if (merleg.jelzes) nemEllenorizheto(e, merleg.jelzes);
+        if (merleg.elvetve) {
+          kivetel(e, merleg.elvetve);
+          continue;   // a régi érték marad érvényben
+        }
+        pontok.set(merleg.entitas, merleg.pont);
+        osszeg = merleg.ujOsszeg;
+        continue;
+      }
+
+      // ===== 2. SZABÁLY: A BESOROLÁS KORLÁTAI (Szakasz 5.4) =====
+      //
+      // ⭐ MIÉRT ITT, ÉS NEM A FELÜLETEN? Mert *„amit a számítás nem ellenőriz, az nem
+      // szabály, csak illemtan"* — a felület a másik gépen nem véd semmitől. A prototípus
+      // ezt Mongoose-validátorral tartotta (`Maximum 3 különböző kategória`); a P2P
+      // koinóban nincs szerver, ami visszautasítsa, tehát a SZÁMÍTÁSNAK kell kihagynia.
+      //
+      // ⚠️ A hivatkozott kategória/típus LÉTEZÉSÉT itt NEM nézzük: az a hiány esete
+      // (D19) — lehet, hogy csak még nem érkezett meg hozzánk. Ilyenkor a besorolás
+      // egyszerűen nem oldódik fel, de az esemény érvényes marad.
+      if (e.tipus === 'GondolatLetrehozas') {
+        const kategoriak = e.adat?.kategoriak;
+
+        if (kategoriak !== undefined && kategoriak !== null) {
+          if (!Array.isArray(kategoriak)) {
+            kivetel(e, 'a kategóriák csak listában adhatók meg');
+            continue;
+          }
+          if (kategoriak.length > koinoSzabalyok.kategoriaKorlat) {
+            kivetel(e, 'legfeljebb ' + koinoSzabalyok.kategoriaKorlat + ' kategória rendelhető egy '
+              + 'gondolathoz (itt ' + kategoriak.length + ')');
+            continue;
+          }
+          if (kategoriak.some((k) => typeof k !== 'string')) {
+            kivetel(e, 'a kategória-hivatkozás csak azonosító lehet');
+            continue;
+          }
+          // ⭐ KÜLÖNBÖZŐ kategória — a prototípus is ezt írta elő. Ugyanaz háromszor
+          // felsorolva nem három besorolás.
+          if (new Set(kategoriak).size !== kategoriak.length) {
+            kivetel(e, 'ugyanaz a kategória többször szerepel');
+            continue;
+          }
+        }
+
+        const gondolatTipus = e.adat?.gondolatTipus;
+        if (gondolatTipus !== undefined && gondolatTipus !== null
+            && typeof gondolatTipus !== 'string') {
+          kivetel(e, 'a gondolattípus-hivatkozás csak azonosító lehet');
+          continue;
+        }
+        continue;
+      }
+
+      // ===== 3. SZABÁLY: JAVASLATOT CSAK A GAZDA TEHET =====
+      // „Csak az tehet javaslatot, aki tudatpontot rendelt a gondolathoz." A kérdés,
+      // hogy MIKORI állapot szerint — és a válasz a saját lánc: a javaslat előtti
+      // eseményei szerint. Így az sem számít, mi történik később máshol: a jogosultság
+      // a javaslat pillanatában eldőlt, és utólag nem írható át.
+      if (e.tipus === 'Javaslat') {
+        const kik = erintettek(e.adat);
+
+        // ----- ⭐ LEGALÁBB EGY ÉRINTETT KELL -----
+        // A prototípus séma-validátora: *„Legalább egy érintett entitás megadása kötelező."*
+        if (!kik.length) {
+          kivetel(e, 'a javaslat nem nevezett meg érintett entitást');
+          continue;
+        }
+
+        // ----- ⭐ MINDEN ÉRINTETT KÜLÖNBÖZŐ -----
+        // Ugyanaz az entitás kétszer felsorolva nem két érintett — és a végrehajtásnál
+        // kétszer futna le rajta a művelet.
+        if (new Set(kik.map((r) => r.entitas)).size !== kik.length) {
+          kivetel(e, 'ugyanaz az entitás többször szerepel az érintettek közt');
+          continue;
+        }
+
+        // ⛔⛔ AZ ISMERETLEN MŰVELETET ITT SZÁNDÉKOSAN NEM DOBJUK EL.
+        //
+        // Kézenfekvő lenne (a prototípusban Mongoose-enum őrizte), és először meg is
+        // írtam — de **rossz**: az ismeretlen művelet nem szabálysértés, hanem a
+        // legvalószínűbben **egy újabb program-változat**, amit én még nem ismerek. Ha a
+        // szabály-réteg kidobná, a régebbi készüléken a javaslat **létre sem jönne**, az
+        // újabbon meg ott állna — vagyis a két gép **más javaslat-halmazt látna**, és épp
+        // ezt tiltja a szerkezet. ⭐ A koino inkább megmutatja a javaslatot, szavazni is
+        // lehet rá, és a végrehajtásnál mondja meg őszintén: *„ismeretlen művelet"*
+        // (`szerkesztesiVegrehajtas.js`, `kihagyottak`) — **bejelent, nem bíráskodik** (D19).
+        // A `JAVASLAT_MUVELETEK` így nem kapu, hanem a MAI lista: azt mondja meg, mit
+        // tudunk végrehajtani.
+
+        // ----- ⭐⭐ ÉS A JOGOSULTSÁG: MINDEN ÉRINTETTEN KELL TUDATPONT -----
+        //
+        // A prototípus `javaslatJogosultsagService.js`-e szó szerint ezt mondja:
+        // *„Ellenőrzi, hogy a eember rendelkezik-e tudatponttal MINDEN érintett entitáson.
+        // Ha mindenhol van tudatpontja, jogosult szavazni/javaslatot létrehozni."*
+        //
+        // ⭐ Tehát ÉS, nem VAGY. Enélkül egy egyesítési javaslatot be lehetne adni úgy, hogy
+        // a másik gondolathoz semmi közöd — pedig az is megszűnne tőle.
+        //
+        // ⚠️ A „MIKORI állapot szerint?" kérdésre változatlan a válasz: a saját lánc, a
+        // javaslat ELŐTTI eseményei szerint. A jogosultság a javaslat pillanatában eldőlt,
+        // és utólag nem írható át.
+        //
+        // ⭐⭐ D85 T3 előfeltétele (2026-10-03 — a T2 mintája): a LÁNC-GYÖKERES javaslat a jogát MAGA
+        // bizonyítja (a saját kiosztás-fájából, érintettenként — a kapu ellenőrizte), és CSAK ez dönt.
+        // *Miért:* a szigorú (b) alatt a csak-G1-tartó a javaslattevő láncát hézagosan látja — a G2-es
+        // pontja a G2 szeletében van —, és a lánc-bejárás a hiányt „nincs”-nek olvasná. A régi
+        // (gyökér nélküli) javaslatnál marad a lánc-bejárás.
+        const hozott = hozottSajatPontok(e);
+        const hianyzo = hozott
+          ? kik.find((r) => (hozott.get(r.entitas) ?? 0) <= 0)
+          : kik.find((r) => (pontok.get(r.entitas) ?? 0) <= 0);
+        if (hianyzo) {
+          kivetel(e, hozott
+            ? 'a javaslattevő nem bizonyította, hogy minden érintett entitáson van tudatpontja'
+            : 'a javaslattevőnek nincs tudatpontja az egyik érintett entitáson');
+          continue;
+        }
+
+        // ----- ⛔ AZ EGYESÍTÉS NEM KEVEREDHET (a prototípus Csomag-validátora) -----
+        // *„Csomag típusban nem lehet Egyesites művelet, használd az Egyesites típust."*
+        // Az egyesítés ÚJ entitást szül a régiek helyén — nem fér bele egy vegyes
+        // csomagba, ahol a többi elem a saját helyén marad.
+        const fajta = javaslatFajtaja(kik);
+        if (fajta === 'Csomag' && kik.some((r) => r.muvelet === 'Egyesites')) {
+          kivetel(e, 'az egyesítés nem keverhető más művelettel egy javaslatban');
+          continue;
+        }
+
+        // ----- ⛔⛔ TÍPUS-ALAPÚ TILTÁSOK (a prototípus három szabálya) -----
+        // ⚠️ Az ISMERETLEN típus (még nem érkezett meg a létrehozó esemény) NEM vád:
+        // jelezzük, de az esemény érvényes marad (D19) — különben minden lemaradás
+        // szabálysértésnek látszana.
+        let tiltott = null;
+        let ismeretlenTipus = null;
+        for (const r of kik) {
+          const tipus = entitasTipusok.get(r.entitas);
+          if (tipus === undefined) { ismeretlenTipus = r; continue; }
+          if ((TILTOTT_MUVELETEK[tipus] ?? []).includes(r.muvelet)) { tiltott = { r, tipus }; break; }
+        }
+        if (tiltott) {
+          kivetel(e, tiltott.tipus + ' entitáson nem indítható ' + tiltott.r.muvelet
+            + ' javaslat (a prototípus tiltása)');
+          continue;
+        }
+
+        // ----- ⛔ EGYESÍTÉS: AZONOS TÍPUS, ÉS CSAK GONDOLAT VAGY KATEGÓRIA -----
+        // *„Egyesíteni csak azonos típusú entitásokat lehet: Gondolatot Gondolattal,
+        // Kategóriát Kategóriával."*
+        if (fajta === 'Egyesites') {
+          const tipusok = new Set(kik.map((r) => entitasTipusok.get(r.entitas)).filter(Boolean));
+          if (tipusok.size > 1) {
+            kivetel(e, 'egyesíteni csak azonos típusú entitásokat lehet');
+            continue;
+          }
+          const kozos = [...tipusok][0];
+          if (kozos !== undefined && !EGYESITHETO_TIPUSOK.includes(kozos)) {
+            kivetel(e, kozos + ' entitást nem lehet egyesíteni');
+            continue;
+          }
+        }
+
+        if (ismeretlenTipus) {
+          nemEllenorizheto(e, 'az érintett entitás típusa ismeretlen (a létrehozó eseménye '
+            + 'még nem érkezett meg), ezért a típus-tiltásokat nem tudtuk ellenőrizni');
+        }
+        continue;
+      }
+
+      // ===== 4. SZABÁLY: ÁLLÁSFOGLALÁS — A HELY HATÁROZZA MEG A HATÓKÖRT (D27/4) =====
+      //
+      // *„Egy egyezmény hatóköre azok köre, akik tudatpontot tettek arra az entitásra, ami
+      // alatt az egyezmény áll — vagy annak bármely leszármazottjára."*
+      //
+      // ⭐ EZ AZ, AMITŐL A POZÍCIÓNAK JELENTÉSE VAN: minél feljebb viszik az egyezményt,
+      // annál többen szólhatnak hozzá. A gyökérben **bárki** — és ez nem külön szabály,
+      // hanem ugyanennek a szabálynak a széle.
+      //
+      // ⭐⭐ ÉS ITT A HIERARCHIKUS TUDATPONT JOGOSULTSÁGGÁ VÁLIK: eddig a **fontosság**
+      // mutatója volt (mekkora egy ág súlya), most azt mondja meg, **ki szólhat hozzá**.
+      // *Nincs új mechanizmus, csak egy meglévő egy szinttel feljebb.*
+      if (e.tipus === 'Allasfoglalas') {
+        const allas = e.adat?.allas;
+        if (!ALLASOK.includes(allas)) {
+          kivetel(e, 'ismeretlen állás: ' + allas);
+          continue;
+        }
+        if (allas === 'utkozik' && typeof e.adat?.masik !== 'string') {
+          kivetel(e, 'az ütközés-jelölés nem nevezte meg a másik egyezményt');
+          continue;
+        }
+
+        const egyezmeny = e.adat?.egyezmeny;
+        if (typeof egyezmeny !== 'string') {
+          kivetel(e, 'az állásfoglalás nem nevezett meg egyezményt');
+          continue;
+        }
+
+        // ⚠️ A HELY: az egyezmény entitásának a SZÜLŐJE alatt van a hatókör. Ha még nem
+        // ismerjük az egyezmény létrehozó eseményét, nem tudunk ítélni — az hiány, nem
+        // tény (D19).
+        if (!szulok.has(egyezmeny)) {
+          nemEllenorizheto(e, 'nem ismerjük az egyezményt, ezért a hatókört sem tudtuk '
+            + 'ellenőrizni');
+          continue;
+        }
+
+        const hatokorGyokere = szulok.get(egyezmeny);
+
+        // ⭐ A GYÖKÉRBEN BÁRKI: ha az egyezmény nem lóg semmi alatt, a hatókör a teljes koino.
+        if (hatokorGyokere === null) continue;
+
+        // Van-e pontom a hatókör gyökerén VAGY bármely leszármazottján?
+        let jogosult = false;
+        for (const [entitas, pont] of pontok) {
+          if (pont <= 0) continue;
+          if (leszarmazottE(entitas, hatokorGyokere, szulok)) { jogosult = true; break; }
+        }
+        if (!jogosult) {
+          kivetel(e, 'nincs tudatpontod ezen az ágon, tehát nem foglalhatsz állást róla');
+        }
+        continue;
+      }
+    }
+  }
+
+  const szamitok = esemenyek.filter((e) => !kiesettek.has(e.azonosito));
+
+  console.log('szabalyokErvenyesitese - VÉGE', {
+    szamit: szamitok.length,
+    kivetel: kivetelek.length,
+    nemEllenorizheto: nemEllenorizhetok.length
+  });
+
+  return { szamitok, kivetelek, nemEllenorizhetok, tagsagFuggoben, tagsagok };
+}
+
+// ===================================
+// AMI SZÁNDÉKOSAN NINCS ITT
+// ===================================
+//
+// - A SZAVAZATI JOGOSULTSÁG. Ma bárki szavazhat, akinek van kulcsa — és ezt a Szakasz 1
+//   nem is tudja jobban: hogy egy kulcs mögött VALÓDI, EGYETLEN ember áll, azt a bizalmi
+//   háló mondja majd meg (D1/D18, Szakasz 3). Addig egy kulcs-özön ugyanúgy elárasztaná a
+//   szavazást, akárhány szabályt írnánk ide. Ez tehát nem feledékenység, hanem a réteg
+//   határa — és felírva a Szakasz 3-hoz.
+//
+// - ⚠️ A SZELEKTÍV MUTOGATÁS (mérve 2026-08-28, a réteg valódi rése). Ha valaki a SAJÁT
+//   láncából elrejt egy eseményt egyes gépek elől, azok nem tudják kiszámolni a keretét,
+//   és átmegy nekik a túllépés — mert a lenti ciklus csak azt látja, amit ismer. A D17
+//   determinizmusa nem sérül (ugyanabból a halmazból mindenki ugyanazt kapja); a két gép
+//   MÁS halmazt ismer. A csalás nyoma bennmarad: HÉZAG keletkezik a láncban, és amint a
+//   hiányzó esemény megérkezik, a kép helyreáll, a hamis kép pedig bizonyíték lesz.
+//   A javasolt irány (döntés a Szakasz 2-ben): ha a szerző láncában hézag van a vizsgált
+//   esemény ELŐTT, a keret NEM ELLENŐRIZHETŐ → jelezzük, ne fogadjuk el csendben. Ára:
+//   hálózaton a hézag normális átmeneti állapot. Részletek: docs/szakasz1_terv.md, 9. pont.
+//
+// - AZ ÁLTALÁNOS JAVASLAT TÁGABB HATÓKÖRE. A D27 szerint az általános javaslatnál a
+//   jogosultság LEFELÉ terjed: aki az entitásra VAGY BÁRMELY LESZÁRMAZOTTJÁRA tett
+//   pontot. Ma mindkét fajtánál a szűkebb szabály fut (az entitáson kell pont legyen).
+//   Amikor az általános javaslat felülete elkészül, ez itt bővül — egy helyen.

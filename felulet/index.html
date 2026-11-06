@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>koino</title>
+<link rel="stylesheet" href="./css/main.css">
+
+<!--
+  felulet/index.html
+
+  A koino felülete — a Szakasz 5.3-tól az ÖRÖKÖLT kártyákkal.
+
+  ⭐ A kártyák (`js/components/kartya/`), a hamburger menü, a szövegmegjelenítő és a CSS
+  **változatlanul** a prototípusból jöttek (`frontend/`), amihez nem nyúltunk: az éles
+  rendszer onnan épül. Amit át kellett írni: az `apiHelper.js` (a helyi kapuhoz) és az
+  `authHelper.js` (a koinóban nincs bejelentkezés — D15).
+
+  ⏸️ Ami még hiányzik: a modálok (5.5) — helyükön helyőrző áll, ami megmondja, hogy még
+  nem készültek el —, a belépő tér (5.6) és a szövegszerkesztő (5.7).
+
+  ⭐ D101 (2026-10-11): a maradék modálok — a Tudatpontok, a Kategória, a Gondolattípus, a Rendezés már a prototípuséi,
+  és a FŐ MENÜ is (`js/foMenu.js`); a ③ óta a Struktúra is (a fa a bejáró sorrendjéből, egy keretig), a ④ óta a Síkidom
+  (egy szint a bejáró sorrendjéből), az ⑤ óta a Keresés (a helyi alja), a ⑥ óta az Értesítések és a beállításaik (a
+  postafiók a készüléken számolódik). A koinós többlet a `js/koinoModalok.js`-ben. Helyőrző modál már nincs.
+
+  ⭐⭐ A HÁZ (D100, 2026-10-10): a pakli is a prototípusé — a `Pakli.js` (láncos-testvéres
+  nézet, kacsacsőrök, húzás, lapos rendezés) bájtra változatlanul jött át; a koinós többlet
+  (a betöltés, a forrás jele, a lapos nézet lapozása) a `js/koinoPakli.js`-ben van.
+
+  ⭐ AZ ALSÓ SÁV (Csaba, 2026-10-15): a fő menü és az alap-információk a prototípus helyén, a lap ALJÁN — a
+  `foOldalForm.html` sávja (menü, vissza/előre, infók), a stílusa bájtra (`css/components/foOldal.css`), a vezérlője a
+  `js/alsoSav.js` (a prototípus `foOldal.js`-ének alsó sáv része, a `FoOldalTortenetKezelo`-val). A koinós többlet a
+  sáv végén: a CSERE — mikor volt, mikor jön a következő kör —, és ha egy csere újat hozott, a lap magától frissül. A
+  korábbi felső sáv (rendezés-választó, frissítés, új gondolat) kimaradt: a prototípusban ezek a fő menüben vannak
+  (Rendezés, Új gondolat létrehozása), a frissítés pedig a csere feliratára kattintva megy. A tér a menüből nyílik.
+-->
+</head>
+<body>
+
+
+<!-- ===== A BELÉPŐ TÉR — a koinók FÖLÖTT (5.6) ===== -->
+<div class="koino-sav" id="ter-sav" hidden>
+  <!-- ⭐ A TÉR/PAKLI VÁLTÓ (5.6): a tér a koinók FÖLÖTT áll, a pakli egy koinón BELÜL. A térbe a fő menü visz. -->
+  <button type="button" id="ter-valto">📚 Vissza a paklihoz</button>
+  <label for="ter-rendezes">Rendezés</label>
+  <select id="ter-rendezes">
+    <!-- ⛔ LÉTSZÁM SZERINT SZÁNDÉKOSAN NINCS: az a D18/2-ben elvetett hamisítható
+         toplista alakja. A program sem fogadja el (`ter.js`: RENDEZESEK). -->
+    <option value="letrehozva">🕒 Létrehozás ideje</option>
+    <option value="eloszorLattam">👁 Amikor először láttam</option>
+    <option value="nev">🔤 Név</option>
+  </select>
+
+  <select id="ter-irany">
+    <option value="csokkeno">csökkenő</option>
+    <option value="novekvo">növekvő</option>
+  </select>
+
+  <button type="button" id="ter-frissites">Frissítés</button>
+  <!-- ⭐⭐ D119 (⑥): a csatlakozás egy koinóhoz és a társak — eddig csak parancs (`csatlakoz`, `tars`). -->
+  <button type="button" id="ter-csatlakozas">🔗 Csatlakozás egy koinóhoz…</button>
+  <button type="button" id="ter-tarsak">🤝 Társak…</button>
+</div>
+
+<!-- ⭐⭐ M7: a belépő sávja — amíg nem tag, hol tart az első kapcsolat (`koinoBelepes.js`) -->
+<div class="koino-belepes" id="belepes-sav" role="status" aria-live="polite" hidden></div>
+
+<p class="allapot" id="allapot">Betöltés…</p>
+
+<main id="pakli" class="pakli"></main>
+<main id="ter" hidden></main>
+
+<div class="tovabb-sav">
+  <button type="button" id="tovabb" hidden>További kártyák</button>
+</div>
+
+<!-- A lap-szintű modálok konténere (a kártyák sajátot kapnak, kártyánként) -->
+<div id="modal-kontener"></div>
+
+<!-- ===== ALSÓ SÁV — a prototípus `foOldalForm.html`-jéből =====
+     Fix pozíció: mindig a képernyő alján látható. Bal oldalt a hamburger menü és a vissza/előre gombok, jobb oldalt az
+     infók. ⚠️ A számok a KÉSZÜLÉKEN ismert részéi (a koinó egészét senki nem számolja meg — 9. szabály); a feliratok
+     ezért mások, mint a prototípusban. ⭐ A koinós többlet a végén: a csere. -->
+<div class="also-sav" role="navigation" aria-label="Főoldal navigáció és statisztika">
+
+  <!-- HAMBURGER MENÜ KONTÉNER – a `foMenu.js` (a prototípus `HamburgerMenu.js`-ével) rendereli ide -->
+  <div id="hamburger-menu-kontener"></div>
+
+  <!-- VISSZA / ELŐRE TÖRTÉNET GOMBOK – az `alsoSav.js` köti be és állítja a tiltott állapotukat -->
+  <div class="also-sav__tortenet" role="group" aria-label="Vissza és előre navigáció">
+    <button
+      type="button"
+      id="tortenet-vissza-gomb"
+      class="also-sav__tortenet-gomb"
+      aria-label="Vissza"
+      title="Vissza (Alt+←)"
+      disabled
+    >↩</button>
+    <button
+      type="button"
+      id="tortenet-elore-gomb"
+      class="also-sav__tortenet-gomb"
+      aria-label="Előre"
+      title="Előre (Alt+→)"
+      disabled
+    >↪</button>
+  </div>
+
+  <!-- INFÓK SÁVA – az `alsoSav.js` tölti fel a program válasza alapján -->
+  <div class="also-sav__infok" aria-label="A készüléken ismert rész">
+    <span class="also-sav__info-elem also-sav__info-elem--nev" aria-label="Platform neve">koino</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <span class="also-sav__info-elem also-sav__info-elem--betoltes" id="info-eembernev"
+      aria-label="Az e-ember (a készülék kulcsa)" title="Te — a készülék kulcsa (D15)">...</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <span class="also-sav__info-elem also-sav__info-elem--betoltes" id="info-tudatpont"
+      aria-label="Szabad tudatpontjaid" title="Szabad tudatpontjaid">...</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <span class="also-sav__info-elem also-sav__info-elem--betoltes" id="info-eemberek-szama"
+      aria-label="E-emberek, akiknek eseménye a készüléken van" title="E-emberek, akiknek eseménye a készüléken van">...</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <span class="also-sav__info-elem also-sav__info-elem--betoltes" id="info-gondolatok-szama"
+      aria-label="A készüléken ismert gondolatok" title="A készüléken ismert gondolatok">...</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <span class="also-sav__info-elem also-sav__info-elem--betoltes" id="info-kategoriak-szama"
+      aria-label="A készüléken ismert kategóriák" title="A készüléken ismert kategóriák">...</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <span class="also-sav__info-elem also-sav__info-elem--betoltes" id="info-gondolattipusok-szama"
+      aria-label="A készüléken ismert gondolattípusok" title="A készüléken ismert gondolattípusok">...</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <span class="also-sav__info-elem also-sav__info-elem--betoltes" id="info-javaslatok-szama"
+      aria-label="A készüléken ismert javaslatok" title="A készüléken ismert javaslatok">...</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <span class="also-sav__info-elem also-sav__info-elem--betoltes" id="info-egyezmenyek-szama"
+      aria-label="A készüléken ismert egyezmények" title="A készüléken ismert egyezmények">...</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <!-- ⭐ A KOINÓS TÖBBLET (2026-10-23): hány entitás van még a koinóban, amit a készülék nem ismer (a tartó szerint). -->
+    <span class="also-sav__info-elem also-sav__info-elem--betoltes" id="info-ismeretlen"
+      aria-label="A még nem ismert entitások" title="A még nem ismert entitások">...</span>
+    <span class="also-sav__elvalaszto" aria-hidden="true">·</span>
+    <!-- ⭐ A KOINÓS TÖBBLET: A CSERE — az utolsó csere ideje (és hozama), és a következő kör visszaszámlálása.
+         Kattintásra azonnal frissít (a pakli, az infók, az értesítés-számláló). -->
+    <button type="button" class="also-sav__info-elem also-sav__info-elem--betoltes also-sav__csere" id="info-csere"
+      aria-label="A csere: az utolsó és a következő">🔄 ...</button>
+    <!-- ⭐⭐ D119 (①b): ha ezen a készüléken MÁS program fut, mint amivel a koinó született (a koino-verzió kártyája) — csak
+         akkor látszik. -->
+    <span class="also-sav__elvalaszto" aria-hidden="true" id="info-program-elvalaszto" hidden>·</span>
+    <span class="also-sav__info-elem also-sav__program" id="info-program" hidden>⚠ más programverzió</span>
+  </div>
+</div>
+
+<script type="module">
+// ⛔ D101 ④: A KÁRTYA-GYÁR ELŐRE. Az örökölt kártyák körbe importálnak: Kartya → SikidomModal → SikidomKartyaPanel →
+// kartyaGyar → GondolatKartya → Kartya. Ha a modul-fát a `Kartya.js` felől érjük el először (a `Pakli.js` így tenné), a
+// GondolatKartya a még nem kész Kartya-osztályból öröklődne („Cannot access 'Kartya' before initialization”), és a lap
+// semmit nem töltene be. A prototípusban a fő oldal a Síkidomot importálta előbb; itt a gyárat — a kör így a gyár felől
+// nyílik, és a Kartya előbb kész, mint a leszármazottai. (A prototípus fájljai változatlanok — M5/A.)
+import './js/components/kartya/kartyaGyar.js';
+import { KoinoPakli } from './js/koinoPakli.js';
+import { TerNezet } from './js/terNezet.js';
+// ⭐⭐ D119 (⑥): a tér két ablaka — a csatlakozás egy koinóhoz és a társak.
+import { csatlakozasMegnyitasa, tarsakMegnyitasa } from './js/koinoCsatlakozas.js';
+// ⭐⭐ D122: az első megnyitás — a csatlakozás ablaka (ha még egy koinót sem ismer a készülék), vagy a profil-űrlap
+import { elsoMegnyitas } from './js/koinoMeghivas.js';
+// ⭐⭐ M7: a belépő sávja (az alsó sáv kérdéséből — a `koino:csereAllapot` jelzés)
+import { belepesSavInditasa } from './js/koinoBelepes.js';
+// ⭐ D101: a maradék modálok koinós többlete (a tudás határa a modálok alján) — a betöltéskor csomagol.
+import './js/koinoModalok.js';
+// ⭐ D112 ⑤: a felderítés — a kártya menüjének „📷 Felderítés…” pontja (a kártya bővítési pontján) a betöltéskor.
+import './js/koinoFelderites.js';
+// ⭐⭐ D119 (①b): a koino-verzió kártya „Kód” füle (a gondolat-kártya köré, a betöltéskor) és az űrlapja (a fő menüből).
+import './js/koinoVerzio.js';
+// ⭐⭐ D120: a törzs-határ — a nagy kép helyén a kérés gombja (a betöltéskor figyel), a méret a kártyán.
+import './js/koinoTorzs.js';
+import { FoMenu } from './js/foMenu.js';
+// ⭐ Az alsó sáv (2026-10-15): vissza/előre, infók, és a csere — ha egy csere újat hozott, a lap magától frissül.
+import { AlsoSav } from './js/alsoSav.js';
+
+// ⭐ A HÁZ (D100): az örökölt `Pakli.js` a `#pakli` konténerbe rajzol, a modálok közös konténerébe nyit.
+const pakli = new KoinoPakli('pakli', 'modal-kontener', {
+  allapotElem: document.getElementById('allapot'),
+  tovabbGomb: document.getElementById('tovabb')
+});
+
+document.getElementById('tovabb').addEventListener('click', () => pakli.tovabbiKartyak());
+
+// ⭐⭐ M7: a belépő sávja — előbb, mint az alsó sáv első kérdése (az adja a jelzést)
+belepesSavInditasa(document.getElementById('belepes-sav'));
+
+// ⭐ Az alsó sáv — a pakli első betöltése után jön létre (lent); a tér váltása már előtte hivatkozhat rá.
+let alsoSav = null;
+
+// ⭐ D101 (M6): A FŐ MENÜ — a prototípus menüje, a lap paklijával; a tér a menüből nyílik (2026-10-15).
+const foMenu = new FoMenu('hamburger-menu-kontener', pakli, { terMegnyitasa: () => mutat('ter') });
+await foMenu.init();
+
+// ===================================
+// ⭐ A BELÉPŐ TÉR (5.6) — és a váltás a pakli és a tér között
+// ===================================
+//
+// ⚠️ A „belépés" NEM bejelentkezés (D15: a koinóban nincs ilyen) — csak annyi, hogy melyik
+// koinót nézi ez a lap. A kulcsod minden koinóban ugyanaz; a TAGSÁG az, ami koino-helyi.
+
+const terNezet = new TerNezet(
+  document.getElementById('ter'),
+  { allapotElem: document.getElementById('allapot') },
+  // ⭐ Belépés után egyből a pakliba visszük — az új koino paklijával (a régi koinó fa-szeletei és mentett
+  // kártyája nélkül: egy idegen azonosítóra a program kérelmet írna be).
+  async () => { await mutat('pakli', { ujKoino: true }); }
+);
+
+const elemek = {
+  pakli: [document.getElementById('pakli')],
+  ter: [document.getElementById('ter'), document.getElementById('ter-sav')]
+};
+
+async function mutat(melyik, { ujKoino = false } = {}) {
+  for (const [nev, doboz] of Object.entries(elemek)) {
+    for (const e of doboz) e.hidden = (nev !== melyik);
+  }
+  // A „További kártyák" gomb csak a paklihoz tartozik.
+  document.getElementById('tovabb').hidden = true;
+
+  if (melyik === 'ter') {
+    // ⚠️ A testvér-jelző kacsacsőrei a lap aljára (`body`) kerülnek, nem a pakliba — a tér fölött ne lebegjenek.
+    pakli.testverJelzo.eltavolitas();
+    await terNezet.betoltes();
+  } else if (ujKoino) {
+    await pakli.ujKoino();
+    // A másik koinó számai (az alsó sáv a lap koinójáról beszél).
+    alsoSav?.adatokBetoltese();
+  } else await pakli.frissites();
+}
+
+// ⭐ Ha a térből egy menüpont (Keresés, Struktúra…) entitásra navigál, a pakli kerül elő.
+document.addEventListener('koino:aktivEntitasValtozas', () => {
+  if (!document.getElementById('ter').hidden) {
+    for (const [nev, doboz] of Object.entries(elemek)) for (const e of doboz) e.hidden = (nev !== 'pakli');
+  }
+});
+
+document.getElementById('ter-valto').addEventListener('click', async () => {
+  await mutat('pakli');
+});
+document.getElementById('ter-frissites').addEventListener('click', () => terNezet.betoltes());
+// ⭐ A tér magától frissül, amíg látszik (a 2026-11-02-i terepi próba: a csatlakozás pillanatának képe maradt ott — „nem fut
+// őrjárata”, „nem ismerem a születését” —, pedig az indító közben elindította az őrjáratot, és a csere a születést is hozta).
+setInterval(() => {
+  if (!document.getElementById('ter').hidden && document.visibilityState === 'visible') terNezet.betoltes();
+}, 15000);
+document.getElementById('ter-csatlakozas').addEventListener('click', () => csatlakozasMegnyitasa({ utana: () => terNezet.betoltes() }));
+document.getElementById('ter-tarsak').addEventListener('click', () => tarsakMegnyitasa({ utana: () => terNezet.betoltes() }));
+document.getElementById('ter-rendezes').addEventListener('change', (e) => {
+  terNezet.rendezes = e.target.value;
+  terNezet.betoltes();
+});
+document.getElementById('ter-irany').addEventListener('change', (e) => {
+  terNezet.irany = e.target.value;
+  terNezet.betoltes();
+});
+
+// ⭐ AZ ALSÓ SÁV — a pakli első betöltése UTÁN (a számok a lap horgonyából jönnek, és a kezdő állapot így kerül a
+// vissza/előre történetbe — mint a prototípus `FoOldal.init`-jében).
+await pakli.indulas();
+alsoSav = new AlsoSav(pakli, foMenu, { pakliLathato: () => !document.getElementById('pakli').hidden });
+alsoSav.init();
+alsoSav.kezdoAllapotRogzitese();
+// ⭐⭐ D122: „Meghívtak? illeszd be ide” — vagy, ha már beléptél, az adataid (egyszer, kihagyható)
+elsoMegnyitas({ csatlakozas: () => csatlakozasMegnyitasa({ utana: async () => { await terNezet.betoltes(); } }) });
+</script>
+
+</body>
+</html>

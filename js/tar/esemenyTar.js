@@ -1,0 +1,495 @@
+// js/tar/esemenyTar.js
+
+// Felelősség: az aláírt események megőrzése, és a SAJÁT LÁNC kezelése.
+//
+// KÉT SZABÁLY, AMI SOHA NEM SÉRÜLHET:
+//   1. ELLENŐRIZETLEN ESEMÉNY NEM KERÜL A TÁRBA. Minden mentés előtt ellenőrizzük az
+//      aláírást és az azonosítót — akkor is, ha „a sajátunk". Így a tár gondolata
+//      önmagában bizonyíték, és soha nem kell utólag megbízni benne.
+//   2. AZ ESEMÉNYEKET NEM MÓDOSÍTJUK ÉS NEM TÖRÖLJÜK. Egy esemény megtörtént; ami
+//      „változik", az egy ÚJABB esemény a láncban (a szavazat módosítása is új esemény).
+//
+// ⚠️ A TÁROLÓT KÍVÜLRŐL KAPJA (D29, 2026-08-28). Ez a fájl csak a LOGIKÁT tudja; hogy
+// az adat fájlban, memóriában vagy máshol él, az a tároló dolga. Így a szabályok EGY
+// példányban léteznek: ha később más tárolót teszünk alá, a lánc-kezelés nem másolódik
+// és nem csúszhat szét.
+//
+// ⭐ A TÁROLÓ MŰVELETEI A 3.2 ÓTA KÉRDEZHETŐK (2026-09-03): `esemeny(azonosito)` ·
+// `szerzoLanca(szerzo)` · `szeletEsemenyei(entitas)` · `sorszamSzerint(szerzo, n)` ·
+// `hozzafuz(esemeny)`. A régi `betolt()` megmaradt, de **csak a próbák és a kis koino
+// állapotszámítása hívja** — a hétköznapi műveletek közül egyetlen sem.
+// *Ez a kilencedik szabály: az illesztés ne kényszerítse a teljes betöltést.*
+//
+// A SAJÁT LÁNC: minden e-ember eseményei egymásra mutatnak (`elozo`), és sorszámozva
+// vannak. Ez adja a D17 „saját lánc-következetesség"-ét — és ezért lepleződik le itt,
+// MENTÉSKOR, ha valaki két különböző eseményt írt alá ugyanarról a pontról.
+//
+// Használják: muveletek.js és minden, ami eseményt olvas.
+
+import { esemenyEllenorzese, elagazasE, szelet, esemenyKoinoja, azonositoAlaku, koinoVerzioE } from '../esemeny/esemeny.js';
+// ⭐ D80: az `Ellentmondas` esemény TARTALMA is a kapun megy át (önmagát igazoló bizonyíték).
+import { ellentmondasEllenorzese } from '../allapot/ellentmondas.js';
+// ⭐ D81: a pont-esemény a saját bizonyítékát hozza — a kapu ellenőrzi, hogy illik a lánc-gyökeréhez.
+import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa, koinoKerete } from '../allapot/lancGyoker.js';
+import { CSOMAG_TIPUS, dontesiCsomagEllenorzese } from '../allapot/dontesiCsomag.js';
+// ⭐ D95/1: a lezárási összegzés alakja.
+import { LEZARASI_OSSZEGZES, lezarasiOsszegzesAlakja } from '../allapot/lezarasiOsszegzes.js';
+// ⭐ D93/2: a tagsági csomag tartalma is a kapun megy át.
+import { TAGSAGI_CSOMAG, tagsagiCsomagEllenorzese } from '../allapot/tagsag.js';
+// ⭐⭐ D118 (②a): a gyermek születésének bizonyítéka (a szülő születésével együtt).
+import { gyermekSzuleteseE, gyermekSzuletesEllenorzese, koinoNezete, bekoltozesE, bekoltozesEllenorzese,
+  bekoltozesekEllenorzese, lancNezete, koinoVerzioEllenorzese } from '../allapot/koinoLanc.js';
+
+// ===================================
+// ESEMÉNY MENTÉSE
+// ===================================
+
+/**
+ * Elment egy eseményt — ellenőrzés után.
+ *
+ * @param {Object} tar - a tároló (betolt/hozzafuz)
+ * @param {Object} esemeny
+ * @param {{ujSajat?: boolean}} [beallitas] - ⭐ D70: a SAJÁT, most aláírt esemény — a tár
+ *   (az író) csak a lánc VÉGÉRE engedi, különben `ELAVULT` hibát dob, és a hívó újra próbál.
+ *   A hálózatról érkezőnél nincs ilyen: ott az elágazás bizonyíték, azt el kell menteni.
+ * @returns {Promise<{mentve: boolean, ok?: string, marMegvolt?: boolean, elagazas?: Object}>}
+ *   mentve=false + ok      → elutasítva (érvénytelen)
+ *   mentve=true + elagazas → elmentve, DE ellentmondás derült ki (lásd lentebb)
+ */
+export async function esemenyMentese(tar, esemeny, beallitas = {}) {
+  console.log('esemenyMentese - KEZDÉS', { azonosito: esemeny?.azonosito, tipus: esemeny?.tipus });
+
+  // ----- 1. ELLENŐRZÉS -----
+  const ellenorzes = await esemenyEllenorzese(esemeny);
+  if (!ellenorzes.rendben) {
+    console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: ellenorzes.ok });
+    return { mentve: false, ok: ellenorzes.ok };
+  }
+
+  // ----- 1/a. ⭐ D81: A PONT-ESEMÉNY BIZONYÍTÉKA -----
+  // Ha a pont-esemény a lánc-gyökerét hordozza, magával hozza az entitása régi értékének bizonyítékát
+  // — és annak illenie kell a saját aláírt kiosztás-gyökeréhez. Ettől a szabály-réteg a bizonyíték
+  // számait (az előző összeget és a régi értéket) elhiheti, ahogy az aláírást is.
+  const onbizonyitas = await pontEsemenyOnbizonyitasa(esemeny);
+  if (!onbizonyitas.rendben) {
+    console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: onbizonyitas.ok });
+    return { mentve: false, ok: onbizonyitas.ok };
+  }
+
+  // ⭐ D85/2 (T2): a szavazat és a javaslat hozott bizonyítékai a saját lánc-gyökeréhez illenek-e.
+  const szavazatBizonyitek = await hozottBizonyitekokOnbizonyitasa(esemeny);
+  if (!szavazatBizonyitek.rendben) {
+    console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: szavazatBizonyitek.ok });
+    return { mentve: false, ok: szavazatBizonyitek.ok };
+  }
+
+  // ----- 1/a2. ⭐ D85 T3: A DÖNTÉSI CSOMAG TARTALMA IS ITT MEGY ÁT -----
+  // A csomag a döntés bemenetének aláírt másolatait hordozza — mindegyik ugyanazon a próbán megy át, mintha
+  // egyenként jött volna, és csak a döntés bemenete lehet benne (`dontesiCsomag.js`). Egy hamis belső
+  // esemény az egész csomagot elveti.
+  if (esemeny.tipus === CSOMAG_TIPUS) {
+    const csomag = await dontesiCsomagEllenorzese(esemeny);
+    if (!csomag.rendben) {
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: csomag.ok });
+      return { mentve: false, ok: csomag.ok };
+    }
+  }
+
+  // ----- 1/a2b. ⭐ D95/1: A LEZÁRÁSI ÖSSZEGZÉS ALAKJA — a tartalmát a minták ellenőrzik (az összegző tartónál) -----
+  if (esemeny.tipus === LEZARASI_OSSZEGZES
+      && (!lezarasiOsszegzesAlakja(esemeny.adat) || esemeny.entitas !== esemeny.adat.javaslat)) {
+    console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: 'hibás lezárási összegzés' });
+    return { mentve: false, ok: 'hibás lezárási összegzés (a javaslat szeletébe szól, a számokkal és a gyökerekkel)' };
+  }
+
+  // ----- 1/a3. ⭐ D93/2: A TAGSÁGI CSOMAG — a lánc másolatai is ugyanazon a próbán, és tagságot kell adniuk -----
+  if (esemeny.tipus === TAGSAGI_CSOMAG) {
+    const csomag = await tagsagiCsomagEllenorzese(esemeny);
+    // ⛔ D118 (④a): a csomagban utazó beköltözés is a születésekkel (különben egy hamis beköltözés ingyen tagságot adna).
+    const bek = csomag.rendben ? await bekoltozesekEllenorzese(esemeny.adat?.lanc, tar) : csomag;
+    if (!bek.rendben) {
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: bek.ok });
+      return { mentve: false, ok: bek.ok };
+    }
+  }
+
+  // ----- 1/a4. ⭐⭐ D118 (②a): A GYERMEK SZÜLETÉSE — a szülő születésével együtt, a létrehozó tagsági bizonyítékával -----
+  // KZ2: gyermeket a szülő vágáskori tagja hozhat létre; D118/5: zárt szülőnek csak zárt gyermeke. ⚠️ Ha a szülő születése
+  // még nincs a tárban, az elutasítás nem végleges — a csere és a kézi út a láncot a gyökértől hozza.
+  if (gyermekSzuleteseE(esemeny)) {
+    const gy = await gyermekSzuletesEllenorzese(esemeny, (await tar.esemeny(esemeny.adat.szulo)) ?? null, tar);
+    if (!gy.rendben) {
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: gy.ok });
+      return { mentve: false, ok: gy.ok, ...(gy.hianyzik ? { hianyzik: true } : {}) };
+    }
+  }
+
+  // ----- 1/a4b. ⭐⭐ D119 (①a): A KOINO-VERZIÓ — a beágyazott gyermek-születés a koinó (a szülő) születésével -----
+  // Ugyanaz a próba, mint a gyermek saját kapuján: egy hamis vagy nem tagtól jött születés nem lesz a szülőben „gyermek”.
+  if (koinoVerzioE(esemeny)) {
+    const kv = await koinoVerzioEllenorzese(esemeny, (await tar.esemeny(esemenyKoinoja(esemeny))) ?? null, tar);
+    if (!kv.rendben) {
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: kv.ok });
+      return { mentve: false, ok: kv.ok, ...(kv.hianyzik ? { hianyzik: true } : {}) };
+    }
+  }
+
+  // ----- 1/a5. ⭐⭐ D118 (④a): A BEKÖLTÖZÉS — a koinó és a szülő születésével, a vágáskori tagsági bizonyítékkal -----
+  if (bekoltozesE(esemeny)) {
+    const bk = await bekoltozesEllenorzese(esemeny, (await tar.esemeny(esemenyKoinoja(esemeny))) ?? null,
+      (await tar.esemeny(esemeny.adat.szulo)) ?? null, tar);
+    if (!bk.rendben) {
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: bk.ok });
+      return { mentve: false, ok: bk.ok, ...(bk.hianyzik ? { hianyzik: true } : {}) };
+    }
+  }
+
+  // ----- 1/b. ⭐ D80: AZ ELLENTMONDÁS BIZONYÍTÉKA IS ITT MEGY ÁT -----
+  // Az `Ellentmondas` esemény a vádolt SAJÁT, egymásnak ellentmondó állításait hordozza — és a
+  // szabály-réteg ennek alapján hagyja ki a pontjait (D79). ⛔ Ezért a tartalmát is itt ellenőrizzük,
+  // az egyetlen kapun (3. szabály): hamis vád nem kerül a tárba, és a szabály a tárban lévőt hiszi el.
+  if (esemeny.tipus === 'Ellentmondas') {
+    // ⭐ D118/2: a koinó kerete a tárból (a születés azonosítója maga a koinó neve); ha nincs meg, a mai érték.
+    const vad = await ellentmondasEllenorzese(esemeny.adat, esemeny.koino,
+      { tudatpontKeret: await koinoKerete(tar, esemeny.koino) });
+    // ⚠️ A vádpontot (vagy elágazásnál a vesztest) a bejelentő mondja be — az ellenőrzés vetette össze.
+    if (!vad.rendben) {
+      console.log('esemenyMentese - VÉGE (HAMIS VÁD)', { ok: vad.ok });
+      return { mentve: false, ok: 'a bizonyíték nem áll meg: ' + vad.ok };
+    }
+  }
+
+  // ----- 2. MÁR MEGVAN? -----
+  // Az azonosító a gondolat lenyomata, tehát ha már megvan, akkor BÁJTRA ugyanaz.
+  // Ezért az ismételt mentés nem hiba, hanem semmit-nem-csinálás. (Ez teszi a hálózati
+  // összefésülést triviálissá.)
+  //
+  // ⭐ 3.2: EZ MÁR NEM OLVASSA VÉGIG A TÁRAT. Eddig `tar.betolt()` volt itt, ezért minden
+  // mentés ára a tár méretével nőtt — mérve: 100 000 eseménynél 495 ms EGYETLEN mentés,
+  // vagyis N esemény beírása négyzetes. Most azonosító szerint kérdezünk, ami O(1).
+  if (await tar.esemeny(esemeny.azonosito)) {
+    console.log('esemenyMentese - VÉGE (már megvolt)');
+    return { mentve: true, marMegvolt: true };
+  }
+
+  // ----- 3. ELÁGAZÁS-KERESÉS: a kettős cselekvés leleplezése -----
+  // Szintén célzott kérdés: elég a szerző láncának EGYETLEN pontját megnézni — oda
+  // ütközhet be egy második esemény.
+  const ottLevok = await tar.sorszamSzerint(esemeny.szerzo, esemeny.sorszam);
+  const utkozo = ottLevok.find((meglevo) => elagazasE(meglevo, esemeny));
+
+  // ----- 4. MENTÉS -----
+  // Az elágazást is elmentjük! A két esemény EGYÜTT a bizonyíték (D17/D19) — ha az
+  // egyiket eldobnánk, épp a bizonyítékot dobnánk el.
+  // ⭐ D70: a tár mögött az ÍRÓ áll — neki mondjuk meg, ha ez a saját, most aláírt eseményünk.
+  await tar.hozzafuz(esemeny, beallitas);
+
+  // ----- 4/b. ⭐ D82: A BIZONYÍTÉK A VÁDOLT ESEMÉNYEIT IS HOZZA — azok is bejönnek -----
+  // Az `Ellentmondas` a vádolt SAJÁT aláírt eseményeit hordozza (az elágazásnál a két ágat). Ha azokat
+  // is bevesszük, minden gép, amelyik a bizonyítékot látja, MINDKÉT ágat látja — és a meglévő választás
+  // (`elagazasokFeloldasa`: a kisebb azonosító) mindenhol ugyanaz lesz. *(Csak a vesztest kihagyni nem
+  // elég: akinél csak az van meg, a nyertest nem ismeri — a villa előtti állapotot számolná.)*
+  // ⚠️ Ugyanazon a kapun mennek át (semmiben nem bízunk), és beágyazott bizonyítékot nem bontunk tovább.
+  if (esemeny.tipus === 'Ellentmondas') await bizonyitekEsemenyeinekMentese(tar, esemeny);
+
+  if (utkozo) {
+    console.warn('esemenyMentese - ELÁGAZÁS! Ugyanaz a szerző két eseményt írt alá ugyanarról a pontról', {
+      szerzo: esemeny.szerzo,
+      sorszam: esemeny.sorszam,
+      egyik: utkozo.azonosito,
+      masik: esemeny.azonosito
+    });
+    console.log('esemenyMentese - VÉGE (elmentve, de ELLENTMONDÁS)');
+    return { mentve: true, elagazas: { egyik: utkozo, masik: esemeny } };
+  }
+
+  console.log('esemenyMentese - VÉGE (elmentve)');
+  return { mentve: true };
+}
+
+/** Egy (a kapun már átment) `Ellentmondas` eseményben hordozott események — ugyanazon a kapun át. */
+async function bizonyitekEsemenyeinekMentese(tar, bizonyitek) {
+  for (const mezo of ['esemeny', 'masik', 'kovetkezo']) {
+    const e = bizonyitek.adat?.[mezo];
+    if (!e || typeof e !== 'object' || e.tipus === 'Ellentmondas') continue;
+    const r = await esemenyMentese(tar, e);
+    if (!r.mentve) console.warn('esemenyMentese - a bizonyíték eseménye nem jött be', { mezo, ok: r.ok });
+  }
+}
+
+// ===================================
+// LEKÉRDEZÉSEK
+// ===================================
+
+/**
+ * Egy esemény lekérése az azonosítója alapján.
+ * @param {Object} tar
+ * @param {string} azonosito
+ * @returns {Promise<Object|undefined>}
+ */
+export async function esemenyLekerese(tar, azonosito) {
+  return tar.esemeny(azonosito);
+}
+
+/**
+ * Egy szerző adott sorszámú eseményei.
+ * (Rendes esetben legfeljebb egy — ha több, az elágazás.)
+ * @param {Object} tar
+ * @param {string} szerzo
+ * @param {number} sorszam
+ * @returns {Promise<Array<Object>>}
+ */
+export async function sorszamSzerint(tar, szerzo, sorszam) {
+  return tar.sorszamSzerint(szerzo, sorszam);
+}
+
+/**
+ * Egy szerző ÖSSZES eseménye, sorszám szerint növekvő sorrendben.
+ * @param {Object} tar
+ * @param {string} szerzo
+ * @returns {Promise<Array<Object>>}
+ */
+export async function sajatLancEsemenyei(tar, szerzo) {
+  return (await tar.szerzoLanca(szerzo)).sort((a, b) => a.sorszam - b.sorszam);
+}
+
+/**
+ * Egy koino ÖSSZES eseménye (az állapotszámításhoz).
+ *
+ * ⚠️ **EZ AZ EGYETLEN MŰVELET, AMI NEM SKÁLÁZIK — és ez tudatos.** Az `allapotSzamitasa`
+ * tiszta függvény: azt számolja ki, amit kap. Kis koinóban ez a teljes halmaz, és úgy is
+ * kell; nagyban viszont a hívó **szeletet** ad neki (`entitasEsemenyei`), és akkor ez a
+ * függvény nem szerepel az útban.
+ *
+ * ⛔ **Új kódban ne ezt hívd** — kérdezz szeletet vagy láncot.
+ *
+ * @param {Object} tar
+ * @param {string} koino
+ * @returns {Promise<Array<Object>>}
+ */
+/**
+ * ⭐⭐ D118 (③): a koinó BEMENETE a koinó-szabály szerint (`koinoLanc.js` — ②b) — a saját eseményei, a születések lánca
+ * és az ősök vágás előtti eseményei. A koinó képe ebből számol (`ketReteg.js`); szülő nélküli koinónál ugyanaz, mint a
+ * `koinoEsemenyei`. ⚠️ Ugyanaz a végigolvasás, mint ott (lásd a fejlécét).
+ * @returns {Promise<Array<Object>>}
+ */
+export async function koinoBemenete(tar, koino) {
+  await tar.frissit?.();
+  const minden = await tar.betolt();
+  if (!azonositoAlaku(koino)) return minden.filter((e) => esemenyKoinoja(e) === koino);
+  const { tartozik } = await koinoNezete(tar, koino);
+  return minden.filter(tartozik);
+}
+
+export async function koinoEsemenyei(tar, koino) {
+  // ⭐ Előbb amit MÁS folyamat fűzött a tárhoz (43. mérés) — különben a futó felület vagy
+  // őrjárat elavult képet számolna. ⚠️ Nem minden tárnak van ilyenje (a próbák memóriás
+  // tára egyetlen folyamaté), ezért feltételes.
+  await tar.frissit?.();
+  return (await tar.betolt()).filter((e) => esemenyKoinoja(e) === koino);
+}
+
+// ===================================
+// A SZELET — egy entitás eseményei
+// ===================================
+//
+// ✅ 3.2 ÓTA EZ CÉLZOTT KÉRDÉS. A 3.1-ben még `tar.betolt()`-tel ment, azzal a
+// megjegyzéssel, hogy „ami itt most számít, az a HELYES KÉRDÉS — a megvalósítás mögötte
+// kicserélhető". Így is lett: a tároló azóta **szelet szerint tartja nyilván** az
+// eseményeket, és egyetlen hívó sem változott tőle. *(9. szabály: az illesztés az első
+// naptól milliárdos, a megvalósítás mögötte lehet egyszerű — és cserélhető.)*
+
+/**
+ * Egy entitás (szelet) összes eseménye.
+ *
+ * A szelet-kulcs típus-független: `esemeny.entitas ?? esemeny.azonosito` — lásd az
+ * `esemeny.js` `szelet()` függvényét.
+ *
+ * @param {Object} tar
+ * @param {string} koino
+ * @param {string} entitas
+ * @returns {Promise<Array<Object>>}
+ */
+export async function entitasEsemenyei(tar, koino, entitas) {
+  // ⭐ 3.2: célzott kérdés — a tároló szelet szerint tartja nyilván az eseményeket, tehát
+  // ez már NEM olvassa végig a tárat. A koino-szűrés csak biztonsági öv (a fájl amúgy is
+  // koinónként külön van).
+  return (await tar.szeletEsemenyei(entitas)).filter((e) => esemenyKoinoja(e) === koino);
+}
+
+/**
+ * Hányadik lesz a következő eseményem EZEN AZ ENTITÁSON?
+ *
+ * ⭐ MIÉRT KELL EZ? Mert szeletelt tárban a koino-szintű `sorszam` hézagjai NORMÁLISSÁ
+ * válnak: ha csak azokat az eseményeket tárolom, amik az általam tartott entitásokra
+ * vonatkoznak, akkor a szerző láncából jogosan hiányoznak darabok. Ezzel a hézag megszűnne
+ * JEL lenni — pedig épp az volt a szelektív mutogatás nyoma.
+ *
+ * Az entitás-szintű sorszám visszaadja a jelet: az ENTITÁSON BELÜLI hézag újra gyanús, az
+ * entitások közti pedig várt és ártalmatlan.
+ *
+ * @param {Object} tar
+ * @param {string} koino
+ * @param {string} szerzo
+ * @param {string} entitas
+ * @returns {Promise<number>}
+ */
+export async function kovetkezoEntitasSorszam(tar, koino, szerzo, entitas) {
+  const sajatjai = (await entitasEsemenyei(tar, koino, entitas))
+    .filter((e) => e.szerzo === szerzo);
+  if (!sajatjai.length) return 1;
+  return Math.max(...sajatjai.map((e) => e.entitasSorszam ?? 1)) + 1;
+}
+
+/**
+ * ⭐ A HORGONY: pár IDEGEN esemény ebből a szeletből, amit már ismerünk.
+ *
+ * MIT OLD MEG? Az `ido` a szerző órája, tehát hazudható — egy visszadátumozott szavazat
+ * beférhetne egy már lezárt döntésbe (`javaslatSzamitas.js` figyelmeztetése). Ha viszont az
+ * eseményem hivatkozik egy MÁSIK ember eseményére, akkor bizonyíthatóan AZUTÁN keletkezett:
+ * nem hivatkozhatnék olyasmire, ami akkor még nem létezett.
+ *
+ * ⚠️ AMIT NEM OLD MEG: aki semmit nem horgonyoz, arról továbbra sem tudjuk, mikor írt. A
+ * horgony a hazugságot MEGDRÁGÍTJA és BIZONYÍTHATÓVÁ teszi, nem zárja ki — ugyanaz a szint,
+ * amit a D42 bemondott összege ad, és ugyanaz a filozófia (D19).
+ *
+ * ⚠️ MIÉRT CSAK EBBŐL A SZELETBŐL? Mert a szeletelt tárban csak ezt látjuk biztosan — és
+ * mert a döntés bemenete úgyis entitás-helyi. Egy másik szeletből vett horgonyt a másik gép
+ * esetleg nem tudná ellenőrizni.
+ *
+ * @param {Object} tar
+ * @param {string} koino
+ * @param {string} entitas
+ * @param {string} sajatSzerzo - a saját kulcsunk (a sajátjainkat kihagyjuk)
+ * @param {number} [darab] - hány horgony (alap: 1 — ennyi elég a „azután" bizonyításához)
+ * @returns {Promise<Array<string>>}
+ */
+export async function horgonyok(tar, koino, entitas, sajatSzerzo, darab = 1) {
+  const idegenek = (await entitasEsemenyei(tar, koino, entitas))
+    .filter((e) => e.szerzo !== sajatSzerzo);
+  if (!idegenek.length) return [];
+
+  // A LEGFRISSEBBEKET választjuk — azok kötik meg legszorosabban az időt. Az `ido` itt
+  // csak RENDEZÉSRE szolgál (a horgony ereje az azonosítóból jön, nem az órából), ezért
+  // ártalmatlan, hogy hazudható.
+  return [...idegenek]
+    .sort((a, b) => (b.ido - a.ido) || (a.azonosito < b.azonosito ? -1 : 1))
+    .slice(0, darab)
+    .map((e) => e.azonosito);
+}
+
+// ===================================
+// A SAJÁT LÁNC VÉGE — a következő esemény helye
+// ===================================
+
+/**
+ * ⭐⭐ D118 (⑤b): HOVA KERÜL a szerző új saját eseménye egy koinóban — a koinóbeli LÁNCA végére (`koinoLanc.js`
+ * `lancNezete`: a koinó saját eseményei, és ha költözött, a hozott előtag); a beköltözésé a saját adatából (a szülőbeli
+ * lánc-pontja után — a láncom ott még nem a gyermeké, a kapu ellenőrizte). ⛔ A nem költöző szülőbeli múltja nem a
+ * gyermekbeli lánca: az ott 1-ről indul (különben a tár legnagyobb sorszáma után folytatná, akármelyik koinóé — és ha a
+ * múltja később érkezik, a két lánc azonos sorszámai elágazásnak látszanának). A művelet és az író (az ELAVULT) ezt hívja.
+ * @param {Object} tar
+ * @param {string} szerzo
+ * @param {string} koino
+ * @param {string|null} [tipus]
+ * @param {Object|null} [adat]
+ * @returns {Promise<{elozo: string|null, sorszam: number}>}
+ */
+export async function ujSajatHelye(tar, szerzo, koino, tipus = null, adat = null) {
+  if (tipus === 'Bekoltozes' && typeof adat?.lanc?.azonosito === 'string' && Number.isSafeInteger(adat.lanc.sorszam)) {
+    return { elozo: adat.lanc.azonosito, sorszam: adat.lanc.sorszam + 1 };
+  }
+  // ⭐ A koinó SZÜLETÉSE (új alakban a koinó-mezője üres — a koinó még nincs): a helyét a hívó adja a tárral — a gyermekéé a
+  // létrehozó szülőbeli láncának vége után (`koino.js` `ujKoinoSzuletese` az ideiglenes tárba csak azt teszi), a szülő
+  // nélkülié 1. ⛔ A koinó láncán keresve semmit nem találna (mérve: a gyermek születése 1-es sorszámot kapott, és a
+  // létrehozó hozott múltja nem jutott át a kapun).
+  if (tipus === 'KoinoLetrehozas') return lancVege(tar, szerzo);
+  const nezet = await lancNezete(tar, koino, szerzo);
+  const lanc = (await sajatLancEsemenyei(tar, szerzo)).filter(nezet.tagja);
+  if (!lanc.length) return { elozo: null, sorszam: 1 };
+  const utolso = lanc[lanc.length - 1];
+  return { elozo: utolso.azonosito, sorszam: utolso.sorszam + 1 };
+}
+
+/**
+ * Megmondja, hova fűzzük a következő saját eseményt.
+ *
+ * @param {Object} tar
+ * @param {string} szerzo
+ * @returns {Promise<{elozo: string|null, sorszam: number}>}
+ */
+export async function lancVege(tar, szerzo) {
+  console.log('lancVege - KEZDÉS', { szerzo: szerzo.slice(0, 8) + '…' });
+
+  const esemenyek = await sajatLancEsemenyei(tar, szerzo);
+  if (esemenyek.length === 0) {
+    console.log('lancVege - VÉGE (üres lánc, ez lesz az első)');
+    return { elozo: null, sorszam: 1 };
+  }
+
+  const utolso = esemenyek[esemenyek.length - 1];
+  console.log('lancVege - VÉGE', { utolsoSorszam: utolso.sorszam });
+  return { elozo: utolso.azonosito, sorszam: utolso.sorszam + 1 };
+}
+
+// ===================================
+// A LÁNC ÉPSÉGÉNEK ELLENŐRZÉSE
+// ===================================
+
+/**
+ * Végigjárja egy szerző láncát, és megnézi, ép-e.
+ *
+ * Három dolgot néz:
+ *   - HÉZAG: hiányzik-e egy sorszám (ilyenkor nem tudunk mindent — ez a hálózaton
+ *     természetes állapot lesz, nem hiba);
+ *   - ELÁGAZÁS: ugyanarra a sorszámra több esemény (ez CSALÁS, és bizonyított);
+ *   - SZAKADÁS: az `elozo` nem a tényleges előző eseményre mutat.
+ *
+ * @param {Object} tar
+ * @param {string} szerzo
+ * @returns {Promise<{ep: boolean, hosszu: number, hezagok: Array<number>, elagazasok: Array<number>, szakadasok: Array<number>}>}
+ */
+export async function lancEllenorzese(tar, szerzo) {
+  console.log('lancEllenorzese - KEZDÉS', { szerzo: szerzo.slice(0, 8) + '…' });
+
+  const esemenyek = await sajatLancEsemenyei(tar, szerzo);
+  const hezagok = [];
+  const elagazasok = [];
+  const szakadasok = [];
+
+  // Sorszám → események (rendesen egy, elágazásnál több)
+  const sorszamonkent = new Map();
+  for (const e of esemenyek) {
+    if (!sorszamonkent.has(e.sorszam)) sorszamonkent.set(e.sorszam, []);
+    sorszamonkent.get(e.sorszam).push(e);
+  }
+
+  const legnagyobb = esemenyek.length ? Math.max(...sorszamonkent.keys()) : 0;
+
+  for (let sorszam = 1; sorszam <= legnagyobb; sorszam++) {
+    const ittLevok = sorszamonkent.get(sorszam);
+
+    if (!ittLevok) { hezagok.push(sorszam); continue; }
+    if (ittLevok.length > 1) { elagazasok.push(sorszam); continue; }
+
+    // Szakadás: az `elozo` a tényleges előző eseményre mutat-e?
+    const e = ittLevok[0];
+    const elozoek = sorszamonkent.get(sorszam - 1);
+    if (sorszam === 1) {
+      if (e.elozo !== null) szakadasok.push(sorszam);
+    } else if (elozoek && elozoek.length === 1 && e.elozo !== elozoek[0].azonosito) {
+      szakadasok.push(sorszam);
+    }
+  }
+
+  const eredmeny = {
+    ep: hezagok.length === 0 && elagazasok.length === 0 && szakadasok.length === 0,
+    hosszu: legnagyobb,
+    hezagok,
+    elagazasok,
+    szakadasok
+  };
+
+  console.log('lancEllenorzese - VÉGE', eredmeny);
+  return eredmeny;
+}
