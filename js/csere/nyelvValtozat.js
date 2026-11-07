@@ -27,7 +27,8 @@
 // ⭐ MIKOR KELL ÚJ SZÁM (D124 / PV1): csak TÖRÉSNÉL — ha egy régi programmal másképp működne (más alak, elhagyott lépés, más közös
 // számítás: szelet-halmaz, lenyomat, DHT-téma). A bővítés jellel megy, szám nélkül: új mező mindig elhagyható, új lépés csak ha
 // mindkét fél jelezte (`cs`, `kd`, `FOGLALT`, `KESZ` + `kesobb` — eddig is így). A törések gyűjtve jönnek: egy kiadás legfeljebb
-// EGY új számot hoz (PV3); a régit a program legalább 6 hónapig beszéli, a szélén fordítva (PV2 — az építés ④-e).
+// EGY új számot hoz (PV3); a régit a program legalább 6 hónapig beszéli, a szélén fordítva (PV2 — az építés ④-e:
+// `forditoSzel.js` — a régi nyelvek jegyzéke, a dátumokkal; a legrégebbi beszélt nyelv onnan jön).
 //
 // ===== ⭐ A SZÁLLÍTÁS JELE (D124 — az építés ②-e) =====
 //
@@ -44,10 +45,17 @@
 
 // ===== A MAI NYELV =====
 
-/** A legrégebbi nyelvváltozat, amit ez a program még beszél. */
-export const NYELV_LEGREGEBBI = 1;
-/** A legújabb nyelvváltozat, amit ez a program beszél. ⭐ Új számot csak törés hoz (lásd fent). */
+// ⭐⭐ D124 ④: a LEGRÉGEBBI nyelv nem külön szám — a régi nyelvek jegyzékéből jön (`forditoSzel.js`): amelyik régihez a program
+// még tud fordítani, és a dátuma még nem jött el. (2026-11-07-ig itt egy `NYELV_LEGREGEBBI = 1` állt: két forrás elcsúszhatott
+// volna — egy nyelv, amit a program „beszél”, de nincs hozzá fordítója.)
+import {
+  REGI_NYELVEK, REGI_SZALLITASOK, legregebbiBeszelt, lejaroNyelvek, kitalaltNyelvKeszlet, kitalaltSzallitasKeszlet
+} from './forditoSzel.js';
+
+/** A legújabb nyelvváltozat, amit ez a program beszél (a logikáé). ⭐ Új számot csak törés hoz (lásd fent). */
 export const NYELV_LEGUJABB = 1;
+/** A mai nyelv-készlet: a legújabb és a régiek lépései (ma egy sincs). */
+const MAI_NYELV_KESZLET = Object.freeze({ legujabb: NYELV_LEGUJABB, lepesek: REGI_NYELVEK });
 /** A jel mezője az első üzenetekben. ⛔ A neve és az alakja (`[a, b]`) soha nem változik. */
 export const NYELV_MEZO = 'ny';
 /** Aki nem küld jelet: a PR6 előtti program — az 1-es nyelv. */
@@ -60,13 +68,41 @@ function ervenyesPar(p) {
 }
 
 /**
- * A saját nyelv — a program állandói, vagy (a próbáknak) a hívó adta pár (`beallitas.nyelv`).
+ * ⭐⭐ D124 ④: a nyelv-készlet — a legújabb nyelv és a régiek lépései (a fordító-szél ebből fordít). A mai, vagy (a próbáknak) a
+ * hívó adta (`beallitas.nyelvKeszlet`), vagy a kitalált 2-es (`KOINO_PROBANYELV=<napok>` — az 1-es lépés dátuma ennyi nap múlva;
+ * csak próbának, mint a `KOINO_NYELV`).
+ */
+export function nyelvKeszlet(beallitas) {
+  if (beallitas?.nyelvKeszlet && typeof beallitas.nyelvKeszlet === 'object') return beallitas.nyelvKeszlet;
+  const napok = probaNapok('KOINO_PROBANYELV');
+  return napok === null ? MAI_NYELV_KESZLET : kitalaltNyelvKeszlet(napok);
+}
+
+/** ⚠️ CSAK PRÓBÁNAK: a kitalált lépés dátuma napokban a környezetből (`KOINO_PROBANYELV=10`, `-1`: lejárt). */
+function probaNapok(nev) {
+  const v = globalThis.process?.env?.[nev];
+  return typeof v === 'string' && /^-?\d{1,4}$/.test(v) ? Number(v) : null;
+}
+
+/**
+ * ⭐⭐ D124 ④ (⑦): a készülék nyelvének és szállításának lejáró lépései (`lejaroNyelvek` — a lap 30 nappal előtte szól).
+ * @returns {{nyelv: Array, szallitas: Array}}
+ */
+export function lejaroValtozatok(beallitas, most = Date.now()) {
+  return { nyelv: lejaroNyelvek(nyelvKeszlet(beallitas), most), szallitas: lejaroNyelvek(szallitasKeszlet(beallitas), most) };
+}
+
+/**
+ * A saját nyelv — a nyelv-készletből (a legrégebbi a jegyzék szerint, MOST), vagy (a próbáknak) a hívó adta pár
+ * (`beallitas.nyelv`, `KOINO_NYELV` — ez a jegyzéket megkerüli: a hiányzó lépést a szél azonos alaknak veszi).
  * @param {Object} [beallitas]
  * @returns {number[]} [legrégebbi, legújabb]
  */
 export function sajatNyelv(beallitas) {
   const n = beallitas?.nyelv ?? kornyezetbol('KOINO_NYELV');
-  return ervenyesPar(n) ? [n[0], n[1]] : [NYELV_LEGREGEBBI, NYELV_LEGUJABB];
+  if (ervenyesPar(n)) return [n[0], n[1]];
+  const k = nyelvKeszlet(beallitas);
+  return [legregebbiBeszelt(k, Date.now()), k.legujabb];
 }
 
 /**
@@ -151,10 +187,17 @@ function nincsKozosSzovege(mi, egyseg, irany, tars, sajat) {
 
 // ===== ⭐ A SZÁLLÍTÁS (az építés ②-e — a kopogásban) =====
 
-/** A legrégebbi szállítás-nemzedék, amit ez a program még beszél (a kézfogás és a titkosított csomag alakja). */
-export const SZALLITAS_LEGREGEBBI = 1;
+// ⭐⭐ D124 ④: a legrégebbi szállítás-nemzedék is a jegyzékből jön (`forditoSzel.js` `REGI_SZALLITASOK`), mint a nyelvé.
 /** A legújabb szállítás-nemzedék. ⭐ Új számot csak a szállítás törése hoz (más kézfogás, más csomag-alak). */
 export const SZALLITAS_LEGUJABB = 1;
+const MAI_SZALLITAS_KESZLET = Object.freeze({ legujabb: SZALLITAS_LEGUJABB, lepesek: REGI_SZALLITASOK });
+
+/** ⭐⭐ D124 ④: a szállítás-készlet — a mai, a hívóé (`beallitas.szallitasKeszlet`), vagy a kitalált 2-es (`KOINO_PROBASZALLITAS`). */
+export function szallitasKeszlet(beallitas) {
+  if (beallitas?.szallitasKeszlet && typeof beallitas.szallitasKeszlet === 'object') return beallitas.szallitasKeszlet;
+  const napok = probaNapok('KOINO_PROBASZALLITAS');
+  return napok === null ? MAI_SZALLITAS_KESZLET : kitalaltSzallitasKeszlet(napok);
+}
 /** A jel mezője a kopogás üzeneteiben. ⛔ A neve és az alakja (`[a, b]`) soha nem változik. */
 export const SZALLITAS_MEZO = 'sz';
 
@@ -164,7 +207,34 @@ export const SZALLITAS_MEZO = 'sz';
  */
 export function sajatSzallitas(beallitas) {
   const n = beallitas?.szallitas ?? kornyezetbol('KOINO_SZALLITAS');
-  return ervenyesPar(n) ? [n[0], n[1]] : [SZALLITAS_LEGREGEBBI, SZALLITAS_LEGUJABB];
+  if (ervenyesPar(n)) return [n[0], n[1]];
+  const k = szallitasKeszlet(beallitas);
+  return [legregebbiBeszelt(k, Date.now()), k.legujabb];
+}
+
+// ===== ⭐⭐ D124 ④: A KÖZÖS SZÁLLÍTÁS FELJEGYZÉSE — a kopogásból a kézfogásnak =====
+//
+// A kapu (`udpKapu.js`) a kopogás jeléből tudja meg a közös szállítást; a kézfogás (`udpVonal.js`) viszont a munkában indul —
+// sokféle hívóból (a csere, a kérelmek, a kézi parancsok). Hogy egyik se felejtse el átadni, a kapu IDE jegyzi (a foglalathoz és a
+// társ címéhez), és a kézfogás innen olvassa. Foglalatonként legfeljebb `FELJEGYZES_KORLAT` cím (a legrégebbi kiesik).
+
+const feljegyzesek = new WeakMap();
+const FELJEGYZES_KORLAT = 1024;
+
+/** A kapu: ezzel a társsal (ezen a foglalaton) ez a közös szállítás. */
+export function szallitasFeljegyzese(halo, cim, port, n) {
+  if (!halo || typeof halo !== 'object' || !Number.isSafeInteger(n)) return;
+  let m = feljegyzesek.get(halo);
+  if (!m) { m = new Map(); feljegyzesek.set(halo, m); }
+  const k = cim + ':' + port;
+  m.delete(k);
+  m.set(k, n);
+  if (m.size > FELJEGYZES_KORLAT) m.delete(m.keys().next().value);
+}
+
+/** A kézfogás: a feljegyzett közös szállítás ezzel a társsal — vagy null. */
+export function feljegyzettSzallitas(halo, cim, port) {
+  return (halo && typeof halo === 'object' ? feljegyzesek.get(halo)?.get(cim + ':' + port) : null) ?? null;
 }
 
 /** A jel, egy kopogás-üzenetbe szórva: `{ sz: [a, b] }`. */

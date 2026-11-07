@@ -43,7 +43,12 @@
 // ⚠️ NULLA FÜGGŐSÉG (6. szabály): a beépített `node:crypto` (X25519, Ed25519, HKDF, AES-GCM) — szinkron,
 // mert a vonal küldő útja szinkron.
 //
-// Használják: csere/udpVonal.js (a kézfogás és a védett rés), csere/udpKapu.js (a jelek), koino.js, próbák.
+// ⭐⭐ D124 ④: ez az 1-es szállítás. Egy jövőbeli szállítás-törésnél a régi részek a jegyzékbe kerülnek (`forditoSzel.js`
+// `REGI_SZALLITASOK`), és a kézfogás a közös nemzedékét választja (`udpVonal.js`); a `munkamenetKulcsai` címkéi ezért paraméterek
+// (alapból az 1-esé — a kitalált próba-szállítás mással hív).
+//
+// Használják: csere/udpVonal.js (a kézfogás és a védett rés — a `forditoSzel.js` részein át), csere/udpKapu.js (a jelek),
+// csere/forditoSzel.js (a mai szállítás részei), koino.js, próbák.
 
 import {
   generateKeyPairSync, diffieHellman, hkdfSync, createCipheriv, createDecipheriv,
@@ -57,6 +62,8 @@ export const KF_JEL = 0xa6;
 
 const KULCS_HOSSZ = 32;
 const CIMKE = 16;
+/** Az 1-es szállítás címkéi (a kézfogás átirata és a két irány kulcsa). ⛔ Ezek az 1-es szállítás részei — nem változhatnak. */
+const KEZFOGAS_CIMKEK = Object.freeze({ atirat: 'koino-kezfogas-1', csere: 'koino-csere-1' });
 
 // ===================================
 // AZ EGYSZERI KULCS ÉS A KÉZFOGÁS-CSOMAG
@@ -88,9 +95,11 @@ export function kezfogasCsomagbol(buf) {
  *
  * @param {{titkos: KeyObject, nyilvanos: Buffer}} sajat - a saját egyszeri kulcsunk
  * @param {Buffer} tarsNyilvanos - a társ egyszeri kulcsa (32 bájt)
+ * @param {{atirat: string, csere: string}} [cimkek] - ⚠️ CSAK a kitalált próba-szállításnak (D124 ④ — `forditoSzel.js`): más
+ *        címkékkel más kulcs jön ki, mint egy másik szállítás-nemzedék kézfogásából
  * @returns {{kuldo: Buffer, fogado: Buffer, atirat: Buffer}}
  */
-export function munkamenetKulcsai(sajat, tarsNyilvanos) {
+export function munkamenetKulcsai(sajat, tarsNyilvanos, cimkek = KEZFOGAS_CIMKEK) {
   if (!Buffer.isBuffer(tarsNyilvanos) || tarsNyilvanos.length !== KULCS_HOSSZ) {
     throw new Error('a társ egyszeri kulcsa nem 32 bájt');
   }
@@ -103,8 +112,8 @@ export function munkamenetKulcsai(sajat, tarsNyilvanos) {
 
   const enVagyokAKisebb = Buffer.compare(sajat.nyilvanos, tarsNyilvanos) < 0;
   const [kisebb, nagyobb] = enVagyokAKisebb ? [sajat.nyilvanos, tarsNyilvanos] : [tarsNyilvanos, sajat.nyilvanos];
-  const atirat = createHash('sha256').update('koino-kezfogas-1').update(kisebb).update(nagyobb).digest();
-  const anyag = Buffer.from(hkdfSync('sha256', kozos, atirat, 'koino-csere-1', 2 * KULCS_HOSSZ));
+  const atirat = createHash('sha256').update(cimkek.atirat).update(kisebb).update(nagyobb).digest();
+  const anyag = Buffer.from(hkdfSync('sha256', kozos, atirat, cimkek.csere, 2 * KULCS_HOSSZ));
   const kisebbtol = anyag.subarray(0, KULCS_HOSSZ);
   const nagyobbtol = anyag.subarray(KULCS_HOSSZ);
   return enVagyokAKisebb

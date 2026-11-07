@@ -6303,6 +6303,23 @@ bejegyzés 7 nap után elévül, a jegyzék legfeljebb 256 társ. A kimondás eg
 `_nyelvKiirasa`) és a `koino` parancs (a készülék nyelve és szállítása, és a teendő). A próba: `nyelvProba.js` (+2) és egy
 parancssor-próba két valódi „2-es” készülékkel (`KOINO_SZALLITAS` / `KOINO_NYELV` — csak próbának), a frissítéssel együtt.
 
+*A fordító-szél, a kézfogás-választó és a régi lépések dátuma (④, 2026-11-07 — elágazás 244):* `js/csere/forditoSzel.js` — a régi
+nyelvek (`REGI_NYELVEK`: lépésenként `meddig`, `le`, `fel`, `szamitasok`) és a régi szállítások (`REGI_SZALLITASOK`: `meddig`,
+`reszek`) jegyzéke, MA ÜRESEN. A **legrégebbi beszélt változat a jegyzékből** jön (`legregebbiBeszelt`: a legújabbtól lefelé, amíg a
+lépés megvan és a dátuma nem jött el — a `NYELV_LEGREGEBBI` / `SZALLITAS_LEGREGEBBI` szám kikerült). **A szél a vonal
+üzenetsorában** (`vonal.js`): a közös nyelv eldőlte után a bejövő a logika, a kimenő a közös nyelv alakjában — az első üzenetek
+(`NYITAS`, `KERELEM`, `FAJLKEREK`, `VALASZ`, `FAJLVEGE`) érintetlenek; a közös számítás a közös nyelvé (`sor.szamitas` — a
+szelet-párok újraszámolva; a nyitás számai a saját legújabb szerint, ezért egy számítás-törés alatt a vegyes pár gyors útja elmarad).
+**A kézfogás-választó**: a kapu a közös szállítást a foglalathoz és a címhez feljegyzi (`szallitasFeljegyzese`), a kézfogás onnan
+olvassa (`kezfogasUdpResen` — a hívó nem adja át, így egy út sem felejtheti el), és a nemzedék részeivel fog kezet; a kézi
+`pajzsfuro` kopogása is viszi a jelet (a ② kimaradt útja); a kapu és a fúró a saját szállítását minden kopogásnál újraszámolja (a
+futó postaládán is eljöhet a dátum — mérve). **A ⑦ dátuma**: akivel a munka a régin ment le, azt a `nyelvek.json`
+`regin`-je jegyzi; ha a régi lépés 30 napon belül lejár (`lejaroValtozatok`), a lap alsó sávja („⚠ N társ a régin”) és a `koino`
+parancs kimondja, a nappal és a teendővel. A próba egy kitalált 2-essel (`kitalaltNyelvKeszlet` / `kitalaltSzallitasKeszlet`,
+`KOINO_PROBANYELV` / `KOINO_PROBASZALLITAS` — csak próbának): `nyelvProba.js` +8 (a valódi régi programmal is), és egy
+parancssor-próba három valódi készülékkel (a kitalált [1,2]-es postaláda, egy mai és egy „csak 2-es” — a gondolat mindkettő
+lemezére átér).
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem

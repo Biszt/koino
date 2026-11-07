@@ -2,7 +2,7 @@
 
 > **Állapot:** ✅ **D124** (Csaba, 2026-11-06: *„minden javaslatodat elfogadom, mehetünk tovább.”* — PV1–PV6 mind (A)) · 🚧 az
 > építés: ✅ ① a jel és az egyezés (elágazás 241) · ✅ ② a kopogás jele (elágazás 242) · ✅ ③ az emlékezet és a kimondás (elágazás
-> 243) · ⏭️ ④ a fordító-szél → ⑤ a kiírt alakok (8.).
+> 243) · ✅ ④ a fordító-szél, a kézfogás-választó és a régi lépések dátuma (elágazás 244) · ⏭️ ⑤ a kiírt alakok (8.).
 >
 > Csaba (2026-11-06): *„rendben értem. csinálhatod, a pr6-ot”*. Az
 > elv a D123-ban eldőlt (PR6 (A) — a KZ5 válasza): *a programok kimondják, melyik nyelvváltozatot beszélik, és az új program egy
@@ -160,8 +160,25 @@ szünetet ad. A „nem felelt” nem nulláz; bármelyik lement munka törli —
 kopogásunkat fogja meg, a kapu közben is felel). A kimondás egy helyen (`nyelvekKepe`): az őrjárat naplója, a lap alsó sávja
 (`/api/csere-allapot` → `nyelvek`: „⚠ frissíts” / „⚠ N régebbi társ”, a teljes mondat a címkében) és a `koino` parancs („A
 protokoll ezen a készüléken: nyelv 1, szállítás 1 — ⚠ 2 társad újabb programot futtat — frissíts …”). A parancssor-próba két
-valódi „2-es” készülékkel (`KOINO_SZALLITAS`, `KOINO_NYELV` — csak próbának) méri, a frissítést is.)* → ④ **a fordító-szél és a régi számítások jegyzéke** — üresen, de egy kitalált 2-es változattal végigpróbálva (különben a
-réteg kész, és az éles út nem hívja — a 4. szabály-hiány) → ⑤ **a kiírt alakok** szabálya (PV5) és a meglévők változatjele.
+valódi „2-es” készülékkel (`KOINO_SZALLITAS`, `KOINO_NYELV` — csak próbának) méri, a frissítést is.)* → ④ ✅ **a fordító-szél és a régi számítások jegyzéke** — üresen, de egy kitalált 2-es változattal végigpróbálva (különben a
+réteg kész, és az éles út nem hívja — a 4. szabály-hiány). *(Megépült 2026-11-07: `js/csere/forditoSzel.js`. ⭐ **A szél a vonal
+üzenetsorában** (`vonal.js` `uzenetSor`): a közös nyelv eldőlte után (`nyelvRogzitese`) a kivett üzenet a logika alakjára, a
+kimenő (`ki`) a közös nyelv alakjára fordítva megy — minden munka-út egy helyen (a csere, a kérelmek, a válasz, a fájl a cserénél
+és a randevún); a randevú kiszolgálójának első, jeles válaszát a kérő a jel után fordítja. ⛔ Az első üzenetek (`NYITAS`, `KERELEM`,
+`FAJLKEREK`, `VALASZ` — és a `FAJLVEGE`, ami egy új kapcsolat első üzenete) soha nem fordítódnak. ⭐ **A legrégebbi beszélt nyelv
+a jegyzékből jön** (a lépések dátumaiból — a `NYELV_LEGREGEBBI` szám kikerült: két forrás elcsúszott volna); a dátum napján a
+régi kiesik, és a társa megnevezett hibát kap (③). ⭐ **A közös számítás** a közös nyelv szerint (`sor.szamitas` — ma a
+szelet-párok; a kérhető nevek listáját a betöltés és a próba ellenőrzi). ⚠️ A nyitás számai a közös nyelv ELŐTT készülnek (a saját
+legújabb szerint): egy számítás-törés alatt a vegyes pár nyitása nem egyezik, és a régi párokon egyeztet — helyesen, a gyors út
+nélkül (kimondott ár). ⭐ **A szállítás: nem szél, hanem választó** — a kapu a kopogásból a közös szállítást a foglalathoz és a
+címhez feljegyzi, a kézfogás onnan olvassa, és annak a nemzedéknek a részeivel fog kezet (`szallitasReszei`; feljegyzés nélkül a
+legrégebbivel). ⛔ Az építés lelete: a kézi `pajzsfuro` parancs saját kopogása a ②-ből kimaradt — most az is viszi a jelet, és
+közös nélkül megnevezve kész. ⛔ A próba lelete: a kapu a saját szállítását csak a nyitáskor számolta — egy napokig futó
+postaládán a lejárt régit is mondta volna (a kézfogás némán bukott volna); most minden kopogásnál. ⭐ **A ⑦ dátuma:** ha egy társ csak a régit beszéli (a lement munka közös nyelve vagy szállítása
+régebbi a legújabbunknál — `nyelvek.json` `regin`), és a régi lépés 30 napon belül lejár, a lap alsó sávja és a `koino`
+parancs kimondja, a nappal. A próba egy KITALÁLT 2-essel (`KOINO_PROBANYELV`, `KOINO_PROBASZALLITAS` — a lépés dátuma napokban):
+az alak más (az üzenet neve más mezőben), a szelet-párok lenyomata más, a kézfogás kulcsai mások — az [1,2] az 1-essel a régin,
+a lejárt lépésű 2-essel a 2-esen cserél, a valódi régi programmal (a git-ből) is.)* → ⑤ **a kiírt alakok** szabálya (PV5) és a meglévők változatjele.
 
 *Kapcsolódik:* `program_retegek_atvizsgalas.md` (D123, R2, PR6), `koltozes_atvizsgalas.md` (KZ5), `meres/eredmenyek.md` 90., a
 `vonal.js` fejléce (a párbeszéd), az `udpKapu.js` fejléce (a kopogás), a `titkositas.js` fejléce (a kézfogás).

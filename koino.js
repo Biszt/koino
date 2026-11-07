@@ -127,9 +127,9 @@ import {
   nyelvJegyzekTarolo
 } from './js/tar/fajlTar.js';
 // ⭐⭐ D124 ③: akivel nem értjük egymást — társanként megjegyezve, órákig nem hívva, kimondva (a lap, a `koino` parancs)
-import { hivhatoE, nemErtjukKulcsa, korMegfigyelesei, ertjukFeljegyzese, nyelvekKepe, nyelvJegyzekAlakja, NEM_ERTJUK_HATAR,
+import { hivhatoE, nemErtjukKulcsa, korMegfigyelesei, ertjukFeljegyzese, reginFeljegyzese, nyelvekKepe, nyelvJegyzekAlakja, NEM_ERTJUK_HATAR,
   NEM_ERTJUK_SZUNET } from './js/csere/nyelvEmlekezet.js';
-import { sajatNyelv, sajatSzallitas } from './js/csere/nyelvValtozat.js';
+import { sajatNyelv, sajatSzallitas, lejaroValtozatok } from './js/csere/nyelvValtozat.js';
 // ⭐ Az alsó sáv (2026-10-15): mikor cserélt utoljára a készülék, és mikor jön a következő kör (helyi feljegyzés)
 import { csereAllapotAlakja, korKezdete, korVege, csereFeljegyzese, csereAllapotKepe, belepesKezdete, belepesJelentkezese,
   belepesKopogasa, belepesKapcsolata, belepesTagsaga } from './js/csere/csereAllapot.js';
@@ -526,10 +526,22 @@ function nyelvJegyzek() {
   return nyelvJegyzekPeldany;
 }
 
-/** ⭐ D124 ③: egy munka lement a társsal — értjük egymást (a bejegyzése, ha volt, törlődik; különben nem ír). */
-async function ertjukEgymast(alairo, tars) {
-  const kulcsok = [alairo ?? null, tars?.cim ? tars.cim + ':' + tars.port : null];
-  await nyelvJegyzek().modosit((j) => ertjukFeljegyzese(j, kulcsok));
+/**
+ * ⭐ D124 ③: egy munka lement a társsal — értjük egymást (a bejegyzése, ha volt, törlődik; különben nem ír). ⭐⭐ D124 ④ (⑦): és ha a
+ * közös nyelv vagy szállítás régebbi a legújabbunknál, feljegyezzük, hogy a társ csak a régit beszéli (a lap a dátum előtt szól).
+ */
+async function ertjukEgymast(alairo, tars, kozos = {}) {
+  const cim = tars?.cim ? tars.cim + ':' + tars.port : null;
+  const kulcsok = [alairo ?? null, cim];
+  const legujabb = { nyelv: sajatNyelv()[1], szallitas: sajatSzallitas()[1] };
+  await nyelvJegyzek().modosit((j) => reginFeljegyzese(ertjukFeljegyzese(j, kulcsok), alairo ?? cim,
+    { nyelv: kozos.nyelv ?? null, szallitas: kozos.szallitas ?? null }, legujabb, Date.now()));
+}
+
+/** ⭐ D124 ③–④: a kimondás képe (a lapnak és a `koino` parancsnak) — a lejáró régi lépésekkel együtt. */
+async function nyelvekMostaniKepe() {
+  const most = Date.now();
+  return nyelvekKepe(await nyelvJegyzek().olvas(), most, lejaroValtozatok(undefined, most));
 }
 
 // ===================================
@@ -5671,6 +5683,8 @@ function resMunka(allapot, halo, tars) {
     const alap = { uj: csere.uj ?? 0, kuldott: csere.kuldott ?? 0, korok: csere.korok ?? 0,
       bajt, masKoino: csere.masKoino ?? null, kivulrolIgyLatszom: csere.kivulrolIgyLatszom ?? null,
       szeletKiszolgalva: csere.szeletKiszolgalva ?? null, alairo,
+      // ⭐ D124 ④ (⑦): a csere közös nyelve (a családi munka-készítő ebből jegyzi, ha a társ csak a régit beszéli)
+      nyelv: Number.isSafeInteger(csere.nyelv) ? csere.nyelv : null,
       // ⭐⭐ D119 (③): a társ családja (a nyitásából) — a családi munka ebből számolja a közös koinókat (csak a lement vagy a
       // MÁSIK koinós nyitásnál; a „később” és a kérelem nem hozza — a két fél így ugyanott áll meg).
       tarsCsalad: csere.tarsCsalad ?? null };
@@ -6637,7 +6651,7 @@ function csaladMunkaKeszito(allapot) {
     }
     // ⭐⭐ D124 ③: a munka lement — közös a szállításunk és a nyelvünk; ha a társat „nem értettük”, már értjük (a bekopogó is törli:
     // ha ő frissített, és ő kopog be, nem kell kivárnunk a szünetünket).
-    await ertjukEgymast(elso?.alairo ?? null, tars);
+    await ertjukEgymast(elso?.alairo ?? null, tars, { nyelv: elso?.nyelv ?? null, szallitas: tars?.szallitas ?? null });
     // ⭐ D119 (⑤): ha a társ egy MÁSIK koinón felelt, és közös koinónk sincs vele (egy független család kapuja, vagy a régi
     // program), ez a címe nem az, ahol keressük — a kör nem veszi elértnek (`masutt`), és a társ többi címét hívja.
     if (!Array.isArray(elso?.tarsCsalad)) return elso?.masKoino ? { ...elso, masutt: true } : elso;
@@ -7258,7 +7272,7 @@ try {
           // ⭐⭐ D124 ③: a protokoll — a készülék nyelve és szállítása, és akivel nem értjük egymást (a teendővel)
           const ny = sajatNyelv(), sz = sajatSzallitas();
           const valtozat = (p) => (p[0] === p[1] ? String(p[0]) : p[0] + '–' + p[1]);
-          const nyelvKep = nyelvekKepe(await nyelvJegyzek().olvas(), Date.now());
+          const nyelvKep = await nyelvekMostaniKepe();
           kiir('A protokoll ezen a készüléken: nyelv ' + valtozat(ny) + ', szállítás ' + valtozat(sz)
             + (nyelvKep.mondatok.length ? SZIN.nem + ' — ⚠ ' + nyelvKep.mondatok.join('; ') + SZIN.vege
               : SZIN.halvany + ' — minden ismert társammal közös' + SZIN.vege));
@@ -9601,6 +9615,10 @@ try {
           if (e.mi === 'HALLAK-ERKEZETT') {
             kiir(SZIN.jo + '  ✓ ŐK IS HALLANAK MINKET (' + e.honnan + ')' + SZIN.vege);
           }
+          // ⭐⭐ D124 ④: a társ kopogásából kiderült, hogy nincs közös szállításunk (vagy hibás a jele) — kimondva
+          if (e.mi === 'NINCS-KOZOS-SZALLITAS' || e.mi === 'HIBAS-SZALLITASJEL') {
+            kiir(SZIN.nem + '  ✗ ' + ora() + ' ' + e.ok + SZIN.vege);
+          }
         }
       });
 
@@ -9701,6 +9719,9 @@ try {
 
         // ⛔ A FOGLALATOT CSAK MOST ZÁRJUK — a fájlok utolsó szelete után.
         eredmeny.halo.close();
+      } else if (eredmeny.nincsKozos) {
+        // ⭐⭐ D124 ④: a rés megnyílt (a kopogása átjött), de a kézfogás nem indulhat — a teendő a fenti mondatban.
+        kiir(SZIN.nem + '✗ A rés megnyílt, de nincs közös szállításunk — nem fogunk kezet: ' + eredmeny.nincsKozos.uzenet + SZIN.vege);
       } else if (eredmeny.sikerult) {
         // ⚠️ FÉL SIKER: az ő csomagjai átjönnek, a mieink nem. Ez is mérés, nem hiba.
         kiir(SZIN.nem + '⚠ FÉL SIKER: az ő kopogása átjött, a miénk nem.' + SZIN.vege);
@@ -11287,7 +11308,7 @@ try {
           const a = tar.allas?.();
           const tudas = (a ? a.n + ':' + a.g : '') + ':' + atmeneti.valtozas();
           // ⭐⭐ D124 ③: akivel nem értjük egymást — a sáv kimondja (hány társ fut régebbi / újabb programot, és mi a teendő)
-          const nyelvek = nyelvekKepe(await nyelvJegyzek().olvas(), Date.now());
+          const nyelvek = await nyelvekMostaniKepe();
           return { adat: { success: true, adatok: { ...kep, tudas, nyelvek, most: Date.now() } } };
         }
 

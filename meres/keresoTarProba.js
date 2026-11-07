@@ -135,12 +135,18 @@ proba('⭐⛔ A megújítás (L3): a tulajdonosé érvényes és ÚJ elem (a ré
   const halmaz = tar.regioHalmaza(0, 0n);
   // ⚠️ A FRISSEBB nyer — akkor is, ha az azonosítója a NAGYOBB (különben a holtverseny-döntő, a kisebb azonosító, véletlenül
   // ugyanazt adná, és a rontás csak az esetek felében bukna): egy későbbi megújítás, amelynek az azonosítója nagyobb.
+  // ⛔ (2026-11-07, a D124 ④ teljes során mérve — "Cannot read properties of null"): 191 próbálkozás ~1/192 eséllyel nem talált
+  // nagyobbat (ha az `uj` azonosítója épp a felső tartományba esett); most ~2000 (~1/2000), és ha mégsem, a bukás megnevezi magát.
   let uj2 = null;
-  for (let d = 9000; d < 200000 && !uj2; d += 1000) {
+  for (let d = 9000; d < 2000000 && !uj2; d += 1000) {
     const [x] = bejegyzesekEpitese({ szuletes, pontEsemenyek,
       megujitas: (esemenyek) => megujitasKeszitese(kulcs, szerzok[1].szerzo, { koino: KOINO, g: szuletes.azonosito, esemenyek,
         ido: Date.now() + d }) });
     if (bejegyzesAzonositoja(x) > bejegyzesAzonositoja(uj)) uj2 = x;
+  }
+  if (!uj2) {
+    process.stderr.write('    (a megújítás próbája: ~2000 próbálkozásból egyiknek sem lett nagyobb az azonosítója)\n');
+    return false;
   }
   const tar2 = await keresoTarNyitasa(KOINO, await ujMappa());
   await bejegyzesBefogadasa(tar2, uj2);

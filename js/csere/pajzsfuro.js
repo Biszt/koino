@@ -47,6 +47,11 @@
 // mond, mint ami a kód, ott előbb-utóbb valaki a feliratot hiszi el.*
 
 import { createSocket } from 'node:dgram';
+// ⭐⭐ D124 ④ (a ② kimaradt útja — a kézfogás-választó építésekor derült ki): a kézi fúró kopogása is viszi a szállítás jelét
+// (`sz`), a társét megnézi, és a közöset a kézfogásnak feljegyzi (a fúrás után a résen azonnal kezet fogunk). Közös nélkül az a
+// cél „kész” (nem kopogunk rá tovább), és a fúrás megnevezi (`NINCS-KOZOS-SZALLITAS`) — a KOPOG-ra a HALLAK-unk akkor is megy, hogy
+// a társ is a mi jelünkből mondja ki.
+import { sajatSzallitas, szallitasJel, szallitasEgyezese, szallitasFeljegyzese } from './nyelvValtozat.js';
 
 // ===================================
 // A KÜLSŐ PORT MEGMÉRÉSE (STUN)
@@ -276,6 +281,8 @@ export async function pajzsfuras(sajatPort, tarsCim, tarsPort, beallitas = {}) {
     // (fél siker) — mert az is mérés. A teljes sikert a `mindketIrany` mondja meg.
     sikerult: soklovas.sikerult,
     mindketIrany: cel.mindketIrany ?? false,
+    // ⭐ D124 ④: ha nincs közös szállításunk, a megnevezése (a kézfogás el sem indul)
+    nincsKozos: cel.nincsKozos ?? null,
     kuldott: soklovas.kuldott,
     kapott: soklovas.kapott,
     honnan: cel.honnan ?? soklovas.honnan,
@@ -337,6 +344,10 @@ export async function pajzsfurasTobbfele(sajatPort, celok, beallitas = {}) {
   //
   // *(A koino módszertana: egy próba, ami mindig átmegy, nem próba.)*
   const sajatAzonosito = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  // ⭐ D124 ④: a saját szállításunk — minden kopogás-csomag viszi, MINDEN alkalommal újraszámolva (a vég nélküli fúrás alatt is
+  // eljöhet a régi lépés dátuma — mint a kapunál)
+  const sajatSz = () => sajatSzallitas(beallitas);
+  const csomag = (uzenet) => JSON.stringify({ uzenet, tol: sajatAzonosito, ...szallitasJel(sajatSz()) });
 
   const kezdet = Date.now();
   let kuldott = 0, kapott = 0, honnan = null;
@@ -432,6 +443,26 @@ export async function pajzsfurasTobbfele(sajatPort, celok, beallitas = {}) {
         allapot.honnan = felado.address;
       }
 
+      // ⭐⭐ D124 ④: a szállítás jele (a KOPOG-ban és a HALLAK-ban) — közösnél feljegyezzük a kézfogásnak; közös nélkül (vagy
+      // hibás jellel) a cél kész, megnevezve, és a HALLAK-on túl semmi nem indul.
+      if (uzenet.uzenet === 'KOPOG' || uzenet.uzenet === 'HALLAK') {
+        const sz = szallitasEgyezese(uzenet, sajatSz());
+        if (sz.szallitas !== null) {
+          szallitasFeljegyzese(halo, felado.address, felado.port, sz.szallitas);
+          if (allapot) allapot.szallitas = sz.szallitas;
+        } else {
+          if (allapot && !allapot.nincsKozos) {
+            allapot.nincsKozos = { irany: sz.irany ?? null, sajat: sz.sajat ?? null, tars: sz.tars ?? null, uzenet: sz.uzenet,
+              hibas: sz.hibas === true };
+            jelez({ mi: sz.hibas ? 'HIBAS-SZALLITASJEL' : 'NINCS-KOZOS-SZALLITAS', cim: allapot.cim, port: allapot.port,
+              irany: sz.irany ?? null, ok: sz.uzenet });
+          }
+          if (uzenet.uzenet === 'KOPOG' && !sz.hibas) halo.send(csomag('HALLAK'), felado.port, felado.address);
+          if ([...allapotok.values()].every((a) => a.mindketIrany || a.nincsKozos)) befejez([...allapotok.values()].some((a) => a.mindketIrany));
+          return;
+        }
+      }
+
       if (uzenet.uzenet === 'KOPOG') {
         // Az ő csomagja átjutott hozzánk. Visszaszólunk — ettől ő is megtudja, hogy a
         // MÁSIK irány is él. ⚠️ Akkor is felelünk, ha nem ismerjük fel: lehet, hogy egy
@@ -439,8 +470,7 @@ export async function pajzsfurasTobbfele(sajatPort, celok, beallitas = {}) {
         // a csere utána ugyanúgy ellenőriz mindent.
         jelez({ mi: 'KOPOG-ERKEZETT', honnan: felado.address, port: felado.port,
           ismert: Boolean(allapot) });
-        halo.send(JSON.stringify({ uzenet: 'HALLAK', tol: sajatAzonosito }),
-          felado.port, felado.address);
+        halo.send(csomag('HALLAK'), felado.port, felado.address);
 
         // ⛔⛔ A BEKOPOGÓT CÉLNAK IS FELVESSZÜK (2026-09-25, a 40. mérés hibája).
         //
@@ -462,8 +492,7 @@ export async function pajzsfurasTobbfele(sajatPort, celok, beallitas = {}) {
             mindketIrany: false, honnan: felado.address, eltelt: null, bekopogo: true };
           allapotok.set(felado.address + ':' + felado.port, uj);
           jelez({ mi: 'BEKOPOGO-CEL', cim: felado.address, port: felado.port });
-          halo.send(JSON.stringify({ uzenet: 'KOPOG', tol: sajatAzonosito }),
-            felado.port, felado.address);
+          halo.send(csomag('KOPOG'), felado.port, felado.address);
         }
         return;
       }
@@ -491,7 +520,8 @@ export async function pajzsfurasTobbfele(sajatPort, celok, beallitas = {}) {
         }
         // ⛔ NEM ÁLLUNK MEG AZ ELSŐ SIKERNÉL, ha több társra fúrunk: a többiek rése még
         // nincs nyitva. *Csak akkor van vége, ha MINDENKI átért* — vagy lejár az ablak.
-        if ([...allapotok.values()].every((a) => a.mindketIrany)) befejez(true);
+        // ⭐ D124 ④: akivel nincs közös szállításunk, az is „kész” (arra nem fúrunk tovább).
+        if ([...allapotok.values()].every((a) => a.mindketIrany || a.nincsKozos)) befejez(true);
       }
     });
 
@@ -526,12 +556,11 @@ export async function pajzsfurasTobbfele(sajatPort, celok, beallitas = {}) {
         for (const allapot of allapotok.values()) {
           // ⭐ AKI ÁTÉRT, ARRA NEM KOPOGUNK TOVÁBB — a rés már nyitva van, a további
           // csomag csak adat (6. szabály) és akkumulátor.
-          if (allapot.mindketIrany) continue;
+          if (allapot.mindketIrany || allapot.nincsKozos) continue;
           // ⭐ Ha közben MÁS portról szólt hozzánk, oda is kopogunk: a leképezése
           // megváltozhatott azóta, hogy a címét megkaptuk.
           const celPort = allapot.masPort ?? allapot.port;
-          halo.send(JSON.stringify({ uzenet: 'KOPOG', tol: sajatAzonosito }),
-            celPort, allapot.cim, (hiba) => {
+          halo.send(csomag('KOPOG'), celPort, allapot.cim, (hiba) => {
             if (hiba) {
               // Egy sikertelen küldés önmagában nem végzetes (a hálózat változik), de ha
               // MINDEN küldés bukik, akkor a csomagjaink el sem indulnak — és ezt látni kell.

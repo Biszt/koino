@@ -22,6 +22,14 @@
 // (`NEM_ERTJUK_KORLAT`), és a rég nem látott bejegyzés elévül (`NEM_ERTJUK_LATSZIK`). Készülék-szintű: a nyelv a programé, nem a
 // koinóé (a család minden koinója ugyanazon a kapun beszél).
 //
+// ===== ⭐⭐ D124 ④ (⑦): AKIVEL MÉG A RÉGIN BESZÉLÜNK =====
+//
+// Ha egy munka a társsal a mi legújabbunknál RÉGEBBI nyelven vagy szállításon ment le (a fordító-szél, a kézfogás-választó), a
+// társ csak a régit beszéli (a közös a két legújabb közül a kisebbik). Amíg a régi lépésünk dátuma messze van, ez rendben van —
+// csendben fordítunk; ha `REGIN_ELORE_NAP` napon belül jön, a lap és a parancs kimondja: utána nem cseréltek, amíg nem frissít. A
+// bejegyzés a `regin` alatt (társanként: a tábla-aláíró, különben a cím), a legutóbbi munka szerint; ha a közös a legújabb,
+// törlődik. Ugyanaz az elévülés és korlát, mint a „nem értjük”-é.
+//
 // Hálózatot nem importál, fájlt nem ír (a tároló a `fajlTar.js`-é: `nyelvJegyzekTarolo`). Használja: koino.js (az őrjárat köre, a
 // munka, a lap `/api/csere-allapot`-ja, a `koino` parancs), a próbák (`meres/nyelvProba.js`).
 
@@ -33,13 +41,17 @@ export const NEM_ERTJUK_SZUNET = 6 * 3600 * 1000;
 export const NEM_ERTJUK_LATSZIK = 7 * 24 * 3600 * 1000;
 /** Legfeljebb ennyi társat jegyzünk (a legrégebben látott esik ki). */
 export const NEM_ERTJUK_KORLAT = 256;
+/** ⭐ D124 ④ (⑦): ennyi nappal a régi lépés dátuma előtt szól a lap, ha van társad, aki csak a régit beszéli. */
+export const REGIN_ELORE_NAP = 30;
+/** A „régin” bejegyzés ideje ennél ritkábban frissül (a hétköznapi munka így nem ír minden alkalommal). */
+const REGIN_FRISSITES = 3600 * 1000;
 
 const IRANYOK = new Set(['regebbi', 'ujabb']);
 const RETEGEK = new Set(['szallitas', 'nyelv']);
 
 /** Üres jegyzék. */
 export function uresNyelvJegyzek() {
-  return { tarsak: {} };
+  return { tarsak: {}, regin: {} };
 }
 
 const idopont = (x) => (Number.isFinite(x) && x > 0 ? x : null);
@@ -52,6 +64,17 @@ const par = (p) => (Array.isArray(p) && p.length === 2 && p.every((x) => Number.
  */
 export function nyelvJegyzekAlakja(nyers) {
   const j = uresNyelvJegyzek();
+  // ⭐ D124 ④: akivel a régin beszélünk (a változat-szám, ha a mi legújabbunknál régebbi; különben null)
+  const r = nyers?.regin;
+  if (r && typeof r === 'object' && !Array.isArray(r)) {
+    const szam = (x) => (Number.isSafeInteger(x) && x >= 1 ? x : null);
+    for (const [kulcs, b] of Object.entries(r)) {
+      if (typeof kulcs !== 'string' || kulcs.length > 128 || !b || typeof b !== 'object' || !idopont(b.utoljara)) continue;
+      const nyelv = szam(b.nyelv), szallitas = szam(b.szallitas);
+      if (nyelv === null && szallitas === null) continue;
+      j.regin[kulcs] = { nyelv, szallitas, utoljara: b.utoljara };
+    }
+  }
   const t = nyers?.tarsak;
   if (!t || typeof t !== 'object' || Array.isArray(t)) return j;
   for (const [kulcs, b] of Object.entries(t)) {
@@ -119,7 +142,7 @@ export function korMegfigyelesei(j, eredmenyek, kulcsa, most) {
     valtozott = true;
   }
   if (!valtozott) return { jegyzek: j, szunetre, valtozott };
-  return { jegyzek: { tarsak: rendrakas(tarsak, most) }, szunetre, valtozott };
+  return { jegyzek: { ...j, tarsak: rendrakas(tarsak, most) }, szunetre, valtozott };
 }
 
 /**
@@ -133,7 +156,36 @@ export function ertjukFeljegyzese(j, kulcsok) {
   if (!torlendo.length) return j;
   const tarsak = { ...j.tarsak };
   for (const k of torlendo) delete tarsak[k];
-  return { tarsak };
+  return { ...j, tarsak };
+}
+
+/**
+ * ⭐⭐ D124 ④ (⑦): egy lement munka közös nyelve és szállítása a társsal. Ha valamelyik régebbi a mi legújabbunknál, feljegyezzük
+ * (a társ csak a régit beszéli); ha a közös a legújabb, a bejegyzés törlődik. Amit a munka nem mondott meg (null — nem csere volt),
+ * az a régi bejegyzésé marad.
+ * @param {Object} j
+ * @param {string|null} kulcs - a társ kulcsa (`nemErtjukKulcsa`)
+ * @param {{nyelv: number|null, szallitas: number|null}} kozos - a munka közös nyelve és szállítása
+ * @param {{nyelv: number, szallitas: number}} legujabb - a mi legújabbunk
+ * @param {number} most
+ * @returns {Object} a jegyzék (ugyanaz az objektum, ha nincs változás — a tároló így nem ír)
+ */
+export function reginFeljegyzese(j, kulcs, kozos, legujabb, most) {
+  if (typeof kulcs !== 'string' || !kulcs) return j;
+  const ny = Number.isSafeInteger(kozos?.nyelv) ? kozos.nyelv : null;
+  const sz = Number.isSafeInteger(kozos?.szallitas) ? kozos.szallitas : null;
+  if (ny === null && sz === null) return j;
+  const regi = j?.regin?.[kulcs] ?? null;
+  const nyelv = ny === null ? regi?.nyelv ?? null : ny < legujabb.nyelv ? ny : null;
+  const szallitas = sz === null ? regi?.szallitas ?? null : sz < legujabb.szallitas ? sz : null;
+  if (nyelv === null && szallitas === null) {
+    if (!regi) return j;
+    const regin = { ...j.regin };
+    delete regin[kulcs];
+    return { ...j, regin };
+  }
+  if (regi && regi.nyelv === nyelv && regi.szallitas === szallitas && most - regi.utoljara < REGIN_FRISSITES) return j;
+  return { ...j, regin: rendrakas({ ...(j?.regin ?? {}), [kulcs]: { nyelv, szallitas, utoljara: most } }, most) };
 }
 
 /** Az elévült bejegyzések ki, és a korlát (a legrégebben látott esik ki). */
@@ -146,11 +198,14 @@ function rendrakas(tarsak, most) {
 /**
  * ⭐⭐ A KIMONDÁS — a lapnak és a parancsnak ugyanaz: hány MEGERŐSÍTETT (a határt elért, nem elévült) társ fut régebbi, és hány
  * újabb programot, és a mondatok a teendővel. ⚠️ A lap ebből csak kiír (nem számol).
+ * ⭐⭐ D124 ④ (⑦): ÉS akivel még a régin beszélünk, ha a régi lépésünk dátuma `REGIN_ELORE_NAP` napon belül jön — a `lejarok`
+ * a készülék lejáró lépései (`nyelvValtozat.js` `lejaroValtozatok`; ha nincs megadva, ez a rész néma).
  * @param {Object} j
  * @param {number} most
- * @returns {{ regebbi: number, ujabb: number, mondatok: string[] }}
+ * @param {{nyelv: Array, szallitas: Array}} [lejarok]
+ * @returns {{ regebbi: number, ujabb: number, lejaro: number, mondatok: string[] }}
  */
-export function nyelvekKepe(j, most) {
+export function nyelvekKepe(j, most, lejarok = null) {
   let regebbi = 0, ujabb = 0;
   for (const b of Object.values(j?.tarsak ?? {})) {
     if (b.egymasUtan < NEM_ERTJUK_HATAR || most - b.utoljara > NEM_ERTJUK_LATSZIK) continue;
@@ -167,5 +222,27 @@ export function nyelvekKepe(j, most) {
     mondatok.push(regebbi + ' társad régebbi programot futtat — amíg nem ' + (regebbi === 1 ? 'frissít' : 'frissítenek')
       + ', nem cseréltek');
   }
-  return { regebbi, ujabb, mondatok };
+  // ⭐ D124 ④ (⑦): akivel még a régin beszélünk, és a régi lépésünk hamarosan lejár — rétegenként egy mondat
+  const lejaroTarsak = new Set();
+  for (const [mi, nev] of [['nyelv', 'nyelvet'], ['szallitas', 'szállítást']]) {
+    const lepesek = Array.isArray(lejarok?.[mi]) ? lejarok[mi] : [];
+    let db = 0, legkorabbi = null, legregebbi = null;
+    for (const [kulcs, b] of Object.entries(j?.regin ?? {})) {
+      const v = b[mi];
+      if (!Number.isSafeInteger(v) || most - b.utoljara > NEM_ERTJUK_LATSZIK || !lepesek.some((x) => x.nyelv === v)) continue;
+      // a v-t addig beszéljük, amíg a v-től fölfelé MINDEN lépésünk él: a legkorábbi dátumuk a határ
+      const hatar = lepesek.filter((x) => x.nyelv >= v).reduce((a, x) => (!a || x.napMulva < a.napMulva ? x : a), null);
+      if (!hatar || hatar.napMulva > REGIN_ELORE_NAP) continue;
+      db++;
+      lejaroTarsak.add(kulcs);
+      if (!legkorabbi || hatar.napMulva < legkorabbi.napMulva) legkorabbi = hatar;
+      if (legregebbi === null || v < legregebbi) legregebbi = v;
+    }
+    if (db) {
+      mondatok.push(db + ' társad még csak a régi (' + legregebbi + '.) ' + nev + ' beszéli — a programod ' + legkorabbi.napMulva
+        + ' nap múlva (' + legkorabbi.meddig + ') már nem beszéli: ha addig nem ' + (db === 1 ? 'frissít' : 'frissítenek')
+        + ', utána nem cseréltek');
+    }
+  }
+  return { regebbi, ujabb, lejaro: lejaroTarsak.size, mondatok };
 }

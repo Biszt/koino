@@ -8652,6 +8652,81 @@ proba('⭐⭐ D124 ③: a „2-es” társak (szállítás és nyelv) — 3 kör
     }
   });
 
+// ⭐⭐ D124 ④ — A FORDÍTÓ-SZÉL ÉS A KÉZFOGÁS-VÁLASZTÓ, a valódi programmal: egy KITALÁLT 2-es nyelvű és szállítású készülék
+// (`KOINO_PROBANYELV`, `KOINO_PROBASZALLITAS` — az 1-es lépése 10 nap múlva jár le) postaládát nyit; egy mai (1-es) és egy
+// „csak 2-es” készülék (az 1-es lépése lejárt) cserél vele. ⭐ Viselkedést mérünk: a gondolat a másik készülék LEMEZÉRE kerül —
+// az 1-essel a régi nyelven és szállításon (a szél fordít, a kézfogás a régi kulcsokkal), a 2-essel a kitalált 2-esen (ahol az
+// 1-es alak és a régi kulcs nem menne át). A `koino` parancs a dátumból számolt változatot mondja (1–2, illetve 2), és ⭐ (a ⑦
+// dátuma) a gazda parancsa és lapja kimondja: az 1-es társ csak a régit beszéli, és a régi lépés 10 nap múlva lejár.
+// Rontás: (a) a kapu nem jegyzi fel a közös szállítást → a kézfogás a legrégebbivel → a 2-es nem fog kezet → bukik; (b) a
+// kézfogás nem a feljegyzett szállítással (mindig a legújabbal) → az 1-es nem → bukik; (c) a csere kimenője nem a szélen → az
+// 1-es nem érti → bukik; (d) a nyelv nem a környezetből (a valódi folyamat nem „2-es”) → a parancs nem 1–2 → bukik; (e) a
+// családi munka nem adja át a közös nyelvet és szállítást → nincs „régin” bejegyzés → bukik; (f) a lap nem a lejáró lépésekkel kér
+// képet → bukik.
+proba('⭐⭐ D124 ④: a kitalált 2-es nyelvű és szállítású postaláda — a mai (1-es) és a „csak 2-es” készülék is megkapja a gondolatát, a `koino` parancs a dátumból számolt változatot mondja',
+  async () => {
+    const g = await ujKeszulek(), v1 = await ujKeszulek(), v2 = await ujKeszulek();
+    const PG = 7986, FG = 7988;
+    const helyben = { KOINO_DHT_BELEPOK: 'nincs', KOINO_TUKOR: '127.0.0.1:9' };
+    const k12 = { ...helyben, KOINO_PROBANYELV: '10', KOINO_PROBASZALLITAS: '10' };
+    const k2 = { ...helyben, KOINO_PROBANYELV: '-1', KOINO_PROBASZALLITAS: '-1' };
+    const tiszta = (x) => String(x).replace(/\x1b\[[0-9;]*m/g, '');
+    let figyelo = null, gNaplo = '', fg = null;
+    const kimenet = {};
+    try {
+      await fut(g, 'koino', 'Fordító-próba', 'nyilt', k12);
+      const K = await koinoNeve(g);
+      if (!K) return false;
+      await fut(g, 'gondolat', 'A KITALÁLT GONDOLAT', k12);
+      await fut(v1, 'csatlakoz', K, helyben);
+      await fut(v2, 'csatlakoz', K, k2);
+      figyelo = spawn(process.execPath, [KOINO_JS, 'figyel', String(PG)],
+        { env: { ...process.env, KOINO_ADAT: g, KOINO_NAPLO: '', ...k12 }, stdio: ['ignore', 'pipe', 'pipe'] });
+      figyelo.stdout.on('data', (x) => { gNaplo += x; });
+      await varj(2000);
+      kimenet.v1 = tiszta(await fut(v1, 'csere', '127.0.0.1', String(PG), helyben).catch((h) => String(h?.message ?? h)));
+      kimenet.v2 = tiszta(await fut(v2, 'csere', '127.0.0.1', String(PG), k2).catch((h) => String(h?.message ?? h)));
+      const lemezen = async (hely) => (await readFile(join(hely, K, 'esemenyek.jsonl'), 'utf8').catch(() => ''))
+        .split('\n').filter(Boolean).some((x) => JSON.parse(x).adat?.cim === 'A KITALÁLT GONDOLAT');
+      kimenet.pg = tiszta(await fut(g, 'koino', k12));
+      kimenet.p2 = tiszta(await fut(v2, 'koino', k2));
+      kimenet.p1 = tiszta(await fut(v1, 'koino', helyben));
+      // ⭐ a ⑦ dátuma: a gazda a lapján is (a felület ugyanazzal a kitalált készlettel fut)
+      figyelo.kill();
+      await varj(500);
+      fg = await feluletet(g, FG, k12);
+      const ny = (await fg.hiv('/api/csere-allapot')).adat?.adatok?.nyelvek ?? null;
+      const jegyzek = JSON.parse(await readFile(join(g, 'nyelvek.json'), 'utf8').catch(() => '{}'));
+      const ki = {
+        egyesKapta: await lemezen(v1),
+        kettesKapta: await lemezen(v2),
+        parancs12: /A protokoll ezen a készüléken: nyelv 1–2, szállítás 1–2/.test(kimenet.pg),
+        parancs2: /A protokoll ezen a készüléken: nyelv 2, szállítás 2/.test(kimenet.p2),
+        parancs1: /A protokoll ezen a készüléken: nyelv 1, szállítás 1/.test(kimenet.p1),
+        // ⭐ a ⑦ dátuma: egy „régin” bejegyzés (az 1-es társ — a 2-es közös a legújabb, nincs bejegyzése), a parancs és a lap kimondja
+        regin: Object.values(jegyzek.regin ?? {}).length === 1 && Object.values(jegyzek.regin)[0].nyelv === 1
+          && Object.values(jegyzek.regin)[0].szallitas === 1,
+        reginParancs: /1 társad még csak a régi \(1\.\) nyelvet beszéli — a programod 10 nap múlva/.test(kimenet.pg)
+          && /1 társad még csak a régi \(1\.\) szállítást beszéli — a programod 10 nap múlva/.test(kimenet.pg),
+        reginLap: ny?.lejaro === 1 && ny.mondatok?.length === 2
+      };
+      const ok = Object.values(ki).every(Boolean);
+      if (!ok) {
+        process.stderr.write('    (D124 ④: ' + JSON.stringify({ ...ki, ny, regin: jegyzek.regin }) + ')\n'
+          + '    (v1 csere: ' + kimenet.v1.replace(/\s+/g, ' ').slice(-500) + ')\n'
+          + '    (v2 csere: ' + kimenet.v2.replace(/\s+/g, ' ').slice(-500) + ')\n'
+          + '    (a gazda: ' + tiszta(gNaplo).replace(/\s+/g, ' ').slice(-700) + ')\n'
+          + '    (a parancsok: ' + [kimenet.pg, kimenet.p2, kimenet.p1].map((x) => (x ?? '').replace(/\s+/g, ' ').slice(-250)).join(' | ') + ')\n');
+      }
+      return ok;
+    } finally {
+      if (fg) fg.folyamat.kill();
+      if (figyelo) figyelo.kill();
+      await varj(800);
+      for (const h of [g, v1, v2]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
 export default futtatas;
 
 // Önállóan is futtatható: node meres/parancssorProba.js

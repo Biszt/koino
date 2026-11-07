@@ -410,20 +410,25 @@ export class AlsoSav {
 
   /**
    * ⭐⭐ D124 ③: akivel nem értjük egymást — ha van ilyen társ, a sáv kimondja (különben rejtve). Ha valaki ÚJABB programot futtat,
-   * az a hangsúlyos (neked van teendőd: frissíts); ha csak régebbi, a szám. A teljes mondat (a teendővel) a címkében.
+   * az a hangsúlyos (neked van teendőd: frissíts); ha csak régebbi, a szám. A teljes mondat (a teendővel) a címkében. ⭐ D124 ④ (⑦):
+   * és ha egy társ csak a régit beszéli, és a régi lépésünk 30 napon belül lejár, az is (a nap a címkében).
    */
   _nyelvKiirasa() {
     const elem = document.getElementById('info-nyelv');
     const elv = document.getElementById('info-nyelv-elvalaszto');
     if (!elem) return;
     const n = this.csere?.nyelvek;
-    const mutat = !!n && (n.ujabb > 0 || n.regebbi > 0);
+    const mutat = !!n && (n.ujabb > 0 || n.regebbi > 0 || n.lejaro > 0);
     elem.hidden = !mutat;
     if (elv) elv.hidden = !mutat;
     if (!mutat) return;
-    elem.textContent = n.ujabb > 0 ? '⚠ frissíts' : '⚠ ' + n.regebbi + ' régebbi társ';
-    elem.title = (n.mondatok ?? []).join('\n') + '\n(Ezekkel a társakkal a program nem tud cserélni: nincs közös nyelvetek. Amíg így '
-      + 'van, órákig nem hívja őket — ha a régebbi programot futtató fél frissít, a következő találkozáskor újra cseréltek.)';
+    // ⭐ D124 ④ (⑦): ha csak a lejáró régi lépés miatt szól (a csere ma még megy), a szám és a szó más
+    elem.textContent = n.ujabb > 0 ? '⚠ frissíts' : n.regebbi > 0 ? '⚠ ' + n.regebbi + ' régebbi társ'
+      : '⚠ ' + n.lejaro + ' társ a régin';
+    elem.title = (n.mondatok ?? []).join('\n') + (n.ujabb > 0 || n.regebbi > 0
+      ? '\n(Ezekkel a társakkal a program nem tud cserélni: nincs közös nyelvetek. Amíg így van, órákig nem hívja őket — ha a '
+        + 'régebbi programot futtató fél frissít, a következő találkozáskor újra cseréltek.)'
+      : '\n(Ma még cseréltek: a program a régi nyelven is beszél velük — de csak a kiírt napig. Ha addig frissítenek, nincs teendő.)');
   }
 
   /**

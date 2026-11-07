@@ -60,10 +60,11 @@ import {
 } from './vonal.js';
 import { KERELEM_KORLAT } from './fajlKerelem.js';
 // ⭐ D89/1: a csere titkosítása — a kézfogás és a csomagok kriptográfiája (hálózat nélkül).
-import {
-  ujEgyszeriKulcs, kezfogasCsomag, kezfogasCsomagbol, munkamenetKulcsai, csomagTitkositasa,
-  csomagKititkositasa, kezfogasAlairasEllenorzese, szemelyesKezfogasEllenorzese, KF_JEL
-} from './titkositas.js';
+import { kezfogasAlairasEllenorzese, szemelyesKezfogasEllenorzese } from './titkositas.js';
+// ⭐⭐ D124 ④: A KÉZFOGÁS-VÁLASZTÓ — a kézfogás és a védett rés a KÖZÖS szállítás-nemzedék részeivel dolgozik (a kapu a kopogásból
+// feljegyzi, `nyelvValtozat.js`); a részek a szállítás jegyzékéből (`forditoSzel.js`).
+import { sajatSzallitas, szallitasKeszlet, feljegyzettSzallitas } from './nyelvValtozat.js';
+import { szallitasReszei } from './forditoSzel.js';
 
 const AZONOSITO = /^[A-Za-z0-9_-]{43}$/;
 
@@ -286,6 +287,11 @@ const UTOHANG = 2000;
 // rétegben van — ha a hívóra bíznánk, az egyik út megtenné, a másik elfelejtené.* Egy munkán belül (csere,
 // aztán randevú) a hívó egyszer fog kezet, és a védett rést adja tovább: a kézfogás munkánként EGY.
 //
+// ⭐⭐ D124 ④: A KÉZFOGÁS-VÁLASZTÓ — a kézfogás a KÖZÖS szállítás-nemzedékkel fog kezet: amit a kapu a kopogás jeléből ehhez a
+// társhoz feljegyzett (`nyelvValtozat.js` `feljegyzettSzallitas`), annak a részeivel (`forditoSzel.js` `szallitasReszei` — az
+// egyszeri kulcs, a kézfogás-csomag, a kulcsok, a csomag titkosítása); feljegyzés nélkül a legrégebbivel, amit beszélünk. A védett
+// rés ugyanazokkal a részekkel dolgozik.
+//
 // A kézfogás: mindkét fél elküldi a 33 bájtos kézfogás-csomagját (`[KF_JEL][egyszeri kulcs]`), és
 // `KF_ISMETLES`-enként ismétli, amíg a társét meg nem kapja. Ha a mienk elveszett (vagy a társ később indult),
 // ő ismétli a sajátját, és a védett rés minden ilyenre felel — amíg tőle titkosított csomag nem jön (onnan
@@ -305,14 +311,17 @@ const KF_VALASZ_KOZ = 200;
  * @param {{kuldo: Buffer, fogado: Buffer, atirat: Buffer}} kulcsok
  * @param {Buffer} kf - a saját kézfogás-csomagunk (a késve kezet fogó társnak)
  * @param {{kuldott: number, kapott: number}} [kezdo] - a kézfogás bájtjai (a mérésnek)
+ * @param {Object} [reszek] - ⭐ D124 ④: a közös szállítás-nemzedék részei (`szallitasReszei`; alapból a mai)
+ * @param {number|null} [szallitas] - ⭐ D124 ④: a közös szállítás száma (a próbáknak és a naplónak)
  */
-export function vedettHalo(halo, tarsCim, tarsPort, kulcsok, kf, kezdo = { kuldott: 0, kapott: 0 }) {
+export function vedettHalo(halo, tarsCim, tarsPort, kulcsok, kf, kezdo = { kuldott: 0, kapott: 0 },
+  reszek = szallitasReszei(szallitasKeszlet(), sajatSzallitas()[1]), szallitas = null) {
   const figyelok = new Set();
   let szamlalo = 0, titkosJott = false, utolsoKfValasz = 0, lezarva = false;
   let kuldott = kezdo.kuldott, kapott = kezdo.kapott;
   const nyers = (adat, felado) => {
     if (felado.address !== tarsCim || felado.port !== tarsPort) return;
-    if (adat[0] === KF_JEL) {
+    if (reszek.kezfogasCsomagbol(adat)) {
       // ⭐ A társ még nem kapta meg a mienket — felelünk (de csak amíg tőle titkosított nem jött).
       if (!titkosJott && !lezarva && Date.now() - utolsoKfValasz > KF_VALASZ_KOZ) {
         utolsoKfValasz = Date.now();
@@ -321,7 +330,7 @@ export function vedettHalo(halo, tarsCim, tarsPort, kulcsok, kf, kezdo = { kuldo
       }
       return;
     }
-    const ki = csomagKititkositasa(kulcsok.fogado, adat);
+    const ki = reszek.csomagKititkositasa(kulcsok.fogado, adat);
     if (!ki) return;                 // hamis, sérült, más kulcsú vagy nyílt: nem ennek a beszélgetésnek szól
     titkosJott = true;
     kapott += adat.length;
@@ -331,9 +340,10 @@ export function vedettHalo(halo, tarsCim, tarsPort, kulcsok, kf, kezdo = { kuldo
   return {
     vedett: true,
     atirat: kulcsok.atirat,
+    szallitas,
     send(adat, port, cim, visszahivas) {
       if (cim !== tarsCim || port !== tarsPort) throw new Error('a védett rés csak a társnak küld');
-      const cs = csomagTitkositasa(kulcsok.kuldo, ++szamlalo,
+      const cs = reszek.csomagTitkositasa(kulcsok.kuldo, ++szamlalo,
         Buffer.isBuffer(adat) ? adat : Buffer.from(String(adat)));
       kuldott += cs.length;
       halo.send(cs, port, cim, visszahivas);
@@ -358,14 +368,26 @@ export function vedettHalo(halo, tarsCim, tarsPort, kulcsok, kf, kezdo = { kuldo
  * @param {Object} halo - a nyers (átfúrt) foglalat
  * @param {string} tarsCim
  * @param {number} tarsPort
- * @param {Object} [beallitas] - `varakozasiIdo`: ennyi után feladjuk (alap: `TETLENSEG_ALAP`)
+ * @param {Object} [beallitas] - `varakozasiIdo`: ennyi után feladjuk (alap: `TETLENSEG_ALAP`); ⭐ D124 ④: `kozosSzallitas` (a
+ *        közös szállítás — ha nincs, amit a kapu ehhez a társhoz feljegyzett; ha az sincs, a legrégebbi, amit beszélünk),
+ *        `szallitasKeszlet` (csak próbának)
  * @returns {Promise<Object>} a védett rés (`vedettHalo`)
  */
 export async function kezfogasUdpResen(halo, tarsCim, tarsPort, beallitas = {}) {
   const varakozasiIdo = beallitas.varakozasiIdo ?? TETLENSEG_ALAP;
-  console.log('kezfogasUdpResen - KEZDÉS', { tarsCim, tarsPort });
-  const sajat = ujEgyszeriKulcs();
-  const kf = kezfogasCsomag(sajat.nyilvanos);
+  // ===== ⭐⭐ D124 ④: A KÉZFOGÁS-VÁLASZTÓ =====
+  //
+  // A közös szállítás a hívóé, vagy (a hétköznapi út) amit a kapu a kopogás jeléből ehhez a társhoz feljegyzett. Ha egyik sincs
+  // (kopogás nélküli út — a próbák), a legrégebbi, amit beszélünk: az átmenet alatt a régi és az új társ is érti. ⚠️ Ami kívül esik
+  // a sajátunkon (egy elavult feljegyzés), az sem számít — akkor is a legrégebbi.
+  const sajatSz = sajatSzallitas(beallitas);
+  const kert = Number.isSafeInteger(beallitas.kozosSzallitas) ? beallitas.kozosSzallitas
+    : feljegyzettSzallitas(halo, tarsCim, tarsPort);
+  const szallitas = Number.isSafeInteger(kert) && kert >= sajatSz[0] && kert <= sajatSz[1] ? kert : sajatSz[0];
+  const r = szallitasReszei(szallitasKeszlet(beallitas), szallitas);
+  console.log('kezfogasUdpResen - KEZDÉS', { tarsCim, tarsPort, szallitas });
+  const sajat = r.ujEgyszeriKulcs();
+  const kf = r.kezfogasCsomag(sajat.nyilvanos);
   const bajtok = { kuldott: 0, kapott: 0 };
   const kuldKf = () => { bajtok.kuldott += kf.length; halo.send(kf, tarsPort, tarsCim, () => {}); };
   const tarsE = await new Promise((teljesul, elakad) => {
@@ -377,7 +399,7 @@ export async function kezfogasUdpResen(halo, tarsCim, tarsPort, beallitas = {}) 
     };
     const figyel = (adat, felado) => {
       if (felado.address !== tarsCim || felado.port !== tarsPort) return;
-      const e = kezfogasCsomagbol(adat);
+      const e = r.kezfogasCsomagbol(adat);
       if (!e) return;
       bajtok.kapott += adat.length;
       vege();
@@ -393,9 +415,9 @@ export async function kezfogasUdpResen(halo, tarsCim, tarsPort, beallitas = {}) 
       elakad(new Error('A társ nem fogott kezet (' + varakozasiIdo + ' ms) — régi program, vagy nem felel'));
     }, varakozasiIdo);
   });
-  const kulcsok = munkamenetKulcsai(sajat, tarsE);
-  console.log('kezfogasUdpResen - VÉGE', { tarsCim, tarsPort });
-  return vedettHalo(halo, tarsCim, tarsPort, kulcsok, kf, bajtok);
+  const kulcsok = r.munkamenetKulcsai(sajat, tarsE);
+  console.log('kezfogasUdpResen - VÉGE', { tarsCim, tarsPort, szallitas });
+  return vedettHalo(halo, tarsCim, tarsPort, kulcsok, kf, bajtok, r, szallitas);
 }
 
 /** Védett rés a munkának: ha már az (a hívó egyszer fogott kezet), azt adjuk; ha nem, most fogunk. */
@@ -416,6 +438,13 @@ async function vedettResre(halo, tarsCim, tarsPort, beallitas) {
  */
 function kerelemTablaja(beallitas, h) {
   return beallitas.tablaKulcs && typeof h.alairas === 'string' ? { kulcs: beallitas.tablaKulcs, aa: h.alairas } : null;
+}
+
+/** ⭐ D124: a próbák nyelve (`nyelv` — egy pár) és ④ a nyelv-készlete (`nyelvKeszlet` — a kitalált 2-es) a vonal hívásaiba. */
+function probaNyelve(beallitas) {
+  return { ...(beallitas.nyelv ? { nyelv: beallitas.nyelv } : {}),
+    ...(beallitas.szallitasKeszlet ? { szallitasKeszlet: beallitas.szallitasKeszlet } : {}),
+    ...(beallitas.nyelvKeszlet ? { nyelvKeszlet: beallitas.nyelvKeszlet } : {}) };
 }
 
 function kezfogasHitelesitese(res, beallitas, koino = null) {
@@ -1390,7 +1419,7 @@ export async function fajlRandevu(nyersHalo, tarsCim, tarsPort, beallitas = {}) 
         const fk = typeof fajlKorlat === 'function' ? fajlKorlat(lenyomat) : null;
         const e = await fajlUdpResen(halo, tarsCim, tarsPort, blob, koino, lenyomat,
           { korlat: Number.isSafeInteger(fk) ? fk : korlat, varakozasiIdo, torlodasJel: jel,
-            ...(beallitas.nyelv ? { nyelv: beallitas.nyelv } : {}),   // ⭐ D124: a próbák nyelve
+            ...probaNyelve(beallitas),   // ⭐ D124: a próbák nyelve (④: a nyelv-készlet is)
             ...(munka ? { munka, adott: () => kozosMunka.adott(lenyomat, forras) } : {}),
             ...(Number.isFinite(feladasIdo) && feladasIdo > 0 ? { feladasIdo } : {}) });
         if (Number.isInteger(e.kesobb)) {
@@ -1477,7 +1506,7 @@ export async function fajlRandevu(nyersHalo, tarsCim, tarsPort, beallitas = {}) 
           return it?.szabad === false ? (Number.isInteger(it.kesobb) && it.kesobb > 0 ? it.kesobb : 60) : null;
         } : null;
         const e = await fajlKiszolgalas(kapcsolat, olvas, { ...(keretKesobb ? { kesobb: keretKesobb } : {}),
-          ...(beallitas.nyelv ? { nyelv: beallitas.nyelv } : {}) });   // ⭐ D124: a próbák nyelve
+          ...probaNyelve(beallitas) });   // ⭐ D124: a próbák nyelve (④: a nyelv-készlet is)
         if (kiszolgalasiKeret && (kapcsolat.bytesWritten ?? 0) > 0) {
           await kiszolgalasiKeret.feljegyez({ ...(keretTars ?? { cim: tarsCim }), bajt: kapcsolat.bytesWritten, keres: 1 });
         }
@@ -1583,7 +1612,7 @@ export async function szeletUdpResen(halo, tarsCim, tarsPort, tar, koino, entita
     const eredmeny = await szeletKapcsolaton(tar, koino, kapcsolat, entitas, beallitas.tovabb ?? {},
       { ki: h.ki, tabla: kerelemTablaja(beallitas, h), tagsagiCsomag: beallitas.tagsagiCsomag,
         meghivoBizonyitek: beallitas.meghivoBizonyitek, utkozesben: utkozesKiszolgalo(res, beallitas),
-        ...(beallitas.nyelv ? { nyelv: beallitas.nyelv } : {}) });   // ⭐ D124: a próbák nyelve
+        ...probaNyelve(beallitas) });   // ⭐ D124: a próbák nyelve (④: a nyelv-készlet is)
     // ⚠️ Előbb kiürítés — a kérésünk nyugtája még úton lehet (ugyanaz az ok, mint a cserénél).
     await kapcsolat.kiurites();
     console.log('szeletUdpResen - VÉGE', eredmeny);
@@ -1669,7 +1698,7 @@ export async function valaszUdpResen(halo, tarsCim, tarsPort, koino, valasz, bea
   });
   try {
     const eredmeny = await valaszKapcsolaton(kapcsolat, koino, valasz,
-      beallitas.nyelv ? { nyelv: beallitas.nyelv } : {});   // ⭐ D124: a próbák nyelve
+      probaNyelve(beallitas));   // ⭐ D124: a próbák nyelve (④: a nyelv-készlet is)
     await kapcsolat.kiurites();
     return eredmeny;
   } finally {

@@ -51,10 +51,17 @@ kapuval is. ✅ **③ az emlékezet és a kimondás** (elágazás 243): `js/cser
 eredménye a nyelv hiányát is mondja (`nincsKozos`, a réteggel); 3 egymás utáni kör után 6 óra szünet (nem egy, hamisítható
 csomagra), bármelyik lement munka törli (a frissített társ bekopogása is); kimondva az őrjárat naplójában, a lap alsó sávjában
 (`/api/csere-allapot` → `nyelvek`) és a `koino` parancsban; a parancssor-próba két valódi „2-es” készülékkel (`KOINO_SZALLITAS`,
-`KOINO_NYELV` — csak próbának). ⏭️ **④ a fordító-szél** és a régi számítások jegyzéke (egy kitalált 2-essel) → ⑤ a kiírt alakok.
+`KOINO_NYELV` — csak próbának). ✅ **④ a fordító-szél, a kézfogás-választó és a régi lépések dátuma** (elágazás 244):
+`js/csere/forditoSzel.js` — a régi nyelvek és szállítások jegyzéke (ma üresen, lépésenként a dátummal), a legrégebbi beszélt
+változat ebből (a külön szám kikerült); a szél a vonal ÜZENETSORÁBAN (a közös nyelv után a kimenő a régi alakra, a bejövő az újra —
+az első üzenetek érintetlenek), a közös számítás a közös nyelvé (`sor.szamitas`); a kézfogás a kapu feljegyzéséből a közös
+szállítással fog kezet; a ⑦ dátuma: akivel a régin beszélünk, azt a lap és a `koino` parancs 30 nappal előbb kimondja (`nyelvek.json`
+`regin`). ⛔ Az építés lelete: a kézi `pajzsfuro` saját kopogása a ②-ből kimaradt — most az is viszi a jelet. A próba egy KITALÁLT
+2-essel (`KOINO_PROBANYELV`, `KOINO_PROBASZALLITAS` — a lépés dátuma napokban; csak próbának), a valódi régi programmal és három
+valódi folyamattal. ⏭️ **⑤ a kiírt alakok** szabálya (PV5) és a meglévők változatjele.
 
-**Az állapot:** **1406 önpróba** (65 próba-fájl; a legutóbbi teljes soron mind zöld — 2026-11-07, a D124 ③ után; előtte a
-D124 ② után is) · 364 fájl / 7129,4 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1415 önpróba** (65 próba-fájl; a legutóbbi teljes soron mind zöld — 2026-11-07, a D124 ④ után, a második
+teljes soron; az elsőn 1413/1415 — a két bukás a „Kisebb nyitottak” alatt) · 365 fájl / 7206,4 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8
@@ -456,7 +463,7 @@ most legfeljebb kétszer újrapróbál, és ha így sem, a bukás megnevezi (ros
 — a tétlenségi óra); magában 5/5 zöld — ugyanaz a jelenség, mint a lenti lezárás-próbáé: a 10 mp-es óra terhelés alatt;
 MÉRENDŐ (mi hallgat el 10 mp-ig 30% veszteség mellett?), nem hangolandó · ⚠️ (2026-10-11) a `csereProba` „a lezárás NEM dobhatja el az utolsó darabot (5×)” próbája a
 teljes sor terhelése alatt egyszer bukott (a 10 mp-es tétlenségi óra — „a másik fél nem válaszol”); magában 5/5, a `csere`
-témakör egészében 363/363 zöld; 2026-11-06-án harmadszor (a D124 ② teljes során, 1402/1403 — magában 3 × 108/108, a következő teljes soron 1403/1403) — a bukásnak meg kell neveznie az okát, mielőtt bárki az időzítéséhez nyúl · egy egyszeri téves „0 új esemény” kiírás a telefonon (helyben nem jön
+témakör egészében 363/363 zöld; 2026-11-06-án harmadszor (a D124 ② teljes során, 1402/1403 — magában 3 × 108/108, a következő teljes soron 1403/1403) — a bukásnak meg kell neveznie az okát, mielőtt bárki az időzítéséhez nyúl · ⚠️ (2026-11-07, a D124 ④ teljes során) a parancssor „D92/1: a KOPOGTATÁS végig” próbája a terhelés alatt egyszer bukott (a tartó meglátta a kérőt, de a kérő munkája csere lett, nem a kérelem — magában 3/3 zöld; az első ilyen bukása) — az időzítéséhez nem nyúltunk; ugyanazon a soron a `keresotar` „megújítás (L3)” próbája a PRÓBA hibáján (191 próbálkozás ~1/192 eséllyel nem talált nagyobb azonosítót → null) — ~2000-re tágítva, és ha mégsem, megnevezi magát · egy egyszeri téves „0 új esemény” kiírás a telefonon (helyben nem jön
 elő) · a D71 őrjárat-próba egyszer bukott a teljes sor terhelése alatt (magában 3/3 zöld, a következő teljes soron
 is) · a `koinoPakli.js` csendes újrakérdezését csak böngészőben mértük (node alatt nem futtatható; a program oldalát a
 D100 parancssor-próbája méri, egy végig futó felülettel) · a lap a még meg nem érkezett szöveget üresen mutatja

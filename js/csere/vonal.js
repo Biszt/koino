@@ -51,7 +51,10 @@
 
 import { koinoSzuleteseE } from '../esemeny/esemeny.js';
 // ⭐⭐ D124 (PR6 ①): a nyelvváltozat — a jel minden munka első üzenetében, és a társé ellenőrizve, mielőtt bármi újat tennénk.
-import { sajatNyelv, nyelvJel, nyelvEllenorzese } from './nyelvValtozat.js';
+import { sajatNyelv, nyelvJel, nyelvEllenorzese, nyelvKeszlet } from './nyelvValtozat.js';
+// ⭐⭐ D124 ④: a fordító-szél — a közös nyelv eldőlte után az üzenetsor fordít (a régi társnak a régi alakra), és a közös
+// számításokat a közös nyelv szerint adja (`forditoSzel.js` — a régi nyelvek jegyzéke).
+import { vonalSzele } from './forditoSzel.js';
 import { ujAlakuSzuletesE } from '../allapot/koinoLanc.js';   // ⭐ D118 (②a)
 import { beolvasztas } from './csere.js';
 // ⭐ A C 7–8. pontja (2026-09-27): a csere szeletenként, tartomány-egyeztetéssel (D74).
@@ -107,10 +110,13 @@ export const CSALAD_KORLAT = 64;
  * sort: a társ a MI jelünkből (a NYITAS-unkból, a kérelmünkből) nevez meg minket, és ha a zárás eldobja (mérve, a nyelv-próba
  * szelet-útján: a kiszolgáló a kérelem olvasásakor azonnal zárt, a NYITAS-a nem ért át, a kérő csak „nem válaszol”-t látott),
  * a hiba az ő oldalán néma marad.
+ * ⭐⭐ D124 ④: a közös nyelvet az üzenetsor is megkapja (`nyelvRogzitese`) — onnan a szélén fordít.
  */
-async function tarsNyelvenekEllenorzese(kapcsolat, uzenet, sajatNy) {
+async function tarsNyelvenekEllenorzese(kapcsolat, sor, uzenet, sajatNy, keszlet) {
   try {
-    return nyelvEllenorzese(uzenet, sajatNy);
+    const nyelv = nyelvEllenorzese(uzenet, sajatNy);
+    sor.nyelvRogzitese(nyelv, sajatNy, keszlet);
+    return nyelv;
   } catch (hiba) {
     console.warn('tarsNyelvenekEllenorzese - nincs közös nyelv', { kod: hiba.kod, irany: hiba.irany ?? null,
       tarse: hiba.tarsNyelve ?? null, sajat: sajatNy });
@@ -188,11 +194,21 @@ function uzenetSor(kapcsolat) {
   let puffer = '';
   let hiba = null;
   let lezarult = false;
+  // ⭐⭐ D124 ④: A FORDÍTÓ-SZÉL — a közös nyelv eldőlte után (`nyelvRogzitese`) a kivett üzenet a logika alakjában jön ki, a kimenő
+  // (`ki`) a vonal alakjában megy. Előtte (és az első üzeneteknél mindig) érintetlen. ⚠️ A fordítás a KIVÉTELKOR történik: ami a
+  // közös nyelv előtt érkezett, de utána veszik ki, az is fordítva jön (a társ már a közös nyelven küldte).
+  let szel = null;
 
   const kiszolgal = () => {
     while (varakozok.length && (beerkezett.length || lezarult || hiba)) {
       const { teljesites, elutasitas } = varakozok.shift();
-      if (beerkezett.length) teljesites(beerkezett.shift());
+      if (beerkezett.length) {
+        const u = beerkezett.shift();
+        if (!szel || szel.azonos) { teljesites(u); continue; }
+        // ⚠️ A társ üzenete nem a közös nyelv alakja: megnevezett hiba (mint a „Várt üzenet: …”), nem összeomlás.
+        try { teljesites(szel.be(u)); }
+        catch (h) { elutasitas(new Error('A társ üzenete nem a közös (' + szel.nyelv + '.) nyelv alakja — ' + h.message)); }
+      }
       else if (hiba) elutasitas(hiba);
       else elutasitas(new Error('A vonal lezárult, mielőtt a válasz megjött volna'));
     }
@@ -233,7 +249,17 @@ function uzenetSor(kapcsolat) {
         varakozok.push({ teljesites, elutasitas });
         kiszolgal();
       });
-    }
+    },
+    /** ⭐ D124 ④: a közös nyelv eldőlt — innen a szélén fordítunk (ugyanazon a kapcsolaton ugyanaz marad). */
+    nyelvRogzitese(nyelv, sajat, keszlet) { szel = vonalSzele(keszlet, sajat, nyelv); },
+    /** ⭐ D124 ④: egy kimenő üzenet a vonal alakjában. */
+    ki(u) { return szel ? szel.ki(u) : u; },
+    /** ⭐ D124 ④: egy a közös nyelv ELŐTT kivett, de már a közös nyelven küldött üzenet a logika alakjában (a fájl-randevú). */
+    be(u) { return szel ? szel.be(u) : u; },
+    /** ⭐ D124 ④: egy közös számítás a közös nyelv szerint (a régi nyelvek jegyzékéből, ha ott van; különben a mai). */
+    szamitas(nev, mai) { return szel ? szel.szamitas(nev, mai) : mai; },
+    /** ⭐ D124 ④: a vonal közös nyelve (null, amíg nem dőlt el). */
+    get nyelv() { return szel ? szel.nyelv : null; }
   };
 }
 
@@ -353,9 +379,12 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   const szuletesAzonositok = rendezettHalmaz(szuletesLanca.map((e) => e.azonosito));
   const szuletesPar = szuletesEsemeny
     ? KOINO_SZULETES_KULCS + ':' + await halmazLenyomata(szuletesAzonositok) : null;
+  // ⭐⭐ D124 ④: a szelet-párok számítása a KÖZÖS nyelv szerint — a nyitásig a legújabbé (lent, a nyelv-készletből), utána a
+  // fordító-szél adja (a régi nyelvek jegyzékéből, ha a közös nyelven más volt).
+  let szeletParokSzamitasa = szeletParok;
   /** A résztvevő szeletek párjai (a szűrő szerint) + a koinó születésének párja (ha ismerem). */
   const parokSzamitasa = async (szuro) => {
-    const p = await szeletParok(tar, koino, szuro);
+    const p = await szeletParokSzamitasa(tar, koino, szuro);
     return szuletesPar ? rendezettHalmaz([...p, szuletesPar]) : p;
   };
   const halmazOf = async (k) => (k === KOINO_SZULETES_KULCS ? szuletesAzonositok
@@ -369,8 +398,9 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
 
   // ⭐ A MÉRÉSEK műszere (70. mérés): ha a hívó ad egy Map-et, üzenet-típusonként összeadjuk a kiküldött (nyílt) bájtokat.
   const uzenetMeres = beallitas.uzenetMeres instanceof Map ? beallitas.uzenetMeres : null;
+  // ⭐ D124 ④: a kimenő üzenet a szélen át (a közös nyelv alakjában — a hétköznapi esetben érintetlenül).
   const kuld = (uzenet) => {
-    const szoveg = JSON.stringify(uzenet) + '\n';
+    const szoveg = JSON.stringify(sor.ki(uzenet)) + '\n';
     if (uzenetMeres) uzenetMeres.set(uzenet.uzenet, (uzenetMeres.get(uzenet.uzenet) ?? 0) + Buffer.byteLength(szoveg));
     return kapcsolat.write(szoveg);
   };
@@ -410,8 +440,12 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   let tarsCsalad = null;            // ⭐ D119 (③): a társ családja a nyitásából (a hívó ebből számolja a közös koinókat)
 
   // ⭐⭐ D124: a saját nyelvem (a próbák a `beallitas.nyelv`-vel mást mondhatnak), és a közös — a társ első üzenetéből.
+  // ⭐ D124 ④: a nyelv-készlet (a régi nyelvek lépései) — a fordító-szél ebből fordít.
+  const keszlet = nyelvKeszlet(beallitas);
   const sajatNy = sajatNyelv(beallitas);
   let nyelv = null;
+  // a nyitásig a legújabb nyelv számítása (a kitalált próba-nyelvé más — a mai programé maga a `szeletParok`)
+  szeletParokSzamitasa = vonalSzele(keszlet, sajatNy, sajatNy[1]).szamitas('szeletParok', szeletParok);
   const eredmeny = () => ({
     korok: 1, uj, kuldott, reszletesAllasok: 0, masKoino, kivulrolIgyLatszom, kapottUdpCimek, nyelv,
     kapottTablaKulcs, kapottDhtGepek, fajlokNala, elteroSzeletek, egyeztetoUzenetek, ujAzonositok, kapottRaj,
@@ -542,7 +576,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   //
   // Bármi az első üzenet (`NYITAS`, `KERELEM`, `FAJLKEREK`, `VALASZ`), a jele benne van (a PR6 előtti programé nincs — az az
   // 1-es). Ha nincs közös nyelv, megnevezett hibával állunk meg: a társ a mi `NYITAS`-unk jeléből ugyanezt számolja, tehát ő is.
-  nyelv = await tarsNyelvenekEllenorzese(kapcsolat, elsoUzenet, sajatNy);
+  nyelv = await tarsNyelvenekEllenorzese(kapcsolat, sor, elsoUzenet, sajatNy, keszlet);
 
   // ===== ⭐⭐ A FÁJL-SZELET KISZOLGÁLÁSA (5.7 / B) — saját kapcsolat, a nyitás helyett =====
   //
@@ -794,6 +828,19 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   }
   if (typeof oveNyitas.lenyomat !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(oveNyitas.lenyomat)) {
     throw new Error('A társ nyitása hibás (nincs érvényes nyitó lenyomat)');
+  }
+
+  // ----- ⭐⭐ D124 ④: A KÖZÖS SZÁMÍTÁS A KÖZÖS NYELVEN -----
+  //
+  // Ha a közös nyelven a szelet-párok számítása más volt (a régi nyelvek jegyzéke), a párokat újraszámoljuk. A nyitó
+  // lenyomatunk a legújabb szerint ment el: a társ az eltérésnek veszi, és az egyeztetés a régi párokon helyesen halad (mint a
+  // D97/1 közös halmazánál) — csak a „nincs újdonság” gyors útja marad el a vegyes párnál, az átmenet alatt.
+  {
+    const kozosParok = sor.szamitas('szeletParok', szeletParok);
+    if (kozosParok !== szeletParokSzamitasa) {
+      szeletParokSzamitasa = kozosParok;
+      parok = await parokSzamitasa(reszvesz);
+    }
   }
 
   // ----- ⭐⭐ D93/3: A TÁRS TÁBLA-KULCSA (a nyitásból) ÉS A ZÁRT KOINÓ KAPUJÁNAK ELSŐ ÍTÉLETE -----
@@ -1614,11 +1661,14 @@ async function fajlSzeletekKiszolgalasa(sor, kuld, fajlOlvas, elsoKeres) {
  */
 export async function fajlKiszolgalas(kapcsolat, fajlOlvas, beallitas = {}) {
   const sor = uzenetSor(kapcsolat);
-  // ⭐⭐ D124: a kiszolgáló nem beszél elsőként (lent: a randevú) — a nyelvét az első VÁLASZA mondja ki.
+  // ⭐⭐ D124: a kiszolgáló nem beszél elsőként (lent: a randevú) — a nyelvét az első VÁLASZA mondja ki. ⭐ D124 ④: a válasz a
+  // közös nyelv alakjában (a szélen át), a jel utána kerül rá (az örök alakjában — a kérő ebből tudja meg a közös nyelvet).
+  const keszlet = nyelvKeszlet(beallitas);
   const sajatNy = sajatNyelv(beallitas);
   let nyelvetMondtam = false;
   const kuld = (targy) => {
-    const t = nyelvetMondtam ? targy : { ...targy, ...nyelvJel(sajatNy) };
+    const f = sor.ki(targy);
+    const t = nyelvetMondtam ? f : { ...f, ...nyelvJel(sajatNy) };
     nyelvetMondtam = true;
     return kapcsolat.write(JSON.stringify(t) + '\n');
   };
@@ -1642,7 +1692,7 @@ export async function fajlKiszolgalas(kapcsolat, fajlOlvas, beallitas = {}) {
   // ⭐⭐ D124: a kérő nyelve. Ha nincs közös, a válasz `FAJLNINCS` a jelünkkel — a PR6 előtti kérő ezt hiánynak olvassa (és
   // tisztán kilép), egy újabb kérő a jelből ugyanazt számolja, mint mi —, és mi megnevezett hibával állunk meg.
   try {
-    nyelvEllenorzese(elso, sajatNy);
+    sor.nyelvRogzitese(nyelvEllenorzese(elso, sajatNy), sajatNy, keszlet);
   } catch (hiba) {
     kuld({ uzenet: 'FAJLNINCS', lenyomat: elso.lenyomat });
     // a válaszunk (a jelünkkel) érjen át, mielőtt a hívó zár — a kérő ebből nevez meg minket
@@ -1717,9 +1767,12 @@ export async function fajlHozatala(blob, koino, lenyomat, kapcsolatNyitas, beall
   // ⭐⭐ D124: a nyelvem az első fájl-kérésben, és a társé az első válaszából (a NYITAS-ából, ha a túloldalon a csere áll; a
   // fájl-randevú kiszolgálójánál az első FAJLSZELET / FAJLNINCS jeléből). Ha a kapcsolat nyelve már eldőlt (a kérelem törzse —
   // `nyelvLatva`), egyik sem kell.
+  const keszlet = nyelvKeszlet(beallitas);
   const sajatNy = sajatNyelv(beallitas);
   let nyelvLatva = beallitas.nyelvLatva === true;
   let nyelvetMondtam = nyelvLatva;
+  // ⭐ D124 ④: a kimenő a szélen át (a `FAJLKEREK` első üzenet — érintetlen; a `KESZ` a közös nyelv alakjában)
+  const kuld = (u) => kapcsolat.write(JSON.stringify(sor.ki(u)) + '\n');
 
   try {
     for (;;) {
@@ -1728,9 +1781,7 @@ export async function fajlHozatala(blob, koino, lenyomat, kapcsolatNyitas, beall
 
       let sikerult = false;
       try {
-        kapcsolat.write(JSON.stringify({
-          uzenet: 'FAJLKEREK', koino, lenyomat, eltolas: kertEltolas, ...(nyelvetMondtam ? {} : nyelvJel(sajatNy))
-        }) + '\n');
+        kuld({ uzenet: 'FAJLKEREK', koino, lenyomat, eltolas: kertEltolas, ...(nyelvetMondtam ? {} : nyelvJel(sajatNy)) });
         nyelvetMondtam = true;
 
         // ⚠️ A másik fél NYITAS-sal kezdhet (a párbeszéd szimmetrikus) — átlépjük, ahogy
@@ -1738,12 +1789,16 @@ export async function fajlHozatala(blob, koino, lenyomat, kapcsolatNyitas, beall
         let uzenet;
         for (;;) {
           uzenet = await sor.kovetkezo();
-          const valasz = uzenet.uzenet === 'FAJLSZELET' || uzenet.uzenet === 'FAJLNINCS';
-          if (!nyelvLatva && (uzenet.uzenet === 'NYITAS' || valasz)) {
-            await tarsNyelvenekEllenorzese(kapcsolat, uzenet, sajatNy);
+          // ⭐ D124 ④: a randevú kiszolgálójának első válasza már a KÖZÖS nyelven jön (ő a kérésünkből tudta), de mi csak a
+          // jeléből tudjuk meg — ezért a jeles üzenetet is felismerjük (egy újabb nyelven a neve más mezőben lehet), és a közös
+          // nyelv eldőlte után a logika alakjára fordítjuk. (A NYITAS első üzenet: a szél érintetlenül hagyja.)
+          if (!nyelvLatva && (uzenet.uzenet === 'NYITAS' || uzenet.uzenet === 'FAJLSZELET' || uzenet.uzenet === 'FAJLNINCS'
+              || 'ny' in uzenet)) {
+            await tarsNyelvenekEllenorzese(kapcsolat, sor, uzenet, sajatNy, keszlet);
             nyelvLatva = true;
+            uzenet = sor.be(uzenet);
           }
-          if (valasz) break;
+          if (uzenet.uzenet === 'FAJLSZELET' || uzenet.uzenet === 'FAJLNINCS') break;
         }
 
         if (uzenet.uzenet === 'FAJLNINCS' && Number.isInteger(uzenet.kesobb) && uzenet.kesobb > 0) {
@@ -1766,7 +1821,7 @@ export async function fajlHozatala(blob, koino, lenyomat, kapcsolatNyitas, beall
         // kérésre vár ezen a kapcsolaton — nélküle a következő fájl kapcsolata a tétlenségi óráig várt (mérve: három fájlból
         // mind a három elbukott, 22 mp alatt).
         if (Number.isInteger(korlat) && Number.isSafeInteger(uzenet.teljes) && uzenet.teljes > korlat) {
-          if (!nyitvaHagy) { try { kapcsolat.write(JSON.stringify({ uzenet: 'KESZ' }) + '\n'); } catch { /* zárt */ } }
+          if (!nyitvaHagy) { try { kuld({ uzenet: 'KESZ' }); } catch { /* zárt */ } }
           console.log('fajlHozatala - VÉGE (nagyobb a határnál)', { lenyomat, teljes: uzenet.teljes, korlat });
           return { kesz: false, tulNagy: uzenet.teljes, ok: 'nagyobb a határnál (' + uzenet.teljes + ' > ' + korlat + ' bájt)',
             bajt, szeletek };
@@ -1780,7 +1835,7 @@ export async function fajlHozatala(blob, koino, lenyomat, kapcsolatNyitas, beall
           await blob.reszlegesEldobas(lenyomat);
           // ⭐ D120 (a mérés lelete): a KESZ-t itt is kimondjuk — különben a kiszolgáló ezen a kapcsolaton a következő kérésre
           // vár, és a következő fájl kapcsolata a tétlenségi óráig hiába kér.
-          if (!nyitvaHagy) { try { kapcsolat.write(JSON.stringify({ uzenet: 'KESZ' }) + '\n'); } catch { /* zárt */ } }
+          if (!nyitvaHagy) { try { kuld({ uzenet: 'KESZ' }); } catch { /* zárt */ } }
           console.warn('fajlHozatala - VÉGE (rossz szelet)', { ok: ellenorzes.ok });
           return { kesz: false, ok: ellenorzes.ok, bajt, szeletek };
         }
@@ -1816,7 +1871,7 @@ export async function fajlHozatala(blob, koino, lenyomat, kapcsolatNyitas, beall
     // értesül róla, és a következő kérésre várna a tétlenségi órája lejártáig.
     // *Amit a szállítás nem mond meg, azt a protokollnak kell.*
     // ⭐ Minden ág a SAJÁT kapcsolatán mondja ki: a `KESZ` a kapcsolat vége, nem a fájlé.
-    if (!nyitvaHagy) { try { kapcsolat.write(JSON.stringify({ uzenet: 'KESZ' }) + '\n'); } catch { /* zárt */ } }
+    if (!nyitvaHagy) { try { kuld({ uzenet: 'KESZ' }); } catch { /* zárt */ } }
 
     if (!munka.keszEgesz()) {
       // ⚠️ Nincs több dolgunk, de a fájl nincs kész: a hiányzó szeleteket másnak kell
@@ -1872,8 +1927,10 @@ export async function fajlHozatala(blob, koino, lenyomat, kapcsolatNyitas, beall
  */
 export async function szeletKapcsolaton(tar, koino, kapcsolat, entitas, tovabb = {}, azonossag = {}) {
   const sor = uzenetSor(kapcsolat);
-  const kuld = (u) => kapcsolat.write(JSON.stringify(u) + '\n');
+  // ⭐ D124 ④: a kimenő a szélen át (a közös nyelv eldőlte után a közös nyelv alakjában)
+  const kuld = (u) => kapcsolat.write(JSON.stringify(sor.ki(u)) + '\n');
   // ⭐⭐ D124: a nyelvem — a jel a kérelemben, és a társé az ő első üzenetéből (a NYITAS-ából, vagy ütközésnél a kérelméből).
+  const keszlet = nyelvKeszlet(azonossag);
   const sajatNy = sajatNyelv(azonossag);
   // ⭐ D93/3: a személyünk (`azonossag.ki` — a rés-réteg írja alá a kézfogás átiratára) — a zárt koinó kapujának.
   const sajatKerelem = { uzenet: 'KERELEM', koino, fajta: 'szelet', kulcs: entitas,
@@ -1890,7 +1947,7 @@ export async function szeletKapcsolaton(tar, koino, kapcsolat, entitas, tovabb =
   for (;;) {
     const uzenet = await sor.kovetkezo();
     // ⭐⭐ D124: a társ nyelve — ha nincs közös, megnevezett hibával állunk meg (ő a kérelmünk jeléből ugyanezt számolja).
-    if (uzenet.uzenet === 'NYITAS' || uzenet.uzenet === 'KERELEM') await tarsNyelvenekEllenorzese(kapcsolat, uzenet, sajatNy);
+    if (uzenet.uzenet === 'NYITAS' || uzenet.uzenet === 'KERELEM') await tarsNyelvenekEllenorzese(kapcsolat, sor, uzenet, sajatNy, keszlet);
     // ⭐ A ⑦ lelete: a társ is kérelemmel nyitott (`kerelemUtkozes`) — vagy mi megyünk elöl, vagy kiszolgáljuk, és a miénk vár.
     if (uzenet.uzenet === 'KERELEM') {
       if (await kerelemUtkozes(sajatKerelem, uzenet, { kapcsolat, sor, kuld, utkozesben: azonossag.utkozesben }) === 'elol') continue;
@@ -1905,7 +1962,7 @@ export async function szeletKapcsolaton(tar, koino, kapcsolat, entitas, tovabb =
       break;
     }
     // ⭐ D93/3: a társ nem tud ellenőrizni minket — a tagsági csomagunkkal felelünk.
-    if (uzenet.uzenet === 'KELL') { kapcsolat.write(JSON.stringify(await tagsagValasz(azonossag)) + '\n'); continue; }
+    if (uzenet.uzenet === 'KELL') { kuld(await tagsagValasz(azonossag)); continue; }
     if (uzenet.uzenet === 'ESEMENY') erkezett.push(uzenet.esemeny);
     // ⭐ D92/1 (c): a társ nem tartja, de továbbadja — a válasz később, `VALASZ`-ként jön.
     if (uzenet.uzenet === 'ATVESZEM') atvette = true;
@@ -1947,8 +2004,10 @@ export async function szeletKapcsolaton(tar, koino, kapcsolat, entitas, tovabb =
 export async function kerelemKapcsolaton(kapcsolat, koino, kerelem, beallitas = {}) {
   // ⭐ D102 (J3): a sorozatban ugyanaz a sor olvas tovább (a pufferben a következő üzenet már ott lehet).
   const sor = beallitas.sor ?? uzenetSor(kapcsolat);
-  const kuld = (u) => kapcsolat.write(JSON.stringify(u) + '\n');
+  // ⭐ D124 ④: a kimenő a szélen át (a sorozatban a sor a kapcsolat közös nyelvét már tudja)
+  const kuld = (u) => kapcsolat.write(JSON.stringify(sor.ki(u)) + '\n');
   // ⭐⭐ D124: a nyelvem — a jel az első kérelemben (a sorozat többi kérelme ugyanazon a kapcsolaton megy: ott már nem kell).
+  const keszlet = nyelvKeszlet(beallitas);
   const sajatNy = sajatNyelv(beallitas);
   // ⭐ D102: a mélység (`m` — a válaszoló maga jár be) és a folytatás (`utan`) a `d` (a legjobb ág) helyett.
   const sajatKerelem = { uzenet: 'KERELEM', koino, fajta: kerelem.fajta, kulcs: kerelem.kulcs, n: kerelem.n, m: kerelem.m === true,
@@ -1968,7 +2027,7 @@ export async function kerelemKapcsolaton(kapcsolat, koino, kerelem, beallitas = 
   for (;;) {
     u = await sor.kovetkezo();
     // ⭐⭐ D124: a társ nyelve (a NYITAS-ából, vagy ütközésnél a kérelméből) — ha nincs közös, megnevezett hibával állunk meg.
-    if (u.uzenet === 'NYITAS' || u.uzenet === 'KERELEM') await tarsNyelvenekEllenorzese(kapcsolat, u, sajatNy);
+    if (u.uzenet === 'NYITAS' || u.uzenet === 'KERELEM') await tarsNyelvenekEllenorzese(kapcsolat, sor, u, sajatNy, keszlet);
     if (u.uzenet === 'KELL') { kuld(await tagsagValasz(beallitas)); continue; }
     // ⭐ A ⑦ lelete: a társ is kérelemmel nyitott (`kerelemUtkozes`) — vagy mi megyünk elöl, vagy kiszolgáljuk, és a miénk vár.
     if (u.uzenet === 'KERELEM') {
@@ -2076,7 +2135,8 @@ export async function kerelemSorozatKapcsolaton(kapcsolat, koino, kerelmek, beal
     if (r.tiltva || r.utkozes) break;
   }
   if (lista.length > 1 && !eredmenyek.at(-1)?.tiltva && !eredmenyek.at(-1)?.utkozes) {
-    try { kapcsolat.write(JSON.stringify({ uzenet: 'VEGE' }) + '\n'); } catch { /* zárt */ }
+    // ⭐ D124 ④: a szélen át (a kapcsolat közös nyelvén)
+    try { kapcsolat.write(JSON.stringify(sor.ki({ uzenet: 'VEGE' })) + '\n'); } catch { /* zárt */ }
   }
   return eredmenyek;
 }
@@ -2138,12 +2198,14 @@ function meghivoBizonyitekAlakja(m) {
  */
 export async function valaszKapcsolaton(kapcsolat, koino, valasz, beallitas = {}) {
   const sor = uzenetSor(kapcsolat);
-  // ⭐⭐ D124: a nyelvem a válaszban, és a társé a NYITAS-ából — ha nincs közös, megnevezett hibával állunk meg.
+  // ⭐⭐ D124: a nyelvem a válaszban, és a társé a NYITAS-ából — ha nincs közös, megnevezett hibával állunk meg. (A `VALASZ` első
+  // üzenet: a szél nem fordítja; a társ `KESZ`-e a közös nyelv alakjában jön, a sor fordítja.)
+  const keszlet = nyelvKeszlet(beallitas);
   const sajatNy = sajatNyelv(beallitas);
   kapcsolat.write(JSON.stringify({ uzenet: 'VALASZ', koino, ...valasz, ...nyelvJel(sajatNy) }) + '\n');
   for (;;) {
     const u = await sor.kovetkezo();
-    if (u.uzenet === 'NYITAS') await tarsNyelvenekEllenorzese(kapcsolat, u, sajatNy);
+    if (u.uzenet === 'NYITAS') await tarsNyelvenekEllenorzese(kapcsolat, sor, u, sajatNy, keszlet);
     if (u.uzenet === 'KESZ') break;
   }
   return { bajtKuldott: kapcsolat.bytesWritten, bajtKapott: kapcsolat.bytesRead };

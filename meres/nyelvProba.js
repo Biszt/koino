@@ -16,6 +16,16 @@
 //   · ⭐⭐ (az építés ③-a) AKIVEL NEM ÉRTJÜK EGYMÁST (`nyelvEmlekezet.js`): 3 egymás utáni kör után 6 óra szünet, egy kör egy
 //     megfigyelés (egy társ több címe is), a siker törli, a kép csak a megerősítetteket mondja, iránnyal; a kapu a nyelv hiányát
 //     is a kör eredményébe teszi; a tároló nem ír, ha nincs változás. (Az őrjárat egészét a parancssor-próba méri.)
+//   · ⭐⭐ (az építés ④-e) A FORDÍTÓ-SZÉL ÉS A RÉGI NYELVEK JEGYZÉKE (`forditoSzel.js`): a lépések sorrendje kifelé és befelé,
+//     az első üzenetek érintetlenek, a közös számítás a közös nyelvé, a legrégebbi beszélt nyelv a dátumokból; és egy KITALÁLT
+//     2-es nyelvvel a résen (a csere, a szelet, a fájl a cserénél és a randevún, a válasz): az [1,2] az 1-essel a régin, a
+//     2-essel (akinek az 1-es lépése lejárt) a 2-esen cserél, a régi szelet-párokkal (a vegyes pár szeletei nem térnek el), a
+//     2-es és az 1-es megnevezve áll meg — és a VALÓDI régi program (a git-ből) a kitalált [1,2]-vel cserél;
+//   · ⭐⭐ (④) A KÉZFOGÁS-VÁLASZTÓ: a szállítás nemzedékének részei a jegyzékből, a kapu feljegyzése a kézfogásnak; egy kitalált
+//     2-es szállítással két kapu a közös nemzedékkel fog kezet (az 1-essel a régi kulcsokkal, a 2-essel az újakkal); és a kézi
+//     PAJZSFÚRÓ kopogása is viszi a jelet: közös szállításon a rés után kezet fog, közös nélkül mindkét fél megnevezve kész;
+//   · ⭐⭐ (④, a ⑦ dátuma) AKIVEL MÉG A RÉGIN BESZÉLÜNK: a lement munka feljegyzi (a legújabbon törli), és a kép csak akkor mondja ki,
+//     ha a régi lépés dátuma 30 napon belül jön — rétegenként, a nappal és a teendővel.
 //
 // Használja: meres/mind.js (`nyelv` csoport, a `csere` csoportban is).
 
@@ -30,18 +40,25 @@ import { esemenyTarNyitasa, fajlBlobTarolo } from '../js/tar/fajlTar.js';
 import { esemenyMentese, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { parbeszed, fajlKiszolgalas } from '../js/csere/vonal.js';
 import {
-  csereUdpResen, szeletUdpResen, valaszUdpResen, fajlUdpResen, kezfogasUdpResen, udpKapcsolat
+  csereUdpResen, szeletUdpResen, valaszUdpResen, fajlUdpResen, kezfogasUdpResen, udpKapcsolat, kerelemUdpResen
 } from '../js/csere/udpVonal.js';
 import {
-  NYELV_LEGREGEBBI, NYELV_LEGUJABB, sajatNyelv, tarsNyelve, kozosNyelv, nyelvEllenorzese,
-  SZALLITAS_LEGREGEBBI, SZALLITAS_LEGUJABB, sajatSzallitas, tarsSzallitasa, szallitasEgyezese
+  NYELV_LEGUJABB, sajatNyelv, nyelvKeszlet, tarsNyelve, kozosNyelv, nyelvEllenorzese,
+  SZALLITAS_LEGUJABB, sajatSzallitas, szallitasKeszlet, tarsSzallitasa, szallitasEgyezese, szallitasFeljegyzese, feljegyzettSzallitas,
+  lejaroValtozatok
 } from '../js/csere/nyelvValtozat.js';
 import { udpKapuNyitasa } from '../js/csere/udpKapu.js';
 import {
   NEM_ERTJUK_HATAR, NEM_ERTJUK_SZUNET, NEM_ERTJUK_LATSZIK, NEM_ERTJUK_KORLAT, uresNyelvJegyzek, nyelvJegyzekAlakja, hivhatoE,
-  nemErtjukKulcsa, korMegfigyelesei, ertjukFeljegyzese, nyelvekKepe
+  nemErtjukKulcsa, korMegfigyelesei, ertjukFeljegyzese, nyelvekKepe, reginFeljegyzese, REGIN_ELORE_NAP
 } from '../js/csere/nyelvEmlekezet.js';
 import { nyelvJegyzekTarolo } from '../js/tar/fajlTar.js';
+import {
+  REGI_NYELVEK, ELSO_UZENETEK, KERHETO_SZAMITASOK, keszletEllenorzese, legregebbiBeszelt, lejaroNyelvek, vonalSzele,
+  kitalaltNyelvKeszlet, REGI_SZALLITASOK, SZALLITAS_RESZEK, szallitasReszei, szallitasKeszletEllenorzese, kitalaltSzallitasKeszlet
+} from '../js/csere/forditoSzel.js';
+import { munkamenetKulcsai, ujEgyszeriKulcs } from '../js/csere/titkositas.js';
+import { pajzsfurasTobbfele } from '../js/csere/pajzsfuro.js';
 import { probaGyujtemeny, ujEember } from './probaFuttato.js';
 
 const { proba, futtatas } = probaGyujtemeny('A protokoll nyelvváltozata (D124 — PR6)');
@@ -102,7 +119,7 @@ proba('⭐ a közös nyelv — mindkét fél ugyanazt számolja; jel nélkül az
   const k = (a, b) => kozosNyelv(a, b);
   const nev = (f) => { try { f(); return null; } catch (h) { return h.kod + (h.irany ? ':' + h.irany : ''); } };
   const jo = {
-    mai: NYELV_LEGREGEBBI === 1 && NYELV_LEGUJABB === 1 && sajatNyelv().join() === '1,1',
+    mai: NYELV_LEGUJABB === 1 && sajatNyelv().join() === '1,1',
     beallitva: sajatNyelv({ nyelv: [2, 3] }).join() === '2,3' && sajatNyelv({ nyelv: 'rossz' }).join() === '1,1',
     egyforma: k([1, 1], [1, 1]).nyelv === 1,
     szimmetrikus: k([1, 2], [1, 1]).nyelv === 1 && k([1, 1], [1, 2]).nyelv === 1
@@ -161,12 +178,12 @@ proba('⭐⭐ a CSERE: közös nyelven lemegy (mindkét fél ugyanazt a közöse
 // ===== ⭐⭐ A KÉRELEM ÚTJAI =====
 
 /** ⭐ A fájl-randevú passzív kiszolgálója a védett résen (mint a `fajlRandevu` kiszolgáló fázisa). */
-async function randevuKiszolgalo(halo, port, olvas, nyelv) {
+async function randevuKiszolgalo(halo, port, olvas, beallitas) {
   const v = await kezfogasUdpResen(halo, '127.0.0.1', port);
   const k = udpKapcsolat(v, '127.0.0.1', port);
   k.setTimeout(TURELEM, () => k.destroy(new Error('a társ nem kért semmit (' + TURELEM + ' ms)')));
   try {
-    return await fajlKiszolgalas(k, olvas, { nyelv });
+    return await fajlKiszolgalas(k, olvas, beallitas);
   } finally {
     await k.kiurites();
     k.end();
@@ -218,7 +235,7 @@ proba('⭐⭐ a KÉRELEM útjai (szelet, válasz, fájl a cserénél, fájl a ra
     (p) => vedettParbeszed(p.masik, p.egyikPort, szolgalo, { nyelv: [1, 1], fajlOlvas: (l) => blob.olvas(l) }));
   await egy('fajlRandevu',
     (p) => fajlUdpResen(p.egyik, '127.0.0.1', p.masikPort, vendegBlob, KOINO, lenyomat, { nyelv: [2, 2], varakozasiIdo: TURELEM }),
-    (p) => randevuKiszolgalo(p.masik, p.egyikPort, (l) => blob.olvas(l), [1, 1]));
+    (p) => randevuKiszolgalo(p.masik, p.egyikPort, (l) => blob.olvas(l), { nyelv: [1, 1] }));
   const jo = Object.fromEntries(Object.entries(eredmeny).map(([nev, [kero, kiszolgalo]]) =>
     [nev, megnevezve(kero, 'regebbi') && megnevezve(kiszolgalo, 'ujabb')]));
   jo.fajlNemJott = (await vendegBlob.olvas(lenyomat)) === null;
@@ -373,7 +390,7 @@ const korMegnevezi = (k, irany) => k.kor.nincsKozos === 1 && k.kor.sikeres === 0
 proba('⭐ a SZÁLLÍTÁS jele — ugyanaz a számítás: jel nélkül az 1-es; a hibás jel és a közös hiánya megnevezve (dobás nélkül)', () => {
   const e = (u, s) => szallitasEgyezese(u, s);
   const jo = {
-    mai: SZALLITAS_LEGREGEBBI === 1 && SZALLITAS_LEGUJABB === 1 && sajatSzallitas().join() === '1,1',
+    mai: SZALLITAS_LEGUJABB === 1 && sajatSzallitas().join() === '1,1',
     beallitva: sajatSzallitas({ szallitas: [2, 3] }).join() === '2,3' && sajatSzallitas({ szallitas: [3, 2] }).join() === '1,1',
     jelNelkul: tarsSzallitasa({ uzenet: 'KOPOG', tol: 'x' }).join() === '1,1' && e({ uzenet: 'KOPOG' }, [1, 1]).szallitas === 1,
     kozos: e({ sz: [2, 4] }, [1, 3]).szallitas === 3 && e({ sz: [1, 3] }, [2, 4]).szallitas === 3,
@@ -591,6 +608,443 @@ proba('⭐ a kör eredménye a NYELV hiányát is mondja (a munka bukásából: 
   const jo = { nyelvben, szallitasban, nemIrt, irt, serult };
   const ok = Object.values(jo).every(Boolean);
   if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify(kor.eredmenyek) + ')\n');
+  return ok;
+});
+
+// ===== ⭐⭐ A FORDÍTÓ-SZÉL ÉS A RÉGI NYELVEK JEGYZÉKE (az építés ④-e) =====
+
+/** Egy kitalált 3 nyelvű készlet: a fordítók a nyomukat hagyják az üzeneten — így a sorrendjük látszik. */
+function haromNyelvu(meddig1, meddig2) {
+  const nyom = (jel) => (u) => ({ ...u, nyom: (u.nyom ?? '') + jel });
+  return { legujabb: 3, lepesek: {
+    1: { meddig: meddig1, le: nyom('L1'), fel: nyom('F1'), szamitasok: { szeletParok: () => 'regi-1' } },
+    2: { meddig: meddig2, le: nyom('L2'), fel: nyom('F2') } } };
+}
+
+// Rontás: (a) a `le` lépések fordított sorrendben → 'L1L2' → bukik; (b) a szél az első üzenetet is fordítja → bukik; (c) a
+// közös számítás a legújabbé (nem a közös nyelvé) → bukik; (d) a legrégebbi nem a dátumból jön (a lejárt lépés is számít) →
+// bukik; (e) egy kérhető számítást a vonal nem kér → bukik; (f) a kitalált nyelv nem a környezetből jön → bukik.
+proba('⭐⭐ a FORDÍTÓ-SZÉL szabálya: kifelé a legújabbtól lefelé, befelé a közöstől fölfelé; az első üzenet érintetlen; a közös számítás a közös nyelvé; a legrégebbi beszélt nyelv a jegyzék dátumaiból; a jegyzék alakja ellenőrizve', async () => {
+  const most = Date.UTC(2026, 10, 7, 12);
+  const k = haromNyelvu('2027-06-01', '2027-06-01');
+  const sz1 = vonalSzele(k, [1, 3], 1), sz2 = vonalSzele(k, [1, 3], 2), sz3 = vonalSzele(k, [1, 3], 3);
+  const u = { uzenet: 'CIMEK', udp: [] };
+  const mai = () => 'mai';
+  const dob = (x) => { try { keszletEllenorzese(x); return false; } catch { return true; } };
+  const vonalForras = await readFile(new URL('../js/csere/vonal.js', import.meta.url), 'utf8');
+  // a kitalált 2-es a környezetből (mint egy valódi folyamatban)
+  const regiKornyezet = process.env.KOINO_PROBANYELV;
+  process.env.KOINO_PROBANYELV = '200';
+  const kitalalt12 = sajatNyelv().join() === '1,2' && nyelvKeszlet().kitalalt === true;
+  process.env.KOINO_PROBANYELV = '-1';
+  const kitalalt2 = sajatNyelv().join() === '2,2';
+  if (regiKornyezet === undefined) delete process.env.KOINO_PROBANYELV; else process.env.KOINO_PROBANYELV = regiKornyezet;
+  const kk = kitalaltNyelvKeszlet(200);
+  const kitalaltAlak = JSON.stringify(vonalSzele(kk, [1, 2], 2).ki(u)) === '{"u2":"CIMEK","udp":[]}'
+    && JSON.stringify(vonalSzele(kk, [1, 2], 1).ki(u)) === JSON.stringify(u)
+    && (() => { try { vonalSzele(kk, [1, 2], 2).be(u); return false; } catch { return true; } })();
+  const jo = {
+    mai: Object.keys(REGI_NYELVEK).length === 0 && NYELV_LEGUJABB === 1 && sajatNyelv().join() === '1,1'
+      && nyelvKeszlet().legujabb === 1 && vonalSzele(nyelvKeszlet(), [1, 1], 1).azonos,
+    legregebbi: legregebbiBeszelt(k, most) === 1
+      && legregebbiBeszelt(haromNyelvu('2026-11-07', '2027-06-01'), most) === 2    // a dátum napján már nem
+      && legregebbiBeszelt(haromNyelvu('2027-06-01', '2026-01-01'), most) === 3    // a felső lejárt: az alsó sem érhető el
+      && legregebbiBeszelt({ legujabb: 3, lepesek: { 2: k.lepesek[2] } }, most) === 2,   // a hiányzó lépés: a lánc megszakad
+    kiSorrend: sz1.ki(u).nyom === 'L2L1' && sz2.ki(u).nyom === 'L2' && sz3.ki(u) === u,
+    beSorrend: sz1.be(u).nyom === 'F1F2' && sz2.be(u).nyom === 'F2' && sz3.be(u) === u,
+    azonos: sz3.azonos && !sz1.azonos,
+    elsoErintetlen: [...ELSO_UZENETEK].every((n) => { const x = { uzenet: n }; return sz1.ki(x) === x && sz1.be(x) === x; }),
+    szamitas: sz1.szamitas('szeletParok', mai)() === 'regi-1' && sz2.szamitas('szeletParok', mai) === mai
+      && sz3.szamitas('szeletParok', mai) === mai,
+    lejaro: lejaroNyelvek(k, most).map((x) => x.nyelv).join() === '1,2' && lejaroNyelvek(k, most)[0].napMulva === 206
+      && lejaroNyelvek(haromNyelvu('2026-11-07', '2027-06-01'), most).map((x) => x.nyelv).join() === '2',
+    ellenorzes: !!keszletEllenorzese(k) && [
+      { legujabb: 2, lepesek: { 1: { meddig: '2027-02-30', le: mai, fel: mai } } },        // nincs ilyen nap
+      { legujabb: 2, lepesek: { 1: { meddig: '2027-02-01', le: mai } } },                  // nincs fel-fordító
+      { legujabb: 2, lepesek: { 2: { meddig: '2027-02-01', le: mai, fel: mai } } },        // a lépés nem a legújabb alatt
+      { legujabb: 2, lepesek: { 1: { meddig: '2027-02-01', le: mai, fel: mai, szamitasok: { ismeretlen: mai } } } }
+    ].every(dob),
+    // ⭐ a 4. szabály-hiány ellen: minden kérhető számítást a vonal valóban kér
+    vonalKeri: KERHETO_SZAMITASOK.length > 0 && KERHETO_SZAMITASOK.every((nev) => vonalForras.includes("szamitas('" + nev + "'")),
+    kitalalt12, kitalalt2, kitalaltAlak
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ')\n');
+  return ok;
+});
+
+/** ⚠️ A kitalált 2-es: [1,2] (a régit is beszéli) és [2,2] (az 1-es lépése lejárt). */
+const KITALALT_12 = () => ({ nyelvKeszlet: kitalaltNyelvKeszlet(200) });
+const KITALALT_2 = () => ({ nyelvKeszlet: kitalaltNyelvKeszlet(-1) });
+
+/** Egy csere a résen, mindkét fél a saját beállításával (a nyelv-készlettel). */
+async function resCsere(tarA, bA, tarB, bB, nyitoA = csereUdpResen, nyitoB = csereUdpResen) {
+  const p = await udpParos();
+  try {
+    return await ketFel(
+      () => nyitoA(p.egyik, '127.0.0.1', p.masikPort, tarA, KOINO, { ...bA, varakozasiIdo: TURELEM }),
+      () => nyitoB(p.masik, '127.0.0.1', p.egyikPort, tarB, KOINO, { ...bB, varakozasiIdo: TURELEM }));
+  } finally {
+    p.bezar();
+  }
+}
+
+const lement = (r, nyelv) => r.ok && r.ertek.nyelv === nyelv;
+const nala = async (tar) => (await koinoEsemenyei(tar, KOINO)).length;
+
+// Rontás: (a) az üzenetsor nem fordít befelé → az [1,2] a 2-es alakot nem érti → bukik; (b) a kimenő nem a szélen megy → a
+// 2-es az 1-es alakot nem érti → bukik; (c) a szél nem a közös nyelvre fordít (mindig a legújabbat beszéli) → az 1-es nem érti
+// → bukik; (d) a közös számítás nem a közös nyelvé (a párok nem számolódnak újra) → a vegyes pár szeletei mind eltérnek →
+// bukik; (e) a legrégebbi nem a dátumból jön → a [2,2] az 1-essel is cserélne → bukik; (f) a nyitás nem a legújabb számításával
+// megy → a vegyes pár nyitása egyezne (a kitalált 2-es nem hű a valódihoz) → bukik.
+proba('⭐⭐⭐ a KITALÁLT 2-ES NYELV a csere résén: az [1,2] az 1-essel a régin cserél (a régi szelet-párokkal — egy szelet sem tér el), a 2-essel a 2-esen (a gyors úton); a lejárt 1-es lépésű 2-es és az 1-es megnevezve áll meg', async () => {
+  const anna = await ujEember(KOINO), bela = await ujEember(KOINO);
+  const annaE = await lanc(anna, 3, 'A'), belaE = await lanc(bela, 2, 'B');
+  // ① az [1,2] és az 1-es: lemegy az 1-esen; a második (nincs újdonság) csere egy szeletet sem lát eltérőnek
+  const tar12 = await ujTar(); await ment(tar12, annaE);
+  const tar1 = await ujTar(); await ment(tar1, belaE);
+  const [a1, b1] = await resCsere(tar12, KITALALT_12(), tar1, {});
+  const egyesLement = lement(a1, 1) && lement(b1, 1) && await nala(tar12) === 5 && await nala(tar1) === 5;
+  const [a1b, b1b] = await resCsere(tar12, KITALALT_12(), tar1, {});
+  // ⚠️ a nyitó lenyomat a saját LEGÚJABB (a 2-es) számítása szerint megy (a közös nyelv előtt készül), ezért a vegyes pár
+  // nyitása nem egyezik: az első szint lefut (a gyors út elmarad — a kimondott ára) — és a régi párokon egy szeletet sem talál eltérőnek
+  const regiParok = lement(a1b, 1) && lement(b1b, 1) && a1b.ertek.elteroSzeletek === 0 && b1b.ertek.elteroSzeletek === 0
+    && a1b.ertek.egyeztetoUzenetek > 0;
+  // ② az [1,2] és a [2,2]: lemegy a 2-esen; a második csere a gyors úton (a 2-es lenyomat mindkettőnél ugyanaz)
+  const tarC = await ujTar(); await ment(tarC, annaE);
+  const tarD = await ujTar(); await ment(tarD, belaE);
+  const [c2, d2] = await resCsere(tarC, KITALALT_12(), tarD, KITALALT_2());
+  const kettesLement = lement(c2, 2) && lement(d2, 2) && await nala(tarC) === 5 && await nala(tarD) === 5;
+  const [c2b, d2b] = await resCsere(tarC, KITALALT_12(), tarD, KITALALT_2());
+  const gyorsUt = lement(c2b, 2) && lement(d2b, 2) && c2b.ertek.egyeztetoUzenetek === 0 && d2b.ertek.egyeztetoUzenetek === 0;
+  // ③ a [2,2] és az 1-es: nincs közös — mindkettő megnevezi, semmi nem megy át
+  const tarE = await ujTar(); await ment(tarE, annaE);
+  const tarF = await ujTar(); await ment(tarF, belaE);
+  const [e3, f3] = await resCsere(tarE, KITALALT_2(), tarF, {});
+  const nincs = megnevezve(e3, 'regebbi') && megnevezve(f3, 'ujabb') && await nala(tarE) === 3 && await nala(tarF) === 2;
+  const jo = { egyesLement, regiParok, kettesLement, gyorsUt, nincs };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) {
+    const r = (x) => (x.ok ? { nyelv: x.ertek.nyelv, elt: x.ertek.elteroSzeletek, egy: x.ertek.egyeztetoUzenetek } : x.kod + ' ' + x.uzenet);
+    process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([a1, b1, a1b, b1b, c2, d2, c2b, d2b, e3, f3].map(r)) + ')\n');
+  }
+  return ok;
+});
+
+// Rontás: (a) a randevú kérője az első (jeles) választ nem fordítja → a 2-es kiszolgálótól nem jön a fájl → bukik; (b) a
+// kiszolgáló a választ nem a szélen küldi → bukik; (c) a kérelem kimenője (a MINTAKEREK) nem a szélen megy → bukik; (d) a
+// törzs fájlja a kérelem során nem fordítva jön → bukik. ⚠️ A szelet-kérő kimenője (a zárt koinó TAGSAG-ja) itt nem mérve.
+proba('⭐⭐ a KITALÁLT 2-ES NYELV a kérelem útjain (a szelet, a fejlécek, a törzs, a fájl a cserénél és a randevún, a válasz): az [1,2] kérő a 2-estől és az 1-estől is megkapja, és a 2-es kérő az [1,2]-től', async () => {
+  const anna = await ujEember(KOINO);
+  const g = await anna.tesz('GondolatLetrehozas', { cim: 'Egy szelet', meret: 10 });
+  const szolgalo = await ujTar(); await ment(szolgalo, [g]);
+  const blob = fajlBlobTarolo(KOINO, await ujMappa('koino-nyelv4-blob-'));
+  const { lenyomat } = await blob.ir(new Uint8Array(70000).fill(9));   // két szelet: a második már a nyelv eldőlte után
+  const eredmeny = {};
+  const egy = async (nev, kero, kiszolgalo, ellenor) => {
+    const p = await udpParos();
+    try {
+      const [k, sz] = await ketFel(() => kero(p), () => kiszolgalo(p));
+      eredmeny[nev] = { ok: k.ok && sz.ok && await ellenor(k.ertek), kero: k.ok ? 'rendben' : k.kod + ' ' + k.uzenet,
+        kiszolgalo: sz.ok ? 'rendben' : sz.kod + ' ' + sz.uzenet };
+    } finally {
+      p.bezar();
+    }
+  };
+  const kapott = (r) => r.kapott >= 1;
+  for (const [nev, kiszolgaloB] of [['szelet2', KITALALT_2()], ['szelet1', {}]]) {
+    await egy(nev,
+      async (p) => szeletUdpResen(p.egyik, '127.0.0.1', p.masikPort, await ujTar(), KOINO, g.azonosito,
+        { ...KITALALT_12(), varakozasiIdo: TURELEM }),
+      (p) => csereUdpResen(p.masik, '127.0.0.1', p.egyikPort, szolgalo, KOINO, { ...kiszolgaloB, varakozasiIdo: TURELEM }),
+      kapott);
+  }
+  await egy('szelet2kero',
+    async (p) => szeletUdpResen(p.egyik, '127.0.0.1', p.masikPort, await ujTar(), KOINO, g.azonosito,
+      { ...KITALALT_2(), varakozasiIdo: TURELEM }),
+    (p) => csereUdpResen(p.masik, '127.0.0.1', p.egyikPort, szolgalo, KOINO, { ...KITALALT_12(), varakozasiIdo: TURELEM }),
+    kapott);
+  for (const [nev, kiszolgaloB] of [['randevu2', KITALALT_2()], ['randevu1', {}]]) {
+    const vendeg = fajlBlobTarolo(KOINO, await ujMappa('koino-nyelv4-vendeg-'));
+    await egy(nev,
+      (p) => fajlUdpResen(p.egyik, '127.0.0.1', p.masikPort, vendeg, KOINO, lenyomat, { ...KITALALT_12(), varakozasiIdo: TURELEM }),
+      (p) => randevuKiszolgalo(p.masik, p.egyikPort, (l) => blob.olvas(l), kiszolgaloB),
+      async () => (await vendeg.olvas(lenyomat))?.length === 70000);
+  }
+  {
+    const vendeg = fajlBlobTarolo(KOINO, await ujMappa('koino-nyelv4-vendeg-'));
+    await egy('fajlCsere2',
+      (p) => fajlUdpResen(p.egyik, '127.0.0.1', p.masikPort, vendeg, KOINO, lenyomat, { ...KITALALT_12(), varakozasiIdo: TURELEM }),
+      (p) => vedettParbeszed(p.masik, p.egyikPort, szolgalo, { ...KITALALT_2(), fajlOlvas: (l) => blob.olvas(l) }),
+      async () => (await vendeg.olvas(lenyomat))?.length === 70000);
+  }
+  // a fejlécek (FEJLECEK → MINTAKEREK → MINTAK) és a törzs (TORZS → a fájl szeletei ugyanazon a soron) a 2-estől
+  const kiszolgalo = {
+    fejlecek: async () => ({ valasz: { lista: [] }, tartja: true, mintak: async (kert) => ({ mintak: { kert }, esemenyek: [] }) }),
+    torzs: async () => [lenyomat]
+  };
+  await egy('fejlecek2',
+    (p) => kerelemUdpResen(p.egyik, '127.0.0.1', p.masikPort, KOINO, { fajta: 'fejlecek', kulcs: g.azonosito, n: 1 },
+      { ...KITALALT_12(), varakozasiIdo: TURELEM, mintaValaszto: () => ({ x: [1] }) }),
+    (p) => csereUdpResen(p.masik, '127.0.0.1', p.egyikPort, szolgalo, KOINO,
+      { ...KITALALT_2(), varakozasiIdo: TURELEM, kerelemKiszolgalo: kiszolgalo }),
+    async (r) => r.kiszolgalta === true && JSON.stringify(r.mintak) === '{"kert":{"x":[1]}}');
+  {
+    const vendeg = fajlBlobTarolo(KOINO, await ujMappa('koino-nyelv4-vendeg-'));
+    await egy('torzs2',
+      (p) => kerelemUdpResen(p.egyik, '127.0.0.1', p.masikPort, KOINO, { fajta: 'torzs', kulcs: g.azonosito },
+        { ...KITALALT_12(), varakozasiIdo: TURELEM, blob: vendeg }),
+      (p) => csereUdpResen(p.masik, '127.0.0.1', p.egyikPort, szolgalo, KOINO,
+        { ...KITALALT_2(), varakozasiIdo: TURELEM, kerelemKiszolgalo: kiszolgalo, fajlOlvas: (l) => blob.olvas(l) }),
+      async (r) => r.fajlok?.[0]?.kesz === true && (await vendeg.olvas(lenyomat))?.length === 70000);
+  }
+  let valaszJott = false;
+  await egy('valasz2',
+    (p) => valaszUdpResen(p.egyik, '127.0.0.1', p.masikPort, KOINO, { az: 'proba-valasz4', fajta: 'szelet', kulcs: g.azonosito },
+      { ...KITALALT_12(), varakozasiIdo: TURELEM }),
+    (p) => csereUdpResen(p.masik, '127.0.0.1', p.egyikPort, szolgalo, KOINO,
+      { ...KITALALT_2(), varakozasiIdo: TURELEM, valaszFogado: async () => { valaszJott = true; return true; } }),
+    async () => valaszJott);
+  const jo = Object.fromEntries(Object.entries(eredmeny).map(([n, e]) => [n, e.ok]));
+  const ok = Object.keys(jo).length === 9 && Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify(eredmeny) + ')\n');
+  return ok;
+});
+
+// Rontás: (a) a szél a régi programnak is a legújabbat beszéli → a régi nem érti → bukik; (b) a régi, jel nélküli társ nem az
+// 1-es → bukik.
+proba('⭐⭐⭐ a VALÓDI régi program (a git-ből) és a KITALÁLT [1,2]: cserélnek (az 1-esen), és a szeletet mindkét irányban megkapják', async () => {
+  const regi = await regiProgram();
+  if (!regi) { process.stdout.write('    (a régi program (' + REGI_PROGRAM + ') nincs meg a git-történetben — kihagyva)\n'); return true; }
+  const regiTar = () => ujTar(regi.fajlTar.esemenyTarNyitasa);
+  const regiMent = (tar, es) => ment(tar, es, regi.esemenyTar.esemenyMentese);
+  const anna = await ujEember(KOINO), bela = await ujEember(KOINO);
+  const annaE = await lanc(anna, 3, 'A'), belaE = await lanc(bela, 2, 'B');
+  const tarA = await regiTar(); await regiMent(tarA, annaE);
+  const tarB = await ujTar(); await ment(tarB, belaE);
+  const [csA, csB] = await resCsere(tarA, {}, tarB, KITALALT_12(), regi.udpVonal.csereUdpResen, csereUdpResen);
+  const csereLement = csA.ok && lement(csB, 1)
+    && (await regi.esemenyTar.koinoEsemenyei(tarA, KOINO)).length === 5 && await nala(tarB) === 5;
+  const g = annaE[0];
+  const maiSzolgalo = await ujTar(); await ment(maiSzolgalo, [g]);
+  const regiSzolgalo = await regiTar(); await regiMent(regiSzolgalo, [g]);
+  let p = await udpParos();
+  const [rk] = await ketFel(
+    async () => regi.udpVonal.szeletUdpResen(p.egyik, '127.0.0.1', p.masikPort, await regiTar(), KOINO, g.azonosito, { varakozasiIdo: TURELEM }),
+    () => csereUdpResen(p.masik, '127.0.0.1', p.egyikPort, maiSzolgalo, KOINO, { ...KITALALT_12(), varakozasiIdo: TURELEM }));
+  p.bezar();
+  p = await udpParos();
+  const [mk] = await ketFel(
+    async () => szeletUdpResen(p.egyik, '127.0.0.1', p.masikPort, await ujTar(), KOINO, g.azonosito, { ...KITALALT_12(), varakozasiIdo: TURELEM }),
+    () => regi.udpVonal.csereUdpResen(p.masik, '127.0.0.1', p.egyikPort, regiSzolgalo, KOINO, { varakozasiIdo: TURELEM }));
+  p.bezar();
+  const jo = { csereLement, regiKeroKapta: rk.ok && rk.ertek.kapott >= 1, kitalaltKeroKapta: mk.ok && mk.ertek.kapott >= 1 };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([csA, csB, rk, mk].map((r) => r.ok ? 'rendben' : r.kod + ' ' + r.uzenet)) + ')\n');
+  return ok;
+});
+
+// ===== ⭐⭐ A KÉZFOGÁS-VÁLASZTÓ (az építés ④-e) =====
+
+// Rontás: (a) a részek nem a nemzedéké (mindig a mai) → az 1-es lépés a kitalált kulcsot adná → bukik; (b) a legrégebbi
+// szállítás nem a dátumból → a lejárt is [1,2] → bukik; (c) a feljegyzés más foglalatra is átlát → bukik; (d) a kitalált
+// szállítás nem a környezetből → bukik.
+proba('⭐⭐ a SZÁLLÍTÁS nemzedékei: a részek a közös nemzedéké (a lépésé, különben a mai); a legrégebbi a dátumból; a kapu feljegyzése foglalatonként és címenként, korlátosan; a készlet alakja ellenőrizve', () => {
+  const most = Date.now();
+  const k = kitalaltSzallitasKeszlet(200, most);
+  const r1 = szallitasReszei(k, 1), r2 = szallitasReszei(k, 2);
+  const a = ujEgyszeriKulcs(), b = ujEgyszeriKulcs();
+  // az 1-es részei a mai kulcsot adják, a 2-esé mást (mindkét oldal a saját nemzedékével ugyanazt)
+  const kulcs1 = r1.munkamenetKulcsai(a, b.nyilvanos).kuldo, kulcs2 = r2.munkamenetKulcsai(a, b.nyilvanos).kuldo;
+  const mai = munkamenetKulcsai(a, b.nyilvanos).kuldo;
+  const halo1 = {}, halo2 = {};
+  szallitasFeljegyzese(halo1, '10.0.0.1', 5, 2);
+  for (let i = 0; i < 1030; i++) szallitasFeljegyzese(halo2, '10.0.1.' + (i % 250), 1000 + i, 1);
+  const regiKornyezet = process.env.KOINO_PROBASZALLITAS;
+  process.env.KOINO_PROBASZALLITAS = '200';
+  const kornyezet12 = sajatSzallitas().join() === '1,2' && szallitasKeszlet().kitalalt === true
+    && lejaroValtozatok().szallitas.map((x) => x.nyelv).join() === '1';
+  process.env.KOINO_PROBASZALLITAS = '-1';
+  const kornyezet2 = sajatSzallitas().join() === '2,2' && lejaroValtozatok().szallitas.length === 0;
+  if (regiKornyezet === undefined) delete process.env.KOINO_PROBASZALLITAS; else process.env.KOINO_PROBASZALLITAS = regiKornyezet;
+  const dob = (x) => { try { szallitasKeszletEllenorzese(x); return false; } catch { return true; } };
+  const jo = {
+    mai: Object.keys(REGI_SZALLITASOK).length === 0 && sajatSzallitas().join() === '1,1' && szallitasKeszlet().legujabb === 1
+      && SZALLITAS_RESZEK.every((n) => typeof szallitasReszei(szallitasKeszlet(), 1)[n] === 'function'),
+    reszek: kulcs1.equals(mai) && !kulcs2.equals(mai) && r2.munkamenetKulcsai(a, b.nyilvanos).kuldo.equals(kulcs2)
+      && r1.csomagTitkositasa === r2.csomagTitkositasa,
+    lejart: sajatSzallitas({ szallitasKeszlet: kitalaltSzallitasKeszlet(-1, most) }).join() === '2,2'
+      && sajatSzallitas({ szallitasKeszlet: k }).join() === '1,2',
+    feljegyzes: feljegyzettSzallitas(halo1, '10.0.0.1', 5) === 2 && feljegyzettSzallitas(halo2, '10.0.0.1', 5) === null
+      && feljegyzettSzallitas(halo1, '10.0.0.1', 6) === null && feljegyzettSzallitas(halo2, '10.0.1.0', 1000) === null
+      && feljegyzettSzallitas(halo2, '10.0.1.29', 2029) === 1,
+    ellenorzes: [
+      { legujabb: 2, lepesek: { 1: { meddig: '2027-13-01', reszek: {} } } },
+      { legujabb: 2, lepesek: { 1: { meddig: '2027-01-01', reszek: { ismeretlen: () => 1 } } } },
+      { legujabb: 1, lepesek: { 1: { meddig: '2027-01-01', reszek: {} } } }
+    ].every(dob),
+    kornyezet12, kornyezet2
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ')\n');
+  return ok;
+});
+
+/**
+ * Egy kapu, a munkája: kézfogás (a kapu feljegyzése szerint — a hívó nem mondja meg) és egy csere a védett résen. A munkák
+ * (a közös szállítással) a `munkak`-ban.
+ */
+async function valasztoKapu(keszlet, tar) {
+  const munkak = [];
+  const sz = keszlet ? { szallitasKeszlet: keszlet } : {};
+  const kapu = await udpKapuNyitasa({ port: 0, jelez: () => {}, ...sz,
+    munka: async (halo, t) => {
+      const v = await kezfogasUdpResen(halo, t.cim, t.port, { ...sz, varakozasiIdo: TURELEM });
+      try {
+        const cs = await csereUdpResen(v, t.cim, t.port, tar, KOINO, { varakozasiIdo: TURELEM });
+        munkak.push({ szallitas: v.szallitas, ok: true });
+        return cs;
+      } catch (hiba) {
+        munkak.push({ szallitas: v.szallitas, ok: false, hiba: hiba.message });
+        throw hiba;
+      } finally {
+        v.zar();
+      }
+    } });
+  return { kapu, munkak };
+}
+
+/** A kopogó (A) és a kopogott (B) kapu — a két munka végéig (az `elotte` a kapuk nyitása után, a kopogás előtt fut). */
+async function valasztoKopogas(kA, kB, elotte = null) {
+  const anna = await ujEember(KOINO), bela = await ujEember(KOINO);
+  const tarA = await ujTar(); await ment(tarA, await lanc(anna, 3, 'A'));
+  const tarB = await ujTar(); await ment(tarB, await lanc(bela, 2, 'B'));
+  const a = await valasztoKapu(kA, tarA), b = await valasztoKapu(kB, tarB);
+  let kor = null;
+  try {
+    if (elotte) elotte();
+    kor = await a.kapu.kopog([{ cim: '127.0.0.1', port: b.kapu.port }], { idokorlat: 3 * TURELEM });
+    for (let i = 0; i < 40 && (a.munkak.length < 1 || b.munkak.length < 1); i++) await varj(100);
+  } finally {
+    a.kapu.zar();
+    b.kapu.zar();
+  }
+  return { a: a.munkak, b: b.munkak, nalaA: await nala(tarA), nalaB: await nala(tarB), kor };
+}
+
+// Rontás: (a) a kapu nem jegyzi fel a közös szállítást → mindkét fél a legrégebbijével fog kezet → az [1,2] és a [2,2] nem
+// érti egymást → bukik; (b) a kézfogás a feljegyzést nem olvassa → ugyanígy bukik; (c) a kézfogás a legújabbal fog kezet (nem
+// a közössel) → az [1,2] és az 1-es nem érti egymást → bukik; (d) a részek nem a közös nemzedékéi → bukik; (e) a kapu a saját
+// szállítását csak a nyitáskor számolja → a futó kapun lejárt régi lépést is mondja, a kézfogás némán bukik → bukik.
+proba('⭐⭐⭐ a KÉZFOGÁS-VÁLASZTÓ a kapun: egy kitalált 2-es szállítással a kopogás után a közös nemzedékkel fognak kezet — az 1-essel az 1-essel, a csak 2-essel a 2-essel —, és a csere mindkét esetben lemegy; a FUTÓ kapun lejárt régi lépés után megnevezve nincs közös', async () => {
+  const egyes = await valasztoKopogas(kitalaltSzallitasKeszlet(200), null);
+  const kettes = await valasztoKopogas(kitalaltSzallitasKeszlet(200), kitalaltSzallitasKeszlet(-1));
+  // ⭐ a régi lépés dátuma a már nyitott kapun jön el (mint egy napokig futó postaládán): a kopogás már a [2,2]-t mondja
+  const k = kitalaltSzallitasKeszlet(200);
+  const futon = await valasztoKopogas(k, null, () => { k.lepesek[1].meddig = '2000-01-01'; });
+  const nk = futon.kor?.eredmenyek?.[0]?.nincsKozos;
+  const rendben = (x, n) => x.a.length === 1 && x.b.length === 1 && x.a[0].ok && x.b[0].ok
+    && x.a[0].szallitas === n && x.b[0].szallitas === n && x.nalaA === 5 && x.nalaB === 5;
+  const jo = { egyes: rendben(egyes, 1), kettes: rendben(kettes, 2),
+    futon: futon.a.length === 0 && futon.b.length === 0 && nk?.mi === 'szallitas' && nk.irany === 'regebbi' && nk.sajat?.join() === '2,2' };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify({ egyes, kettes, futon: { ...futon, kor: futon.kor?.eredmenyek } }) + ')\n');
+  return ok;
+});
+
+/** Két kézi pajzsfúró egymásra (rögzített portokon); az átfúrt résen a kézfogás a fúrás feljegyzése szerint. */
+async function ketFuro(kA, kB, portA, portB, indulA = null) {
+  const fel = { a: [], b: [] };
+  const egy = (keszlet, sajatPort, tarsPort, nev) => pajzsfurasTobbfele(sajatPort, [{ cim: '127.0.0.1', port: tarsPort }], {
+    idokorlat: 3 * TURELEM, koz: 100, sajatCimMerese: false, ...(keszlet ? { szallitasKeszlet: keszlet } : {}),
+    utana: (e) => { if (e.mi === 'NINCS-KOZOS-SZALLITAS') fel[nev].push(e); if (e.mi === 'INDUL' && nev === 'a' && indulA) indulA(); },
+    atfurt: async (allapot, halo) => {
+      const v = await kezfogasUdpResen(halo, allapot.cim, allapot.port,
+        { ...(keszlet ? { szallitasKeszlet: keszlet } : {}), varakozasiIdo: TURELEM });
+      fel[nev].push({ mi: 'KEZET-FOGTUNK', szallitas: v.szallitas });
+      v.zar();
+    }
+  });
+  const [ra, rb] = await Promise.all([egy(kA, portA, portB, 'a'), egy(kB, portB, portA, 'b')]);
+  return { ra, rb, fel };
+}
+
+// Rontás: (a) a fúró kopogása jel nélkül megy → a „2-es” a fúrót 1-esnek látja, és kezet fogna → bukik; (b) a fúró nem jegyzi
+// fel a közöset → a kézfogás a legrégebbivel → bukik; (c) a közös nélküli cél nem „kész” → a fúrás az ablak végéig tart, és nem
+// nevez meg → bukik; (d) a fúró a saját szállítását csak egyszer számolja → a fúrás alatt lejárt régit is mondja → bukik.
+proba('⭐⭐ a kézi PAJZSFÚRÓ is viszi a szállítás jelét: közös szállításon a rés után a közös nemzedékkel fog kezet; közös nélkül mindkét fúró megnevezve, az ablak vége előtt kész', async () => {
+  const kozos = await ketFuro(kitalaltSzallitasKeszlet(200), kitalaltSzallitasKeszlet(-1), 7991, 7993);
+  const kezdet = Date.now();
+  const nincs = await ketFuro(kitalaltSzallitasKeszlet(-1), null, 7995, 7997);
+  const nincsIdo = Date.now() - kezdet;
+  // ⭐ a régi lépés a fúrás indulásakor jár le (mint egy vég nélkül fúró parancsnál): a kopogás már a [2,2]-t mondja
+  const k = kitalaltSzallitasKeszlet(200);
+  const futon = await ketFuro(k, null, 7999, 8001, () => { k.lepesek[1].meddig = '2000-01-01'; });
+  const kezet = (x) => x.length === 1 && x[0].mi === 'KEZET-FOGTUNK' && x[0].szallitas === 2;
+  const jo = {
+    kozos: kozos.ra.atfurtak.length === 1 && kozos.rb.atfurtak.length === 1 && kezet(kozos.fel.a) && kezet(kozos.fel.b),
+    nincs: nincs.ra.atfurtak.length === 0 && nincs.rb.atfurtak.length === 0
+      && nincs.ra.celok[0]?.nincsKozos?.irany === 'regebbi' && nincs.rb.celok[0]?.nincsKozos?.irany === 'ujabb'
+      && nincs.fel.a.length === 1 && nincs.fel.b.length === 1,
+    hamarKesz: nincsIdo < 2 * TURELEM,
+    futon: futon.ra.atfurtak.length === 0 && futon.ra.celok[0]?.nincsKozos?.irany === 'regebbi' && futon.fel.a.length === 1
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify({ ...jo, nincsIdo, kozos: kozos.fel, nincs: nincs.fel,
+    celok: [nincs.ra.celok, nincs.rb.celok] }) + ')\n');
+  return ok;
+});
+
+// ===== ⭐⭐ AKIVEL MÉG A RÉGIN BESZÉLÜNK (④ — a ⑦ dátuma) =====
+
+// Rontás: (a) a legújabbon lement munka nem törli → bukik; (b) a nem csere (null) munka törli → bukik; (c) a kép a 30 napon túli
+// dátumot is kimondja → bukik; (d) a kép a már nem beszélt (a legrégebbi alatti) változatot is számolja → bukik; (e) a határ
+// nem a v-től fölfelé a legkorábbi → bukik; (f) a „nem értjük” rész eldobja a régin-bejegyzéseket → bukik.
+proba('⭐⭐ AKIVEL MÉG A RÉGIN BESZÉLÜNK: a régebbi közös nyelvű munka feljegyzi, a legújabbon lement törli; a lap csak 30 napon belüli dátumnál szól — rétegenként, a nappal és a teendővel', () => {
+  const T0 = Date.UTC(2026, 10, 7, 12);
+  const NAP = 24 * 3600 * 1000;
+  const legujabb = { nyelv: 2, szallitas: 2 };
+  let j = uresNyelvJegyzek();
+  j = reginFeljegyzese(j, 'A', { nyelv: 1, szallitas: 2 }, legujabb, T0);
+  j = reginFeljegyzese(j, 'B', { nyelv: 1, szallitas: 1 }, legujabb, T0);
+  j = reginFeljegyzese(j, 'C', { nyelv: 2, szallitas: 2 }, legujabb, T0);
+  const feljegyezve = Object.keys(j.regin).sort().join() === 'A,B' && j.regin.A.szallitas === null && j.regin.B.szallitas === 1;
+  const ugyanaz = reginFeljegyzese(j, 'A', { nyelv: 1, szallitas: 2 }, legujabb, T0 + 60000) === j
+    && reginFeljegyzese(j, 'A', { nyelv: null, szallitas: null }, legujabb, T0) === j;
+  // a „nem értjük” lépései nem dobják el
+  const megmarad = Object.keys(ertjukFeljegyzese(korMegfigyelesei(j, [{ cim: 'x', port: 1, cel: { cim: 'x', port: 1 }, ok: false,
+    nincsKozos: { mi: 'nyelv', irany: 'ujabb', sajat: [1, 2], tars: [3, 3] } }], () => 'x:1', T0).jegyzek, ['x:1']).regin).length === 2;
+  // a lejáró lépések (a nyelvnél 10, a szállításnál 40 nap múlva)
+  const lejarok = (nyNap, szNap) => ({ nyelv: [{ nyelv: 1, meddig: '2026-11-17', napMulva: nyNap }],
+    szallitas: [{ nyelv: 1, meddig: '2026-12-17', napMulva: szNap }] });
+  const kep = nyelvekKepe(j, T0, lejarok(10, 40));
+  const mindketto = nyelvekKepe(j, T0, lejarok(10, 20));
+  const messze = nyelvekKepe(j, T0, lejarok(REGIN_ELORE_NAP + 1, 40));
+  // a már nem beszélt változat (a legrégebbi lépésünk a 2-es — az 1-est elhagytuk): nem „hamarosan”, hanem már most nincs közös
+  // (azt a „nem értjük” mondja ki), tehát itt nem számít
+  const nemBeszelt = nyelvekKepe(j, T0, { nyelv: [{ nyelv: 2, meddig: '2026-11-12', napMulva: 5 }], szallitas: [] });
+  const nincsMegadva = nyelvekKepe(j, T0);
+  // a határ a v-től fölfelé a legkorábbi: a 3 nyelvű készüléken az 1-es a 2-es lépés (5 nap) dátumán is elvész
+  const harom = nyelvekKepe({ tarsak: {}, regin: { D: { nyelv: 1, szallitas: null, utoljara: T0 } } }, T0,
+    { nyelv: [{ nyelv: 1, meddig: '2027-01-01', napMulva: 55 }, { nyelv: 2, meddig: '2026-11-12', napMulva: 5 }], szallitas: [] });
+  // a legújabbon lement munka törli; a rég nem látott elévül
+  const torolve = Object.keys(reginFeljegyzese(j, 'B', { nyelv: 2, szallitas: 2 }, legujabb, T0).regin).join() === 'A';
+  const elevult = nyelvekKepe(j, T0 + NEM_ERTJUK_LATSZIK + NAP, lejarok(10, 20)).lejaro === 0;
+  const jo = {
+    feljegyezve, ugyanaz, megmarad, torolve, elevult,
+    kep: kep.lejaro === 2 && kep.mondatok.length === 1
+      && kep.mondatok[0] === '2 társad még csak a régi (1.) nyelvet beszéli — a programod 10 nap múlva (2026-11-17) már nem beszéli:'
+        + ' ha addig nem frissítenek, utána nem cseréltek',
+    mindketto: mindketto.lejaro === 2 && mindketto.mondatok.length === 2
+      && /^1 társad még csak a régi \(1\.\) szállítást beszéli — a programod 20 nap múlva \(2026-12-17\) már nem beszéli: ha addig nem frissít, utána/.test(mindketto.mondatok[1]),
+    messze: messze.lejaro === 0 && messze.mondatok.length === 0,
+    nemBeszelt: nemBeszelt.lejaro === 0 && nincsMegadva.lejaro === 0,
+    harom: harom.lejaro === 1 && /5 nap múlva \(2026-11-12\)/.test(harom.mondatok[0] ?? ''),
+    alak: Object.keys(nyelvJegyzekAlakja(JSON.parse(JSON.stringify(j))).regin).length === 2
+      && Object.keys(nyelvJegyzekAlakja({ regin: { X: { nyelv: 0, utoljara: T0 }, Y: { nyelv: 1 } } }).regin).length === 0
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify({ jo, kep, mindketto, harom }) + ')\n');
   return ok;
 });
 

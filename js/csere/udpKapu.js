@@ -50,8 +50,9 @@
 // a kapu (1) munkát nem indít (a kézfogás úgysem menne át), (2) nem kopog vissza, (3) a kopogására mégis `HALLAK`-kal felel —
 // ebből tudja meg a társ a MI jelünket, és ő is kimondhatja az okot (különben nála csak „nem felelt” lenne: a nem-esemény
 // néma) —, és (4) kimondja (`NINCS-KOZOS-SZALLITAS`, társanként egyszer, az iránnyal). A kör az ilyen célt nem hívja tovább,
-// és a bukását megnevezi (`nincsKozos`). A közös szállítás a munkához is átér (`tars.szallitas`) — a fordító-szél (④) ebből
-// választ kézfogást.
+// és a bukását megnevezi (`nincsKozos`). A közös szállítás a munkához is átér (`tars.szallitas`), és ⭐ D124 ④: a kapu a
+// foglalathoz és a társ címéhez FELJEGYZI (`szallitasFeljegyzese`) — a kézfogás (`udpVonal.js` `kezfogasUdpResen`) onnan
+// olvassa, bármelyik munkából indul (a hívónak nem kell átadnia: az őr a rétegben van).
 // ⚠️ A kopogás nem hitelesített (a UDP feladócíme hamisítható): egy hamis „nincs közös” egy kört elvehet — mint ma egy hamis
 // FOGLALT. Egy valódi `HALLAK` a közös jellel ugyanúgy munkát indít.
 //
@@ -65,7 +66,7 @@ import { TITKOS_JEL, KF_JEL } from './titkositas.js';
 import { createSocket } from 'node:dgram';
 import { stunValaszE, kulsoCimFoglalaton } from './pajzsfuro.js';
 // ⭐ D124 ②: a szállítás jele a kopogásban.
-import { sajatSzallitas, szallitasJel, szallitasEgyezese } from './nyelvValtozat.js';
+import { sajatSzallitas, szallitasJel, szallitasEgyezese, szallitasFeljegyzese } from './nyelvValtozat.js';
 
 // ⭐ Ennyi ezredmásodpercenként kopogunk egy még nem felelt társra — mint eddig a fúróban.
 const KOPOGAS_KOZ = 1000;
@@ -129,12 +130,15 @@ export async function udpKapuNyitasa(beallitas) {
   let lezarva = false;
 
   // ⭐ D124 ②: a saját szállításunk — minden kopogás-üzenet viszi (egy helyen, a `kuld`-ban).
-  const sajatSz = sajatSzallitas(beallitas);
+  // ⭐⭐ D124 ④: MINDEN kopogásnál újra — a régi lépés dátuma egy napokig futó kapun (a postaládán) is eljöhet, és a jelünknek
+  // ugyanazt kell mondania, amit a kézfogás választ (az is most számol). Egyszer számolva a lejárt régit is mondtuk volna: a társ
+  // munkát kezdett volna, a kézfogás pedig némán elbukott volna (nem a megnevezett „nincs közös”).
+  const sajatSz = () => sajatSzallitas(beallitas);
 
   const most = () => Date.now();
   const kuld = (uzenet, cim, cport) => {
     if (lezarva) return;
-    halo.send(JSON.stringify({ uzenet, tol: azonosito, ...szallitasJel(sajatSz) }), cport, cim, (hiba) => {
+    halo.send(JSON.stringify({ uzenet, tol: azonosito, ...szallitasJel(sajatSz()) }), cport, cim, (hiba) => {
       if (hiba) jelez({ mi: 'KULDES-BUKOTT', cim, port: cport, ok: hiba.message });
     });
   };
@@ -237,9 +241,11 @@ export async function udpKapuNyitasa(beallitas) {
    * ⭐ A `KOPOG`-ra ilyenkor is `HALLAK` megy (a hívó küldi): ebből tudja meg a társ a mi jelünket.
    */
   const szallitasRendben = (t, u) => {
-    const e = szallitasEgyezese(u, sajatSz);
+    const e = szallitasEgyezese(u, sajatSz());
     if (e.szallitas !== null) {
       t.szallitas = e.szallitas;
+      // ⭐⭐ D124 ④: a kézfogás (bármelyik munkából) innen tudja, melyik nemzedékkel fogjon kezet ezzel a társsal
+      szallitasFeljegyzese(halo, t.cim, t.port, e.szallitas);
       t.nincsKozos = null;
       t.hibasJel = false;
       return e;

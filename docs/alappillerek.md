@@ -1836,3 +1836,17 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     („nyelvJegyzek is not defined”, 500) — a nyelv készülék-szintű, a helye a gyár előtt van · ⭐ a parancssor-próba két valódi „2-es”
     készülékkel (`KOINO_SZALLITAS`, `KOINO_NYELV` — csak próbának): 3 kör után szünet, a lap és a parancs kimondja, a frissített
     társ bekopogása törli · ⏭️ ④ a fordító-szél és a régi számítások jegyzéke (egy kitalált 2-essel) → ⑤ a kiírt alakok.
+244. **2026-11-07 · D124 ④ — a fordító-szél, a kézfogás-választó és a régi lépések dátuma** → **`forditoSzel.js`: a régi nyelvek
+    és szállítások jegyzéke (ma üresen), lépésenként a dátummal; a legrégebbi beszélt változat a jegyzékből (a külön szám kikerült);
+    a szél a vonal üzenetsorában (a közös nyelv után a kimenő a régi alakra, a bejövő az újra — minden munka-út egy helyen; az első
+    üzenetek érintetlenek); a közös számítás a közös nyelvé (`sor.szamitas`); a kézfogás a kapu feljegyzéséből a közös szállítással
+    fog kezet; a ⑦ dátuma: akivel a régin beszélünk, azt a lap és a parancs 30 nappal előbb kimondja** · ⭐ a szél az üzenetsorban:
+    egy hely, ahol minden üzenet átmegy — a logikában nincs „ha a társ régi” ág (PV2 (A)) · ⭐ a szállítás nem fordítható, ezért
+    választó, és a kapu jegyzi fel (az őr a rétegben, nem a hívókban) · ⚠️ a nyitás számai a közös nyelv ELŐTT készülnek: egy
+    számítás-törés alatt a vegyes pár gyors útja elmarad (kimondott ár; a próba méri) · ⛔ az építés lelete: a kézi `pajzsfuro`
+    saját kopogása a ②-ből kimaradt — most az is viszi a jelet · ⛔ a próba lelete: a kapu a saját szállítását a nyitáskor számolta
+    egyszer — egy napokig futó postaládán a lejárt régit is mondta volna, a társ munkát kezdett volna, és a kézfogás némán bukott
+    volna (nem a megnevezett „nincs közös”); most minden kopogásnál (a fúró is) · ⭐ a próba egy kitalált 2-essel (más alak, más szelet-pár lenyomat,
+    más kézfogás-kulcs — `KOINO_PROBANYELV`, `KOINO_PROBASZALLITAS`), a valódi régi programmal és három valódi folyamattal ·
+    ⚠️ nem mérve: a szelet-kérő zárt koinós `TAGSAG`-ja és a fájl-kérő `KESZ`-e a szélen (a kiszolgáló bármire zár), a védett rés
+    csomag-részei (a kitalált szállítás csak a kulcsot váltja), a lap alsó sávjának szövege · ⏭️ ⑤ a kiírt alakok.
