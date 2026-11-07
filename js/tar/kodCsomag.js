@@ -44,7 +44,11 @@ const UT_KORLAT = 512;
 // A szöveges fájlok (a sorvég ezekben normálódik) — a többi bájtra pontosan marad.
 const SZOVEGES = /\.(m?js|cjs|md|css|html?|json|txt|svg|sh|ps1|ya?ml)$/i;
 // A bejárásnál (git nélkül) a program fájljai.
-const KODNAK_VALO = /\.(m?js|cjs|md|css|html?|json|txt|svg|png|jpe?g|gif|ico|webp|woff2?)$/i;
+// ⛔ A 91. mérés lelete (2026-11-07, D123 ④ — PR5): a telepítők (`termux/*.sh`, `windows/*.ps1`, `windows/koino.cmd`) eddig
+// kimaradtak — a git nélküli mappa (a Windowsos telepítés a GitHub zip-jéből, és egy kártyából összerakott program) így ugyanarra a
+// változatra MÁS nevet számolt, mint a git-munkakönyvtár (a lap „ℹ más felület”-et mondhatott). Egy próba őrzi, hogy git nélkül
+// ugyanaz a név jön (`koinoVerzioProba.js`).
+const KODNAK_VALO = /\.(m?js|cjs|md|css|html?|json|txt|svg|png|jpe?g|gif|ico|webp|woff2?|sh|ps1|cmd)$/i;
 // A bejárásnál kihagyott mappák (az adat, a git, a függőségek — utóbbi nincs is: 0 npm). ⭐ A tár saját, nem-program részei
 // (a gyökérben): lent, `NEM_PROGRAM_…`.
 const KIHAGYOTT_MAPPAK = new Set(['.git', 'node_modules', 'koino-adat']);

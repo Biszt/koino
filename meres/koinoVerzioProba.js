@@ -140,6 +140,40 @@ proba('⭐ D119 (①a): a futó program kód-csomagja — a program fájljai (a 
     return ok;
   });
 
+// ⛔ A 91. mérés lelete (2026-11-07, D123 ④ — PR5): a GIT NÉLKÜLI mappa (a Windowsos telepítés a GitHub zip-jéből, és egy kártyából
+// összerakott program) ugyanarra a változatra ugyanazt a nevet számolja, mint a git-munkakönyvtár. A próba a követett fájlokat (mint a
+// zip — a dokumentációval együtt) egy `.git` nélküli mappába másolja, és a két kód-csomagot összeveti; ha a jövőben egy új fajta
+// fájl kerül a programba, amit a bejárás nem lát, ez bukik. Rontás: a telepítők (`.sh`, `.ps1`, `.cmd`) a bejárásból kimaradnak →
+// más név → bukik.
+proba('⛔ a 91. mérés lelete: a GIT NÉLKÜLI másolat (mint a zip-ből, vagy egy kártyából összerakva) ugyanazt a kód-nevet számolja, mint a git-munkakönyvtár — a telepítők is benne',
+  async () => {
+    const { execFileSync } = await import('node:child_process');
+    let utak;
+    try {
+      utak = execFileSync('git', ['ls-files', '-z'], { cwd: PROGRAM, maxBuffer: 16 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] })
+        .toString().split('\0').filter(Boolean);
+    } catch { utak = []; }
+    if (!utak.length) { process.stdout.write('    (nincs git — a git nélküli mappa itt maga a program; kihagyva)\n'); return true; }
+    const hely = await mkdtemp(join(tmpdir(), 'koino-gitnelkul-'));
+    try {
+      for (const ut of utak) {
+        const cel = join(hely, ...ut.split('/'));
+        await mkdir(dirname(cel), { recursive: true });
+        try { await writeFile(cel, await readFile(join(PROGRAM, ut))); } catch { /* a lemezről hiányzik — a kód-csomag is kihagyja */ }
+      }
+      const git = await kodCsomagKeszitese(PROGRAM);
+      const nelkul = await kodCsomagKeszitese(hely);
+      const kimarad = git.jegyzek.fajlok.map((f) => f[0]).filter((u) => !nelkul.jegyzek.fajlok.some((g) => g[0] === u));
+      const tobblet = nelkul.jegyzek.fajlok.map((f) => f[0]).filter((u) => !git.jegyzek.fajlok.some((g) => g[0] === u));
+      const ok = nelkul.hivatkozas.lenyomat === git.hivatkozas.lenyomat && !kimarad.length && !tobblet.length
+        && nelkul.jegyzek.fajlok.some((f) => f[0] === 'termux/telepit.sh') && nelkul.jegyzek.fajlok.some((f) => f[0] === 'windows/telepit.ps1');
+      if (!ok) process.stderr.write('    (kimarad: ' + kimarad.join(', ') + ' | többlet: ' + tobblet.join(', ') + ')\n');
+      return ok;
+    } finally {
+      await rm(hely, { recursive: true, force: true });
+    }
+  });
+
 // ===================================
 // 2. A KOINO-VERZIÓ A KAPUN
 // ===================================

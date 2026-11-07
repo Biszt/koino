@@ -1864,3 +1864,12 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     kétszer · ⭐ a próba egy kitalált következővel (`KOINO_PROBAALAK` — csak a számában más), a git-ből elővett régi program ellen, a
     kiáltás valódi foglalatokon, a tábla és a témák három valódi folyamattal, a rekesz az M8 útján mindkét irányban · ⚠️ nem mérve az
     éles úton: a kopogtató és a kereső-régió témái, a `felfedez` parancs · ✅ a D124 építése kész (①–⑤) · ⏭️ PR5 → PR4.
+246. **2026-11-07 · D123 ④ — PR5, telepítés a kártyáról: átvizsgálva, és a 91. mérés lelete javítva** → **a kártyából egy működő
+    program összerakható (91.: 367 fájl ~0,5 s alatt kiírva, mind a lenyomata szerint, a kiírt program elindul, a magja ugyanaz) —
+    a PR5-höz új adat nem kell, a munka a csere és az előnézet; ⛔ a lelet: a git nélküli mappa (a Windowsos zip-telepítés, egy
+    kártyából összerakott program) a telepítőket (`.sh`, `.ps1`, `.cmd`) a bejárásból kihagyta, és ugyanarra a változatra más
+    programnevet számolt — javítva, egy próba őrzi** · ⭐ a javaslat: a kártya kódja a `koino-uj`-ba, és a mai frissítés lánca
+    (PR7) cserél — a telefonon a `.git` az új programmal megy (a telepítő sor így később is frissít) · ⚠️ egy program fut a
+    készüléken: ha a kártya magja más, mint egy koinóé, ott „más számítás” lesz — az előnézet koinónként kimondja · ⚠️ a lenyomat
+    azt bizonyítja, hogy a kód az, amit a kártya megnevez, azt nem, hogy jó · ⏸️ TK1–TK5 Csabánál
+    (`kartya_telepites_atvizsgalas.md`).

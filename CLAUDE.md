@@ -67,9 +67,16 @@ a dátumig olvassuk; a `koino` parancs kimondja („A kiírt alakok: …”). �
 meghívóra a „régi alakú — kérj újat”-ot mondta, egy újabbra is — most az iránnyal; a más alakú kiáltást a mai olvasó megnevezi (a régi
 „másik koinónak” vette). A próba egy kitalált következővel (`KOINO_PROBAALAK` — csak próbának), a régi program ellen, a kiáltás
 valódi foglalatokon, a tábla és a témák három valódi folyamattal, a rekesz az M8 útján mindkét irányban. ✅ **A D124 építése kész.**
-⏭️ A D123 ④ — **PR5** (telepítés a kártyáról), utána ⑤ **PR4** (feltöltött nézetek).
+🔍 **D123 ④ — PR5, telepítés a kártyáról: ÁTVIZSGÁLVA** ([`kartya_telepites_atvizsgalas.md`](docs/kartya_telepites_atvizsgalas.md),
+**91. mérés** — `kartyaTelepitesMeres.js`: a kártya kódjából egy működő program összerakható, 367 fájl ~0,5 s alatt, mind a
+lenyomata szerint; a munka a csere és az előnézet). ⛔ **A mérés lelete (javítva, elágazás 246):** a git nélküli mappa (a Windowsos
+zip-telepítés, egy kártyából összerakott program) a telepítőket (`.sh`, `.ps1`, `.cmd`) a bejárásból kihagyta, és ugyanarra a
+változatra más programnevet számolt, mint a telefon — most `kodCsomag.js` `KODNAK_VALO`, és egy próba őrzi. ⏸️ **TK1–TK5
+Csabánál** (a csere a mai frissítés láncán, a telefonon a `.git`-tel · az előnézet küszöb nélkül · a más mag koinónként kimondva ·
+a hiányzó fájlok elhozása · a visszaút és a nem induló program). Utána ⑤ **PR4** (feltöltött nézetek).
 
-**Az állapot:** **1422 önpróba** (65 próba-fájl; a legutóbbi teljes soron mind zöld — 2026-11-07, a D124 ⑤ után) · 367 fájl / 7259,5 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1423 önpróba** (65 próba-fájl; a legutóbbi teljes soron 1422/1422 zöld — 2026-11-07, a D124 ⑤
+után; az azóta jött egy — a git nélküli név, a 91. mérés lelete — a csoportjában zöld) · 368 fájl / 7271,9 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

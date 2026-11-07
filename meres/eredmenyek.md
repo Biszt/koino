@@ -5372,6 +5372,35 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 91. ⭐ A KÁRTYÁBÓL ÖSSZERAKOTT PROGRAM — működik-e, és ugyanazt a programot nevezi-e meg? (D123 ④, PR5 — telepítés a kártyáról, 2026-11-07, a laptopon)
+
+*`kartyaTelepitesMeres.js` (a terv: `docs/kartya_telepites_atvizsgalas.md` 2.). Ennek a programnak a kód-csomagja (ahogy a
+koino-verzió kártya ma készül — a git-munkakönyvtárból) egy üres mappába kiírva, fájlonként a lenyomata szerint; a kiírt mappa
+kód-csomagja és magja; a kiírt program egy üres adat-mappával; és egy `.git` nélküli másolat (mint a Windowsos telepítés a zip-ből).*
+
+```
+A JAVÍTÁS ELŐTT
+(a) a kód-csomag a git-munkakönyvtárból: 367 fájl, 7275.1 KB (a jegyzék 32.0 KB), 234 ms
+(b) a kiírás egy üres mappába: 367 fájl, 7259.5 KB, 536 ms, a lenyomat szerint rossz: 0
+(c) a kiírt mappa kód-csomagja (git nélkül, bejárva): 362 fájl — a név ⛔ MÁS; a mag ugyanaz
+    a bejárásból kimarad (5): termux/indit.sh, termux/telepit.sh, windows/indit.ps1, windows/koino.cmd, windows/telepit.ps1
+(d) a kiírt program fut: a születés kilépési kódja 0, a `koino` parancsé 0 (1371 ms) — „A számítás magja: … — ezen a készüléken is ez fut”
+(e) a git nélküli másolat (mint a zip-ből — 419 követett fájl): 362 fájl a csomagban — a név ⛔ MÁS (ugyanaz az öt kimarad)
+A JAVÍTÁS UTÁN (a bejárás a telepítőket is viszi)
+(c) a kiírt mappa kód-csomagja: 367 fájl — a név UGYANAZ; a mag ugyanaz
+(e) a git nélküli másolat: 367 fájl a csomagban — a név UGYANAZ
+```
+
+⭐ **A lelet:** a kártyából egy működő program összerakható (fél másodperc, minden fájl ellenőrizve, a mag ugyanaz) — a PR5-höz új
+adat nem kell, csak a csere és az előnézet. ⛔ **De a git nélküli mappa más programnevet számolt:** a bejárás szűrője a
+telepítőket (`.sh`, `.ps1`, `.cmd`) kihagyta — így **minden Windowsos telepítés** (a zip-ből) ugyanarra a változatra más nevet
+mondott, mint a telefon, a lap tájékoztató szintje („ℹ más felület”) tévesen szólhatott, és egy Windowson készült kártya kódjából
+a telepítők hiányoztak. A mag nem érintett. → **javítva** (`kodCsomag.js` `KODNAK_VALO`), és egy próba őrzi (`koinoVerzioProba.js`:
+a git nélküli másolat ugyanazt a nevet számolja). ⚠️ Amit ez nem mér: a csere (a futó program leállítása, a mappák cseréje, az
+újraindulás) — az a PR5 építése (TK1, TK5).
+
+---
+
 ## 90. ⭐ A TÜRELMES OLVASÓ — mit tesz a mai program egy nála újabb társ üzeneteivel? (D123 ③, PR6 — a nyelvváltozat, 2026-11-06, a laptopon)
 
 *`protokollMeres.js` (a terv: `docs/protokoll_valtozat_atvizsgalas.md` 4.). Két mai program cserél a védett UDP-résen (kézfogás,
