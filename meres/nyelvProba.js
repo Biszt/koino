@@ -25,7 +25,12 @@
 //     2-es szállítással két kapu a közös nemzedékkel fog kezet (az 1-essel a régi kulcsokkal, a 2-essel az újakkal); és a kézi
 //     PAJZSFÚRÓ kopogása is viszi a jelet: közös szállításon a rés után kezet fog, közös nélkül mindkét fél megnevezve kész;
 //   · ⭐⭐ (④, a ⑦ dátuma) AKIVEL MÉG A RÉGIN BESZÉLÜNK: a lement munka feljegyzi (a legújabbon törli), és a kép csak akkor mondja ki,
-//     ha a régi lépés dátuma 30 napon belül jön — rétegenként, a nappal és a teendővel.
+//     ha a régi lépés dátuma 30 napon belül jön — rétegenként, a nappal és a teendővel;
+//   · ⭐⭐ (az építés ⑤-e) A KIÍRT ALAKOK (`kiirtAlak.js` — PV5 (A)): a jegyzék szabálya (az élő változatok a dátumból, a
+//     legújabbtól; az irány; a kép); a mai tábla, meghívó-rekesz, DHT-témák, kiáltás és meghívó BÁJTRA a régi program alakja (a
+//     git-ből), a kitalált következő máshol van, és a régi olvasó nem olvassa (a kiáltását „másik koinónak”, a meghívóját „régi
+//     alakúnak” látná) — a mai megnevezi; és a kiáltás valódi foglalatokon (a kitalált [1,2] kiáltót a régi válaszoló is megtalálja).
+//     (A tábla, a témák és a meghívó rekesze az éles úton: a parancssor-próba két ⑤-ös próbája.)
 //
 // Használja: meres/mind.js (`nyelv` csoport, a `csere` csoportban is).
 
@@ -59,6 +64,19 @@ import {
 } from '../js/csere/forditoSzel.js';
 import { munkamenetKulcsai, ujEgyszeriKulcs } from '../js/csere/titkositas.js';
 import { pajzsfurasTobbfele } from '../js/csere/pajzsfuro.js';
+import {
+  KIIRT_ALAKOK, REGI_KIIRT_ALAKOK, kiirtKeszletEllenorzese, eloAlakok, alakIranya, szamozatlanUtan, kiirtAlakokKepe,
+  kitalaltKiirtKeszlet
+} from '../js/csere/kiirtAlak.js';
+import { rekeszSoKulcsokbol, cimBejegyzes, cimBejegyzesbol, tarsRekesze } from '../js/csere/tabla.js';
+import { ujTablaKulcs, nyilvanosResz } from '../js/csere/tablaKulcs.js';
+import { meghivoRekesze, rekeszBejegyzes, rekeszBejegyzesbol } from '../js/csere/meghivoRekesz.js';
+import {
+  cimjegyzekTema, gyokerDarabTemaja, keszulekKopogtatoTemaja, temaKopogtatoja, hirdetendoTemak, figyelendoKopogtatok
+} from '../js/csere/cimjegyzek.js';
+import { keresoRegioTemaja } from '../js/csere/keresoReteg.js';
+import { felfedezoUzenet, kialtasFeldolgozasa, helyiFelfedezes, felfedezoValaszolo } from '../js/csere/helyiFelfedezes.js';
+import { meghivoKeszitese, meghivoOlvasasa, meghivoE, meghivoSzovegbol, ujMeghivoJelei } from '../js/csere/meghivo.js';
 import { probaGyujtemeny, ujEember } from './probaFuttato.js';
 
 const { proba, futtatas } = probaGyujtemeny('A protokoll nyelvváltozata (D124 — PR6)');
@@ -288,7 +306,14 @@ async function regiProgram() {
     udpKapu: await betolt('js/csere/udpKapu.js'),
     udpVonal: await betolt('js/csere/udpVonal.js'),
     fajlTar: await betolt('js/tar/fajlTar.js'),
-    esemenyTar: await betolt('js/tar/esemenyTar.js')
+    esemenyTar: await betolt('js/tar/esemenyTar.js'),
+    // ⭐ D124 ⑤: a kiírt alakok régi moduljai (a PR6 előtt és óta a ⑤-ig változatlanok — a mai 1-es alak ezekkel bájtra azonos)
+    tabla: await betolt('js/csere/tabla.js'),
+    meghivoRekesz: await betolt('js/csere/meghivoRekesz.js'),
+    cimjegyzek: await betolt('js/csere/cimjegyzek.js'),
+    keresoReteg: await betolt('js/csere/keresoReteg.js'),
+    helyiFelfedezes: await betolt('js/csere/helyiFelfedezes.js'),
+    meghivo: await betolt('js/csere/meghivo.js')
   };
   return regiBetoltve;
 }
@@ -1045,6 +1070,231 @@ proba('⭐⭐ AKIVEL MÉG A RÉGIN BESZÉLÜNK: a régebbi közös nyelvű munka
   };
   const ok = Object.values(jo).every(Boolean);
   if (!ok) process.stderr.write('    (' + JSON.stringify({ jo, kep, mindketto, harom }) + ')\n');
+  return ok;
+});
+
+// ===== ⭐⭐ A KIÍRT ALAKOK (az építés ⑤-e — PV5 (A); `kiirtAlak.js`) =====
+//
+// Amit a program KITESZ (a tábla és a meghívó rekesze, a DHT-témák, a kiáltás, a meghívó szövege), azt egy ismeretlen program
+// olvassa — kézfogás nélkül. A szabály: az alak a HELYÉBEN hordozza a számát; a mai alakok az 1-esek (a meghívóé a 2-es), bájtra
+// változatlanul; az átmenet alatt az író minden élő alakba ír, az olvasó mindegyiket nézi. A kitalált következő
+// (`kitalaltKiirtKeszlet`) csak a SZÁMÁBAN más — épp az, amit a szabály mér.
+
+// Rontás: (a) az élő változatok a legrégebbitől → [1,2] → bukik; (b) a lépés a dátuma napján még él → a 0 napos is él → bukik;
+// (c) az irány fordított → bukik; (d) a számozott címke az 1-esnél is számot tesz → bukik; (e) a környezet nem számít → bukik;
+// (f) a készlet ellenőrzése nem nézi a lépés számát → bukik.
+proba('⭐⭐ a KIÍRT ALAKOK jegyzéke: a mai alakok (a tábla, a rekesz, a témák, a kiáltás 1-es, a meghívó 2-es); az élő változatok a dátumból, a legújabbtól; az irány; a számozott címke; a kép; a készlet alakja ellenőrizve', () => {
+  const most = Date.UTC(2026, 10, 7, 12);
+  const kitalalt = (napok) => ({ kiirtKeszlet: kitalaltKiirtKeszlet(napok, most) });
+  const dob = (k) => { try { kiirtKeszletEllenorzese(k); return false; } catch { return true; } };
+  const regiEnv = process.env.KOINO_PROBAALAK;
+  let envbol = null, envNelkul = null;
+  try {
+    process.env.KOINO_PROBAALAK = '10';
+    envbol = eloAlakok('tema').join() + '|' + eloAlakok('meghivo').join();
+    delete process.env.KOINO_PROBAALAK;
+    envNelkul = eloAlakok('tema').join();
+  } finally {
+    if (regiEnv === undefined) delete process.env.KOINO_PROBAALAK; else process.env.KOINO_PROBAALAK = regiEnv;
+  }
+  const jo = {
+    mai: KIIRT_ALAKOK.tabla === 1 && KIIRT_ALAKOK.rekesz === 1 && KIIRT_ALAKOK.tema === 1 && KIIRT_ALAKOK.kialtas === 1
+      && KIIRT_ALAKOK.meghivo === 2 && Object.keys(REGI_KIIRT_ALAKOK).length === 0
+      && ['tabla', 'rekesz', 'tema', 'kialtas'].every((a) => eloAlakok(a).join() === '1') && eloAlakok('meghivo').join() === '2',
+    atmenet: eloAlakok('tabla', kitalalt(10), most).join() === '2,1' && eloAlakok('meghivo', kitalalt(10), most).join() === '3,2',
+    lejart: eloAlakok('tabla', kitalalt(-1), most).join() === '2' && eloAlakok('meghivo', kitalalt(-1), most).join() === '3',
+    // ⭐ a dátum NAPJÁN a régi már nem él (mint a nyelvé); előtte még igen
+    datumNapja: eloAlakok('rekesz', kitalalt(0), most).join() === '2' && eloAlakok('rekesz', kitalalt(1), most).join() === '2,1',
+    irany: alakIranya(3, [2, 1]) === 'ujabb' && alakIranya(1, [2]) === 'regebbi' && alakIranya(1, [2, 1]) === null
+      && alakIranya(2, [2, 1]) === null,
+    cimke: szamozatlanUtan('koino-tabla-so', 1) === 'koino-tabla-so' && szamozatlanUtan('koino-tabla-so', 2) === 'koino-tabla-so-2',
+    kep: kiirtAlakokKepe() === 'tábla 1 · rekesz 1 · témák 1 · kiáltás 1 · meghívó 2'
+      && kiirtAlakokKepe(kitalalt(10), most) === 'tábla 1–2 · rekesz 1–2 · témák 1–2 · kiáltás 1–2 · meghívó 2–3',
+    env: envbol === '2,1|3,2' && envNelkul === '1',
+    alak: !dob({ legujabb: { ...KIIRT_ALAKOK }, lepesek: {} })
+      && dob({ legujabb: { tabla: 1 } })                                                               // hiányzó alak
+      && dob({ legujabb: { ...KIIRT_ALAKOK, uj: 1 } })                                                 // ismeretlen alak
+      && dob({ legujabb: { ...KIIRT_ALAKOK }, lepesek: { tabla: { 1: { meddig: '2027-01-01' } } } })   // a lépés nem a legújabb alatt
+      && dob({ legujabb: { ...KIIRT_ALAKOK, tabla: 2 }, lepesek: { tabla: { 1: { meddig: '2027-02-30' } } } })   // nem dátum
+      && !dob({ legujabb: { ...KIIRT_ALAKOK, tabla: 2 }, lepesek: { tabla: { 1: { meddig: '2027-02-28' } } } })
+      && dob({ legujabb: { ...KIIRT_ALAKOK }, lepesek: { mas: {} } })
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify({ jo, envbol, envNelkul }) + ')\n');
+  return ok;
+});
+
+// Rontás: (a) a tábla sója az 1-esnél is számot kap → a mai rekesz nem a régi helyén → bukik; (b) a só nem nézi a változatot →
+// a 2-es az 1-es helyén → bukik; (c) a tábla tartalmának alakja nem a változaté → a régi olvasó a 2-est is elolvasná → bukik;
+// (d) a meghívó rekeszének származtatása nem nézi a változatot → bukik; (e) … az 1-esnél is számot tesz → bukik.
+// ⚠️ A rekesz TARTALMÁNAK alakja (`koino-belepo-n`) a kulcs mögött másodlagos őr: a más változatú kulccsal a titkosítás már nem
+// nyílik — ezt a próba nem tudja külön megbuktatni.
+proba('⭐⭐⭐ a mai TÁBLA és MEGHÍVÓ-REKESZ bájtra a régi (a git-ből elővett PR6 előtti program): ugyanott, ugyanazzal a kulccsal — a régi olvasó a mai bejegyzést olvassa, a mai a régiét; a kitalált 2-es MÁSHOL van, és a régi olvasó nem olvassa', async () => {
+  const regi = await regiProgram();
+  if (!regi) { process.stdout.write('    (a régi program (' + REGI_PROGRAM + ') nincs meg a git-történetben — kihagyva)\n'); return true; }
+  const egyik = await ujTablaKulcs(), masik = await ujTablaKulcs();
+  const egyikNy = nyilvanosResz(egyik), masikNy = nyilvanosResz(masik);
+  const cim = { hoszt: '203.0.113.7', port: 41001 };
+  const CS = 'csalad-proba';
+  // a tábla: egyik ír (a masik rekeszébe), masik olvas
+  const ma1 = await cimBejegyzes(egyik, masikNy, cim, 1e12, CS);
+  const ma2 = await cimBejegyzes(egyik, masikNy, cim, 1e12, CS, 2);
+  const regiB = await regi.tabla.cimBejegyzes(egyik, masikNy, cim, 1e12, CS);
+  const r1 = await tarsRekesze(masik, egyikNy, CS), r2 = await tarsRekesze(masik, egyikNy, CS, 2);
+  const rr = await regi.tabla.tarsRekesze(masik, egyikNy, CS);
+  const soHex = async (f, cs) => (await f({ titkosito: egyik.titkositoNyilvanos }, masikNy, cs)).toString('hex');
+  const port = (x) => x?.port ?? null;
+  const tabla = {
+    so: (await soHex(rekeszSoKulcsokbol, null)) === (await soHex(regi.tabla.rekeszSoKulcsokbol, null))
+      && (await soHex(rekeszSoKulcsokbol, CS)) === (await soHex(regi.tabla.rekeszSoKulcsokbol, CS)),
+    hely: ma1.cel.equals(regiB.cel) && r1.so.equals(rr.so) && r1.kulcs.equals(rr.kulcs) && ma1.salt.equals(r1.so),
+    regiOlvassaMait: port(await regi.tabla.cimBejegyzesbol(masik, egyikNy, ma1.ertek)) === 41001,
+    maiOlvassaRegit: port(await cimBejegyzesbol(masik, egyikNy, regiB.ertek)) === 41001,
+    kettoMashol: !ma2.cel.equals(ma1.cel) && ma2.salt.equals(r2.so) && !r2.so.equals(r1.so),
+    kettoOlvashato: port(await cimBejegyzesbol(masik, egyikNy, ma2.ertek, 2)) === 41001,
+    // ⛔ a régi olvasó a 2-es tartalmat sem olvassa (ha egy rekeszbe kerülne is) — és a változatok egymásét sem
+    nemKeveredik: (await regi.tabla.cimBejegyzesbol(masik, egyikNy, ma2.ertek)) === null
+      && (await cimBejegyzesbol(masik, egyikNy, ma2.ertek, 1)) === null && (await cimBejegyzesbol(masik, egyikNy, ma1.ertek, 2)) === null
+  };
+  // a meghívó rekesze: a belépő ír, a meghívó olvas (a titokból mindkettő ugyanazt számolja)
+  const { titok } = ujMeghivoJelei();
+  const be = { cimek: [cim], alairo: egyik.alairoNyilvanos, most: 1e12 };
+  const m1 = await meghivoRekesze(titok), m2 = await meghivoRekesze(titok, 2), mr = await regi.meghivoRekesz.meghivoRekesze(titok);
+  const b1 = await rekeszBejegyzes(titok, be), b2 = await rekeszBejegyzes(titok, be, 2);
+  const br = await regi.meghivoRekesz.rekeszBejegyzes(titok, be);
+  const cport = (x) => x?.cimek?.[0]?.port ?? null;
+  const rekesz = {
+    hely: m1.kulcs.equals(mr.kulcs) && m1.so.equals(mr.so) && b1.cel.equals(br.cel),
+    regiOlvassaMait: cport(await regi.meghivoRekesz.rekeszBejegyzesbol(titok, b1.ertek)) === 41001,
+    maiOlvassaRegit: cport(await rekeszBejegyzesbol(titok, br.ertek)) === 41001,
+    kettoMashol: !m2.kulcs.equals(m1.kulcs) && !m2.so.equals(m1.so) && !b2.cel.equals(b1.cel),
+    kettoOlvashato: cport(await rekeszBejegyzesbol(titok, b2.ertek, 2)) === 41001,
+    nemKeveredik: (await regi.meghivoRekesz.rekeszBejegyzesbol(titok, b2.ertek)) === null
+      && (await rekeszBejegyzesbol(titok, b2.ertek, 1)) === null && (await rekeszBejegyzesbol(titok, b1.ertek, 2)) === null
+  };
+  const ok = Object.values(tabla).every(Boolean) && Object.values(rekesz).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify({ tabla, rekesz }) + ')\n');
+  return ok;
+});
+
+// Rontás: (a) a téma címkéje az 1-esnél más → a mai téma nem a régi → bukik; (b) a téma nem nézi a változatot → a hirdetés két
+// változata egy téma → bukik; (c) a kiáltás 1-es alakja is `v`-t visz → nem a régi szöveg → bukik; (d) a rejtett jel nem nézi a
+// változatot → a régi olvasó a 2-est is elfogadná → bukik; (e) a mai olvasó a más alakot „másik koinónak” veszi → bukik; (f) a
+// meghívó-olvasó az újabbat is „régi alakúnak” mondja → bukik; (g) a meghívó készítése nem a változat előtagjával → bukik.
+proba('⭐⭐⭐ a mai DHT-TÉMÁK, KIÁLTÁS és MEGHÍVÓ bájtra a régi (a git-ből): a kitalált következő más témán, más rejtett jellel (és `v`-vel), más előtaggal — a régi olvasó a kiáltását „másik koinónak”, a meghívóját „régi alakúnak” látja; a mai MEGNEVEZI (újabb / régebbi alak)', async () => {
+  const regi = await regiProgram();
+  if (!regi) { process.stdout.write('    (a régi program (' + REGI_PROGRAM + ') nincs meg a git-történetben — kihagyva)\n'); return true; }
+  const kulcs = await ujTablaKulcs();
+  const AL = kulcs.alairoNyilvanos;
+  const K = (await ujTablaKulcs()).alairoNyilvanos;   // egy 43 jeles név (a meghívó koinója is ilyen)
+  const rc = regi.cimjegyzek;
+  // a témák
+  const hb = { koino: K, alairo: AL, legfelsoDarab: 300, vallaltSzeletek: ['szelet-1'], szeletHirdetes: 1 };
+  const ma = hirdetendoTemak(hb), regiH = rc.hirdetendoTemak(hb), ket = hirdetendoTemak({ ...hb, valtozatok: [2, 1] });
+  const figy = figyelendoKopogtatok({ koino: K, alairo: AL, hirdetett: ket, valtozatok: [2, 1] });
+  const figyRegi = rc.figyelendoKopogtatok({ koino: K, alairo: AL, hirdetett: regiH });
+  const temak = {
+    azonos: cimjegyzekTema(K, 'szelet', 'x').equals(rc.cimjegyzekTema(K, 'szelet', 'x'))
+      && gyokerDarabTemaja(K, 3, 5n).equals(rc.gyokerDarabTemaja(K, 3, 5n))
+      && keszulekKopogtatoTemaja(K, AL).equals(rc.keszulekKopogtatoTemaja(K, AL))
+      && temaKopogtatoja(K, 'kereso', '3:5').equals(rc.temaKopogtatoja(K, 'kereso', '3:5'))
+      && keresoRegioTemaja(K, 3, 5n).equals(regi.keresoReteg.keresoRegioTemaja(K, 3, 5n)),
+    hirdetendo: ma.length === 2 && ma.length === regiH.length
+      && ma.every((t, i) => t.tema.equals(regiH[i].tema) && t.kulcs === regiH[i].kulcs && t.temak.length === 1),
+    // ⭐ az átmenet: minden téma két változatban — a második a régi téma, az első más (és az a `tema`)
+    atmenet: ket.every((t, i) => t.temak.length === 2 && t.temak[1].equals(regiH[i].tema) && !t.temak[0].equals(t.temak[1])
+      && t.tema.equals(t.temak[0])),
+    figyelendo: figy.length === figyRegi.length && figy.every((f, i) => f.temak.length === 2 && f.temak[1].equals(figyRegi[i].tema)
+      && !f.temak[0].equals(f.temak[1]))
+  };
+  // a kiáltás
+  const u1 = felfedezoUzenet('KOPOGOK', K, 7373, 'jel-1'), u2 = felfedezoUzenet('KOPOGOK', K, 7373, 'jel-1', 2);
+  const felado = { address: '10.0.0.9', port: 7374 };
+  const rk = (u) => regi.helyiFelfedezes.kialtasFeldolgozasa(u, felado, K, 'masik');
+  const mk = (u, v) => kialtasFeldolgozasa(u, felado, K, 'masik', v);
+  const kialtas = {
+    azonos: u1 === regi.helyiFelfedezes.felfedezoUzenet('KOPOGOK', K, 7373, 'jel-1') && !('v' in JSON.parse(u1)),
+    kettoMas: JSON.parse(u2).v === 2 && JSON.parse(u2).k !== JSON.parse(u1).k,
+    regiEgyest: rk(u1).rendben === true,
+    regiKettot: rk(u2).ok === 'mas-koino',                 // ⛔ a régi olvasó csendben „másik koinónak” veszi
+    maiEgyesKettot: mk(u2, [1]).ok === 'ujabb-alak' && mk(u2, [1]).valtozat === 2,
+    kettesEgyest: mk(u1, [2]).ok === 'regebbi-alak',
+    atmenet: mk(u1, [2, 1]).valtozat === 1 && mk(u2, [2, 1]).valtozat === 2 && mk(u2, [2, 1]).rendben,
+    masKoino: mk(felfedezoUzenet('KOPOGOK', 'masik-koino', 7373, 'j', 2), [2, 1]).ok === 'mas-koino',
+    hibasJel: mk(JSON.stringify({ ...JSON.parse(u1), v: 'x' }), [1]).ok === 'hibas-alakjel'
+  };
+  // a meghívó
+  const { titok, azonosito } = ujMeghivoJelei();
+  const adat = { koino: K, alairo: AL, cimek: [{ hoszt: '10.0.0.1', port: 7373 }], azonosito, titok, meghivottNev: 'Ferenc',
+    lejarat: 2e12 };
+  const mm2 = meghivoKeszitese(adat), mm3 = meghivoKeszitese({ ...adat, valtozat: 3 });
+  const tit = (r) => r?.meghivo?.titok ?? null;
+  const meghivo = {
+    azonos: mm2 === regi.meghivo.meghivoKeszitese(adat) && tit(regi.meghivo.meghivoOlvasasa(mm2)) === titok,
+    harmasElotag: mm3.startsWith('koino-meghivo:3:'),
+    regiHarmast: /régi alakú/.test(regi.meghivo.meghivoOlvasasa(mm3).hiba ?? ''),   // ⛔ a régi olvasó fordítva mondja
+    maiHarmast: meghivoOlvasasa(mm3, [2]).irany === 'ujabb' && /újabb programmal készült/.test(meghivoOlvasasa(mm3, [2]).hiba ?? '')
+      && /frissítsd a programot/.test(meghivoOlvasasa(mm3, [2]).hiba ?? ''),
+    harmasKettest: meghivoOlvasasa(mm2, [3]).irany === 'regebbi' && /kérj újat/.test(meghivoOlvasasa(mm2, [3]).hiba ?? ''),
+    atmenet: tit(meghivoOlvasasa(mm2, [3, 2])) === titok && tit(meghivoOlvasasa('egy sor ' + mm3 + ' vége', [3, 2])) === titok,
+    egyes: /régi alakú/.test(meghivoOlvasasa('koino-meghivo:1:abc').hiba ?? ''),
+    felismeri: meghivoE(mm3) && meghivoE('x koino-meghivo:1:abc') && !meghivoE(K) && meghivoSzovegbol('sor ' + mm3 + ' vége') === mm3
+      && meghivoSzovegbol('sor ' + mm2) === mm2
+  };
+  const ok = [temak, kialtas, meghivo].every((x) => Object.values(x).every(Boolean));
+  if (!ok) process.stderr.write('    (' + JSON.stringify({ temak, kialtas, meghivo }) + ')\n');
+  return ok;
+});
+
+// Rontás: (a) a kiáltó csak a legújabb alakban kiált → a régi válaszoló nem felel → bukik; (b) a mai válaszoló a legújabb
+// alakban felel, nem a hallottban → a csak 1-es kiáltó nem olvassa → bukik; (c) a kiáltó a más alakot nem nevezi meg → bukik;
+// (d) a válaszoló a régebbi alakot nem nevezi meg → bukik.
+proba('⭐⭐⭐ a KIÁLTÁS valódi foglalatokon: a kitalált [1,2] kiáltót a régi (git) válaszoló is, a csak 2-es is megtalálja, a mai [1,2] válaszoló a csak 1-es kiáltónak is felel; a csak 2-es kiáltót a régi nem (csendben); a más alakú kiáltást a hallgató megnevezi', async () => {
+  const regi = await regiProgram();
+  if (!regi) { process.stdout.write('    (a régi program (' + REGI_PROGRAM + ') nincs meg a git-történetben — kihagyva)\n'); return true; }
+  const K = 'proba-kialtas';
+  const mai = { felfedezoValaszolo };
+  const kor = async (modul, vPort, kPort, vValt, kValt) => {
+    const esemenyek = [];
+    const v = await modul.felfedezoValaszolo({ koino: K, sajatPort: 7373, figyeloPort: vPort, celok: ['127.0.0.1'],
+      ...(vValt ? { valtozatok: vValt } : {}), esemenyre: (e) => esemenyek.push(e) });
+    try {
+      if (!v.mukodik) return { talalt: -1 };
+      const t = await helyiFelfedezes({ koino: K, sajatPort: 7375, figyeloPort: kPort, celok: ['127.0.0.1'], celPort: vPort,
+        idokorlat: 1200, valtozatok: kValt });
+      return { talalt: t.tarsak.length, port: t.tarsak[0]?.port ?? null,
+        eldobva: esemenyek.filter((e) => e.mi === 'ELDOBVA').map((e) => e.ok) };
+    } finally {
+      v.bezar();
+      await varj(100);
+    }
+  };
+  const r = {
+    regi12: await kor(regi.helyiFelfedezes, 8011, 8012, null, [2, 1]),
+    kettes12: await kor(mai, 8013, 8014, [2], [2, 1]),
+    ketto1: await kor(mai, 8015, 8016, [2, 1], [1]),
+    regi2: await kor(regi.helyiFelfedezes, 8017, 8018, null, [2]),
+    kettes1: await kor(mai, 8019, 8020, [2], [1])
+  };
+  // két kiáltó egymásra: az 1-es a 2-es kiáltását hallja, és megnevezi (nem „másik koinó”)
+  const hallott = [];
+  const [x, y] = await Promise.all([
+    helyiFelfedezes({ koino: K, sajatPort: 7373, figyeloPort: 8021, celok: ['127.0.0.1'], celPort: 8022, idokorlat: 1200,
+      valtozatok: [1], esemenyre: (e) => hallott.push(e) }),
+    helyiFelfedezes({ koino: K, sajatPort: 7375, figyeloPort: 8022, celok: ['127.0.0.1'], celPort: 8021, idokorlat: 1200,
+      valtozatok: [2] })
+  ]);
+  const jo = {
+    regi12: r.regi12.talalt === 1 && r.regi12.port === 7373,
+    kettes12: r.kettes12.talalt === 1 && r.kettes12.port === 7373,
+    ketto1: r.ketto1.talalt === 1,
+    regi2: r.regi2.talalt === 0,
+    kettes1: r.kettes1.talalt === 0 && r.kettes1.eldobva.includes('regebbi-alak'),
+    egymasra: x.tarsak.length === 0 && y.tarsak.length === 0
+      && hallott.some((e) => e.mi === 'ELDOBVA' && e.ok === 'ujabb-alak' && e.valtozat === 2)
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify({ jo, r }) + ')\n');
   return ok;
 });
 

@@ -58,10 +58,18 @@ az első üzenetek érintetlenek), a közös számítás a közös nyelvé (`sor
 szállítással fog kezet; a ⑦ dátuma: akivel a régin beszélünk, azt a lap és a `koino` parancs 30 nappal előbb kimondja (`nyelvek.json`
 `regin`). ⛔ Az építés lelete: a kézi `pajzsfuro` saját kopogása a ②-ből kimaradt — most az is viszi a jelet. A próba egy KITALÁLT
 2-essel (`KOINO_PROBANYELV`, `KOINO_PROBASZALLITAS` — a lépés dátuma napokban; csak próbának), a valódi régi programmal és három
-valódi folyamattal. ⏭️ **⑤ a kiírt alakok** szabálya (PV5) és a meglévők változatjele.
+valódi folyamattal. ✅ **⑤ a kiírt alakok** (elágazás 245): `js/csere/kiirtAlak.js` — alakonként a legújabb szám (a tábla, a
+meghívó rekesze, a DHT-témák, a kiáltás 1-es, a meghívó 2-es) és a régi alakok jegyzéke (ma üresen, a dátummal — a dátum egy helyen:
+`valtozatDatum.js`); a mai alakok BÁJTRA a régiek (a ⑤ nem törés); a 2-estől a szám a HELYBEN (a só, a téma címkéje, a kiáltás
+rejtett jele és `v`-je, a meghívó előtagja — egy rekeszbe egy érték fér); az átmenet alatt minden élő alakba írunk és mindegyikben
+nézünk (a DHT-témák minden hívása a `temakBejelentese` / `temakKeresese` segéden); a meghívót csak a legújabb alakban írjuk, a régit
+a dátumig olvassuk; a `koino` parancs kimondja („A kiírt alakok: …”). ⛔ Az építés lelete: a meghívó-olvasó minden más számú
+meghívóra a „régi alakú — kérj újat”-ot mondta, egy újabbra is — most az iránnyal; a más alakú kiáltást a mai olvasó megnevezi (a régi
+„másik koinónak” vette). A próba egy kitalált következővel (`KOINO_PROBAALAK` — csak próbának), a régi program ellen, a kiáltás
+valódi foglalatokon, a tábla és a témák három valódi folyamattal, a rekesz az M8 útján mindkét irányban. ✅ **A D124 építése kész.**
+⏭️ A D123 ④ — **PR5** (telepítés a kártyáról), utána ⑤ **PR4** (feltöltött nézetek).
 
-**Az állapot:** **1415 önpróba** (65 próba-fájl; a legutóbbi teljes soron mind zöld — 2026-11-07, a D124 ④ után, a második
-teljes soron; az elsőn 1413/1415 — a két bukás a „Kisebb nyitottak” alatt) · 365 fájl / 7206,4 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1422 önpróba** (65 próba-fájl; a legutóbbi teljes soron mind zöld — 2026-11-07, a D124 ⑤ után) · 367 fájl / 7259,5 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

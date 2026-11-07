@@ -18,12 +18,24 @@
 // a hibás meghívóból semmi nem lesz (null és az ok). A beillesztett üzenet körülötte lévő szövege (a telepítő sor is) nem zavar,
 // és ha egy csatorna a sort tördelte, a szóközök kihagyásával is megpróbáljuk.
 //
+// ⭐⭐ D124 ⑤ (PV5 (A)): A MEGHÍVÓ HORDOZZA A VÁLTOZATÁT — az előtag száma (`koino-meghivo:<n>:` — a mai a 2-es). A program a
+// LEGÚJABB alakban írja (a telepítő sor, ami viszi, mindig a legújabb programot hozza), és a dátumig a régit is OLVASSA (egy
+// meghívó egy hónapig él: a törés előtt kiadottak beilleszthetők maradnak — `kiirtAlak.js`). Amit nem olvas, azt az IRÁNNYAL
+// mondja ki: a régebbire „kérj újat”, az újabbra „frissítsd a programot” (2026-11-07-ig minden más számú meghívóra a „régi alakú”
+// állt — egy újabb programmal kiadott meghívóra is).
+//
 // Használják: koino.js (a lap és a parancsok), a próbák.
 
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { azonositoAlaku } from '../esemeny/esemeny.js';
+import { eloAlakok, alakIranya } from './kiirtAlak.js';
 
+/** A mai (2-es) meghívó előtagja. ⭐ D124 ⑤: a többi változaté `meghivoElotag(n)`. */
 export const MEGHIVO_ELOTAG = 'koino-meghivo:2:';
+/** ⭐ D124 ⑤: az n-es meghívó előtagja. */
+export const meghivoElotag = (n) => 'koino-meghivo:' + n + ':';
+/** Bármelyik változat előtagja egy szövegben (a szám az első csoport). */
+const ELOTAG_MINTA = /koino-meghivo:(\d{1,4}):/;
 /** A meghívó szöveg felső határa (jelben) — egy üzenetben, papíron is átvihető. */
 export const MEGHIVO_KORLAT = 3072;
 /** Legfeljebb ennyi cím egy meghívóban (a helyi címek és a nyilvános). */
@@ -112,10 +124,11 @@ export function ujMeghivoJelei() {
  * kimarad, legfeljebb `MEGHIVO_CIM_KORLAT`), az azonosítóval és a titokkal, a meghívott nevével, a lejárattal és a kötelező
  * profil-mezőkkel.
  * @param {{koino: string, alairo: string, cimek?: Array, azonosito: string, titok: string, meghivottNev: string, lejarat: number,
- *   profilMezok?: Array<string>}} m
+ *   profilMezok?: Array<string>, valtozat?: number}} m - a `valtozat` (D124 ⑤) alapból a legújabb élő
  * @returns {string}
  */
-export function meghivoKeszitese({ koino, alairo, cimek = [], azonosito, titok, meghivottNev, lejarat, profilMezok = [] }) {
+export function meghivoKeszitese({ koino, alairo, cimek = [], azonosito, titok, meghivottNev, lejarat, profilMezok = [],
+  valtozat = eloAlakok('meghivo')[0] }) {
   if (!azonositoAlaku(koino)) throw new Error('A meghívó koinója egy 43 jeles név.');
   if (!azonositoAlaku(alairo)) throw new Error('A meghívó készülékének tábla-aláírója egy 43 jeles kulcs.');
   if (typeof azonosito !== 'string' || !AZ_MINTA.test(azonosito)) throw new Error('A meghívó azonosítója nem ép.');
@@ -130,7 +143,8 @@ export function meghivoKeszitese({ koino, alairo, cimek = [], azonosito, titok, 
     if (c.length >= MEGHIVO_CIM_KORLAT) break;
   }
   const p = [...new Set((profilMezok ?? []).filter((x) => typeof x === 'string' && MEZO_MINTA.test(x)))].slice(0, 16);
-  return MEGHIVO_ELOTAG + Buffer.from(JSON.stringify({ k: koino, t: alairo, c, i: azonosito, s: titok, m, l: lejarat,
+  if (!Number.isSafeInteger(valtozat) || valtozat < 1) throw new Error('A meghívó változata nem pozitív egész.');
+  return meghivoElotag(valtozat) + Buffer.from(JSON.stringify({ k: koino, t: alairo, c, i: azonosito, s: titok, m, l: lejarat,
     ...(p.length ? { p } : {}) }), 'utf8').toString('base64url');
 }
 
@@ -150,10 +164,11 @@ export function windowsTelepitoSorMeghivoval(meghivo) {
  */
 export function meghivoSzovegbol(szoveg) {
   if (typeof szoveg !== 'string') return null;
-  const i = szoveg.indexOf(MEGHIVO_ELOTAG);
-  if (i < 0) return null;
-  const torzs = szoveg.slice(i + MEGHIVO_ELOTAG.length).match(/^[A-Za-z0-9_-]*/)[0];
-  return torzs ? MEGHIVO_ELOTAG + torzs : null;
+  // ⭐ D124 ⑤: bármelyik változat előtagjával (a tárolt sor egy korábbi alakú is lehet)
+  const t = ELOTAG_MINTA.exec(szoveg);
+  if (!t) return null;
+  const torzs = szoveg.slice(t.index + t[0].length).match(/^[A-Za-z0-9_-]*/)[0];
+  return torzs ? t[0] + torzs : null;
 }
 
 /**
@@ -175,9 +190,12 @@ export function windowsSorHibaja(sor) {
 
 // ===== A MEGHÍVÓ BEOLVASÁSA =====
 
-/** Van-e a szövegben meghívó (az előtagja)? — a lap ebből tudja, hogy nem egy puszta koinó-nevet illesztettek be. */
+/**
+ * Van-e a szövegben meghívó (az előtagja)? — a lap ebből tudja, hogy nem egy puszta koinó-nevet illesztettek be. ⭐ D124 ⑤:
+ * BÁRMELYIK változaté — egy régebbi vagy újabb meghívó is meghívó (a beolvasás az iránnyal mondja ki, miért nem olvassuk).
+ */
 export function meghivoE(szoveg) {
-  return typeof szoveg === 'string' && szoveg.includes(MEGHIVO_ELOTAG);
+  return typeof szoveg === 'string' && ELOTAG_MINTA.test(szoveg);
 }
 
 function torzsOlvasasa(torzs) {
@@ -208,23 +226,38 @@ function torzsOlvasasa(torzs) {
 
 /**
  * A meghívó beolvasása egy beillesztett szövegből (a körülötte lévő szöveg — a telepítő sor is — nem zavar).
- * @returns {{meghivo: Object}|{hiba: string}}
+ * ⭐ D124 ⑤: az élő változatok bármelyikét olvassa (`valtozatok` — a legújabbtól); a többit az iránnyal nevezi meg (`irany`:
+ * 'regebbi' — kérj újat; 'ujabb' — frissíts). ⚠️ A kitalált következő (a próbák 3-asa) csak a számában más: a törzse ugyanaz —
+ * egy valódi törésnél a régi törzs olvasója is a jegyzékbe kerülne.
+ * @param {string} szoveg
+ * @param {number[]} [valtozatok]
+ * @returns {{meghivo: Object}|{hiba: string, irany?: string, valtozat?: number}}
  */
-export function meghivoOlvasasa(szoveg) {
+export function meghivoOlvasasa(szoveg, valtozatok = eloAlakok('meghivo')) {
   if (typeof szoveg !== 'string') return { hiba: 'nincs meghívó' };
-  const i = szoveg.indexOf(MEGHIVO_ELOTAG);
-  if (i < 0) {
+  const t = ELOTAG_MINTA.exec(szoveg);
+  if (!t) {
     return { hiba: szoveg.includes('koino-meghivo:') ? 'ez egy régi alakú meghívó — kérj újat a meghívódtól'
       : 'ez nem koino-meghívó (a „' + MEGHIVO_ELOTAG + '” előtag hiányzik)' };
   }
-  const maradek = szoveg.slice(i + MEGHIVO_ELOTAG.length, i + MEGHIVO_ELOTAG.length + MEGHIVO_KORLAT + 256);
+  const n = Number(t[1]);
+  const irany = alakIranya(n, valtozatok);
+  if (irany === 'regebbi') {
+    return { hiba: 'ez egy régi alakú meghívó (' + n + '.) — kérj újat a meghívódtól', irany, valtozat: n };
+  }
+  if (irany === 'ujabb') {
+    return { hiba: 'ez a meghívó egy újabb programmal készült (' + n + '. alak, ez a program a ' + valtozatok[0]
+      + '.-ig olvas) — frissítsd a programot (a telepítő sorral), és illeszd be újra', irany, valtozat: n };
+  }
+  const elotag = t[0], i = t.index;
+  const maradek = szoveg.slice(i + elotag.length, i + elotag.length + MEGHIVO_KORLAT + 256);
   // Előbb a megszakítás nélküli rész; ha az nem ép, a szóközök (egy tördelő csatorna sortörései) kihagyásával.
   const egyben = maradek.match(/^[A-Za-z0-9_-]*/)[0];
-  if (egyben.length + MEGHIVO_ELOTAG.length > MEGHIVO_KORLAT) return { hiba: 'a meghívó túl hosszú' };
+  if (egyben.length + elotag.length > MEGHIVO_KORLAT) return { hiba: 'a meghívó túl hosszú' };
   const elso = torzsOlvasasa(egyben);
   if (elso.meghivo) return elso;
   const tordelt = maradek.match(/^[A-Za-z0-9_\s-]*/)[0].replace(/\s+/g, '');
-  if (tordelt !== egyben && tordelt.length + MEGHIVO_ELOTAG.length <= MEGHIVO_KORLAT) {
+  if (tordelt !== egyben && tordelt.length + elotag.length <= MEGHIVO_KORLAT) {
     const masodik = torzsOlvasasa(tordelt);
     if (masodik.meghivo) return masodik;
   }

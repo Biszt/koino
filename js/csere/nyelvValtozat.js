@@ -51,6 +51,7 @@
 import {
   REGI_NYELVEK, REGI_SZALLITASOK, legregebbiBeszelt, lejaroNyelvek, kitalaltNyelvKeszlet, kitalaltSzallitasKeszlet
 } from './forditoSzel.js';
+import { probaNapok } from './valtozatDatum.js';
 
 /** A legújabb nyelvváltozat, amit ez a program beszél (a logikáé). ⭐ Új számot csak törés hoz (lásd fent). */
 export const NYELV_LEGUJABB = 1;
@@ -76,12 +77,6 @@ export function nyelvKeszlet(beallitas) {
   if (beallitas?.nyelvKeszlet && typeof beallitas.nyelvKeszlet === 'object') return beallitas.nyelvKeszlet;
   const napok = probaNapok('KOINO_PROBANYELV');
   return napok === null ? MAI_NYELV_KESZLET : kitalaltNyelvKeszlet(napok);
-}
-
-/** ⚠️ CSAK PRÓBÁNAK: a kitalált lépés dátuma napokban a környezetből (`KOINO_PROBANYELV=10`, `-1`: lejárt). */
-function probaNapok(nev) {
-  const v = globalThis.process?.env?.[nev];
-  return typeof v === 'string' && /^-?\d{1,4}$/.test(v) ? Number(v) : null;
 }
 
 /**

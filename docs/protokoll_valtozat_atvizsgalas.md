@@ -2,7 +2,8 @@
 
 > **Állapot:** ✅ **D124** (Csaba, 2026-11-06: *„minden javaslatodat elfogadom, mehetünk tovább.”* — PV1–PV6 mind (A)) · 🚧 az
 > építés: ✅ ① a jel és az egyezés (elágazás 241) · ✅ ② a kopogás jele (elágazás 242) · ✅ ③ az emlékezet és a kimondás (elágazás
-> 243) · ✅ ④ a fordító-szél, a kézfogás-választó és a régi lépések dátuma (elágazás 244) · ⏭️ ⑤ a kiírt alakok (8.).
+> 243) · ✅ ④ a fordító-szél, a kézfogás-választó és a régi lépések dátuma (elágazás 244) · ✅ ⑤ a kiírt alakok (elágazás 245) —
+> a D124 építése kész.
 >
 > Csaba (2026-11-06): *„rendben értem. csinálhatod, a pr6-ot”*. Az
 > elv a D123-ban eldőlt (PR6 (A) — a KZ5 válasza): *a programok kimondják, melyik nyelvváltozatot beszélik, és az új program egy
@@ -178,7 +179,25 @@ postaládán a lejárt régit is mondta volna (a kézfogás némán bukott volna
 régebbi a legújabbunknál — `nyelvek.json` `regin`), és a régi lépés 30 napon belül lejár, a lap alsó sávja és a `koino`
 parancs kimondja, a nappal. A próba egy KITALÁLT 2-essel (`KOINO_PROBANYELV`, `KOINO_PROBASZALLITAS` — a lépés dátuma napokban):
 az alak más (az üzenet neve más mezőben), a szelet-párok lenyomata más, a kézfogás kulcsai mások — az [1,2] az 1-essel a régin,
-a lejárt lépésű 2-essel a 2-esen cserél, a valódi régi programmal (a git-ből) is.)* → ⑤ **a kiírt alakok** szabálya (PV5) és a meglévők változatjele.
+a lejárt lépésű 2-essel a 2-esen cserél, a valódi régi programmal (a git-ből) is.)* → ⑤ ✅ **a kiírt alakok** szabálya (PV5) és a
+meglévők változatjele. *(Megépült 2026-11-07: `js/csere/kiirtAlak.js` — alakonként a legújabb szám (a tábla, a meghívó rekesze, a
+DHT-témák és a kiáltás 1-es, a meghívó 2-es) és a régi alakok jegyzéke, MA ÜRESEN, lépésenként a dátummal (a dátum számítása egy
+helyen: `valtozatDatum.js` — a nyelvé is onnan). ⭐ **A mai alakok az 1-esek, bájtra változatlanul** — a git-ből elővett régi
+program ugyanazt számolja; ami ma nem mond számot, az az 1-es (mint a jel nélküli nyelv), ez a lépés tehát maga nem törés. ⭐ **A
+szám a HELYBEN van**, nem csak a tartalomban: a tábla és a meghívó rekeszének sójában (`koino-tabla-so-2`,
+`koino-meghivo-rekesz-2`), a téma címkéjében (`koino-cimjegyzek-2`), a kiáltás rejtett jelében (és a `v` mezőben), a meghívó
+előtagjában — egy BEP 44 rekeszbe egy érték fér: ha a két alak egy helyre írna, a frissebb a régit felülírná. ⭐ **Az átmenet
+alatt mindkettő**: az őrjárat és a parancsok minden élő alakba írnak (a tábla, a rekesz, a témák bejelentése, a kiáltás) és
+mindegyikben néznek (a legújabbtól); a válaszoló a hallott alakban felel; a meghívót a program csak a legújabb alakban írja (a
+telepítő sor a legújabb programot hozza), de a dátumig a régit is olvassa. ⭐ **Ahol a régi olvasó lát, ott kimondja**: a mai
+olvasó a más alakú kiáltást (`ujabb-alak` / `regebbi-alak`) és a más számú meghívót az iránnyal nevezi meg — ⛔ az építés
+lelete: eddig minden más számú meghívóra a „régi alakú — kérj újat” állt, egy újabb programmal kiadottra is (fordítva), és a
+régi kiáltás-olvasó a más számú kiáltást csendben „másik koinónak” veszi; a `koino` parancs kimondja a kiírt alakokat. ⚠️ A
+rekeszeknél és a témáknál a régi olvasó nem lát semmit (más helyen keres) — ezért kell az átmenet; a lejárt lépés után a régi és
+az új egymást nem találja meg (kimondott határ — a lap a ⑦ dátumát a nyelvnél mondja). ⚠️ Ára: az átmenet alatt a DHT-kiírás
+kétszer megy. A próba egy kitalált következővel (`KOINO_PROBAALAK` — csak a számában más): `nyelvProba.js` +4 (a régi program
+ellen, a kiáltás valódi foglalatokon), a parancssor-próba +3 (három valódi folyamat a táblán és a témákon; a meghívó rekesze az
+M8 útján, mindkét irányban).)*
 
 *Kapcsolódik:* `program_retegek_atvizsgalas.md` (D123, R2, PR6), `koltozes_atvizsgalas.md` (KZ5), `meres/eredmenyek.md` 90., a
 `vonal.js` fejléce (a párbeszéd), az `udpKapu.js` fejléce (a kopogás), a `titkositas.js` fejléce (a kézfogás).

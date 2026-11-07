@@ -1975,37 +1975,63 @@ proba('⭐⭐ M7: a belépő sávja — elfogadva, kopog (amíg a meghívó kés
 // a lapnak is kimondja (`koinoBelepes.jelentkezett`); F sávjának jelentkezése a rekesz gépeit mondja. Rontás: (a) F nem ír a rekeszbe;
 // (b) A nem keresi; (c) A megtalálja, de nem veszi a kör céljai közé → F nem lesz tag; (d) az API nem adja → bukik.
 proba('⭐⭐ M8: a meghívó rekesze — a belépő a BEP 44-en jelentkezik, a meghívó gépe megtalálja és rákopog; F tag lesz',
-  async () => {
+  () => meghivoRekeszProbaja());
+
+// ⭐⭐ D124 ⑤: UGYANEZ AZ ÁTMENETBEN — F egy kitalált [1,2] alakú program (`KOINO_PROBAALAK=10`: a rekesz 2-es és 1-es, a meghívó
+// 3-as és 2-es), A a mai (a rekesz 1-es, a meghívó 2-es). F a mai A 2-es meghívóját olvassa (a régit — a dátumig), és a rekesz
+// MINDKÉT alakjába ír; A a régi (1-es) rekeszben találja meg — az éles úton (az őrjárat címjegyzék-köre és a rekesz-kör). Rontás:
+// (a) a belépő csak a legújabb alakú rekeszbe ír → A nem találja, F nem lesz tag → bukik; (b) a meghívó-olvasó csak a legújabbat
+// olvassa → F nem csatlakozik → bukik.
+proba('⭐⭐ D124 ⑤: a meghívó rekesze az átmenetben — a kitalált [1,2] belépő a mai meghívó 2-es meghívóját olvassa, és a rekesz mindkét alakjába ír: a mai meghívó gép a régi alakúban találja meg; F tag lesz',
+  () => meghivoRekeszProbaja({ portok: [8041, 8043, 8045], fKornyezet: { KOINO_PROBAALAK: '10' } }));
+
+// ⭐⭐ D124 ⑤: ÉS FORDÍTVA — A, a meghívó gép a kitalált [1,2] (a rekeszt a 2-esben és az 1-esben is nézi), F a mai (csak az 1-esbe
+// ír): A a régi alakúban találja meg. ⚠️ A meghívót a program csak a LEGÚJABB alakban írja (A-é a 3-as — a telepítő sor a
+// legújabb programot hozza); a mai F a 3-ast nem olvasná („újabb programmal készült — frissíts”), ezért a próba a meghívó előtagját a
+// mai alakra írja át (a kitalált 3-as törzse ugyanaz). Rontás: a meghívó gép csak a legújabb alakú rekeszt nézi → nem találja F-et,
+// F nem lesz tag → bukik.
+proba('⭐⭐ D124 ⑤: a meghívó rekesze az átmenetben, fordítva — a kitalált [1,2] meghívó gép a mai belépőt a régi alakú rekeszben találja meg; F tag lesz',
+  () => meghivoRekeszProbaja({ portok: [8047, 8049, 8051], aKornyezet: { KOINO_PROBAALAK: '10' }, fElotag: 'koino-meghivo:2:' }));
+
+/**
+ * ⭐ M8 (és a D124 ⑤ átmenete): a meghívó rekeszének próbája — `aKornyezet` a meghívó gép, `fKornyezet` a belépő folyamataié (a
+ * kitalált alakhoz); `fElotag`: a belépőnek adott meghívó előtagja (alapból amit A kiírt).
+ */
+async function meghivoRekeszProbaja({ portok = [7989, 7991, 7993], aKornyezet = {}, fKornyezet = {}, fElotag = null } = {}) {
+  {
     const { hamisHalozat } = await import('./dhtProba.js');
     const a = await ujKeszulek();
     const f = await ujKeszulek();
-    const PA = 7989, PF = 7991, FA = 7993;
+    const [PA, PF, FA] = portok;
     const halo = await hamisHalozat(12, { bep5Elvesz: true });
     const helyben = { KOINO_DHT_BELEPOK: halo.belepo(0), KOINO_TUKOR: '127.0.0.1:9', KOINO_KISZOLGALAS: 'alap',
       KOINO_REKESZ_KOZ: '2000' };
+    const aHelyben = { ...helyben, ...aKornyezet };
+    const fHelyben = { ...helyben, ...fKornyezet };
     const futok = [];
     let fa = null;
     const naplo = { a: '', f: '' };
     const inditas = (hely, port, kulcs) => {
       const o = spawn(process.execPath, [KOINO_JS, 'orjarat', '0.05', String(port)],
-        { env: { ...process.env, KOINO_ADAT: hely, KOINO_NAPLO: '', ...helyben }, stdio: ['ignore', 'pipe', 'pipe'] });
+        { env: { ...process.env, KOINO_ADAT: hely, KOINO_NAPLO: '', ...(kulcs === 'f' ? fHelyben : aHelyben) },
+          stdio: ['ignore', 'pipe', 'pipe'] });
       o.stdout.on('data', (x) => { naplo[kulcs] += x; });
       futok.push(o);
     };
     try {
-      await fut(a, 'koino', 'Rekesz-próba', helyben);
+      await fut(a, 'koino', 'Rekesz-próba', aHelyben);
       const K = await koinoNeve(a);
       inditas(a, PA, 'a');
       for (let i = 0; i < 30; i++) {
         if (JSON.parse(await readFile(join(await koinoMappa(a), 'csere.json'), 'utf8').catch(() => '{}'))?.kor?.port) break;
         await varj(500);
       }
-      const m = ((await fut(a, 'meghivo', 'Ferenc', 'kijelentem', helyben)).match(/koino-meghivo:2:[A-Za-z0-9_-]+/) ?? [])[0] ?? '';
+      const m = ((await fut(a, 'meghivo', 'Ferenc', 'kijelentem', aHelyben)).match(/koino-meghivo:\d+:[A-Za-z0-9_-]+/) ?? [])[0] ?? '';
       // F nem éri el A-t: a meghívó címei egy halott címre cserélve (a meghívó nem aláírt — a bizonyíték a titok)
-      const ELOTAG = 'koino-meghivo:2:';
+      const ELOTAG = (m.match(/^koino-meghivo:\d+:/) ?? ['koino-meghivo:2:'])[0];
       const j = m ? JSON.parse(Buffer.from(m.slice(ELOTAG.length), 'base64url').toString('utf8')) : {};
-      const vak = ELOTAG + Buffer.from(JSON.stringify({ ...j, c: [['127.0.0.1', 9]] }), 'utf8').toString('base64url');
-      await fut(f, 'csatlakoz', vak, helyben);
+      const vak = (fElotag ?? ELOTAG) + Buffer.from(JSON.stringify({ ...j, c: [['127.0.0.1', 9]] }), 'utf8').toString('base64url');
+      await fut(f, 'csatlakoz', vak, fHelyben);
       // a régi (BEP 5) jelentkezés megvan — de a hamis DHT elnyeli (fent)
       const ny = JSON.parse(await readFile(join(await koinoMappa(f), 'kerelmek.json'), 'utf8').catch(() => '{}'));
       const voltJelentkezes = (ny.fuggo ?? []).some((x) => x.fajta === 'szelet' && x.kulcs === K);
@@ -2013,12 +2039,12 @@ proba('⭐⭐ M8: a meghívó rekesze — a belépő a BEP 44-en jelentkezik, a 
       let tag = false;
       for (let i = 0; i < 90 && !tag; i++) {
         await varj(1000);
-        tag = /✔ tag/.test(await fut(f, 'tagsag', helyben));
+        tag = /✔ tag/.test(await fut(f, 'tagsag', fHelyben));
       }
       const meghivok = JSON.parse(await readFile(join(await koinoMappa(a), 'meghivok.json'), 'utf8').catch(() => '[]'));
       const rekesz = meghivok.find((x) => x.nev === 'Ferenc')?.rekesz ?? null;
       const fAllapot = JSON.parse(await readFile(join(await koinoMappa(f), 'csere.json'), 'utf8').catch(() => '{}'));
-      fa = await feluletet(a, FA, helyben);
+      fa = await feluletet(a, FA, aHelyben);
       const lista = (await fa.hiv('/api/meghivo/sajat')).adat?.meghivok ?? [];
       const tiszta = (x) => x.replace(/\x1b\[[0-9;]*m/g, '').replace(/\s+/g, ' ');
       const jo = {
@@ -2041,7 +2067,8 @@ proba('⭐⭐ M8: a meghívó rekesze — a belépő a BEP 44-en jelentkezik, a 
       await varj(1000);
       for (const h of [a, f]) await rm(h, { recursive: true, force: true });
     }
-  });
+  }
+}
 
 // ⭐⭐ M3 (a) (B3 — a 87. mérés után: „csak a kudarc-számláló”): A KOPOGTATÓK ZAJA. A 2026-11-04-i terepen a meghívó készülék-témáján
 // a DHT szinte csak zajt adott (a bejelentést figyelő gépek címét), és a meghívó minden körben rájuk is kopogott. Itt A egy koinó
@@ -8723,6 +8750,85 @@ proba('⭐⭐ D124 ④: a kitalált 2-es nyelvű és szállítású postaláda �
       if (fg) fg.folyamat.kill();
       if (figyelo) figyelo.kill();
       await varj(800);
+      for (const h of [g, v1, v2]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
+// ⭐⭐ D124 ⑤ (PV5 (A)): A KIÍRT ALAKOK AZ ÁTMENETBEN — három valódi folyamat egy hamis DHT-n: g egy kitalált [1,2] alakú program
+// (`KOINO_PROBAALAK=10`: a tábla, a témák 2-es és 1-es), v1 a mai (1-es), v2 egy „csak 2-es” (a régi lépés lejárt). (1) A TÁBLA: g
+// kiírja a címét mindkét társa rekeszébe, mindkét alakban — v1 és v2 is kiolvassa; v1 és v2 is kiírja a magáét — g mindkettőt
+// kiolvassa (az 1-est az 1-es, a 2-est a 2-es rekeszben), de v1 és v2 egymásét NEM (más alakban írnak — a lejárt lépés kimondott
+// határa). (2) A DHT-TÉMÁK: g hirdeti a gyökér-darabját — v1 és v2 is megtalálja; v1 és v2 hirdet — g mindkettőt megtalálja,
+// egymást nem. (3) A `koino` parancs kimondja a kiírt alakokat (g: „1–2”). Rontás: (a) a tábla-író csak a legújabb alakba ír → v1 nem
+// találja g-t → bukik; (b) a tábla-olvasó csak a legújabbat nézi → g nem találja v1-et → bukik; (c) a hirdető csak a legújabb témán
+// → v1 nem találja → bukik; (d) a kereső csak a legújabbon → g nem találja v1-et → bukik; (e) a parancs nem a készletből → bukik.
+proba('⭐⭐ D124 ⑤: a kiírt alakok az átmenetben — a kitalált [1,2] készülék a táblára és a DHT-témákra mindkét alakban ír, és mindkettőben olvas: a mai és a „csak 2-es” is megtalálja, ő mindkettőt; a kettő egymást nem (hamis DHT-n)',
+  async () => {
+    const { hamisHalozat } = await import('./dhtProba.js');
+    const { ujTablaKulcs, nyilvanosResz } = await import('../js/csere/tablaKulcs.js');
+    const g = await ujKeszulek(), v1 = await ujKeszulek(), v2 = await ujKeszulek();
+    const halo = await hamisHalozat(12);
+    const dht = { KOINO_DHT_BELEPOK: halo.belepo(0), KOINO_TUKOR: '127.0.0.1:9' };
+    const k12 = { ...dht, KOINO_PROBAALAK: '10' }, k2 = { ...dht, KOINO_PROBAALAK: '-1' };
+    const tiszta = (x) => String(x).replace(/\x1b\[[0-9;]*m/g, '');
+    const ki = {};
+    try {
+      // (1) a tábla — a kötések kézi úton (a jegyzék sima JSON, 4. szabály): mindenki mindkét másikkal
+      const kulcs = { g: await ujTablaKulcs(), v1: await ujTablaKulcs(), v2: await ujTablaKulcs() };
+      const kotes = (ovek) => JSON.stringify({ kotesek: ovek.map((o) => ({ ...nyilvanosResz(o), hoszt: '10.0.0.1', port: 7373,
+        utoljara: Date.now(), talalkozasok: 3, eloszor: Date.now() })) });
+      for (const [nev, hely, ovek] of [['g', g, ['v1', 'v2']], ['v1', v1, ['g', 'v2']], ['v2', v2, ['g', 'v1']]]) {
+        await writeFile(join(hely, 'tabla-kulcs.json'), JSON.stringify(kulcs[nev]), 'utf8');
+        await writeFile(join(hely, 'kotesek.json'), kotes(ovek.map((o) => kulcs[o])), 'utf8');
+      }
+      ki.gIr = tiszta(await fut(g, 'tabla', 'kiir', '203.0.113.7', '41001', k12));
+      ki.v1Ir = tiszta(await fut(v1, 'tabla', 'kiir', '203.0.113.8', '41002', dht));
+      ki.v2Ir = tiszta(await fut(v2, 'tabla', 'kiir', '203.0.113.9', '41003', k2));
+      ki.gOlvas = tiszta(await fut(g, 'tabla', 'olvas', k12));
+      ki.v1Olvas = tiszta(await fut(v1, 'tabla', 'olvas', dht));
+      ki.v2Olvas = tiszta(await fut(v2, 'tabla', 'olvas', k2));
+      // (2) a DHT-témák — egy koinó (g alapítja; v1 és v2 a nevéből csatlakozik), a gyökér-darab hirdetése és keresése
+      await fut(g, 'koino', 'Alak-próba', 'nyilt', k12);
+      const K = await koinoNeve(g);
+      if (!K) return false;
+      await fut(v1, 'csatlakoz', K, dht);
+      await fut(v2, 'csatlakoz', K, k2);
+      ki.gHirdet = tiszta(await fut(g, 'cimjegyzek', 'hirdet', '8031', k12));
+      await fut(v1, 'cimjegyzek', 'hirdet', '8032', dht);
+      await fut(v2, 'cimjegyzek', 'hirdet', '8033', k2);
+      ki.gKeres = tiszta(await fut(g, 'cimjegyzek', 'gyoker', k12));
+      ki.v1Keres = tiszta(await fut(v1, 'cimjegyzek', 'gyoker', dht));
+      ki.v2Keres = tiszta(await fut(v2, 'cimjegyzek', 'gyoker', k2));
+      // (3) a parancs
+      ki.gKoino = tiszta(await fut(g, 'koino', k12));
+      ki.v1Koino = tiszta(await fut(v1, 'koino', dht));
+      ki.v2Koino = tiszta(await fut(v2, 'koino', k2));
+      const van = (sz, ...minta) => minta.every((m) => m.test(sz));
+      const cim = (p) => new RegExp('127\\.0\\.0\\.1 ' + p + '\\b');
+      const jo = {
+        gIr: van(ki.gIr, /2 rekeszbe kiírva/, /2 változatban/),
+        v1Ir: /2 rekeszbe kiírva/.test(ki.v1Ir) && !/változatban/.test(ki.v1Ir),
+        // ⭐ g mindkettőt — a régit a régi, az újat az új rekeszben
+        gOlvas: van(ki.gOlvas, /203\.0\.113\.8:41002 \(a tábla 1\. rekeszében\)/, /203\.0\.113\.9:41003 \(a tábla 2\. rekeszében\)/),
+        v1Olvas: /203\.0\.113\.7:41001/.test(ki.v1Olvas) && !/41003/.test(ki.v1Olvas) && /nincs a táblán/.test(ki.v1Olvas),
+        v2Olvas: /203\.0\.113\.7:41001/.test(ki.v2Olvas) && !/41002/.test(ki.v2Olvas) && /nincs a táblán/.test(ki.v2Olvas),
+        gHirdet: /✓ gyoker/.test(ki.gHirdet),
+        gKeres: cim(8032).test(ki.gKeres) && cim(8033).test(ki.gKeres),
+        v1Keres: cim(8031).test(ki.v1Keres) && !cim(8033).test(ki.v1Keres),
+        v2Keres: cim(8031).test(ki.v2Keres) && !cim(8032).test(ki.v2Keres),
+        parancs: /A kiírt alakok: tábla 1–2 · rekesz 1–2 · témák 1–2 · kiáltás 1–2 · meghívó 2–3/.test(ki.gKoino)
+          && /A kiírt alakok: tábla 1 · rekesz 1 · témák 1 · kiáltás 1 · meghívó 2/.test(ki.v1Koino)
+          && /A kiírt alakok: tábla 2 · rekesz 2 · témák 2 · kiáltás 2 · meghívó 3/.test(ki.v2Koino)
+      };
+      const ok = Object.values(jo).every(Boolean);
+      if (!ok) {
+        process.stderr.write('    (D124 ⑤: ' + JSON.stringify(jo) + ')\n'
+          + Object.entries(ki).map(([n, x]) => '    (' + n + ': ' + x.replace(/\s+/g, ' ').slice(-360) + ')\n').join(''));
+      }
+      return ok;
+    } finally {
+      halo.bezar();
+      await varj(500);
       for (const h of [g, v1, v2]) await rm(h, { recursive: true, force: true });
     }
   });

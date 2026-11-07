@@ -20,15 +20,23 @@
 // ⭐ És a keresés üteme (M2, B2 (b) — Csaba, 2026-11-04): a meghívó a rekeszt az első órában 2, az első napban 5, utána 10
 // percenként nézi, amíg a meghívó él (a belépő napok múlva is beillesztheti).
 //
+// ⭐⭐ D124 ⑤ (PV5 (A)): A REKESZ HORDOZZA A VÁLTOZATÁT — a három származtatott érték (a kulcspár, a só, a titkosító kulcs) és a
+// tartalom alakja is a változat számával készül (`n` — a mai az 1-es, bájtra változatlanul: `koino-meghivo-rekesz|…`,
+// `koino-belepo-1`; a 2-estől `koino-meghivo-rekesz-2|…`, `koino-belepo-2`). Az átmenet alatt a belépő mindkét rekeszbe ír, a
+// meghívó mindkettőt nézi (`kiirtAlak.js`) — egy régi meghívó gép a régit találja meg, egy új az újat.
+//
 // Hálózatot nem importál (1. szabály) — a bejegyzést a hívó viszi a DHT-ra (`dht.js`). Használja: koino.js, meghivoProba.js.
 
 import { createHash, webcrypto } from 'node:crypto';
 import { bejegyzesKeszitese } from './dht.js';
+import { szamozatlanUtan } from './kiirtAlak.js';
 
 const { subtle } = webcrypto;
 
-/** A rekesz tartalmának alakja (a titkosított JSON `a` mezője). */
+/** A rekesz tartalmának alakja (a titkosított JSON `a` mezője) — a mai, 1-es változatban. */
 export const REKESZ_ALAK = 'koino-belepo-1';
+/** ⭐ D124 ⑤: a tartalom alakja az n-es változatban. */
+const alakja = (n) => 'koino-belepo-' + n;
 /** Legfeljebb ennyi cím egy rekeszben (a nyilvános és a helyiek) — a BEP 44 értéke ≤ 1000 bájt. */
 export const REKESZ_CIM_KORLAT = 4;
 /** M2: a keresés üteme — az első órában, az első napban, utána. */
@@ -42,24 +50,25 @@ const HOSZT_MINTA = /^[A-Za-z0-9.:%_-]{1,64}$/;
 const ALAIRO_MINTA = /^[A-Za-z0-9_-]{22,64}$/;
 const TITOK_MINTA = /^[A-Za-z0-9_-]{22,64}$/;
 
-/** A titokból egy cimkézett 32 bájtos lenyomat (a három származtatott érték egymástól független). */
-function szarmaztatott(titok, cimke) {
-  return createHash('sha256').update('koino-meghivo-rekesz|' + cimke + '|' + titok).digest();
+/** A titokból egy cimkézett 32 bájtos lenyomat (a három származtatott érték egymástól független) — az n-es változatban. */
+function szarmaztatott(titok, cimke, n) {
+  return createHash('sha256').update(szamozatlanUtan('koino-meghivo-rekesz', n) + '|' + cimke + '|' + titok).digest();
 }
 
 /**
  * ⭐ A meghívó rekesze — a kulcspár (a BEP 44-hez), a nyers nyilvános kulcs és a só (hol keressük), és a titkosító kulcs.
  * @param {string} titok - a meghívó titka
+ * @param {number} [n] - ⭐ D124 ⑤: a rekesz változata (a mai az 1-es — bájtra a régi)
  * @returns {Promise<{kulcspar: {privateKey: CryptoKey, publicKey: CryptoKey}, kulcs: Buffer, so: Buffer, aes: CryptoKey}>}
  */
-export async function meghivoRekesze(titok) {
+export async function meghivoRekesze(titok, n = 1) {
   if (typeof titok !== 'string' || !TITOK_MINTA.test(titok)) throw new Error('A meghívó titka nem ép.');
-  const privateKey = await subtle.importKey('pkcs8', Buffer.concat([PKCS8_ELOTAG, szarmaztatott(titok, 'kulcs')]),
+  const privateKey = await subtle.importKey('pkcs8', Buffer.concat([PKCS8_ELOTAG, szarmaztatott(titok, 'kulcs', n)]),
     { name: 'Ed25519' }, true, ['sign']);
   const kulcs = Buffer.from((await subtle.exportKey('jwk', privateKey)).x, 'base64url');
   const publicKey = await subtle.importKey('raw', kulcs, { name: 'Ed25519' }, true, ['verify']);
-  const aes = await subtle.importKey('raw', szarmaztatott(titok, 'titkositas'), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
-  return { kulcspar: { privateKey, publicKey }, kulcs, so: szarmaztatott(titok, 'so').subarray(0, SO_HOSSZ), aes };
+  const aes = await subtle.importKey('raw', szarmaztatott(titok, 'titkositas', n), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  return { kulcspar: { privateKey, publicKey }, kulcs, so: szarmaztatott(titok, 'so', n).subarray(0, SO_HOSSZ), aes };
 }
 
 /** Egy cím ép alakja → [hoszt, port] vagy null. */
@@ -87,16 +96,17 @@ function cimLista(cimek) {
  * (a BEP 44 szerint a nagyobb írja felül a kisebbet: a frissebb cím győz).
  * @param {string} titok
  * @param {{cimek: Array<{hoszt: string, port: number}>, alairo: string, most?: number}} b
+ * @param {number} [n] - ⭐ D124 ⑤: a rekesz változata (a mai az 1-es)
  * @returns {Promise<Object>} a `dht.js` `kozzetesz`-ének átadható bejegyzés
  */
-export async function rekeszBejegyzes(titok, { cimek, alairo, most = Date.now() }) {
+export async function rekeszBejegyzes(titok, { cimek, alairo, most = Date.now() }, n = 1) {
   const c = cimLista(cimek);
   if (!c.length) throw new Error('A rekeszbe nincs mit kiírni: egy ép cím sincs.');
   if (typeof alairo !== 'string' || !ALAIRO_MINTA.test(alairo)) throw new Error('A tábla-aláíró nem ép.');
-  const r = await meghivoRekesze(titok);
+  const r = await meghivoRekesze(titok, n);
   const iv = webcrypto.getRandomValues(new Uint8Array(12));
   const zart = await subtle.encrypt({ name: 'AES-GCM', iv }, r.aes,
-    new TextEncoder().encode(JSON.stringify({ a: REKESZ_ALAK, c, t: alairo, m: most })));
+    new TextEncoder().encode(JSON.stringify({ a: alakja(n), c, t: alairo, m: most })));
   const ertek = Buffer.concat([Buffer.from(iv), Buffer.from(zart)]).toString('base64url');
   return bejegyzesKeszitese({ kulcspar: r.kulcspar, salt: r.so, seq: Math.floor(most / 1000), ertek });
 }
@@ -106,16 +116,17 @@ export async function rekeszBejegyzes(titok, { cimek, alairo, most = Date.now() 
  * titkosítás sértetlensége és az alak. Ami nem illik, az null (kimondva a hívónál — D19).
  * @param {string} titok
  * @param {Buffer|string} ertek - a bejegyzés értéke
+ * @param {number} [n] - ⭐ D124 ⑤: a rekesz változata, ahonnan az érték jött (a mai az 1-es)
  * @returns {Promise<{cimek: Array<{hoszt: string, port: number}>, alairo: string, mikor: number}|null>}
  */
-export async function rekeszBejegyzesbol(titok, ertek) {
+export async function rekeszBejegyzesbol(titok, ertek, n = 1) {
   try {
-    const r = await meghivoRekesze(titok);
+    const r = await meghivoRekesze(titok, n);
     const nyers = Buffer.from(typeof ertek === 'string' ? ertek : Buffer.from(ertek).toString('utf8'), 'base64url');
     if (nyers.length < 13) return null;
     const nyilt = await subtle.decrypt({ name: 'AES-GCM', iv: nyers.subarray(0, 12) }, r.aes, nyers.subarray(12));
     const j = JSON.parse(new TextDecoder().decode(nyilt));
-    if (j?.a !== REKESZ_ALAK || typeof j.t !== 'string' || !ALAIRO_MINTA.test(j.t)) return null;
+    if (j?.a !== alakja(n) || typeof j.t !== 'string' || !ALAIRO_MINTA.test(j.t)) return null;
     const c = cimLista(j.c);
     if (!c.length) return null;
     return { cimek: c.map(([hoszt, port]) => ({ hoszt, port })), alairo: j.t, mikor: Number.isFinite(j.m) ? j.m : 0 };

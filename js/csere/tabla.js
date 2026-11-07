@@ -23,10 +23,16 @@
 // bejegyzés hogyan jut a táblára, az a hívó dolga — ma a `dht.js`, holnap lehet más
 // (2. szabály: a tábla cserélhető és elhagyható).
 //
+// ⭐⭐ D124 ⑤ (PV5 (A)): A REKESZ HORDOZZA A VÁLTOZATÁT — a só (a rekesz HELYE) és a tartalom alakja is a változat számával
+// készül (`n` — a mai az 1-es, bájtra változatlanul: `koino-tabla-so|…`, `koino-cim-1`; a 2-estől `koino-tabla-so-2|…`,
+// `koino-cim-2`). Egy rekeszbe egy érték fér: ha a két változat egy helyre írna, a frissebb a másikat felülírná, és a régi
+// olvasó a sajátját elveszítené. Az átmenet alatt az őrjárat mindkét rekeszbe ír, és mindkettőt nézi (`kiirtAlak.js`).
+//
 // Használják: koino.js (az őrjárat tábla-ága és a `tabla` parancs) és a tablaProba.js.
 
 import { bejegyzesKeszitese, bencodeKodol } from './dht.js';
 import { kozosTitok, titkositva, kititkositva, bajtokka, szovegge } from './tablaKulcs.js';
+import { szamozatlanUtan } from './kiirtAlak.js';
 
 // ⭐ A SÓ HOSSZA: 20 bájt bőven elég (a BEP 44 legfeljebb 64-et enged), és ennyi már
 // kitalálhatatlan. *Nem titkosítás, hanem cím: aki nem tudja, az nem találja meg a rekeszt.*
@@ -46,7 +52,8 @@ const SO_HOSSZ = 20;
 //
 // ⭐ A `mikor` tehát TÁJÉKOZTATÁS: az e-ember lássa, mikor írta ki a társ (az őrjárat ki is
 // írja) — idegen óra, ezért nem dönt semmiről. *Egy mező, ami nem dönt, nem is hazudhat.*
-const ALAK = 'koino-cim-1';
+/** A tartalom alakja az n-es változatban (a mai: `koino-cim-1`). */
+const alakja = (n) => 'koino-cim-' + n;
 
 /**
  * A TÁRSANKÉNTI rekesz „sója" — a két NYILVÁNOS titkosító-kulcsból, fix sorrendben.
@@ -68,13 +75,14 @@ const ALAK = 'koino-cim-1';
  * @param {{titkosito: string}} egyik
  * @param {{titkosito: string}} masik
  * @param {string|null} [csalad]
+ * @param {number} [n] - ⭐ D124 ⑤: a rekesz változata (a mai az 1-es — a só bájtra a régi)
  * @returns {Promise<Buffer>}
  */
-export async function rekeszSoKulcsokbol(egyik, masik, csalad = null) {
+export async function rekeszSoKulcsokbol(egyik, masik, csalad = null, n = 1) {
   // ⭐ A SORREND NEM A HÍVÓTÓL FÜGG, hanem a kulcsok szövegétől: ugyanaz a két szöveg van
   // meg mindkét gépen, csak fordítva. *Ugyanaz a trükk, mint a fájl-randevú szerepénél.*
   const kettő = [String(egyik.titkosito), String(masik.titkosito)].sort();
-  const bajtok = new TextEncoder().encode('koino-tabla-so|' + kettő.join('|')
+  const bajtok = new TextEncoder().encode(szamozatlanUtan('koino-tabla-so', n) + '|' + kettő.join('|')
     + (csalad == null ? '' : '|csalad|' + String(csalad)));
   const darat = await crypto.subtle.digest('SHA-256', bajtok);
   return Buffer.from(darat).subarray(0, SO_HOSSZ);
@@ -88,18 +96,19 @@ export async function rekeszSoKulcsokbol(egyik, masik, csalad = null) {
  * @param {{hoszt: string, port: number}} cim - a friss külső UDP-címünk
  * @param {number} [most]
  * @param {string|null} [csalad] - a család gyökere (D119 ⑤c — a rekesz a családé)
+ * @param {number} [n] - ⭐ D124 ⑤: a rekesz változata (a mai az 1-es)
  * @returns {Promise<Object>} a `dht.js` `kozzetesz`-ének átadható bejegyzés
  */
-export async function cimBejegyzes(sajatTablaKulcs, tarsNyilvanos, cim, most = Date.now(), csalad = null) {
-  console.log('cimBejegyzes - KEZDÉS', { tars: tarsNyilvanos?.alairo?.slice(0, 8) });
+export async function cimBejegyzes(sajatTablaKulcs, tarsNyilvanos, cim, most = Date.now(), csalad = null, n = 1) {
+  console.log('cimBejegyzes - KEZDÉS', { tars: tarsNyilvanos?.alairo?.slice(0, 8), valtozat: n });
 
   const titok = await kozosTitok(sajatTablaKulcs, tarsNyilvanos);
   const so = await rekeszSoKulcsokbol(
-    { titkosito: sajatTablaKulcs.titkositoNyilvanos }, tarsNyilvanos, csalad);
+    { titkosito: sajatTablaKulcs.titkositoNyilvanos }, tarsNyilvanos, csalad, n);
 
   // A titkosított rakomány: alak + cím + a kiírás ideje (a fogadó a saját órájához köti).
   const rejtett = await titkositva(titok,
-    JSON.stringify({ alak: ALAK, hoszt: cim.hoszt, port: cim.port, mikor: most }));
+    JSON.stringify({ alak: alakja(n), hoszt: cim.hoszt, port: cim.port, mikor: most }));
 
   // ⭐ A SORSZÁM MÁSODPERCBEN: a BEP 44 szerint a nagyobb sorszám írja felül a kisebbet,
   // tehát a frissebb cím legyőzi a régit. *Az óra pontossága itt nem igazság-kérdés:
@@ -126,13 +135,14 @@ async function kulcsparVisszaallitasa(leiras) {
  * Hol keressük a TÁRS rekeszét? — a kulcsa és a közös só.
  *
  * @param {string|null} [csalad] - a család gyökere (D119 ⑤c)
+ * @param {number} [n] - ⭐ D124 ⑤: a rekesz változata (a mai az 1-es)
  * @returns {Promise<{kulcs: Buffer, so: Buffer}>}
  */
-export async function tarsRekesze(sajatTablaKulcs, tarsNyilvanos, csalad = null) {
+export async function tarsRekesze(sajatTablaKulcs, tarsNyilvanos, csalad = null, n = 1) {
   return {
     kulcs: bajtokka(tarsNyilvanos.alairo),
     so: await rekeszSoKulcsokbol(
-      { titkosito: sajatTablaKulcs.titkositoNyilvanos }, tarsNyilvanos, csalad)
+      { titkosito: sajatTablaKulcs.titkositoNyilvanos }, tarsNyilvanos, csalad, n)
   };
 }
 
@@ -143,16 +153,17 @@ export async function tarsRekesze(sajatTablaKulcs, tarsNyilvanos, csalad = null)
  *   · az aláírást maga a DHT-réteg nézi meg (`bejegyzesEllenorzese`) — az a kulcs írta-e,
  *     akire kérdeztünk;
  *   · a titkosítás sértetlenségét az AES-GCM (ha bárki hozzányúlt, HIBÁT dob);
- *   · az ALAKOT itt nézzük: ami nem a mi formánk, az nem cím.
+ *   · az ALAKOT itt nézzük: ami nem a mi formánk, az nem cím (⭐ D124 ⑤: az n-es rekeszben az n-es alak).
  *
+ * @param {number} [n] - a rekesz változata, ahonnan az érték jött (a mai az 1-es)
  * @returns {Promise<{hoszt: string, port: number, mikor: number}|null>}
  */
-export async function cimBejegyzesbol(sajatTablaKulcs, tarsNyilvanos, ertek) {
+export async function cimBejegyzesbol(sajatTablaKulcs, tarsNyilvanos, ertek, n = 1) {
   try {
     const titok = await kozosTitok(sajatTablaKulcs, tarsNyilvanos);
     const nyers = typeof ertek === 'string' ? ertek : Buffer.from(ertek).toString('utf8');
     const nyilt = JSON.parse(await kititkositva(titok, nyers));
-    if (nyilt?.alak !== ALAK) return null;
+    if (nyilt?.alak !== alakja(n)) return null;
     if (typeof nyilt.hoszt !== 'string' || !Number.isInteger(nyilt.port)) return null;
     if (nyilt.port <= 0 || nyilt.port >= 65536) return null;
     return { hoszt: nyilt.hoszt, port: nyilt.port, mikor: Number(nyilt.mikor) || 0 };

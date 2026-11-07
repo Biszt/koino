@@ -54,6 +54,10 @@ import { szeletParok } from './szeletEgyeztetes.js';
 import {
   ujEgyszeriKulcs, kezfogasCsomag, kezfogasCsomagbol, munkamenetKulcsai, csomagTitkositasa, csomagKititkositasa
 } from './titkositas.js';
+// ⭐ D124 ⑤: a lépések dátuma egy helyen — a kiírt alakok jegyzéke (`kiirtAlak.js`) is ezt használja.
+import { lepesLejarata as lejarat, legregebbiBeszelt, lejaroNyelvek, napMulva } from './valtozatDatum.js';
+
+export { legregebbiBeszelt, lejaroNyelvek };
 
 // ===== A JEGYZÉK =====
 
@@ -68,17 +72,6 @@ export const ELSO_UZENETEK = Object.freeze(new Set(['NYITAS', 'KERELEM', 'FAJLKE
 
 /** A közös számítások, amelyeket a vonal a közös nyelv szerint KÉR (`szamitas(nev, …)`) — csak ezek jegyezhetők be. */
 export const KERHETO_SZAMITASOK = Object.freeze(['szeletParok']);
-
-const NAP = 24 * 60 * 60 * 1000;
-const DATUM = /^(\d{4})-(\d{2})-(\d{2})$/;
-
-/** A `meddig` napjának kezdete (UTC, ezredmásodperc) — vagy NaN, ha nem érvényes dátum. */
-function lejarat(meddig) {
-  const t = typeof meddig === 'string' ? DATUM.exec(meddig) : null;
-  if (!t) return NaN;
-  const ms = Date.UTC(Number(t[1]), Number(t[2]) - 1, Number(t[3]));
-  return new Date(ms).toISOString().slice(0, 10) === meddig ? ms : NaN;
-}
 
 /**
  * ⛔ Egy nyelv-készlet alakja (a betöltéskor és a próbákban): `legujabb` ≥ 1; a lépések 1 ≤ n < legujabb, mindegyiknek érvényes
@@ -103,32 +96,8 @@ export function keszletEllenorzese(k) {
 }
 keszletEllenorzese({ legujabb: 1, lepesek: REGI_NYELVEK });
 
-/**
- * ⭐ A legrégebbi nyelv, amit a program MOST még beszél: a legújabbtól lefelé, amíg a lépés megvan, és a dátuma még nem jött el.
- * @param {{legujabb: number, lepesek: Object}} keszlet
- * @param {number} most - ezredmásodperc (Date.now())
- */
-export function legregebbiBeszelt(keszlet, most) {
-  let n = keszlet.legujabb;
-  while (n > 1) {
-    const l = keszlet.lepesek?.[n - 1];
-    if (!l || !(most < lejarat(l.meddig))) break;
-    n--;
-  }
-  return n;
-}
-
-/**
- * ⭐ A lépések dátumai a legrégebbi beszélt nyelvtől (⑦ — a lap 30 nappal előtte szól): `[{ nyelv, meddig, napMulva }]`.
- */
-export function lejaroNyelvek(keszlet, most) {
-  const lista = [];
-  for (let n = legregebbiBeszelt(keszlet, most); n < keszlet.legujabb; n++) {
-    const meddig = keszlet.lepesek[n].meddig;
-    lista.push({ nyelv: n, meddig, napMulva: Math.ceil((lejarat(meddig) - most) / NAP) });
-  }
-  return lista;
-}
+// ⭐ A legrégebbi beszélt nyelv (`legregebbiBeszelt`) és a lejáró lépések (`lejaroNyelvek`) a `valtozatDatum.js`-ben — innen
+// tovább adva (a régi hívók innen kérik).
 
 // ===== A SZÉL =====
 
@@ -258,9 +227,6 @@ async function kitalaltSzeletParok(tar, koino, reszvesz) {
     return p.slice(0, i + 1) + createHash('sha256').update('kitalalt-2:' + p.slice(i + 1)).digest('base64url');
   });
 }
-
-/** A `napok` múlva eljövő nap (ÉÉÉÉ-HH-NN, UTC) — a kitalált lépések dátuma. */
-const napMulva = (napok, most) => new Date(Math.floor((most + napok * NAP) / NAP) * NAP).toISOString().slice(0, 10);
 
 /**
  * ⚠️ CSAK PRÓBÁNAK: a kitalált 2-es nyelv készlete — az 1-es lépés dátuma `napok` múlva.

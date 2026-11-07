@@ -130,6 +130,8 @@ import {
 import { hivhatoE, nemErtjukKulcsa, korMegfigyelesei, ertjukFeljegyzese, reginFeljegyzese, nyelvekKepe, nyelvJegyzekAlakja, NEM_ERTJUK_HATAR,
   NEM_ERTJUK_SZUNET } from './js/csere/nyelvEmlekezet.js';
 import { sajatNyelv, sajatSzallitas, lejaroValtozatok } from './js/csere/nyelvValtozat.js';
+// ⭐⭐ D124 ⑤: a kiírt alakok (a tábla, a rekesz, a DHT-témák, a kiáltás, a meghívó) élő változatai — az átmenet alatt mindbe írunk
+import { eloAlakok, kiirtAlakokKepe } from './js/csere/kiirtAlak.js';
 // ⭐ Az alsó sáv (2026-10-15): mikor cserélt utoljára a készülék, és mikor jön a következő kör (helyi feljegyzés)
 import { csereAllapotAlakja, korKezdete, korVege, csereFeljegyzese, csereAllapotKepe, belepesKezdete, belepesJelentkezese,
   belepesKopogasa, belepesKapcsolata, belepesTagsaga } from './js/csere/csereAllapot.js';
@@ -171,7 +173,7 @@ import { felszabaditas, buliVolt, MEGULEPEDES_BULIK } from './js/allapot/felszab
 import { vallalasSzamitasa } from './js/allapot/vallalas.js';
 // ⭐⭐ D91: a címjegyzék (G) — a vakított témák, a gyökér-darab, a hirdetés üteme.
 import {
-  cimjegyzekTema, hirdetendoTemak, gyokerDarabTemaja, sajatGyokerDarabjai, HIRDETES_KOZ,
+  cimjegyzekTema, hirdetendoTemak, temaValtozatokkal, gyokerDarabTemaja, sajatGyokerDarabjai, HIRDETES_KOZ,
   keszulekKopogtatoTemaja, temaKopogtatoja, figyelendoKopogtatok,
   // ⭐ D95/4: a gyökér darabjai a cserében.
   gyokerDarabja, gyokerMelysegBecslese, gyokerDarabKulcsai, gyokerDarabKulcsa, gyokerDarabBol, GYOKER_DARAB_CEL,
@@ -542,6 +544,35 @@ async function ertjukEgymast(alairo, tars, kozos = {}) {
 async function nyelvekMostaniKepe() {
   const most = Date.now();
   return nyelvekKepe(await nyelvJegyzek().olvas(), most, lejaroValtozatok(undefined, most));
+}
+
+// ===== ⭐⭐ D124 ⑤: A DHT-TÉMÁK ÉLŐ VÁLTOZATAI =====
+//
+// Egy téma (a címjegyzéké, a kopogtatóé, a kereső-régióé) az átmenet alatt két helyen van (a régi és az új változat lenyomata —
+// `cimjegyzek.js`): a hirdető MINDKETTŐN bejelent, a kereső MINDKETTŐN néz, és a címeket egyszer veszi. Ma egy változat él: a
+// forgalom a régi.
+
+/** Egy téma minden élő változatában — a `kepzo(n)` adja az n-es téma lenyomatát; a legújabbtól. */
+function temaValtozatai(kepzo) {
+  return eloAlakok('tema').map((n) => kepzo(n));
+}
+
+/** Bejelentés egy téma minden élő változatán — a tárolók száma a legjobb változaté, a próbált gépeké összesen. */
+async function temakBejelentese(kliens, temak, port) {
+  let tarolta = 0, probalt = 0;
+  for (const t of temak) {
+    const be = await kliens.bejelent(t, port);
+    tarolta = Math.max(tarolta, be.tarolta ?? 0);
+    probalt += be.probalt ?? 0;
+  }
+  return { tarolta, probalt };
+}
+
+/** A téma hirdetői minden élő változatán — címenként egyszer (név nélkül; bizalom nem jár velük). */
+async function temakKeresese(kliens, temak) {
+  const ki = new Map();
+  for (const t of temak) for (const x of (await kliens.tarsakKeresese(t)).tarsak ?? []) ki.set(x.cim + ':' + x.port, x);
+  return { tarsak: [...ki.values()] };
 }
 
 // ===================================
@@ -1293,7 +1324,8 @@ async function kereses(kerdes, { cim = null, port = null, fuggo = false } = {}) 
     else {
       const kliens = await tablaKliens();
       try {
-        celok = (await kliens.tarsakKeresese(keresoRegioTemaja(KOINO, melyseg, lenyomatDarabja(hely, melyseg)))).tarsak
+        celok = (await temakKeresese(kliens,
+          temaValtozatai((n) => keresoRegioTemaja(KOINO, melyseg, lenyomatDarabja(hely, melyseg), n)))).tarsak
           .filter((t) => !(sajatCimE(t.cim, sajatGep) && Number(t.port) === kp)).slice(0, 4);
         await dhtIsmertekMentese(kliens);
       } catch { celok = []; } finally { kliens.bezar(); }
@@ -1474,10 +1506,10 @@ async function felajanlasKor(kliens) {
   let ny = await kerelmekOlvasasa();
   let regiok = 0, celokDb = 0;
   for (const [kulcs, c] of [...csoportok.entries()].slice(0, FELAJANLAS_REGIO_KORLAT)) {
-    const tema = keresoRegioTemaja(KOINO, c.melyseg, c.darab);
+    const temak = temaValtozatai((n) => keresoRegioTemaja(KOINO, c.melyseg, c.darab, n));
     let celok = [];
     try {
-      celok = (await kliens.tarsakKeresese(tema)).tarsak
+      celok = (await temakKeresese(kliens, temak)).tarsak
         .filter((t) => !(sajatCimE(t.cim, sajatGep) && Number(t.port) === kp))
         .slice(0, 6).map((t) => ({ hoszt: t.cim, port: t.port }));
     } catch { celok = []; }
@@ -1879,18 +1911,25 @@ async function meghivoRekeszekKore(allapot, port, kk = '') {
 /**
  * ⭐⭐ M8: a megadott meghívók rekeszeinek keresése egy DHT-munkamenetben (BEP 44 — az aláírást a `dht.js` ellenőrzi, a
  * titkosítást és az alakot a `rekeszBejegyzesbol`).
+ * ⭐⭐ D124 ⑤: a rekesz élő változatain a legújabbtól (`eloAlakok('rekesz')`) — az első olvasható dönt (egy régi belépő a régibe ír).
  * @returns {Promise<Array<{i: string, nev: string, bejegyzes: Object|null, olvashatatlan: boolean}>>}
  */
 async function meghivoRekeszekKeresese(meghivok) {
   const kliens = await tablaKliens();
+  const valtozatok = eloAlakok('rekesz');
   const ki = [];
   try {
     for (const x of meghivok) {
-      const r = await meghivoRekesze(x.s);
-      const e = await kliens.keres(r.kulcs, r.so);
-      if (!e.legjobb) { ki.push({ i: x.i, nev: x.nev, bejegyzes: null, olvashatatlan: false }); continue; }
-      const b = await rekeszBejegyzesbol(x.s, e.legjobb.ertek);
-      ki.push({ i: x.i, nev: x.nev, bejegyzes: b, olvashatatlan: !b });
+      let b = null, talalt = false;
+      for (const n of valtozatok) {
+        const r = await meghivoRekesze(x.s, n);
+        const e = await kliens.keres(r.kulcs, r.so);
+        if (!e.legjobb) continue;
+        talalt = true;
+        b = await rekeszBejegyzesbol(x.s, e.legjobb.ertek, n);
+        if (b) break;
+      }
+      ki.push({ i: x.i, nev: x.nev, bejegyzes: b, olvashatatlan: talalt && !b });
     }
     await dhtIsmertekMentese(kliens);
   } finally {
@@ -2092,8 +2131,15 @@ async function belepoRekeszKiirasa(kliens, { kulso = null, kapuPort = null } = {
   const cimek = [...(kulso && typeof kulso.cim === 'string' && Number.isInteger(kulso.port) ? [{ hoszt: kulso.cim, port: kulso.port }] : []),
     ...(await helyiCimeim()).map((hoszt) => ({ hoszt, port }))];
   const alairo = (await tablaKulcsBiztositasa()).alairoNyilvanos;
-  const r = await kliens.kozzetesz(await rekeszBejegyzes(m.s, { cimek, alairo, most: Date.now() }));
-  return { tarolta: r.tarolta ?? 0, probalt: r.probalt ?? 0 };
+  // ⭐⭐ D124 ⑤: a rekesz MINDEN élő változatába (az átmenet alatt kettőbe — a régi meghívó gép a régit nézi, az új az újat); a
+  // tárolók száma a legjobb változaté (a jelentkezés kimondásához).
+  let tarolta = 0, probalt = 0;
+  for (const n of eloAlakok('rekesz')) {
+    const r = await kliens.kozzetesz(await rekeszBejegyzes(m.s, { cimek, alairo, most: Date.now() }, n));
+    tarolta = Math.max(tarolta, r.tarolta ?? 0);
+    probalt += r.probalt ?? 0;
+  }
+  return { tarolta, probalt };
 }
 
 /**
@@ -2960,13 +3006,16 @@ async function sajatHirdetendoTemak() {
   const vallalt = [...v.pontok.entries()].filter(([, p]) => p > 0).sort((a, b) => b[1] - a[1]).map(([k]) => k);
   const gy = await gyokerMelysegem();
   const { szeletHirdetes } = await cimjegyzekBeallitas();
+  // ⭐⭐ D124 ⑤: minden téma minden élő változatában (`temak` — az átmenet alatt kettő; a `tema` a legújabb)
+  const valtozatok = eloAlakok('tema');
   const temak = hirdetendoTemak({ koino: KOINO, alairo: tablaKulcs.alairoNyilvanos, legfelsoDarab: gy.becsles,
-    melyseg: gy.melyseg, vallaltSzeletek: vallalt, szeletHirdetes });
+    melyseg: gy.melyseg, vallaltSzeletek: vallalt, szeletHirdetes, valtozatok });
   // ⭐⭐ D107 L2 (a kereső-réteg ③c): a kereső-régióm témája is — a régió tartói ezen találják meg egymást (és a ④-ben a
   // felajánló is). Vakított, mint a többi (a koinó a só — D91).
   const kr = await keresoRegioim();
   const [kd] = sajatKeresoRegioi(tablaKulcs.alairoNyilvanos, kr.melyseg, 1);
-  temak.push({ fajta: 'kereso', kulcs: kr.melyseg + ':' + kd.toString(16), tema: keresoRegioTemaja(KOINO, kr.melyseg, kd) });
+  temak.push(temaValtozatokkal('kereso', kr.melyseg + ':' + kd.toString(16), (n) => keresoRegioTemaja(KOINO, kr.melyseg, kd, n),
+    valtozatok));
   return { temak, legfelso: gy.becsles, melyseg: gy.melyseg, sajatMelyseg: gy.sajat, tanultMelyseg: gy.tanult, szeletHirdetes };
 }
 
@@ -2977,7 +3026,7 @@ async function cimjegyzekHirdetese(port) {
   try {
     const eredmeny = [];
     for (const t of temak) {
-      const be = await kliens.bejelent(t.tema, port);
+      const be = await temakBejelentese(kliens, t.temak, port);
       eredmeny.push({ fajta: t.fajta, kulcs: t.kulcs, tarolta: be.tarolta, probalt: be.probalt });
     }
     await dhtIsmertekMentese(kliens);
@@ -2987,9 +3036,9 @@ async function cimjegyzekHirdetese(port) {
   }
 }
 
-/** Egy kopogtató téma (a nyilvántartás alakjából): a készüléké, vagy egy hirdetett téma párja. */
-function kopogtatoTemaBuffer(k) {
-  return k.fajta === 'keszulek' ? keszulekKopogtatoTemaja(KOINO, k.kulcs) : temaKopogtatoja(KOINO, k.fajta, k.kulcs);
+/** Egy kopogtató téma (a nyilvántartás alakjából): a készüléké, vagy egy hirdetett téma párja (`n`: a témák változata — D124 ⑤). */
+function kopogtatoTemaBuffer(k, n = 1) {
+  return k.fajta === 'keszulek' ? keszulekKopogtatoTemaja(KOINO, k.kulcs, n) : temaKopogtatoja(KOINO, k.fajta, k.kulcs, n);
 }
 
 /**
@@ -3009,19 +3058,20 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
   try {
     const eredmeny = [];
     for (const t of temak) {
-      const be = await kliens.bejelent(t.tema, port);
+      const be = await temakBejelentese(kliens, t.temak, port);
       eredmeny.push({ fajta: t.fajta, kulcs: t.kulcs, tarolta: be.tarolta, probalt: be.probalt });
     }
     const kopogtatok = new Map();
-    for (const f of figyelendoKopogtatok({ koino: KOINO, alairo: tablaKulcs.alairoNyilvanos, hirdetett: temak })) {
-      const k = await kliens.tarsakKeresese(f.tema);
+    for (const f of figyelendoKopogtatok({ koino: KOINO, alairo: tablaKulcs.alairoNyilvanos, hirdetett: temak,
+      valtozatok: eloAlakok('tema') })) {
+      const k = await temakKeresese(kliens, f.temak);
       for (const t of k.tarsak) kopogtatok.set(t.cim + ':' + t.port, { cim: t.cim, port: t.port });
     }
     // ⭐⭐ D107 L2 (③c): a régióm TÖBBI TARTÓJA — a régió témáján (név nélküli címek; a kör céljai közé kerülnek, mint a
     // kopogtatók). Mindkét fél megtalálja a másikat, ezért a buliban egymásra kopognak (D33) — kopogtató pár nem kell.
     const regioTarsak = new Map();
     for (const t of temak.filter((x) => x.fajta === 'kereso')) {
-      const k = await kliens.tarsakKeresese(t.tema);
+      const k = await temakKeresese(kliens, t.temak);
       for (const x of k.tarsak.slice(0, REGIO_TARS_KORLAT)) regioTarsak.set(x.cim + ':' + x.port, { cim: x.cim, port: x.port });
     }
     // ⭐⭐ D107 L4 (④c): a felajánlás — a még fel nem ajánlott bejegyzéseim régiónként függő kérelembe (a régió témájának
@@ -3032,7 +3082,7 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
     const bejelentett = [];
     const bejelentesek = [];   // ⭐ M7: témánként, hány gép tárolta (a belépő lapja ebből mondja ki a jelentkezést)
     for (const k of fuggoKopogtatok(await kerelmekOlvasasa())) {
-      const be = await kliens.bejelent(kopogtatoTemaBuffer(k), port);
+      const be = await temakBejelentese(kliens, temaValtozatai((n) => kopogtatoTemaBuffer(k, n)), port);
       bejelentett.push(k.fajta + ':' + k.kulcs);
       bejelentesek.push({ kulcs: k.fajta + ':' + k.kulcs, tarolta: be.tarolta ?? 0 });
       if (be.tarolta > 0) bejelentve++;
@@ -3049,11 +3099,14 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
   }
 }
 
-/** Kik hirdették a témát — címek, név nélkül; bizalom nem jár velük (3. szabály). */
+/**
+ * Kik hirdették a témát — címek, név nélkül; bizalom nem jár velük (3. szabály). ⭐ D124 ⑤: a téma élő változatainak listája (egy
+ * lenyomat is jó — a régi hívók).
+ */
 async function cimjegyzekKeresese(tema) {
   const kliens = await tablaKliens();
   try {
-    const k = await kliens.tarsakKeresese(tema);
+    const k = await temakKeresese(kliens, Array.isArray(tema) ? tema : [tema]);
     await dhtIsmertekMentese(kliens);
     return k.tarsak;
   } finally {
@@ -3066,24 +3119,37 @@ async function cimjegyzekKeresese(tema) {
  *
  * ⭐ Eseményre, nem órára (Csaba döntése): csak akkor írunk, ha a címünk MEGVÁLTOZOTT.
  * *Egy nyugodt napon a tábla forgalma nulla.*
+ *
+ * ⭐⭐ D124 ⑤: a tábla MINDEN élő változatába (`eloAlakok('tabla')` — ma egy: az 1-es) — az átmenet alatt két rekeszbe, hogy a
+ * régi társ a régit, az új az újat találja meg. Egy társ akkor „kiírva”, ha legalább egy változatba sikerült.
  */
 async function tablaraKiiras(sajatKulcs, kotesJegyzek, cim, naplo = () => {}) {
   const celok = kotesLista(kotesJegyzek, 5).filter((k) => k.titkosito && k.alairo);
   if (!celok.length || !cim?.hoszt) return { kiirt: 0, tarolta: 0 };
 
   const kliens = await tablaKliens();
+  const valtozatok = eloAlakok('tabla');
   try {
     let kiirt = 0, tarolta = 0;
     for (const k of celok) {
-      try {
-        const bejegyzes = await cimBejegyzes(sajatKulcs,
-          { alairo: k.alairo, titkosito: k.titkosito }, cim, Date.now(), await csaladomKulcsa());
-        const e = await kliens.kozzetesz(bejegyzes);
+      let ennek = 0, sikeres = 0, utolsoHiba = null;
+      for (const n of valtozatok) {
+        try {
+          const bejegyzes = await cimBejegyzes(sajatKulcs,
+            { alairo: k.alairo, titkosito: k.titkosito }, cim, Date.now(), await csaladomKulcsa(), n);
+          const e = await kliens.kozzetesz(bejegyzes);
+          sikeres++;
+          ennek += e.tarolta ?? 0;
+        } catch (hiba) {
+          utolsoHiba = hiba;
+        }
+      }
+      if (sikeres) {
         kiirt++;
-        tarolta += e.tarolta ?? 0;
-        naplo({ mi: 'KIIRVA', tars: k.alairo.slice(0, 8), tarolta: e.tarolta });
-      } catch (hiba) {
-        naplo({ mi: 'KIIRAS-BUKOTT', tars: k.alairo.slice(0, 8), ok: hiba.message });
+        tarolta += ennek;
+        naplo({ mi: 'KIIRVA', tars: k.alairo.slice(0, 8), tarolta: ennek, valtozatok: sikeres });
+      } else {
+        naplo({ mi: 'KIIRAS-BUKOTT', tars: k.alairo.slice(0, 8), ok: utolsoHiba?.message ?? 'ismeretlen' });
       }
     }
     await dhtIsmertekMentese(kliens);
@@ -3096,40 +3162,49 @@ async function tablaraKiiras(sajatKulcs, kotesJegyzek, cim, naplo = () => {}) {
 /**
  * „Hol van most a társam?" — a NÉMA kötések rekeszét olvassuk ki.
  *
+ * ⭐⭐ D124 ⑤: a tábla élő változatain a legújabbtól (`eloAlakok('tabla')`) — az első olvasható rekesz dönt (egy új társ az
+ * újba, egy régi a régibe ír; az átmenet alatt egy régi társért egy kereséssel több megy).
+ *
  * @returns {Promise<Array<{alairo: string, hoszt: string, port: number}>>}
  */
 async function tablarolOlvasas(sajatKulcs, nemak, naplo = () => {}) {
   if (!nemak.length) return [];
 
   const kliens = await tablaKliens();
+  const valtozatok = eloAlakok('tabla');
   try {
     const talaltak = [];
     for (const k of nemak) {
       if (!k.titkosito || !k.alairo) continue;
       try {
-        const rekesz = await tarsRekesze(sajatKulcs, { alairo: k.alairo, titkosito: k.titkosito }, await csaladomKulcsa());
-        const e = await kliens.keres(rekesz.kulcs, rekesz.so);
-        if (!e.legjobb) {
+        let cim = null, valtozat = null, kerdes = 0, valasz = 0, olvashatatlan = false;
+        for (const n of valtozatok) {
+          const rekesz = await tarsRekesze(sajatKulcs, { alairo: k.alairo, titkosito: k.titkosito }, await csaladomKulcsa(), n);
+          const e = await kliens.keres(rekesz.kulcs, rekesz.so);
+          kerdes += e.kereses?.kerdes ?? 0;
+          valasz += e.kereses?.valasz ?? 0;
+          if (!e.legjobb) continue;
+          const ertek = Buffer.from(e.legjobb.ertek).toString('utf8');
+          cim = await cimBejegyzesbol(sajatKulcs, { alairo: k.alairo, titkosito: k.titkosito }, ertek, n);
+          if (cim) { valtozat = n; break; }
+          olvashatatlan = true;
+        }
+        if (!cim && olvashatatlan) { naplo({ mi: 'OLVASHATATLAN', tars: k.alairo.slice(0, 8) }); continue; }
+        if (!cim) {
           // ⛔⛔ A „NINCS RAJTA" ÉS A „NEM TUDTAM MEGNÉZNI" KÉT KÜLÖN DOLOG (40. mérés,
           // 2026-09-24). Terepen egy mobilnet nélküli telefon azt írta, hogy *„egy néma
           // társ nincs a táblán"* — pedig egyetlen DHT-gép sem felelt neki. ⭐ Ha senki nem
           // felelt, a keresés nem mondhat semmit a rekeszről: az a hálózat híre, nem a
           // társé (D19). *Ugyanaz a hibafajta, mint a `felfedez` „már ismerős" felirata.*
-          const kerdes = e.kereses?.kerdes ?? 0;
-          const valasz = e.kereses?.valasz ?? 0;
           naplo({ mi: valasz ? 'NINCS-A-TABLAN' : 'TABLA-NEM-ELERHETO',
             tars: k.alairo.slice(0, 8), kerdes, valasz });
           continue;
         }
-        const ertek = Buffer.from(e.legjobb.ertek).toString('utf8');
-        const cim = await cimBejegyzesbol(sajatKulcs,
-          { alairo: k.alairo, titkosito: k.titkosito }, ertek);
-        if (!cim) { naplo({ mi: 'OLVASHATATLAN', tars: k.alairo.slice(0, 8) }); continue; }
         talaltak.push({ alairo: k.alairo, titkosito: k.titkosito, ...cim });
         // ⚠️ A `mikor` a TÁRS órája — tájékoztatás, nem döntés (lásd `tabla.js`): a címet
         // frissként jegyezzük be akkor is, ha a bejegyzés órákkal ezelőtti.
         naplo({ mi: 'MEGVAN-A-TABLAN', tars: k.alairo.slice(0, 8), alairo: k.alairo,
-          hoszt: cim.hoszt, port: cim.port, mikor: cim.mikor });
+          hoszt: cim.hoszt, port: cim.port, mikor: cim.mikor, valtozat });
       } catch (hiba) {
         naplo({ mi: 'OLVASAS-BUKOTT', tars: k.alairo.slice(0, 8), ok: hiba.message });
       }
@@ -3472,7 +3547,9 @@ async function fuggoKerelemFelvetele(k, { cimek = null, dht = false, kopogtatok:
     kopogtatok.push({ fajta: 'szelet', kulcs: k.kulcs });
     if (dht) {
       try {
-        for (const t of await cimjegyzekKeresese(cimjegyzekTema(KOINO, 'szelet', k.kulcs))) celok.push({ hoszt: t.cim, port: t.port });
+        for (const t of await cimjegyzekKeresese(temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', k.kulcs, n)))) {
+          celok.push({ hoszt: t.cim, port: t.port });
+        }
       } catch { /* a DHT segédeszköz */ }
     }
   } else {
@@ -3483,7 +3560,9 @@ async function fuggoKerelemFelvetele(k, { cimek = null, dht = false, kopogtatok:
       kopogtatok.push({ fajta: 'gyoker', kulcs: mm + ':' + dd });
       if (dht) {
         try {
-          for (const t of await cimjegyzekKeresese(gyokerDarabTemaja(KOINO, mm, dd))) celok.push({ hoszt: t.cim, port: t.port });
+          for (const t of await cimjegyzekKeresese(temaValtozatai((n) => gyokerDarabTemaja(KOINO, mm, dd, n)))) {
+            celok.push({ hoszt: t.cim, port: t.port });
+          }
         } catch { /* a DHT segédeszköz */ }
       }
     }
@@ -6978,7 +7057,7 @@ try {
           const kp = await kapuPortja();
           if (kp) {
             for (const k of fuggoKopogtatok(await kerelmekOlvasasa())) {
-              try { await kliens.bejelent(kopogtatoTemaBuffer(k), kp); } catch { /* segédeszköz */ }
+              try { await temakBejelentese(kliens, temaValtozatai((n) => kopogtatoTemaBuffer(k, n)), kp); } catch { /* segédeszköz */ }
             }
           }
           await dhtIsmertekMentese(kliens);
@@ -7276,6 +7355,8 @@ try {
           kiir('A protokoll ezen a készüléken: nyelv ' + valtozat(ny) + ', szállítás ' + valtozat(sz)
             + (nyelvKep.mondatok.length ? SZIN.nem + ' — ⚠ ' + nyelvKep.mondatok.join('; ') + SZIN.vege
               : SZIN.halvany + ' — minden ismert társammal közös' + SZIN.vege));
+          // ⭐⭐ D124 ⑤: a kiírt alakok változatai (az átmenet alatt „1–2”: mindkét alakot írja és olvassa)
+          kiir(SZIN.halvany + 'A kiírt alakok: ' + kiirtAlakokKepe() + SZIN.vege);
           kiir(SZIN.halvany + 'Ezen a készüléken a becenév: ' + KOINO_BECENEV + ' · a másik készüléken: csatlakoz ' + KOINO
             + SZIN.vege);
         }
@@ -7494,7 +7575,8 @@ try {
         const e = await tablaraKiiras(kulcs, jegyzek, cim, (esemeny) => {
           if (esemeny.mi === 'KIIRVA') {
             kiir(SZIN.jo + '  ✓ ' + esemeny.tars + '… rekeszébe ('
-              + esemeny.tarolta + ' tároló gép)' + SZIN.vege);
+              + esemeny.tarolta + ' tároló gép' + (esemeny.valtozatok > 1 ? ', ' + esemeny.valtozatok + ' változatban' : '') + ')'
+              + SZIN.vege);
           }
           if (esemeny.mi === 'KIIRAS-BUKOTT') {
             kiir(SZIN.nem + '  ✗ ' + esemeny.tars + '…: ' + esemeny.ok + SZIN.vege);
@@ -7512,10 +7594,13 @@ try {
           kiir(SZIN.halvany + 'A kötés a bulin születik: `orjarat`.' + SZIN.vege);
           break;
         }
+        // ⭐ D124 ⑤: az átmenet alatt (több élő tábla-változat) azt is kimondjuk, melyik rekeszben találtuk
+        const tobbValtozat = eloAlakok('tabla').length > 1;
         const talaltak = await tablarolOlvasas(kulcs, kotesLista(jegyzek, 5), (esemeny) => {
           if (esemeny.mi === 'MEGVAN-A-TABLAN') {
             kiir(SZIN.jo + '  ⭐ ' + esemeny.tars + '… → ' + esemeny.hoszt + ':'
-              + esemeny.port + SZIN.vege);
+              + esemeny.port + SZIN.vege + (tobbValtozat ? SZIN.halvany + ' (a tábla ' + esemeny.valtozat + '. rekeszében)'
+                + SZIN.vege : ''));
           }
           if (esemeny.mi === 'NINCS-A-TABLAN') {
             kiir(SZIN.halvany + '  · ' + esemeny.tars + '… nincs a táblán (nem írt ki'
@@ -8435,7 +8520,7 @@ try {
         if (mit === 'keres') {
           const az = ervek[1];
           if (!az) throw new Error('Melyik szelet tartóit keressem?\n  node koino.js cimjegyzek keres <azonosító>');
-          probak = [{ cimke: 'szelet ' + az.slice(0, 12) + '…', tema: cimjegyzekTema(KOINO, 'szelet', az) }];
+          probak = [{ cimke: 'szelet ' + az.slice(0, 12) + '…', tema: temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', az, n)) }];
         } else {
           const m = (await gyokerMelysegem()).melyseg;
           const sajat = sajatGyokerDarabjai((await tablaKulcsBiztositasa()).alairoNyilvanos, m, 1)[0];
@@ -8448,7 +8533,8 @@ try {
           const parok = [[m, d]];
           if (m > 0) parok.push([m - 1, d >> 1n]);
           if (m < GYOKER_MAX_MELYSEG) parok.push([m + 1, d * 2n], [m + 1, d * 2n + 1n]);
-          probak = parok.map(([mm, dd]) => ({ cimke: 'gyökér ' + mm + ':' + dd, tema: gyokerDarabTemaja(KOINO, mm, dd) }));
+          probak = parok.map(([mm, dd]) => ({ cimke: 'gyökér ' + mm + ':' + dd,
+            tema: temaValtozatai((n) => gyokerDarabTemaja(KOINO, mm, dd, n)) }));
         }
         kiir(SZIN.vastag + 'KERESÉS a DHT-n' + SZIN.vege);
         for (const pr of probak) {
@@ -8530,7 +8616,9 @@ try {
         try {
           const kliens = await tablaKliens();
           try {
-            for (const kt of kopogtatok) if ((await kliens.bejelent(kopogtatoTemaBuffer(kt), kp)).tarolta > 0) bejelentve++;
+            for (const kt of kopogtatok) {
+              if ((await temakBejelentese(kliens, temaValtozatai((n) => kopogtatoTemaBuffer(kt, n)), kp)).tarolta > 0) bejelentve++;
+            }
             await dhtIsmertekMentese(kliens);
           } finally { kliens.bezar(); }
         } catch { /* a DHT segédeszköz */ }
@@ -9391,6 +9479,7 @@ try {
         + KOINO + SZIN.vege);
       kiir();
 
+      const masAlakuak = new Set();   // ⭐ D124 ⑤: a nem olvasott alakú kiáltók — címenként egyszer kimondva
       const eredmeny = await helyiFelfedezes({
         koino: KOINO, sajatPort, idokorlat: masodperc * 1000,
         esemenyre: (e) => {
@@ -9407,6 +9496,15 @@ try {
           } else if (e.mi === 'ELDOBVA' && e.ok === 'mas-koino') {
             kiir(SZIN.halvany + '  · ' + e.honnan + ' — MÁSIK koino, nem ránk tartozik'
               + SZIN.vege);
+          } else if (e.mi === 'ELDOBVA' && (e.ok === 'ujabb-alak' || e.ok === 'regebbi-alak')
+            && !masAlakuak.has(e.honnan + '|' + e.ok)) {
+            // ⭐⭐ D124 ⑤: egy kiáltás, aminek az ALAKJÁT nem olvasom — megnevezve (egyszer címenként: a kiáltás ismétlődik).
+            // A koinóját nem tudom (a rejtett jelét a más alak más számmal számolja): lehet a miénk, lehet másé.
+            masAlakuak.add(e.honnan + '|' + e.ok);
+            kiir(SZIN.nem + '  ⚠ ' + e.honnan + ' — ' + (e.ok === 'ujabb-alak'
+              ? 'egy ÚJABB program kiált (a kiáltás ' + e.valtozat + '. alakja) — ha a koinódé, frissítsd a programot (a telepítő sorral)'
+              : 'egy RÉGEBBI program kiált (a kiáltás ' + e.valtozat + '. alakja, amit ez a program már nem olvas) — ha a koinódé, '
+                + 'frissítenie kell') + SZIN.vege);
           }
         }
       });
@@ -9770,7 +9868,7 @@ try {
         let dhtTalalt = [];
         if (!ismertek.length) {
           try {
-            dhtTalalt = (await cimjegyzekKeresese(cimjegyzekTema(KOINO, 'szelet', entitas)))
+            dhtTalalt = (await cimjegyzekKeresese(temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', entitas, n))))
               .map((t) => ({ hoszt: t.cim, port: t.port }));
           } catch { /* a DHT segédeszköz: ha nem elérhető, a társak maradnak */ }
           if (dhtTalalt.length) {

@@ -27,14 +27,21 @@ export const TEMA_FAJTAK = ['szelet', 'gyoker', 'kopogtato', 'kereso'];
  * ⭐ A koinó azonosítója a só: kívülálló nem tudja kiszámolni (a zárt koinó a titkosított csere óta nem adja
  * ki), a DHT-gépek csak egy értelmezhetetlen lenyomatot látnak.
  *
+ * ⭐⭐ D124 ⑤ (PV5 (A)): A TÉMA HORDOZZA A VÁLTOZATÁT — a címke száma a témák változata (`n`; a mai az 1-es, bájtra
+ * változatlanul: `koino-cimjegyzek-1`). Egy törés után a 2-es téma máshol van: az átmenet alatt a hirdető mindkettőn bejelent, a
+ * kereső mindkettőn néz (`kiirtAlak.js` — a hívó a változatonkénti témát kéri: `hirdetendoTemak` és `figyelendoKopogtatok`
+ * `temak`-ja). Egy régi kereső így a régin találja meg az újat, egy új az újon a régit.
+ *
  * @param {string} koino
  * @param {'szelet'|'gyoker'} fajta
  * @param {string|number} kulcs - a szelet azonosítója, vagy a gyökér-darab sorszáma
+ * @param {number} [n] - a témák változata (a mai az 1-es)
  * @returns {Buffer} 20 bájt
  */
-export function cimjegyzekTema(koino, fajta, kulcs) {
+export function cimjegyzekTema(koino, fajta, kulcs, n = 1) {
   if (!TEMA_FAJTAK.includes(fajta)) throw new Error('ismeretlen téma-fajta: ' + fajta);
-  return createHash('sha256').update('koino-cimjegyzek-1').update('|').update(String(koino)).update('|')
+  if (!Number.isSafeInteger(n) || n < 1) throw new Error('a téma változata pozitív egész');
+  return createHash('sha256').update('koino-cimjegyzek-' + n).update('|').update(String(koino)).update('|')
     .update(fajta).update('|').update(String(kulcs)).digest().subarray(0, 20);
 }
 
@@ -357,9 +364,9 @@ export function gyokerMelysege(legfelsoDarab, cel = GYOKER_DARAB_CEL) {
   return darabMelysege(legfelsoDarab, Number.isFinite(cel) && cel > 0 ? cel : GYOKER_DARAB_CEL);
 }
 
-/** Egy gyökér-darab témája (a mélység is benne van — más mélység, más téma). */
-export function gyokerDarabTemaja(koino, melyseg, darab) {
-  return cimjegyzekTema(koino, 'gyoker', melyseg + ':' + darab);
+/** Egy gyökér-darab témája (a mélység is benne van — más mélység, más téma; `n`: a témák változata — D124 ⑤). */
+export function gyokerDarabTemaja(koino, melyseg, darab, n = 1) {
+  return cimjegyzekTema(koino, 'gyoker', melyseg + ':' + darab, n);
 }
 
 /**
@@ -372,18 +379,32 @@ export function gyokerDarabTemaja(koino, melyseg, darab) {
  * @param {number} b.legfelsoDarab - a legfelső szintű gondolatok száma (a mélységhez)
  * @param {Array<string>} [b.vallaltSzeletek] - a vállalt szeletek, fontossági sorrendben
  * @param {number} [b.szeletHirdetes] - készülékenkénti beállítás (alapból 0)
- * @returns {Array<{fajta: string, kulcs: string, tema: Buffer}>}
+ * @param {number[]} [b.valtozatok] - ⭐ D124 ⑤: a témák élő változatai, a legújabbtól (`kiirtAlak.js` `eloAlakok('tema')`)
+ * @returns {Array<{fajta: string, kulcs: string, tema: Buffer, temak: Buffer[]}>} a `tema` a legújabb változaté, a `temak`
+ *   mindegyiké (a hirdető mindegyiken bejelent)
  */
-export function hirdetendoTemak({ koino, alairo, legfelsoDarab, vallaltSzeletek = [], szeletHirdetes = 0, melyseg: adott = null }) {
+export function hirdetendoTemak({ koino, alairo, legfelsoDarab, vallaltSzeletek = [], szeletHirdetes = 0, melyseg: adott = null,
+  valtozatok = [1] }) {
   // ⭐ D95/4: ha a hívó a mélységet a csere becsléséből adja (`gyokerMelysegBecslese`), azt használjuk — egy forrás.
   const melyseg = Number.isInteger(adott) ? adott : gyokerMelysege(legfelsoDarab);
   const [darab] = sajatGyokerDarabjai(alairo, melyseg, 1);
-  const ki = [{ fajta: 'gyoker', kulcs: melyseg + ':' + darab, tema: gyokerDarabTemaja(koino, melyseg, darab) }];
+  const ki = [temaValtozatokkal('gyoker', melyseg + ':' + darab, (n) => gyokerDarabTemaja(koino, melyseg, darab, n), valtozatok)];
   const db = Number.isInteger(szeletHirdetes) && szeletHirdetes > 0 ? szeletHirdetes : 0;
   for (const k of vallaltSzeletek.filter((x) => typeof x === 'string' && x !== '').slice(0, db)) {
-    ki.push({ fajta: 'szelet', kulcs: k, tema: cimjegyzekTema(koino, 'szelet', k) });
+    ki.push(temaValtozatokkal('szelet', k, (n) => cimjegyzekTema(koino, 'szelet', k, n), valtozatok));
   }
   return ki;
+}
+
+/**
+ * ⭐ D124 ⑤: egy téma minden élő változatában — `{ fajta, kulcs, tema, temak }` (a `tema` a legújabb, a régi hívóknak és a
+ * próbáknak). A `valtozatok` a legújabbtól; üres vagy hibás lista a mai 1-es.
+ */
+export function temaValtozatokkal(fajta, kulcs, kepzo, valtozatok = [1]) {
+  const v = Array.isArray(valtozatok) && valtozatok.length && valtozatok.every((n) => Number.isSafeInteger(n) && n >= 1)
+    ? valtozatok : [1];
+  const temak = v.map((n) => kepzo(n));
+  return { fajta, kulcs, tema: temak[0], temak };
 }
 
 // ===================================
@@ -401,16 +422,16 @@ export function hirdetendoTemak({ koino, alairo, legfelsoDarab, vallaltSzeletek 
 // ütemében). ⚠️ A cím név nélküli, bizalom nem jár vele (3. szabály); aki ismeri a koinót és a témát, az látja, hány
 // cím kopogtat (azt nem, mit kér — D92/1).
 
-/** Egy készülék kopogtató témája (a tábla-aláírójából — a készülék neve, nem az azonosság, D6). */
-export function keszulekKopogtatoTemaja(koino, alairo) {
-  return cimjegyzekTema(koino, 'kopogtato', 'keszulek:' + alairo);
+/** Egy készülék kopogtató témája (a tábla-aláírójából — a készülék neve, nem az azonosság, D6; `n`: a témák változata). */
+export function keszulekKopogtatoTemaja(koino, alairo, n = 1) {
+  return cimjegyzekTema(koino, 'kopogtato', 'keszulek:' + alairo, n);
 }
 
-/** Egy hirdetett téma párja: ahol a hirdetőit kérni lehet (`fajta` 'gyoker' vagy 'szelet'). */
-export function temaKopogtatoja(koino, fajta, kulcs) {
+/** Egy hirdetett téma párja: ahol a hirdetőit kérni lehet (`fajta` 'gyoker' vagy 'szelet'; `n`: a témák változata). */
+export function temaKopogtatoja(koino, fajta, kulcs, n = 1) {
   // ⭐ D107 L4 (④c): a kereső-régió párja is — a felajánló ezen jelentkezik, ha a régió tartóját közvetlenül nem éri el.
   if (fajta !== 'gyoker' && fajta !== 'szelet' && fajta !== 'kereso') throw new Error('ismeretlen hirdetett téma: ' + fajta);
-  return cimjegyzekTema(koino, 'kopogtato', fajta + ':' + kulcs);
+  return cimjegyzekTema(koino, 'kopogtato', fajta + ':' + kulcs, n);
 }
 
 /**
@@ -419,13 +440,14 @@ export function temaKopogtatoja(koino, fajta, kulcs) {
  * @param {string} b.koino
  * @param {string} b.alairo
  * @param {Array<{fajta: string, kulcs: string}>} b.hirdetett - `hirdetendoTemak` eredménye
- * @returns {Array<{fajta: string, kulcs: string, tema: Buffer}>}
+ * @param {number[]} [b.valtozatok] - ⭐ D124 ⑤: a témák élő változatai, a legújabbtól (mindegyiken néz)
+ * @returns {Array<{fajta: string, kulcs: string, tema: Buffer, temak: Buffer[]}>}
  */
-export function figyelendoKopogtatok({ koino, alairo, hirdetett = [] }) {
-  const ki = [{ fajta: 'keszulek', kulcs: alairo, tema: keszulekKopogtatoTemaja(koino, alairo) }];
+export function figyelendoKopogtatok({ koino, alairo, hirdetett = [], valtozatok = [1] }) {
+  const ki = [temaValtozatokkal('keszulek', alairo, (n) => keszulekKopogtatoTemaja(koino, alairo, n), valtozatok)];
   for (const t of hirdetett) {
     if (t.fajta === 'gyoker' || t.fajta === 'szelet' || t.fajta === 'kereso') {
-      ki.push({ fajta: t.fajta, kulcs: t.kulcs, tema: temaKopogtatoja(koino, t.fajta, t.kulcs) });
+      ki.push(temaValtozatokkal(t.fajta, t.kulcs, (n) => temaKopogtatoja(koino, t.fajta, t.kulcs, n), valtozatok));
     }
   }
   return ki;

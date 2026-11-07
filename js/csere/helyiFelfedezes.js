@@ -36,12 +36,22 @@
 //   · nem mond semmit rólunk azon túl, hogy melyik koinóé vagyunk és hol hallgatunk;
 //   · aki ezt sem akarja, annak ott a kézi `tars` út (4. szabály).
 //
+// ===== ⭐⭐ D124 ⑤ (PV5 (A)): A KIÁLTÁS HORDOZZA A VÁLTOZATÁT =====
+//
+// A kiáltás kiírt alak: egy ismeretlen (akár újabb) program hallja meg, kézfogás nélkül. A változat a REJTETT JELBEN van (a
+// címke száma: `koino-felfedezes-1` — a mai az 1-es, bájtra változatlanul), és a 2-estől a `v` mezőben is (a mai alak nem
+// hordja: ami nem mond számot, az az 1-es). Az átmenet alatt a kiáltó MINDEN élő alakban kiált (`kiirtAlak.js`), a válaszoló
+// abban az alakban felel, amelyikben a kiáltást hallotta. ⭐ És ha egy alakot nem olvasunk, MEGNEVEZZÜK (`ujabb-alak` —
+// frissíts; `regebbi-alak`), nem „másik koinónak” vesszük — a mai olvasó így a következő törést már kimondja. (A `v` nélküli,
+// de más számú rejtett jelet a régi olvasó csak „másik koinónak” láthatja — ezért kell az átmenet.)
+//
 // Használják: koino.js (`felfedez` parancs) és a csereProba.js.
 
 // ⭐ D89/7: a koinó azonosítója nem hangzik el nyíltan — a rejtett jel lenyomat.
 import { createHash } from 'node:crypto';
 import { createSocket } from 'node:dgram';
 import { randomBytes } from 'node:crypto';
+import { eloAlakok, alakIranya } from './kiirtAlak.js';
 
 // ===================================
 // AMIN KIÁLTUNK
@@ -87,9 +97,10 @@ export const VALASZ_KOZ = 1000;
  * együtt, lenyomatolva. Aki tudja az azonosítót, ugyanezt kiszámolja és felismeri; aki nem, az a wifin csak
  * annyit lát, hogy egy koino fut itt — azt nem, hogy MELYIK koinóé (egy zárt koinó tagságát se árulja el).
  * ⚠️ A futás jele minden kiáltásban más, így két kiáltásból sem lehet összefűzni, hogy ugyanaz a koinó.
+ * ⭐ D124 ⑤: `n` — a kiáltás változata (a címke száma; a mai az 1-es).
  */
-export function koinoRejtettJele(koino, jel) {
-  return createHash('sha256').update('koino-felfedezes-1').update(String(koino)).update('|')
+export function koinoRejtettJele(koino, jel, n = 1) {
+  return createHash('sha256').update('koino-felfedezes-' + n).update(String(koino)).update('|')
     .update(String(jel)).digest('base64url').slice(0, 22);
 }
 
@@ -98,14 +109,17 @@ export function koinoRejtettJele(koino, jel) {
  *
  * ⚠️ Szándékosan APRÓ és unalmas: a koinó rejtett jele, egy port, és egy véletlen jel.
  * Minden további mező olyasmi lenne, amit egy idegen a wifin ingyen megtudhat rólunk.
+ * ⭐ D124 ⑤: a 2-estől a `v` (a kiáltás változata) is — a mai, 1-es alak bájtra a régi (`v` nélkül).
  *
  * @param {'KOPOGOK'|'ITT-VAGYOK'} mi
  * @param {string} koino - melyik koinóé vagyunk
  * @param {number} port - hol hallgatunk cserére
  * @param {string} jel - a FUTÁS véletlen jele (ettől ismerjük fel a saját visszhangunkat)
+ * @param {number} [n] - a kiáltás változata (a mai az 1-es)
  */
-export function felfedezoUzenet(mi, koino, port, jel) {
-  return JSON.stringify({ mi, k: koinoRejtettJele(koino, jel), port, jel });
+export function felfedezoUzenet(mi, koino, port, jel, n = 1) {
+  const k = koinoRejtettJele(koino, jel, n);
+  return JSON.stringify(n === 1 ? { mi, k, port, jel } : { mi, k, port, jel, v: n });
 }
 
 /**
@@ -119,9 +133,10 @@ export function felfedezoUzenet(mi, koino, port, jel) {
  * @param {Object} felado - { address, port } — akitől jött
  * @param {string} sajatKoino
  * @param {string} sajatJel - a saját futásunk jele
- * @returns {{rendben: boolean, ok?: string, mi?: string, tars?: {hoszt: string, port: number}, valaszCim?: {hoszt: string, port: number}}}
+ * @param {number[]} [valtozatok] - ⭐ D124 ⑤: a kiáltás élő változatai, a legújabbtól (`kiirtAlak.js`)
+ * @returns {{rendben: boolean, ok?: string, mi?: string, valtozat?: number, tars?: {hoszt: string, port: number}, valaszCim?: {hoszt: string, port: number}}}
  */
-export function kialtasFeldolgozasa(nyers, felado, sajatKoino, sajatJel) {
+export function kialtasFeldolgozasa(nyers, felado, sajatKoino, sajatJel, valtozatok = eloAlakok('kialtas')) {
   let uzenet;
   try {
     uzenet = JSON.parse(String(nyers));
@@ -136,10 +151,17 @@ export function kialtasFeldolgozasa(nyers, felado, sajatKoino, sajatJel) {
   // A saját visszhangunk: a szórást mi magunk is megkapjuk. Ez nem hiba, csak kihagyjuk.
   if (uzenet.jel === sajatJel) return { rendben: false, ok: 'sajat-visszhang' };
 
+  // ⭐⭐ D124 ⑤: A KIÁLTÁS VÁLTOZATA — `v` nélkül az 1-es (a mai és a régebbi programok). Amit nem olvasunk, azt megnevezzük:
+  // egy újabb program kiáltását nem vesszük „másik koinónak” (a rejtett jele a mi számunkkal nem egyezne — csendben).
+  const v = uzenet.v === undefined ? 1 : uzenet.v;
+  if (!Number.isSafeInteger(v) || v < 1) return { rendben: false, ok: 'hibas-alakjel' };
+  const irany = alakIranya(v, valtozatok);
+  if (irany) return { rendben: false, ok: irany === 'ujabb' ? 'ujabb-alak' : 'regebbi-alak', valtozat: v };
+
   // ⚠️ MÁS KOINO — teljesen rendes dolog egy közös wifin (egy lakásban két koino is futhat).
   // Nem hiba, nem gyanús: egyszerűen nincs miről beszélnünk.
   // ⭐ D89/7: a rejtett jelet a saját azonosítónkból számoljuk újra — ha nem egyezik, más koinóé.
-  if (typeof uzenet.jel !== 'string' || uzenet.k !== koinoRejtettJele(sajatKoino, uzenet.jel)) {
+  if (typeof uzenet.jel !== 'string' || uzenet.k !== koinoRejtettJele(sajatKoino, uzenet.jel, v)) {
     return { rendben: false, ok: 'mas-koino' };
   }
 
@@ -152,6 +174,7 @@ export function kialtasFeldolgozasa(nyers, felado, sajatKoino, sajatJel) {
   return {
     rendben: true,
     mi: uzenet.mi,
+    valtozat: v,
     // ⭐ A CÍM A FOGLALATBÓL JÖN, NEM AZ ÜZENETBŐL. Amit a másik magáról állít, azt
     // hazudhatja; amit a csomag hordoz, azt nem — onnan tényleg megérkezett valami.
     // A PORT viszont az üzenetből kell: a kiáltást a felfedező portról küldte, cserélni
@@ -196,6 +219,7 @@ export function felfedezettekOsszefesulese(eddigiek, uj) {
  * @param {number} [beallitas.celPort] - a másik felfedező portja
  * @param {number} [beallitas.idokorlat] - meddig hallgatózunk (ms)
  * @param {Function} [beallitas.esemenyre] - minden lépésnél meghívjuk (műszer, nem napló)
+ * @param {number[]} [beallitas.valtozatok] - ⭐ D124 ⑤: a kiáltás élő változatai (alapból a `kiirtAlak.js` szerint)
  * @returns {Promise<{tarsak: Array, kialtasok: number, valaszok: number, kapottUzenetek: number, eltelt: number}>}
  */
 export async function helyiFelfedezes(beallitas) {
@@ -207,10 +231,11 @@ export async function helyiFelfedezes(beallitas) {
     celPort = FELFEDEZO_PORT,
     idokorlat = 2000,
     ismetlesKoz = ISMETLES_KOZ,
-    esemenyre
+    esemenyre,
+    valtozatok = eloAlakok('kialtas', beallitas)
   } = beallitas;
 
-  console.log('helyiFelfedezes - KEZDÉS', { koino, sajatPort, figyeloPort, celPort });
+  console.log('helyiFelfedezes - KEZDÉS', { koino, sajatPort, figyeloPort, celPort, valtozatok });
 
   const jel = randomBytes(6).toString('hex');
   const kezdet = Date.now();
@@ -249,9 +274,9 @@ export async function helyiFelfedezes(beallitas) {
     });
 
     halo.on('message', (nyers, felado) => {
-      const eredmeny = kialtasFeldolgozasa(nyers, felado, koino, jel);
+      const eredmeny = kialtasFeldolgozasa(nyers, felado, koino, jel, valtozatok);
       if (!eredmeny.rendben) {
-        esemenyre?.({ mi: 'ELDOBVA', ok: eredmeny.ok, honnan: felado.address });
+        esemenyre?.({ mi: 'ELDOBVA', ok: eredmeny.ok, honnan: felado.address, valtozat: eredmeny.valtozat });
         return;
       }
 
@@ -269,8 +294,9 @@ export async function helyiFelfedezes(beallitas) {
 
       // ⭐ A KIÁLTÁSRA VISSZASZÓLUNK — CÉLZOTTAN. Így akkor is összejön az ismerkedés, ha a
       // szórás csak az egyik irányba megy át. A válaszra nem válaszolunk (nem gyűrűzik).
+      // ⭐ D124 ⑤: abban az alakban, amelyikben a kiáltást hallottuk.
       if (eredmeny.mi === 'KOPOGOK') {
-        const valasz = Buffer.from(felfedezoUzenet('ITT-VAGYOK', koino, sajatPort, jel));
+        const valasz = Buffer.from(felfedezoUzenet('ITT-VAGYOK', koino, sajatPort, jel, eredmeny.valtozat));
         halo.send(valasz, eredmeny.valaszCim.port, eredmeny.valaszCim.hoszt, (hiba) => {
           if (hiba) console.warn('helyiFelfedezes - a válasz nem ment el', { ok: hiba.message });
           else valaszok++;
@@ -291,7 +317,9 @@ export async function helyiFelfedezes(beallitas) {
         }
       }
 
-      const kialtas = Buffer.from(felfedezoUzenet('KOPOGOK', koino, sajatPort, jel));
+      // ⭐⭐ D124 ⑤: az átmenet alatt MINDEN élő alakban kiáltunk (a legújabbal kezdve) — a régi
+      // program a régit hallja meg, az új az újat. Ma egy alak: a kiáltás bájtra a régi.
+      const kialtasCsomagok = valtozatok.map((n) => Buffer.from(felfedezoUzenet('KOPOGOK', koino, sajatPort, jel, n)));
 
       // ⭐ ISMÉTELVE KIÁLTUNK, NEM EGYSZER. Lásd az `ISMETLES_KOZ` indoklását: aki később
       // indul, az egyszeri kiáltást már nem hallja meg — és így a felfedezés attól függne,
@@ -299,19 +327,19 @@ export async function helyiFelfedezes(beallitas) {
       const kiKialt = (elso) => {
         if (lezarva) return;
         for (const cel of celok) {
-          halo.send(kialtas, celPort, cel, (hiba) => {
+          kialtasCsomagok.forEach((kialtas, i) => halo.send(kialtas, celPort, cel, (hiba) => {
             if (hiba) {
               // ⚠️ Csak az ELSŐ kudarcot jelentjük, különben az ismétlés elárasztaná a
               // képernyőt ugyanazzal a hibával. A tény nem változik az ötödik ismétlésre.
-              if (elso) {
+              if (elso && i === 0) {
                 console.warn('helyiFelfedezes - a kiáltás nem ment el', { cel, ok: hiba.message });
                 esemenyre?.({ mi: 'KIALTAS-BUKOTT', cel, ok: hiba.message });
               }
             } else {
               kialtasok++;
-              if (elso) esemenyre?.({ mi: 'KIALTOTTAM', cel });
+              if (elso && i === 0) esemenyre?.({ mi: 'KIALTOTTAM', cel });
             }
-          });
+          }));
         }
       };
 
@@ -344,7 +372,7 @@ export async function helyiFelfedezes(beallitas) {
 export async function felfedezoValaszolo(beallitas) {
   const {
     koino, sajatPort, figyeloPort = FELFEDEZO_PORT, celok = ALAP_CELOK,
-    valaszKoz = VALASZ_KOZ, esemenyre
+    valaszKoz = VALASZ_KOZ, esemenyre, valtozatok = eloAlakok('kialtas', beallitas)
   } = beallitas;
 
   // ⚠️ KI MIKOR KAPOTT MÁR VÁLASZT — a fékezéshez. Kulcs: a kiáltó futás-jele.
@@ -375,7 +403,11 @@ export async function felfedezoValaszolo(beallitas) {
     });
 
     halo.on('message', (nyers, felado) => {
-      const e = kialtasFeldolgozasa(nyers, felado, koino, jel);
+      const e = kialtasFeldolgozasa(nyers, felado, koino, jel, valtozatok);
+      // ⭐ D124 ⑤: egy nem olvasott alakú kiáltás megnevezve (a hívó műszere) — a válaszoló nem felel rá.
+      if (!e.rendben && (e.ok === 'ujabb-alak' || e.ok === 'regebbi-alak')) {
+        esemenyre?.({ mi: 'ELDOBVA', ok: e.ok, honnan: felado.address, valtozat: e.valtozat });
+      }
       // ⚠️ CSAK A KIÁLTÁSRA felelünk. A válaszra válaszolni gyűrűzést csinálna.
       if (!e.rendben || e.mi !== 'KOPOGOK') return;
 
@@ -386,7 +418,9 @@ export async function felfedezoValaszolo(beallitas) {
       if (most - (utoljaraValaszoltam.get(kie) ?? 0) < valaszKoz) return;
       utoljaraValaszoltam.set(kie, most);
 
-      const valasz = Buffer.from(felfedezoUzenet('ITT-VAGYOK', koino, sajatPort, jel));
+      // ⭐ D124 ⑤: abban az alakban felelünk, amelyikben a kiáltást hallottuk (a kiáltó az átmenet
+      // alatt több alakban kiált — a fékezés miatt az elsőre felelünk, és azt ő biztosan olvassa).
+      const valasz = Buffer.from(felfedezoUzenet('ITT-VAGYOK', koino, sajatPort, jel, e.valtozat));
 
       // ⭐ KÉTFELÉ VÁLASZOLUNK, ÉS EZ MÉRÉSBŐL JÖTT (2026-08-30). A célzott válasz önmagában
       // kevés: a felfedező port RÖGZÍTETT, tehát egy gépen több koino-példány ugyanazon a

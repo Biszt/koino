@@ -1850,3 +1850,17 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     más kézfogás-kulcs — `KOINO_PROBANYELV`, `KOINO_PROBASZALLITAS`), a valódi régi programmal és három valódi folyamattal ·
     ⚠️ nem mérve: a szelet-kérő zárt koinós `TAGSAG`-ja és a fájl-kérő `KESZ`-e a szélen (a kiszolgáló bármire zár), a védett rés
     csomag-részei (a kitalált szállítás csak a kulcsot váltja), a lap alsó sávjának szövege · ⏭️ ⑤ a kiírt alakok.
+245. **2026-11-07 · D124 ⑤ — a kiírt alakok: a szám az alak helyében, az átmenet alatt mindkettő** → **`kiirtAlak.js`: alakonként a
+    legújabb szám és a régi alakok jegyzéke (ma üresen, lépésenként a dátummal — a dátum egy helyen: `valtozatDatum.js`); a mai
+    alakok bájtra a régiek (az 1-esek; a meghívóé a 2-es); a 2-estől a szám a sóban, a téma címkéjében, a kiáltás rejtett jelében és
+    `v`-jében, a meghívó előtagjában; az írók minden élő alakba írnak, az olvasók mindegyiket nézik** · ⭐ a szám a HELYBEN, nem csak a
+    tartalomban: egy BEP 44 rekeszbe egy érték fér — ha a két alak egy helyre írna, a frissebb a régit felülírná, és a régi olvasó a
+    sajátját elveszítené · ⭐ a mai alak az 1-es (mint a jel nélküli nyelv, ①): a ⑤ maga nem törés · ⛔ az építés lelete: a mai
+    meghívó-olvasó minden más számú meghívóra a „régi alakú — kérj újat”-ot mondta, egy újabb programmal kiadottra is (fordítva);
+    most az iránnyal · ⛔ és a régi kiáltás-olvasó a más számú kiáltást csendben „másik koinónak” veszi — a mai megnevezi
+    (`ujabb-alak`), így a következő törést már kimondja · ⭐ a meghívót csak a legújabb alakban írjuk (a telepítő sor a legújabb
+    programot hozza), a régit a dátumig olvassuk · ⚠️ a rekeszeknél és a témáknál a régi olvasó nem lát semmit — ezért kell az
+    átmenet; a lejárt lépés után a régi és az új egymást nem találja (kimondott határ) · ⚠️ ára: az átmenet alatt a DHT-kiírás
+    kétszer · ⭐ a próba egy kitalált következővel (`KOINO_PROBAALAK` — csak a számában más), a git-ből elővett régi program ellen, a
+    kiáltás valódi foglalatokon, a tábla és a témák három valódi folyamattal, a rekesz az M8 útján mindkét irányban · ⚠️ nem mérve az
+    éles úton: a kopogtató és a kereső-régió témái, a `felfedez` parancs · ✅ a D124 építése kész (①–⑤) · ⏭️ PR5 → PR4.

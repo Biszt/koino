@@ -277,7 +277,7 @@ export function keresoMelysegBecslese(helyek, sajat, cel = KERESO_REGIO_CEL) {
   return melysegBecslese(helyek, sajat, cel);
 }
 
-/** Egy kereső-régió témája a DHT-n — vakított: a koinó azonosítója a só (D91). */
-export function keresoRegioTemaja(koino, melyseg, darab) {
-  return cimjegyzekTema(koino, 'kereso', melyseg + ':' + darab);
+/** Egy kereső-régió témája a DHT-n — vakított: a koinó azonosítója a só (D91); `n`: a témák változata (D124 ⑤). */
+export function keresoRegioTemaja(koino, melyseg, darab, n = 1) {
+  return cimjegyzekTema(koino, 'kereso', melyseg + ':' + darab, n);
 }

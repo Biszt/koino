@@ -6320,6 +6320,23 @@ parancs kimondja, a nappal és a teendővel. A próba egy kitalált 2-essel (`ki
 parancssor-próba három valódi készülékkel (a kitalált [1,2]-es postaláda, egy mai és egy „csak 2-es” — a gondolat mindkettő
 lemezére átér).
 
+*A kiírt alakok (⑤, 2026-11-07 — elágazás 245; PV5 (A)):* `js/csere/kiirtAlak.js` — a kiírt alakok (a hirdetőtábla és a meghívó
+rekesze, a DHT-témák, a helyi kiáltás, a meghívó szövege) legújabb száma (`KIIRT_ALAKOK`: a tábla, a rekesz, a témák és a kiáltás
+1-es, a meghívó 2-es) és a régi alakok jegyzéke (`REGI_KIIRT_ALAKOK`: alakonként, lépésenként `meddig`), MA ÜRESEN; az élő
+változatok (`eloAlakok` — a legújabbtól a dátum szerint; a dátum számítása `valtozatDatum.js`, a nyelvé is). **A mai alakok az
+1-esek, bájtra a régiek** (a git-ből elővett régi program ugyanazt számolja) — a ⑤ maga nem törés. **A szám a helyben**: a 2-estől a
+tábla sója (`koino-tabla-so-2`) és tartalma (`koino-cim-2`), a meghívó rekeszének származtatása (`koino-meghivo-rekesz-2`) és
+tartalma (`koino-belepo-2`), a téma címkéje (`koino-cimjegyzek-2`), a kiáltás rejtett jele (`koino-felfedezes-2`) és `v` mezője, a
+meghívó előtagja. **Az átmenet alatt mindkettő**: a tábla-író, a belépő rekesze, a témák bejelentése (`temakBejelentese`) és a
+kiáltó minden élő alakba ír; a tábla-olvasó, a meghívó rekesz-köre és a témák keresése (`temakKeresese`) a legújabbtól mindegyiket
+nézi; a válaszoló a hallott alakban felel; a meghívót csak a legújabb alakban írja, a régit a dátumig olvassa. **A kimondás**: a
+kiáltás és a meghívó más alakját a mai olvasó az iránnyal nevezi meg (a meghívónál eddig minden más szám „régi alakú” volt); a
+`koino` parancs: „A kiírt alakok: tábla 1 · rekesz 1 · témák 1 · kiáltás 1 · meghívó 2”. A próba egy kitalált következővel
+(`kitalaltKiirtKeszlet`, `KOINO_PROBAALAK` — csak próbának): `nyelvProba.js` +4, a parancssor-próba +3 (a tábla és a témák három
+valódi folyamattal — a mai és a „csak 2-es” a kitalált [1,2]-t megtalálja, ő mindkettőt, a kettő egymást nem; a meghívó rekesze az
+M8 útján mindkét irányban). ⚠️ Nem mérve az éles úton: a kopogtató és a kereső-régió témái (ugyanaz a két segéd viszi őket, mint a
+gyökér-darabét), a `felfedez` parancs (a kiáltás modulja valódi foglalatokon mérve).
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem
