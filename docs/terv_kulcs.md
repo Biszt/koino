@@ -3,7 +3,8 @@
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-08. Programkód nem készült; amit csak mérés dönthet el, az a
 8. szakaszban „mérendő”. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-3/2 – ET-3/6 Csabánál (7. szakasz).
+> **Állapot:** ✅ **eldöntve** (Csaba, 2026-11-08: *„mindet elfogadom, jöhet a következő téma.”* — ET-3/2 – ET-3/6 mind (A)) · ⏭️ átadható
+> az építőnek (9. szakasz).
 >
 > Csaba (2026-11-08): *„ez már kész van (aggodalom: ha valaki elhagyja)? több készülékről is tudja használni a kulcsát?”* — *„rendben,
 > majd ne felejtsük el megtervezni, mert ez is fontos.”* — és a helyreállításról (**ET-3/1**): *„kutassunk tovább, a kulcs
@@ -155,6 +156,18 @@ A készüléked a csere-kulcsot **darabokra osztja** úgy, hogy bármely *k* dar
   elliptikus görbén; a WebCrypto ezt közvetlenül nem adja — megvalósítható-e a meglévő X25519-cel, vagy egy egyszerű saját
   számolással (ritka művelet, lehet lassú).
 
+## 9. Az átadás (az építőnek)
+
+**A döntések** (Csaba, 2026-11-08, mind (A)): **ET-3/2** készülékkulcsok az azonosság kulcsa alatt (a mai kulcs az azonosság) ·
+**ET-3/3** közös tudatpont-keret, a túllépést a rögzített sorrend dönti el, kimondva · **ET-3/4** új készüléket csak az azonosság
+kulcsa vehet fel · **ET-3/5** a csere-kulcs papíron vagy fájlban ÉS darabolva a hálózatban, jelszóval · **ET-3/6** ha minden elveszett,
+a jelszó is: egyelőre új regisztráció, kimondva. Az elv (ET-3/1): a helyreállítás választott bizottság nélkül.
+
+**A következő építési lépés:** egy átvizsgálás a 8. szakasz méréseivel (a mai elágazás súlya, az esemény mérete, a láncok
+összefésülése, az őrzők megmaradása, a jelszavas darab-visszaadás a beépített kriptográfiával). ⚠️ A mag változása — **az első éles
+koinó előtt**; a D-számot az építő adja (ET-3/2 – ET-3/6).
+
 ## Napló
 
 - **2026-11-08** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-3/2 – ET-3/6 Csabánál.
+- **2026-11-08** — Csaba: *„mindet elfogadom”* — ET-3/2 – ET-3/6 mind (A); átadható az építőnek (9. szakasz).
