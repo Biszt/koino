@@ -1883,3 +1883,12 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     mérve: 1,5 mp alatt a hívó felület a válasza előtt leállt, és a kérés el sem bukott, csak függött — most 4 mp, a lap 15 mp után
     figyel, és a RÉGI kulcsával: ha „engedély nincs”, már az új fut (a kulcs indításonként új) · ⚠️ a telefonon az új program a háttérben
     indul (a régi Termux-ablakban a régi leállt) · ⚠️ a telefon leállítása (`pkill`) itt nem próbálható — a terepen · ⏭️ a terepi próba.
+248. **2026-11-08 · D123 ⑤ — PR4, a közösség feltöltött nézetei: átvizsgálva (92. mérés)** → **a nézet-kártya a mag változása
+    nélkül megy: a mai kapu egy új típust beenged, a kép a típust megőrzi, egy új mezőt eldob — ha a kód a kártya szövegében egy
+    csatolt HTML-fájl, a mai szállítás viszi (a régi társaké is); a böngésző négy réteggel szigetel (a sandbox, a nézet CSP-je, a
+    lap `frame-src`-je, egy őr a WebRTC ellen) — a mért 30 út mind zárva, de a sandbox egymagában kevés: abból szinte minden kijut**
+    · ⛔ a Chrome a `webrtc 'block'`-ot nem ismeri — a WebRTC minden CSP mellett kiküldi az UDP-t; egy őr-szkript (a konstruktorok
+    lefedve, a nézet kódja előtt) zárja · ⛔ a mérés lelete: a Claude alkalmazás beépített böngészője a sandbox-keret minden kérését a
+    saját szűrőjével megállítja (`ERR_BLOCKED_BY_CLIENT`) — ott minden út „zártnak” látszott; csak a kontroll leplezte le, a mérés fej
+    nélküli Chrome-mal ismételve · ⚠️ amit nem ismerünk, azt a négy réteg nem garantáltan zárja — a második védvonal a hatókör: a nézet
+    csak a saját koinójában fut, és csak a közös képet látja (amit a szerzője is) · ⏸️ NZ1–NZ6 Csabánál (`nezetek_atvizsgalas.md`).

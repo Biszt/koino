@@ -5372,6 +5372,48 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 92. ⭐ A FELTÖLTÖTT NÉZET — hordozza-e a mai program, és elszigeteli-e a böngésző? (D123 ⑤, PR4 — a közösség feltöltött nézetei, 2026-11-08, a laptopon)
+
+*`nezetMeres.js` (a terv: `docs/nezetek_atvizsgalas.md` 2.). (a) Egy nézet-kártya három alakban a mai kapun, a koinó képén, a mai
+pakliban és a fájl-igényben. (b) Egy „rosszindulatú” nézet 30 úttal egy `sandbox="allow-scripts"` srcdoc-keretben, négy
+beállításban (K0 csak sandbox · K1 + a nézet CSP-je · K2 + `webrtc 'block'` · K3 + egy őr-szkript), a valódi kapu mögött, a lap
+három változatában (CSP nélkül · `frame-src 'none'` · `'self'`) — fej nélküli Chrome 156-tal (üres profil); a külvilág egy második
+helyi kiszolgáló és egy UDP-kapu (mindent naplóznak), és egy kontroll (a lapról és egy nyitott keretből).*
+
+```
+(a) A NÉZET-KÁRTYA A MAI PROGRAMON (mind a hármat beengedi a kapu, a pontjukkal)
+saját típus (Nezet) + nezet mező    a képben tipus=Nezet, a nezet mező ELVÉSZ · fájl-igény: semmi · a mai pakliban tipus=Nezet
+gondolat + nezet mező               a képben tipus=Gondolat, a mező ELVÉSZ · fájl-igény: semmi
+gondolat, a kód a szövegben (blokk) a képben tipus=Gondolat · fájl-igény: A KÓD FÁJLJA
+(b) AZ ELSZIGETELÉS (⛔ = a külvilág naplózta)               K0          K1          K1 + a lapon frame-src 'none'
+a lap címe, DOM-ja, tára (localStorage, süti, IndexedDB)    SecurityError mindenütt · referrer üres · eredet null
+a kapu fetch-csel (a kulccsal is)                           elakad (az eredet null — a kapu Origin-őre)
+a kapu képpel, egy kiszivárgott kulccsal                    ⚠️ kiszolgálva  zárva      zárva
+fetch, kép, beacon, WebSocket, stílus, előtöltés, szkript,
+  munkás, beágyazott keret, document.write, a CSP feloldása ⛔ mind kijut   zárva      zárva
+felugró ablak, a lap elnavigálása, űrlap                    zárva (a sandbox)
+önnavigáció, meta refresh                                   ⛔ kijut        ⛔ kijut    zárva
+data: / blob: dokumentum                                    ⛔ kijut        zárva      zárva
+WebRTC (STUN/TURN)                                          ⛔ 10 UDP       ⛔ 10 UDP   ⛔ 10 UDP — a K2-ben is; a K3-ban 0
+a WebRTC egy friss belső keret konstruktorával              SecurityError (a belső keret idegen eredet) — 0 UDP
+src-ből a kapu egy lapja (X-Frame-Options: DENY)            nem fut
+KONTROLL: a lapról és egy nyitott keretből                  kijut (a böngésző nem tilt — a „zárva” az elszigetelésé)
+```
+
+⭐ **A lelet:** (a) a kártya a mag változása nélkül megy — a kapu beengedi, a kép a típust megőrzi, az ismeretlen MEZŐT eldobja;
+egy `nezet` mező tehát csak az eseményben élne (a lapnak a létrehozó eseményt kellene olvasnia, és a mai szállítás nem vinné), a
+szövegben csatolt fájlt viszont a mai fájl-igény elhozza — a még nem frissített társaké is. (b) A sandbox egymagában kevés; a nézet
+CSP-je minden betöltést zár, és nem oldható fel (a `document.write` és a data:/blob: dokumentum is örökli); az önnavigációt csak a
+LAP `frame-src`-je fogja meg (a srcdoc keret közben fut); a WebRTC-t egyik CSP sem — a Chrome a `webrtc 'block'`-ot nem ismeri —, egy
+őr-szkript (a konstruktorok lefedve, a nézet kódja előtt) igen. A négy réteggel a mért 30 út zárva. ⚠️ A kulcs a nézethez nem jut el
+(a referrer üres, a lap elérhetetlen) — ha mégis, a CSP nélkül egy képpel olvasó kérést tehetne a kapura. ⛔ **A mérés lelete — egy
+vak ellenőrzés:** a Claude asztali alkalmazás beépített böngészőjében MINDEN út „zártnak” látszott, a CSP nélküli is: a keret
+kéréseit az alkalmazás saját szűrője állítja meg (`net::ERR_BLOCKED_BY_CLIENT`) — csak a kontroll leplezte le; a JS-szintű
+eredmények (SecurityError, frame-src, WebRTC) ott is ugyanazok. ⚠️ Amit nem mér: a telefon böngészője, a Firefox és a Safari, a
+DNS-előtöltés, és ami nincs a 30 út között.
+
+---
+
 ## 91. ⭐ A KÁRTYÁBÓL ÖSSZERAKOTT PROGRAM — működik-e, és ugyanazt a programot nevezi-e meg? (D123 ④, PR5 — telepítés a kártyáról, 2026-11-07, a laptopon)
 
 *`kartyaTelepitesMeres.js` (a terv: `docs/kartya_telepites_atvizsgalas.md` 2.). Ennek a programnak a kód-csomagja (ahogy a
