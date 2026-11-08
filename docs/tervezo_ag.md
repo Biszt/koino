@@ -236,7 +236,9 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
 - **ET-1 — Az általános javaslat és egyezmény** (D27): *„ez még nincsen rendessen megtervezve, ugye? ezt a tervről beszéljünk majd.”*
 - **ET-2 — A szavazás, és a titkos, de ellenőrizhető szavazás** (D2): *„ezt is beszéljük át.”*
 - **ET-3 — A kulcs: több készülék és a helyreállítás** (D15 — a kulcs hitelesít, nem titkol; D82 — a kettős lánc: nem büntet): *„ha
-  valaki elhagyja? több készülékről is tudja használni a kulcsát?”*
+  valaki elhagyja? több készülékről is tudja használni a kulcsát?”* → 🔍 **a terv: [`terv_kulcs.md`](terv_kulcs.md)** (2026-11-08) —
+  három kulcs (készülékkulcs, az azonosság kulcsa, előre lekötött csere-kulcs), a csere-kulcs darabolva, jelszóval, véletlen
+  őrzőknél; ⚠️ a mag változása (az első éles koinó előtt). ⏸️ ET-3/2 – ET-3/6 Csabánál.
   - ⭐ **A több készülék** — Csaba: *„ne felejtsük el megtervezni, mert ez is fontos.”* Az első irány: a fő kulcs minden készüléknek
     saját, aláírt alkulcsot ad (minden készüléknek saját lánca — nincs elágazás).
   - ✅ **ET-3/1** (Csaba, 2026-11-08): a helyreállításhoz **választott bizottság nélküli** megoldást keresünk — *„egy randomizált,
@@ -286,5 +288,6 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — Csaba döntései: **ET-4/1** (marad a felhatalmazásos 2. lépcső, az automatikus elvetve), **ET-6/1** (az elismerés
   egyelőre nem kell), **ET-3/1** (a kulcs-helyreállítás bizottság nélkül: véletlen, replikált, titkosított, automatikus — kutatandó);
   a több készülék fontos (ET-3). Nyitott: **ET-4/2** (a felső harmad vagy a D57). A jelek alakja: téma ET-n, döntés ET-n/m.
+- **2026-11-08** — **ET-3** megtervezve: [`terv_kulcs.md`](terv_kulcs.md); ⏸️ ET-3/2 – ET-3/6 Csabánál.
 - **2026-11-08** — **ET-4/2:** marad a D57 (legalább N felhatalmazás, N a 2. lépcsősök mediánja). Az ET-4 ezzel lezárult: a 2. lépcső
   terve nem változik.
