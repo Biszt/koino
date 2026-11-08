@@ -131,8 +131,8 @@ sorrend fontosabb, mint hogy minél hamarabb látsszon valami; amire egy lépés
   szabály**: pénz csak bizonyított identitás után). A felhatalmazás megbízás, nem pontszám (**D60**). Az ellenőrzés a gyökérig megy, és
   mérten logaritmikus (**D59 — az ellenőrzés a gyökérig megy, mert mérve olcsó**). A papír nélküli emberrel ebben a verzióban nem
   számolunk (**D58**). ✅ **ET-4/1** (Csaba, 2026-11-08): az automatikus, számított 2. lépcső elvetve — **marad a felhatalmazásos
-  rendszer**. ⏸️ Nyitott (ET-4/2): a tanúsítók köre „a felhatalmazottak felső harmada”, vagy a mai **D57 — a küszöb abszolút szám, nem
-  rangsor** (lásd a 3. szakaszt).
+  rendszer**. ✅ **ET-4/2** (Csaba, 2026-11-08): **marad a D57 — a küszöb abszolút szám, nem rangsor**: az tanúsíthat, akinek
+  legalább N felhatalmazása van; N-t a 2. lépcsősök érték javaslatainak mediánja adja (**D57/b**). *„rendben. maradjon ez.”*
 - **A rendszer bejelentő, nem bíró** (**D19**): ami nem ellenőrizhető, azt kimondja. A „még nem értünk össze” jelzés tényt mutat, nem
   ítéletet (**D49 — a minimum kemény szabály, a jelzés tényt mutat**; **D55 — a nyíltság**).
 - **A bemutatkozás** (**D62 — a bemutatkozás lánc-esemény, és csak kölcsönösen számít**): akik találkoztak, aláírják egymásnak; csak
@@ -250,10 +250,10 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
 - **ET-4 — A hitelesség mértéke és a pénztárca:** ✅ **ET-4/1** (Csaba, 2026-11-08): *„inkább ismét elvetem, az automatizált 2.
   lépcsős hitelesítést. maradjunk, a meghatalmazásos rendszernél, ahol a közösség tagjai, hatalmaznak fel másokat arra, hogy igazoljanak
   e-embereket, a 2. lépcsős hitelesítéshez. így sem minden felhatalmazott igazolhat, hanem csak az 1/3-uk (akiknek a legtöbb van).”*
-  ⏸️ **ET-4/2 — nyitott:** a „felső harmad” pontosan a D57 előtti alak; a **D57 — a küszöb abszolút szám, nem rangsor** (2026-09-06)
+  ✅ **ET-4/2** (Csaba: *„rendben. maradjon ez.”*): **marad a D57**. A háttér: a „felső harmad” pontosan a D57 előtti alak; a **D57 — a küszöb abszolút szám, nem rangsor** (2026-09-06)
   azért váltotta fel „legalább N felhatalmazás”-ra (N = a 2. lépcsősök érték javaslatainak mediánja — **D57/b**), mert a rangsorhoz
   mindenki felhatalmazás-számát ismerni kellene (9. szabály), és egy becslés készülékenként mást mondana arról, ki tanúsíthat. Csaba
-  dönt: marad a D57, vagy a felső harmad. — Az eredeti kérdés: *„ha a találkozási rendszer elkészül, és kitalálunk egy matematikát arra, hogy valaki
+  ennek tudatában a D57 mellett döntött; a felső harmad szándéka N beállításával érhető el. — Az eredeti kérdés: *„ha a találkozási rendszer elkészül, és kitalálunk egy matematikát arra, hogy valaki
   mennyire hitelesített, és ehhez kötjük automatikusan a kriptotárcát, az milyen lenne? tudjuk számszerűsíteni az e-emberek
   kapcsolati tengerben elfoglalt helyét, bizonyosság szempontjából? Nem volna egy rossz következmény, ha szükségesek lennének a
   bemutatkozó bulik.”* Kapcsolódik: D18/3 (folytonos igazolás — Csaba ötlete, 2026-08-25), D44 (a tanúsítási keret), D49 (a jelzés
@@ -286,3 +286,5 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — Csaba döntései: **ET-4/1** (marad a felhatalmazásos 2. lépcső, az automatikus elvetve), **ET-6/1** (az elismerés
   egyelőre nem kell), **ET-3/1** (a kulcs-helyreállítás bizottság nélkül: véletlen, replikált, titkosított, automatikus — kutatandó);
   a több készülék fontos (ET-3). Nyitott: **ET-4/2** (a felső harmad vagy a D57). A jelek alakja: téma ET-n, döntés ET-n/m.
+- **2026-11-08** — **ET-4/2:** marad a D57 (legalább N felhatalmazás, N a 2. lépcsősök mediánja). Az ET-4 ezzel lezárult: a 2. lépcső
+  terve nem változik.
