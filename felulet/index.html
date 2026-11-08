@@ -175,6 +175,9 @@ import './js/koinoModalok.js';
 import './js/koinoFelderites.js';
 // ⭐⭐ D119 (①b): a koino-verzió kártya „Kód” füle (a gondolat-kártya köré, a betöltéskor) és az űrlapja (a fő menüből).
 import './js/koinoVerzio.js';
+// ⭐⭐ D126: a közösség feltöltött nézetei — a nézet-kártya „🧩 Kód” füle (a gondolat-kártya köré, a betöltéskor), és a futtatás.
+import './js/koinoNezet.js';
+import { nezetBezarasa } from './js/koinoNezetKeret.js';
 // ⭐⭐ D120: a törzs-határ — a nagy kép helyén a kérés gombja (a betöltéskor figyel), a méret a kártyán.
 import './js/koinoTorzs.js';
 import { FoMenu } from './js/foMenu.js';
@@ -220,6 +223,8 @@ const elemek = {
 };
 
 async function mutat(melyik, { ujKoino = false } = {}) {
+  // ⭐⭐ D126: egy futó feltöltött nézet a pakli helyén áll — a tér vagy egy másik koinó előtt bezárul (NZ2: a saját koinójában fut).
+  nezetBezarasa({ frissit: false });
   for (const [nev, doboz] of Object.entries(elemek)) {
     for (const e of doboz) e.hidden = (nev !== melyik);
   }

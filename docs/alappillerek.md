@@ -1892,3 +1892,12 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     saját szűrőjével megállítja (`ERR_BLOCKED_BY_CLIENT`) — ott minden út „zártnak” látszott; csak a kontroll leplezte le, a mérés fej
     nélküli Chrome-mal ismételve · ⚠️ amit nem ismerünk, azt a négy réteg nem garantáltan zárja — a második védvonal a hatókör: a nézet
     csak a saját koinójában fut, és csak a közös képet látja (amit a szerzője is) · ⏸️ NZ1–NZ6 Csabánál (`nezetek_atvizsgalas.md`).
+249. **2026-11-08 · D126 — a közösség feltöltött nézetei: a kártya szövegében, a saját koinójában, négy réteg mögött (PR4)** → **a nézet
+    egy `Nezet` típusú kártya, a kódja a szövegében csatolt HTML-fájl (a szöveg első fájl-blokkja) — a mag nem változik; a bekapcsolás a
+    te készülékedé, koinónként és a kód lenyomatához kötve (egy egyezmény új kódja kikapcsolja); a nézet a pakli helyén fut, egy
+    `sandbox="allow-scripts"` keretben, a tartalma elején a CSP és a WebRTC-őr, a lap CSP-je `frame-src 'none'`; a lappal egy
+    számozott kérdés-készleten beszél (a közös kép lapozva, a szöveg, a fájl bájtokban, az én kulcsom, a megnyitás)** · ⭐ a valódi
+    lapon, fej nélküli Chrome-mal mérve: a nézetből semmi nem jut ki (a lap kontrollja kijut), a lap kulcsa nem jut el hozzá, a
+    kérdéseire jó választ kap · ⛔ az építés lelete: a Chrome a sandbox-keretet külön folyamatba teszi (a próba a keret saját
+    munkamenetén éri el); egy második, engedékeny CSP (`default-src *`) a `data:`/`blob:` képet is tiltja — a feloldás csak szigorít ·
+    ⏭️ a terepi próba (a telefon böngészője).

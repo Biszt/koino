@@ -45,6 +45,8 @@ import egyezmeny from './egyezmenyProba.js';
 import felszabaditas from './felszabaditasProba.js';
 import parancssor from './parancssorProba.js';
 import telepites from './telepitesProba.js';
+// ⭐⭐ D126 (PR4): a közösség feltöltött nézetei — a kártya, a bekapcsolás, a lap útjai, és a böngészős elszigetelés (Chrome-mal).
+import nezet from './nezetProba.js';
 import vizsga from './vizsgaProba.js';
 import dht from './dhtProba.js';
 import kotes from './kotesProba.js';
@@ -136,6 +138,7 @@ const PROBAK = [
   { nev: 'lezarasiosszegzes', futtat: lezarasiOsszegzes },
   { nev: 'felszabaditas', futtat: felszabaditas },
   { nev: 'telepites', futtat: telepites },
+  { nev: 'nezet', futtat: nezet },
   { nev: 'parancssor', futtat: parancssor },
   { nev: 'vizsga', futtat: vizsga },
   { nev: 'dht', futtat: dht },
@@ -209,7 +212,7 @@ const CSOPORTOK = {
   // az A pillér: az összegző Merkle-fa és ami rá épül
   fa: ['osszegzofa', 'lancgyoker', 'ellentmondas', 'eszlelo', 'lancellenorzes'],
   // a kézi út a parancssorból, külön folyamatokban (viselkedést mér, nem feliratot)
-  parancssor: ['telepites', 'parancssor']
+  parancssor: ['telepites', 'nezet', 'parancssor']
 };
 
 // A `meres/` mappa `*Proba.js` fájljai közül, ami NEM önpróba (nem ide tartozik, külön futtatandó).

@@ -35,6 +35,8 @@ import { kanonikusBajtok } from './esemeny/kanonikusAlak.js';
 import { szovegDarabra } from './esemeny/szovegDarab.js';
 // ⭐ D120: a szöveg blokkjaiban hivatkozott fájlok (a törzs méretéhez).
 import { entitasFajljai } from './allapot/fajlIgeny.js';
+// ⭐⭐ D126 (PR4): a nézet-kártya (a szövege: a leírás és a kód fájl-blokkja)
+import { NEZET_TIPUS, nezetSzovegBlokkjai } from './allapot/nezetKartya.js';
 // ⭐ D93: a tagság (a csomag kiadásához) és a tár-alapú lánc-gyűjtés.
 import { tagsagiIndex, horgonyTagsaga, tagsagiLanc, TAGSAGI_CSOMAG } from './allapot/tagsag.js';
 import {
@@ -449,6 +451,30 @@ export async function koinoVerzioLetrehozasa(kornyezet, { szuletes, leiras, kodB
   };
   // ⭐ D26: a tárolási vállalás mértéke — a koino-verzió törzse a kód is.
   entitas.meret = kanonikusBajtok(entitas).length + (entitas.szoveg?.bajt ?? 0) + kodBajt;
+  return esemenytTeszek(kornyezet, 'GondolatLetrehozas', entitas);
+}
+
+/**
+ * ⭐⭐ D126 (NZ1 (A)): A NÉZET-KÁRTYA — a közösség egy feltöltött nézete (a D123 PR4-e). Egy legfelső szintű entitás
+ * (`GondolatLetrehozas`, `tipus: 'Nezet'` — a koino-verzió kártya mintájára): a címe a nézet neve, a SZÖVEGE a leírás és EGY csatolt
+ * HTML-fájl, a nézet kódja (`nezetKartya.js` `nezetSzovegBlokkjai`). ⭐ Így a mag nem változik: a kép a típust megőrzi, a szöveget
+ * (és a benne csatolt fájlt) a mai szállítás viszi, a még nem frissített társak is (92. mérés (a)). A kód csak szerkesztési
+ * egyezménnyel változhat (a szöveg módosítása).
+ * ⚠️ A kód fájlja már a fájl-tárban kell legyen (a hívó tette oda) — a szöveg törzs-mérete így a kódot is mondja (D120). A pontot a
+ * hívó rendeli hozzá (D14: pont nélkül nincs).
+ * @param {Object} kornyezet
+ * @param {{cim: string, leiras?: string|null, kod: {lenyomat: string, nev: string}}} adatok
+ */
+export async function nezetLetrehozasa(kornyezet, { cim, leiras = null, kod }) {
+  if (typeof cim !== 'string' || !cim.trim()) throw new Error('Mi legyen a nézet neve (a kártya címe)?');
+  const entitas = {
+    tipus: NEZET_TIPUS,
+    cim: cim.trim(),
+    szoveg: await szovegDarabbaTetele(kornyezet, nezetSzovegBlokkjai({ leiras, kod })),
+    szulo: null
+  };
+  // ⭐ D26: a tárolási vállalás mértéke — a nézet törzse a kódja is (a szöveg törzse: a darab és a csatolt fájl).
+  entitas.meret = kanonikusBajtok(entitas).length + (entitas.szoveg?.torzs ?? entitas.szoveg?.bajt ?? 0);
   return esemenytTeszek(kornyezet, 'GondolatLetrehozas', entitas);
 }
 

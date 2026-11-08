@@ -2,8 +2,8 @@
 
 > **Állapot:** ✅ **D123** (Csaba, 2026-11-06: *„Mindet elfogadom”* — PR1–PR7 a javaslat szerint, a 4. szakasz ⭐ jelű válaszai). 🚧
 > Az építés: ✅ ① PR1–PR3 (a 6. szakasz) → ✅ ② PR7 (a 7. szakasz) → ✅ ③ PR6 (D124 — `protokoll_valtozat_atvizsgalas.md`) →
-> ✅ ④ PR5 (D125 — `kartya_telepites_atvizsgalas.md`; építve, ⏭️ a terepi próba) → 🔍 ⑤ PR4 (átvizsgálva —
-> `nezetek_atvizsgalas.md`, 92. mérés; ⏸️ NZ1–NZ6 Csabánál).
+> ✅ ④ PR5 (D125 — `kartya_telepites_atvizsgalas.md`; építve, ⏭️ a terepi próba) → ✅ ⑤ PR4 (D126 — `nezetek_atvizsgalas.md`,
+> 92. mérés; építve, ⏭️ a terepi próba). ✅ **A D123 sorrendje végigment.**
 >
 > **A kérdés (Csaba, 2026-11-05):** *„beszéljük át, hogy hogyan lehetne program rétegek szerint, program verziókat létrehozni. pl. a
 > megjelenítési módozatok közül, amiket a közösség »feltölt«, szabadon lehet használni, költözés nélkül, gondolom, de ami meglévő

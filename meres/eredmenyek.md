@@ -5412,6 +5412,12 @@ kéréseit az alkalmazás saját szűrője állítja meg (`net::ERR_BLOCKED_BY_C
 eredmények (SecurityError, frame-src, WebRTC) ott is ugyanazok. ⚠️ Amit nem mér: a telefon böngészője, a Firefox és a Safari, a
 DNS-előtöltés, és ami nincs a 30 út között.
 
+⭐ **Az építés után (D126, 2026-11-08):** a VALÓDI lapon, a valódi keretben ugyanezt méri egy önpróba (`meres/nezetProba.js` — fej
+nélküli Chrome, CDP-vel, kontrollal): a nézetből semmi nem jut ki, a lap kontrollja (kérés, kép, a WebRTC UDP-je) kijut. Két új lelet:
+(1) a Chrome a sandbox-keretet KÜLÖN FOLYAMATBA teszi — a keret csak a saját DevTools-munkamenetén érhető el; (2) a nézet CSP-feloldási
+kísérlete (egy második, `default-src *` CSP) a `data:` és a `blob:` képet is tiltja — a `*` ezeket nem fedi, a böngésző a két szabályt
+metszi. A `data:` és a `blob:` kép (a nézet-felület `fajl` válaszából) egyébként betölt.
+
 ---
 
 ## 91. ⭐ A KÁRTYÁBÓL ÖSSZERAKOTT PROGRAM — működik-e, és ugyanazt a programot nevezi-e meg? (D123 ④, PR5 — telepítés a kártyáról, 2026-11-07, a laptopon)

@@ -1,0 +1,201 @@
+/* felulet/css/components/koinoNezet.css */
+
+/* Felelősség: ⭐⭐ D126 (PR4) — a közösség feltöltött nézetei a lapon (koinós többlet, a prototípusban nincs ilyen): a nézet-kártya
+   jele és „🧩 Kód” füle, a bekapcsolás, a „Nézetek…” és az „Új nézet…” ablak, és a futó nézet a pakli helyén (felirattal,
+   bezárással), a „vissza a nézethez” gomb. Használja: `felulet/js/koinoNezet.js`, `felulet/js/koinoNezetKeret.js`. */
+
+/* ===== A KÁRTYA ===== */
+.koino-nezet-jel {
+  display: inline-block;
+  margin-right: 0.5em;
+  padding: 0.05em 0.45em;
+  border-radius: 0.6em;
+  background: #e0f2f1;
+  color: #00695c;
+  font-size: 0.8em;
+  white-space: nowrap;
+}
+
+.koino-nezet,
+.koino-nezet-ablak {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+.koino-nezet-ablak {
+  font-size: 1em;
+}
+
+.koino-nezet__leiras,
+.koino-nezet__allas-sor,
+.koino-nezet__siker {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.koino-nezet__siker {
+  color: #2e7d32;
+}
+
+.koino-nezet__allas--be {
+  color: #00695c;
+  font-weight: 600;
+}
+
+.koino-nezet__allas--valtozott {
+  color: #b35c00;
+  font-weight: 600;
+}
+
+.koino-nezet__kimondas {
+  margin: 0;
+  padding-left: 1.2rem;
+  line-height: 1.45;
+}
+
+.koino-nezet__figyelem {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  border-left: 3px solid #b35c00;
+  background: rgba(179, 92, 0, 0.08);
+  line-height: 1.45;
+}
+
+.koino-nezet__kod summary {
+  cursor: pointer;
+}
+
+.koino-nezet__szoveg {
+  max-height: 18em;
+  overflow: auto;
+  margin: 0.4em 0 0;
+  padding: 0.5em;
+  background: rgba(0, 0, 0, 0.04);
+  font-size: 0.85em;
+  white-space: pre-wrap;
+}
+
+.koino-nezet__mezo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.koino-nezet__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.koino-nezet__elem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+}
+
+.koino-nezet__gombok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.koino-nezet__gomb {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.koino-nezet__gomb--fo {
+  background: #00796b;
+  border-color: #00796b;
+  color: #fff;
+}
+
+.koino-nezet__gomb:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ===== A FUTÓ NÉZET — a pakli helyén, egész lapon ===== */
+.koino-nezet-futas {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 7rem);
+  min-height: 20rem;
+  margin: 0 0.5rem;
+}
+
+.koino-nezet-futas[hidden] {
+  display: none;
+}
+
+.koino-nezet-futas__sav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #00796b;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: #e0f2f1;
+  color: #004d40;
+  font-size: 0.9em;
+}
+
+.koino-nezet-futas__felirat {
+  overflow-wrap: anywhere;
+  cursor: help;
+}
+
+.koino-nezet-futas__bezar {
+  flex: none;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.koino-nezet-futas__keret {
+  flex: 1;
+  width: 100%;
+  border: 1px solid #00796b;
+  border-radius: 0 0 6px 6px;
+  background: #fff;
+}
+
+/* amíg a nézet látszik, a pakli lebegő jelei és állapot-sora rejtve (a pakli újrakérdezése visszatenné őket) */
+body.koino-nezet-fut .testver-jelzo,
+body.koino-nezet-fut .koino-testver-hiany,
+body.koino-nezet-fut #allapot {
+  display: none !important;
+}
+
+.koino-nezet-vissza {
+  position: fixed;
+  right: 1rem;
+  bottom: 4.5rem;
+  z-index: 50;
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-radius: 1.2rem;
+  background: #00796b;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}

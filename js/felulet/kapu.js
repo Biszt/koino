@@ -251,6 +251,9 @@ async function kereskezeles(keres, valasz, { gyoker, kezelo, kulcs, port, testKo
       // találgassa a fájltípust.
       'x-frame-options': 'DENY',
       'x-content-type-options': 'nosniff',
+      // ⭐⭐ D126 (PR4, a 92. mérés harmadik rétege): a lap maga SEMMIT nem tölt keretbe — így egy feltöltött nézet (a lap `srcdoc`
+      // keretében, ami ettől még fut) nem navigálhatja el önmagát kifelé (a sandbox ezt nem fogja meg, a nézet CSP-je sem).
+      'content-security-policy': "frame-src 'none'",
       // ⚠️ A jelszó a címsorban utazik az első megnyitásnál — ne vigye tovább egy
       // kifelé mutató hivatkozás a hivatkozó-fejlécben.
       'referrer-policy': 'no-referrer',

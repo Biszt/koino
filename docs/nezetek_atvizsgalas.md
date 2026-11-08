@@ -1,6 +1,7 @@
 # A közösség feltöltött nézetei — átvizsgálás (D123 ⑤, PR4 — 2026-11-08, kód nélkül)
 
-> **Állapot:** 🔍 átvizsgálva · ⏸️ NZ1–NZ6 Csabánál. Az elv a D123-ban eldőlt (PR4 (B)): *„olvasó nézetek elsőként: egy nézet
+> **Állapot:** ✅ **D126 — MEGÉPÜLT** (Csaba, 2026-11-08: *„mindet elfogadom, mehetünk tovább”* — NZ1–NZ6 mind (A); az építés: 8.
+> szakasz) · ⏭️ a terepi próba (a telefon böngészője). Az elv a D123-ban eldőlt (PR4 (B)): *„olvasó nézetek elsőként: egy nézet
 > egy kártya (mint a koino-verzió kártya — a kódja rajta, a pont rá a közösség jelzése), a lap elszigetelten futtatja (külön
 > keretben, a kapu csak olvasó végpontokat ad neki), és te kapcsolod be a saját készülékeden.”* Ez az átvizsgálás azt nézi meg,
 > HOL és HOGYAN — a kód és a **92. mérés** alapján (`meres/nezetMeres.js`). Programkód nem készült, csak a mérés.
@@ -191,6 +192,42 @@ koino-verzió kártyánál.
 CSP-je és az őr), és **a nézet-felület 1** → ③ **a bekapcsolás** (`nezetek.json`, a lenyomat, koinónként) és a fő menü →
 ④ **a próbák:** a 92. mérés (b) részéből önpróba, fej nélküli Chrome-mal. Ha nincs Chrome a gépen, kimarad — mint a `sh`-t
 kívánó próbák. → ⑤ **terepi próba** (a telefon böngészője).
+
+## 8. Az építés (D126, 2026-11-08)
+
+**A kártya:** egy `Nezet` típusú legfelső szintű entitás (`muveletek.js` `nezetLetrehozasa`); a szövege a leírás és a kód fájl-blokkja
+(`nezetKartya.js` `nezetSzovegBlokkjai`). A kód a szöveg ELSŐ fájl-blokkja (`nezetKodja`) — így egy egyezmény, ami a szöveget módosítja,
+a kódot is cserélheti. A törzs mérete (D120) a kódot is mondja, a tárolási vállalás (D26) is.
+
+**A bekapcsolás:** `<adat>/nezetek.json` — koinónként (NZ2), kártyánként a kód lenyomatával (NZ1); legfeljebb 64 nézet egy koinóban, 256
+koinó. Az állás: `be` (a mostani kód az, amit bekapcsoltál), `valtozott` (más a kódja — kikapcsolva, újra meg kell nézni), `ki`. A lap a
+lenyomatot, amit az e-ember látott, maga küldi (ha közben más kód jött, nem kapcsol be).
+
+**A futtatás:** a lap a programtól kéri a keret tartalmát (`/api/nezet/keret` — csak bekapcsolva, ugyanazzal a kóddal): a nézet CSP-je és az
+őr a legelején, a kliens (`koinoNezet`), a kód (`nezetFelulet.js` `nezetKeretTartalma`). A keret `sandbox="allow-scripts"`, a pakli helyén;
+a lap CSP-je `frame-src 'none'` (a kapu minden válaszán).
+
+**A nézet-felület 1:** a nézetben `koinoNezet.kerdez(kérdés, adat)` és `koinoNezet.figyel('valtozas', fv)`. A kérdések:
+- `koino` → a név, a szabályok, a felület száma, és a nézet saját kártyája;
+- `en` → az én kulcsom;
+- `entitasok` `{ kurzor?, darab ≤ 100, rendezes?, irany? }` → egy oldal a közös képből (`kovetkezo` kurzorral), mezőnként kimondva
+  (azonosító, típus, cím, szülő, besorolás, pontok, a saját pontom, szerző, idő, a javaslat állása);
+- `szoveg` `{ azonosito }` → a szöveg (blokkok vagy sima szöveg);
+- `fajl` `{ lenyomat }` → a bájtok (`ArrayBuffer`) — a nézet `blob:`-ot vagy `data:`-t csinál belőle (mindkettő mérve a valódi lapon);
+- `megnyit` `{ azonosito }` → a lap a pakliban megnyitja a kártyát, és egy gomb visz vissza a nézethez.
+
+A lap csak a saját keretének üzenetére felel, egyszerre legfeljebb 4 kérdés lehet úton.
+
+**A mérés a valódi lapon** (`meres/nezetProba.js`, fej nélküli Chrome): a kontroll (a lapról egy kérés, egy kép és a WebRTC UDP-je)
+kijut; a nézetből a 92. mérés útjai (a fetch, a kép, a beacon, a WebSocket, a stílus, az előtöltés, a szkript, a munkás, a keret, a
+felugró, az űrlap, a CSP-feloldás, a WebRTC — a friss belső keretével is —, az önnavigáció, a meta refresh, a data:/blob: dokumentum, a
+`document.write`, a lap elnavigálása) semmit nem juttatnak ki; a lap címe, DOM-ja és tára `SecurityError`; a kulcs se a keret tartalmában,
+se a nézet dokumentumában nincs.
+
+⛔ **Az építés lelete:**
+- a Chrome a sandbox-keretet KÜLÖN FOLYAMATBA teszi — a próba csak a keret saját DevTools-munkamenetén éri el (`Target.setAutoAttach`);
+- egy második, „engedékeny” CSP (`default-src *`) a `data:` és a `blob:` képet is TILTJA: a böngésző a két szabályt metszi, és a `*` ezeket
+  nem fedi — a nézet feloldási kísérlete tehát csak szigorít. (A próbában ez a képek után fut, egy friss keretben.)
 
 *Kapcsolódik:* `program_retegek_atvizsgalas.md` (D123, PR4), `csaladi_orjarat_atvizsgalas.md` (D119 — a koino-verzió kártya),
 `kartya_telepites_atvizsgalas.md` (D125 — a „Kód” fül, a lenyomat határa), `felulet_terv.md` (a 7. szabály), `js/felulet/kapu.js`

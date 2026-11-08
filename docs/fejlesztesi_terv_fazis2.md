@@ -6366,6 +6366,37 @@ azonnal kilép (a szkriptet egy `Start-Process` indítja); a kártya és a kód 
 PowerShell paraméternévnek venne); a lap kulcsa indításonként új — a régi fül a régi kulcsával figyel. A próba: `telepitesProba.js` (8),
 16 rontás. ⏭️ A terepi próba (a telefon leállítása — `pkill` — és a háttérben indulás).
 
+### D126. A KÖZÖSSÉG FELTÖLTÖTT NÉZETEI: „A KÁRTYA SZÖVEGÉBEN, A SAJÁT KOINÓJÁBAN, NÉGY RÉTEG MÖGÖTT” (2026-11-08)
+
+*A D123 PR4-ének hol-ja és hogyan-ja. Az átvizsgálás: [`nezetek_atvizsgalas.md`](nezetek_atvizsgalas.md), a 92. mérés (a nézet-kártya
+a mag változása nélkül megy, ha a kód a kártya szövegében egy csatolt fájl; a böngésző négy réteggel szigetel — a sandbox egymagában
+kevés).*
+
+**A döntés** (Csaba, 2026-11-08: *„mindet elfogadom, mehetünk tovább”* — NZ1–NZ6 mind (A)):
+1. **NZ1 — a kód helye:** a saját típusú kártya (`Nezet`) SZÖVEGÉBEN, egy csatolt HTML-fájlként (a szkript és a stílus benne). A mag
+   nem változik, a mai szállítás viszi, a még nem frissített társak is. Változni csak szerkesztési egyezménnyel tud; a bekapcsolás a
+   kód lenyomatához kötött — az új kódot mindenki maga kapcsolja be újra.
+2. **NZ2 — a hatókör:** egy nézet csak abban a koinóban fut, ahol a kártyája van (a szerzője ott tag: amit a nézet lát, azt ő is látja).
+3. **NZ3 — mit lát:** a koinó közös képét, és hogy melyik az én kulcsom, a pontjaimmal. Meghívót, társat, értesítést, kulcsot nem.
+4. **NZ4 — a nézet-felület:** egy külön, kicsi, SZÁMOZOTT kérdés-készlet (ma az 1-es), nem a lap belső útjai.
+5. **NZ5 — hol:** a pakli helyén, egész lapon, a fő menüből („🧩 Nézetek…”), felirattal és bezárással.
+6. **NZ6 — mit tehet:** olvas, és kérheti, hogy a lap nyisson meg egy kártyát; a cselekvés a lap saját ablakában marad, a te kezeddel.
+
+*Az építés (①–④, 2026-11-08 — elágazás 249):* `js/allapot/nezetKartya.js` (a kártya szövege, a kód — a szöveg ELSŐ fájl-blokkja —, a
+bekapcsolás jegyzéke: koinónként, a lenyomathoz kötve, korlátosan — `<adat>/nezetek.json`), `js/muveletek.js` `nezetLetrehozasa`,
+`js/felulet/nezetFelulet.js` (a keret tartalma: a nézet CSP-je és az őr a LEGELEJÉN, a kliens — `koinoNezet.kerdez/figyel` —, a kód; a
+kérdés-készlet: `koino`, `en`, `entitasok` (lapozva, ≤ 100), `szoveg` a programnál, `fajl` és `megnyit` a lapnál; a válasz csak a
+kimondott mezőkkel), `js/felulet/kapu.js` (a lap CSP-je: `frame-src 'none'` — a harmadik réteg), `koino.js` (`nezetFeltoltese`,
+`nezetKartyai`, `nezetKartyaja`, a be- és kikapcsolás, `nezetKerete`; a `nezet` parancs: `uj`, `kod`, `be [igen]`, `ki`; a lap útjai:
+`/api/nezetek`, `/api/nezet` (GET a kártya a kimondással, POST a feltöltés), `/api/nezet/be|ki`, `/api/nezet/keret` — csak bekapcsolva,
+ugyanazzal a kóddal —, `/api/nezet/kerdes`), a lap (`felulet/js/koinoNezet.js` — a 🧩 jel, a „🧩 Kód” fül, a bekapcsolás ablaka, a
+„Nézetek…” és az „Új nézet…”; `felulet/js/koinoNezetKeret.js` — a keret `sandbox="allow-scripts"`-szal a pakli helyén, a beszéd: csak a
+saját keret üzenete, egyszerre ≤ 4 kérdés úton, a `megnyit` után „🧩 Vissza a nézethez”, a csere `valtozas`-a). A próba:
+`meres/nezetProba.js` (7) — benne a valódi lapon, fej nélküli Chrome-mal, KONTROLLAL mért elszigetelés; 18 rontás. ⛔ Az építés
+lelete: (1) a Chrome a sandbox-keretet KÜLÖN FOLYAMATBA teszi — a próba a keret saját DevTools-munkamenetén éri el (`Target.setAutoAttach`);
+(2) egy második, „engedékeny” CSP (`default-src *`) a `data:` és a `blob:` képet is tiltja (a böngésző a kettőt metszi, a `*` ezeket nem
+fedi) — a feloldási kísérlet csak szigorít. ⏭️ A terepi próba (a telefon böngészője).
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem

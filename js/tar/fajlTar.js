@@ -2242,7 +2242,26 @@ export function udpCimTarolo(hely = alapHely()) {
  * @param {Function} [alak] - a beolvasott adat ellenőrzött alakja (`nyelvJegyzekAlakja`)
  */
 export function nyelvJegyzekTarolo(hely = alapHely(), alak = (x) => x ?? { tarsak: {} }) {
-  const fajl = join(hely, 'nyelvek.json');
+  return helyiJegyzekTarolo(join(hely, 'nyelvek.json'), alak);
+}
+
+/**
+ * ⭐⭐ D126 (PR4): a bekapcsolt nézetek jegyzéke (`<adat>/nezetek.json` — KÉSZÜLÉK-szintű, koinónként: a nézet a te készülékeden
+ * fut, a bekapcsolás nem esemény, nem terjed). Az alak és a szabály a `nezetKartya.js`-é; ugyanúgy ír, mint a `nyelvek.json`.
+ * @param {string} [hely]
+ * @param {Function} [alak] - a beolvasott adat ellenőrzött alakja (`nezetJegyzekAlakja`)
+ */
+export function nezetJegyzekTarolo(hely = alapHely(), alak = (x) => x ?? { koinok: {} }) {
+  // ⚠️ Nem csendes: a bekapcsolás az e-ember kérése — ha nem sikerül (a korlát, vagy az írás), azt ki kell mondani.
+  return helyiJegyzekTarolo(join(hely, 'nezetek.json'), alak, { csendes: false });
+}
+
+/**
+ * Egy helyi JSON-jegyzék (készülék-szintű feljegyzés): a `modosit` a mostanit olvassa, és arra vezeti rá a változást, folyamaton
+ * belül sorban; ha az átalakítás ugyanazt adja vissza, nem ír; az írás ideiglenes fájlon át, átnevezéssel. Ha nem sikerül, csendben
+ * elmarad (null) — a hívó dönti el, mit mond.
+ */
+function helyiJegyzekTarolo(fajl, alak, { csendes = true } = {}) {
   const olvas = async () => {
     try { return alak(JSON.parse(await readFile(fajl, 'utf8'))); } catch { return alak(null); }
   };
@@ -2260,11 +2279,12 @@ export function nyelvJegyzekTarolo(hely = alapHely(), alak = (x) => x ?? { tarsa
         try {
           await writeFile(ideiglenes, JSON.stringify(uj), 'utf8');
           await rename(ideiglenes, fajl);
-        } catch {
+        } catch (hiba) {
           await rm(ideiglenes, { force: true }).catch(() => {});
+          if (!csendes) throw hiba;
         }
         return uj;
-      }).catch(() => null);
+      }).catch((hiba) => { if (!csendes) throw hiba; return null; });
     }
   };
 }

@@ -89,7 +89,7 @@ import { writeFile, readFile, mkdir, rename, mkdtemp, rm, stat } from 'node:fs/p
 import { tmpdir, homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { randomUUID, randomInt } from 'node:crypto';
-import { dirname, join, resolve, sep } from 'node:path';
+import { basename, dirname, join, resolve, sep } from 'node:path';
 
 import {
   esemenyTarNyitasa, koinoBecenevFeloldasa, koinoBecenevKijelolese, koinoBecenevei, kulcsTarolo, tarsakTarolo, szeletJegyzekTarolo,
@@ -124,7 +124,9 @@ import {
   // ⭐ D120: a törzs-elemek helyi jegyzéke (a határ fölötti fájlok mérete, a kért elemek)
   torzsElemTarolo,
   // ⭐⭐ D124 ③: akivel nem értjük egymást (készülék-szintű)
-  nyelvJegyzekTarolo
+  nyelvJegyzekTarolo,
+  // ⭐⭐ D126 (PR4): a bekapcsolt nézetek (készülék-szintű, koinónként)
+  nezetJegyzekTarolo
 } from './js/tar/fajlTar.js';
 // ⭐⭐ D124 ③: akivel nem értjük egymást — társanként megjegyezve, órákig nem hívva, kimondva (a lap, a `koino` parancs)
 import { hivhatoE, nemErtjukKulcsa, korMegfigyelesei, ertjukFeljegyzese, reginFeljegyzese, nyelvekKepe, nyelvJegyzekAlakja, NEM_ERTJUK_HATAR,
@@ -230,8 +232,15 @@ import {
   // ⭐ D95/1: a nagy szelet teljes tartója kiadja a lezárt döntések összegzését.
   lezarasiOsszegzesKiadasa,
   // ⭐⭐ D119 (①a): a koino-verzió — a gyermek születése a szülőben, a kóddal; és a szabad pontjaim (az előzetes vizsgálathoz).
-  koinoVerzioLetrehozasa, szabadTudatpontjaim
+  koinoVerzioLetrehozasa, szabadTudatpontjaim,
+  // ⭐⭐ D126 (PR4): a nézet-kártya (a kód a szövegében, egy csatolt HTML-fájl)
+  nezetLetrehozasa
 } from './js/muveletek.js';
+// ⭐⭐ D126 (PR4): a közösség feltöltött nézetei — a kártya szabályai, a bekapcsolás (a lenyomathoz kötve, koinónként), és a
+// nézet-felület (a keret tartalma, a kérdés-készlet, a válaszok alakja)
+import { NEZET_TIPUS, NEZET_LISTA_KORLAT, nezetKodja, kodSzovege, kodNeve, nezetJegyzekAlakja, nezetBekapcsolasa,
+  nezetKikapcsolasa, nezetAllasa } from './js/allapot/nezetKartya.js';
+import { NEZET_FELULET, NEZET_KIMONDAS, nezetKeretTartalma, nezetEntitasa, nezetKerdesAlakja } from './js/felulet/nezetFelulet.js';
 import { tagE, tanusithatE, lepcso2E, ujIdentitasNezet, tagsagiEsemenyekGyujtese } from './js/allapot/identitas.js';
 // ⭐ D93/3: a zárt koinó kapuja — a tagság tiszta számítása és a tagsági csomag ellenőrzése.
 import { tagsagiIndex, szerzoTagsaga, tagsagiCsomagEllenorzese, TAGSAGI_CSOMAG, LANC_TIPUSOK } from './js/allapot/tagsag.js';
@@ -528,6 +537,16 @@ let nyelvJegyzekPeldany = null;
 function nyelvJegyzek() {
   nyelvJegyzekPeldany ??= nyelvJegyzekTarolo(alapHely(), nyelvJegyzekAlakja);
   return nyelvJegyzekPeldany;
+}
+
+/**
+ * ⭐⭐ D126 (PR4): a bekapcsolt nézetek (`<adat>/nezetek.json`, `nezetKartya.js`) — készülék-szintű feljegyzés, koinónként (NZ2: a
+ * nézet csak a saját koinójában fut) és a kód lenyomatához kötve (NZ1). Folyamatonként egy tároló (a módosítások sorban mennek).
+ */
+let nezetJegyzekPeldany = null;
+function nezetJegyzek() {
+  nezetJegyzekPeldany ??= nezetJegyzekTarolo(alapHely(), nezetJegyzekAlakja);
+  return nezetJegyzekPeldany;
 }
 
 /**
@@ -975,6 +994,139 @@ async function kartyaKodjanakKiirasa(kartyaAz) {
   }
   const k = await kodKiirasa(kod, jegyzek, (l) => blob.olvas(l), hely.uj);
   return { ...k, hely, kod };
+}
+
+// ===================================
+// ⭐⭐ D126 (D123 PR4): A KÖZÖSSÉG FELTÖLTÖTT NÉZETEI — a kártya, a kódja, a bekapcsolás, a keret
+// ===================================
+
+/**
+ * ⭐⭐ D126 (NZ1 (A)): EGY NÉZET FELTÖLTÉSE — a HTML-fájl a koinó fájl-tárába, a nézet-kártya (a szövegében a leírás és a fájl), és a
+ * pont rá (D14). A parancs (`nezet uj`) és a lap („🧩 Új nézet…”) ugyanezt hívja. A pontot tevő tárolja a kódot is (D3, D26 — mint
+ * egy csatolmányt). ⚠️ A szabad pontot előre nézzük: a kártya aláírt esemény, nem vonható vissza.
+ * @param {{cim: string, leiras?: string|null, pont?: number, nev?: string|null, bajtok: Uint8Array}} b
+ */
+async function nezetFeltoltese({ cim, leiras = null, pont = KEZDO_PONT, nev = null, bajtok }) {
+  const c = typeof cim === 'string' ? cim.trim() : '';
+  if (!c) throw new Error('Mi legyen a nézet neve (a kártya címe)?');
+  if (!Number.isSafeInteger(pont) || pont < 1) throw new Error('A nézethez tudatpontot kell rendelned (D14) — legalább 1-et.');
+  kodSzovege(bajtok);   // ⛔ csak UTF-8 szöveg (egy HTML-fájl) — különben megnevezett hiba
+  const szabad = await szabadTudatpontjaim(kornyezet);
+  if (pont > szabad) throw new Error('A nézethez ' + pont + ' tudatpontot rendelnél, de csak ' + szabad + ' szabad (pont=<kevesebb>).');
+  const { lenyomat, meret } = await fajlBlobTarolo(KOINO).ir(bajtok);
+  const kod = { lenyomat, nev: kodNeve(nev) };
+  const e = await nezetLetrehozasa(kornyezet, { cim: c, leiras, kod });
+  await tudatpontRendezese(kornyezet, e.azonosito, pont, 'aktiv');
+  return { kartya: e.azonosito, cim: c, kod: { ...kod, bajt: meret }, pont };
+}
+
+/**
+ * ⭐⭐ D126: egy nézet-kártya a képből — a kódja (a szöveg első fájl-blokkja — `nezetKodja`), hogy megvan-e a készüléken, és az
+ * állása (be / ki / a kódja azóta változott — `nezetAllasa`).
+ */
+async function nezetKartyaKepbol(e, jegyzek) {
+  const blob = fajlBlobTarolo(KOINO);
+  const f = await szovegFeloldasa(e.szoveg ?? null, (l) => blob.olvas(l));
+  const kod = nezetKodja(f.szoveg);
+  const megvan = kod ? await blob.van(kod.lenyomat) : false;
+  const bajt = megvan ? await blob.meret(kod.lenyomat) : null;
+  const a = nezetAllasa(jegyzek, KOINO, e.azonosito, kod?.lenyomat ?? null);
+  return { azonosito: e.azonosito, cim: e.cim, szerzo: e.szerzo, letrehozva: e.letrehozva ?? null, pont: e.osszesPont ?? 0,
+    hozzajarulok: e.hozzajarulok?.size ?? 0, sajatPont: e.hozzajarulok?.get(szerzo)?.pont ?? 0, szovegHianyzik: f.hianyzik,
+    kod: kod ? { ...kod, bajt } : null, megvan, allas: a.allas,
+    bekapcsolva: a.bekapcsolva ? { lenyomat: a.bekapcsolva.lenyomat, ido: a.bekapcsolva.ido } : null };
+}
+
+/**
+ * ⭐⭐ D126 (NZ5): a koinó nézet-kártyái — a képből (D14: amire senki nem tett pontot, az nincs), pont szerint, korlátosan
+ * (`NEZET_LISTA_KORLAT` — 9. szabály), a bekapcsoltak elöl. NZ2 (A): csak ennek a koinónak a kártyái.
+ */
+async function nezetKartyai() {
+  const { allapot } = await kepetKeszit();
+  const j = await nezetJegyzek().olvas();
+  const lista = [...allapot.entitasok.values()].filter((e) => e.tipus === NEZET_TIPUS)
+    .sort((a, b) => (b.osszesPont - a.osszesPont) || (a.azonosito < b.azonosito ? -1 : 1)).slice(0, NEZET_LISTA_KORLAT);
+  const ki = [];
+  for (const e of lista) ki.push(await nezetKartyaKepbol(e, j));
+  const sorrend = { be: 0, valtozott: 1, ki: 2 };
+  return ki.sort((a, b) => sorrend[a.allas] - sorrend[b.allas]);   // stabil: azon belül a pont szerinti sorrend marad
+}
+
+/** ⭐⭐ D126: egy nézet-kártya ebben a koinóban (NZ2) — különben megnevezett hiba. */
+async function nezetKartyaja(kartyaAz) {
+  const { allapot } = await kepetKeszit();
+  const e = allapot.entitasok.get(typeof kartyaAz === 'string' ? kartyaAz : '');
+  if (!e || e.tipus !== NEZET_TIPUS) {
+    const h = new Error('Nincs ilyen nézet-kártya ebben a koinóban (egy nézet csak a saját koinójában fut).');
+    h.kod = 'NINCS';
+    throw h;
+  }
+  return nezetKartyaKepbol(e, await nezetJegyzek().olvas());
+}
+
+/** ⭐⭐ D126: a nézet kódja szövegként (a „Kód” fül, a `nezet kod` parancs, a keret) — ha megvan a készüléken. */
+async function nezetKodSzovege(kartyaAz, n = null) {
+  n ??= await nezetKartyaja(kartyaAz);
+  if (!n.kod) {
+    const h = new Error('Ennek a nézet-kártyának a szövegében nincs csatolt fájl — nincs kódja.');
+    h.kod = 'NINCS-KOD';
+    throw h;
+  }
+  const bajtok = await fajlBlobTarolo(KOINO).olvas(n.kod.lenyomat);
+  if (!bajtok) {
+    const h = new Error('A nézet kódja még nincs meg ezen a készüléken — a kártya vállalóitól jön (ha pontot teszel rá, vagy elkéred).');
+    h.kod = 'NINCS-MEG';
+    throw h;
+  }
+  return { n, szoveg: kodSzovege(bajtok) };
+}
+
+/**
+ * ⭐⭐ D126 (NZ1, NZ2): A BEKAPCSOLÁS ezen a készüléken — csak a saját koinójában (a kártya ennek a koinónak a képében van), csak a
+ * meglévő kóddal, és ha a hívó megnevezi, csak ha az a kártya MOSTANI kódja (amit az e-ember látott — ha közben egy egyezmény más
+ * kódot hozott, újra meg kell néznie). A parancs (`nezet be`) és a lap ugyanezt hívja. Helyi feljegyzés, nem esemény.
+ * @param {string} kartyaAz
+ * @param {string|null} [lenyomat] - a kód lenyomata, amit az e-ember látott
+ */
+async function nezetBekapcsolasaKeszuleken(kartyaAz, lenyomat = null) {
+  const n = await nezetKartyaja(kartyaAz);
+  if (!n.kod) throw new Error('Ennek a nézet-kártyának a szövegében nincs csatolt fájl — nincs mit bekapcsolni.');
+  if (lenyomat && lenyomat !== n.kod.lenyomat) {
+    const h = new Error('A nézet kódja közben megváltozott (egy egyezmény új kódot hozott) — nézd meg újra, mielőtt bekapcsolod.');
+    h.kod = 'VALTOZOTT';
+    throw h;
+  }
+  if (!n.megvan) {
+    const h = new Error('A nézet kódja még nincs meg ezen a készüléken — előbb hozd el (a „Kód” fül), utána kapcsold be.');
+    h.kod = 'NINCS-MEG';
+    throw h;
+  }
+  await nezetJegyzek().modosit((j) => nezetBekapcsolasa(j, { koino: KOINO, kartya: n.azonosito, lenyomat: n.kod.lenyomat, cim: n.cim }));
+  return { ...n, allas: 'be', bekapcsolva: { lenyomat: n.kod.lenyomat, ido: Date.now() } };
+}
+
+/** ⭐⭐ D126: a kikapcsolás — akkor is, ha a kártya már nincs a képben. */
+async function nezetKikapcsolasaKeszuleken(kartyaAz) {
+  if (typeof kartyaAz !== 'string' || !kartyaAz) throw new Error('Melyik nézetet kapcsoljam ki?');
+  await nezetJegyzek().modosit((j) => nezetKikapcsolasa(j, { koino: KOINO, kartya: kartyaAz }));
+  return { kartya: kartyaAz, allas: 'ki' };
+}
+
+/**
+ * ⭐⭐ D126: A KERET TARTALMA egy bekapcsolt nézethez (`nezetFelulet.js` — a CSP, az őr, a kliens és a kód). Csak ha be van
+ * kapcsolva, és a kódja ugyanaz, amit bekapcsoltál; különben megnevezett hiba (KI, VALTOZOTT, NINCS-MEG).
+ */
+async function nezetKerete(kartyaAz) {
+  const n = await nezetKartyaja(kartyaAz);
+  if (n.allas !== 'be') {
+    const h = new Error(n.allas === 'valtozott'
+      ? 'A nézet kódja azóta megváltozott, hogy bekapcsoltad (egy egyezmény új kódot hozott) — nézd meg, és kapcsold be újra.'
+      : 'Ez a nézet nincs bekapcsolva ezen a készüléken.');
+    h.kod = n.allas === 'valtozott' ? 'VALTOZOTT' : 'KI';
+    throw h;
+  }
+  const { szoveg } = await nezetKodSzovege(kartyaAz, n);
+  return { kartya: n.azonosito, cim: n.cim, kod: n.kod, felulet: NEZET_FELULET, srcdoc: nezetKeretTartalma(szoveg) };
 }
 
 /**
@@ -6597,6 +6749,8 @@ return {
   profilomAllapota, igazoltMeghivasokAlairasa,
   // ⭐⭐ D125: a telepítés a kártyáról
   telepitesElonezete,
+  // ⭐⭐ D126: a közösség feltöltött nézetei
+  nezetFeltoltese, nezetKartyai, nezetKartyaja, nezetKodSzovege, nezetBekapcsolasaKeszuleken, nezetKikapcsolasaKeszuleken, nezetKerete,
   tovabbitasok,
   tovabbitasokTakaritasa, tukorBeallitas, ujKoinoSzuletese,
   // ⭐ D119 (③): a családi munkának (a parancsok nem használják)
@@ -6636,6 +6790,8 @@ const {
   profilomAllapota, igazoltMeghivasokAlairasa,
   // ⭐⭐ D125: a telepítés a kártyáról
   telepitesElonezete,
+  // ⭐⭐ D126: a közösség feltöltött nézetei
+  nezetFeltoltese, nezetKartyai, nezetKartyaja, nezetKodSzovege, nezetBekapcsolasaKeszuleken, nezetKikapcsolasaKeszuleken, nezetKerete,
   tovabbitasok,
   tovabbitasokTakaritasa, tukorBeallitas, ujKoinoSzuletese
 } = foPeldany;
@@ -7601,6 +7757,85 @@ try {
       const v = await koinoVerzioKeszitese(KOINO, { nev, ...e });
       if (e.becenev) await koinoBecenevKijelolese(e.becenev, v.szuletes.azonosito);
       koinoVerzioKiirasa(v, e.becenev);
+      break;
+    }
+
+    // ===== ⭐⭐ D126 (D123 PR4): A KÖZÖSSÉG FELTÖLTÖTT NÉZETEI — a kézi út (a lap ugyanezt hívja: `/api/nezet…`) =====
+    //   nezet                                         — a koinó nézet-kártyái (a pont, a kód, az állás: be / ki / a kódja változott)
+    //   nezet uj <fájl> "<cím>" [pont=N] [leiras=…]   — egy HTML-fájl feltöltése nézet-kártyaként (a pont rá — D14)
+    //   nezet kod <kártya>                            — a nézet kódja (a HTML), ahogy a kártya szövegében csatolva van
+    //   nezet be <kártya> [igen]                      — mit lát a nézet és mit nem; `igen`-nel bekapcsolja ezen a készüléken
+    //   nezet ki <kártya>                             — kikapcsolja
+    //   ⚠️ A rajzot a parancssor nem tudja: a nézet egy rajzoló (7. szabály — a böngésző a rajzolója); a parancssor a feltöltést, a
+    //   kódot és a be/kikapcsolást tudja.
+    case 'nezet': {
+      const mit = ervek[0] ?? '';
+      const ALLAS_SZOVEG = { be: SZIN.jo + '🧩 bekapcsolva' + SZIN.vege, ki: SZIN.halvany + 'kikapcsolva' + SZIN.vege,
+        valtozott: SZIN.nem + '⚠ a kódja azóta változott — kikapcsolva (újra: nezet be <kártya>)' + SZIN.vege };
+      const kartyaNeve = async (r) => {
+        const { allapot } = await kepetKeszit();
+        return feloldas(r, [...allapot.entitasok.values()].filter((e) => e.tipus === NEZET_TIPUS).map((e) => e.azonosito));
+      };
+      if (mit === 'uj') {
+        const fajl = ervek[1];
+        const cim = ervek[2];
+        if (!fajl || !cim) throw new Error('Melyik fájl, és mi a nézet neve? node koino.js nezet uj <fájl.html> "<cím>" [pont=N] [leiras=…]');
+        const pontErv = ervek.find((x) => /^pont=\d+$/.test(x));
+        const leirasErv = ervek.find((x) => x.startsWith('leiras='));
+        const n = await nezetFeltoltese({ cim, leiras: leirasErv ? leirasErv.slice(7) : null,
+          pont: pontErv ? Number(pontErv.slice(5)) : KEZDO_PONT, nev: basename(fajl), bajtok: new Uint8Array(await readFile(fajl)) });
+        kiir('A nézet feltöltve: „' + n.cim + '” — egy nézet-kártyával (' + rovidAzonosito(n.kartya) + ', ' + n.pont + ' tudatpontod rajta).');
+        kiir('  A kódja: ' + n.kod.nev + ' — ' + (n.kod.bajt / 1024).toFixed(1) + ' KB (' + n.kod.lenyomat + ')');
+        kiir(SZIN.halvany + '  A kártya a pakliban van; a többiek a cserével kapják. Bekapcsolni (ezen a készüléken): nezet be '
+          + n.kartya.slice(0, 8) + SZIN.vege);
+        break;
+      }
+      if (mit === 'kod') {
+        if (!ervek[1]) throw new Error('Melyik nézet kódja? node koino.js nezet kod <kártya>');
+        const { n, szoveg } = await nezetKodSzovege(await kartyaNeve(ervek[1]));
+        kiir(SZIN.vastag + '🧩 „' + n.cim + '” — a kódja: ' + n.kod.nev + SZIN.vege + SZIN.halvany + ' (' + n.kod.lenyomat + ')' + SZIN.vege);
+        process.stdout.write(szoveg.endsWith('\n') ? szoveg : szoveg + '\n');
+        break;
+      }
+      if (mit === 'ki') {
+        if (!ervek[1]) throw new Error('Melyik nézetet kapcsoljam ki? node koino.js nezet ki <kártya>');
+        const { allapot } = await kepetKeszit();
+        const jelolt = [...allapot.entitasok.values()].filter((e) => e.tipus === NEZET_TIPUS).map((e) => e.azonosito);
+        let az = ervek[1];
+        try { az = feloldas(ervek[1], jelolt); } catch { /* már nincs a képben — a teljes nevével is kikapcsolható */ }
+        await nezetKikapcsolasaKeszuleken(az);
+        kiir('A nézet kikapcsolva ezen a készüléken (' + rovidAzonosito(az) + ').');
+        break;
+      }
+      if (mit === 'be') {
+        if (!ervek[1]) throw new Error('Melyik nézetet kapcsoljam be? node koino.js nezet be <kártya> [igen]');
+        const n = await nezetKartyaja(await kartyaNeve(ervek[1]));
+        kiir(SZIN.vastag + '🧩 „' + n.cim + '”' + SZIN.vege + ' — feltöltött nézet (' + rovidAzonosito(n.azonosito) + ')');
+        kiir('  Feltette: ' + rovidAzonosito(n.szerzo) + ' · ' + n.pont + ' tudatpont rajta (' + n.hozzajarulok + ' e-embertől)');
+        kiir('  A kódja: ' + (n.kod ? n.kod.nev + (n.kod.bajt != null ? ' — ' + (n.kod.bajt / 1024).toFixed(1) + ' KB' : '') + ' (' + n.kod.lenyomat + ')'
+          + (n.megvan ? '' : SZIN.nem + ' — még nincs meg ezen a készüléken' + SZIN.vege) : SZIN.nem + 'nincs (a szövegében nincs csatolt fájl)' + SZIN.vege));
+        kiir('  Mit lát: ' + NEZET_KIMONDAS.latja + '.');
+        kiir('  Mit nem: ' + NEZET_KIMONDAS.nemLatja + '.');
+        kiir('  ' + SZIN.nem + '⚠ ' + NEZET_KIMONDAS.hamisRajz + SZIN.vege);
+        kiir('  Most: ' + ALLAS_SZOVEG[n.allas]);
+        if (ervek[2] === 'igen') {
+          await nezetBekapcsolasaKeszuleken(n.azonosito, n.kod?.lenyomat ?? null);
+          kiir(SZIN.jo + '✓ Bekapcsolva ezen a készüléken, ebben a koinóban — a kód lenyomatához kötve (ha egy egyezmény új kódot hoz, '
+            + 'kikapcsol). A lapon: a fő menü „🧩 Nézetek…”.' + SZIN.vege);
+        } else if (n.allas !== 'be') {
+          kiir(SZIN.halvany + 'A bekapcsolás: nezet be ' + ervek[1] + ' igen' + SZIN.vege);
+        }
+        break;
+      }
+      if (mit) throw new Error('Ismeretlen: nezet ' + mit + ' — nezet · nezet uj <fájl> "<cím>" [pont=N] · nezet kod|be|ki <kártya>');
+      const lista = await nezetKartyai();
+      kiir(SZIN.vastag + 'A KOINÓ NÉZETEI' + SZIN.vege + SZIN.halvany + '  (a közösség feltöltött nézetei — olvasnak, nem írnak)' + SZIN.vege);
+      if (!lista.length) kiir(SZIN.halvany + '  (még nincs — feltölteni: nezet uj <fájl.html> "<cím>" [pont=N])' + SZIN.vege);
+      for (const n of lista) {
+        kiir('  🧩 ' + n.azonosito.slice(0, 8) + '  „' + n.cim + '” · ' + n.pont + ' pont · ' + (n.kod ? n.kod.nev
+          + (n.megvan ? '' : ' (a kód még nincs meg)') : 'nincs kódja') + ' · ' + ALLAS_SZOVEG[n.allas]);
+      }
+      if (lista.length) kiir(SZIN.halvany + '  A kód: nezet kod <kártya> · bekapcsolás: nezet be <kártya> · a lapon: „🧩 Nézetek…”' + SZIN.vege);
       break;
     }
 
@@ -10385,7 +10620,9 @@ try {
           koltozesElonezete, koltozesVegrehajtasa, lapHianyzoinakElkerese, laposMegjegyzes, postafiokFrissitese,
           postafiokMegjegyzes, postafiokModositasa, programVerzioja, sikidomMegjegyzes, strukturaMegjegyzes, torzsElemKerese,
           torzsKerhetoi, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, tagsagAllapotom, profilomAllapota,
-          telepitesElonezete, kartyaKodjanakKiirasa
+          telepitesElonezete, kartyaKodjanakKiirasa,
+          // ⭐⭐ D126: a közösség feltöltött nézetei (a belépett koinóé — NZ2)
+          nezetFeltoltese, nezetKartyai, nezetKartyaja, nezetBekapcsolasaKeszuleken, nezetKikapcsolasaKeszuleken, nezetKerete, koinoSzuletese
         } = aktiv.peldany;
         // ⭐ B/2: az olvasók (a pakli) a két tár nézetét kapják — FL1 óta minden koinóban (a koinó átmeneti tára is látszik).
         const olvasoTar = ketTarNezet(tar, atmeneti);
@@ -10541,6 +10778,70 @@ try {
             try {
               const c = await programCsereje({ vissza: true, port });
               return { adat: { success: true, mondat: c.mondat } };
+            } catch (hiba) {
+              return { allapot: 400, adat: { hiba: hiba.message } };
+            }
+          }
+
+          // ===================================
+          // ⭐⭐ D126 (D123 PR4): A KÖZÖSSÉG FELTÖLTÖTT NÉZETEI — a feltöltés, a be- és kikapcsolás, és a nézet kérdései
+          // ===================================
+          //
+          // A feltöltés ugyanaz a függvény, mint a `nezet uj` parancsé (a fájl base64-ben, mint a `/api/feltoltes/fajl`-nál). A
+          // bekapcsolás a lap kimondott lenyomatával (amit az e-ember látott — NZ1); a nézet kérdéseit a lap EGY úton adja tovább, és csak
+          // a bekapcsolt nézetét: a válasz a nézet-felület alakja (`nezetFelulet.js` — NZ3, NZ4), nem a lap belső útjaié.
+          if (utvonal === '/api/nezet') {
+            try {
+              if (typeof test?.adat !== 'string' || !test.adat) return { allapot: 400, adat: { hiba: 'Melyik HTML-fájl a nézet? (nincs mit feltölteni)' } };
+              const bajtok = new Uint8Array(Buffer.from(test.adat, 'base64'));
+              const n = await nezetFeltoltese({ cim: test?.cim, leiras: typeof test?.leiras === 'string' && test.leiras.trim() ? test.leiras.trim() : null,
+                pont: Number.isSafeInteger(test?.pont) ? test.pont : KEZDO_PONT, nev: typeof test?.nev === 'string' ? test.nev : null, bajtok });
+              pakliNezet.horgony = null;      // a kép elavult
+              return { adat: { success: true, ...n } };
+            } catch (hiba) {
+              return { allapot: 400, adat: { hiba: hiba.message } };
+            }
+          }
+          if (utvonal === '/api/nezet/be') {
+            try {
+              const lenyomat = typeof test?.lenyomat === 'string' && test.lenyomat ? test.lenyomat : null;
+              if (!lenyomat) return { allapot: 400, adat: { hiba: 'A bekapcsoláshoz a kód lenyomata kell (amit láttál).' } };
+              return { adat: { success: true, nezet: await nezetBekapcsolasaKeszuleken(test?.kartya, lenyomat) } };
+            } catch (hiba) {
+              return { allapot: 400, adat: { hiba: hiba.message, kod: hiba.kod ?? null } };
+            }
+          }
+          if (utvonal === '/api/nezet/ki') {
+            try {
+              return { adat: { success: true, ...(await nezetKikapcsolasaKeszuleken(test?.kartya)) } };
+            } catch (hiba) {
+              return { allapot: 400, adat: { hiba: hiba.message } };
+            }
+          }
+          if (utvonal === '/api/nezet/kerdes') {
+            try {
+              const n = await nezetKartyaja(test?.kartya);
+              if (n.allas !== 'be') return { allapot: 403, adat: { hiba: 'Ez a nézet nincs bekapcsolva ezen a készüléken.' } };
+              const k = nezetKerdesAlakja(test?.kerdes, test?.adat);
+              if (k.hiba) return { allapot: 400, adat: { hiba: k.hiba } };
+              if (k.kerdes === 'koino') {
+                const sz = await koinoSzuletese();
+                return { adat: { valasz: { azonosito: KOINO, nev: sz?.adat?.nev ?? null, szabalyok: koinoSzabalyai(sz), felulet: NEZET_FELULET,
+                  nezet: { kartya: n.azonosito, cim: n.cim } } } };
+              }
+              if (k.kerdes === 'en') return { adat: { valasz: { kulcs: szerzo } } };
+              const darabOlvas = (lenyomat) => fajlBlobTarolo(KOINO).olvas(lenyomat);
+              if (k.kerdes === 'szoveg') {
+                const t = await entitasSzovege(olvasoTar, KOINO, k.adat.azonosito, { nezet: pakliNezet, darabOlvas });
+                if (!t) return { allapot: 404, adat: { hiba: 'Nincs ilyen entitás ezen a készüléken.' } };
+                return { adat: { valasz: { azonosito: t.azonosito, szoveg: t.szoveg ?? null, hianyzik: t.szovegHianyzik === true } } };
+              }
+              // entitasok — egy oldal a közös képből (a pakli lapos útja, a nézet alakjában)
+              const oldal = await pakliOldal(olvasoTar, KOINO, { rendezes: k.adat.rendezes, irany: k.adat.irany,
+                kurzor: k.adat.kurzor ?? undefined, darab: k.adat.darab, szerzo, nezet: pakliNezet, darabOlvas,
+                bemondasok: await bemondasok(), fejlecTudas: await fejlecTudas() });
+              return { adat: { valasz: { entitasok: (oldal.kartyak ?? []).map(nezetEntitasa), kovetkezo: oldal.kovetkezoKurzor ?? null,
+                osszes: Number.isSafeInteger(oldal.osszes) ? oldal.osszes : null } } };
             } catch (hiba) {
               return { allapot: 400, adat: { hiba: hiba.message } };
             }
@@ -11138,6 +11439,32 @@ try {
 
         // ⭐⭐ D119 (①b): A KÁRTYA „KÓD” FÜLE — a koino-verzió jegyzéke (ha megvan a készüléken), hány fájlja van meg, és a futó
         // program neve (egyezik-e a kártyáéval). Egy fájl tartalma a meglévő `/api/fajl/<lenyomat>` úton jön.
+        // ⭐⭐ D126 (NZ5): A KOINÓ NÉZETEI — a nézet-kártyák (pont szerint, korlátosan, a bekapcsoltak elöl), egy kártya (a „Kód” fül és a
+        // bekapcsolás előtt), és a keret tartalma egy bekapcsolt nézethez (a CSP, az őr, a kliens és a kód — csak ha be van kapcsolva,
+        // és a kódja ugyanaz). Semmit nem ír.
+        if (utvonal === '/api/nezetek') {
+          try {
+            return { adat: { kartyak: await nezetKartyai(), felulet: NEZET_FELULET } };
+          } catch (hiba) {
+            return { allapot: 400, adat: { hiba: hiba.message } };
+          }
+        }
+        if (utvonal === '/api/nezet') {
+          try {
+            return { adat: { ...(await nezetKartyaja(kereses.get('kartya'))), kimondas: NEZET_KIMONDAS, felulet: NEZET_FELULET } };
+          } catch (hiba) {
+            return { allapot: hiba.kod === 'NINCS' ? 404 : 400, adat: { hiba: hiba.message, kod: hiba.kod ?? null } };
+          }
+        }
+        if (utvonal === '/api/nezet/keret') {
+          try {
+            return { adat: await nezetKerete(kereses.get('kartya')) };
+          } catch (hiba) {
+            return { allapot: hiba.kod === 'KI' || hiba.kod === 'VALTOZOTT' ? 403 : hiba.kod === 'NINCS' ? 404 : 400,
+              adat: { hiba: hiba.message, kod: hiba.kod ?? null } };
+          }
+        }
+
         if (utvonal === '/api/kod') {
           const { allapot } = await kepetKeszit();
           const e = allapot.entitasok.get(kereses.get('kartya') ?? '');
@@ -11728,7 +12055,8 @@ try {
       const feltoltesKorlat = Math.ceil(FAJL_KORLAT * 4 / 3) + 64 * 1024;
 
       const felulet = await kapuNyitasa({
-        testKorlat: (ut) => ut.startsWith('/api/feltoltes/') ? feltoltesKorlat : undefined,
+        // ⭐⭐ D126: a nézet feltöltése is (a HTML-fájl base64-ben, a cím, a leírás és a pont mellett)
+        testKorlat: (ut) => (ut.startsWith('/api/feltoltes/') || ut === '/api/nezet') ? feltoltesKorlat : undefined,
         // ⛔⛔ EGYETLEN JELSZÓ-MENTES ÚT: a fájl-kiszolgálás. Egy `<img src>` nem küld
         // fejlécet, a címébe pedig **tilos** jelszót tenni — az a cím a gondolat
         // ESEMÉNYÉBEN van eltárolva, tehát a jelszó a láncra kerülne és szétterjedne.
@@ -11761,6 +12089,7 @@ try {
       kiir('Használat: allapot [napok] · kulcs · mentes <fájl> · visszatolt <fájl> [felulir]');
     kiir('           koino <név> [leírás] [nyilt] · gondolat <cím> [szöveg]');
       kiir('           koinoverzio <név> [leírás] [pont=N] [becenev=…] · koltozes <gyermek> [elhagy=…] [fájl]   (D119, D118)');
+      kiir('           nezet [uj <fájl> "<cím>" [pont=N] | kod|be|ki <kártya>]   (D126: a közösség feltöltött nézetei)');
       kiir('           pont <azonosító> <pont> [passziv] · javaslat <azonosító> <új cím> [indoklás]');
       kiir('           torol <azonosító> [indoklás] · athelyez <mit> <hova|gyoker> [indoklás]');
       kiir('           egyesit <az1>,<az2>[,...] <egyesített cím> [indoklás]');

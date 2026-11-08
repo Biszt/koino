@@ -438,6 +438,8 @@ export class AlsoSav {
   async _csereUtaniFrissites(kezzel) {
     console.log('AlsoSav._csereUtaniFrissites - KEZDÉS', { kezzel });
     this.foMenu?._ertesitesBadgeFrissitese?.();
+    // ⭐⭐ D126: egy futó feltöltött nézet is megtudja (a nézet-felület `valtozas` eseménye — `koinoNezetKeret.js`)
+    document.dispatchEvent(new CustomEvent('koino:csereUjat'));
     if (!this.pakliLathato()) {
       this.frissitesFugg = false;
       this.adatokBetoltese();

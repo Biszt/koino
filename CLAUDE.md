@@ -78,16 +78,27 @@ koinónként, a figyelmeztetés), a fő menü „🧬 A program ezen a készül�
 leválasztott PowerShell konzol nélkül azonnal kilép (`Start-Process` indítja); a base64url név kötőjellel is kezdődhet (környezetben
 megy); a lap kulcsa indításonként új — a régi fül a régi kulcsával figyel. `meres/telepitesProba.js` (8, a `parancssor` csoportban),
 16 rontás. ⏭️ **A terepi próba** (a telefon leállítása — `pkill` — és a háttérben indulás; egy kártya egy másik készülékről).
-🔍 **D123 ⑤ — PR4, a közösség feltöltött nézetei: ÁTVIZSGÁLVA** ([`nezetek_atvizsgalas.md`](docs/nezetek_atvizsgalas.md), **92. mérés** —
+✅ **D123 ⑤ — PR4, a közösség feltöltött nézetei: D126, MEGÉPÜLT** — előbb ÁTVIZSGÁLVA ([`nezetek_atvizsgalas.md`](docs/nezetek_atvizsgalas.md), **92. mérés** —
 `meres/nezetMeres.js`): a nézet-kártya a mag nélkül megy (a mai kapu egy új típust beenged, a kép megőrzi, egy új MEZŐT eldob — a
 kód a kártya szövegében egy csatolt HTML-fájl, azt a mai szállítás viszi); a böngésző négy réteggel szigetel (`sandbox="allow-scripts"`
 srcdoc, a nézet CSP-je, a lap `frame-src 'none'`-ja, egy őr a WebRTC ellen — a Chrome a `webrtc 'block'`-ot nem ismeri) — a mért 30 út
 zárva, a sandbox egymagában kevés. ⛔ A mérés lelete: a Claude alkalmazás beépített böngészője a sandbox-keret kéréseit a saját
 szűrőjével állítja meg (`ERR_BLOCKED_BY_CLIENT`) — böngészős elszigetelést fej nélküli Chrome-mal kell mérni (`--headless=new
---user-data-dir=<üres>`), és mindig kontrollal. ⏸️ **NZ1–NZ6 Csabánál** (a kód helye, a hatókör, mit lát, a nézet-felület, hol jelenik
-meg, mit tehet).
+--user-data-dir=<üres>`), és mindig kontrollal. ✅ **D126, MEGÉPÜLT** (Csaba: *„mindet elfogadom, mehetünk tovább”* — NZ1–NZ6 (A);
+elágazás 249, az átvizsgálás 8. szakasza): a nézet egy `Nezet` típusú kártya, a kódja a szövegében csatolt HTML-fájl (a szöveg ELSŐ
+fájl-blokkja — `js/allapot/nezetKartya.js`); a bekapcsolás a te készülékedé, koinónként és a kód lenyomatához kötve
+(`<adat>/nezetek.json` — egy egyezmény új kódja kikapcsolja: `valtozott`); a nézet a pakli helyén fut egy `sandbox="allow-scripts"`
+keretben, a tartalma (a CSP, az őr, a kliens, a kód) a programé (`js/felulet/nezetFelulet.js`), a lap CSP-je `frame-src 'none'` (a
+kapu minden válaszán); a nézet-felület 1: `koinoNezet.kerdez('koino'|'en'|'entitasok'|'szoveg'|'fajl'|'megnyit')` és
+`figyel('valtozas')`. A parancs: `nezet [uj <fájl> "<cím>" [pont=N] [leiras=…] | kod|be [igen]|ki <kártya>]`; a lap: a 🧩 jel, a
+„🧩 Kód” fül, a bekapcsolás ablaka (mit lát, mit nem, a hamis rajz), a fő menü „🧩 Nézetek…” és „🧩 Új nézet…”, a „megnyit” után
+„🧩 Vissza a nézethez” (`felulet/js/koinoNezet.js`, `koinoNezetKeret.js`). `meres/nezetProba.js` (7, a `parancssor` csoportban) —
+benne a valódi lapon, fej nélküli Chrome-mal, CDP-vel (csomag nélkül, a Node WebSocketjével) mért elszigetelés, kontrollal; 18 rontás.
+⛔ Az építés lelete: a Chrome a sandbox-keretet KÜLÖN FOLYAMATBA teszi (a próba a keret saját munkamenetén éri el —
+`Target.setAutoAttach`); egy második, engedékeny CSP (`default-src *`) a `data:`/`blob:` képet is tiltja (a böngésző metszi a kettőt).
+⏭️ **A terepi próba** (a telefon böngészője). ✅ **A D123 sorrendje (PR1–3 → PR7 → PR6 → PR5 → PR4) végigment.**
 
-**Az állapot:** **1431 önpróba** (66 próba-fájl; a legutóbbi teljes soron 1431/1431 zöld — 2026-11-08, a D125 után) · 375 fájl / 7390,4 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1438 önpróba** (67 próba-fájl; a legutóbbi teljes soron 1438/1438 zöld — 2026-11-08, a D126 után) · 381 fájl / 7514,2 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

@@ -61,8 +61,10 @@ export function kartyaAdatta(k) {
     entitasId: k.azonosito,
     // ⭐⭐ D119 (①b): a koino-verzió kártyát a lap a GONDOLAT kártyájával rajzolja (a prototípusban nincs ilyen típus) — a
     // koinós többlet (`koinoVerzio.js`) a `koinoVerzio` mezőből ismeri fel, és teszi hozzá a jelet és a „Kód” fület.
-    entitasTipus: k.tipus === 'KoinoVerzio' ? 'Gondolat' : k.tipus,
+    // ⭐⭐ D126 (PR4): a nézet-kártyát is — a `koinoNezet.js` a `koinoNezet` jelből ismeri fel (🧩 jel, „Kód” fül, bekapcsolás).
+    entitasTipus: k.tipus === 'KoinoVerzio' || k.tipus === 'Nezet' ? 'Gondolat' : k.tipus,
     ...(k.koinoVerzio ? { koinoVerzio: k.koinoVerzio } : {}),
+    ...(k.tipus === 'Nezet' ? { koinoNezet: true } : {}),
 
     // ⭐ D101 ⑥: az ága alatti olvasatlan értesítések — a program számolja (a postafiók ős-láncaiból, `koino.js`).
     olvasatlanErtesitesek: Number.isInteger(k.olvasatlanErtesitesek) ? k.olvasatlanErtesitesek : 0,

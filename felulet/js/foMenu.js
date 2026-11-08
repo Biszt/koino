@@ -45,6 +45,8 @@ import { koltozesMegnyitasa } from './koinoKoltozes.js';
 import { koinoVerzioMegnyitasa } from './koinoVerzio.js';
 // ⭐⭐ D125: a program ezen a készüléken (a telepítés eredménye és a visszaút)
 import { telepitesMegnyitasa } from './koinoTelepites.js';
+// ⭐⭐ D126: a közösség feltöltött nézetei (a koinó nézetei és egy új nézet feltöltése)
+import { nezetekMegnyitasa, ujNezetMegnyitasa } from './koinoNezet.js';
 // ⭐⭐ D121, D122: a meghívás a lapon — a „Meghívóim” (a prototípus ablaka) és a profil-űrlap („eember beállítások”)
 import { meghivoimMegnyitasa, profilUrlapMegnyitasa } from './koinoMeghivas.js';
 
@@ -112,6 +114,8 @@ export class FoMenu {
       { ikon: '🚧', felirat: 'Világtérkép', akcio: () => fejlesztesreVarMegjelenitese('Világtérkép', MODAL_KONTENER) },
       { ikon: '🔷', felirat: 'Síkidom nézet', akcio: () => this._sikidomMegnyitasa() },
       { ikon: '↕️', felirat: 'Rendezés', akcio: () => this._rendezesMegnyitasa() },
+      // ⭐⭐ D126 (NZ5): a közösség feltöltött nézetei — a bekapcsoltak a pakli helyén nyílnak meg
+      { ikon: '🧩', felirat: 'Nézetek…', akcio: () => nezetekMegnyitasa() },
       // ⭐ A koinós többlet (5.6): a belépő tér — a koinók, amiket ismerek (a prototípusban a „koinó” mint fogalom nem volt)
       ...(this.terMegnyitasa ? [{ ikon: '🌐', felirat: 'A tér — a koinóim', akcio: () => this._terMegnyitasa() }] : []),
       // ⭐ D118 (⑥): a költözés egy gyermek-koinóba (a sikeres költözés után a tér nyitható — ott a családfa)
@@ -132,6 +136,8 @@ export class FoMenu {
       { ikon: '✏️', felirat: 'Új gondolat létrehozása', elvalaszto: true, akcio: () => this._ujGondolatModalMegnyitasa() },
       { ikon: '🏷️', felirat: 'Új kategória létrehozása', akcio: () => this._ujKategoriaModalMegnyitasa() },
       { ikon: '🧩', felirat: 'Új gondolat típus létrehozása', akcio: () => this._ujGondolatTipusModalMegnyitasa() },
+      // ⭐⭐ D126: egy nézet feltöltése (egy HTML-fájl a kártya szövegében — a kártya és a pont rá)
+      { ikon: '🧩', felirat: 'Új nézet…', akcio: () => ujNezetMegnyitasa() },
       // — 4) Fiók — ⭐⭐ D122: a „Meghívóim” a prototípus ablaka (a meghívott neve + a nyilatkozat; a 📋 egy sort másol: a telepítő
       // sort a meghívóval — a meghívott gépe a következő cserénél magától tag lesz), az „eember beállítások” a profil-űrlap.
       { ikon: '✉️', felirat: 'Meghívóim', elvalaszto: true, akcio: () => meghivoimMegnyitasa() },
