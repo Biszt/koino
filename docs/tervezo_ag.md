@@ -22,20 +22,21 @@ A szabályok:
    építőé. Amit csak mérés dönthet el, azt a terv kimondja („mérendő: …”), és az építő méri meg az átvizsgáláskor — a „előbb a mérés,
    aztán az építés” elve így is áll.
 2. **A tervező csak a saját fájljaiba ír:** ebbe, és az új tervdokumentumaiba (`docs/terv_<téma>.md`). A közös dokumentumokhoz nem
-   nyúl — azokat az építő vezeti át, amikor a tervet átveszi.
+   nyúl — azokat az építő vezeti át, amikor a tervet átveszi (a javításokat is: 4. szakasz).
 3. **A számozás külön:** a tervező javaslatai és Csaba rájuk hozott döntései **ET1, ET2, …** („előre-terv”) jelet kapnak. Amikor az
-   építő átveszi őket, a következő D-szám lesz belőlük, mellette az ET-jel (pl. „D130 (ET4)”). Így a két ág sosem ad két döntésnek
-   ugyanazt a számot.
+   építő átveszi őket, a következő D-szám lesz belőlük (a következő szabad: D127), mellette az ET-jel (pl. „D130 (ET4)”).
 4. **A commit csak a saját fájlra:** `git add <fájl>` és `git commit -F <üzenet> -- <fájl>` — a fájl megnevezése miatt a másik ág
    félkész (akár már hozzáadott) munkája sosem kerül bele.
 5. **A D-szintű döntés Csabáé** — mindkét ágon döntési kérdésként.
 6. **Az átadás:** egy téma végén a tervező kimondja, mi kész a tervben, mi a következő építési lépés, és mit kell előtte mérni; az
    építő ebből indítja az átvizsgálást (a megszokott módon, de már a kész tervvel).
+7. **A hivatkozás:** egy D-szám mellett mindig ott áll a döntés címe is (Csaba, 2026-11-08: *„írd le a »címét« is, mert nem akarom
+   kikeresni a dokumentumokban”*).
 
 ## 2. A kiinduló kép: a teljes P2P koino terve (2026-11-08)
 
 *Az állapot a D126 lezárásakor: 126 tervezési döntés (D1–D126), 249 elágazás, 92 mérés, ~1430 önpróba, a program 375 fájl /
-~7390 KB. A D126 (a feltöltött nézetek) a fork pillanatában megépült, a próbái zöldek, a teljes sor és a commit az építő ágon zárul.*
+~7390 KB. Csaba még aznapi helyreigazításai benne vannak (4. szakasz).*
 
 ### 2.1 Mi a koino, és mi a Fázis 2
 
@@ -43,139 +44,222 @@ A **Kollektív Intelligencia Online** egy közösségi tér, amit a tagjai irán
 fejlesztők, moderátorok és felelősök. A lényeg a közös döntés: gondolatokból javaslatok, javaslatokból egyezmények születnek,
 központi szereplő nélkül.
 
-A **Fázis 1** (`koino_1.1`, a koino.hu) a központi szerveres prototípus. Bebizonyította a döntés-gépezetet; ma befagyasztva fut. A
-**Fázis 2** a P2P koino (`C:\koino`): a készüléken fut, szerver nélkül, aláírt eseményekkel. A fordulat oka (D22): *„a kis családi
-közösségeknek is P2P-nek kell lenniük.”* A nyelv JavaScript maradt (D23), a régi adat nem költözik — új regisztráció lesz (D24).
-A koino önálló program (Node — D29), a böngésző csak a rajzolója (7. szabály).
+**A cél kezdettől az egyenrangú, skálázható P2P koino volt; a központi szerveres koino mindig csak lépcsőfok** (Csaba, 2026-11-08).
+A **Fázis 1** (`koino_1.1`, a koino.hu) ez a lépcsőfok: a döntés-gépezetet bizonyította, ma befagyasztva fut. A **Fázis 2** a P2P
+koino (`C:\koino`): a készüléken fut, szerver nélkül, aláírt eseményekkel. A **D22 (P2P az első kiadástól — nincs központi szerveres
+kiadás)** azt mondta ki, hogy köztes, szerveres kiadás nem lesz. ⚠️ A sokat idézett mondata (*„a kis családi közösségeknek is P2P-nek
+kell lenniük”*) nem a fordulat oka: a skálázhatóságról szólt — nincs külön, családi méretre szabott, nem skálázható működés.
 
-A koino **eszköz, nem közösség** (D13): bárki indíthat koinót — család, osztály, munkahely, párt. A szétválás (fork) normál
-üzemmód, nem vésznyílás; a siker mércéje az, hány koinó létezik. Ahol egy erkölcsi kérdésre nincs egyértelmű válasz, ott nem
-választunk, hanem kettéosztunk: legalább két koinó indul (az egyikben a teljes név és a település kötelező, a másik enyhébb). Nincs
-„családi” és „globális” koino: egy program van, ami nő — ezért a szerkezetének az első naptól a milliárdot kell bírnia.
+A nyelv JavaScript maradt (**D23 — a megvalósítás nyelve: JavaScript marad**), a régi adat nem költözik (**D24 — új regisztráció
+lesz**). A koino önálló program, a böngésző csak a rajzolója (**D29 — a futtatókörnyezet: a koino önálló program, nem böngésző**).
+
+A koino **eszköz, nem közösség** (**D13 — a koino eszköz, nem közösség; a fork normál üzemmód**): bárki indíthat koinót (család,
+osztály, munkahely, párt), és a szétválás normál működés, nem vészkijárat. Nincs „családi” és „globális” koino: egy program van, ami
+nő — ezért a szerkezetének az első naptól a milliárdot kell bírnia. **Egy koinóval indulunk** (Csaba, 2026-11-08).
 
 ### 2.2 A szabályok, amik minden döntést kötnek
 
-- **A platform-függetlenség nyolc szabálya:** a szállítás cserélhető; semmi nem múlik egyetlen címen; a bizalom sosem a csatornából
-  jön (egy kapu van: `esemenyMentese`); mindig van kézi út (fájlba ki, fájlból be); nincs folyamatos kapcsolat (postaláda, nem élő
-  továbbító); nulla függőség, és az utazó adat kicsi marad; a böngésző csak kliens; jogi védelemre nem tervezünk.
-- **A kilencedik, ami fölöttük áll:** a skálázhatóság szempontjából az első verziónak is késznek kell lennie. A szerkezet és az
-  illesztés milliárdos, a megvalósítás mögötte lehet egyszerű. A „végtelen” mércéje: egy készülék terhe nem a koinó méretétől függ,
-  hanem attól, amivel ő maga foglalkozik. A méret-korlát nem lehet szűkebb a koinó saját határánál; ahol ez drága, ott kimondott
-  kivétel áll (D106).
-- **A munka elvei:** az egyszerű és változtatható jobb a teljesnél (ami ritka és nem végzetes, azt felírjuk, de nem építjük); a
-  helyes sorrend fontosabb, mint hogy minél hamarabb látsszon valami; amire egy lépés épül, azt nem halasztjuk (az alappillér elve);
-  előbb a mérés, aztán az építés; egy próba csak akkor bizonyít, ha elrontva bukik.
+**A nyolc szabály** (a platform-függetlenség — D30–D32):
+1. A szállítás cserélhető.
+2. Semmi nem múlik egyetlen címen vagy szolgáltatáson.
+3. **A bizalom sosem a csatornából jön.** Egy eseményt soha nem fogadunk el azért, mert „megbízható helyről jött”. Minden esemény —
+   a saját műveletem, a társtól jött, egy fájlból behozott — ugyanazon az ellenőrzésen megy át (az aláírás, a koinó, a szerző lánca,
+   a bizonyíték). *Példa: ha egy rosszindulatú közvetítő azt adja tovább, hogy „Anna igennel szavazott”, de az esemény alatt nincs ott
+   Anna aláírása, a kapu eldobja — mindegy, kitől jött.*
+4. Mindig van kézi út (fájlba ki, fájlból be).
+5. Nincs folyamatos kapcsolat: postaláda van, nem élő továbbító.
+6. Nulla függőség, és az utazó adat kicsi marad.
+7. A böngésző csak kliens.
+8. Jogi védelemre nem tervezünk.
+
+**A kilencedik, ami fölöttük áll:** a skálázhatóság szempontjából az első verziónak is késznek kell lennie. A szerkezet és az
+illesztés milliárdos, a megvalósítás mögötte lehet egyszerű. A „végtelen” mércéje: egy készülék terhe nem a koinó méretétől függ,
+hanem attól, amivel ő maga foglalkozik.
+
+**D106 — a „végtelen” mércéje: a koinó saját határa, és a kimondott kivétel.** Minden rögzített szám a programban egy korlát. Kétféle
+van: a **teher-korlát** azt fogja meg, mennyit dolgozik egy készülék (pl. legfeljebb 3 kötés) — ez rendben van, ettől marad kicsi a
+teher. A **méret-korlát** viszont egy szám, ami a koinóval együtt nőne (pl. hány darabra osztjuk a koinó gyökerét). A szabály: egy
+méret-korlát se fogyjon el hamarabb, mint maga a koinó — a koinó saját határa az, ahány entitást egyáltalán meg tud különböztetni
+(~2^128). *Példa: a gyökér darabjainak száma 16 biten (65 536 darab) állt — egy nagy koinó kinőtte volna, ezért 144 bitre nőtt.* Ahol
+ez túl drága lenne, ott **kimondott kivétel** áll, számmal és indokkal: a pontösszegek a mai számábrázolással ~900 milliárd e-emberig
+pontosak (az emberiség ~87-szereséig) — ezért ott nem írtuk át az adatformátumot, hanem kimondtuk a határt.
+
+**A munka elvei:** az egyszerű és változtatható jobb a teljesnél (ami ritka és nem végzetes, azt felírjuk, de nem építjük); a helyes
+sorrend fontosabb, mint hogy minél hamarabb látsszon valami; amire egy lépés épül, azt nem halasztjuk; előbb a mérés, aztán az
+építés; egy próba csak akkor bizonyít, ha elrontva bukik.
 
 ### 2.3 A döntés gépezete
 
 - **A gondolat** a platform alapegysége. A **kategóriák** és a **gondolattípusok** rendszerezik — ezek is önálló entitások, mert róluk
   is a közösség dönt.
 - **A tudatpont:** mindenkinek ugyanannyi (10 000). Nem elkölthető, csak szétosztható és bármikor átrendezhető. Prioritást fejez ki,
-  nem szavazaterőt. Egyben **tárolási vállalás** is (D3, D26): aki pontot tesz egy entitásra, az a készülékén tárolja. Amire senki
-  nem tesz pontot, az eltűnik — a felejtés a rendszer alapállapota (D14).
-- **A javaslat:** csak az tehet, akinek pontja van az érintett gondolaton. A **szerkesztési** javaslat módosít, áthelyez, töröl vagy
-  egyesít; ha több entitást érint, érintettenként külön dől el, és mindegyiknek teljesülnie kell (a töredék-modell). Az **általános**
-  javaslat a közösség álláspontja: az egyezménye élő, csatlakozni, tiltakozni és ütközést jelölni lehet hozzá (D27). Az alkotmány, a
-  2/3-os rendszer és a program-frissítés mint gépezet elvetve (D64–D66): *„mind sok új élt hoznak létre.”*
-- **A szavazás:** aki pontot tett az érintettre, egyenlő súllyal szavaz. ⚠️ A D2 célja — titkos, de ellenőrizhető szavazás, kiváltságos
-  adatkezelő nélkül — még nincs megépítve.
-- **A küszöbök:** a tulajdonosok érték javaslatainak mediánja (D4), a felelősség-elvvel: amit a tulajdonosok nem védenek be, azt a
-  rendszer sem védi helyettük. A **bizonyossági mutató** szerint a döntés a minimum és a maximum döntési idő között zárul — annál
-  hamarabb, minél egyértelműbb az eredmény és nagyobb a részvétel.
-- **Az egyezmény** nem kihirdetés, hanem **számítás** (D17): ugyanabból az eseményhalmazból mindenki ugyanazt kapja. Ugyanolyan
-  entitás, mint a gondolat (D85). A ténye és a hatálya külön áll (D8), és a tény is csak addig él, amíg valaki tartja (D14).
+  nem szavazaterőt. Egyben tárolási vállalás is (**D3 — a tudatpont tárolási vállalás is**; **D26 — az entitás mérete**): aki pontot
+  tesz egy entitásra, az a készülékén tárolja. Amire senki nem tesz pontot, az eltűnik (**D14 — a tartós mag = a csalás-elleni
+  csontváz**: a felejtés a rendszer alapállapota).
+- **A szerkesztési javaslat:** csak az tehet, akinek pontja van az érintett gondolaton. Módosít, áthelyez, töröl vagy egyesít; ha több
+  entitást érint, érintettenként külön dől el, és mindnek teljesülnie kell (**D85 — a javaslat és az egyezmény ugyanolyan entitás,
+  mint a gondolat**).
+- **Az általános javaslat** a közösség álláspontja (**D27 — szerkesztési és általános javaslat/egyezmény**). ⏸️ **Nincs rendesen
+  megtervezve** — napirenden (3. szakasz, ET-1). Az alkotmány, a 2/3-os rendszer és a program-frissítés mint gépezet elvetve (**D64 —
+  az alkotmány**; **D66 — a megújulás = költözés, nem frissítés**: *„mind sok új élt hoznak létre”*).
+- **A szavazás:** aki pontot tett az érintettre, egyenlő súllyal szavaz. A titkos, de ellenőrizhető szavazás (**D2 — szavazás: titkos,
+  de ellenőrizhető, kiváltságos adatkezelő nélkül**) cél maradt, még nincs megépítve — napirenden (ET-2).
+- **A küszöbök:** a tulajdonosok érték javaslatainak mediánja (**D4 — küszöb-kormányzás: medián + felelősség-elv**). A bizonyossági
+  mutató szerint a döntés a minimum és a maximum döntési idő között zárul — annál hamarabb, minél egyértelműbb az eredmény és nagyobb a
+  részvétel.
+- **Az egyezmény** (**D17 — a konszenzus hatóköre és biztonsági alapja**) nem kihirdetés, hanem számítás. A prototípusban a szerver
+  egy időzített feladattal lezárta a javaslatot, és beírta az adatbázisba, hogy „elfogadva” — valaki kimondta. A P2P koinóban nincs,
+  aki kimondja: minden készülék maga számolja ki a nála lévő eseményekből (a javaslat, a szavazatok, a pontok, a küszöb-javaslatok, az
+  idő), hogy a feltételek teljesültek-e. *Példa: Anna és Béla gépén ugyanaz a javaslat és ugyanaz a 12 szavazat van — mindkét gép
+  ugyanazt számolja („elfogadva, kedd 18:00-kor”), anélkül, hogy egymást kérdeznék. Ha Béla gépére egy szavazat még nem jutott el, az
+  ő gépe addig mást mutathat — ezért hosszúak a döntési idők, és ezért mondja ki a program, amit nem lát.* Az egyezmény ténye és
+  hatálya külön áll (**D8 — egyezmény: tény ↔ hatály szétválasztása**), és a tény is csak addig él, amíg valaki tartja (D14).
 
 ### 2.4 Az identitás
 
-- **A kulcs maga a személy** (Ed25519 — D15): hitelesít, nem titkol; a helyreállítás több tanúból áll. Személyes adat soha nem kerül
-  a láncra (D6); a név a profilban sózott lenyomattal szerepel, a darabja törölhető (D88).
-- **A két lépcső (D56):** az **1. lépcső** egy meghívó — ettől tag vagy, és minden mehet: gondolat, tudatpont, javaslat, szavazat. A
-  **2. lépcső** három tanúsítás felhatalmazott tanúsítóktól — ez a pénztárca kapuja (D11). A felhatalmazás megbízás, nem pontszám
-  (D60). Az ellenőrzés a gyökérig megy, és mérten logaritmikus (D59). Ebben a verzióban a papír nélküli emberrel nem számolunk (D58).
-- **A rendszer bejelentő, nem bíró (D19):** ami nem ellenőrizhető, azt kimondja. A kontraszt-jelzés („még nem értünk össze”) tényt
-  mutat, nem ítéletet.
-- **A szeletelt világban** a tagság a tagnál utazik a bizonyítékával (D93), a 2. lépcső szúrópróbával igazolható (D94), a tagsági lánc
-  korlátja 256 (D113).
-- **A belépés a lapon (D121–D122):** a meghívó egyetlen bemásolt sor (a telepítő és a meghívó együtt); a meghívott gépe az első
-  cserénél bizonyítja, hogy nála a titok, és a meghívó gépe magától meghívja.
+- **A kulcs maga a személy** (**D15 — a kulcs hitelesít, nem titkol; a helyreállítás több tanúból áll**). Személyes adat nem kerül a
+  láncra (**D6 — személyes adat SOHA a láncra**); a név a profilban sózott lenyomattal szerepel, törölhető (**D88 — a név a
+  profilban**).
+  - ✅ **Kész:** a kulcs kimentése fájlba és visszatöltése (`mentes`, `visszatolt` — csak parancssorból; a lapon még nincs).
+  - ❌ **Nincs megépítve:** a több-tanús helyreállítás (ha a kulcs és a mentés is elvész). Ma ilyenkor az azonosság elveszett.
+  - ⚠️ **Több készülék:** a kulcs átvihető egy másik készülékre, de ha két készülék egymástól függetlenül ír alá, a saját lánc
+    kettéágazik (**D82 — a kettős lánc: nem büntet**): mindenki ugyanazt az ágat számolja érvényesnek, a másik ág eseményei nem
+    számítanak. Egy személy több készülékének nincs még kidolgozott útja — napirenden (ET-3).
+- **A két lépcső** (**D56 — a két lépcsős beléptetés**): az 1. lépcső egy meghívó — ettől tag vagy, és minden mehet (gondolat, pont,
+  javaslat, szavazat). A 2. lépcső három tanúsítás felhatalmazott tanúsítóktól — ez a pénztárca kapuja (**D11 — Sybil-pénz ütemezési
+  szabály**: pénz csak bizonyított identitás után). A felhatalmazás megbízás, nem pontszám (**D60**). Az ellenőrzés a gyökérig megy, és
+  mérten logaritmikus (**D59 — az ellenőrzés a gyökérig megy, mert mérve olcsó**). A papír nélküli emberrel ebben a verzióban nem
+  számolunk (**D58**). ⏸️ Csaba (2026-11-08): *„ezen még rágódjunk egy kicsit”* — a hitelesség számszerűsítése és az automatikus
+  pénztárca napirenden (ET-4).
+- **A rendszer bejelentő, nem bíró** (**D19**): ami nem ellenőrizhető, azt kimondja. A „még nem értünk össze” jelzés tényt mutat, nem
+  ítéletet (**D49 — a minimum kemény szabály, a jelzés tényt mutat**; **D55 — a nyíltság**).
+- **A bemutatkozás** (**D62 — a bemutatkozás lánc-esemény, és csak kölcsönösen számít**): akik találkoztak, aláírják egymásnak; csak
+  a kölcsönös számít.
+- **A szeletelt világban** a tagság a tagnál utazik a bizonyítékával (**D93 — az identitás a szeletelt világban**), a 2. lépcső
+  szúrópróbával igazolható (**D94**), a tagsági lánc korlátja 256 (**D113**).
+- **A belépés a lapon** (**D121 — a meghívás a lapon**; **D122 — a meghívó kulcs: „egy bemásolás, és a következő csere után bent
+  vagy”**).
 
 ### 2.5 Az adat: események, tárak, számítás
 
-- **Minden művelet aláírt esemény,** kanonikus alakban, a szerző láncán (sorszám, előző, lánc-gyökér — D63). Módosítás és törlés
-  nincs, csak hozzáfűzés. Minden esemény ugyanazon az egy kapun megy be — a sajátom, a társé, a fájlból hozott is.
-- **A tár:** egy hozzáfűzhető adatfájl és egy mutató (D73), mögötte az **író** (D70): koinónként és készülékenként egy folyamat fűz.
-- **A szelet** (D72) egy entitás eseményei — ez a tárolás és a csere egysége. A szöveg, a kép és a kód külön, tartalom-címzett
-  darab (a neve a lenyomata).
-- **Két tár (D75):** a **tartós** az, amit vállalok (amire pontot tettem, a saját azonosságom, a koinó születése); az **átmeneti**
-  az, amit csak láttam (eldobható, ≤ 20 MB). Ami nincs nálam, azt **kérésre** hozom el (D76).
-- **Az összegző Merkle-fa** (D78) teszi ellenőrizhetővé, amit egy készülék nem tud egészében látni: a kiosztás-listát szúrópróbával
-  (D79), az ellentmondást bizonyítékkal (D80–D82 — a kettős lánc nem büntet, hanem a két ágat egy helyre hozza).
-- **Az állapot nem tárolt, hanem számított** (`koinoKepe`). A **mag** (D123) az a 17 fájl, ami a koinó képét és a kaput számolja: ha
-  ez változik, más lesz a számítás — ez költözést kíván.
+- **Minden művelet aláírt esemény**, a szerző láncán (**D63 — a lánc-gyökér: gördülő elköteleződés a saját láncra**). Módosítás és
+  törlés nincs, csak hozzáfűzés. Minden esemény ugyanazon az egy kapun megy be (3. szabály).
+- **A tár** (**D73 — az entitásonkénti tár alakja**) és mögötte **egy író** (**D70 — koinónként és készülékenként egy folyamat fűz a
+  tárhoz**).
+- **A szelet** (**D72 — a szeletelés: ki mit tart, és a szöveg külön darab**): egy entitás eseményei — a tárolás és a csere egysége.
+- **Két tár** (**D75 — a két tár: tartós és átmeneti**): a tartós az, amit vállalok, az átmeneti az, amit csak láttam (eldobható).
+  Ami nincs nálam, azt kérésre hozom el (**D76 — a kérelmezés**).
+- **Az összegző Merkle-fa** (**D78**) teszi ellenőrizhetővé, amit egy készülék nem lát egészében (**D79 — a kiosztás-lista
+  szúrópróbával**; **D80–D82 — az ellentmondás bizonyítéka, a kettős lánc**).
+- **Az állapot nem tárolt, hanem számított.** A **mag** (**D123 — a program rétegei: „a számítás köt, a többi szabad”**) az a 17 fájl,
+  ami a koinó képét és a kaput számolja; ha ez változik, költözés kell.
 
 ### 2.6 A hálózat
 
-- **UDP mindenhol** (D67, D69): állandó UDP-kapu, kopogás a fal órájához igazítva (a két rés középen találkozik), postaláda (D34). A
-  csere titkosított (X25519 + AES-256-GCM); a koinó alapból **zárt** — a tartalmát csak tag kapja (D89).
-- **A megtalálás:** a meghívó címei, a helyi felfedezés; a tartós kapcsolat a **kötés** (K = 3, a neve a tábla-kulcs, nem a cím —
-  D71) és a **hirdetőtábla** (a DHT-n, BEP 44 — ha valaki címet vált); a tartalom szerint a **raj** és a **címjegyzék** (BEP 5, vakított
-  témák — D91), két NAT között a **függő kérelem** (D92).
-- **A csere** szeletenként, két szinten: előbb a szeletek lenyomatai, aztán az eltérők tartományai (D74); a társ-emlékezettel csak az
-  azóta változott (D98); újdonság nélkül fél körönként egyszer (D99). A **szigorú (b)** szerint egy készülék csak a vállalt szeleteiben
-  vesz részt (D95, D97), és 24 óráig még tartja, amiről levette a pontját (D104).
-- **A kérelem** (D87, D92): fejlécek, szúrópróba, szelet, törzs. A **kiszolgálási keret** (D109) óránként korlátozza, mennyit adok
-  másnak; a **törzs-határ** (D120) szerint a nem vállalt nagy fájl csak kérésre jön; a fájl több forrásból is jöhet (D114).
-- **A kereső-réteg** (D105, D107): szavanként két kulcs a DHT-n (az egész szó és az első négy betű), csak tag szerzők, osztódó fiók,
-  aláírt megújítás. A **felderítés** (D108, D112) egy ág egyszeri pillanatképe.
-- **A protokoll nyelvváltozata** (D124): minden munka elején mindkét fél kimondja, mit beszél; a régit egy kimondott dátumig fordítja.
+- **UDP mindenhol** (**D67 — a UDP marad a fő út**; **D69 — UDP mindenhol**), kopogás a fal órájához igazítva, postaláda (**D34**). A
+  csere titkosított, a koinó alapból zárt (**D89 — ki olvashatja egy koinó tartalmát**).
+- **A megtalálás:** a kötés (**D71 — a kopogás-kör a társat keresi, nem a címét**), a hirdetőtábla a DHT-n, a raj és a címjegyzék
+  (**D91 — a címjegyzék: a fa és a raj**), a függő kérelem (**D92 — a kérelmezés útja és alakja**).
+- **A csere** szeletenként (**D74 — a tartomány-lenyomat**), a társ-emlékezettel (**D98**), újdonság nélkül fél körönként egyszer
+  (**D99**), csak a vállalt szeletekben (**D95 — a szigorú (b) alakja**; **D97 — a közös halmaz és a raj a körben**), 24 órás
+  kifutással (**D104 — a kifutás**).
+- **A kérés és a korlátok:** a kérelem (**D92**), a kiszolgálási keret (**D109**), a törzs-határ (**D120 — a nagy törzs elemenként,
+  kérésre**), a több forrás (**D114**). ⏸️ Csaba (2026-11-08): **részletes „Hálózati beállítások” menüpont** kell — napirenden (ET-5).
+- **A keresés** (**D105 — a kereső-réteg alakja**; **D107**) és a **felderítés** (**D108**, **D112**).
+- **A protokoll nyelvváltozata** (**D124 — „minden munka elején kimondva”**).
 
 ### 2.7 A felület
 
-A lap a böngészőben fut, a helyi kapun át: csak a hurok-címen, öt őrrel (jelszó, Origin, Host, útvonal, JSON-írás). A prototípus
-kártyái bájtra átjöttek; a koinós többlet köréjük épül. Ott van a pakli (D100), a modálok és a bejáró (D101–D102), az alsó sáv, az
-értesítés a készülék saját értesítőjén (D103), a belépő tér (a koinóid — D25), a csatlakozás, a társak, a Struktúra, a Síkidom és a
-Keresés. A parancssor mindent tud, amit a lap — a rajzot kivéve (4. szabály).
+A lap a böngészőben fut, a helyi kapun át, öt őrrel (jelszó, Origin, Host, útvonal, JSON-írás). A prototípus kártyái bájtra
+átjöttek; a koinós többlet köréjük épül: a pakli (**D100 — a ház**), a modálok és a bejáró (**D101**, **D102**), az alsó sáv, az
+értesítés a készülék saját értesítőjén (**D103**), a belépő tér (**D25 — a belépő tér: a koinók családfája**), a csatlakozás, a
+társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a lap — a rajzot kivéve (4. szabály).
 
 ### 2.8 A koinók családja és a program megújulása
 
-- **A megújulás költözés, nem frissítés** (D66): a régi koinót nem írjuk felül; aki akar, átköltözik az újba.
-- **A költözés** (D118): a múlt közös, a jelenlét személyes. A gyermek a szülőre épül, a vágásig átírás nélkül, de súlyt csak a
-  beköltözők hoznak. A koinó neve a születése lenyomata, a szabályai a születésében állnak.
-- **A koino-verzió kártya** (D119): egy gyermek-koinó születése, a kártyáján a teljes program kódja; a közös gyökerű koinókat egy
-  **családi őrjárat** cseréli.
-- **A program rétegei** (D123): a koinó a számítás **magját** nevezi meg — ez köt; a protokoll, a helyi viselkedés és a felület szabadon
-  változhat. Erre épült a protokoll nyelvváltozata (D124), a **telepítés a kártyáról** (D125: a régi mellé, a futó program cserél, 30
-  mp után visszafordít) és a **közösség feltöltött nézetei** (D126: a kód a kártya szövegében, csak a saját koinójában, négy réteg
-  mögött elszigetelve; olvas és „megnyit”, írni nem tud).
-- **A kormányzás három szintje** (`kormanyzas.md`): a gondolat és a program ugyanazzal a gépezettel dől el (önalkalmazás — nincs
-  végtelen torony); a koinók sokasága felett nincs kormányzat, mert nincs mit eldönteni — egy koinó léte tény. A forráskód-kormányzás
-  öt lépcsőjéből a javaslat, a döntés és a bevezetés (a költözés) áll; az **elismerés** (a hozzáértés látható, de nem ad jogot) és a
-  **sürgősségi út** (N9) még nincs.
+- **D66 — a megújulás = költözés, nem frissítés:** a régit nem írjuk felül; aki akar, átköltözik.
+- **D118 — a költözés alakja: a múlt közös, a jelenlét személyes.** A koinó neve a születése lenyomata, a szabályai a születésben
+  állnak; másik szabály = másik koinó.
+- **D119 — a koino-verzió kártya és a családi őrjárat:** egy gyermek-koinó születése, a kártyáján a teljes programmal.
+- **D123 — a program rétegei**, és ami rá épült: **D124 (a protokoll nyelvváltozata)**, **D125 (telepítés a kártyáról)**, **D126 (a
+  közösség feltöltött nézetei)**.
+- **A kormányzás három szintje** (`kormanyzas.md`, **D12 — a három szint**): a gondolat és a program ugyanazzal a gépezettel dől el; a
+  koinók sokasága felett nincs kormányzat. A forráskód-kormányzás öt lépcsőjéből három áll (a javaslat, a döntés, a bevezetés — a
+  költözés). Kettő nincs (**N9 — elismerés-entitás + kinevezési rendszer**):
+  - **az elismerés:** egy új entitás, amit az e-emberek egymásra „aggatnak”, az érintett beleegyezésével (pl. *„ért az adatbázisokhoz
+    — 14-en ismerték el”*). Tájékoztat, nem jogosít: a szavazat egyenlő marad, de látszik, ki ért valamihez — így egy kód-javaslatnál
+    nem kell se vakon szavazni, se szakértőkre bízni;
+  - **a sürgősségi út:** ha baj van (pl. egy súlyos hiba a programban), nincs idő a hosszú döntésre. Erre a közösség kinevezett
+    „őröket” választhat, időkorlátos megbízással, nyilvános lépésekkel és utólagos közösségi jóváhagyással. Ugyanez a minta lehet a
+    kulcs-helyreállító bizottság is (D15) — de mindig **tanú, nem hatóság**: a szava önmagában soha nem elég.
+  - Napirenden (ET-6).
 
 ### 2.9 Ami még nincs: a pénz és a konszenzus
 
-- **A pénz** (D10, D11, D16, D20 és Csaba első konkrét terve, 2026-09-02): a pénzteremtés szabálya közösségi, de lassan és drágán
-  módosítható; **egyenlő osztalék**, feltétel nélkül, „csak úgy, a létezéséért”; az induló 10 koinos egy év alatt (a mennyiséget a
-  létszámhoz köti, később nem módosítható), és évi 10% az összes pénzre, mindenkinek egyenlően szétosztva (2/3-dal módosítható);
-  belső piac, ahol az ár a keresletből derül ki; legalább 3 e-ember hozza létre. ⚠️ Ez a terv javaslat, nem lezárt döntés
-  (csak a feltétel nélküliség eldöntött) — és a 2/3-os módosítása ütközik a D66-tal, ami a 2/3-os rendszert elvetette: ez tervezendő. Lassú, nyilvános és megtámadható: a nagyobb átutalás
-  késleltetve, a várakozási ablakban megállítható (D16). Örökölhető — a tudatpont és az azonosság nem (D20). ⛔ **Csak az identitás
-  éles bizonyítása után indulhat** (D11). A kiköltözésnél a pénz kivezetése is ide tartozik.
-- **A konszenzus** (D7, D17): globális egyetértés csak két dologhoz kell — az azonosság egyszeriségéhez és a pénzhez; minden más saját
-  lánc-következetesség és determinisztikus számítás. Személy-alapú (egy ember, egy érvényesítő hang), nem munka- és nem vagyon-alapú.
-  A köteg-gyökér elfogadása és az érvényesítők befolyásolhatatlan kiválasztása **az utolsó valódi kutatási kérdés** (N8).
-- **A titkos szavazás** (D2) — cél, ma még nem képesség.
-- **Az egyesítés és a különválás** Csaba modellje szerint (`gepezet.md` 5.) — terv, nyitott kérdésekkel.
+- **A pénz** (**D10 — alkotmányos kibocsátás + egyenlő osztalék**; **D11 — Sybil-pénz ütemezési szabály**; **D16 — a pénz lassú,
+  nyilvános és megtámadható**; **D20 — öröklés: a pénz igen, a tudatpont és az azonosság soha**; és Csaba első konkrét terve,
+  2026-09-02): egyenlő osztalék, feltétel nélkül, „a létezéséért”; az induló 10 koinos egy év alatt; évi 10% az összes pénzre,
+  mindenkinek egyenlően; belső piac, ahol az ár a keresletből derül ki. Csak az identitás éles bizonyítása után indulhat.
+  - ⚠️ **Az ellentmondás:** a 2026-09-02-i pénz-terv szerint a paramétereit a közösség később **2/3-os többséggel** írhatná át. Tíz
+    nappal később a **D66** kimondta: *„nem kell 2/3-adot előidéző rendszer”* — vagyis 2/3-os szavazás nincs a koinóban. A pénz-terv
+    tehát egy olyan eszközre hivatkozik, amit azóta elvetettünk: el kell dönteni, hogyan módosulnak a pénz paraméterei. A legközelebbi
+    a D118 mintája: a paraméterek a koinó születésében állnak, és a változás egy gyermek-koinó, ahová költözni lehet.
+  - ⏸️ Csaba (2026-11-08): a pénz a koinó-családban — egy másik változatban **100 000 koinos, egy év alatt**; és kérdés, hogy a 10% a
+    már kiosztottat szorozza, vagy a még csak járót is. Napirenden (ET-7).
+- **A konszenzus és a köteg-gyökér** (**D7 — személy-alapú konszenzus**; **D17**; **D21 — a tartós mag replikációja**). Ma a koino
+  konszenzus nélkül működik: minden, ami ma van, a szerzők saját láncából és determinisztikus számításból jön. Két dologhoz kell majd
+  közös egyetértés: **az azonosság egyszeriségéhez** (ki tag) **és a pénzhez** (ki mennyit költött el — különben ugyanazt a pénzt két
+  különböző társnak is el lehetne költeni). A D21 terve: ezeket egy Merkle-fába gyűjtjük, és naponta egy köteget zárunk — a köteg
+  egyetlen 32 bájtos csúcs-száma a **köteg-gyökér**. Mindenkinek ugyanazt a gyökeret kell elfogadnia, különben két „valóság” lenne.
+  **A kutatási kérdés: ki mondja ki, melyik gyökér az érvényes, szerver nélkül?** Bányászat (számítási erő) és letét (vagyon) kizárva
+  (D7). A terv: a hitelesített e-emberek egy véletlenül kiválasztott köre írja alá — de a kiválasztásnak megjósolhatatlannak és
+  befolyásolhatatlannak kell lennie (különben a támadó kivárja, hogy az ő emberei kerüljenek sorra), működnie kell, ha sokan nincsenek
+  online, és el kell dönteni, mi történik, ha két gyökér is aláírást kap. A biztonsága pontosan annyi, amennyi az identitás-rétegé
+  (D17). Napirenden (ET-8).
+- **A titkos szavazás** (D2), az **egyesítés és a különválás** Csaba modellje szerint (`gepezet.md` 5.).
 
-### 2.10 A nyitott ágak (2026-11-08)
+### 2.10 A nyitott ágak (az építőnél, 2026-11-08)
 
-- **A terepen próbálandó:** a telefon cseréje a kártyáról (D125 — a futó koinó leállítása, a háttérben indulás), a feltöltött nézet a
-  telefon böngészőjében (D126), a két mobil közötti rés (🅱️), az őrjárat egyszeri megállása (2026-11-05 — a processzoridőt mérjük).
-- **Csabánál:** a koinó többi BEP 5 útja (BP1–BP4, átvizsgálva); az IPv6 (kettős kapu); a régebbi kérdések — a véletlen séta, az olcsóbb
-  tábla-kulcs, a fájl-bájtok kézi útja, a hívás ötlete.
-- **Még nem tervezett részletesen:** gyökér-koinó a lapról (ma csak parancsból); a családi őrjárat terepi leletei; a meghívás mellékes
-  megfigyelései.
+- **A terepen próbálandó:** a telefon cseréje a kártyáról (D125), a feltöltött nézet a telefon böngészőjében (D126), a két mobil
+  közötti rés, az őrjárat egyszeri megállása.
+- **Csabánál:** a koinó többi BEP 5 útja (BP1–BP4), az IPv6, a véletlen séta, az olcsóbb tábla-kulcs, a fájl-bájtok kézi útja, a hívás
+  ötlete.
+- **Még nem tervezett:** gyökér-koinó a lapról; a családi őrjárat terepi leletei.
 
-## 3. A tervező ág naplója
+## 3. A napirend — a megbeszélendő témák (ET)
+
+*Csaba 2026-11-08-i kérései és kérdései. A sorrend Csabáé.*
+
+- **ET-1 — Az általános javaslat és egyezmény** (D27): *„ez még nincsen rendessen megtervezve, ugye? ezt a tervről beszéljünk majd.”*
+- **ET-2 — A szavazás, és a titkos, de ellenőrizhető szavazás** (D2): *„ezt is beszéljük át.”*
+- **ET-3 — A kulcs: több készülék és a helyreállítás** (D15, D82): *„ha valaki elhagyja? több készülékről is tudja használni a
+  kulcsát?”*
+- **ET-4 — A hitelesség mértéke és a pénztárca:** *„ha a találkozási rendszer elkészül, és kitalálunk egy matematikát arra, hogy valaki
+  mennyire hitelesített, és ehhez kötjük automatikusan a kriptotárcát, az milyen lenne? tudjuk számszerűsíteni az e-emberek
+  kapcsolati tengerben elfoglalt helyét, bizonyosság szempontjából? Nem volna egy rossz következmény, ha szükségesek lennének a
+  bemutatkozó bulik.”* Kapcsolódik: D18/3 (folytonos igazolás — Csaba ötlete, 2026-08-25), D44 (a tanúsítási keret), D49 (a jelzés
+  tájékoztat, nem jogosít), D50/D62 (a bemutatkozások), D55, és a méréssel kizárt irányok (`fejlesztesi_terv_fazis2.md`, a D49 után).
+- **ET-5 — A hálózati beállítások menüpont:** *„részletes, hálózati beállítások menüpontot is terveznünk kell majd.”*
+- **ET-6 — Az elismerés és a sürgősségi út** (N9).
+- **ET-7 — A pénz a koinó-családban** (D10, D16, N10): 100 000 koinos egy év alatt; a 10% alapja (a kiosztott, vagy a járandóság is);
+  a paraméterek módosítása a D66 után.
+- **ET-8 — A köteg-gyökér és a konszenzus** (D17, D21, N8).
+
+## 4. Átvezetendő javítások a közös dokumentumokba (az építőnek)
+
+Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára — a hibás állítások a közös dokumentumokból jöttek:
+
+1. **A D22 oka** (`CLAUDE.md` „A projekt / Két tár” része, `fejlesztesi_terv_fazis2.md` D22): *„nem ez az oka. ez a mondat, akkor
+   született, amikor a skálázhatóság prioritásáról beszéltük, hogy nincs külön családi méretre szabott működés, ami nem skálázható. A
+   központi szerveres koino, mindig is csak lépcsőfok volt. az egyenrangú skálázható p2p volt a cél.”*
+2. **A siker mércéje** (`fejlesztesi_terv_fazis2.md` D13: *„Siker-mérce változik: … hány koino létezik”*): *„én nem állítok ilyet.”*
+3. **A két koinó** (`fejlesztesi_terv_fazis2.md`, „🌓 KÉT KOINO INDUL, NEM EGY”, 2026-09-02): *„ilyet sem mondtam. eggyel indulunk.”* —
+   a dokumentumban 2026-09-02-ről ez az idézet áll: *„Eldöntöttem, hogy legalább 2 koinót fogok indítani.”*; a mai döntés: **egy
+   koinóval indulunk**.
+
+## 5. A tervező ág naplója
 
 - **2026-11-08** — a tervező ág indul (Csaba forkja a D126 építése közben). A kiinduló kép: a 2. szakasz.
+- **2026-11-08** — Csaba átnézte a kiinduló képet: három helyreigazítás (4. szakasz), magyarázatok a nem érthető pontokhoz (a 3.
+  szabály, D106, D17, N9, a 2/3 és a D66, a köteg-gyökér — a 2. szakaszba beírva), és a napirend (3. szakasz, ET-1 – ET-8). A D-számok
+  mellé a címük került.
