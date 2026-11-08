@@ -23,8 +23,9 @@ A szabályok:
    aztán az építés” elve így is áll.
 2. **A tervező csak a saját fájljaiba ír:** ebbe, és az új tervdokumentumaiba (`docs/terv_<téma>.md`). A közös dokumentumokhoz nem
    nyúl — azokat az építő vezeti át, amikor a tervet átveszi (a javításokat is: 4. szakasz).
-3. **A számozás külön:** a tervező javaslatai és Csaba rájuk hozott döntései **ET1, ET2, …** („előre-terv”) jelet kapnak. Amikor az
-   építő átveszi őket, a következő D-szám lesz belőlük (a következő szabad: D127), mellette az ET-jel (pl. „D130 (ET4)”).
+3. **A számozás külön:** a tervező témái **ET-1, ET-2, …** („előre-terv”) jelet kapnak, egy témán belül Csaba döntései **ET-4/1,
+   ET-4/2, …** jelet. Amikor az építő átveszi őket, a következő D-szám lesz belőlük (a következő szabad: D127), mellette az ET-jel (pl.
+   „D130 (ET-4/1)”).
 4. **A commit csak a saját fájlra:** `git add <fájl>` és `git commit -F <üzenet> -- <fájl>` — a fájl megnevezése miatt a másik ág
    félkész (akár már hozzáadott) munkája sosem kerül bele.
 5. **A D-szintű döntés Csabáé** — mindkét ágon döntési kérdésként.
@@ -129,8 +130,9 @@ sorrend fontosabb, mint hogy minél hamarabb látsszon valami; amire egy lépés
   javaslat, szavazat). A 2. lépcső három tanúsítás felhatalmazott tanúsítóktól — ez a pénztárca kapuja (**D11 — Sybil-pénz ütemezési
   szabály**: pénz csak bizonyított identitás után). A felhatalmazás megbízás, nem pontszám (**D60**). Az ellenőrzés a gyökérig megy, és
   mérten logaritmikus (**D59 — az ellenőrzés a gyökérig megy, mert mérve olcsó**). A papír nélküli emberrel ebben a verzióban nem
-  számolunk (**D58**). ⏸️ Csaba (2026-11-08): *„ezen még rágódjunk egy kicsit”* — a hitelesség számszerűsítése és az automatikus
-  pénztárca napirenden (ET-4).
+  számolunk (**D58**). ✅ **ET-4/1** (Csaba, 2026-11-08): az automatikus, számított 2. lépcső elvetve — **marad a felhatalmazásos
+  rendszer**. ⏸️ Nyitott (ET-4/2): a tanúsítók köre „a felhatalmazottak felső harmada”, vagy a mai **D57 — a küszöb abszolút szám, nem
+  rangsor** (lásd a 3. szakaszt).
 - **A rendszer bejelentő, nem bíró** (**D19**): ami nem ellenőrizhető, azt kimondja. A „még nem értünk össze” jelzés tényt mutat, nem
   ítéletet (**D49 — a minimum kemény szabály, a jelzés tényt mutat**; **D55 — a nyíltság**).
 - **A bemutatkozás** (**D62 — a bemutatkozás lánc-esemény, és csak kölcsönösen számít**): akik találkoztak, aláírják egymásnak; csak
@@ -192,7 +194,8 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
   - **a sürgősségi út:** ha baj van (pl. egy súlyos hiba a programban), nincs idő a hosszú döntésre. Erre a közösség kinevezett
     „őröket” választhat, időkorlátos megbízással, nyilvános lépésekkel és utólagos közösségi jóváhagyással. Ugyanez a minta lehet a
     kulcs-helyreállító bizottság is (D15) — de mindig **tanú, nem hatóság**: a szava önmagában soha nem elég.
-  - Napirenden (ET-6).
+  - ✅ **ET-6/1** (Csaba, 2026-11-08): **az elismerés egyelőre nem kell** — *„még nem biztos, hogy szükséges ez.”* A sürgősségi út
+    nincs elvetve; a kulcs-helyreállításhoz bizottság nélküli megoldást keresünk (ET-3/1).
 
 ### 2.9 Ami még nincs: a pénz és a konszenzus
 
@@ -232,15 +235,32 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
 
 - **ET-1 — Az általános javaslat és egyezmény** (D27): *„ez még nincsen rendessen megtervezve, ugye? ezt a tervről beszéljünk majd.”*
 - **ET-2 — A szavazás, és a titkos, de ellenőrizhető szavazás** (D2): *„ezt is beszéljük át.”*
-- **ET-3 — A kulcs: több készülék és a helyreállítás** (D15, D82): *„ha valaki elhagyja? több készülékről is tudja használni a
-  kulcsát?”*
-- **ET-4 — A hitelesség mértéke és a pénztárca:** *„ha a találkozási rendszer elkészül, és kitalálunk egy matematikát arra, hogy valaki
+- **ET-3 — A kulcs: több készülék és a helyreállítás** (D15 — a kulcs hitelesít, nem titkol; D82 — a kettős lánc: nem büntet): *„ha
+  valaki elhagyja? több készülékről is tudja használni a kulcsát?”*
+  - ⭐ **A több készülék** — Csaba: *„ne felejtsük el megtervezni, mert ez is fontos.”* Az első irány: a fő kulcs minden készüléknek
+    saját, aláírt alkulcsot ad (minden készüléknek saját lánca — nincs elágazás).
+  - ✅ **ET-3/1** (Csaba, 2026-11-08): a helyreállításhoz **választott bizottság nélküli** megoldást keresünk — *„egy randomizált,
+    replikált, és titkosított automatikus folyamatot”*; a bizottság (N9) nincs teljesen elvetve. Az első két irány a kutatáshoz:
+    (a) **jelszóval védett, darabolt kulcs-mentés** — a mentést a készülék darabokra osztja (titok-megosztás: bármely *k* darab
+    visszaadja), a darabokat titkosítva véletlenül választott tagok őrzik, és automatikusan, korlátozott próbálkozásszámmal adják
+    vissza annak, aki a jelszót tudja (a Signal-féle „biztonságos érték-visszaállítás” mintája, központi kiszolgáló nélkül); (b)
+    **várakozási ablakos kulcscsere** — az új kulcs nyilvánosan bejelenti, hogy átveszi az azonosságot, és ha a régi kulcs egy
+    hosszú ablakban (pl. 2 hét) nem tiltakozik, a véletlen tagok gépei automatikusan elfogadják (a D16 — a pénz lassú, nyilvános és
+    megtámadható mintája). Mérendő/átgondolandó: a gyenge jelszó, az összejátszó darab-őrzők, és mi van, ha a gazdája meghalt.
+- **ET-4 — A hitelesség mértéke és a pénztárca:** ✅ **ET-4/1** (Csaba, 2026-11-08): *„inkább ismét elvetem, az automatizált 2.
+  lépcsős hitelesítést. maradjunk, a meghatalmazásos rendszernél, ahol a közösség tagjai, hatalmaznak fel másokat arra, hogy igazoljanak
+  e-embereket, a 2. lépcsős hitelesítéshez. így sem minden felhatalmazott igazolhat, hanem csak az 1/3-uk (akiknek a legtöbb van).”*
+  ⏸️ **ET-4/2 — nyitott:** a „felső harmad” pontosan a D57 előtti alak; a **D57 — a küszöb abszolút szám, nem rangsor** (2026-09-06)
+  azért váltotta fel „legalább N felhatalmazás”-ra (N = a 2. lépcsősök érték javaslatainak mediánja — **D57/b**), mert a rangsorhoz
+  mindenki felhatalmazás-számát ismerni kellene (9. szabály), és egy becslés készülékenként mást mondana arról, ki tanúsíthat. Csaba
+  dönt: marad a D57, vagy a felső harmad. — Az eredeti kérdés: *„ha a találkozási rendszer elkészül, és kitalálunk egy matematikát arra, hogy valaki
   mennyire hitelesített, és ehhez kötjük automatikusan a kriptotárcát, az milyen lenne? tudjuk számszerűsíteni az e-emberek
   kapcsolati tengerben elfoglalt helyét, bizonyosság szempontjából? Nem volna egy rossz következmény, ha szükségesek lennének a
   bemutatkozó bulik.”* Kapcsolódik: D18/3 (folytonos igazolás — Csaba ötlete, 2026-08-25), D44 (a tanúsítási keret), D49 (a jelzés
   tájékoztat, nem jogosít), D50/D62 (a bemutatkozások), D55, és a méréssel kizárt irányok (`fejlesztesi_terv_fazis2.md`, a D49 után).
 - **ET-5 — A hálózati beállítások menüpont:** *„részletes, hálózati beállítások menüpontot is terveznünk kell majd.”*
-- **ET-6 — Az elismerés és a sürgősségi út** (N9).
+- **ET-6 — Az elismerés és a sürgősségi út** (N9 — elismerés-entitás + kinevezési rendszer): ✅ **ET-6/1** — az elismerés egyelőre
+  nem kell; a sürgősségi út nyitva.
 - **ET-7 — A pénz a koinó-családban** (D10, D16, N10): 100 000 koinos egy év alatt; a 10% alapja (a kiosztott, vagy a járandóság is);
   a paraméterek módosítása a D66 után.
 - **ET-8 — A köteg-gyökér és a konszenzus** (D17, D21, N8).
@@ -263,3 +283,6 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — Csaba átnézte a kiinduló képet: három helyreigazítás (4. szakasz), magyarázatok a nem érthető pontokhoz (a 3.
   szabály, D106, D17, N9, a 2/3 és a D66, a köteg-gyökér — a 2. szakaszba beírva), és a napirend (3. szakasz, ET-1 – ET-8). A D-számok
   mellé a címük került.
+- **2026-11-08** — Csaba döntései: **ET-4/1** (marad a felhatalmazásos 2. lépcső, az automatikus elvetve), **ET-6/1** (az elismerés
+  egyelőre nem kell), **ET-3/1** (a kulcs-helyreállítás bizottság nélkül: véletlen, replikált, titkosított, automatikus — kutatandó);
+  a több készülék fontos (ET-3). Nyitott: **ET-4/2** (a felső harmad vagy a D57). A jelek alakja: téma ET-n, döntés ET-n/m.
