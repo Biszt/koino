@@ -610,6 +610,12 @@ D100 parancssor-próbája méri, egy végig futó felülettel) · a lap a még m
   [`docs/folyamatabra.md`](docs/folyamatabra.md) — nyolc mermaid-ábra: a nagy kép, egy esemény útja, az őrjárat
   köre, egy csere, a társkeresés, az e-ember útja, a koinó családja, és **hol tartunk** (kész · nyitott · még nincs).
   ⚠️ Ha egy pillér vagy egy nyitott ág változik, az ábrát is javítsd.
+- ⭐ **A tervező ág — a terv a munka előtt** (2026-11-08, Csaba: *„miközben dolgozól a másik ágon, én fork-ot hajtottam végre, azért,
+  hogy itt program írás nélkűl tudjunk előre haladni a koino tervezésével”*): [`docs/tervezo_ag.md`](docs/tervezo_ag.md) — egy külön
+  session tervez, kód nélkül. ⛔ A tervező csak a saját fájljaiba ír (`docs/tervezo_ag.md`, `docs/terv_<téma>.md`), és csak azokat
+  commitolja (`git commit -- <fájl>`); a közös dokumentumok (ez a fájl, a fejlesztési terv, az alappillérek, a folyamatábra…) az
+  építő sessionéi. ⛔ A `docs/tervezo_ag.md`-t az építő session NE szerkessze. A tervező döntései **ET1, ET2…** jelet kapnak; az
+  építő az átvételkor ad nekik D-számot (pl. „D130 (ET4)”).
 - ⚠️ **Új session-váltáskor** a fenti „SESSION-VÁLTÁS" blokkot **cseréld le**, ne fölé írj
   újat — a régit (ha kell) a napló tetejére tedd. *Így maradt 233 KB-os ez a fájl.*
 
