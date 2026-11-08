@@ -39,6 +39,10 @@ nélkül.
 A program parancsai ugyanazzal az adattal: `%USERPROFILE%\koino\windows\koino.cmd ter`, `… koino.cmd belep`, és
 így tovább. Ez a Termux `koino <parancs>`-ának párja.
 
+**⬇ Egy koino-verzió kártyáról is telepíthetsz** (D125): a kártya „🧬 Kód” fülén „⬇ Telepítés erre a készülékre…”. A lap előtte
+megmutatja, ki tette fel, mi változik, és hogy a kód a kulcsaiddal fog futni. A régi program a `koino-regi`-ben marad, a fő menü
+„🧬 A program ezen a készüléken…” ablakában visszaállhatsz rá; ha az új 30 mp alatt nem indul el, a régi magától visszakerül.
+
 ## Mit csinál a sor, lépésenként
 
 - A `powershell` maga a parancs, a többi egy idézőjeles szöveg. Ezért fut a PowerShellben és a régi parancssorban is. A

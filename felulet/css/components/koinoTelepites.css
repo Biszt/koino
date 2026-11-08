@@ -1,0 +1,89 @@
+/* felulet/css/components/koinoTelepites.css */
+
+/* Felelősség: ⭐⭐ D125 — a telepítés a kártyáról ablaka (`felulet/js/koinoTelepites.js`): az előnézet (a kártya, a fájlok, a rétegek,
+   a más mag koinónként, a figyelmeztetés), a telepítés és a visszaút gombjai, a csere állása. A színek a lap változói. */
+
+.koino-telepites {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-wrap: anywhere;
+}
+
+.koino-telepites__leiras,
+.koino-telepites__megjegyzes {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.koino-telepites__megjegyzes {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+.koino-telepites__retegek {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.koino-telepites__reteg {
+  margin: 0.2rem 0;
+}
+
+.koino-telepites__reteg--figyelem {
+  color: var(--szin-figyelmeztetes, #b35c00);
+  font-weight: 600;
+}
+
+.koino-telepites__fajlok {
+  margin: 0.3rem 0 0;
+  padding-left: 1rem;
+  max-height: 12rem;
+  overflow: auto;
+  font-size: 0.85em;
+}
+
+.koino-telepites__mi {
+  opacity: 0.75;
+}
+
+.koino-telepites__figyelem {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  border-left: 3px solid var(--szin-figyelmeztetes, #b35c00);
+  background: rgba(179, 92, 0, 0.08);
+  line-height: 1.45;
+}
+
+.koino-telepites__allas {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.koino-telepites__gombok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.koino-telepites__gomb {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.koino-telepites__gomb--fo {
+  background: var(--szin-elsodleges, #2b6cb0);
+  border-color: var(--szin-elsodleges, #2b6cb0);
+  color: #fff;
+}
+
+.koino-telepites__gomb:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

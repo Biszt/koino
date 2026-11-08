@@ -80,6 +80,10 @@ koino-verzió kártya; ha a gépeden más a számítás magja, mint amivel a koi
 ⭐ **2026-11-06 óta a legegyszerűbb frissítés: a fenti egy sor** (a „legegyszerűbb út” 2. pontja — meghívó nélkül is):
 frissít, a futó régi koinót leállítja, és az újjal indít. Az alábbi sor a fejlesztéshez kell, mert az önpróbákat is lefuttatja.
 
+⬇ **Egy koino-verzió kártyáról is** (D125): a kártya „🧬 Kód” fülén „⬇ Telepítés erre a készülékre…” — a régi a `~/koino-regi`-ben
+marad (vissza: a fő menü „🧬 A program ezen a készüléken…”). ⚠️ A telefonon az új program a HÁTTÉRBEN indul: a régi Termux-ablakban a
+koino leáll, a lap magától új fülön nyílik.
+
 *Erre akkor van szükség, ha a laptopon fejlesztettünk valamit, és a telefonnak is meg kell
 kapnia. A koino gyorsan változik, és **a két készüléknek ugyanazt a verziót kell futtatnia**
 — a csere-protokoll változhat.*

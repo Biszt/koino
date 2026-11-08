@@ -6337,6 +6337,35 @@ valódi folyamattal — a mai és a „csak 2-es” a kitalált [1,2]-t megtalá
 M8 útján mindkét irányban). ⚠️ Nem mérve az éles úton: a kopogtató és a kereső-régió témái (ugyanaz a két segéd viszi őket, mint a
 gyökér-darabét), a `felfedez` parancs (a kiáltás modulja valódi foglalatokon mérve).
 
+### D125. TELEPÍTÉS A KÁRTYÁRÓL: „A RÉGI MELLÉ, A MAI CSERE LÁNCÁN, ELŐTTE KIMONDVA” (2026-11-07)
+
+*A D123 PR5-jének hol-ja és hogyan-ja. Az átvizsgálás: [`kartya_telepites_atvizsgalas.md`](kartya_telepites_atvizsgalas.md), a 91.
+mérés (a kártya kódjából egy működő program összerakható; a lelete — a git nélküli mappa más programnevet számolt — javítva).*
+
+**A döntés** (Csaba, 2026-11-07: *„mindet elfogadom, mehetünk tovább.”* — TK1–TK5 mind (A)):
+1. **TK1 — a csere a mai frissítés láncán:** a kártya kódja a `koino-uj`-ba (fájlonként a lenyomata szerint), a régi `koino-regi`-be,
+   az új a helyére, és indul; a telefonon a `.git` az új programmal megy (a telepítő sor így később is a GitHubról frissít).
+2. **TK2 — az előnézet, küszöb nélkül:** a szerző, a pont, rétegenként a változás (a mag, a felület, a többi), a mag koinónként, és
+   kimondva: a kód a kulcsaiddal fut, a lenyomat azt bizonyítja, hogy ez az a kód — azt nem, hogy jó. Az e-ember dönt.
+3. **TK3 — a más mag kimondva, nem tiltva:** egy program fut a készüléken; ahol a koinó más maggal született, az előnézet megnevezi.
+4. **TK4 — csak a teljes, ellenőrzött kóddal;** ha hiányzik fájl, az előnézet megmondja, és felajánlja az elhozást.
+5. **TK5 — a visszaút:** a régi a `koino-regi`-ben marad („↩ Vissza az előző programra” — a lapon és parancsként); ha az új program
+   30 mp-en belül nem felel, a régi kerül vissza, kimondva.
+
+⭐ **Az építés pontosítása (2026-11-07):** a cserét a FUTÓ program végzi (a saját `csere` szkriptjével), nem a kártya telepítője —
+egy régebbi kártya (a PR7 előtti, a D125 előtti) telepítője nem tudna cserélni, és a TK5 visszafordítása sem volna benne. A kártya
+programja csak INDUL (a saját indítójával). Az elv (a TK1) ugyanaz: a régi mellé, a régi megmarad.
+
+*Az építés (①–③, 2026-11-07/08 — elágazás 247):* `js/tar/programTelepites.js` (a kiírás: előbb minden fájl ellenőrizve, a kiírt
+mappa a kártya kódját kell nevezze; a csere helye — Windowson a git-tárat nem cseréli, a telefonon a `.git` az új programmal megy; az
+előnézet rétegei), `koino.js` (`telepitesElonezete`, `kartyaKodjanakKiirasa`, `programCsereje`, a `telepit` parancs, a
+`/api/telepites` útjai), `windows/csere.ps1` és `termux/csere.sh` (leállít, cserél, indít, 30 mp-ig vár, különben visszafordít; az
+eredmény az adat-mappa `telepites.json`-ja), a lap (`felulet/js/koinoTelepites.js` — a „Kód” fül gombja, az előnézet, a fő menü
+„🧬 A program ezen a készüléken…” ablaka a visszaúttal, az eredmény a betöltéskor). ⛔ Mérve: a leválasztott PowerShell konzol nélkül
+azonnal kilép (a szkriptet egy `Start-Process` indítja); a kártya és a kód base64url neve környezetben megy (egy kötőjellel kezdődőt a
+PowerShell paraméternévnek venne); a lap kulcsa indításonként új — a régi fül a régi kulcsával figyel. A próba: `telepitesProba.js` (8),
+16 rontás. ⏭️ A terepi próba (a telefon leállítása — `pkill` — és a háttérben indulás).
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem

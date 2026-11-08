@@ -137,7 +137,8 @@ proba('⭐⭐ a bizonyíték: a helyes titokkal elfogadható; a koinóra, a SZEM
 // ===== ⭐ A WINDOWSOS TELEPÍTŐ SOR (elágazás 232 — a terepi lelet: a Termux-sor a Windows parancssorában az első szónál megállt) =====
 
 const KOINO_MAPPA = join(dirname(fileURLToPath(import.meta.url)), '..');
-const WINDOWS_SZKRIPTEK = ['windows/telepit.ps1', 'windows/indit.ps1'];
+// ⭐ D125: a csere szkriptje is (a kártyáról telepítés és a visszaút — `windows/csere.ps1`)
+const WINDOWS_SZKRIPTEK = ['windows/telepit.ps1', 'windows/indit.ps1', 'windows/csere.ps1'];
 
 // Rontás: a windowsos sor nem a meghívóval végződik, vagy egy `$`-t / `%`-ot / belső idézőjelet kap → bukik; az őr nem nézi a
 // jeleket → a rossz sorok „épek” → bukik.
@@ -157,7 +158,7 @@ proba('⭐ a WINDOWSOS sor: ugyanaz a meghívó a végén, a lap kiolvassa, a t�
 
 // Rontás: a sor máshol keresi a telepítőt (vagy a fájl hiányzik — a meglévő vagy a letöltött helyen); a .ps1 BOM nélkül kerül a
 // tárba → bukik.
-proba('⭐ a windowsos telepítő ott van, ahol a sor keresi (a meglévő és a letöltött helyen is); a két .ps1 UTF-8 BOM-mal (és van bennük magyar betű), a koino.cmd csak ASCII', () => {
+proba('⭐ a windowsos telepítő ott van, ahol a sor keresi (a meglévő és a letöltött helyen is); a három .ps1 (a telepítő, az indító és a csere) UTF-8 BOM-mal (és van bennük magyar betű), a koino.cmd csak ASCII', () => {
   const utak = [...WINDOWS_TELEPITO_SOR.matchAll(/& \.\\(\S+?\\telepit\.ps1)/g)].map((m) => m[1].replace(/\\/g, '/'));
   const vizsgalt = WINDOWS_TELEPITO_SOR.match(/Test-Path (\S+?\\telepit\.ps1)/)?.[1]?.replace(/\\/g, '/');
   const bomos = WINDOWS_SZKRIPTEK.every((f) => {
@@ -177,7 +178,7 @@ const futtat = (fajl, ervek, beallitas = {}) => new Promise((teljesul) => {
 });
 
 // Rontás: egy szintaktikai hiba a szkriptben (pl. egy hiányzó zárójel) → bukik.
-proba('⭐ (Windowson) a PowerShell hibátlanul értelmezi a két szkriptet és a sor parancsát', async () => {
+proba('⭐ (Windowson) a PowerShell hibátlanul értelmezi a szkripteket (a telepítőt, az indítót és a cserét) és a sor parancsát', async () => {
   if (process.platform !== 'win32') { process.stdout.write('    (nem Windows — kihagyva)\n'); return true; }
   const ideiglenes = await mkdtemp(join(tmpdir(), 'koino-windows-'));
   try {

@@ -89,7 +89,7 @@ import { writeFile, readFile, mkdir, rename, mkdtemp, rm, stat } from 'node:fs/p
 import { tmpdir, homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { randomUUID, randomInt } from 'node:crypto';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 
 import {
   esemenyTarNyitasa, koinoBecenevFeloldasa, koinoBecenevKijelolese, koinoBecenevei, kulcsTarolo, tarsakTarolo, szeletJegyzekTarolo,
@@ -162,6 +162,8 @@ import {
 } from './js/esemeny/esemeny.js';
 // ⭐⭐ D119 (①a): a kód-csomag — a futó program kódja a koino-verzió kártyájára, és a koinó programjával összevetve.
 import { sajatKodCsomag, kodCsomagTarolasa, kodJegyzekOlvasasa, sajatMag, magJegyzeke } from './js/tar/kodCsomag.js';
+// ⭐⭐ D125: a telepítés a kártyáról — a kiírás, a csere helye, az előnézet rétegei
+import { kodKiirasa, telepitesHelye, valtozasRetegei } from './js/tar/programTelepites.js';
 import { szabalyokAlakiHibaja, ALAP_SZABALYOK, koinoSzabalyai, teljesSzabalyok } from './js/esemeny/koinoSzabalyok.js';
 import { szuletesLanc, szuloTagsagaEpitese, bekoltozesekEllenorzese, koinoNezete, lancNezete } from './js/allapot/koinoLanc.js';
 import { koinoKepe } from './js/allapot/ketReteg.js';
@@ -575,6 +577,114 @@ async function temakKeresese(kliens, temak) {
   return { tarsak: [...ki.values()] };
 }
 
+// ===== ⭐⭐ D125 (D123 PR5): A PROGRAM CSERÉJE — készülék-szinten (egy program fut a készüléken) =====
+//
+// A cserét a FUTÓ program indítja, a SAJÁT platform-szkriptjével (`windows/csere.ps1`, `termux/csere.sh`) — nem a kártya telepítője
+// (egy régebbi kártyáé nem tudna cserélni, és a TK5 visszafordítása sem volna benne). A szkript egy másolatból fut (az adat-mappában:
+// a program mappáját a csere átnevezi), LEVÁLASZTVA (a futó programot ő állítja le — a hívót is). Az eredményt a szkript írja
+// (`<adat>/telepites.json`); a program indításkor és a `telepit` parancs ebből mondja el, mi történt.
+
+const PROGRAM_MAPPAJA = dirname(fileURLToPath(import.meta.url));
+const TELEPITES_FAJL = 'telepites.json';
+
+/** ⭐ D125: a csere legutóbbi eredménye (a szkript írja) — vagy null. */
+async function utolsoTelepites() {
+  try { return JSON.parse(await readFile(join(alapHely(), TELEPITES_FAJL), 'utf8')); } catch { return null; }
+}
+
+/** ⭐ D125: a program ezen a készüléken — a kódja, a magja, a csere helye, megvan-e az előző (a visszaút), az utolsó telepítés. */
+async function telepitesAllapota() {
+  const hely = await telepitesHelye(PROGRAM_MAPPAJA);
+  return { hely, sajat: (await sajatKodCsomag(PROGRAM_MAPPAJA)).hivatkozas, mag: (await sajatMag(PROGRAM_MAPPAJA)).hivatkozas,
+    regiVan: await stat(join(hely.regi, 'koino.js')).then(() => true, () => false), utolso: await utolsoTelepites() };
+}
+
+/**
+ * ⭐⭐ D125 (TK1, TK5): A CSERE INDÍTÁSA — telepítésnél a már kiírt új mappa (`kartyaKodjanakKiirasa`) kerül a helyére, visszaútnál
+ * a `-regi`. A szkript leválasztva fut: leállítja a futó programot (a hívót is), cserél, indít, és 30 mp-ig vár, hogy az új
+ * feleljen — ha nem, a régit teszi vissza.
+ * @param {{kod?: Object, kartya?: string, vissza?: boolean, port?: number}} b
+ * @returns {Promise<{mondat: string, hely: Object}>}
+ */
+async function programCsereje({ kod = null, kartya = null, vissza = false, port = null } = {}) {
+  const hely = await telepitesHelye(PROGRAM_MAPPAJA);
+  if (!hely.lehet) throw new Error('A csere ezen a készüléken nem megy: ' + hely.ok);
+  const adat = resolve(alapHely());
+  // ⛔ ha az adat a program mappájában volna, a csere vele vinné (a kulcsot is)
+  if (adat === hely.mappa || adat.startsWith(hely.mappa + sep)) {
+    throw new Error('Az adat-mappa (' + adat + ') a program mappájában van — a csere vinné; állítsd a KOINO_ADAT-ot a mappán kívülre.');
+  }
+  const van = (ut) => stat(ut).then(() => true, () => false);
+  if (vissza && !(await van(join(hely.regi, 'koino.js')))) {
+    throw new Error('Nincs előző program (' + hely.regi + ') — a visszaút az első csere után lesz.');
+  }
+  if (!vissza && !(await van(join(hely.uj, 'koino.js')))) {
+    throw new Error('Az új program nincs kiírva (' + hely.uj + ') — előbb: telepit <kártya> kiir');
+  }
+  const windows = hely.platform === 'windows';
+  const masolat = join(adat, windows ? 'csere.ps1' : 'csere.sh');
+  await mkdir(adat, { recursive: true });
+  await writeFile(masolat, await readFile(join(PROGRAM_MAPPAJA, windows ? 'windows' : 'termux', windows ? 'csere.ps1' : 'csere.sh')));
+  await writeFile(join(adat, TELEPITES_FAJL), JSON.stringify({ allapot: 'folyamatban', mikor: Date.now(), kod: kod?.lenyomat ?? '',
+    kartya: kartya ?? '', vissza, helye: hely.mappa, mondat: 'a csere folyamatban (' + (vissza ? 'vissza az előzőre' : 'telepítés') + ')' }));
+  const felPort = String(port ?? process.env.KOINO_FELULET_PORT ?? 7499);
+  const varakozas = String(Number.parseInt(process.env.KOINO_CSERE_VARAKOZAS ?? '', 10) || 30);
+  const { spawn } = await import('node:child_process');
+  // ⚠️ a kód és a kártya neve base64url — kötőjellel is kezdődhet, amit a PowerShell paraméternévnek venne: környezetben megy
+  const env = { ...process.env, KOINO_ADAT: adat, KOINO_CSERE_VARAKOZAS: varakozas, KOINO_CSERE_KOD: kod?.lenyomat ?? '',
+    KOINO_CSERE_KARTYA: kartya ?? '' };
+  if (windows) {
+    // ⛔ MÉRVE (2026-11-07): a leválasztott (`detached`) PowerShell konzol nélkül azonnal kilép, és semmit nem tesz. Ezért egy rövid
+    // PowerShell a `Start-Process`-szel indítja a szkriptet — saját (rejtett) ablakban, a hívótól függetlenül: túléli, hogy a szkript
+    // a hívót (a futó programot) leállítja.
+    const q = (s) => "'" + String(s).replace(/'/g, "''") + "'";
+    const ervek = ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', masolat, '-Helye', hely.mappa, '-Uj', hely.uj, '-Regi', hely.regi,
+      '-Adat', adat, '-Port', felPort, '-Varakozas', varakozas, ...(vissza ? ['-Vissza'] : []),
+      ...(process.env.KOINO_CSERE_REJTETT === 'igen' ? ['-Rejtett'] : [])];
+    const parancs = 'Start-Process -FilePath powershell.exe -WindowStyle Hidden -WorkingDirectory ' + q(dirname(hely.mappa))
+      + ' -ArgumentList @(' + ervek.map((a) => q('"' + a + '"')).join(',') + ')';
+    const kilepes = await new Promise((kesz) => {
+      const p = spawn('powershell', ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(parancs, 'utf16le').toString('base64')],
+        { stdio: 'ignore', windowsHide: true, cwd: dirname(hely.mappa), env });
+      p.on('error', () => kesz(-1));
+      p.on('exit', (k) => kesz(k));
+    });
+    if (kilepes !== 0) throw new Error('A csere szkriptje nem indult el (a PowerShell kilépési kódja: ' + kilepes + ').');
+  } else {
+    const p = spawn('sh', [masolat, hely.mappa, hely.uj, hely.regi, adat, felPort, vissza ? 'vissza' : 'telepites'],
+      { detached: true, stdio: 'ignore', cwd: dirname(hely.mappa), env });
+    p.unref();
+  }
+  return { hely, mondat: (vissza ? '↩ A visszaút elindult' : '⬇ A csere elindult') + ': a futó program leáll, a mappák helyet cserélnek ('
+    + (vissza ? hely.regi + ' ↔ ' + hely.mappa : hely.uj + ' → ' + hely.mappa + ', a régi: ' + hely.regi) + '), és a program újraindul'
+    + (windows ? ' egy új ablakban' : ' a háttérben') + '. Ha ' + varakozas + ' mp alatt nem felel, a régi kerül vissza — az eredmény: '
+    + join(adat, TELEPITES_FAJL) + ' (és: telepit).' };
+}
+
+/** ⭐ D125: az előnézet a parancssorban (a lap ugyanezt rajzolja). */
+function telepitesElonezetKiirasa(el) {
+  const r = (x) => x.slice(0, 12) + '…';
+  kiir(SZIN.vastag + 'TELEPÍTÉS A KÁRTYÁRÓL — előnézet' + SZIN.vege + SZIN.halvany + '  (semmit nem írtam)' + SZIN.vege);
+  kiir('  a kártya: „' + (el.kartya.cim ?? '?') + '” · feltöltötte: ' + r(el.kartya.szerzo ?? '') + ' · ' + el.kartya.pont + ' pont rajta');
+  kiir('  a kód: ' + r(el.kod.lenyomat) + ' — ' + (el.ugyanaz ? SZIN.jo + 'ez fut ezen a készüléken' + SZIN.vege
+    : 'a futó: ' + r(el.sajat.lenyomat)));
+  kiir('  a fájljai: ' + (el.osszes === null ? SZIN.nem + 'a jegyzéke még nincs meg' + SZIN.vege
+    : el.megvan + '/' + el.osszes + (el.teljes ? SZIN.jo + ' — mind megvan' + SZIN.vege : SZIN.nem + ' — a többit előbb el kell hozni'
+      + ' (a kártya „Kód” füle, vagy a törzs-kérelem)' + SZIN.vege)));
+  if (el.retegek) {
+    const db = (l) => l.length + ' fájl' + (l.length ? ' (' + l.slice(0, 4).map((x) => x.ut + (x.mi === 'uj' ? ' +' : x.mi === 'eltunt' ? ' −' : '')).join(', ')
+      + (l.length > 4 ? ', …' : '') + ')' : '');
+    kiir('  ' + (el.mag.egyezik === false ? SZIN.nem + '⚠ a MAG más' + SZIN.vege : 'a mag ugyanaz') + ' · változik: a magban '
+      + db(el.retegek.mag) + ' · a felületen ' + db(el.retegek.felulet) + ' · máshol ' + db(el.retegek.tobbi));
+  }
+  if (el.mas.length) {
+    kiir(SZIN.nem + '  ⚠ ezekben a koinóidban MÁS SZÁMÍTÁSSAL futnál (más maggal születtek — ha ott maradsz, a régit futtasd): '
+      + el.mas.map((k) => '„' + (k.nev ?? r(k.koino)) + '”').join(', ') + SZIN.vege);
+  }
+  if (!el.hely.lehet) kiir(SZIN.nem + '  ⚠ a csere ezen a készüléken nem megy: ' + el.hely.ok + SZIN.vege);
+  kiir(SZIN.halvany + '  ' + el.figyelmeztetes + SZIN.vege);
+}
+
 // ===================================
 // ⭐⭐ D119 (②): A KOINÓ-PÉLDÁNY — a koinó-szintű rész egy gyárban
 // ===================================
@@ -794,6 +904,77 @@ async function programVerzioja() {
   const szint = magEgyezik === false ? 'mag' : (magEgyezik === null && egyezik === false) ? 'mag'
     : egyezik === false ? 'program' : null;
   return { koinoe, sajat, egyezik, mag: { koinoe: magKoinoe, sajat: magSajat, egyezik: magEgyezik }, szint };
+}
+
+// ===================================
+// ⭐⭐ D125 (D123 PR5): A TELEPÍTÉS A KÁRTYÁRÓL — az előnézet és a kiírás (a csere: `programCsereje`, a gyár előtt)
+// ===================================
+
+/**
+ * ⭐⭐ D125 (TK2–TK4): A TELEPÍTÉS ELŐNÉZETE egy koino-verzió kártyára — ki tette fel, hány pont van rajta, megvan-e minden fájlja,
+ * rétegenként mi változik a futó programhoz képest (`valtozasRetegei`), és ⚠️ melyik koinóban lesz „más számítás” (a készülék
+ * koinói közül azok, amelyek más maggal születtek, mint a kártya kódjáé — TK3: kimondva, nem tiltva). Semmit nem ír.
+ * @param {string} kartyaAz - a koino-verzió kártya azonosítója
+ */
+async function telepitesElonezete(kartyaAz) {
+  const { allapot } = await kepetKeszit();
+  const e = allapot.entitasok.get(kartyaAz ?? '');
+  const kod = e?.koinoVerzio?.kod;
+  if (!kod) throw new Error('Nincs ilyen koino-verzió kártya ezen a készüléken.');
+  const blob = fajlBlobTarolo(KOINO);
+  const jegyzek = await kodJegyzekOlvasasa(kod, (l) => blob.olvas(l));
+  let megvan = 0;
+  for (const f of jegyzek?.fajlok ?? []) if (await blob.van(f[1])) megvan++;
+  const sajatCs = await sajatKodCsomag(PROGRAM_GYOKER);
+  const sajatMagja = await sajatMag(PROGRAM_GYOKER);
+  const kartyaMag = jegyzek ? await kodJegyzekMagja(jegyzek, blob) : null;
+  const retegek = jegyzek ? valtozasRetegei(jegyzek, sajatCs.jegyzek,
+    [...(kartyaMag?.utak ?? []), ...sajatMagja.jegyzek.fajlok.map((f) => f[0])]) : null;
+  // ⭐ TK3: a készülék koinói, és a születésük magja a kártya kódjáéhoz képest
+  const koinok = [];
+  if (kartyaMag) {
+    for (const k of await ismertKoinok(alapHely())) {
+      if (!azonositoAlaku(k)) continue;
+      const sz = await (await koinoTaraEgyszer(k)).esemeny(k).catch(() => null);
+      if (!sz) continue;
+      const m = szovegHivatkozasE(sz.adat?.mag) ? sz.adat.mag.lenyomat : null;
+      koinok.push({ koino: k, nev: sz.adat?.nev ?? null, mag: m, egyezik: m ? m === kartyaMag.hivatkozas.lenyomat : null });
+    }
+  }
+  const hely = await telepitesHelye(PROGRAM_GYOKER);
+  const regiVan = await stat(hely.regi).then(() => true, () => false);
+  return {
+    kartya: { azonosito: e.azonosito, cim: e.cim, szerzo: e.szerzo, pont: e.osszesPont ?? 0, letrehozva: e.letrehozva ?? null },
+    kod, osszes: jegyzek?.fajlok.length ?? null, megvan, teljes: !!jegyzek && megvan === jegyzek.fajlok.length,
+    ugyanaz: kod.lenyomat === sajatCs.hivatkozas.lenyomat, sajat: sajatCs.hivatkozas,
+    mag: { kartyae: kartyaMag?.hivatkozas ?? null, sajat: sajatMagja.hivatkozas,
+      egyezik: kartyaMag ? kartyaMag.hivatkozas.lenyomat === sajatMagja.hivatkozas.lenyomat : null },
+    retegek, koinok, mas: koinok.filter((x) => x.egyezik === false),
+    hely: { lehet: hely.lehet, ok: hely.ok, platform: hely.platform, uj: hely.uj, regi: hely.regi, gitVele: hely.gitVele }, regiVan,
+    figyelmeztetes: 'A kód a kulcsaiddal fog futni. A lenyomat azt bizonyítja, hogy ez az a kód, amit a kártya megnevez — azt nem, '
+      + 'hogy jó: a változott fájlokat a „Kód” fülön olvashatod.'
+  };
+}
+
+/**
+ * ⭐⭐ D125 (TK1, TK4): a kártya kódjának KIÍRÁSA a régi mellé (`<mappa>-uj`) — csak a teljes, ellenőrzött kóddal; a csere nem
+ * ennek a dolga (`programCsereje`).
+ * @returns {Promise<{fajl: number, bajt: number, hova: string, hely: Object, kod: Object}>}
+ */
+async function kartyaKodjanakKiirasa(kartyaAz) {
+  const { allapot } = await kepetKeszit();
+  const kod = allapot.entitasok.get(kartyaAz ?? '')?.koinoVerzio?.kod;
+  if (!kod) throw new Error('Nincs ilyen koino-verzió kártya ezen a készüléken.');
+  const hely = await telepitesHelye(PROGRAM_GYOKER);
+  const blob = fajlBlobTarolo(KOINO);
+  const jegyzek = await kodJegyzekOlvasasa(kod, (l) => blob.olvas(l));
+  if (!jegyzek) {
+    const h = new Error('A kártya kódjának jegyzéke még nincs meg ezen a készüléken — előbb hozd el (a kártya „Kód” füle)');
+    h.kod = 'HIANYZO-FAJL';
+    throw h;
+  }
+  const k = await kodKiirasa(kod, jegyzek, (l) => blob.olvas(l), hely.uj);
+  return { ...k, hely, kod };
 }
 
 /**
@@ -6399,7 +6580,7 @@ return {
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
   fuggoKerelmekAllasa, gyokerMelysegem, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, kapottCimekBeolvasztasa,
-  kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
+  kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
   ketFokAllapota, keziCsere, keziHibaSzovege, keziKapuNyitasa, kiszolgalasBeallitas, kiszolgalasFajl, kiszolgalasiKeretHatara,
   keretAllasIrasa, kiszolgalasiKeretKapcsolo, kodOlvasoKeszites, koinoErvei, koinoSzuletese, koinoVerzioElonezete, koinoVerzioKeszitese,
@@ -6414,6 +6595,8 @@ return {
   // ⭐⭐ D121: a meghívás a lapon
   belepesHaNincs, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, meghivasVegrehajtasa, tagsagAllapotom,
   profilomAllapota, igazoltMeghivasokAlairasa,
+  // ⭐⭐ D125: a telepítés a kártyáról
+  telepitesElonezete,
   tovabbitasok,
   tovabbitasokTakaritasa, tukorBeallitas, ujKoinoSzuletese,
   // ⭐ D119 (③): a családi munkának (a parancsok nem használják)
@@ -6436,7 +6619,7 @@ const {
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
   fuggoKerelmekAllasa, gyokerMelysegem, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, kapottCimekBeolvasztasa,
-  kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
+  kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
   ketFokAllapota, keziCsere, keziHibaSzovege, keziKapuNyitasa, kiszolgalasBeallitas, kiszolgalasFajl, kiszolgalasiKeretHatara,
   keretAllasIrasa, kiszolgalasiKeretKapcsolo, kodOlvasoKeszites, koinoErvei, koinoSzuletese, koinoVerzioElonezete, koinoVerzioKeszitese,
@@ -6451,6 +6634,8 @@ const {
   // ⭐⭐ D121: a meghívás a lapon
   belepesHaNincs, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, meghivasVegrehajtasa, tagsagAllapotom,
   profilomAllapota, igazoltMeghivasokAlairasa,
+  // ⭐⭐ D125: a telepítés a kártyáról
+  telepitesElonezete,
   tovabbitasok,
   tovabbitasokTakaritasa, tukorBeallitas, ujKoinoSzuletese
 } = foPeldany;
@@ -7416,6 +7601,51 @@ try {
       const v = await koinoVerzioKeszitese(KOINO, { nev, ...e });
       if (e.becenev) await koinoBecenevKijelolese(e.becenev, v.szuletes.azonosito);
       koinoVerzioKiirasa(v, e.becenev);
+      break;
+    }
+
+    // ===== ⭐⭐ D125 (D123 PR5): A TELEPÍTÉS A KÁRTYÁRÓL — a kézi út (a lap ugyanezt hívja: `/api/telepites`) =====
+    //   telepit                    — a futó program, a visszaút (megvan-e a régi), az utolsó telepítés feljegyzése
+    //   telepit <kártya>           — az ELŐNÉZET (semmit nem ír): ki tette fel, a pont, rétegenként mi változik, a mag koinónként
+    //   telepit <kártya> kiir      — csak a kiírás a régi mellé (`<mappa>-uj`), ellenőrizve — csere nélkül
+    //   telepit <kártya> igen      — a kiírás ÉS a csere (a futó program leáll, a régi a `-regi`-be, az új indul — TK1, TK5)
+    //   telepit vissza             — vissza az előző programra (a `-regi`)
+    case 'telepit': {
+      const mit = ervek[0] ?? '';
+      if (!mit) {
+        const a = await telepitesAllapota();
+        kiir(SZIN.vastag + 'A PROGRAM ezen a készüléken' + SZIN.vege + SZIN.halvany + '  (' + a.hely.mappa + ')' + SZIN.vege);
+        kiir('  a kódja: ' + a.sajat.lenyomat + ' · a magja: ' + a.mag.lenyomat);
+        kiir('  ' + (a.regiVan ? '↩ az előző program megvan (' + a.hely.regi + ') — vissza: telepit vissza'
+          : SZIN.halvany + 'előző program nincs (a visszaút a következő csere után lesz)' + SZIN.vege));
+        if (a.utolso) kiir(SZIN.halvany + '  az utolsó telepítés: ' + a.utolso.mondat + SZIN.vege);
+        if (!a.hely.lehet) kiir(SZIN.nem + '  ⚠ a csere ezen a készüléken nem megy: ' + a.hely.ok + SZIN.vege);
+        kiir(SZIN.halvany + '  Egy koino-verzió kártyáról: telepit <kártya> (előnézet) · telepit <kártya> igen (telepítés)' + SZIN.vege);
+        break;
+      }
+      if (mit === 'vissza') {
+        const c = await programCsereje({ vissza: true });
+        kiir(c.mondat);
+        break;
+      }
+      const { allapot } = await kepetKeszit();
+      const kartya = feloldas(mit, [...allapot.entitasok.values()].filter((e) => e.koinoVerzio).map((e) => e.azonosito));
+      const el = await telepitesElonezete(kartya);
+      telepitesElonezetKiirasa(el);
+      if (ervek[1] === 'kiir' || ervek[1] === 'igen') {
+        if (el.ugyanaz) { kiir(SZIN.jo + '✓ Ez a program már fut ezen a készüléken — nincs mit telepíteni.' + SZIN.vege); break; }
+        const k = await kartyaKodjanakKiirasa(kartya);
+        kiir(SZIN.jo + '✓ A kártya kódja kiírva: ' + k.hova + ' (' + k.fajl + ' fájl, ' + (k.bajt / 1024).toFixed(1)
+          + ' KB — mind a lenyomata szerint, és a mappa a kártya kódját nevezi meg)' + SZIN.vege);
+        if (ervek[1] === 'igen') {
+          const c = await programCsereje({ kod: k.kod, kartya });
+          kiir(c.mondat);
+        } else {
+          kiir(SZIN.halvany + '  A csere: telepit ' + mit + ' igen' + SZIN.vege);
+        }
+      } else if (!el.ugyanaz) {
+        kiir(SZIN.halvany + 'A telepítés: telepit ' + mit + ' igen' + SZIN.vege);
+      }
       break;
     }
 
@@ -10154,7 +10384,8 @@ try {
           keresesFuggoAllasa, keresesMegjegyzes, kiszolgalasBeallitas, koinoVerzioElonezete, koinoVerzioKeszitese,
           koltozesElonezete, koltozesVegrehajtasa, lapHianyzoinakElkerese, laposMegjegyzes, postafiokFrissitese,
           postafiokMegjegyzes, postafiokModositasa, programVerzioja, sikidomMegjegyzes, strukturaMegjegyzes, torzsElemKerese,
-          torzsKerhetoi, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, tagsagAllapotom, profilomAllapota
+          torzsKerhetoi, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, tagsagAllapotom, profilomAllapota,
+          telepitesElonezete, kartyaKodjanakKiirasa
         } = aktiv.peldany;
         // ⭐ B/2: az olvasók (a pakli) a két tár nézetét kapják — FL1 óta minden koinóban (a koinó átmeneti tára is látszik).
         const olvasoTar = ketTarNezet(tar, atmeneti);
@@ -10281,6 +10512,35 @@ try {
               if (!entitas && elem) entitas = (await torzsKerhetoi()).kerhetok.find((k) => k.elem === elem)?.entitas ?? null;
               if (!entitas) return { allapot: 404, adat: { hiba: 'Nincs ilyen kérhető (határ fölötti) elem ezen a készüléken.' } };
               return { adat: { success: true, ...(await torzsElemKerese(entitas, elem)) } };
+            } catch (hiba) {
+              return { allapot: 400, adat: { hiba: hiba.message } };
+            }
+          }
+
+          // ⭐⭐ D125 (TK1, TK4): A TELEPÍTÉS A KÁRTYÁRÓL — a kiírás (csak a teljes, ellenőrzött kóddal) és a csere indítása (a
+          // futó program — ez is — leáll, az új indul; a lap kulcsa indításonként új: az új program a saját lapját nyitja meg).
+          if (utvonal === '/api/telepites') {
+            try {
+              const kartya = typeof test?.kartya === 'string' ? test.kartya : '';
+              const el = await telepitesElonezete(kartya);
+              if (el.ugyanaz) return { allapot: 400, adat: { hiba: 'Ezen a készüléken már ez a program fut.' } };
+              if (!el.hely.lehet) return { allapot: 400, adat: { hiba: 'A csere ezen a készüléken nem megy: ' + el.hely.ok } };
+              if (!el.teljes) {
+                return { allapot: 400, adat: { hiba: 'A kártya kódjából még nincs meg minden fájl (' + el.megvan + '/' + (el.osszes ?? '?')
+                  + ') — előbb kérd el (a „Kód” fül).' } };
+              }
+              const k = await kartyaKodjanakKiirasa(kartya);
+              const c = await programCsereje({ kod: k.kod, kartya, port });
+              return { adat: { success: true, mondat: c.mondat, fajl: k.fajl } };
+            } catch (hiba) {
+              return { allapot: 400, adat: { hiba: hiba.message, kod: hiba.kod ?? null } };
+            }
+          }
+          // ⭐⭐ D125 (TK5): A VISSZAÚT — az előző program (a `-regi`) kerül a helyére.
+          if (utvonal === '/api/telepites/vissza') {
+            try {
+              const c = await programCsereje({ vissza: true, port });
+              return { adat: { success: true, mondat: c.mondat } };
             } catch (hiba) {
               return { allapot: 400, adat: { hiba: hiba.message } };
             }
@@ -10895,6 +11155,20 @@ try {
             sajat, egyezik: sajat.lenyomat === kod.lenyomat,
             mag: { kartyae: kartyaMag?.hivatkozas ?? null, sajat: sajatMagja, utak: kartyaMag?.utak ?? null,
               egyezik: kartyaMag ? kartyaMag.hivatkozas.lenyomat === sajatMagja.lenyomat : null } } };
+        }
+
+        // ⭐⭐ D125: A TELEPÍTÉS — kártyával az ELŐNÉZET (TK2–TK4; semmit nem ír), kártya nélkül a program ezen a készüléken (a
+        // kódja, az utolsó telepítés — a lap betöltéskor ebből mondja ki az eredményt —, a visszaút).
+        if (utvonal === '/api/telepites') {
+          try {
+            const a = await telepitesAllapota();
+            const kozos = { utolso: a.utolso, regiVan: a.regiVan };
+            if (kereses.get('kartya')) return { adat: { ...(await telepitesElonezete(kereses.get('kartya'))), ...kozos } };
+            return { adat: { sajat: a.sajat, mag: a.mag, hely: { lehet: a.hely.lehet, ok: a.hely.ok, platform: a.hely.platform,
+              mappa: a.hely.mappa, regi: a.hely.regi }, ...kozos } };
+          } catch (hiba) {
+            return { allapot: 400, adat: { hiba: hiba.message } };
+          }
         }
 
         // ⭐⭐ D120: A KÉRHETŐ TÖRZS-ELEMEK — ami a határ miatt nem jön magától (a méretével), egy entitásra (`entitas`) vagy egy

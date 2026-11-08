@@ -44,6 +44,7 @@ import fajlAtvitel from './fajlAtvitelProba.js';
 import egyezmeny from './egyezmenyProba.js';
 import felszabaditas from './felszabaditasProba.js';
 import parancssor from './parancssorProba.js';
+import telepites from './telepitesProba.js';
 import vizsga from './vizsgaProba.js';
 import dht from './dhtProba.js';
 import kotes from './kotesProba.js';
@@ -134,6 +135,7 @@ const PROBAK = [
   { nev: 'dontesicsomag', futtat: dontesiCsomag },
   { nev: 'lezarasiosszegzes', futtat: lezarasiOsszegzes },
   { nev: 'felszabaditas', futtat: felszabaditas },
+  { nev: 'telepites', futtat: telepites },
   { nev: 'parancssor', futtat: parancssor },
   { nev: 'vizsga', futtat: vizsga },
   { nev: 'dht', futtat: dht },
@@ -207,7 +209,7 @@ const CSOPORTOK = {
   // az A pillér: az összegző Merkle-fa és ami rá épül
   fa: ['osszegzofa', 'lancgyoker', 'ellentmondas', 'eszlelo', 'lancellenorzes'],
   // a kézi út a parancssorból, külön folyamatokban (viselkedést mér, nem feliratot)
-  parancssor: ['parancssor']
+  parancssor: ['telepites', 'parancssor']
 };
 
 // A `meres/` mappa `*Proba.js` fájljai közül, ami NEM önpróba (nem ide tartozik, külön futtatandó).

@@ -20,6 +20,8 @@ import KartyaFulsav from './components/kartya/KartyaFulsav.js';
 import Modal from './components/modals/Modal.js';
 import { apiGet, apiPost } from './utils/apiHelper.js';
 import { kodKereseGomb } from './koinoTorzs.js';   // ⭐ D120: a kód kérése (a határ fölött)
+// ⭐⭐ D125: a telepítés a kártyáról (a „Kód” fül gombja), és a telepítés eredménye a lap betöltésekor
+import { telepitesMegnyitasa, telepitesEredmenyenekKimondasa } from './koinoTelepites.js';
 
 const MODAL_KONTENER = 'modal-kontener';
 
@@ -91,7 +93,7 @@ GondolatKartya.prototype._bodyFeltoltese = function (body, ...tobbi) {
     fulek,
     onFulValtas: (id) => {
       // ⭐ D120: minden megnyitáskor friss (egy kérés): a kért kód a cserével közben megjöhet — az állás ne ragadjon be
-      if (id === 'kod') kodFulBetoltese(kod, this.entitas.entitasId);
+      if (id === 'kod') { telepitesGombFigyelese(kod, this.entitas.entitasId); kodFulBetoltese(kod, this.entitas.entitasId); }
       this._kibovitesUjraertekeles?.();
     }
   });
@@ -126,6 +128,11 @@ async function kodFulBetoltese(elem, kartya) {
       : '<p class="koino-kod__mas">⚠ Ezen a készüléken MÁS ' + (a.mag?.egyezik === false ? 'SZÁMÍTÁS (más mag)' : 'program')
         + ' fut (a tiéd: <code title="' + html(a.sajat?.lenyomat) + '">' + html(rovid(a.sajat?.lenyomat)) + '</code>) — ennek a '
         + 'gyermeknek a kódja a lenti. Nem tiltjuk: ha a két verzió szabálya eltér, a számítás is eltérhet.</p>');
+  // ⭐⭐ D125: a telepítés gombja — ha nem ez a program fut (az ablak az előnézettel nyílik: TK2–TK4)
+  if (!a.egyezik) {
+    fej += '<div class="koino-kod__telepites"><button type="button" class="koino-telepites__gomb koino-telepites__gomb--fo" '
+      + 'data-muvelet="telepites">⬇ Telepítés erre a készülékre…</button></div>';
+  }
   const magban = new Set(a.mag?.utak ?? []);
   if (!a.jegyzek) {
     elem.innerHTML = fej + '<p class="koino-megjegyzes">A kód jegyzéke még nem jött meg erre a készülékre. A kód a kártya '
@@ -160,6 +167,20 @@ async function kodFulBetoltese(elem, kartya) {
   });
   console.log('kodFulBetoltese - VÉGE', { fajlok: fajlok.length, megvan: a.megvan, egyezik: a.egyezik });
 }
+
+/** ⭐⭐ D125: a „Kód” fül telepítés-gombja (a fül tartalma újrarajzolódik — a figyelő a fül elemén, egyszer). */
+function telepitesGombFigyelese(elem, kartya) {
+  if (elem.dataset.telepitesFigyel) return;
+  elem.dataset.telepitesFigyel = '1';
+  elem.addEventListener('click', (e) => {
+    if (!e.target.closest('button[data-muvelet="telepites"]')) return;
+    e.stopPropagation();   // a kártya a koppintást is figyeli (kiválasztás)
+    telepitesMegnyitasa({ kartya });
+  });
+}
+
+// ⭐⭐ D125: ha a program az imént cserélődött (a kártyáról vagy vissza), a lap betöltésekor egyszer kimondjuk az eredményt.
+telepitesEredmenyenekKimondasa();
 
 // ===================================
 // AZ ŰRLAP — „🧬 Új koino-verzió (gyermek)…”

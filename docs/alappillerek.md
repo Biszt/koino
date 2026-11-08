@@ -1873,3 +1873,13 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     készüléken: ha a kártya magja más, mint egy koinóé, ott „más számítás” lesz — az előnézet koinónként kimondja · ⚠️ a lenyomat
     azt bizonyítja, hogy a kód az, amit a kártya megnevez, azt nem, hogy jó · ⏸️ TK1–TK5 Csabánál
     (`kartya_telepites_atvizsgalas.md`).
+247. **2026-11-07/08 · D125 — telepítés a kártyáról: a régi mellé, a futó program cserél, 30 mp után visszafordít** → **a kártya kódja
+    a `-uj`-ba (előbb minden fájl ellenőrizve; a kiírt mappa a kártya kódját kell nevezze); a cserét a FUTÓ program saját szkriptje
+    végzi (`windows/csere.ps1`, `termux/csere.sh`): leállít, a régi a `-regi`-be (a telefonon a `.git` az új programmal), az új a
+    helyére, indít, és ha 30 mp alatt nem felel, a régit teszi vissza; a visszaút a `-regi`-vel cserél; a lap előtte rétegenként és
+    koinónként kimondja, mi változik** · ⭐ nem a kártya telepítője cserél: egy régebbi kártyáé nem tudna, és a visszafordítás sem volna
+    benne · ⛔ mérve: a leválasztott (`detached`) PowerShell konzol nélkül azonnal kilép, semmit nem tesz — egy `Start-Process` indítja,
+    saját rejtett ablakban · ⛔ a base64url név kötőjellel is kezdődhet — a PowerShell paraméternévnek venné: környezetben megy · ⛔ a lapról
+    mérve: 1,5 mp alatt a hívó felület a válasza előtt leállt, és a kérés el sem bukott, csak függött — most 4 mp, a lap 15 mp után
+    figyel, és a RÉGI kulcsával: ha „engedély nincs”, már az új fut (a kulcs indításonként új) · ⚠️ a telefonon az új program a háttérben
+    indul (a régi Termux-ablakban a régi leállt) · ⚠️ a telefon leállítása (`pkill`) itt nem próbálható — a terepen · ⏭️ a terepi próba.

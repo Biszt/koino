@@ -43,6 +43,8 @@ import { felderitesekMegnyitasa, felderitesInditasa } from './koinoFelderites.js
 import { koltozesMegnyitasa } from './koinoKoltozes.js';
 // ⭐⭐ D119 (①b): az új koino-verzió (gyermek-koinó) űrlapja.
 import { koinoVerzioMegnyitasa } from './koinoVerzio.js';
+// ⭐⭐ D125: a program ezen a készüléken (a telepítés eredménye és a visszaút)
+import { telepitesMegnyitasa } from './koinoTelepites.js';
 // ⭐⭐ D121, D122: a meghívás a lapon — a „Meghívóim” (a prototípus ablaka) és a profil-űrlap („eember beállítások”)
 import { meghivoimMegnyitasa, profilUrlapMegnyitasa } from './koinoMeghivas.js';
 
@@ -118,6 +120,8 @@ export class FoMenu {
       // ⭐⭐ D119 (①b): egy gyermek-koinó a koino-verzió kártyájával (a kód a futó program)
       { ikon: '🧬', felirat: 'Új koino-verzió (gyermek)…', akcio: () => koinoVerzioMegnyitasa({
         terMegnyitasa: this.terMegnyitasa ? () => this._terMegnyitasa() : null }) },
+      // ⭐⭐ D125 (TK5): a program ezen a készüléken — a kódja, az utolsó telepítés, a visszaút az előzőre
+      { ikon: '🧬', felirat: 'A program ezen a készüléken…', akcio: () => telepitesMegnyitasa() },
       // ⭐ D112 ⑤ (F5): a felderítések (pillanatképek) — az állás, újra, törlés; és az egész koinó felderítése
       { ikon: '📷', felirat: 'Felderítések', akcio: () => felderitesekMegnyitasa() },
       { ikon: '📷', felirat: 'Az egész koinó felderítése…', akcio: () => felderitesInditasa({ ag: 'gyoker' }) },

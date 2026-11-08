@@ -67,16 +67,20 @@ a dátumig olvassuk; a `koino` parancs kimondja („A kiírt alakok: …”). �
 meghívóra a „régi alakú — kérj újat”-ot mondta, egy újabbra is — most az iránnyal; a más alakú kiáltást a mai olvasó megnevezi (a régi
 „másik koinónak” vette). A próba egy kitalált következővel (`KOINO_PROBAALAK` — csak próbának), a régi program ellen, a kiáltás
 valódi foglalatokon, a tábla és a témák három valódi folyamattal, a rekesz az M8 útján mindkét irányban. ✅ **A D124 építése kész.**
-🔍 **D123 ④ — PR5, telepítés a kártyáról: ÁTVIZSGÁLVA** ([`kartya_telepites_atvizsgalas.md`](docs/kartya_telepites_atvizsgalas.md),
-**91. mérés** — `kartyaTelepitesMeres.js`: a kártya kódjából egy működő program összerakható, 367 fájl ~0,5 s alatt, mind a
-lenyomata szerint; a munka a csere és az előnézet). ⛔ **A mérés lelete (javítva, elágazás 246):** a git nélküli mappa (a Windowsos
-zip-telepítés, egy kártyából összerakott program) a telepítőket (`.sh`, `.ps1`, `.cmd`) a bejárásból kihagyta, és ugyanarra a
-változatra más programnevet számolt, mint a telefon — most `kodCsomag.js` `KODNAK_VALO`, és egy próba őrzi. ⏸️ **TK1–TK5
-Csabánál** (a csere a mai frissítés láncán, a telefonon a `.git`-tel · az előnézet küszöb nélkül · a más mag koinónként kimondva ·
-a hiányzó fájlok elhozása · a visszaút és a nem induló program). Utána ⑤ **PR4** (feltöltött nézetek).
+✅ **D123 ④ — PR5, telepítés a kártyáról: D125, MEGÉPÜLT** (Csaba: *„mindet elfogadom, mehetünk tovább.”* — TK1–TK5 (A);
+[`kartya_telepites_atvizsgalas.md`](docs/kartya_telepites_atvizsgalas.md), elágazás 246–247; a 91. mérés lelete — a git nélküli
+bejárás a telepítőket kihagyta — javítva). A kártya kódja a `-uj`-ba (előbb minden fájl ellenőrizve, a kiírt mappa a kártya kódját
+kell nevezze — `js/tar/programTelepites.js`); a cserét a FUTÓ program saját szkriptje végzi (`windows/csere.ps1`, `termux/csere.sh` —
+nem a kártyáé: egy régebbi kártya nem tudna cserélni): leállít, a régi a `-regi`-be (a telefonon a `.git` vele), az új a helyére,
+indít, és ha 30 mp alatt nem felel, visszafordít; az eredmény az adat-mappa `telepites.json`-ja. A parancs: `telepit [<kártya>
+[kiir|igen] | vissza]`; a lap: a „🧬 Kód” fül „⬇ Telepítés erre a készülékre…” (az előnézet: a szerző, a pont, a rétegek, a mag
+koinónként, a figyelmeztetés), a fő menü „🧬 A program ezen a készüléken…” (a visszaút), és az eredmény a betöltéskor. ⛔ Mérve: a
+leválasztott PowerShell konzol nélkül azonnal kilép (`Start-Process` indítja); a base64url név kötőjellel is kezdődhet (környezetben
+megy); a lap kulcsa indításonként új — a régi fül a régi kulcsával figyel. `meres/telepitesProba.js` (8, a `parancssor` csoportban),
+16 rontás. ⏭️ **A terepi próba** (a telefon leállítása — `pkill` — és a háttérben indulás; egy kártya egy másik készülékről), utána
+⑤ **PR4** (feltöltött nézetek).
 
-**Az állapot:** **1423 önpróba** (65 próba-fájl; a legutóbbi teljes soron 1422/1422 zöld — 2026-11-07, a D124 ⑤
-után; az azóta jött egy — a git nélküli név, a 91. mérés lelete — a csoportjában zöld) · 368 fájl / 7271,9 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1431 önpróba** (66 próba-fájl; a legutóbbi teljes soron 1431/1431 zöld — 2026-11-08, a D125 után) · 374 fájl / 7359,8 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

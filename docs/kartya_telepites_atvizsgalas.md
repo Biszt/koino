@@ -1,6 +1,7 @@
 # Telepítés a kártyáról — átvizsgálás (D123 ④, PR5 — 2026-11-07, kód nélkül)
 
-> **Állapot:** 🔍 átvizsgálva · ⏸️ **TK1–TK5 Csabánál** (5.). Az elv a D123-ban eldőlt (PR5 (B)): *„a kártya kód-csomagjából egy új
+> **Állapot:** ✅ **D125** (Csaba, 2026-11-07: *„mindet elfogadom, mehetünk tovább.”* — TK1–TK5 mind (A)) · ✅ az építés ①–③
+> (elágazás 247) · ⏭️ ④ a terepi próba (7.). Az elv a D123-ban eldőlt (PR5 (B)): *„a kártya kód-csomagjából egy új
 > programmappa a régi MELLÉ (minden fájl a lenyomata szerint ellenőrizve, a jegyzék lenyomata a kártya `kod`-ja), az e-ember maga
 > indítja, a lap előtte megmutatja, ki tette fel, hány pont van rajta és mi változott (rétegenként); a régi mappa megmarad
 > (visszaút), az adat mappán kívül van.”* Ez az átvizsgálás azt nézi meg, HOL és HOGYAN — a kód és a **91. mérés** alapján
@@ -107,11 +108,9 @@ a mérés (c)-je és (e)-je: 367 fájl, a név ugyanaz.
 
 ## 7. Az építés sorrendje (ha a kérdések eldőlnek)
 
-✅ **A 91. mérés lelete** (a git nélküli bejárás a telepítőket is viszi — elágazás 246) → ① **a kiírás és az ellenőrzés** (a
-`koino-uj`, fájlonként; a parancs; a próba: a kiírt mappa jegyzéke a kártya `kod`-ja, egy hamisított fájl megáll) → ② **a csere**
-a két platformon (a Windowson a PR7 lánca; a telefonon az új csere a `.git`-tel — TK1) és a **visszaút** (TK5) → ③ **a lap**
-(az előnézet rétegenként, a mag koinónként, a hiányzó fájlok, a telepítés gombja) → ④ **terepi próba** (laptop + telefon: egy
-kártyáról telepítve, és vissza).
+✅ **A 91. mérés lelete** (a git nélküli bejárás a telepítőket is viszi — elágazás 246) → ✅ ① **a kiírás és az ellenőrzés** → ✅ ②
+**a csere** a két platformon és a **visszaút** → ✅ ③ **a lap** → ⏭️ ④ **terepi próba** (laptop + telefon: egy kártyáról telepítve,
+és vissza). *(Megépült 2026-11-07/08 — elágazás 247:* **① a kiírás** (`js/tar/programTelepites.js` `kodKiirasa`: előbb minden fájl beolvasva és ellenőrizve — megvan-e, a mérete és a lenyomata a jegyzéké-e, az útja biztonságos-e —, csak utána ír; a kiírt mappa kód-csomagja a kártya `kod`-ját kell nevezze, különben törlődik; megnevezett hibák: `HIANYZO-FAJL`, `ROSSZ-FAJL`, `TILTOTT-UT`, `KIIRT-MAS`) és **az előnézet** (`telepitesElonezete` — a szerző, a pont, a fájlok állása, a rétegek: `valtozasRetegei`, a mag koinónként: a készülék koinóinak születési magja a kártya kódjáéhoz képest) · **② a csere** a FUTÓ program saját szkriptjével (`windows/csere.ps1`, `termux/csere.sh` — az adat-mappába másolva, leválasztva): leállít, a régi a `-regi`-be (a telefonon a `.git` az új programmal megy), az új a helyére, indít (Windowson egy új ablakban, mint az asztali ikon; a telefonon a háttérben), és 30 mp-ig vár, hogy feleljen — ha nem, a régit teszi vissza (a nem induló a `-hibas`-ba); a visszaút a `-regi`-vel helyet cserél; az eredmény az adat-mappa `telepites.json`-ja (és `telepites.log`). ⛔ **Mérve:** a leválasztott (`detached`) PowerShell konzol nélkül azonnal kilép — ezért egy rövid PowerShell a `Start-Process`-szel indítja a szkriptet, saját rejtett ablakban; a kártya és a kód neve base64url (kötőjellel is kezdődhet — a PowerShell paraméternévnek venné): környezetben megy; a szkript 4 mp-et vár a leállítás előtt (1,5 mp alatt a hívó felület a válasza előtt leállt). **A parancs:** `telepit` (az állapot) · `telepit <kártya>` (az előnézet) · `telepit <kártya> kiir` · `telepit <kártya> igen` · `telepit vissza`. · **③ a lap:** a „🧬 Kód” fül „⬇ Telepítés erre a készülékre…” gombja → az előnézet (`felulet/js/koinoTelepites.js`) → „Igen, telepítem”; a fő menü „🧬 A program ezen a készüléken…” (a kód, az utolsó telepítés, „↩ Vissza az előző programra”); a lap kulcsa indításonként új, ezért a régi fül a RÉGI kulcsával figyel (ha a válasz „engedély nincs”, már az új fut), az új program a saját lapját nyitja meg, és az az eredményt betöltéskor egyszer kimondja. Böngészőben végigjárva (a telepítés és a visszaút). **A próbák:** `meres/telepitesProba.js` (8 — a kiírás szabályai, a csere helye, a rétegek, az éles út két programmal, a lap útjai, a valódi windowsos csere előre és vissza, a TK5 visszafordítás, a telefon szkriptje a Git Bash-sel a valódi `indit.sh`-val), a meghívó-próba a `csere.ps1` BOM-jával és értelmezésével; 16 rontás, mind bukik. ⚠️ **A terepen próbálandó:** a telefon futó koinójának leállítása (`pkill` — itt nincs) és a háttérben indulás; egy valódi koino-verzió kártya egy másik készülékről.)*
 
 *Kapcsolódik:* `program_retegek_atvizsgalas.md` (D123, PR5), `csaladi_orjarat_atvizsgalas.md` (D119 — a koino-verzió kártya, a
 kód-csomag), `torzs_hatar_atvizsgalas.md` (D120 — a kártya kódja elemként), `meres/eredmenyek.md` 91., `windows/telepit.ps1` és
