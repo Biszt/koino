@@ -56,7 +56,10 @@ lesz**). A koino önálló program, a böngésző csak a rajzolója (**D29 — a
 
 A koino **eszköz, nem közösség** (**D13 — a koino eszköz, nem közösség; a fork normál üzemmód**): bárki indíthat koinót (család,
 osztály, munkahely, párt), és a szétválás normál működés, nem vészkijárat. Nincs „családi” és „globális” koino: egy program van, ami
-nő — ezért a szerkezetének az első naptól a milliárdot kell bírnia. **Egy koinóval indulunk** (Csaba, 2026-11-08).
+nő — ezért a szerkezetének az első naptól a milliárdot kell bírnia. **Egy koinóval indulunk** (Csaba, 2026-11-08). ⚠️ **A mostani
+koinók teszt koinók;** az „első koinó” az, amit Csaba majd szélesebb körben terjeszt (*„majd szólok, hogy melyeket akarom szélesebb
+körben is terjeszteni”*). ⭐ **Ideiglenes megoldást kerülünk:** ha egy rész végleges alakja ismert, az elejétől úgy épül (Csaba,
+2026-11-08).
 
 ### 2.2 A szabályok, amik minden döntést kötnek
 
@@ -296,5 +299,7 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-3** megtervezve: [`terv_kulcs.md`](terv_kulcs.md); ⏸️ ET-3/2 – ET-3/6 Csabánál.
 - **2026-11-08** — **ET-3/2 – ET-3/6 mind (A)** — az ET-3 eldöntve, átadható az építőnek. A következő téma: ET-2 (a szavazás).
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
+- **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
+  elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
 - **2026-11-08** — **ET-4/2:** marad a D57 (legalább N felhatalmazás, N a 2. lépcsősök mediánja). Az ET-4 ezzel lezárult: a 2. lépcső
   terve nem változik.
