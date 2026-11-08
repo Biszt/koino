@@ -13,7 +13,8 @@
 **A költözés helye a kormányzásban** (Csaba kérdése: *„a költözés a forráskód-kormányzás, vagy csak annak a része?”*): a
 [`kormanyzas.md`](kormanyzas.md) öt lépcsőjéből (javaslat · értékelés · döntés · bevezetés · sürgősségi út) a **negyedik**, a
 bevezetés — ott eredetileg a D9 önfrissítése állt, ezt a D66 vetette el. ⭐ És a D66 óta a **súlypontja** is: elosztott
-rendszerben senki nem kényszeríthet senkit az elfogadott kód futtatására, ezért a kódról szóló szavazás legfeljebb jelzés, a
+rendszerben senki nem kényszeríthet senkit az elfogadott kód futtatására, ezért a kódról szóló szavazás legfeljebb jelzés (⛔ elavult —
+Csaba, 2026-11-08: *„nem kell szavazás a kódról.”*), a
 valódi döntés az, hogy **ki költözik** (a D65 kérdésére is ez lett a válasz). A kormányzás így inkább választás, mint
 határozat. Két irányban nem esik egybe a kettő: a költözés **tágabb** (ugyanez kell a szétváláshoz, egy változat
 kipróbálásához és a „más paraméterekkel” induló koinóhoz — D13, D25), és **szűkebb** is (a kód változásainak többsége nem

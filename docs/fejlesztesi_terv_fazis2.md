@@ -1752,7 +1752,8 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
   **normál működés**, sőt: **bárki indíthat teljesen új koinót** — család, osztály,
   munkahely, párt. *„A koinót nem kizárólag egy közösségnek építem, hanem egy eszközt
   szeretnék adni, amivel bárkik csinálhatnak közösséget."*
-- **Siker-mérce változik:** nem az, hányan vannak a koino.hu-n, hanem **hány koino létezik**.
+- ~~**Siker-mérce változik:** nem az, hányan vannak a koino.hu-n, hanem **hány koino létezik**.~~ ⛔ **Helyreigazítás (Csaba,
+  2026-11-08):** *„én nem állítok ilyet.”* — ilyen siker-mérce nincs.
 - **Az értelmezési egység az ADATBÁZIS.** Két születési mód: **szétválás** (a verzió-javaslat
   megosztja a közösséget → az adatbázis LEMÁSOLÓDIK, a regisztráltakon is osztoznak, a múlt
   közös) és **új alapítás** (üres, teljesen külön adatbázis, nincs közös múlt). A szétválás
@@ -1950,6 +1951,9 @@ visszafordíthatatlan**.
 az ablak.
 
 ### 🌓 KÉT KOINO INDUL, NEM EGY (Csaba döntése, 2026-09-02) — a D13/b első valódi alkalmazása
+
+⛔⛔ **Helyreigazítás (Csaba, 2026-11-08):** *„ilyet sem mondtam. eggyel indulunk.”* — a mai döntés: **egy koinóval indulunk.** Az
+alábbi szakasz a 2026-09-02-i feljegyzés, történetként marad meg; a „két koinó” nem terv.
 
 > *„Eldöntöttem, hogy legalább 2 koinót fogok indítani. Ha lesz még ilyen morális kérdés,
 > akkor az egyik verzió megy az egyikbe, a másik a másikba."*
@@ -2592,6 +2596,11 @@ gondolat, mint bármi más**.
 
 > „A központi server részét most nem kell fejleszteni. A kis családi közösségeknek is
 > P2P-nek kell lenniük." — Csaba
+
+⛔ **Helyreigazítás (Csaba, 2026-11-08):** a fenti második mondat NEM a D22 oka — *„nem ez az oka. ez a mondat, akkor született,
+amikor a skálázhatóság prioritásáról beszéltük, hogy nincs külön családi méretre szabott működés, ami nem skálázható. A központi
+szerveres koino, mindig is csak lépcsőfok volt. az egyenrangú skálázható p2p volt a cél.”* A D22 tehát nem fordulat, hanem a cél
+kimondása: a központi szerveres koino lépcsőfok volt, és a kis közösség sem kap külön, nem skálázható működést.
 
 **Ez a döntés felülír egy tervezési feltevést.** Az eredeti lépés-sorrend az A szakaszt
 (kulcsok, bizalmi háló) kifejezetten *„még központi szerverrel"* építette volna meg, azzal
@@ -6067,7 +6076,8 @@ a megjegyzés a felderítést ajánlja. A tömeges elhozás a felderítés dolga
 de mielött elkezdjük beszéljük át, alapossan.”*
 
 **A helye:** a költözés a forráskód-kormányzás ([`kormanyzas.md`](kormanyzas.md)) 4. lépcsője, a bevezetés — a D9
-önfrissítése helyett —, és a D66 óta a súlypontja: a kódról szóló szavazás legfeljebb jelzés, a valódi döntés az, hogy ki
+önfrissítése helyett —, és a D66 óta a súlypontja: ~~a kódról szóló szavazás legfeljebb jelzés~~ (⛔ elavult — Csaba, 2026-11-08:
+*„nem kell szavazás a kódról.”*), a valódi döntés az, hogy ki
 költözik.
 
 **A hat döntés:**

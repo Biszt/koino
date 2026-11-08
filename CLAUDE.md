@@ -19,7 +19,7 @@ p2p koino-nak külön kéne lennie.”* → *„tiszta lappal szeretnék indúln
 A prototípusból a felület bájtra örökölt (5.3) — a `meres/kapuProba.js` a szomszéd tár `frontend/`-jével veti össze (vagy a
 `KOINO_PROTOTIPUS` mappájával; ha nincs a gépen, kimarad).
 
-**A fordulat oka (D22):** *„a központi server részét most nem kell fejleszteni. A kis családi közösségeknek is P2P-nek kell lenniük."* — a régi koino a prototípus, ami tanított; az új a **készüléken** kezdődik, örökölve belőle a domain-logikát és a felületet.
+**A D22 (P2P az első kiadástól) oka:** a központi szerveres koino mindig is csak lépcsőfok volt — a cél kezdettől az egyenrangú, skálázható P2P. ⛔ *Helyreigazítás (Csaba, 2026-11-08):* nem a „kis családi közösségek” mondata az ok — *„nem ez az oka. ez a mondat, akkor született, amikor a skálázhatóság prioritásáról beszéltük, hogy nincs külön családi méretre szabott működés, ami nem skálázható. A központi szerveres koino, mindig is csak lépcsőfok volt. az egyenrangú skálázható p2p volt a cél.”* A régi koino a prototípus, ami tanított; az új a **készüléken** kezdődik, örökölve belőle a domain-logikát és a felületet.
 
 ## ⏭️ HOL TARTUNK — ELŐSZÖR EZT OLVASD (2026-10-15)
 
@@ -536,6 +536,8 @@ D100 parancssor-próbája méri, egy végig futó felülettel) · a lap a még m
 - **Ne kérj engedélyt** — commit, push, a következő lépés: csináld, és számolj be (lásd lent:
   *„ENGEDÉLY ELŐRE"*). A D-szintű döntés Csabáé, azt **döntési kérdésként** tedd fel.
 - **Magyarázatnál folyó szöveg, ne táblázat** (Csaba kérése).
+- ⭐ **Egy D-szám mellé mindig a döntés CÍME is** (Csaba, 2026-11-08 — mindkét ágra): nem „a D118 szerint”, hanem „a D118 (a
+  költözés alakja) szerint” — a szám egymagában semmit nem mond.
 - **Fájlonként add hozzá**, ne `git add -A` (más session munkája is állhat a könyvtárban).
 - **Commit-üzenet fájlból:** PowerShellben a `-m` idézőjelei eltörnek — az üzenet egy fájlba,
   és `git commit -F`. ⚠️ **Ne a `.git/` alá** (Csaba, 2026-09-26): azt az app érzékeny helynek
