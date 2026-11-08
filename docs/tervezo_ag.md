@@ -189,8 +189,9 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
 - **D123 — a program rétegei**, és ami rá épült: **D124 (a protokoll nyelvváltozata)**, **D125 (telepítés a kártyáról)**, **D126 (a
   közösség feltöltött nézetei)**.
 - **A kormányzás három szintje** (`kormanyzas.md`, **D12 — a három szint**): a gondolat és a program ugyanazzal a gépezettel dől el; a
-  koinók sokasága felett nincs kormányzat. A forráskód-kormányzás öt lépcsőjéből három áll (a javaslat, a döntés, a bevezetés — a
-  költözés). Kettő nincs (**N9 — elismerés-entitás + kinevezési rendszer**):
+  koinók sokasága felett nincs kormányzat. ⭐ **A kódról nem kell szavazás** (Csaba, 2026-11-08 — az építő ág `1453b06`): a program
+  változása egy új koinó-verzió, és mindenki maga dönti el, átköltözik-e (D66). A forráskód-kormányzás öt lépcsőjéből így ennyi kell: a
+  javaslat (egy koino-verzió kártya) és a bevezetés (a költözés). Ami még nincs (**N9 — elismerés-entitás + kinevezési rendszer**):
   - **az elismerés:** egy új entitás, amit az e-emberek egymásra „aggatnak”, az érintett beleegyezésével (pl. *„ért az adatbázisokhoz
     — 14-en ismerték el”*). Tájékoztat, nem jogosít: a szavazat egyenlő marad, de látszik, ki ért valamihez — így egy kód-javaslatnál
     nem kell se vakon szavazni, se szakértőkre bízni;

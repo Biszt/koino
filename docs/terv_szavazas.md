@@ -104,9 +104,8 @@ a koinóban a részvétel részleges, és menet közbeni eredmény sincs. → ne
 
 ## 6. A kérdések (⏸️ Csabáé)
 
-- **ET-2/1 — Titkos vagy nyílt?** (A) ⭐ titkos, az első szélesebb körben terjesztett koinótól — a nyíltság önkéntes: bárki kimondhatja
-  a saját állását, de senki nem kényszeríthető rá (9. szakasz); (B) nyílt, mindig — a D2 elvetve. *(Csaba még nem biztos az etikai
-  kérdésben; a két oldal a 9. szakaszban.)*
+- ✅ **ET-2/1 — Titkos vagy nyílt?** (Csaba, 2026-11-08): **titkos, önkéntes nyíltsággal**, az első szélesebb körben terjesztett
+  koinótól — *„ha a közösségnek ez nem tetszik, majd létrehoznak egy új koino verziót.”*
 - **ET-2/2 — Ha titkos, mi titkos?** (A) ⭐ hogy ki HOGYAN szavazott; hogy KI szavazott, az látszik (a részvételhez és a jogosultsághoz
   kell); (B) az is, hogy ki szavazott (névtelen szavazás).
 - **ET-2/3 — Ha titkos, a módszer:** (A) ⭐ titkosított szavazat, csak az összeg nyílik, véletlen összesítők a jogosultak közül;
@@ -148,9 +147,8 @@ növeli, ezért rövidebb lesz a döntési idő.”*
   556‰ → a döntés kb. **3,1 nap** után zárul;*
 - *ha a 2 tartózkodó nem szavaz: ugyanúgy elfogadva, de a részvétel 9/11 = 818‰ → mutató 465‰ → kb. **3,7 nap**.*
 
-⚠️ **A kimondott következmény:** sok tartózkodás mellett kevés igen is gyorsan elfogad (pl. 1 igen, 0 nem, 20 tartózkodik: 100%,
-teljes részvétel → gyors zárás). Ezt csak a közösség által állított küszöbök fogják meg (a részvételi küszöb ezt nem — a tartózkodás
-részvétel).
+**A kimondott következmény:** sok tartózkodás mellett kevés igen is gyorsan elfogad (pl. 1 igen, 0 nem, 20 tartózkodik: 100%,
+teljes részvétel → gyors zárás). ✅ Csaba (2026-11-08): *„szerintem ez nem probléma.”*
 
 ⚠️ **A mag változása** (`javaslatSzamitas.js` `allasSzamokbol`): a mostani teszt koinók után, az első, szélesebb körben terjesztett
 koinó előtt.
@@ -183,10 +181,36 @@ gondolok róla”.)*
 **A kis csoport** (ET-2/5) ettől független: ott a végeredmény úgyis sokat elárul. Ha a szavazás mindig titkosított, ott is az — csak a
 lap kimondja, hogy kevés szavazónál a titok gyenge.
 
+## 10. „Csak a szavazó azonosíthatóságát kell védeni, nem?” (Csaba, 2026-11-08)
+
+**Igen — a cél egyetlen dolog: hogy egy szavazatot ne lehessen a szavazójához kötni.** Ezt kétféleképpen lehet elérni, és a
+két út ugyanazt védi:
+- **(A) a tartalmat rejtjük:** az látszik, hogy Anna szavazott (alá van írva), de az nem, hogy mit — a szavazata titkosított, és csak
+  az összeg nyílik ki;
+- **(B) a szerzőt rejtjük:** az látszik, hogy valaki igennel szavazott, de az nem, hogy ki — a szavazat névtelen, csak az biztos,
+  hogy egy jogosult adta le.
+
+**Miért az (A) a javaslatom, ha a cél ugyanaz:**
+1. **A jogosultság:** csak az szavazhat, akinek pontja van a gondolaton és a javaslaton. Az (A)-nál ez ugyanúgy ellenőrizhető, mint ma
+   (az aláírásból). A (B)-nél a névtelen aláírásnak a teljes jogosulti kört fel kell sorolnia — egy népszerű gondolatnál ez akár
+   százezer kulcs egy szavazatban (9. szabály: egy készülék terhe nem nőhet a koinóval).
+2. **A névtelen beküldés:** a (B)-nél a szavazatot úgy kell eljuttatni, hogy a beküldő gépe ne árulja el a szavazót (különben az első
+   gép, amelyiken megjelenik, a szavazóé). Ehhez a szavazatnak több idegen gépen át kell utaznia. Az (A)-nál ez nem kell: a tartalom
+   titkos, mindegy, honnan jön.
+3. **Ami az (A)-ból következik** (az ET-2/4 és az ET-2/5 ezért kérdés): mivel látszik, KI szavazott és MIKOR, a menet közbeni összeg
+   nem nyílhat ki minden szavazat után — különben „Béla az imént szavazott, és az igenek eggyel nőttek” —, ezért nyílik kötegekben
+   (vagy ha mindenki szavazott, vagy a határidőkor). És kis csoportban a végeredmény úgyis sokat elárul — ezen egyik út sem segít.
+
+⭐ **Ezért a négy kérdés egy csomagban dönthető el:** ET-2/2 (A) — a tartalom titkos, a részvétel látszik; ET-2/3 (A) — titkosított
+szavazat, csak az összeg nyílik, véletlen összesítők a jogosultak közül; ET-2/4 (A) — az összeg kötegekben nyílik; ET-2/5 (A) — kis
+csoportban is titkosított, a lap kimondja, hogy ott gyenge a titok.
+
 ## Napló
 
 - **2026-11-08** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba: a tartózkodás nem maradhat (a javítás: 8.); ha titkos, az elejétől — az „először nyílt” javaslat visszavonva;
   az etikai kérdés még nyitott (a két oldal: 9.).
+- **2026-11-08** — ✅ **ET-2/1** (Csaba): titkos, önkéntes nyíltsággal; a tartózkodás következménye *„nem probléma”*. Csaba kérdése
+  az ET-2/2–5-re: *„csak a szavazó azonosíthatóságát kell védeni, nem?”* — a válasz a 10. szakaszban.
 - **2026-11-08** — ✅ **ET-2/6** (Csaba): a tartózkodás a támogatottságba nem, a részvételbe igen — a bizonyosságot növeli, a döntési
   időt rövidíti (a javaslatom, hogy lassítson, helyesbítve).
