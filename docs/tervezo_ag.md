@@ -301,5 +301,7 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-08** — ✅ **ET-2/6:** a tartózkodás a támogatottsági arányt nem módosítja, a részvételt növeli → a bizonyosság nő, a
+  döntési idő rövidül.
 - **2026-11-08** — **ET-4/2:** marad a D57 (legalább N felhatalmazás, N a 2. lépcsősök mediánja). Az ET-4 ezzel lezárult: a 2. lépcső
   terve nem változik.

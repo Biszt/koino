@@ -99,7 +99,8 @@ a koinóban a részvétel részleges, és menet közbeni eredmény sincs. → ne
   szavazott”).
 - **Egy út, nem kettő:** kis csoportban is titkosított, és a lap kimondja, hogy kevés szavazónál a titok gyenge (a végeredmény sokat
   elárul). Nincs külön „nyílt mód” — kevesebb a hibalehetőség.
-- **A tartózkodás:** a 8. szakasz szerint — részvétel, de nem dönt, csak lassít.
+- **A tartózkodás** (✅ ET-2/6): a támogatottságba nem számít, a részvételbe igen — így a bizonyosságot növeli, és rövidebb lesz a
+  döntési idő (8. szakasz).
 
 ## 6. A kérdések (⏸️ Csabáé)
 
@@ -114,9 +115,8 @@ a koinóban a részvétel részleges, és menet közbeni eredmény sincs. → ne
   vagy a határidő), a lezárás ideje a legutóbb kinyílt összegből; (B) a korai lezárás csak a részvételből, az eredmény a végén nyílik.
 - **ET-2/5 — Kis csoportban:** (A) ⭐ ott is titkosított, és a lap kimondja, hogy a titok gyenge (egy út); (B) *X* jogosult alatt nyílt
   (két út — a korábbi javaslat).
-- **ET-2/6 — A tartózkodás** (✅ Csaba: nem maradhat a prototípus szerint): (A) ⭐ részvétel, de nem dönt, csak lassít — az elfogadás az
-  igenek és a nemek arányából, a részvételbe beszámít, a bizonyossági mutatóban csökkenti az egyértelműséget (8. szakasz); (B) a
-  bizonyossági mutatóból is kimarad (5 igen, 0 nem, 20 tartózkodás mellett nagyon gyors zárás). ⚠️ Mindkettő a mag változása.
+- ✅ **ET-2/6 — A tartózkodás** (Csaba, 2026-11-08): a támogatottsági arányt nem módosítja, a részvételt növeli, ezért a bizonyossági
+  mutatót is növeli, és rövidebb lesz a döntési idő (8. szakasz). ⚠️ A mag változása.
 
 ## 7. Mérendő (az építőnek, ha a titkos szavazás sorra kerül)
 
@@ -129,25 +129,31 @@ a koinóban a részvétel részleges, és menet közbeni eredmény sincs. → ne
 
 ## 8. A tartózkodás javítása (ET-2/6)
 
-Csaba (2026-11-08): *„ezt orvosolni kell. van javaslatod?”* — és: *„ne maradjon úgy, mint a prototípusban.”*
+Csaba (2026-11-08): *„ezt orvosolni kell. van javaslatod?”* — *„ne maradjon úgy, mint a prototípusban.”* — és a javaslatom
+helyesbítése: ✅ *„a tartózkodás, a támogatottsági arányt nem módosítja, a részvételt viszont növeli, ezért a bizonyossági mutatót is
+növeli, ezért rövidebb lesz a döntési idő.”*
 
-**A javaslat — a tartózkodás részvétel, de nem dönt, csak lassít:**
-- **Az elfogadás:** az igenek aránya az igenek és a nemek között ≥ az elfogadási küszöb — a tartózkodás itt nem számít:
-  `igen × 100 ≥ küszöb × (igen + nem)` (egész aritmetikával, mint ma). Ha senki nem mondott se igent, se nemet, nincs elfogadás.
-- **A részvétel:** a tartózkodó részt vett — a részvételi arányba beszámít (ez a tartózkodás értelme: „itt vagyok, de nem állok
-  egyik oldalra sem”).
-- **A bizonyossági mutató:** marad, ahogy ma — a tartózkodás csökkenti az egyértelműséget, tehát **meghosszabbítja** a döntési időt:
-  több idő marad a többieknek, de a tartózkodás maga nem buktat el semmit.
+**✅ A szabály (ET-2/6, Csaba döntése):**
+- **A támogatottság:** az igenek aránya az igenek és a nemek között — a tartózkodás nem számít bele:
+  `igen × 100 ≥ elfogadási küszöb × (igen + nem)` (egész aritmetikával, mint ma). Ha senki nem mondott se igent, se nemet, nincs
+  elfogadás.
+- **A részvétel:** a tartózkodó részt vett — beszámít (`igen + nem + tartózkodik` a nevezőhöz).
+- **Az egyértelműség** (a bizonyossági mutató egyik fele): az igenek és a nemek különbsége az igenek és a nemek között — a tartózkodás
+  ebbe sem számít.
+- **A bizonyossági mutató** = (egyértelműség + részvétel) / 2, ezért **a tartózkodás növeli** (a részvételen át), és **rövidebb lesz a
+  döntési idő**.
 
-*Példa: 5 igen, 4 nem, 2 tartózkodik → elfogadás: 5/9 = 56% ≥ 51% — elfogadva. A részvétel 11 szavazó. A bizonyosság alacsony
-(az igen és a nem különbsége csak 1 a 11-ből), ezért a döntés a maximális idő közelében zárul — addig bárki szavazhat még, és
-megfordíthatja.*
+*Példa — 11 jogosult, a küszöb 51%, a döntési idő 1 mp – 7 nap:*
+- *5 igen, 4 nem, 2 tartózkodik: támogatottság 5/9 = 56% → **elfogadva**; egyértelműség 1/9 = 111‰, részvétel 11/11 = 1000‰ → mutató
+  556‰ → a döntés kb. **3,1 nap** után zárul;*
+- *ha a 2 tartózkodó nem szavaz: ugyanúgy elfogadva, de a részvétel 9/11 = 818‰ → mutató 465‰ → kb. **3,7 nap**.*
 
-**A második lehetőség:** a bizonyossági mutató se számolja a tartózkodást (az egyértelműség csak az igenek és a nemek között). Akkor
-5:4-nél ugyanaz, de 5 igen, 0 nem, 20 tartózkodás mellett a döntés nagyon gyorsan zárulna — pedig a résztvevők többsége nem foglalt
-állást. → az első a javaslatom.
+⚠️ **A kimondott következmény:** sok tartózkodás mellett kevés igen is gyorsan elfogad (pl. 1 igen, 0 nem, 20 tartózkodik: 100%,
+teljes részvétel → gyors zárás). Ezt csak a közösség által állított küszöbök fogják meg (a részvételi küszöb ezt nem — a tartózkodás
+részvétel).
 
-⚠️ **A mag változása** (`javaslatSzamitas.js`): a mostani teszt koinók után, az első, szélesebb körben terjesztett koinó előtt.
+⚠️ **A mag változása** (`javaslatSzamitas.js` `allasSzamokbol`): a mostani teszt koinók után, az első, szélesebb körben terjesztett
+koinó előtt.
 
 ## 9. Titkos vagy nyílt — az etikai kérdés (ET-2/1)
 
@@ -182,3 +188,5 @@ lap kimondja, hogy kevés szavazónál a titok gyenge.
 - **2026-11-08** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba: a tartózkodás nem maradhat (a javítás: 8.); ha titkos, az elejétől — az „először nyílt” javaslat visszavonva;
   az etikai kérdés még nyitott (a két oldal: 9.).
+- **2026-11-08** — ✅ **ET-2/6** (Csaba): a tartózkodás a támogatottságba nem, a részvételbe igen — a bizonyosságot növeli, a döntési
+  időt rövidíti (a javaslatom, hogy lassítson, helyesbítve).
