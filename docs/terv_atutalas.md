@@ -131,9 +131,39 @@ pénzt kivenni — *„120 000 Annának a festékre”*. A kérdés az volt, hog
 egy napokig tartó, nyilvános szavazás. Ellopni nincs mit, és a megállításra (egy visszavonó javaslatra) a szavazás ideje alatt amúgy is van
 mód. → **(B) a kassza kifizetésének nincs külön ablaka.**
 
+## 8. Túlbonyolítjuk? (Csaba, 2026-11-09)
+
+Csaba: *„ebben a példában Béla nem becsületes, hiszen megállapodott Annával. egyébként nekem nem jut eszembe olyan visszaélés, amit ne
+tartana vissza az a tény, hogy a tranzakciók nyomonkövethetők, de visszatart az, ha van időablak. ezt beszéljük át, mert lehet, hogy túl
+bonyolítjuk.”*
+
+**Amiben igaza van:**
+- **Ha Béla személyesen ad át készpénzt** valakinek, aki Anna nevében jön, de nem Anna — az Béla kockázata (a megállapodás Annával szólt).
+- **A koinón belül minden nyom egy ismert azonossághoz vezet.** Aki magának vagy egy cinkosának utal, lebukik — a 2. lépcső mögött valódi,
+  tanúsított ember áll (az első koinóban névvel és településsel).
+
+**Az egyetlen eset, ahol a nyom nem segít, de az ablak igen:** egy **kívülálló** (nem koinó-tag) ellopja Anna telefonját, és a koinosait
+**online** eladja: Béla banki átutalással vagy kriptóval fizet egy külső számlára, és „Annától” (a lopott kulccsal aláírva) megkapja a
+koinost. Béla nem tisztességtelen — csak egy aláírásban bízott. A koinos-nyom Bélánál véget ér, a pénz-nyom a koinón kívül van. *(A
+rendőrség a banki nyomon elkaphatja — de az már nem a koino.)*
+
+**Erre van egy egyszerűbb védelem is, mint az ablak:** a koino **a nagyobb átutaláshoz a készülékén kéri a PIN-kódodat** (a készülékkulcs
+jelszóval védett — ET-3). A telefon-tolvaj így nem tud küldeni. Ez helyi dolog: a protokollhoz, a tanúkhoz, a piachoz nem kell hozzányúlni.
+
+**A lehetőségek:**
+- **(A) ⭐ nincs várakozási ablak** — a védelem a nyomonkövethetőség (a koinón belül), a PIN a nagyobb átutaláshoz (a kívülálló
+  telefon-tolvaj ellen), és a kulcs-szerkezet (ET-3: az ellopott készülék kizárható, a csere-kulccsal visszaveszed az azonosságodat). ⚠️
+  Ez a **D16 — a pénz lassú, nyilvános és megtámadható** felülvizsgálata: egy ellopott pénz (ha a tolvaj a PIN-t is tudja) nem hozható
+  vissza a programmal.
+- **(B) a várakozási ablak csak annak, aki bekapcsolja** a saját fiókjára (mint egy bankkártya napi limitje) — az eladó látja, ha a vevő
+  fiókjának van ablaka.
+- **(C) a teljes D16** — a 7. szakasz alakja (ablak az összeg szerint, a megállítás lopás-bejelentés).
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-11/1 – ET-11/5 Csabánál.
 - **2026-11-09** — ✅ ET-11/3 (a piaci kiegészítéssel), ET-11/4. Csaba: a határ az összes pénzhez (→ a fejenkénti átlag 10%-a); a változó
   ablak (→ az összegtől igen, a kapcsolatoktól nem — D49, a 31–45%); a piac és az ablak (→ a megállítás lopás-bejelentés, kizárja a küldő
   készüléket); ET-11/5 elmagyarázva, a javaslat javítva: nincs külön ablak (7.).
+- **2026-11-09** — Csaba: *„lehet, hogy túl bonyolítjuk”* — az egyetlen eset, ahol a nyom nem segít (a kívülálló telefon-tolvaj online
+  eladása); az egyszerűbb védelem: PIN a nagyobb átutaláshoz; három lehetőség (8.).
