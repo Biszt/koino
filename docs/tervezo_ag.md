@@ -287,8 +287,8 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
 - **ET-9 — Közös kasszák** (Csaba, 2026-11-09): projektre, a koinó-családnak, helyek szerint (*„a 10%-nak 1%-a a globális kasszába, 2% a
   saját országába, 4% a régiós kasszájába, 8% a települése kasszájába, a maradék 85% meg hozzá”*), és hogy többséggel kikényszeríthető-e.
   → 🔍 **a terv: [`terv_kassza.md`](terv_kassza.md)** — ⭐ a kassza egy entitás, kifizetés elfogadott kifizetési javaslattal; az osztalék
-  része a közösbe a születési szabályban (többséggel nem kényszeríthető); a helyek a fában; ⚠️ a hely nyilvános állítás (D6). ⏸️ ET-9/1 –
-  ET-9/6 Csabánál.
+  része a közösbe a születési szabályban (többséggel nem kényszeríthető); a helyek a fában; ⚠️ a hely nyilvános állítás (D6). ✅
+  **Eldöntve** (2026-11-09, mind (A)) — az építés a pénzzel, az ET-8 után.
 - **ET-10 — A belső piac** (a vételi és eladási szándék, *„jegyezve legyen”*).
 - **ET-11 — Az átutalás ablaka és összeghatára** (D16).
 
@@ -318,6 +318,7 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — ✅ **ET-9/1 – ET-9/6** (A) — a közös kasszák eldöntve.
 - **2026-11-09** — ✅ **ET-7/1 – ET-7/4** (A). Új témák: **ET-9** (közös kasszák — megtervezve: [`terv_kassza.md`](terv_kassza.md); ⏸️
   ET-9/1 – ET-9/6 Csabánál), **ET-10** (a belső piac), **ET-11** (az átutalás ablaka, D16).
 - **2026-11-09** — Csaba: *„rendben.”* — az ET-1, ET-2, ET-3 egy költözésben, az első szélesebb körben terjesztett koinó előtt; a

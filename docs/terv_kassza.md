@@ -2,7 +2,8 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-9/1 – ET-9/6 Csabánál (7. szakasz).
+> **Állapot:** ✅ **eldöntve** (Csaba, 2026-11-09: *„rendben, elfogadom a javaslataidat”* — ET-9/1 – ET-9/6 mind (A)) · az építés a
+> pénzzel együtt, az ET-8 után (9. szakasz).
 >
 > Csaba (2026-11-09): *„beszéljük át, hogy létrehozhatók-e közös kasszák, amik el vannak különítve, egy projekthez, vagy bármihez? pl. egy
 > új entitás típus, aminek lehet pénztárcája, vagy a teljes koino-családnak lehet-e egy közös kasszája? meg hogy globális többséggel
@@ -108,6 +109,20 @@ a személyé. Egy 500 fős település kasszája így évente ~400 000 koinost k
 - **Ki mondja ki, melyik pénzmozgás érvényes, és a koinó-szintű számokat** (a létező pénz, a 2. lépcsősök száma, a kasszák egyenlege) —
   az ET-8, a köteg-gyökér.
 
+## 9. A döntések és az átadás (Csaba, 2026-11-09)
+
+**ET-9/1** a kassza egy saját típusú entitás (egy gondolat alatt vagy legfelül); bárki befizethet; kifizetés csak elfogadott kifizetési
+javaslattal, amit a program végrehajt, a D16 ablakával · **ET-9/2** a kifizetésekről a kassza pont-tulajdonosai döntenek — a helyek
+kasszájánál közülük azok, akik oda tartoznak · **ET-9/3** az osztalék egy része a közösbe: a koinó születési szabálya mondja meg (pl.
+1% · 2% · 4% · 8% · 85%) — többséggel nem kényszeríthető senkire · **ET-9/4** helyek szerinti kasszák: a helyek entitások a fában,
+mindenki kimondja, melyik települést támogatja (a régió és az ország a fából); a D6 alóli kivétel kimondva, csak erre · **ET-9/5** aki
+nem választ helyet, annak a része a következő meglévő szintre megy (végül a koinó kasszájába) · **ET-9/6** ha egy kasszán senki nem tart
+pontot, a pénze a szülő kasszájába száll (ha nincs, a koinó közös kasszájába).
+
+**Az építés:** a pénzzel (ET-7) együtt, a D11 és az ET-8 után — a kasszák egyenlegét és az osztalék koinó-szintű számait a napi köteg
+mondja ki. A D-számot az építő adja.
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-9/1 – ET-9/6 Csabánál.
+- **2026-11-09** — ✅ ET-9/1 – ET-9/6 mind (A) (9. szakasz).
