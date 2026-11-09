@@ -29,9 +29,9 @@
 
 ## 2. A halál megállapítása
 
-1. **A bejelentés:** legalább **3 független tanú** jelenti — akikkel az elhunytnak kölcsönös bemutatkozása (**D62**) vagy tanúsítása volt,
+1. **A bejelentés:** legalább **3 független tanú** jelenti — akikkel az elhunytnak kölcsönös bemutatkozása (**D62 — a bemutatkozás lánc-esemény, és csak kölcsönösen számít**) vagy tanúsítása volt,
    és akik nem egy körből valók (pl. nem ugyanaz a meghívó-ág).
-2. **A várakozás: 30 nap, nyilvánosan.** Az érintett minden készüléke szól (ET-11/4: *„Halálodat jelentették — ha élsz: Itt vagyok.”*).
+2. **A várakozás: 30 nap, nyilvánosan.** Az érintett minden készüléke szól (az ET-11/4 értesítési útján): *„Halálodat jelentették — ha élsz: Itt vagyok.”*
 3. **Ha a kulcs közben aláír** (*„itt vagyok”*): ez nem felment, hanem **eszkalál** — a D18/7 szerint legalább 3 független tanúnak kell
    megerősítenie, hogy **személyesen találkoztak vele** a bejelentés után. Ha ez megvan, a bejelentés elesik; ha nincs, a halál áll.
    ⭐ *„Aki valóban él, azt látják az emberek; egy örökölt kulcs nem tud embereket előállítani.”* (D18/7)
@@ -49,7 +49,7 @@
   olyan, mintha nem lenne végrendelet. ⭐ Tipp a lapon: *„adj belőle egy példányt legalább két megnevezettnek”*.
 - **A végrehajtás automatikus:** a halál megállapítása után a pénz az örökösökhöz megy — a tanúk (ET-8) a szabály alapján nyugtázzák, nem
   egy kulcs aláírása alapján (a halott nem ír alá).
-- **Az örökös** bármely koinó-azonosság lehet (1. lépcsős is — osztalékot csak a 2. lépcsős kap, de pénzt tarthat bárki). Akit a
+- **Az örökös** bármely koinó-azonosság lehet (1. lépcsős is — osztalékot csak a 2. lépcsős kap, de pénzt tarthat bárki). Aki a
   megnevezéskor még nem tag (pl. egy gyermek), azt később, ha belépett, a jegyzékbe fel lehet venni.
 
 ## 4. Végrendelet nélkül
@@ -65,7 +65,7 @@ határt átlép) — aki nem nevez meg senkit, annak a pénze a közösé lesz.
 ## 5. Ami a többi részt érinti
 
 - **A kulcs** (ET-3): az elhunyt csere-kulcsa sem éleszti fel az azonosságot a halál megállapítása után (D20: az azonosság nem
-  örökölhető); aki tévesen nyilvánítottak halottnak, az a 2. szakasz 3. pontjának útján jön vissza.
+  örökölhető); akit tévesen nyilvánítottak halottnak, az a 2. szakasz 3. pontjának útján jön vissza.
 - **A kasszák** (ET-9): a kassza lehet örökös; és a végrendelet nélküli pénz kasszába megy.
 - **A piac és a nyitott ügyletek** (ET-10): a halál napjáig visszaigazolt ügyletek érvényesek; a nyitott ajánlatok a pontokkal együtt
   elfelejtődnek (D14).
