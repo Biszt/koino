@@ -2,7 +2,8 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-12/1 – ET-12/5 Csabánál (6. szakasz).
+> **Állapot:** ✅ **ET-12/1 – ET-12/4 eldöntve** (A), **ET-12/5 (B)** (Csaba, 2026-11-09: *„ezzel az a baj, hogy csak a 2. lépcsősöknek van
+> pénztárcája. a többivel egyet értek.”*) · ⏸️ **ET-12/6** (a ki nem fizethető rész) Csabánál · az átadás: 7. szakasz.
 >
 > Csaba (2026-11-09): *„még eszembe jutott valami, ami kimaradt. az öröklési rendszer. azt hiszem, már erről is beszéltünk korábban.”*
 
@@ -49,8 +50,11 @@
   olyan, mintha nem lenne végrendelet. ⭐ Tipp a lapon: *„adj belőle egy példányt legalább két megnevezettnek”*.
 - **A végrehajtás automatikus:** a halál megállapítása után a pénz az örökösökhöz megy — a tanúk (ET-8) a szabály alapján nyugtázzák, nem
   egy kulcs aláírása alapján (a halott nem ír alá).
-- **Az örökös** bármely koinó-azonosság lehet (1. lépcsős is — osztalékot csak a 2. lépcsős kap, de pénzt tarthat bárki). Aki a
-  megnevezéskor még nem tag (pl. egy gyermek), azt később, ha belépett, a jegyzékbe fel lehet venni.
+- **Az örökös csak 2. lépcsős lehet** (vagy egy kassza) — **pénztárcája csak a 2. lépcsősnek van** (Csaba, 2026-11-09; ET-12/5). *(Az első
+  változatban tévesen az állt, hogy pénzt bárki tarthat.)* A jegyzéket a lapod aláíráskor ellenőrzi, de mert lepecsételt, a végrehajtáskor
+  a program újra megnézi: **a halál megállapításakor** élő 2. lépcsős-e a megnevezett. Ha nem (közben meghalt, vagy még nem érte el a 2.
+  lépcsőt) → ⏸️ ET-12/6.
+- **Aki még nem 2. lépcsős** (pl. a gyermeked): ⏸️ ET-12/6 dönti el, beírható-e előre.
 
 ## 4. Végrendelet nélkül
 
@@ -82,8 +86,37 @@ határt átlép) — aki nem nevez meg senkit, annak a pénze a közösé lesz.
 - **ET-12/4 — Végrendelet nélkül:** (A) ⭐ a támogatott település kasszájába (ha nincs, a koinó kasszájába), és a lap mindenkit megkér, hogy
   nevezzen meg örököst; (B) a közvetlen leszármazottaké, tanúkkal igazolt családi kapcsolat alapján (a D20 eredeti alakja — családi adat
   a láncon, viták).
-- **ET-12/5 — Ki lehet örökös:** (A) ⭐ bármely koinó-azonosság (1. lépcsős is); (B) csak 2. lépcsős.
+- **ET-12/5 — Ki lehet örökös:** (A) bármely koinó-azonosság (1. lépcsős is); (B) csak 2. lépcsős. → ✅ **(B)** — Csaba: *„csak a 2.
+  lépcsősöknek van pénztárcája”*.
+- **ET-12/6 — A ki nem fizethető rész** (ha a megnevezett a halál megállapításakor nem élő 2. lépcsős): (A) ⭐ a jegyzékbe bármely
+  koinó-azonosság beírható (a még 1. lépcsős gyermeked is — a lap figyelmeztet: *„X még nem 2. lépcsős — ha a halálodkor sem lesz az, a
+  része a többieké”*), de **csak az kap, aki a halál megállapításakor élő 2. lépcsős**; a többiek része arányosan az ő részükhöz adódik, és
+  ha egy sem marad, a végrendelet nélküli szabály jön (a település kasszája) — nincs várakozó, befagyott pénz; (B) a ki nem fizethető rész
+  **vár** (pl. legfeljebb 5 évig), hogy a megnevezett elérje a 2. lépcsőt, utána a település kasszájába — családbarátabb egy árva
+  gyermeknek, de évekig nyitott állapot és befagyott pénz; (C) csak 2. lépcsős írható be (az (A), az előre beírás lehetősége nélkül).
+  *Tipp mindhárom esetben: ha a gyermeked még kicsi, nevezz meg mellé egy felnőttet is, akiben megbízol.*
+
+## 7. A döntések és az átadás (Csaba, 2026-11-09)
+
+**ET-12/1** a halál: legalább 3 független tanú, 30 napos nyilvános várakozás, a kulcs aláírása eszkalál (3 független tanú személyes
+megerősítése kell), közben a pénz befagy · **ET-12/2** a végrendelet egy örökös-jegyzék (azonosságok és kasszák arányokkal, a fizetési
+kulccsal aláírva, bármikor módosítható) · **ET-12/3** lepecsételt (a láncon csak a lenyomata; a halál után bárki bemutathatja) · **ET-12/4**
+végrendelet nélkül a támogatott település kasszájába (ha nincs, a koinó kasszájába), és a lap mindenkit megkér, hogy nevezzen meg örököst
+· **ET-12/5** örökös csak 2. lépcsős (vagy kassza) lehet · ⏸️ **ET-12/6** nyitva.
+
+**A közös dokumentumokba (az építőnek):**
+- a **D20 — öröklés: a pénz igen, a tudatpont és az azonosság soha** módosul: végrendelet nélkül nem a közvetlen leszármazottaké (a koinó
+  nem tart családi adatot — **D6 — személyes adat SOHA a láncra**), hanem a település kasszájáé; a D20 védelme (a család érdekeltsége) a
+  megnevezett örökösökön át marad meg;
+- a **D18 — az identitás-réteg, 7. pont (a halál)** számokat kap (3 tanú, 30 nap, 3 tanú az eszkalációnál);
+- ⚠️ **Csaba szabálya általános: pénztárcája csak a 2. lépcsősnek van.** Ez a pénz többi részére is vonatkozik: átutalás (ET-11) és piaci
+  ügylet (ET-10) is csak 2. lépcsős vagy kassza felé mehet.
+
+**Az építés:** a halál megállapítása az identitás-réteggel (D18), a végrendelet a pénzzel (ET-7) együtt, az ET-8 után. A D-számot az
+építő adja.
 
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-12/1 – ET-12/5 Csabánál.
+- **2026-11-09** — ✅ ET-12/1 – ET-12/4 (A), ET-12/5 (B): pénztárcája csak a 2. lépcsősnek van (az első változat tévedése javítva); ⏸️
+  ET-12/6 (a ki nem fizethető rész) felvéve.
