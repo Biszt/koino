@@ -2,7 +2,8 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-7/1 – ET-7/4 Csabánál (6. szakasz).
+> **Állapot:** ✅ **eldöntve** (Csaba, 2026-11-09: *„rendben, elfogadom a javaslataidat”* — ET-7/1 – ET-7/4 mind (A)) · a közös kasszák
+> külön témában (ET-9 — [`terv_kassza.md`](terv_kassza.md)).
 >
 > Csaba (2026-11-08): *„majd arról is beszéljünk, hogy ez hogyan tud illeszkedni az egy családhoz tartozó koino verziók között. … már nem
 > 10 koinos-ban gondolkodok, hanem 100.000-ben, és nem egyben kapnák meg, hanem 1 év alatt. azt még nem tudom, hogy a 10 százalék a már
@@ -107,6 +108,18 @@ programja tartja be. Hogy minden gép ugyanazt a pénzkönyvet lássa (és senki
 - **Az átutalás ablaka és összeghatára** (D16) — a koinó születési szabályai közé kerülnek; az értékük a pénz átvizsgálásánál.
 - **Ki mondja ki, melyik pénzmozgás érvényes** — az ET-8 (a köteg-gyökér).
 
+## 8. A döntések (Csaba, 2026-11-09)
+
+**ET-7/1** 100 000 koinos, egy év alatt, a 2. lépcső napjától · **ET-7/2** a 10% csak a létező pénzre · **ET-7/3** a pénz szabályai a
+koinó születésében, a változás új koinó-verzió (költözéssel) · **ET-7/4** minden koinónak saját pénzkönyve; a gyermek nem örököl
+egyenleget; a költöző pénze kivezetéssel jön át (egy az egyhez); az induló összeg és az osztalék a jelenléttel megy, egyszer jár.
+
+**Az építés feltételei:** a D11 (az identitás éles bizonyítása) és az ET-8 (ki mondja ki, melyik pénzmozgás érvényes). ⚠️ Egy lelet a
+kasszák tervezéséből (ET-9): **az osztalék maga is két koinó-szintű számot kíván** — a létező pénz összegét (M) és a 2. lépcsősök számát
+(N) —, ezeket egy készülék egy nagy koinóban nem tudja helyben megszámolni. Ezt is a napi köteg (ET-8) mondhatja ki.
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-7/1 – ET-7/4 Csabánál.
+- **2026-11-09** — ✅ ET-7/1 – ET-7/4 (A). Csaba új kérdései: közös kasszák (projekt, koinó-család, helyek szerint) → ET-9; a belső piac →
+  ET-10; az átutalás ablaka és összeghatára (D16) → ET-11.
