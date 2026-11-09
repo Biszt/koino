@@ -293,7 +293,9 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
   → 🔍 **a terv: [`terv_kassza.md`](terv_kassza.md)** — ⭐ a kassza egy entitás, kifizetés elfogadott kifizetési javaslattal; az osztalék
   része a közösbe a születési szabályban (többséggel nem kényszeríthető); a helyek a fában; ⚠️ a hely nyilvános állítás (D6). ✅
   **Eldöntve** (2026-11-09, mind (A)) — az építés a pénzzel, az ET-8 után.
-- **ET-10 — A belső piac** (a vételi és eladási szándék, *„jegyezve legyen”*).
+- **ET-10 — A belső piac** (a vételi és eladási szándék, *„jegyezve legyen”*). Csaba elképzelése (2026-11-09): *„a piacot úgy képzeltem
+  el, hogy az is csak egy tranzakció, csak a piacon keresztül ellenértéket is meg kell adni (ez lehet bármi: fiat pénz — akár készpénzben
+  —, kriptopénz, vagy egy tehén, eper, vagy bármilyen ingóság). ezek jegyezve lesznek, és ezek fogják meghatározni a koinos értékét.”*
 - **ET-11 — Az átutalás ablaka és összeghatára** (D16). → 🔍 **a terv: [`terv_atutalas.md`](terv_atutalas.md)** (2026-11-09) — ⭐ nagy
   átutalás: egy nap alatt az egyenleg 10%-a fölött; 72 órás ablak; megállítani a többi készülék és a csere-kulcs tudja, azonnal; az
   értesítés a többi készülékre megy. ⏸️ ET-11/1 – ET-11/5 Csabánál.
@@ -324,6 +326,8 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — ET-11: ✅ ET-11/3, ET-11/4; a határ a fejenkénti átlaghoz, a változó ablak, a piac és a kassza — a javított javaslat
+  a terv 7. szakaszában; Csaba piac-elképzelése az ET-10-be.
 - **2026-11-09** — **ET-11** megtervezve: [`terv_atutalas.md`](terv_atutalas.md); ⏸️ ET-11/1 – ET-11/5 Csabánál.
 - **2026-11-09** — ✅ **ET-8/2: naponta** — az ET-8 eldöntve, átadható (a szimulációkkal kezdve).
 - **2026-11-09** — ✅ **ET-8/1, ET-8/3, ET-8/4, ET-8/5** (A); az ET-8/2 nyitott: Csaba szerint az évi kör ritka → javaslat: naponta (a

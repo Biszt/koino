@@ -2,7 +2,8 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-11/1 – ET-11/5 Csabánál (6. szakasz).
+> **Állapot:** 🔍 tervezve · ✅ ET-11/3, ET-11/4 (Csaba, 2026-11-09) · ⏸️ ET-11/1, ET-11/2, ET-11/5 és a piac — Csaba válaszai és a
+> javított javaslat a 7. szakaszban.
 
 ## 1. A rövid válasz
 
@@ -75,6 +76,64 @@ onnan állítja meg — a 72 óra erre elég.
 - **ET-11/5 — A kassza nagy kifizetése:** (A) ⭐ ugyanúgy 72 órát vár; ezalatt egy visszavonó javaslat megállíthatja; (B) nincs külön ablak
   (a döntési idő elég).
 
+## 7. Csaba válaszai (2026-11-09) és a javított javaslat
+
+### 7.1 A határ mindenkire ugyanaz (ET-11/1)
+
+Csaba: *„akkor ne a saját kasszájához mérjük, hanem az összes koinoshoz, amit naponta kiszámolnak a tanúk. így mindenkire ugyanaz
+vonatkozik.”*
+
+**Jó — és a napi kör (ET-8/2) ezt már kimondja.** A javaslat: a határ a **fejenkénti átlag** (a létező pénz osztva a 2. lépcsősök
+számával) **10%-a naponta**. Ez mindenkire ugyanaz, és a koinóval együtt nő. *Példa: ha az átlag 100 000, a napi határ 10 000 — Annára és
+Bélára egyformán.* ⚠️ Az *összes* pénzhez mérni egy nagy koinóban óriási határt adna (milliárd fő × 100 000), ezért az átlagot javaslom —
+ha mégis az összeshez akarod, egy nagyon kicsi rész kell (pl. milliomod), ami a létszámmal együtt elavul.
+
+### 7.2 A változó ablak — az összegtől igen, a kapcsolatoktól óvatosan (ET-11/2)
+
+Csaba: *„az ablak hossza is legyen változó, ami a tranzakció mennyiségétől, és az érintettek hitelesség-mutatójától függ (itt a
+találkozási tengerben lévő kapcsolataira gondolok).”*
+
+- **Az összegtől: igen.** *Példa: a napi határ fölött 24 óra, az átlag felénél 72 óra, az átlagnál nagyobb összegnél 7 nap.*
+- **A kapcsolatoktól — egy ütközés, amit el kell mondanom:** a **D49 — a jelzés tényt mutat, soha nem ítéletet** három védőkorlátja közül az
+  egyik: *„a jelzés tájékoztat, nem jogosít — vékony hálótól semmilyen jog nem csökken”*. Ha a kevesebb kapcsolat hosszabb ablakot jelent,
+  akkor a vékony háló egy jogot csökkent (lassabb a pénze). És a mérések szerint a *„kevés kapcsolata van”* jelzés a becsületes tagok
+  **31–45%-át** érintené — épp a magányosokat és a frissen érkezetteket. *(Az ET-4/1-ben ugyanezért vetetted el a számított hitelességet a
+  2. lépcsőnél.)*
+- ⭐ **A javaslat:** az ablak csak az **összegtől** függjön; a kapcsolatok **tájékoztatásként** látszanak a címzettnek (*„Annát 40-en
+  ismerik személyesen”*) — és ő dönti el, mikor adja át az árut (7.3).
+
+### 7.3 A piac és az ablak (ET-11/3 kiegészítése)
+
+Csaba: *„a piaci tranzakció esetében gondot jelenthet az, ha a küldő visszavonhatja az utalását, miután megkapta az ellenértéket. amúgy én
+nem látom annak a préda értékét, hogy valaki készülékével utalok magamnak koinost, mivel teljesen nyomon követhető. a lebukás garantált.”*
+
+**Az első felében igazad van:** ha a tolvaj magának utal, a nyoma ott van — a pénz egy ismert, 2. lépcsős azonossághoz megy. **De a piac
+nyit egy másik utat:** a tolvaj Anna telefonjáról nem magának utal, hanem **Bélának, aki cserébe készpénzt ad neki** (vagy egy tehenet). A
+koinos-nyom Bélához vezet, aki becsületes — a tolvaj a készpénzzel eltűnt. Ez ellen véd az ablak: Anna megállítja — de akkor Béla marad
+pórul, ha már átadta a készpénzt.
+
+⭐ **A javaslat — a piaci ügylet is ablakot kap, de:**
+- **a megállítás lopás-bejelentés:** aki egy piaci ügyletet megállít, azzal kimondja, hogy *„nem én küldtem”* — és a küldő készülék ezzel
+  automatikusan kizáródik (ET-3). Így a megállítás nem használható olcsó meggondolásra (*„megkaptam a tehenet, visszaveszem a pénzt”*): a
+  saját készülékeddel fizetett, majd megállított ügylet egy nyilvános lopás-bejelentés, ami a készülékedet viszi;
+- **az eladó látja, mikor végleges:** *„Függő: 50 000 Annától — csütörtök 14:00-tól nem visszavonható”* — és ő dönti el, átadja-e előbb
+  az árut (a kockázatot vállalva) vagy kivárja;
+- **a határ alatti ügylet azonnal végleges** (a mindennapi kis vásárlás nem vár).
+
+### 7.4 A kassza nagy kifizetése (ET-11/5) — mire gondoltam, és a javított javaslat
+
+Csaba: *„itt nem tudom, hogy mire gondolsz.”*
+
+**Mire gondoltam:** az ET-9-ben eldöntöttük, hogy egy kasszából (pl. a játszótér kasszájából) csak elfogadott kifizetési javaslattal lehet
+pénzt kivenni — *„120 000 Annának a festékre”*. A kérdés az volt, hogy egy ilyen elfogadott, nagy kifizetés is várjon-e még 72 órát.
+
+⛔ **A javított javaslat: ne várjon.** Az ablak a **lopott kulcs** ellen véd — egy kassza kifizetését viszont nem egy kulcs indítja, hanem
+egy napokig tartó, nyilvános szavazás. Ellopni nincs mit, és a megállításra (egy visszavonó javaslatra) a szavazás ideje alatt amúgy is van
+mód. → **(B) a kassza kifizetésének nincs külön ablaka.**
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-11/1 – ET-11/5 Csabánál.
+- **2026-11-09** — ✅ ET-11/3 (a piaci kiegészítéssel), ET-11/4. Csaba: a határ az összes pénzhez (→ a fejenkénti átlag 10%-a); a változó
+  ablak (→ az összegtől igen, a kapcsolatoktól nem — D49, a 31–45%); a piac és az ablak (→ a megállítás lopás-bejelentés, kizárja a küldő
+  készüléket); ET-11/5 elmagyarázva, a javaslat javítva: nincs külön ablak (7.).
