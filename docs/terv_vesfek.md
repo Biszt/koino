@@ -2,7 +2,8 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-6/2 – ET-6/7 Csabánál (7. szakasz). *(Az ET-6/1 — az elismerés egyelőre nem kell — 2026-11-08-án
+> **Állapot:** ✅ **eldöntve** (Csaba, 2026-11-09: *„rendben, minden javaslatodat elfogadom.”* — ET-6/2 – ET-6/7 mind (A)) · az átadás:
+> 9. szakasz. *(Az ET-6/1 — az elismerés egyelőre nem kell — 2026-11-08-án
 > eldőlt.)*
 >
 > Csaba (2026-11-08): *„ezt nem vetem el teljesen, de azért még kutassunk tovább … egyéb megoldások után is, ami nem igényel választott
@@ -112,6 +113,25 @@ A fék **a mag része**, mert azt változtatja, mit nyugtáznak a tanúk és mit
 körre épül (ET-8), ezért **a pénzzel együtt** épül, az ET-8 után. Amíg nincs pénz, a legsúlyosabb vészhelyzet (a pénz) még nem létezik. A
 D-számot az építő adja.
 
+## 9. A döntések és az átadás (Csaba, 2026-11-09)
+
+**ET-6/2** őrök helyett vészfék: csak megállít, legfeljebb 72 órára, *„tanú, nem hatóság”* · **ET-6/3** zárt lista: a pénz (az új
+átutalások nyugtázása), egy entitás törzse (nem adják tovább, a lap nem mutatja — a csontváz marad), a riasztás (verziót nem ajánlhat) ·
+**ET-6/4** a napi kör dönt (ET-8), a fele igenjével 12 órán belül; jelezni bármely 2. lépcsős tag tud, hetente egyszer; kis koinóban a kör
+az egész közösség · **ET-6/5** a kör szavazata titkos, önkéntes nyíltsággal (ET-2), csak az igenek száma látszik · **ET-6/6** legfeljebb
+72 óra; a program D19-gondolatot nyit, ott a rendes döntés meghosszabbíthatja vagy feloldhatja; döntés nélkül magától feloldódik;
+ugyanarra a tárgyra újra csak a rendes döntés húzhatja · **ET-6/7** gépileg ellenőrizhető bizonyítéknál (sikeres kettős költés, a napi kör
+ellentmondó számai) a pénz-fék testület nélkül, 72 órára.
+
+**A közös dokumentumokba (az építőnek):**
+- az **N9 — elismerés-entitás + kinevezési (őr) rendszer** lezárul: az elismerés egyelőre nem kell (ET-6/1); a kulcs-helyreállító
+  bizottság helyett a véletlen, titkosított darabőrzés (ET-3/1); a kinevezett őrök helyett a vészfék (ET-6);
+- a **D19 — a rendszer BEJELENTŐ, nem BÍRÓ** zárt listája bővül a vészfékkel; a negyedik korlát (az alapértelmezett kimenet) a fékre
+  feloldás — az elve szerint (*„a nem-döntés nem lehet a támadó nyeresége”*).
+
+**Az építés:** a mag része (költözés — D66), a napi körre épül, ezért a pénzzel együtt, az ET-8 után. A D-számot az építő adja.
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-6/2 – ET-6/7 Csabánál.
+- **2026-11-09** — ✅ ET-6/2 – ET-6/7 mind (A) (9. szakasz).

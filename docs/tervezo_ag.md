@@ -104,7 +104,7 @@ sorrend fontosabb, mint hogy minél hamarabb látsszon valami; amire egy lépés
   entitást érint, érintettenként külön dől el, és mindnek teljesülnie kell (**D85 — a javaslat és az egyezmény ugyanolyan entitás,
   mint a gondolat**).
 - **Az általános javaslat** a közösség álláspontja (**D27 — szerkesztési és általános javaslat/egyezmény**). ⏸️ **Nincs rendesen
-  megtervezve** — napirenden (3. szakasz, ET-1). Az alkotmány, a 2/3-os rendszer és a program-frissítés mint gépezet elvetve (**D64 —
+  megtervezve** — napirenden (3. szakasz, ET-1). → ✅ *azóta eldöntve: [`terv_altalanos.md`](terv_altalanos.md) (ET-1).* Az alkotmány, a 2/3-os rendszer és a program-frissítés mint gépezet elvetve (**D64 —
   az alkotmány**; **D66 — a megújulás = költözés, nem frissítés**: *„mind sok új élt hoznak létre”*).
 - **A szavazás:** aki pontot tett az érintettre, egyenlő súllyal szavaz. A titkos, de ellenőrizhető szavazás (**D2 — szavazás: titkos,
   de ellenőrizhető, kiváltságos adatkezelő nélkül**) cél maradt, még nincs megépítve — napirenden (ET-2).
@@ -169,7 +169,8 @@ sorrend fontosabb, mint hogy minél hamarabb látsszon valami; amire egy lépés
   (**D99**), csak a vállalt szeletekben (**D95 — a szigorú (b) alakja**; **D97 — a közös halmaz és a raj a körben**), 24 órás
   kifutással (**D104 — a kifutás**).
 - **A kérés és a korlátok:** a kérelem (**D92**), a kiszolgálási keret (**D109**), a törzs-határ (**D120 — a nagy törzs elemenként,
-  kérésre**), a több forrás (**D114**). ⏸️ Csaba (2026-11-08): **részletes „Hálózati beállítások” menüpont** kell — napirenden (ET-5).
+  kérésre**), a több forrás (**D114**). ⏸️ Csaba (2026-11-08): **részletes „Hálózati beállítások” menüpont** kell — napirenden (ET-5). → ✅ *azóta eldöntve:
+  [`terv_halozat.md`](terv_halozat.md).*
 - **A keresés** (**D105 — a kereső-réteg alakja**; **D107**) és a **felderítés** (**D108**, **D112**).
 - **A protokoll nyelvváltozata** (**D124 — „minden munka elején kimondva”**).
 
@@ -212,7 +213,7 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
     tehát egy olyan eszközre hivatkozik, amit azóta elvetettünk: el kell dönteni, hogyan módosulnak a pénz paraméterei. A legközelebbi
     a D118 mintája: a paraméterek a koinó születésében állnak, és a változás egy gyermek-koinó, ahová költözni lehet.
   - ⏸️ Csaba (2026-11-08): a pénz a koinó-családban — egy másik változatban **100 000 koinos, egy év alatt**; és kérdés, hogy a 10% a
-    már kiosztottat szorozza, vagy a még csak járót is. Napirenden (ET-7).
+    már kiosztottat szorozza, vagy a még csak járót is. Napirenden (ET-7). → ✅ *azóta eldöntve: [`terv_penz.md`](terv_penz.md).*
 - **A konszenzus és a köteg-gyökér** (**D7 — személy-alapú konszenzus**; **D17**; **D21 — a tartós mag replikációja**). Ma a koino
   konszenzus nélkül működik: minden, ami ma van, a szerzők saját láncából és determinisztikus számításból jön. Két dologhoz kell majd
   közös egyetértés: **az azonosság egyszeriségéhez** (ki tag) **és a pénzhez** (ki mennyit költött el — különben ugyanazt a pénzt két
@@ -285,7 +286,7 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
   nem kell; a sürgősségi út → 🔍 **a terv: [`terv_vesfek.md`](terv_vesfek.md)** (2026-11-09) — ⭐ őrök helyett **vészfék**: a napi kör
   (ET-8, véletlen, senki nem választja) titkos szavazással, a fele igenjével 12 órán belül megállíthatja a pénzt, egy entitás törzsét,
   vagy riasztást tesz ki (verziót nem ajánlhat); legfeljebb 72 óra, D19-gondolattal, utána magától feloldódik; gépi bizonyítéknál (sikeres
-  kettős költés) a pénz-fék automatikus. ⏸️ ET-6/2 – ET-6/7 Csabánál.
+  kettős költés) a pénz-fék automatikus. ✅ **Eldöntve** (2026-11-09, ET-6/2 – ET-6/7 mind (A)) — az építés a pénzzel, az ET-8 után.
 - **ET-7 — A pénz a koinó-családban** (D10, D16, N10): 100 000 koinos egy év alatt; a 10% alapja (a kiosztott, vagy a járandóság is);
   a paraméterek módosítása a D66 után. → 🔍 **a terv: [`terv_penz.md`](terv_penz.md)** (2026-11-09) — ⭐ a 10% a létező pénzre; a
   szabályok a születésben, a változás költözés; minden koinónak saját pénzkönyve, a költöző pénze kivezetéssel átjön, az induló összeg
@@ -345,6 +346,7 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — ✅ **ET-6/2 – ET-6/7** (A) — a vészfék eldöntve. ⭐ **A napirend minden pontja eldöntve** (ET-1 – ET-12).
 - **2026-11-09** — **ET-6** (a sürgősségi út) megtervezve: [`terv_vesfek.md`](terv_vesfek.md) — vészfék a napi körrel; ⏸️ ET-6/2 –
   ET-6/7 Csabánál.
 - **2026-11-09** — ✅ **ET-5/7** (A) — a hálózati beállítások eldöntve. Nyitva: ET-6 (a sürgősségi út).
