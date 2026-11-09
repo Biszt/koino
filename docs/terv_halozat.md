@@ -2,7 +2,9 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-5/1 – ET-5/6 Csabánál (6. szakasz).
+> **Állapot:** ✅ **ET-5/1 – ET-5/6 eldöntve**, mind (A) (Csaba, 2026-11-09: *„rendben, elfogadom a javaslataidat.”*) · ➕ Csaba
+> kiegészítése: *„még azt is beállíthatóvá kéne tenni, hogy a nem tudatpontos tárhelyet, mekkorára hagyja tágulni, mielőtt törölné a
+> régieket.”* → 7. szakasz, ⏸️ **ET-5/7** Csabánál.
 >
 > Csaba (2026-11-08, a kérés és a korlátok — a kérelem, a kiszolgálási keret, a törzs-határ — összefoglalójánál): *„részletes, hálózati
 > beállítások menüpontot is terveznünk kell majd.”*
@@ -36,6 +38,10 @@ megépülhet, a többi témától függetlenül.
   (`pajzsfuro`), a helyi felfedezés (`felfedez` — kézi, *„ki van még ezen a wifin?”*).
 - **Az ébrentartás** (Termux): csak környezeti változóval kapcsolható ki.
 - **Megnézhető:** a vállalásom (`vallalas`), a tár tömörítése (`tomorit`), az elmúlt óra kiszolgálása (`kiszolgalas`).
+- **A nem vállalt (nem tudatpontos) adat** — három külön, korlátos tár, mindegyikből a legrégebben megnézett megy ki (a 7. szakasz
+  részletezi): az átmeneti tár (az események, **20 MB**), a fájl-tár nem vállalt része (a képek és a csatolt fájlok, **50 MB**), és a
+  felderítések rögzített adata (**1 GB**). ⚠️ Egyik sem állítható ma: a kód megjegyzése *„készülékenként állítható”*-t ír, de bekötve
+  nincs — a fájl-tárét csak a próbák szűkítik egy környezeti változóval.
 
 ## 3. Az ablak — öt rész
 
@@ -50,6 +56,8 @@ megépülhet, a többi témától függetlenül.
 4. **🤝 Kikkel és hol:** a társak (a meglévő ablak), a helyi felfedezés gombja, a szeletenkénti DHT-hirdetés (0–50), a port, a router
    megkérése (be/ki).
 5. **📱 A készülék:** a takarékos mód (4. kérdés), a havi figyelmeztetés (5. kérdés), az ébrentartás (be/ki).
+6. **💾 Tárhely** (Csaba kiegészítése — 7. szakasz): a nem vállalt adat kerete, a felderítéseké, a tartós tár mérete (csak nézni), és a
+   *„Tömörítés”* gomb (az Állapotból ide kerül).
 
 **⛔ Nem állítható, de látszik — a miértjével:**
 - a koinó szabályai (a mag — D123): ezek a koinó képét számolják; aki mást számol, az másik koinóban van;
@@ -96,6 +104,53 @@ tízszerese, a DHT-hirdetés legfeljebb 50 (ma is), a törzs-határ legfeljebb 1
   készülékenként egy beállítás (a telefon adatkerete egy, akárhány koinód van): a keret a futó koinók közt egyenlően oszlik, az ablak
   koinónként bontva mutatja a forgalmat; (B) koinónként külön (három koinóval háromszoros a forgalom).
 
+## 7. A nem vállalt adat tárhelye (Csaba kiegészítése, 2026-11-09)
+
+> *„még azt is beállíthatóvá kéne tenni, hogy a nem tudatpontos tárhelyet, mekkorára hagyja tágulni, mielőtt törölné a régieket.”*
+
+**Ma (a kódban megnézve)** a készülék háromféle adatot tart, amire nem tett tudatpontot — mindhárom korlátos, és ha betelt, a
+**legrégebben megnézett** megy ki (**D75 — a két tár: tartós (vállalt) és átmeneti (látott, eldobható)**, az SK11 szerint):
+- **az átmeneti tár** — a böngészés közben elhozott események: **20 MB** koinónként;
+- **a fájl-tár nem vállalt része** — a képek és a csatolt fájlok: **50 MB**; védett a vállalt, a saját, a profil-kép, és ami 24 órán belül
+  érkezett;
+- **a felderítések rögzített adata** (**D112 — a felderítés**): **1 GB** — ezt te kérted el egy ágból, ezért külön kerete van.
+
+Ami kiesik, az nem vész el: bárki más tartja, aki pontot tett rá, és a következő megnézéskor újra elhozza a készülék (a tartalma a
+lenyomatából ellenőrizhető). **A tartós tár** (amire pontot tettél) nem tartozik ide: azt vállaltad, a méretét a tudatpontjaid adják, nem
+egy beállítás.
+
+⭐ **A javaslat — a 💾 Tárhely részben két szám:**
+- **🗂️ A böngészésből megmaradt adat** — egyetlen szám a két első tárra együtt (alapból a mai **70 MB**: 20 + 50); a program ugyanabban
+  az arányban osztja el az események és a fájlok közt. *Egy embernek egy szám érthető; hogy a mögötte lévő két tár hogyan osztozik, az a
+  program dolga.*
+- **🔭 A felderítések** — külön szám (alapból **1 GB**), mert ezt kifejezetten te kérted el.
+
+**A határok** (a 9. szabály: minden szám korlátos):
+- **alul 10 MB** — kisebb tárral a lap ugyanazt újra és újra elhozná, vagyis a kis tár több forgalom;
+- **felül a szabad hely fele** a beállításkor; és ha a lemez közben megtelik, a program a keretet magától szűkíti — és ezt **kimondja**
+  (értesítés), nem csendben teszi.
+
+**A többi beállítással így illeszkedik:**
+- **készülékenként egy szám** (ET-5/6): a koinók közt egyenlően oszlik, mint a keret;
+- **a takarékos mód nem szűkíti** (ET-5/4): a kisebb tár több újraletöltés, vagyis épp több forgalom;
+- **a „mindent” készülék** mindent tart — nála a szám szürke, a miértjével;
+- **az ablak mutatja**, mennyi van most benne, és mennyi esett ki az utóbbi napon (ha sok, érdemes nagyobbra venni).
+
+- **ET-5/7 — A nem vállalt adat tárhelye:** (A) ⭐ két szám: a böngészésből megmaradt adat (egy szám az eseményekre és a fájlokra együtt,
+  alapból 70 MB) és a felderítések (alapból 1 GB); a határok: alul 10 MB, felül a szabad hely fele; ha a lemez megtelik, a program szűkít
+  és szól; készülékenként, a koinók közt egyenlően; (B) három külön szám (az események, a fájlok, a felderítések), a mai tárak szerint.
+
+## 8. A döntések és az átadás (Csaba, 2026-11-09)
+
+**ET-5/1** egy „🌐 Hálózat” menüpont a fő menüben (most hat résszel: Állapot · Mennyit adok · Mennyit hozok · Kikkel és hol · A készülék
+· Tárhely), és a `halozat` parancs · **ET-5/2** csak a készülék saját számai állíthatók, a közös (a mag, a kopogás üteme, a kifutás, az
+elsőbbség szerkezete) látszik a miértjével · **ET-5/3** a keret alsó határa óránként 5 MB és 150 kérés · **ET-5/4** takarékos mód: egy
+kézi kapcsoló, minden a negyedére, nincs DHT-hirdetés és „mindent”; a lap rákérdez, ha a böngésző mobilnetet jelez · **ET-5/5** a havi
+adatkeret figyelmeztet, nem állít le · **ET-5/6** készülékenként egy beállítás, a keret a futó koinók közt egyenlően · ⏸️ **ET-5/7** nyitva.
+
+**Az építés:** a szabad rétegben (D123) — költözés nélkül, bármikor, a többi témától függetlenül. A D-számot az építő adja.
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-5/1 – ET-5/6 Csabánál.
+- **2026-11-09** — ✅ ET-5/1 – ET-5/6 mind (A); Csaba kiegészítése (a nem vállalt adat tárhelye) → 7. szakasz, ⏸️ ET-5/7.

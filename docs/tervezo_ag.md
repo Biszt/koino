@@ -279,7 +279,7 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
   [`terv_halozat.md`](terv_halozat.md)** (2026-11-09) — ⭐ egy „🌐 Hálózat” menüpont öt résszel és a `halozat` parancs; csak a
   készülék saját számai állíthatók (a közös — a mag, a kopogás üteme, a kifutás, az elsőbbség — látszik, a miértjével); alsó határ a
   kiszolgálásnál, takarékos mód, havi figyelmeztetés (nem leállás), készülékenként egy beállítás. Költözés nem kell (D123: a szabad
-  réteg). ⏸️ ET-5/1 – ET-5/6 Csabánál.
+  réteg). ✅ ET-5/1 – ET-5/6 mind (A) (2026-11-09); ➕ Csaba: a nem vállalt adat tárhelye is állítható legyen → ⏸️ ET-5/7 Csabánál.
 - **ET-6 — Az elismerés és a sürgősségi út** (N9 — elismerés-entitás + kinevezési rendszer): ✅ **ET-6/1** — az elismerés egyelőre
   nem kell; a sürgősségi út nyitva.
 - **ET-7 — A pénz a koinó-családban** (D10, D16, N10): 100 000 koinos egy év alatt; a 10% alapja (a kiosztott, vagy a járandóság is);
@@ -341,6 +341,8 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — ✅ **ET-5/1 – ET-5/6** (A); Csaba kiegészítése: *„a nem tudatpontos tárhelyet, mekkorára hagyja tágulni, mielőtt
+  törölné a régieket”* → a 💾 Tárhely rész, ⏸️ ET-5/7.
 - **2026-11-09** — **ET-5** megtervezve: [`terv_halozat.md`](terv_halozat.md) (a mai kapcsolók a kódból összegyűjtve); ⏸️ ET-5/1 –
   ET-5/6 Csabánál.
 - **2026-11-09** — ✅ **ET-12/6** (A) — az öröklés eldöntve. Nyitva: ET-5 (a hálózati beállítások), ET-6 (a sürgősségi út).
