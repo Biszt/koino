@@ -3,7 +3,8 @@
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült; a számokat egy rövid számolás adja, a
 szimuláció az építőé (10. szakasz). A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-8/1 – ET-8/5 Csabánál (9. szakasz).
+> **Állapot:** ✅ ET-8/1, ET-8/3, ET-8/4, ET-8/5 eldöntve (Csaba, 2026-11-09: *„a többit elfogadom”* — mind (A)) · ⏸️ ET-8/2: Csaba
+> szerint az évi kör túl ritka — a napi számolás ára és a javított alak az 5. szakaszban.
 >
 > Csaba (2026-11-08): *„A köteg-gyökér elfogadása az utolsó valódi kutatási kérdés — ezt fejtsd ki.”* — és (2026-11-09): *„rendben, akkor
 > vágjunk bele, az et-8-ba.”*
@@ -100,6 +101,37 @@ részét — ET-9). Ha a kör egy évben nem áll össze, az előző évi érté
 ki a létező pénz 10%-át. *Példa: ha egy koinó tíz év alatt nagyon megnő, és a tagok többsége új (még csak az induló 100 000-rel), a napi
 osztalék addigra a létező pénz ~25%-a lenne, nem 10%-a.* Az évenkénti mérés ezt kiigazítja. *(A Duniter is félévente számolja újra.)*
 
+### 5.1 Évente, hetente vagy naponta? (Csaba, 2026-11-09)
+
+Csaba: *„az évente, szerintem túl ritka, főleg az elején, amikor 1 év alatt több száz %-ot is nőhet a már kiosztott koinos. mi lenne, ha
+hetente számolnák az osztalékot, vagy naponta? mennyire drága naponta kiszámolni az osztalékot, az osztalék kifizetése előtt?”*
+
+**Igaza van.** Az osztalék a fejenkénti átlag (a létező pénz / a 2. lépcsősök száma) 10%-a — és ez az első évben a legmozgékonyabb: az
+induláskor senki nem kapott még semmit (az átlag ~0), egy év múlva ~100 000. *Egy évi kör az év elején ~0-t mondana — egész évben szinte
+semmi osztalék nem járna.*
+
+⛔ **Egy javítás a tervemen:** fent azt írtam, hogy a kör tagjai *„a saját tudásukból kiszámolják a két számot”*. Egy nagy koinóban ez nem
+megy — egyetlen gép sem tudja megszámolni a létező pénzt és a 2. lépcsősöket (ezért kell a kör egyáltalán). ⭐ **A számlálás is a fát
+követi, és csak a változást kell számolni:**
+- a két szám egyik napról a másikra **a változásokból** jön: *a tegnapi szám + az új 2. lépcsősök − akik kiestek*; *a tegnapi pénz + a
+  szabály szerint keletkezett pénz (az induló részletek és az osztalék) + a kivezetésekből bejött − a kivezetéssel kiment*;
+- a napi változást **régiónként** számolják a DHT-n (mint a gyökér darabjait és a kereső-régiókat): minden régió a saját napi
+  változását egy összegző fával (**D78**) adja fel, a kör összeadja, és szúrópróbával ellenőrzi (**D79**) — egy gép terhe a saját régiója
+  marad (9. szabály).
+
+**A napi kör ára — kicsi:**
+- **Minden gépnek:** naponta egyszer egy aláírt nyilatkozat jut el hozzá (a két szám, a napi osztalék, és legalább 43 aláírás a 64-ből) —
+  **kb. 5 KB naponta**, kevesebb, mint négy „nincs újdonság” csere (6. szabály: egy ilyen csere 1,2–1,7 KB).
+- **A kör tagjainak:** a régiók napi összegét összeadni és aláírni — percek, a nap bármely részében (postaláda, nem kell egyszerre online
+  lenniük).
+- **A régiók tartóinak:** a saját régiójuk napi változása (új 2. lépcsősök, kivezetések) — ritka események, elhanyagolható munka.
+
+**A kifizetés:** a ma kimondott számokból jár a holnapi osztalék (egy nap csúszással — a kör a napot lezárva számol). Ha egy nap a kör nem
+áll össze, az előző napi érték marad.
+
+**Hetente** is mehet (a forgalom heti ~5 KB), de az első hónapokban egy hét alatt is sokat változik az átlag — a napi kör ára olyan kicsi,
+hogy nem éri meg ritkítani.
+
 ## 6. A kasszák egyenlege — a kifizetés hozza a bizonyítékát
 
 Egy kassza (ET-9) befizetései sok ember láncán vannak (egy ország kasszájáé milliókén). Egy kifizetéshez nem kell mindenkinek tudnia a
@@ -131,8 +163,9 @@ megszünteti azt a pénzt” — így a tanúk nyugtájával válik ellenőrizhe
 - **ET-8/1 — Az átutalás:** (A) ⭐ tanú-nyugtákkal, konszenzus nélkül — állandó tanú-kör (pl. 32, ebből 22 nyugta), a DHT-ról, 2. lépcsős
   tagokból; (B) napi köteg-gyökér, amit egy választott kör aláír (a D21 eredeti terve) — minden pénzmozgást egy napi közös állapotba
   zár, ami egy nagy koinóban egy gépen sem számolható ki.
-- **ET-8/2 — Az osztalék számai:** (A) ⭐ évente egy véletlen kis kör mondja ki (kétharmados aláírással), az évre rögzített napi
-  osztalékkal; (B) naponta (pontosabb, de naponta kell a kör); (C) előre megírt ütemterv, kör nélkül (gyors növekedésnél eltér a 10%-tól).
+- **ET-8/2 — Az osztalék számai** (⏸️ Csaba: az évi túl ritka): (A) ⭐ **naponta** egy véletlen kis kör mondja ki (kétharmados
+  aláírással), a régiók napi változásából; a holnapi osztalék a mai számokból; ha nincs kör, az előző napi érték (5.1); (B) hetente;
+  ~~évente~~ (az első évben ~0-t mondana); (C) előre megírt ütemterv, kör nélkül (gyors növekedésnél eltér a 10%-tól).
 - **ET-8/3 — A kasszák egyenlege:** (A) ⭐ a kifizetési javaslat hozza a bizonyítékát (összegző fa, szúrópróba), a kassza kifizetései a
   saját szeletében, sorrendben; (B) a kasszák egyenlegét is az évi kör mondja ki (de akkor a kifizetés évente egyszer mehetne).
 - **ET-8/4 — A tanúk és a kör kiválasztása:** (A) ⭐ a DHT-n, a lenyomathoz legközelebbi 2. lépcsős tagok — bárki kiszámolja, senki nem
@@ -156,3 +189,5 @@ mtsai: „Algorand” (SOSP 2017 — a sorsolt bizottság); a KERI tanú-nyugtá
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-8/1 – ET-8/5 Csabánál.
+- **2026-11-09** — ✅ ET-8/1, ET-8/3, ET-8/4, ET-8/5 (A). Csaba: az évi kör túl ritka → a napi kör ára (kb. 5 KB/nap/gép) és egy javítás:
+  a két számot a kör sem tudja a saját gépén megszámolni — a napi változás régiónként, összegző fával (5.1).

@@ -322,6 +322,8 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — ✅ **ET-8/1, ET-8/3, ET-8/4, ET-8/5** (A); az ET-8/2 nyitott: Csaba szerint az évi kör ritka → javaslat: naponta (a
+  napi változás régiónként számolva — a tervem javítva).
 - **2026-11-09** — **ET-8** megtervezve: [`terv_konszenzus.md`](terv_konszenzus.md); ⏸️ ET-8/1 – ET-8/5 Csabánál.
 - **2026-11-09** — ✅ **ET-9/1 – ET-9/6** (A) — a közös kasszák eldöntve.
 - **2026-11-09** — ✅ **ET-7/1 – ET-7/4** (A). Új témák: **ET-9** (közös kasszák — megtervezve: [`terv_kassza.md`](terv_kassza.md); ⏸️
