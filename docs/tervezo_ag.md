@@ -282,7 +282,10 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
   réteg). ✅ ET-5/1 – ET-5/6 mind (A) (2026-11-09); ➕ Csaba: a nem vállalt adat tárhelye is állítható legyen → ✅ ET-5/7 (A): két szám (a böngészés 70 MB, a felderítések 1 GB), 10 MB –
   a szabad hely fele. ✅ **Eldöntve** — az építés a szabad rétegben, költözés nélkül, bármikor.
 - **ET-6 — Az elismerés és a sürgősségi út** (N9 — elismerés-entitás + kinevezési rendszer): ✅ **ET-6/1** — az elismerés egyelőre
-  nem kell; a sürgősségi út nyitva.
+  nem kell; a sürgősségi út → 🔍 **a terv: [`terv_vesfek.md`](terv_vesfek.md)** (2026-11-09) — ⭐ őrök helyett **vészfék**: a napi kör
+  (ET-8, véletlen, senki nem választja) titkos szavazással, a fele igenjével 12 órán belül megállíthatja a pénzt, egy entitás törzsét,
+  vagy riasztást tesz ki (verziót nem ajánlhat); legfeljebb 72 óra, D19-gondolattal, utána magától feloldódik; gépi bizonyítéknál (sikeres
+  kettős költés) a pénz-fék automatikus. ⏸️ ET-6/2 – ET-6/7 Csabánál.
 - **ET-7 — A pénz a koinó-családban** (D10, D16, N10): 100 000 koinos egy év alatt; a 10% alapja (a kiosztott, vagy a járandóság is);
   a paraméterek módosítása a D66 után. → 🔍 **a terv: [`terv_penz.md`](terv_penz.md)** (2026-11-09) — ⭐ a 10% a létező pénzre; a
   szabályok a születésben, a változás költözés; minden koinónak saját pénzkönyve, a költöző pénze kivezetéssel átjön, az induló összeg
@@ -342,6 +345,8 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — **ET-6** (a sürgősségi út) megtervezve: [`terv_vesfek.md`](terv_vesfek.md) — vészfék a napi körrel; ⏸️ ET-6/2 –
+  ET-6/7 Csabánál.
 - **2026-11-09** — ✅ **ET-5/7** (A) — a hálózati beállítások eldöntve. Nyitva: ET-6 (a sürgősségi út).
 - **2026-11-09** — ✅ **ET-5/1 – ET-5/6** (A); Csaba kiegészítése: *„a nem tudatpontos tárhelyet, mekkorára hagyja tágulni, mielőtt
   törölné a régieket”* → a 💾 Tárhely rész, ⏸️ ET-5/7.
