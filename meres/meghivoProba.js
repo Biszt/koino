@@ -292,7 +292,7 @@ async function frissitesOtthona(otthon, { git = false } = {}) {
   await mkdir(join(regi, 'windows'), { recursive: true });
   await writeFile(join(regi, 'windows', 'telepit.ps1'), helyettesTelepito('regi'));
   await writeFile(join(regi, 'koino.js'), FUTO_ZAROLO);
-  // a régi tárból telepített program (a költözés — 2026-11-06): a régi elrendezésben, a koino_1.1\koino alatt
+  // a régi tárból telepített program (a bekapcsolódás — 2026-11-06): a régi elrendezésben, a koino_1.1\koino alatt
   await mkdir(join(otthon, 'koino_1.1', 'koino'), { recursive: true });
   await writeFile(join(otthon, 'koino_1.1', 'koino', 'koino.js'), FUTO_PROGRAM);
   await writeFile(join(regi, 'regi.txt'), 'régi');
@@ -315,8 +315,8 @@ async function frissitesOtthona(otthon, { git = false } = {}) {
 const ujTelepitoFuttatasa = (otthon, telepito, sz) => futtat('powershell.exe',
   ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', telepito, sz], { env: { ...process.env, KOINO_INDITAS: 'nem' }, cwd: otthon });
 
-// ⭐⭐ A csere: a futó régi koino leáll (és a régi tár helyéről futó is — a költözés; a másik mappáé nem), a régi a `koino-regi`-be, az új a helyére, a letöltés mappája
-// eltűnik, és a régi telepítő NEM fut. ⭐ A régi tár sorának hívási láncával (a költözés): a letöltött új telepítőt egy, a régi
+// ⭐⭐ A csere: a futó régi koino leáll (és a régi tár helyéről futó is — a bekapcsolódás; a másik mappáé nem), a régi a `koino-regi`-be, az új a helyére, a letöltés mappája
+// eltűnik, és a régi telepítő NEM fut. ⭐ A régi tár sorának hívási láncával (a bekapcsolódás): a letöltött új telepítőt egy, a régi
 // sor letöltésében (`koino_1.1-uj`) álló „régi” telepítő hívja — a végén ennek a mappának is el kell tűnnie (a régi programé —
 // `koino_1.1\koino` — marad). Rontás: (a) a leállítás kimarad → a régi „koino.js” tovább fut → bukik; (b) a leállítás
 // mintája túl tág (csak `koino.js`) → a másik mappáé is leáll → bukik; (c) a régebbi generáció nem törlődik / a régi nem kerül
@@ -488,7 +488,7 @@ proba('⭐ (Termuxon) PR7: a telepit.sh leállítja az ebből a mappából futó
     await mkdir(join(otthon, 'prefix', 'bin'), { recursive: true });
     const a = spawn(process.execPath, [join(konyvtar, 'koino.js')], { stdio: 'ignore' });
     const b = spawn(process.execPath, [join(otthon, 'mas', 'koino', 'koino.js')], { stdio: 'ignore' });
-    // a régi tár helyéről futó (a költözés)
+    // a régi tár helyéről futó (a bekapcsolódás)
     await mkdir(join(otthon, 'koino_1.1', 'koino'), { recursive: true });
     await writeFile(join(otthon, 'koino_1.1', 'koino', 'koino.js'), FUTO_PROGRAM);
     const r1 = spawn(process.execPath, [join(otthon, 'koino_1.1', 'koino', 'koino.js')], { stdio: 'ignore' });

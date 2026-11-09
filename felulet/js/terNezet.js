@@ -150,7 +150,7 @@ export class TerNezet {
     }
     elem.appendChild(labjegyzet);
 
-    // ----- ⭐⭐ D118 (⑥): A CSALÁDFA — a szülő, a gyermekek, és a költözéseim -----
+    // ----- ⭐⭐ D118 (⑥): A CSALÁDFA — a szülő, a gyermekek, és a bekapcsolódásaim -----
     const csalad = this._csalad(koino);
     if (csalad) elem.appendChild(csalad);
 
@@ -192,7 +192,8 @@ export class TerNezet {
 
   /**
    * ⭐⭐ D118 (⑥): a családfa a kártyán — ↑ a szülője, ↓ a gyermekei (a nevükre kattintva oda lépünk; amit a készülék nem
-   * ismer, az halványan, a rövid nevével — D19), és a költözéseim (ide beköltöztem · innen kiköltöztem).
+   * ismer, az halványan, a rövid nevével — D19), és ⭐ D127 a bekapcsolódásaim (ide bekapcsolódtam · innen ide is bekapcsolódtam —
+   * a szülőben közben megmaradtam).
    * @returns {HTMLElement|null}
    */
   _csalad(koino) {
@@ -200,15 +201,15 @@ export class TerNezet {
     if (koino.szulo) {
       sorok.push(['↑ a szülője:', [{ azonosito: koino.szulo, nev: koino.szuloNev, ismert: koino.szuloIsmert }]]);
     }
-    // ⭐ D119 (①b): a kártyáról ismert gyermek tára még nincs a készüléken — a neve igen (a „Költözés…” onnan is visz)
+    // ⭐ D119 (①b): a kártyáról ismert gyermek tára még nincs a készüléken — a neve igen (a „Bekapcsolódás…” onnan is visz)
     if (koino.gyermekek?.length) sorok.push(['↓ a gyermekei:', koino.gyermekek.map((g) => ({ ...g, ismert: !g.kartyarol }))]);
-    const koltozesek = [];
-    if (koino.enBekoltoztem) koltozesek.push('🧳 ide költöztél (a szülőből)');
-    for (const gy of koino.kikoltoztem ?? []) {
+    const bekapcsolodasok = [];
+    if (koino.enBekapcsolodtam) bekapcsolodasok.push('🌿 ide bekapcsolódtál (a szülőben is megmaradtál)');
+    for (const gy of koino.bekapcsolodtam ?? []) {
       const g = koino.gyermekek?.find((x) => x.azonosito === gy);
-      koltozesek.push('🧳 innen kiköltöztél ide: ' + (g?.nev ?? gy.slice(0, 8) + '…'));
+      bekapcsolodasok.push('🌿 innen ide is bekapcsolódtál: ' + (g?.nev ?? gy.slice(0, 8) + '…'));
     }
-    if (!sorok.length && !koltozesek.length) return null;
+    if (!sorok.length && !bekapcsolodasok.length) return null;
 
     const doboz = document.createElement('div');
     doboz.className = 'koino-kartya__csalad';
@@ -249,9 +250,9 @@ export class TerNezet {
       });
       doboz.appendChild(sor);
     }
-    for (const szoveg of koltozesek) {
+    for (const szoveg of bekapcsolodasok) {
       const sor = document.createElement('p');
-      sor.className = 'koino-kartya__csalad-sor koino-kartya__csalad-sor--koltozes';
+      sor.className = 'koino-kartya__csalad-sor koino-kartya__csalad-sor--bekapcsolodas';
       sor.textContent = szoveg;
       doboz.appendChild(sor);
     }

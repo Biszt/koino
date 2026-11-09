@@ -1,7 +1,7 @@
 /* felulet/css/components/koinoCsatlakozas.css */
 
 /* Felelősség: ⭐ D119 ⑥ — a tér két ablaka (koinós többlet): a csatlakozás egy koinóhoz és a társak; és az őrjárat állása a tér
-   kártyáján (a parancs a másoló gombjával). A színek a lap meglévő változóiból (`base/variables.css`), a költözés ablakának
+   kártyáján (a parancs a másoló gombjával). A színek a lap meglévő változóiból (`base/variables.css`), a bekapcsolódás ablakának
    mintájára. */
 
 .koino-csatlakozas { display: flex; flex-direction: column; gap: 10px; }

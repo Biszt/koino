@@ -1,9 +1,9 @@
-// meres/ketRetegProba.js — ⭐⭐ D118 (a költözés ③): a koinó képe két rétegben
+// meres/ketRetegProba.js — ⭐⭐ D118 (a bekapcsolódás ③): a koinó képe két rétegben
 //
 // Azt bizonyítja, hogy egy szülőre épülő koinó a szülő múltját a SZÜLŐ szabályaival, a vágás pillanatára számolja, és a
 // lezárt döntések rögzítve jönnek át (D118/3 — a gyermek szigorúbb küszöbe sem fordítja meg őket); hogy a jelenben a
-// szerkezet mindenkié, a súly csak a költözőké (D118/1 — a nem költöző pontja és szavazata nem számít, a D14 itt ítél);
-// hogy a nem költöző nyitott javaslata nem folytatódik, a költözőé a gyermek küszöbeivel igen (KZ6 (A)); és hogy a szülő
+// szerkezet mindenkié, a súly csak a bekapcsolódóké (D118/1 — a nem bekapcsolódó pontja és szavazata nem számít, a D14 itt ítél);
+// hogy a nem bekapcsolódó nyitott javaslata nem folytatódik, a bekapcsolódóé a gyermek küszöbeivel igen (KZ6 (A)); és hogy a szülő
 // nélküli koinó képe ugyanaz, mint eddig.
 
 import { probaGyujtemeny, ujEember } from './probaFuttato.js';
@@ -30,14 +30,14 @@ const T0 = Date.UTC(2026, 0, 1);
 const VAGAS = T0 + 10 * NAP;
 
 /**
- * A szülő és a gyermek: A az alapító (és a gyermek létrehozója — a születésével költözik), B és C tag a szülőben.
+ * A szülő és a gyermek: A az alapító (és a gyermek létrehozója — a születésével bekapcsolódik), B és C tag a szülőben.
  * X: csak A pontja · Y: csak B pontja · Z: A és B pontja. J1: A javaslata X-re, 2/3-dal elfogadva a vágás előtt. J2: B
  * javaslata Z-re, nyitott a vágáskor. J3: A javaslata Z-re, nyitott a vágáskor (A támogatja, B ellenzi). A gyermek
  * elfogadási küszöbe 80% (a szülőé 51%).
  * @param {Object} [b]
- * @param {boolean} [b.bKoltozik] - B is beköltözik (a gyermekben tag, a ③-ban paraméterként költöző)
+ * @param {boolean} [b.bBekapcsolodik] - B is bekapcsolódik (a gyermekben tag, a ③-ban paraméterként bekapcsolódó)
  */
-async function szuloEsGyermek({ bKoltozik = false } = {}) {
+async function szuloEsGyermek({ bBekapcsolodik = false } = {}) {
   const A = await ujEember('');
   const P = await A.tesz('KoinoLetrehozas', { nev: 'Szülő', leiras: null, alapitok: [], zart: true,
     szabalyok: teljesSzabalyok() }, T0);
@@ -75,14 +75,14 @@ async function szuloEsGyermek({ bKoltozik = false } = {}) {
   await szavaz(A, J1, 'Tamogat', T0 + 1100);
   await szavaz(B, J1, 'Tamogat', T0 + 1200);
   await szavaz(C, J1, 'Ellenez', T0 + 1300);
-  // J4: A javaslata X-re, a szülőben ELVETVE (1/3) — a költöző egyedül elfogadná.
+  // J4: A javaslata X-re, a szülőben ELVETVE (1/3) — a bekapcsolódó egyedül elfogadná.
   const J4 = await javaslat(A, X, 'X elvetett', T0 + 2000);
   await szavaz(A, J4, 'Tamogat', T0 + 2100);
   await szavaz(B, J4, 'Ellenez', T0 + 2200);
   await szavaz(C, J4, 'Ellenez', T0 + 2300);
-  const J2 = await javaslat(B, Z, 'Z a nem költözőtől', VAGAS - ORA);
+  const J2 = await javaslat(B, Z, 'Z a nem bekapcsolódótól', VAGAS - ORA);
   await szavaz(B, J2, 'Tamogat', VAGAS - ORA + 10);
-  const J3 = await javaslat(A, Z, 'Z a költözőtől', VAGAS - ORA + 100);
+  const J3 = await javaslat(A, Z, 'Z a bekapcsolódótól', VAGAS - ORA + 100);
   await szavaz(A, J3, 'Tamogat', VAGAS - ORA + 110);
   await szavaz(B, J3, 'Ellenez', VAGAS - ORA + 120);
 
@@ -102,13 +102,13 @@ async function szuloEsGyermek({ bKoltozik = false } = {}) {
   k.push(await A.tesz('GondolatLetrehozas', { cim: 'A gyermekben', meret: 10 }, VAGAS + 100));
   k.push(await A.tesz('TudatpontRendezes', { entitas: k[1].azonosito, pont: 50 }, VAGAS + 101));
   // ⚠️ B a gyermekben TAG (A meghívja) — különben a nem tag súlya a D93/1 miatt amúgy sem számítana, és a próba nem a
-  // költözés szabályát mérné. Költözni csak a `bKoltozik`-kal költözik (a lánc-pontja az első gyermekbeli eseménye — a
+  // bekapcsolódás szabályát mérné. Bekapcsolódni csak a `bBekapcsolodik`-kal bekapcsolódik (a lánc-pontja az első gyermekbeli eseménye — a
   // ④-ig paraméter).
   B.koinotValt(K.azonosito);
   const bBe = await B.tesz('Belepes', {}, VAGAS + 200);
   k.push(bBe, await A.tesz('Meghivas', { kit: B.szerzo, sajatBelepes: K.azonosito }, VAGAS + 201, { entitas: bBe.azonosito }));
-  const koltozok = bKoltozik ? new Map([[B.szerzo, bBe.sorszam]]) : null;
-  return { A, B, C, P, K, X, Y, Z, J1, J2, J3, J4, p, k, koltozok, sajat: k[1], utana };
+  const bekapcsolodok = bBekapcsolodik ? new Map([[B.szerzo, bBe.sorszam]]) : null;
+  return { A, B, C, P, K, X, Y, Z, J1, J2, J3, J4, p, k, bekapcsolodok, sajat: k[1], utana };
 }
 
 /** A régi út: a három fázis egy rétegen. */
@@ -136,7 +136,7 @@ proba('⭐ D118 (③): a szülő nélküli koinó képe UGYANAZ, mint a három f
 // 2. A MÚLT: a lezárt döntés rögzítve, a szülő szabályaival
 // ===================================
 
-proba('⭐⭐ D118/3: a vágás előtt LEZÁRT döntések rögzítve jönnek át — az elfogadott az egyezményével, az elvetett elvetve; se a költözők egyedül, se a gyermek szigorúbb küszöbe (80%) nem fordítja meg',
+proba('⭐⭐ D118/3: a vágás előtt LEZÁRT döntések rögzítve jönnek át — az elfogadott az egyezményével, az elvetett elvetve; se a bekapcsolódók egyedül, se a gyermek szigorúbb küszöbe (80%) nem fordítja meg',
   async () => {
     const s = await szuloEsGyermek();
     const most = VAGAS + 30 * NAP;
@@ -144,21 +144,21 @@ proba('⭐⭐ D118/3: a vágás előtt LEZÁRT döntések rögzítve jönnek át
     const j1 = kep.javaslatok.get(s.J1.azonosito);
     const j4 = kep.javaslatok.get(s.J4.azonosito);
     // ⚠️ A próba nem vak: a múlt adataira a gyermek küszöbét téve a J1 elbukna (667‰ < 800‰), a jelen bemenetéből (csak a
-    // költöző szavazatával) a J4 átmenne.
+    // bekapcsolódó szavazatával) a J4 átmenne.
     const szigorubb = javaslatokSzamitasa(kep.mult.allapot.szamitok, kep.mult.allapot, most,
       { alapKuszobok: { ...kep.mult.allapot.koino.szabalyok.alapKuszobok, elfogadasiKuszob: 80 } }).get(s.J1.azonosito);
-    const csakKoltozo = javaslatokSzamitasa(kep.allapot.szamitok, kep.allapot, most).get(s.J4.azonosito);
+    const csakBekapcsolodo = javaslatokSzamitasa(kep.allapot.szamitok, kep.allapot, most).get(s.J4.azonosito);
     return j1?.mult === true && j1.statusz === 'elfogadva' && j1.tamogatottsagEzrelek === 667
       && j4?.mult === true && j4.statusz === 'elvetve'
       && kep.allapot.entitasok.get(s.X.azonosito)?.cim === 'X új'
-      && szigorubb?.statusz === 'elvetve' && csakKoltozo?.statusz === 'elfogadva';
+      && szigorubb?.statusz === 'elvetve' && csakBekapcsolodo?.statusz === 'elfogadva';
   });
 
 // ===================================
-// 3. A JELEN: a súly csak a költözőké
+// 3. A JELEN: a súly csak a bekapcsolódóké
 // ===================================
 
-proba('⭐⭐ D118/1: a súly csak a költözőké — a nem költöző pontja nem számít (a csak az övé entitás a gyermekben nem él), a szerkezet mindenkié',
+proba('⭐⭐ D118/1: a súly csak a bekapcsolódóké — a nem bekapcsolódó pontja nem számít (a csak az övé entitás a gyermekben nem él), a szerkezet mindenkié',
   async () => {
     const s = await szuloEsGyermek();
     const kep = await koinoKepe([...s.p, s.utana, ...s.k], { koino: s.K.azonosito, most: VAGAS + 30 * NAP });
@@ -172,7 +172,7 @@ proba('⭐⭐ D118/1: a súly csak a költözőké — a nem költöző pontja n
       && kep.mult.allapot.entitasok.get(s.Y.azonosito)?.osszesPont === 100;
   });
 
-proba('⭐⭐ KZ6 (A): a NEM KÖLTÖZŐ nyitott javaslata nem folytatódik; a KÖLTÖZŐÉ igen — a nem költöző szavazata nélkül, a gyermek küszöbével',
+proba('⭐⭐ KZ6 (A): a NEM BEKAPCSOLÓDÓ nyitott javaslata nem folytatódik; a BEKAPCSOLÓDÓÉ igen — a nem bekapcsolódó szavazata nélkül, a gyermek küszöbével',
   async () => {
     const s = await szuloEsGyermek();
     const most = VAGAS + 30 * NAP;
@@ -184,27 +184,27 @@ proba('⭐⭐ KZ6 (A): a NEM KÖLTÖZŐ nyitott javaslata nem folytatódik; a K�
     return multban.get(s.J2.azonosito)?.statusz === 'folyamatban' && multban.get(s.J3.azonosito)?.statusz === 'folyamatban'
       && !kep.javaslatok.has(s.J2.azonosito)
       && j3 && !j3.mult && j3.statusz === 'elfogadva' && j3.ellenzok === 0
-      && kep.allapot.entitasok.get(s.Z.azonosito)?.cim === 'Z a költözőtől'
+      && kep.allapot.entitasok.get(s.Z.azonosito)?.cim === 'Z a bekapcsolódótól'
       && szuloben?.statusz === 'elvetve';
   });
 
-proba('⭐ D118 (③): egy MÁSIK költöző (a ④-ig paraméter) a pontjait és a szavazatát is hozza — az ő entitása él, és a szavazata számít',
+proba('⭐ D118 (③): egy MÁSIK bekapcsolódó (a ④-ig paraméter) a pontjait és a szavazatát is hozza — az ő entitása él, és a szavazata számít',
   async () => {
-    const s = await szuloEsGyermek({ bKoltozik: true });
+    const s = await szuloEsGyermek({ bBekapcsolodik: true });
     const most = VAGAS + 30 * NAP;
-    const kep = await koinoKepe([...s.p, ...s.k], { koino: s.K.azonosito, most, koltozok: s.koltozok });
+    const kep = await koinoKepe([...s.p, ...s.k], { koino: s.K.azonosito, most, bekapcsolodok: s.bekapcsolodok });
     const j3 = kep.javaslatok.get(s.J3.azonosito);
     return kep.allapot.entitasok.get(s.Y.azonosito)?.osszesPont === 100
       && kep.allapot.entitasok.get(s.Z.azonosito)?.osszesPont === 200
       && j3?.ellenzok === 1 && j3.statusz === 'elvetve'
-      && kep.javaslatok.has(s.J2.azonosito);   // B is költözött: az ő nyitott javaslata is folytatódik
+      && kep.javaslatok.has(s.J2.azonosito);   // B is bekapcsolódott: az ő nyitott javaslata is folytatódik
   });
 
 // ===================================
 // 4. TÖBB NEMZEDÉK
 // ===================================
 
-proba('⭐ D118 (③): több nemzedéken át — a nagyszülőben lezárt döntés a szülőn át az unokába is rögzítve jön, a súly a költözőkkel halad',
+proba('⭐ D118 (③): több nemzedéken át — a nagyszülőben lezárt döntés a szülőn át az unokába is rögzítve jön, a súly a bekapcsolódókkal halad',
   async () => {
     const A = await ujEember('');
     const G = await A.tesz('KoinoLetrehozas', { nev: 'Nagyszülő', leiras: null, alapitok: [], zart: true,
@@ -232,9 +232,9 @@ proba('⭐ D118 (③): több nemzedéken át — a nagyszülőben lezárt dönt�
       && kep.mult?.mult?.javaslatok.get(j.azonosito)?.statusz === 'elfogadva';
   });
 
-// ⭐ A súly nemzedékenként: aki a nagyszülőből a szülőbe költözött, de onnan az unokába nem, annak a nagyszülőbeli súlya az
-// unokában nem számít — és aki a szülőbe csak meghívással jött (nem költözött), annak a nagyszülőbeli súlya sem.
-proba('⭐ D118 (③): a súly NEMZEDÉKENKÉNT — a nagyszülőből a szülőbe költözött, de tovább nem költözött szerző nagyszülőbeli pontja az unokában nem él',
+// ⭐ A súly nemzedékenként: aki a nagyszülőből a szülőbe bekapcsolódott, de onnan az unokába nem, annak a nagyszülőbeli súlya az
+// unokában nem számít — és aki a szülőbe csak meghívással jött (nem bekapcsolódott), annak a nagyszülőbeli súlya sem.
+proba('⭐ D118 (③): a súly NEMZEDÉKENKÉNT — a nagyszülőből a szülőbe bekapcsolódott, de tovább nem bekapcsolódott szerző nagyszülőbeli pontja az unokában nem él',
   async () => {
     const A = await ujEember('');
     const G = await A.tesz('KoinoLetrehozas', { nev: 'Nagyszülő', leiras: null, alapitok: [], zart: true,
@@ -243,11 +243,11 @@ proba('⭐ D118 (③): a súly NEMZEDÉKENKÉNT — a nagyszülőből a szülőb
     const D = await ujEember(G.azonosito);
     const dBe = await D.tesz('Belepes', {}, T0 + 10);
     const dM = await A.tesz('Meghivas', { kit: D.szerzo, sajatBelepes: G.azonosito }, T0 + 11, { entitas: dBe.azonosito });
-    const q = await D.tesz('GondolatLetrehozas', { cim: 'Q a költözött szerzőtől', meret: 10 }, T0 + 20);
+    const q = await D.tesz('GondolatLetrehozas', { cim: 'Q a bekapcsolódott szerzőtől', meret: 10 }, T0 + 20);
     const qp = await D.tesz('TudatpontRendezes', { entitas: q.azonosito, pont: 100 }, T0 + 21);
     const g = await A.tesz('GondolatLetrehozas', { cim: 'g az alapítótól', meret: 10 }, T0 + 30);
     const gp = await A.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 100 }, T0 + 31);
-    // D hozza létre a szülőt (költözik G → P); A a szülőben csak meghívott tag.
+    // D hozza létre a szülőt (bekapcsolódik G → P); A a szülőben csak meghívott tag.
     D.koinotValt('');
     const P = await D.tesz('KoinoLetrehozas', { nev: 'Szülő', leiras: null, alapitok: [], zart: true, szulo: G.azonosito,
       szuloTagsag: { horgony: dBe.azonosito, lanc: [dBe, dM] }, szabalyok: teljesSzabalyok() }, T0 + 10 * NAP);
@@ -257,18 +257,18 @@ proba('⭐ D118 (③): a súly NEMZEDÉKENKÉNT — a nagyszülőből a szülőb
     const aM = await D.tesz('Meghivas', { kit: A.szerzo, sajatBelepes: P.azonosito }, T0 + 10 * NAP + 11, { entitas: aBe.azonosito });
     const r = await A.tesz('GondolatLetrehozas', { cim: 'R a szülőben', meret: 10 }, T0 + 10 * NAP + 20);
     const rp = await A.tesz('TudatpontRendezes', { entitas: r.azonosito, pont: 100 }, T0 + 10 * NAP + 21);
-    // A hozza létre az unokát (költözik P → K).
+    // A hozza létre az unokát (bekapcsolódik P → K).
     A.koinotValt('');
     const K = await A.tesz('KoinoLetrehozas', { nev: 'Unoka', leiras: null, alapitok: [], zart: true, szulo: P.azonosito,
       szuloTagsag: { horgony: aBe.azonosito, lanc: [aBe, aM] }, szabalyok: teljesSzabalyok() }, T0 + 20 * NAP);
-    // ⚠️ D az unokában TAG (A meghívja, nem költözik) — a nem tag súlya amúgy sem számítana (D93/1).
+    // ⚠️ D az unokában TAG (A meghívja, nem bekapcsolódik) — a nem tag súlya amúgy sem számítana (D93/1).
     A.koinotValt(K.azonosito);
     D.koinotValt(K.azonosito);
     const dKBe = await D.tesz('Belepes', {}, T0 + 20 * NAP + 10);
     const dKM = await A.tesz('Meghivas', { kit: D.szerzo, sajatBelepes: K.azonosito }, T0 + 20 * NAP + 11, { entitas: dKBe.azonosito });
     const most = T0 + 30 * NAP;
     const kep = await koinoKepe([G, dBe, dM, q, qp, g, gp, P, aBe, aM, r, rp, K, dKBe, dKM], { koino: K.azonosito, most });
-    // ⚠️ A próba nem vak: a szülőben D (a költöző) nagyszülőbeli pontja él, A-é nem.
+    // ⚠️ A próba nem vak: a szülőben D (a bekapcsolódó) nagyszülőbeli pontja él, A-é nem.
     const szulo = kep.mult.allapot.entitasok;
     const e = kep.allapot.entitasok;
     return szulo.get(q.azonosito)?.osszesPont === 100 && !szulo.has(g.azonosito)
@@ -304,7 +304,7 @@ proba('⛔⛔ D118 (③): a létrehozó új pontja a gyermekben a HOZOTT pontjai
 // 6. A FELÜLET IS EZT LÁTJA — a pakli képe
 // ===================================
 
-proba('⭐ D118 (③): a pakli (a felület) ugyanazt a két réteget látja — a hozott entitás a vágáskori alakjával, a nem költözőé nincs',
+proba('⭐ D118 (③): a pakli (a felület) ugyanazt a két réteget látja — a hozott entitás a vágáskori alakjával, a nem bekapcsolódóé nincs',
   async () => {
     const s = await szuloEsGyermek();
     const tar = await esemenyTarNyitasa(s.K.azonosito, await mkdtemp(join(tmpdir(), 'koino-ketreteg-')));

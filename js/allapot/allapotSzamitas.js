@@ -112,7 +112,7 @@ export function rendezettBemenet(esemenyek) {
 export function elagazasokFeloldasa(esemenyek, lancAga = null) {
   const kulcsSzerint = new Map();      // "szerzo|sorszam" → események
   for (const e of esemenyek) {
-    // ⭐ D118 (⑤b): a lánc-ág szerint (a koinó képe adja) — a nem költöző ős-eseménye külön ág, nem a gyermekbeli lánca.
+    // ⭐ D118 (⑤b): a lánc-ág szerint (a koinó képe adja) — a nem bekapcsolódó ős-eseménye külön ág, nem a gyermekbeli lánca.
     const kulcs = (lancAga ? lancAga(e) : e.szerzo) + '|' + e.sorszam;
     if (!kulcsSzerint.has(kulcs)) kulcsSzerint.set(kulcs, []);
     kulcsSzerint.get(kulcs).push(e);
@@ -163,7 +163,7 @@ export function elagazasokFeloldasa(esemenyek, lancAga = null) {
  * Megkeresi azokat az eseményeket, amelyek visszafelé lépnek a saját láncuk idejében.
  *
  * @param {Array<Object>} ervenyesek - elágazás-mentesített események
- * @param {Function} [lancAga] - ⭐ D118 (⑤b): a lánc-ág (a nem költöző ős-eseménye külön ág — a régi ideje nem visszalépés)
+ * @param {Function} [lancAga] - ⭐ D118 (⑤b): a lánc-ág (a nem bekapcsolódó ős-eseménye külön ág — a régi ideje nem visszalépés)
  * @returns {Array<Object>} { szerzo, sorszam, ido, elozoIdo, azonosito }
  */
 export function idoEllentmondasokKeresese(ervenyesek, lancAga = null) {
@@ -261,7 +261,7 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
   // láthatom (csak a születésük jön el, a szülő vagy a gyökér-darab bejelentéseként), tehát a D14 rájuk sem ítélhet.
   const nemTartott = typeof beallitas.nemTartott === 'function' ? beallitas.nemTartott : null;
   // Mely entitásoknak láttuk legalább egy pont-eseményét (a D14 kivétele és a döntés ismerete ugyanez a jel).
-  // ⭐ D119 (A): a jelenből kizárt, de látott ELHAGYOTT pont (a költöző nem hozta — KZ3) is tudás: „ez a költöző 0-t hoz rá”
+  // ⭐ D119 (A): a jelenből kizárt, de látott ELHAGYOTT pont (a bekapcsolódó nem hozta — KZ3) is tudás: „ez a bekapcsolódó 0-t hoz rá”
   // (`ketReteg.js` adja) — különben az elhagyott entitás a gyermekben „a pontjai ismeretlenek” szellemként maradna.
   const pontjaIsmert = new Set(beallitas.elhagyottPontok instanceof Set ? beallitas.elhagyottPontok : []);
 
@@ -279,7 +279,7 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
   const rendezettek = rendezettBemenet(csomagokKibontasa(esemenyek));
 
   // ⭐⭐ D118 (⑤b): a szerzők LÁNC-ÁGA és a láncon ismert, de a jelenből kizárt sorszámok (a koinó képe adja — `ketReteg.js`):
-  // a nem költöző ős-eseménye külön ág (nem elágazás, nem idő-visszalépés), és a kizárt esemény helye nem hézag.
+  // a nem bekapcsolódó ős-eseménye külön ág (nem elágazás, nem idő-visszalépés), és a kizárt esemény helye nem hézag.
   const lancAga = typeof beallitas.lancAga === 'function' ? beallitas.lancAga : null;
   const ismertSorszamok = beallitas.ismertSorszamok instanceof Map ? beallitas.ismertSorszamok : null;
   const { ervenyesek, ellentmondasok } = elagazasokFeloldasa(rendezettek, lancAga);

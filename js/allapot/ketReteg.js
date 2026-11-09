@@ -1,6 +1,6 @@
 // js/allapot/ketReteg.js
 
-// Felelősség: ⭐⭐ D118 (a költözés ③, 2026-10-24) — A KOINÓ KÉPE KÉT RÉTEGBEN: a múlt az ős szabályaival, a jelen a
+// Felelősség: ⭐⭐ D118 (a bekapcsolódás ③, 2026-10-24) — A KOINÓ KÉPE KÉT RÉTEGBEN: a múlt az ős szabályaival, a jelen a
 // koinóéval.
 //
 // A számítás három fázis (`allapotSzamitasa` → `javaslatokSzamitasa` → `szerkesztesiEgyezmenyekAlkalmazasa`). Egy
@@ -10,7 +10,7 @@
 //   · A MÚLT (a talaj): nemzedékenként, a gyökértől lefelé — az ős eseményei az ŐS szabályaival (a születéséből), a vágás
 //     pillanatára számolva, és az ős saját múltjával (rekurzívan). Ebből a gyermekbe a LEZÁRT döntések kerülnek át,
 //     rögzítve (D118/3: mindenki szavazatával, a szülő küszöbeivel — nem fordulhatnak meg).
-//   · A JELEN: a koinó saját eseményei, és az ősökéből a szerkezet (mindenkié) és a súly (csak a költözőké, a
+//   · A JELEN: a koinó saját eseményei, és az ősökéből a szerkezet (mindenkié) és a súly (csak a bekapcsolódóké, a
 //     lánc-pontjukig — `jelenbenSzamit`), a koinó szabályaival; a D14 itt ítél.
 //   · A VÉGREHAJTÁS: a múlt rögzített és a jelen elfogadott egyezményei egy sorban (a lejárat szerint, ugyanazzal a kóddal) —
 //     az entitások a vágáskori alakjukat kapják, és a jelen változásai arra épülnek.
@@ -24,7 +24,7 @@
 import { allapotSzamitasa } from './allapotSzamitas.js';
 import { javaslatokSzamitasa } from './javaslatSzamitas.js';
 import { szerkesztesiEgyezmenyekAlkalmazasa } from './szerkesztesiVegrehajtas.js';
-import { lancKoltozoi, jelenbenSzamit, lancbanVan } from './koinoLanc.js';
+import { lancBekapcsolodoi, jelenbenSzamit, lancbanVan } from './koinoLanc.js';
 import { esemenyKoinoja, azonositoAlaku, koinoSzuleteseE } from '../esemeny/esemeny.js';
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 
@@ -70,7 +70,7 @@ export function lancBemenetbol(esemenyek, koino) {
  * @param {Map} [beallitas.osszegzesek] - a jelen réteg ellenőrzött lezárási összegzései (D95/1)
  * @param {Set<string>} [beallitas.csakAtmeneti] - a D14 kivétele (B/2)
  * @param {Function} [beallitas.nemTartott] - a D14 kivétele (D97)
- * @param {Map<string, number>} [beallitas.koltozok] - a legfelső költözés további költözői (a ③ próbáinak; a ④-ig)
+ * @param {Map<string, number>} [beallitas.bekapcsolodok] - a legfelső bekapcsolódás további bekapcsolódói (a ③ próbáinak; a ④-ig)
  * @returns {Promise<{allapot: Object, javaslatok: Map, mult: Object|null}>} a `mult`: a szülő vágáskori képe (ha van)
  */
 export async function koinoKepe(esemenyek, beallitas = {}) {
@@ -78,32 +78,32 @@ export async function koinoKepe(esemenyek, beallitas = {}) {
   const most = beallitas.most ?? Date.now();
   const lanc = koino ? lancBemenetbol(esemenyek, koino) : [];
   if (lanc.length < 2) return { ...(await haromFazis(esemenyek, koino, most, beallitas, null)), mult: null };
-  // ⭐ A költözők nemzedékenként: a létrehozó (a születésével) és a beköltözők (a bemenet beköltözéseiből — ④a).
-  const koltozok = lancKoltozoi(lanc, beallitas.koltozok instanceof Map ? beallitas.koltozok : null, esemenyek);
-  return nemzedekKepe(esemenyek, lanc, koltozok, 0, most, beallitas);
+  // ⭐ A bekapcsolódók nemzedékenként: a létrehozó (a születésével) és a bekapcsolódók (a bemenet bekapcsolódásaiból — ④a).
+  const bekapcsolodok = lancBekapcsolodoi(lanc, beallitas.bekapcsolodok instanceof Map ? beallitas.bekapcsolodok : null, esemenyek);
+  return nemzedekKepe(esemenyek, lanc, bekapcsolodok, 0, most, beallitas);
 }
 
 /** A `lanc[i]` koinó képe `most`-kor: a múltja (ha van) a vágásakor, rögzítve; a jelene. */
-async function nemzedekKepe(esemenyek, lanc, koltozok, i, most, beallitas) {
+async function nemzedekKepe(esemenyek, lanc, bekapcsolodok, i, most, beallitas) {
   let mult = null;
   let rogzitettek = null;
   if (i + 1 < lanc.length) {
-    mult = await multKepe(esemenyek, lanc, koltozok, i + 1, lanc[i].ido, beallitas);
+    mult = await multKepe(esemenyek, lanc, bekapcsolodok, i + 1, lanc[i].ido, beallitas);
     // ⭐ A vágáskor LEZÁRT döntések (elfogadva, elvetve, nem ismert) — a folyamatban lévők a jelenben folytatódnak, ha a
-    // javaslattevő költözött (KZ6 (A): a nem költözőé nem — a javaslata nincs a jelen bemenetében).
+    // javaslattevő bekapcsolódott (KZ6 (A): a nem bekapcsolódóé nem — a javaslata nincs a jelen bemenetében).
     rogzitettek = new Map([...mult.javaslatok].filter(([, j]) => j.statusz !== 'folyamatban'));
   }
-  const bemenet = esemenyek.filter((e) => jelenbenSzamit(e, lanc, i, koltozok));
-  // ⭐⭐ D118 (⑤b): a szerzők LÁNCA ebben a nemzedékben (`lancbanVan`) — a láncon kívüli ős-esemény (a nem költöző múltja) külön
+  const bemenet = esemenyek.filter((e) => jelenbenSzamit(e, lanc, i, bekapcsolodok));
+  // ⭐⭐ D118 (⑤b): a szerzők LÁNCA ebben a nemzedékben (`lancbanVan`) — a láncon kívüli ős-esemény (a nem bekapcsolódó múltja) külön
   // ág: nem elágazás és nem idő-visszalépés a gyermekbeli láncához képest; és a láncon lévő, de a jelenből kizárt esemény (a
-  // tagsági csomag, az ős születése, az elhagyott pont) ismert sorszám, nem hézag — különben a költöző hazug bemondása csak
+  // tagsági csomag, az ős születése, az elhagyott pont) ismert sorszám, nem hézag — különben a bekapcsolódó hazug bemondása csak
   // jelzés volna (mérve).
-  const lancAga = (e) => (lancbanVan(e, lanc, i, koltozok) ? e.szerzo : e.szerzo + '|' + esemenyKoinoja(e));
+  const lancAga = (e) => (lancbanVan(e, lanc, i, bekapcsolodok) ? e.szerzo : e.szerzo + '|' + esemenyKoinoja(e));
   const ismertSorszamok = new Map();
-  // ⭐ D119 (A): az elhagyott pont (a láncon van, a jelenből kizárt) entitása — a D14 ítélhet róla (a költöző 0-t hoz rá).
+  // ⭐ D119 (A): az elhagyott pont (a láncon van, a jelenből kizárt) entitása — a D14 ítélhet róla (a bekapcsolódó 0-t hoz rá).
   const elhagyottPontok = new Set();
   for (const e of esemenyek) {
-    if (!lancbanVan(e, lanc, i, koltozok) || jelenbenSzamit(e, lanc, i, koltozok)) continue;
+    if (!lancbanVan(e, lanc, i, bekapcsolodok) || jelenbenSzamit(e, lanc, i, bekapcsolodok)) continue;
     if (!ismertSorszamok.has(e.szerzo)) ismertSorszamok.set(e.szerzo, new Set());
     ismertSorszamok.get(e.szerzo).add(e.sorszam);
     if (e.tipus === 'TudatpontRendezes' && azonositoAlaku(e.adat?.entitas)) elhagyottPontok.add(e.adat.entitas);
@@ -118,13 +118,13 @@ const multGyorsitotar = new Map();
 const MULT_EMLEK = 8;
 
 /** Egy ős (`lanc[i]`) képe a vágáskor (`vagas`) — gyorsítótárból, ha a múlt bemenete azóta nem változott. */
-async function multKepe(esemenyek, lanc, koltozok, i, vagas, beallitas) {
+async function multKepe(esemenyek, lanc, bekapcsolodok, i, vagas, beallitas) {
   const nevek = new Set(lanc.slice(i).map((sz) => sz.azonosito));
   const azonositok = esemenyek.filter((e) => nevek.has(esemenyKoinoja(e))).map((e) => e.azonosito).sort();
   const kulcs = lanc[i].azonosito + '|' + vagas + '|' + lenyomatSzinkron(azonositok);
   const kesz = multGyorsitotar.get(kulcs);
   if (kesz) return kesz;
-  const kep = await nemzedekKepe(esemenyek, lanc, koltozok, i, vagas, { csakAtmeneti: beallitas.csakAtmeneti,
+  const kep = await nemzedekKepe(esemenyek, lanc, bekapcsolodok, i, vagas, { csakAtmeneti: beallitas.csakAtmeneti,
     nemTartott: beallitas.nemTartott });
   if (multGyorsitotar.size >= MULT_EMLEK) multGyorsitotar.delete(multGyorsitotar.keys().next().value);
   multGyorsitotar.set(kulcs, kep);

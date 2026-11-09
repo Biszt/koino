@@ -142,7 +142,7 @@ async function kodFulBetoltese(elem, kartya) {
   elem.innerHTML = fej + '<div class="koino-kod__keres"></div><ul class="koino-kod__lista">' + fajlok.map((f) => '<li><button type="button" class="koino-kod__fajl"'
     + ' data-lenyomat="' + html(f[1]) + '" data-ut="' + html(f[0]) + '">' + html(f[0]) + '</button> <span class="koino-kod__meret">'
     + kb(f[2]) + '</span>' + (magban.has(f[0]) ? '<span class="koino-kod__mag" title="A számítás magja: a koinó képe és a kapu ebből '
-      + 'a fájlból is áll — ha változik, az a koinó számítását változtatja (költözés).">⚙ mag</span>' : '') + '</li>').join('')
+      + 'a fájlból is áll — ha változik, az a koinó számítását változtatja (új koinó, bekapcsolódással).">⚙ mag</span>' : '') + '</li>').join('')
     + '</ul><div class="koino-kod__tartalom" hidden></div>';
   // ⭐ D120: ha a kód a határ fölött van (nem vállalom a kártyát), a kérés gombja a lista fölött
   if (a.megvan < fajlok.length) {
@@ -218,9 +218,9 @@ export async function koinoVerzioMegnyitasa({ terMegnyitasa = null } = {}) {
     if (siker) {
       tartalom.innerHTML = '<p class="koino-verzio-urlap__siker">✅ Megszületett: <strong>' + html(siker.nev) + '</strong> ('
         + html(rovid(siker.gyermek)) + ').</p><p class="koino-verzio-urlap__leiras">A kártyája a pakliban van (' + siker.pont
-        + ' tudatpontod rajta); a kódja ' + siker.fajlok + ' fájl, ' + kb(siker.bajt) + '. A születéseddel beköltöztél (a hozott '
-        + 'pontjaid: ' + siker.hozottOsszeg + '). A többi készülék a szülő cseréjével kapja a kártyát — onnan költözhetnek '
-        + '(„🧳 Költözés…”).</p>'
+        + ' tudatpontod rajta); a kódja ' + siker.fajlok + ' fájl, ' + kb(siker.bajt) + '. A születéseddel bekapcsolódtál — itt is megmaradtál (a gyermekbe '
+        + 'hozott pontjaid: ' + siker.hozottOsszeg + '). A többi készülék a szülő cseréjével kapja a kártyát — onnan bekapcsolódhatnak '
+        + '(„🌿 Bekapcsolódás…”).</p>'
         + (terMegnyitasa ? '<div class="koino-verzio-urlap__gombok"><button type="button" class="koino-verzio-urlap__gomb '
           + 'koino-verzio-urlap__gomb--fo" data-muvelet="ter">A tér megnyitása</button></div>' : '');
       return;
@@ -233,7 +233,7 @@ export async function koinoVerzioMegnyitasa({ terMegnyitasa = null } = {}) {
     const sz = szuloSzabalyai();
     const ki = (x) => (folyamatban || megerosites ? ' disabled' : '') + x;
     tartalom.innerHTML = '<p class="koino-verzio-urlap__leiras">A koino-verzió egy gyermek-koinó: a „' + html(elo.nev ?? '?')
-      + '” koinóra épül (a múlt közös, a súlyt a költöző hozza — D118), a saját szabályaival, és a kódja a te FUTÓ programod — a '
+      + '” koinóra épül (a múlt közös, a súlyt a bekapcsolódó hozza — D118), a saját szabályaival, és a kódja a te FUTÓ programod — a '
       + 'kártyája „Kód” fülén bárki ellenőrizheti (D119).</p>'
       + '<label class="koino-verzio-urlap__mezo">A gyermek neve <input type="text" data-mezo="nev" maxlength="200" value="'
       + html(ertekek.nev) + '"' + ki('') + '></label>'
@@ -253,11 +253,11 @@ export async function koinoVerzioMegnyitasa({ terMegnyitasa = null } = {}) {
       + ' (<code title="' + html(elo.program.lenyomat) + '">' + html(rovid(elo.program.lenyomat)) + '</code>).'
       // ⭐ D123 (PR1): a gyermeket a számítás MAGJA köti — a többi réteg később szabadon változhat
       + (elo.mag ? ' A gyermeket a számítás magja köti: <code title="' + html(elo.mag.lenyomat) + '">' + html(rovid(elo.mag.lenyomat))
-        + '</code> — a felület és a többi réteg később költözés nélkül is frissülhet.' : '') + '</p>'
+        + '</code> — a felület és a többi réteg később új koinó nélkül is frissülhet.' : '') + '</p>'
       + (megerosites
         ? '<p class="koino-verzio-urlap__figyelem">Biztos? A gyermek születése és a kártya aláírt esemény — nem vonható vissza. A '
-          + 'születéseddel beköltözöl a gyermekbe (a pontjaid a gyermek keretébe jönnek; a koino-verzió kártyákra tett pontjaid a '
-          + 'szülőben maradnak).</p><div class="koino-verzio-urlap__gombok"><button type="button" class="koino-verzio-urlap__gomb"'
+          + 'születéseddel bekapcsolódsz a gyermekbe: itt megmaradsz a teljes súlyoddal, és a pontjaid a gyermekben is számítanak (a '
+          + 'koino-verzió kártyákra tettek kivételével — azok csak itt).</p><div class="koino-verzio-urlap__gombok"><button type="button" class="koino-verzio-urlap__gomb"'
           + ' data-muvelet="megse"' + (folyamatban ? ' disabled' : '') + '>Mégse</button><button type="button" class="'
           + 'koino-verzio-urlap__gomb koino-verzio-urlap__gomb--fo" data-muvelet="letrehozom"' + (folyamatban ? ' disabled' : '')
           + '>' + (folyamatban ? 'Létrehozom…' : 'Igen, létrehozom') + '</button></div>'

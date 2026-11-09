@@ -294,10 +294,10 @@ proba('⭐ Az „először láttam" szerint is rendezhető (a hamisíthatatlan, 
   });
 
 // ===================================
-// ⭐⭐ D118 (⑥): A CSALÁDFA ÉS A BEKÖLTÖZŐ A TÉREN
+// ⭐⭐ D118 (⑥): A CSALÁDFA ÉS A BEKAPCSOLÓDÓ A TÉREN
 // ===================================
 
-proba('⭐⭐ D118 (⑥): a téren a gyermek a szülőjét, a szülő a gyermekét mutatja — és a beköltöző a gyermekben belépő ÉS tag (a beköltözése a horgonya), a szülőben látja a kiköltözését',
+proba('⭐⭐ D118 (⑥): a téren a gyermek a szülőjét, a szülő a gyermekét mutatja — és a bekapcsolódó a gyermekben belépő ÉS tag (a bekapcsolódása a horgonya), a szülőben (ahol megmaradt) látja, hova kapcsolódott be',
   async () => {
     const hely = await ujKeszulek();
     const NAP = 86400 * 1000;
@@ -313,12 +313,9 @@ proba('⭐⭐ D118 (⑥): a téren a gyermek a szülőjét, a szülő a gyermek�
     A.koinotValt('');
     const K = await A.tesz('KoinoLetrehozas', { nev: 'Gyermek', leiras: null, alapitok: [], zart: true, szulo: P.azonosito,
       szuloTagsag: { horgony: P.azonosito, lanc: [] }, szabalyok: teljesSzabalyok() }, VAGAS);
-    // B kiköltözése (a szülőben) és beköltözése (a gyermekben) — a szülőbeli láncát a belépése után folytatja.
-    const kik = await esemenyLetrehozasa({ koino: P.azonosito, tipus: 'Kikoltozes', adat: { gyermek: K.azonosito },
-      elozo: bBe.azonosito, sorszam: bBe.sorszam + 1, ido: VAGAS + 500, entitas: bBe.azonosito, entitasSorszam: 9, latott: [] },
-    B.kulcspar);
+    // ⭐ D127: B bekapcsolódása (a gyermekben) — a szülőbeli láncát a belépése után folytatja; a szülőben semmi nem íródik.
     B.koinotValt(K.azonosito);
-    const bek = await B.tesz('Bekoltozes', { szulo: P.azonosito, kikoltozes: kik.azonosito,
+    const bek = await B.tesz('Bekapcsolodas', { szulo: P.azonosito,
       lanc: { sorszam: bBe.sorszam, azonosito: bBe.azonosito }, szuloTagsag: { horgony: bBe.azonosito, lanc: [bBe, bM] } },
     VAGAS + 600);
     const ment = async (koino, esemenyek) => {
@@ -328,19 +325,20 @@ proba('⭐⭐ D118 (⑥): a téren a gyermek a szülőjét, a szülő a gyermek�
         if (!m.mentve) throw new Error('nem menthető (' + e.tipus + '): ' + m.ok);
       }
     };
-    await ment(P.azonosito, [P, bBe, bM, kik]);
+    await ment(P.azonosito, [P, bBe, bM]);
     await ment(K.azonosito, [P, bBe, bM, K, bek]);
     const ter = await terKartyai(hely, { szerzo: B.szerzo });
     const pk = ter.kartyak.find((k) => k.azonosito === P.azonosito);
     const kk = ter.kartyak.find((k) => k.azonosito === K.azonosito);
-    // ⚠️ A próba nem vak: a beköltözés nélkül (a régi horgony-típusokkal) a gyermekben B se belépő, se tag nem volna.
+    // ⚠️ A próba nem vak: a bekapcsolódás nélkül (a régi horgony-típusokkal) a gyermekben B se belépő, se tag nem volna.
     const ok = !!pk && !!kk && kk.szulo === P.azonosito && kk.szuloIsmert === true && kk.szuloNev === 'Szülő'
       && pk.szulo === null && pk.gyermekek.length === 1 && pk.gyermekek[0].azonosito === K.azonosito
       && pk.gyermekek[0].nev === 'Gyermek' && kk.gyermekek.length === 0
-      && kk.enBekoltoztem === true && kk.enTagVagyok === true && kk.belepok === 2 && kk.tagok === 2
-      && pk.kikoltoztem.length === 1 && pk.kikoltoztem[0] === K.azonosito && pk.enBekoltoztem === false;
-    if (!ok) process.stderr.write('    (' + JSON.stringify({ pk: pk && { gy: pk.gyermekek, kik: pk.kikoltoztem },
-      kk: kk && { szulo: kk.szulo, nev: kk.szuloNev, be: kk.enBekoltoztem, tag: kk.enTagVagyok, belepok: kk.belepok,
+      && kk.enBekapcsolodtam === true && kk.enTagVagyok === true && kk.belepok === 2 && kk.tagok === 2
+      && pk.bekapcsolodtam.length === 1 && pk.bekapcsolodtam[0] === K.azonosito && pk.enBekapcsolodtam === false
+      && pk.enTagVagyok === true;
+    if (!ok) process.stderr.write('    (' + JSON.stringify({ pk: pk && { gy: pk.gyermekek, bek: pk.bekapcsolodtam, tag: pk.enTagVagyok },
+      kk: kk && { szulo: kk.szulo, nev: kk.szuloNev, be: kk.enBekapcsolodtam, tag: kk.enTagVagyok, belepok: kk.belepok,
         tagok: kk.tagok, miert: kk.miert } }) + ')\n');
     return ok;
   });

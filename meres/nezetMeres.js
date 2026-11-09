@@ -5,7 +5,7 @@
 //   (a) A NÉZET-KÁRTYA A MAI PROGRAMON — átmegy-e a mai kapun egy új fajta kártya (három alakban: saját típussal és `nezet`
 //       mezővel; gondolatként, `nezet` mezővel; és gondolatként, a kódot a szövegben megnevezve), mit őriz meg belőle a koinó
 //       képe (a mag), mit lát belőle a mai pakli és a mai fájl-igény (a szállítás). Vagyis: kell-e hozzá a MAG változása —
-//       az költözés volna (D118) —, és mit lát egy még nem frissített társ.
+//       az új számítás, vagyis új koinó-család volna (D127 — a bekapcsolódás) —, és mit lát egy még nem frissített társ.
 //
 //   (b) A BÖNGÉSZŐ ELSZIGETELÉSE — egy „rosszindulatú” nézet egy elszigetelt keretben (`<iframe sandbox="allow-scripts"
 //       srcdoc>`, a nézet elé tett CSP-vel és anélkül) mit ér el: a lap kulcsát és tárát, a helyi kaput (kulccsal és anélkül),

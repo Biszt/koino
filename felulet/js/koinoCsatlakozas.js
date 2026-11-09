@@ -24,10 +24,10 @@ const MODAL_KONTENER = 'modal-kontener';
 const LENYOMAT = /^[A-Za-z0-9_-]{43}$/;
 const MEGHIVO_ELOTAG = 'koino-meghivo:';
 const VARAKOZAS_MS = 5000;
-// ⚠️ D118/3 (4.6): a gyermekben az a tag, aki a szülőben tag volt ÉS beköltözött, vagy akit a gyermekben meghívtak — a csatlakozás
+// ⚠️ D118/3 (4.6): a gyermekben az a tag, aki a szülőben tag volt ÉS bekapcsolódott, vagy akit a gyermekben meghívtak — a csatlakozás
 // egyik sem: egy ZÁRT gyermek a tartalmát csak tagnak adja ki.
 const ZART_GYERMEK = 'Zárt koinó: a tartalmát csak tagnak adják ki — a csatlakozástól még nem leszel tag benne. Ha a szülőjében tag '
-  + 'voltál a születésekor, a „🧳 Költözés…” beköltöztet (akkor tag leszel, a súlyoddal); különben egy tagjának kell meghívnia.';
+  + 'voltál a születésekor, a „🌿 Bekapcsolódás…” bekapcsol (akkor tag leszel, a súlyoddal); különben egy tagjának kell meghívnia.';
 
 const html = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const rovid = (az) => String(az ?? '').slice(0, 8) + '…';
@@ -143,7 +143,7 @@ export async function csatlakozasMegnyitasa({ koino = '', nev = null, zart = nul
       + '<input type="text" name="koino" spellcheck="false" autocomplete="off" maxlength="4000" value="' + html(koino) + '"'
       + (kartyarol ? ' readonly' : '') + ' placeholder="koino-meghivo:2:… — vagy 43 jel"></label>'
       + (kartyarol && nev ? '<p class="koino-csatlakozas__leiras">A koino-verzió kártyájáról: <strong>' + html(nev) + '</strong> — a '
-        + 'családod őrjárata felveszi (nem költözöl vele: a súlyod a szülőben marad; költözni a fő menü „🧳 Költözés…” pontjával).'
+        + 'családod őrjárata felveszi (nem bekapcsolódsz vele: a súlyod a szülőben marad; bekapcsolódni a fő menü „🌿 Bekapcsolódás…” pontjával).'
         + (zart ? ' ' + ZART_GYERMEK : '') + '</p>' : '')
       + '<label class="koino-csatlakozas__mezo">Becenév ezen a készüléken (nem kötelező)'
       + '<input type="text" name="becenev" spellcheck="false" autocomplete="off" maxlength="32" value="'

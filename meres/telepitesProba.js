@@ -10,7 +10,7 @@
 //     paranccsal előnézi (más a kód, ugyanaz a mag, a felület változott), kiírja (a kiírt mappa a kártya kódját nevezi meg), és ⭐ Windowson
 //     a valódi csere: A helyén B kódja fut (a felület felel), az előző a `-regi`-ben; a `telepit vissza` visszaállít; és egy nem induló
 //     program (TK5) után a régi kerül vissza, kimondva;
-//   · a telefon cseréje (`termux/csere.sh`) — ahol van `sh` (Windowson a Git Bash-sel): a mappák, a `.git` költözése, az indítás és a
+//   · a telefon cseréje (`termux/csere.sh`) — ahol van `sh` (Windowson a Git Bash-sel): a mappák, a `.git` átvitele, az indítás és a
 //     visszafordítás.
 //
 // Használja: meres/mind.js (`telepites` — a `parancssor` csoportban).

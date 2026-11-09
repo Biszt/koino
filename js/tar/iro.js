@@ -198,7 +198,7 @@ export function iroTarNyitasa(belso, { mappa, jelez = () => {} }) {
 
       if (ujSajat) {
         // ⭐ A SAJÁT ÚJ ESEMÉNY CSAK A LÁNC VÉGÉRE: ez zárja ki az elágazást.
-        // ⭐ D118 (⑤b): a koinóbeli láncom vége (a nem költöző gyermekbeli lánca 1-ről indul; a beköltözésé a lánc-pontja után).
+        // ⭐ D118 (⑤b): a koinóbeli láncom vége (a nem bekapcsolódó gyermekbeli lánca 1-ről indul; a bekapcsolódásé a lánc-pontja után).
         const veg = await ujSajatHelye(belso, esemeny.szerzo, esemenyKoinoja(esemeny), esemeny.tipus, esemeny.adat);
         if (esemeny.sorszam !== veg.sorszam || (esemeny.elozo ?? null) !== veg.elozo) {
           throw kodosHiba('ELAVULT', 'elavult lánc-vég (a ' + esemeny.sorszam

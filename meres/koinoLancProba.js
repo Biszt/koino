@@ -1,4 +1,4 @@
-// meres/koinoLancProba.js — ⭐⭐ D118 (a költözés ②a): a gyermek születése és a születések lánca
+// meres/koinoLancProba.js — ⭐⭐ D118 (a bekapcsolódás ②a): a gyermek születése és a születések lánca
 //
 // Azt bizonyítja, hogy egy koinó a szülőjére épülhet, és ezt bárki ellenőrizheti a két születésből: a gyermek születése a
 // létrehozó tagsági bizonyítékát hozza a szülőben (KZ2), a zárt szülőnek csak zárt gyermeke lehet (D118/5), és a kapu a
@@ -195,7 +195,7 @@ proba('⭐⭐ D118 (②a): a beolvasztás a lánc születéseit akármilyen sorr
 // 5. ⭐⭐ ②b — A KAPU KOINÓ-SZABÁLYA: az ős vágás előtti eseményei a gyermekbe tartoznak
 // ===================================
 //
-// Egy esemény a gyermeké, ha a gyermeké; vagy a lánc egy születése; vagy egy ős eseménye a vágása előtt — a nem költözőé
+// Egy esemény a gyermeké, ha a gyermeké; vagy a lánc egy születése; vagy egy ős eseménye a vágása előtt — a nem bekapcsolódóé
 // az óra szerint (`ido` ≤ annak a nemzedéknek a születése, amelyik tőle örökölt), ⭐ a létrehozóé a LÁNC-PONT szerint (a
 // sorszáma a gyermek születéséé alatt): az óra-csúszás így sem engedheti be a vágás utáni szülőbeli eseményét, ami a
 // gyermekbeli folytatással egy sorszámot viselne.
@@ -232,7 +232,7 @@ async function nemzedekekTaggal() {
   return { G, P, C, gElotte, gUtana, be, m, tElotte, eElotte, tUtana, eUtanaCsuszo, cSajat };
 }
 
-proba('⭐⭐ ②b: a koinó-szabály — az ős vágás előtti eseménye a gyermeké (a nem költözőé az óra, a létrehozóé a lánc-pont szerint), a vágás utáni nem',
+proba('⭐⭐ ②b: a koinó-szabály — az ős vágás előtti eseménye a gyermeké (a nem bekapcsolódóé az óra, a létrehozóé a lánc-pont szerint), a vágás utáni nem',
   async () => {
     const n = await nemzedekekTaggal();
     const tar = await ujTar(n.C.azonosito);

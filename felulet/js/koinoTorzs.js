@@ -108,7 +108,7 @@ export async function kodKereseGomb(kartya) {
     gomb.classList.add('koino-torzs-kerheto--kerve');
   } else {
     gomb.textContent = '📦 A kód elhozása' + (meret ? ' (' + meret + ')' : '') + ' — a következő csere hozza el';
-    gomb.title = 'A kód a törzs-határ fölött van: aki nem vállalja a kártyát, csak kérésre hozza el (a költözés magától).';
+    gomb.title = 'A kód a törzs-határ fölött van: aki nem vállalja a kártyát, csak kérésre hozza el (bekapcsolódáskor magától jön).';
     gomb.addEventListener('click', (e) => {
       e.stopPropagation();
       keres({ entitas: kartya, elem: 'kod' }, gomb, '⏳ a kód kérve — a következő csere hozza el');

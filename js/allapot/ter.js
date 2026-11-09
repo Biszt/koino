@@ -48,7 +48,7 @@ import { koinoSzuleteseListabol } from '../esemeny/esemeny.js';
 import { esemenyTarNyitasa, ismertKoinok, terJegyzekTarolo, alapHely } from '../tar/fajlTar.js';
 import { koinoEsemenyei } from '../tar/esemenyTar.js';
 import { tagE, ujIdentitasNezet } from './identitas.js';
-import { HORGONY_TIPUSOK } from './tagsag.js';   // ⭐ D118 (⑥): a beköltözés is horgony
+import { HORGONY_TIPUSOK } from './tagsag.js';   // ⭐ D118 (⑥): a bekapcsolódás is horgony
 
 // ===================================
 // A PARAMÉTEREK
@@ -102,8 +102,8 @@ export async function koinoKartyaja(hely, koino, beallitas = {}) {
   // ----- A HORGONYOK: ki lépett be ebbe a koinóba? -----
   // Szerzőnként EGY horgony számít (az elsője); a `Belepes` és a `KoinoLetrehozas`
   // ugyanúgy horgony (D56 — az alapító a rekurzió alapesete).
-  // ⭐ D118 (⑥): a BEKÖLTÖZÉS is horgony (a költözőé a gyermekben — `tagsag.js` `HORGONY_TIPUSOK`); eddig a gyermek-koinó
-  // kártyája a beköltözőket nem számolta, és a beköltöző a sajátján „nem léptem be”-t látott.
+  // ⭐ D118 (⑥): a BEKAPCSOLÓDÁS is horgony (a bekapcsolódóé a gyermekben — `tagsag.js` `HORGONY_TIPUSOK`); eddig a gyermek-koinó
+  // kártyája a bekapcsolódókat nem számolta, és a bekapcsolódó a sajátján „nem léptem be”-t látott.
   const horgonyok = new Map();                       // szerző → a horgony azonosítója
   for (const e of esemenyek) {
     if (!HORGONY_TIPUSOK.has(e.tipus)) continue;
@@ -153,14 +153,11 @@ export async function koinoKartyaja(hely, koino, beallitas = {}) {
     miert: en?.ok ?? 'nem léptem be ebbe a koinóba',
     enAlapitottam: !!alapitas && alapitas.szerzo === beallitas.szerzo,
 
-    // ⭐⭐ D118 (⑥): A CSALÁDFA — a szülője (a születéséből; a neve és a gyermekek a tér egészéből — `terKartyai`), és a
-    // költözéseim: ide beköltöztem-e, innen hova költöztem ki (a saját kiköltözéseim ebben a koinóban).
+    // ⭐⭐ D118 (⑥): A CSALÁDFA — a szülője (a születéséből; a neve és a gyermekek a tér egészéből — `terKartyai`), és ⭐ D127:
+    // ide bekapcsolódtam-e (a horgonyom itt a bekapcsolódásom). Hogy innen hova kapcsolódtam be, azt a gyermekek kártyái mondják
+    // (`terKartyai` — a szülőben nem írunk semmit, KÖ4 (A)).
     szulo: typeof alapitas?.adat?.szulo === 'string' ? alapitas.adat.szulo : null,
-    enBekoltoztem: enHorgonyEsemenye?.tipus === 'Bekoltozes',
-    kikoltoztem: beallitas.szerzo
-      ? esemenyek.filter((e) => e.tipus === 'Kikoltozes' && e.szerzo === beallitas.szerzo && typeof e.adat?.gyermek === 'string')
-        .map((e) => e.adat.gyermek)
-      : []
+    enBekapcsolodtam: enHorgonyEsemenye?.tipus === 'Bekapcsolodas'
   };
 
   console.log('ter.koinoKartyaja - VÉGE', { koino, tagok, belepok: kartya.belepok });
@@ -238,6 +235,8 @@ export async function terKartyai(hely = alapHely(), beallitas = {}) {
     k.szuloIsmert = !!k.szulo && nevSzerint.has(k.szulo);
     k.szuloNev = k.szuloIsmert ? nevSzerint.get(k.szulo) : null;
     k.gyermekek = kartyak.filter((g) => g.szulo === k.azonosito).map((g) => ({ azonosito: g.azonosito, nev: g.nev }));
+    // ⭐ D127: innen hova kapcsolódtam be — a gyermekek kártyáiból (ahol a horgonyom a bekapcsolódásom); itt közben megmaradtam
+    k.bekapcsolodtam = kartyak.filter((g) => g.szulo === k.azonosito && g.enBekapcsolodtam).map((g) => g.azonosito);
     // ⭐⭐ D119 (①b): és a koino-verzió kártyákról ismert gyermekek — a tárukat a készülék még nem ismeri (a kártya a szülő
     // cseréjével jön); a hívó adja (`kartyaGyermekek`: koinó → [{ azonosito, nev }]).
     for (const g of beallitas.kartyaGyermekek?.get?.(k.azonosito) ?? []) {

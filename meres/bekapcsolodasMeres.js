@@ -1,12 +1,12 @@
-// meres/koltozesMeres.js
+// meres/bekapcsolodasMeres.js
 
-// Felelősség: ⭐ A 82. MÉRÉS — A KÖLTÖZÉS ÁRA (D118, a költözés ④, 2026-10-24).
+// Felelősség: ⭐ A 82. MÉRÉS — A BEKAPCSOLÓDÁS ÁRA (D118, a bekapcsolódás ④, 2026-10-24).
 //
-// Mekkora a két esemény (a kiköltözés és a beköltözés) a tagsági lánc mélységével, mekkora a gyermek születése a létrehozó
+// Mekkora a bekapcsolódás eseménye (⭐ D127 óta egy: a szülőben nem íródik semmi) a tagsági lánc mélységével, mekkora a gyermek születése a létrehozó
 // láncával, és mennyi a születések lánca nemzedékenként (a gyermek első cseréjének és a csatlakozónak az ára)? Egy szelet
 // örökölt múltja a vonalon és a lemezen ugyanannyi, mint a szülőben volt (a múlt eseményei átírás nélkül jönnek — D118/1).
 //
-// Nem önpróba: számokat ad. Futtatás: node meres/koltozesMeres.js
+// Nem önpróba: számokat ad. Futtatás: node meres/bekapcsolodasMeres.js
 
 import './naplo.js';
 import { ujEember } from './probaFuttato.js';
@@ -18,7 +18,7 @@ const kiir = (s) => process.stdout.write(s + '\n');
 const bajt = (e) => Buffer.byteLength(JSON.stringify(e));
 const T0 = Date.UTC(2026, 0, 1);
 
-/** Egy szülő, és benne egy `d` mélységű meghívási lánc végén a költöző (A → t1 → … → td). */
+/** Egy szülő, és benne egy `d` mélységű meghívási lánc végén a bekapcsolódó (A → t1 → … → td). */
 async function lancosSzulo(d) {
   const A = await ujEember('');
   const P = await A.tesz('KoinoLetrehozas', { nev: 'Szülő', leiras: null, alapitok: [], zart: true,
@@ -33,31 +33,28 @@ async function lancosSzulo(d) {
     esemenyek.push(be, m);
     elozo = t; elozoHorgony = be.azonosito; utolso = { ember: t, be };
   }
-  return { A, P, esemenyek, koltozo: utolso };
+  return { A, P, esemenyek, bekapcsolodo: utolso };
 }
 
-kiir('A KÖLTÖZÉS ESEMÉNYEI (a tagsági lánc mélysége szerint)');
+kiir('A BEKAPCSOLÓDÁS ESEMÉNYEI (a tagsági lánc mélysége szerint)');
 for (const d of [1, 4, 13]) {
   const s = await lancosSzulo(d);
-  const bizonyitek = szuloTagsagaEpitese(s.esemenyek, s.P.azonosito, s.koltozo.be.azonosito);
+  const bizonyitek = szuloTagsagaEpitese(s.esemenyek, s.P.azonosito, s.bekapcsolodo.be.azonosito);
   // a gyermek (A hozza létre — az alapítónak üres a lánca)
   s.A.koinotValt('');
   const K = await s.A.tesz('KoinoLetrehozas', { nev: 'Gyermek', leiras: null, alapitok: [], zart: true, szulo: s.P.azonosito,
     szuloTagsag: { horgony: s.P.azonosito, lanc: [] }, szabalyok: teljesSzabalyok() }, T0 + 1000);
-  // a költöző gyermeke (ha ő hozná létre): a születés a láncával
-  const t = s.koltozo.ember;
+  // a bekapcsolódó gyermeke (ha ő hozná létre): a születés a láncával
+  const t = s.bekapcsolodo.ember;
   t.koinotValt('');
   const Kt = await t.tesz('KoinoLetrehozas', { nev: 'Gyermek', leiras: null, alapitok: [], zart: true, szulo: s.P.azonosito,
     szuloTagsag: bizonyitek, szabalyok: teljesSzabalyok() }, T0 + 1000);
-  const kik = await esemenyLetrehozasa({ koino: s.P.azonosito, tipus: 'Kikoltozes', adat: { gyermek: K.azonosito },
-    elozo: s.koltozo.be.azonosito, sorszam: s.koltozo.be.sorszam + 1, ido: T0 + 2000, entitas: s.koltozo.be.azonosito,
-    entitasSorszam: 2, latott: [] }, t.kulcspar);
-  const bek = await esemenyLetrehozasa({ koino: K.azonosito, tipus: 'Bekoltozes', adat: { szulo: s.P.azonosito,
-    kikoltozes: kik.azonosito, lanc: { sorszam: s.koltozo.be.sorszam, azonosito: s.koltozo.be.azonosito },
-    szuloTagsag: bizonyitek }, elozo: s.koltozo.be.azonosito, sorszam: s.koltozo.be.sorszam + 1, ido: T0 + 2000,
+  const bek = await esemenyLetrehozasa({ koino: K.azonosito, tipus: 'Bekapcsolodas', adat: { szulo: s.P.azonosito,
+    lanc: { sorszam: s.bekapcsolodo.be.sorszam, azonosito: s.bekapcsolodo.be.azonosito },
+    szuloTagsag: bizonyitek }, elozo: s.bekapcsolodo.be.azonosito, sorszam: s.bekapcsolodo.be.sorszam + 1, ido: T0 + 2000,
     entitas: null, entitasSorszam: 1, latott: [] }, t.kulcspar);
-  kiir('  ' + String(d).padStart(2) + ' lépés: kiköltözés ' + bajt(kik) + ' B · beköltözés ' + bajt(bek) + ' B (a bizonyíték '
-    + bizonyitek.lanc.length + ' esemény) · a gyermek születése: az alapítótól ' + bajt(K) + ' B, a költözőtől ' + bajt(Kt) + ' B');
+  kiir('  ' + String(d).padStart(2) + ' lépés: bekapcsolódás ' + bajt(bek) + ' B (a bizonyíték '
+    + bizonyitek.lanc.length + ' esemény) · a gyermek születése: az alapítótól ' + bajt(K) + ' B, a bekapcsolódótól ' + bajt(Kt) + ' B');
 }
 
 kiir('');

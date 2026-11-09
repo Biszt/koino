@@ -298,10 +298,10 @@ proba('⭐ D119 (①a): a képben a koino-verzió entitás — a gyermekével é
 });
 
 // ===================================
-// 3. A KÁRTYÁRA TETT PONT NEM KÖLTÖZIK (Csaba: „(A) Nem költözik”)
+// 3. A KÁRTYÁRA TETT PONT NEM KERÜL A GYERMEKBE (Csaba: „(A) Nem költözik”)
 // ===================================
 
-proba('⭐⭐ D119 (A): a koino-verzió kártyára tett pont nem költözik — a második gyermek születése elhagyja, a képében a testvér kártyája nem él; elhagyás nélkül élne',
+proba('⭐⭐ D119 (A): a koino-verzió kártyára tett pont nem bekapcsolódik — a második gyermek születése elhagyja, a képében a testvér kártyája nem él; elhagyás nélkül élne',
   async () => {
     const s = await verzio();
     const kvPont = await s.A.tesz('TudatpontRendezes', { entitas: s.kv.azonosito, pont: 50 }, VAGAS + 20);

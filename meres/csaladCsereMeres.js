@@ -74,12 +74,12 @@ async function csaladMerese(k) {
       await fut(a, ['koinoverzio', 'Mérés gyermek ' + i, 'pont=1', 'becenev=g' + i]);
       gyermekek.push({ becenev: 'g' + i, nev: await koinoNeve(a, 'g' + i) });
     }
-    // B a szülőt a kézi úton kapja meg (a kártyákkal), és minden gyermekbe BEKÖLTÖZIK (a valódi menet: a gyermek tagjai a
-    // költözők — aki nem költözött, az a gyermekben semmit nem vállal, és a cseréje ott üres)
+    // B a szülőt a kézi úton kapja meg (a kártyákkal), és minden gyermekbe BEKAPCSOLÓDIK (a valódi menet: a gyermek tagjai a
+    // bekapcsolódók — aki nem bekapcsolódott, az a gyermekben semmit nem vállal, és a cseréje ott üres)
     await fut(b, ['gondolat', 'B a szülőben']);
     await fut(a, ['kivisz', join(a, 'p.jsonl')]);
     await fut(b, ['behoz', join(a, 'p.jsonl')]);
-    for (const g of gyermekek) await fut(b, ['koltozes', g.nev]);
+    for (const g of gyermekek) await fut(b, ['bekapcsolodas', g.nev]);
     // egy-egy új gondolat A-nál minden koinóban (az első csere ezt hozza)
     await fut(a, ['gondolat', 'Új a szülőben']);
     for (const g of gyermekek) await fut(a, ['gondolat', 'Új: ' + g.becenev], { KOINO_AZONOSITO: g.becenev });

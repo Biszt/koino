@@ -73,7 +73,7 @@
   color: var(--color-text-faint);
 }
 
-/* ----- ⭐⭐ D118 (⑥): A CSALÁDFA — a szülő, a gyermekek, a költözéseim -----
+/* ----- ⭐⭐ D118 (⑥): A CSALÁDFA — a szülő, a gyermekek, a bekapcsolódásaim -----
    A nevek gombok (oda lépünk); a készüléken nem ismert szülő halványan és dőlten (D19: hiány, nem vád). */
 
 .koino-kartya__csalad {
@@ -83,7 +83,7 @@
 
 .koino-kartya__csalad-sor { margin: .15rem 0; }
 
-.koino-kartya__csalad-sor--koltozes { color: var(--color-text-faint); }
+.koino-kartya__csalad-sor--bekapcsolodas { color: var(--color-text-faint); }
 
 .koino-kartya__csalad-nev {
   background: none;

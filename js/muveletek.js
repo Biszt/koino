@@ -197,8 +197,8 @@ export async function azonossagHorgonya(tar, koino, szerzo) {
   const lanc = (await sajatLancEsemenyei(tar, szerzo)).filter((e) => esemenyKoinoja(e) === koino);
   const belepes = lanc.find((e) => e.tipus === 'Belepes');
   if (belepes) return belepes.azonosito;
-  // ⭐ D118 (④a): a költözőé a beköltözése, a létrehozóé (az alapítóé) a születés.
-  return lanc.find((e) => e.tipus === 'Bekoltozes')?.azonosito
+  // ⭐ D118 (④a): a bekapcsolódóé a bekapcsolódása, a létrehozóé (az alapítóé) a születés.
+  return lanc.find((e) => e.tipus === 'Bekapcsolodas')?.azonosito
     ?? lanc.find((e) => e.tipus === 'KoinoLetrehozas')?.azonosito ?? null;
 }
 
@@ -258,7 +258,7 @@ const ELAVULT_PROBAK = 20;
  */
 async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
   const { entitas = null, horgonyozzunk = false } = beallitas;
-  // ⭐ D118 (⑤b): a koinóbeli láncom végére (a nem költöző gyermekbeli lánca 1-ről indul; a beköltözés a lánc-pontja után).
+  // ⭐ D118 (⑤b): a koinóbeli láncom végére (a nem bekapcsolódó gyermekbeli lánca 1-ről indul; a bekapcsolódás a lánc-pontja után).
   const veg = await ujSajatHelye(kornyezet.tar, kornyezet.szerzo, kornyezet.koino, tipus, adat);
 
   // A saját szeletét nyitó eseménynél az entitás-sorszám mindig 1 — nincs mihez képest
@@ -296,9 +296,9 @@ async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
   // ⭐ D85 T3 előfeltétele: a JAVASLAT is — érintettenként a javaslattevő pontjára.
   const szavazatKulcsok = (tipus === 'Szavazat' || tipus === 'Javaslat') && Array.isArray(beallitas.bizonyitekKulcsok)
     && beallitas.bizonyitekKulcsok.length ? beallitas.bizonyitekKulcsok : null;
-  // ⭐ D118 (⑤b): a BEKÖLTÖZÉS nem horgonyoz — a lánc nézete a beköltözéssel változik (előtte a szülőbeli előtag még nem a
+  // ⭐ D118 (⑤b): a BEKAPCSOLÓDÁS nem horgonyoz — a lánc nézete a bekapcsolódással változik (előtte a szülőbeli előtag még nem a
   // gyermekbeli láncom), a következő eseményem már a hozott kiosztást köti.
-  const { lancGyoker, bizonyitek } = tipus === 'Bekoltozes' ? { lancGyoker: null, bizonyitek: null }
+  const { lancGyoker, bizonyitek } = tipus === 'Bekapcsolodas' ? { lancGyoker: null, bizonyitek: null }
     : await lancUjEsemenyhez(kornyezet.tar, kornyezet.koino, kornyezet.szerzo,
       veg.sorszam, kornyezet.lancTarolo ?? null, pontEntitas ?? szavazatKulcsok);
   const vegsoAdat = (pontEntitas || szavazatKulcsok) && bizonyitek ? { ...adat, bizonyitek } : adat;
@@ -330,10 +330,10 @@ async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
  * @returns {Promise<{osszeg: number, regi: number}>}
  */
 async function sajatKiosztott(kornyezet, entitas) {
-  // ⭐⭐ D118 (③): a JELEN réteg szerint — a költöző (a létrehozó) szülőbeli pontjai is a láncom (a hozott kiosztás);
+  // ⭐⭐ D118 (③): a JELEN réteg szerint — a bekapcsolódó (a létrehozó) szülőbeli pontjai is a láncom (a hozott kiosztás);
   // ugyanaz a szabály, amit a szabály-réteg a koinó képében lát (`jelenbenSzamit`), különben a bemondott összeg
   // ellentmondana a láncomnak.
-  // ⭐ ④a: a saját beköltözésem (a láncomban) mondja meg, mit hozok — a lánc-pontot és az elhagyott pontokat.
+  // ⭐ ④a: a saját bekapcsolódásom (a láncomban) mondja meg, mit hozok — a lánc-pontot és az elhagyott pontokat.
   // ⭐ D118 (⑤b): a LÁNCOM (a hozott előtaggal) adja a folytonosságot, a jelen réteg a súlyt — mint a szabály-rétegben, ahol a
   // láncon lévő, de a jelenből kizárt esemény ismert sorszám, nem hézag.
   const nezet = await lancNezete(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
@@ -414,7 +414,7 @@ export function koinoLetrehozasa(kornyezet, nev, leiras, alapitok, beallitas = {
     // ⭐ D93/5 (D28/3): a koinó kötelező profil-mezői (pl. ['nev', 'telepules']) — ha nincs, a koinó nem vár profilt.
     ...(Array.isArray(beallitas.profil) && beallitas.profil.length ? { profil: [...beallitas.profil] } : {}),
     // ⭐⭐ D118/2 (①b): a koinó SZABÁLYAI — MIND (a megadottak a mai értékek helyén), hogy egy későbbi program alapértéke ne
-    // írhassa át őket; a kapu ellenőrzi (`koinoSzabalyok.js`). Nem változtatható: egy másik szabály egy másik koinó (a költözés).
+    // írhassa át őket; a kapu ellenőrzi (`koinoSzabalyok.js`). Nem változtatható: egy másik szabály egy másik koinó (a bekapcsolódás).
     szabalyok: teljesSzabalyok(beallitas.szabalyok),
     // ⭐⭐ D118 (②a): a GYERMEK születése a szülő nevét és a létrehozó tagsági bizonyítékát hozza (KZ2 — `koinoLanc.js`).
     ...(beallitas.szulo ? { szulo: beallitas.szulo, szuloTagsag: beallitas.szuloTagsag } : {}),
@@ -601,9 +601,9 @@ export async function tagsagiCsomagKiadasa(kornyezet) {
   const r = horgonyTagsaga(idx, horgony);
   if (!r.igen) return { kiadva: false, ok: r.ok };
   if (r.melyseg === 0) {
-    // ⭐ D118 (④b): a beköltözött horgonya maga a bizonyíték (a beköltözés — a tagsági kísérők viszik), az alapítóé a születés.
-    return { kiadva: false, melyseg: 0, ok: idx.horgonyok.get(horgony)?.tipus === 'Bekoltozes'
-      ? 'beköltözött — a horgonyom maga a bizonyíték (a beköltözésem)' : 'alapító — a láncom maga a koinó létrehozása' };
+    // ⭐ D118 (④b): a bekapcsolódott horgonya maga a bizonyíték (a bekapcsolódás — a tagsági kísérők viszik), az alapítóé a születés.
+    return { kiadva: false, melyseg: 0, ok: idx.horgonyok.get(horgony)?.tipus === 'Bekapcsolodas'
+      ? 'bekapcsolódott — a horgonyom maga a bizonyíték (a bekapcsolódásom)' : 'alapító — a láncom maga a koinó létrehozása' };
   }
   const lanc = tagsagiLanc(idx, horgony);
   // Van-e már legalább ilyen rövid csomagom (a meglévő csomag mélysége a saját láncából számítható)?
@@ -643,22 +643,14 @@ export function belepes(kornyezet, alapitas) {
 }
 
 /**
- * ⭐⭐ D118 (④b): A KIKÖLTÖZÉS — a szülőben, a saját azonosság-szeletembe (`horgony` — a szülőbeli horgonyom): „átmentem a
- * gyermekbe”. A szülő ebből tudja, ki ment át (a családfa; később a pénz kivezetése — 4.8). A szülő jelene: a gyermekbe nem
- * kerül, a beköltözés hivatkozik rá.
- */
-export function kikoltozes(kornyezet, gyermek, horgony) {
-  return esemenytTeszek(kornyezet, 'Kikoltozes', { gyermek }, { entitas: horgony });
-}
-
-/**
- * ⭐⭐ D118 (④b): A BEKÖLTÖZÉS — a gyermekben; a saját szeletét nyitja (a horgonyom ott). ⚠️ A szülőbeli láncomat a
+ * ⭐⭐ D127 (a bekapcsolódás: a szülőben megmaradsz): A BEKAPCSOLÓDÁS — a gyermekben; a saját szeletét nyitja (a horgonyom ott). A
+ * szülőben nem írunk semmit (KÖ4 (A)): ott a teljes súlyommal megmaradok, és tovább dolgozhatok. ⚠️ A szülőbeli láncomat a
  * megnevezett (vágás előtti utolsó) eseménye után folytatja: a hívó gondoskodik róla, hogy a gyermek tárában a láncom vége az
- * legyen (az első kitöltés — `koino.js` `koltozes`); a kapu ellenőrzi.
- * @param {Object} adat - `{ szulo, kikoltozes, lanc: { sorszam, azonosito }, szuloTagsag, elhagy? }`
+ * legyen (az első kitöltés — `koino.js` `bekapcsolodasVegrehajtasa`); a kapu ellenőrzi.
+ * @param {Object} adat - `{ szulo, lanc: { sorszam, azonosito }, szuloTagsag, elhagy? }`
  */
-export function bekoltozes(kornyezet, adat) {
-  return esemenytTeszek(kornyezet, 'Bekoltozes', adat, { entitas: null });
+export function bekapcsolodas(kornyezet, adat) {
+  return esemenytTeszek(kornyezet, 'Bekapcsolodas', adat, { entitas: null });
 }
 
 /**

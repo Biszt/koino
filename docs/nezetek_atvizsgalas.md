@@ -1,7 +1,7 @@
 # A közösség feltöltött nézetei — átvizsgálás (D123 ⑤, PR4 — 2026-11-08, kód nélkül)
 
 > **Állapot:** ✅ **D126 — MEGÉPÜLT** (Csaba, 2026-11-08: *„mindet elfogadom, mehetünk tovább”* — NZ1–NZ6 mind (A); az építés: 8.
-> szakasz) · ⏭️ a terepi próba (a telefon böngészője). Az elv a D123-ban eldőlt (PR4 (B)): *„olvasó nézetek elsőként: egy nézet
+> szakasz) · ✅ a terepi próba (2026-11-08, közös wifin: Brave, Android — kontrollal). Az elv a D123-ban eldőlt (PR4 (B)): *„olvasó nézetek elsőként: egy nézet
 > egy kártya (mint a koino-verzió kártya — a kódja rajta, a pont rá a közösség jelzése), a lap elszigetelten futtatja (külön
 > keretben, a kapu csak olvasó végpontokat ad neki), és te kapcsolod be a saját készülékeden.”* Ez az átvizsgálás azt nézi meg,
 > HOL és HOGYAN — a kód és a **92. mérés** alapján (`meres/nezetMeres.js`). Programkód nem készült, csak a mérés.

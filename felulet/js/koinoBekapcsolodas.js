@@ -1,12 +1,12 @@
-// felulet/js/koinoKoltozes.js
+// felulet/js/koinoBekapcsolodas.js
 
-// Felelősség: ⭐⭐ A KÖLTÖZÉS A FELÜLETEN (D118 ⑥) — koinós többlet, a prototípusban nincs ilyen: a fő menü „🧳 Költözés…”
-// pontja ezt az ablakot nyitja. A mostani koinó ismert gyermekei (ezen a készüléken), mindegyiknél: költözhetek-e (ha nem,
+// Felelősség: ⭐⭐ A BEKAPCSOLÓDÁS A FELÜLETEN (D118 ⑥) — koinós többlet, a prototípusban nincs ilyen: a fő menü „🌿 Bekapcsolódás…”
+// pontja ezt az ablakot nyitja. A mostani koinó ismert gyermekei (ezen a készüléken), mindegyiknél: bekapcsolódhatok-e (ha nem,
 // miért — a program mondja ki), a gyermek kerete, a hozott pontjaim; ha nem férnek a kerethez (KZ3), az elhagyandók
-// kiválasztása; és a megerősítés után a költözés (a kiköltözés itt, a beköltözés a gyermekben).
+// kiválasztása; és a megerősítés után a bekapcsolódás (egy esemény a gyermekben — itt semmi nem íródik: megmaradsz, D127).
 //
-// ⭐ A lap csak rajzol (7. szabály): az előkészítést és a költözést a program végzi (`koino.js` `koltozesElonezete`,
-// `koltozesVegrehajtasa` — ugyanaz, mint a `koltozes` parancsé), a lap a kapu útvonalán kérdez (`GET` / `POST /api/koltozes`).
+// ⭐ A lap csak rajzol (7. szabály): az előkészítést és a bekapcsolódást a program végzi (`koino.js` `bekapcsolodasElonezete`,
+// `bekapcsolodasVegrehajtasa` — ugyanaz, mint a `bekapcsolodas` parancsé), a lap a kapu útvonalán kérdez (`GET` / `POST /api/bekapcsolodas`).
 // ⚠️ A hatókör kimondva: csak a készüléken ismert gyermekek látszanak (a gyermek születését a csere vagy egy fájl hozza).
 //
 // Használja: `foMenu.js`.
@@ -20,15 +20,15 @@ const html = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', 
 const rovid = (az) => String(az ?? '').slice(0, 8) + '…';
 
 /**
- * A költözés ablaka.
- * @param {{terMegnyitasa?: Function|null}} [b] - a sikeres költözés után a tér nyitható (ott a családfa)
+ * A bekapcsolódás ablaka.
+ * @param {{terMegnyitasa?: Function|null}} [b] - a sikeres bekapcsolódás után a tér nyitható (ott a családfa)
  */
-export async function koltozesMegnyitasa({ terMegnyitasa = null } = {}) {
-  console.log('koltozesMegnyitasa - KEZDÉS');
+export async function bekapcsolodasMegnyitasa({ terMegnyitasa = null } = {}) {
+  console.log('bekapcsolodasMegnyitasa - KEZDÉS');
   const tartalom = document.createElement('div');
-  tartalom.className = 'koino-koltozes';
+  tartalom.className = 'koino-bekapcsolodas';
   const modal = new Modal(MODAL_KONTENER, {
-    cim: '🧳 Költözés egy gyermek-koinóba',
+    cim: '🌿 Bekapcsolódás egy gyermek-koinóba',
     meret: 'alap',
     tartalom,
     gombok: [{ felirat: 'Bezárás', tipus: 'masodlagos', akcio: () => modal.bezaras() }]
@@ -37,7 +37,7 @@ export async function koltozesMegnyitasa({ terMegnyitasa = null } = {}) {
   let elonezet = null;
   let megerosites = null;          // a gyermek, akinél a megerősítés látszik
   let folyamatban = false;
-  let siker = null;                // a sikeres költözés válasza
+  let siker = null;                // a sikeres bekapcsolódás válasza
   const elhagyott = new Map();     // gyermek → Set(entitás) — amit a gyermekbe NEM hozok (KZ3)
 
   const elhagyottja = (g) => elhagyott.get(g.azonosito) ?? new Set();
@@ -46,20 +46,20 @@ export async function koltozesMegnyitasa({ terMegnyitasa = null } = {}) {
   // ----- EGY GYERMEK SORA -----
   const gyermekSora = (g) => {
     const nev = g.nev ? html(g.nev) : '<em>nem ismert a neve</em>';
-    let resz = '<div class="koino-koltozes-sor' + (g.lehet ? '' : ' koino-koltozes-sor--nem') + '" data-gyermek="'
+    let resz = '<div class="koino-bekapcsolodas-sor' + (g.lehet ? '' : ' koino-bekapcsolodas-sor--nem') + '" data-gyermek="'
       + html(g.azonosito) + '">'
-      + '<div class="koino-koltozes-sor__cim">' + nev + ' <span class="koino-koltozes-sor__az">' + html(rovid(g.azonosito)) + '</span></div>';
+      + '<div class="koino-bekapcsolodas-sor__cim">' + nev + ' <span class="koino-bekapcsolodas-sor__az">' + html(rovid(g.azonosito)) + '</span></div>';
     if (!g.lehet) {
       // ⚠️ Az ok a programé (az előkészítés kimondott oka) — a lap nem talál ki semmit.
-      return resz + '<div class="koino-koltozes-sor__allas">Nem költözhetsz ide: ' + html(g.ok ?? '?') + '</div></div>';
+      return resz + '<div class="koino-bekapcsolodas-sor__allas">Nem bekapcsolódhatsz ide: ' + html(g.ok ?? '?') + '</div></div>';
     }
     const ossz = osszeg(g);
     const nemFer = ossz > g.keret;
-    resz += '<div class="koino-koltozes-sor__allas">A kerete: <strong>' + g.keret + '</strong> tudatpont · a hozott pontjaid: <strong>'
-      + ossz + '</strong>' + (nemFer ? ' — <span class="koino-koltozes-sor__hiba">nem fér: hagyj el legalább ' + (ossz - g.keret)
+    resz += '<div class="koino-bekapcsolodas-sor__allas">A kerete: <strong>' + g.keret + '</strong> tudatpont · a hozott pontjaid: <strong>'
+      + ossz + '</strong>' + (nemFer ? ' — <span class="koino-bekapcsolodas-sor__hiba">nem fér: hagyj el legalább ' + (ossz - g.keret)
       + ' pontnyit</span>' : '') + ' · a lánc-pontod: a ' + g.lancPont + '. eseményed (a gyermek születése előtti utolsó)</div>';
     if (g.pontok.length) {
-      resz += '<ul class="koino-koltozes-sor__pontok">' + g.pontok.map((p) => '<li><label>'
+      resz += '<ul class="koino-bekapcsolodas-sor__pontok">' + g.pontok.map((p) => '<li><label>'
         + '<input type="checkbox" data-gyermek="' + html(g.azonosito) + '" data-az="' + html(p.azonosito) + '"'
         + (elhagyottja(g).has(p.azonosito) ? ' checked' : '') + (folyamatban ? ' disabled' : '') + '> elhagyom · '
         + (p.cim ? html(p.cim) : '<em>' + html(rovid(p.azonosito)) + '</em>') + ' — ' + p.pont + ' pont</label></li>').join('')
@@ -68,16 +68,16 @@ export async function koltozesMegnyitasa({ terMegnyitasa = null } = {}) {
       resz += '<p class="koino-megjegyzes">A gyermek születése előtt nem volt pontod — súlyt nem hozol, a tagságodat igen.</p>';
     }
     if (megerosites === g.azonosito) {
-      resz += '<p class="koino-koltozes-sor__figyelem">Biztos? A kiköltözés itt és a beköltözés a gyermekben aláírt esemény — '
+      resz += '<p class="koino-bekapcsolodas-sor__figyelem">Biztos? A bekapcsolódás a gyermekben aláírt esemény — '
         + 'nem vonható vissza. A gyermekbe a születése előtti pontjaid jönnek (az elhagyottak nélkül) és a vágáskori tagságod; '
         + 'a születése utáni tevékenységed itt marad. Ebben a koinóban a pontjaid megmaradnak — a két koinóban külön kereted van.</p>'
-        + '<div class="koino-koltozes-sor__gombok">'
-        + '<button type="button" class="koino-koltozes-sor__gomb" data-muvelet="megse"' + (folyamatban ? ' disabled' : '') + '>Mégse</button>'
-        + '<button type="button" class="koino-koltozes-sor__gomb koino-koltozes-sor__gomb--fo" data-muvelet="koltozom"'
-        + (folyamatban || nemFer ? ' disabled' : '') + '>' + (folyamatban ? 'Költözöm…' : 'Igen, költözöm') + '</button></div>';
+        + '<div class="koino-bekapcsolodas-sor__gombok">'
+        + '<button type="button" class="koino-bekapcsolodas-sor__gomb" data-muvelet="megse"' + (folyamatban ? ' disabled' : '') + '>Mégse</button>'
+        + '<button type="button" class="koino-bekapcsolodas-sor__gomb koino-bekapcsolodas-sor__gomb--fo" data-muvelet="bekapcsolodom"'
+        + (folyamatban || nemFer ? ' disabled' : '') + '>' + (folyamatban ? 'Bekapcsolódom…' : 'Igen, bekapcsolódom') + '</button></div>';
     } else {
-      resz += '<div class="koino-koltozes-sor__gombok"><button type="button" class="koino-koltozes-sor__gomb koino-koltozes-sor__gomb--fo"'
-        + ' data-muvelet="megerosites"' + (nemFer || folyamatban ? ' disabled' : '') + '>Költözöm ide…</button></div>';
+      resz += '<div class="koino-bekapcsolodas-sor__gombok"><button type="button" class="koino-bekapcsolodas-sor__gomb koino-bekapcsolodas-sor__gomb--fo"'
+        + ' data-muvelet="megerosites"' + (nemFer || folyamatban ? ' disabled' : '') + '>Bekapcsolódom ide…</button></div>';
     }
     return resz + '</div>';
   };
@@ -85,17 +85,18 @@ export async function koltozesMegnyitasa({ terMegnyitasa = null } = {}) {
   // ----- AZ ABLAK TARTALMA -----
   const rajzol = () => {
     if (siker) {
-      tartalom.innerHTML = '<p class="koino-koltozes__siker">✅ Beköltöztél: <strong>' + html(siker.nev ?? rovid(siker.gyermek))
-        + '</strong>.</p><p class="koino-koltozes__leiras">A lánc-pontod: a ' + siker.lancPont + '. eseményed · a hozott pontjaid: '
+      tartalom.innerHTML = '<p class="koino-bekapcsolodas__siker">✅ Bekapcsolódtál: <strong>' + html(siker.nev ?? rovid(siker.gyermek))
+        + '</strong>.</p><p class="koino-bekapcsolodas__leiras">A lánc-pontod: a ' + siker.lancPont + '. eseményed · a hozott pontjaid: '
         + siker.hozottOsszeg + ' (' + siker.hozott + ' entitáson' + (siker.elhagyva ? ', elhagyva ' + siker.elhagyva : '')
         + ') · a gyermekbe vitt múlt: ' + siker.vitt + ' új esemény. A többi készülék a következő cserén tudja meg.</p>'
-        + (terMegnyitasa ? '<div class="koino-koltozes-sor__gombok"><button type="button" class="koino-koltozes-sor__gomb '
-          + 'koino-koltozes-sor__gomb--fo" data-muvelet="ter">A tér megnyitása</button></div>' : '');
+        + (terMegnyitasa ? '<div class="koino-bekapcsolodas-sor__gombok"><button type="button" class="koino-bekapcsolodas-sor__gomb '
+          + 'koino-bekapcsolodas-sor__gomb--fo" data-muvelet="ter">A tér megnyitása</button></div>' : '');
       return;
     }
     const gyermekek = elonezet?.gyermekek ?? [];
-    tartalom.innerHTML = '<p class="koino-koltozes__leiras">A költözés ebből a koinóból egy gyermekébe visz: a gyermek a '
-      + 'szülőre épül (a múlt közös), a súlyt a költöző hozza (D118). Csak a készüléken ismert gyermekek látszanak.</p>'
+    tartalom.innerHTML = '<p class="koino-bekapcsolodas__leiras">A bekapcsolódással egy gyermekébe is belépsz — ebben a koinóban megmaradsz, a '
+      + 'teljes súlyoddal (a kettő párhuzamos). A gyermek a szülőre épül (a múlt közös), és ott a súlyt a bekapcsolódó hozza (D127). '
+      + 'Csak a készüléken ismert gyermekek látszanak.</p>'
       + (elonezet?.megjegyzes ? '<p class="koino-megjegyzes">' + html(elonezet.megjegyzes) + '</p>' : '')
       + (gyermekek.length ? gyermekek.map(gyermekSora).join('')
         : '<p class="koino-megjegyzes">Ennek a koinónak nincs ismert gyermeke ezen a készüléken. Gyermeket a '
@@ -103,7 +104,7 @@ export async function koltozesMegnyitasa({ terMegnyitasa = null } = {}) {
   };
 
   const betolt = async () => {
-    elonezet = await apiGet('koltozes');
+    elonezet = await apiGet('bekapcsolodas');
     rajzol();
   };
 
@@ -134,13 +135,13 @@ export async function koltozesMegnyitasa({ terMegnyitasa = null } = {}) {
     if (!g) return;
     if (muvelet === 'megerosites') { megerosites = g.azonosito; rajzol(); return; }
     if (muvelet === 'megse') { megerosites = null; rajzol(); return; }
-    if (muvelet === 'koltozom') {
+    if (muvelet === 'bekapcsolodom') {
       folyamatban = true;
       rajzol();
       try {
-        siker = await apiPost('koltozes', { gyermek: g.azonosito, elhagy: [...elhagyottja(g)] });
+        siker = await apiPost('bekapcsolodas', { gyermek: g.azonosito, elhagy: [...elhagyottja(g)] });
       } catch (hiba) {
-        modal.hibaBeallitasa(hiba.message ?? 'A költözés nem sikerült.');
+        modal.hibaBeallitasa(hiba.message ?? 'A bekapcsolódás nem sikerült.');
         folyamatban = false;
         megerosites = null;
         await betolt().catch(() => rajzol());
@@ -156,8 +157,8 @@ export async function koltozesMegnyitasa({ terMegnyitasa = null } = {}) {
   try {
     await betolt();
   } catch (hiba) {
-    tartalom.innerHTML = '<p class="koino-megjegyzes">A költözés előnézete most nem kérdezhető le: ' + html(hiba.message) + '</p>';
+    tartalom.innerHTML = '<p class="koino-megjegyzes">A bekapcsolódás előnézete most nem kérdezhető le: ' + html(hiba.message) + '</p>';
   }
-  console.log('koltozesMegnyitasa - VÉGE', { gyermekek: elonezet?.gyermekek?.length ?? 0 });
+  console.log('bekapcsolodasMegnyitasa - VÉGE', { gyermekek: elonezet?.gyermekek?.length ?? 0 });
   return modal;
 }

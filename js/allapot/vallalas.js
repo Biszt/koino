@@ -63,7 +63,7 @@ export function vallalasSzamitasa(sajatEsemenyek, beallitas = {}) {
     if (e.sorszam !== vart) folytonos = false;
     vart = e.sorszam + 1;
     if (typeof beallitas.szamit === 'function' && !beallitas.szamit(e)) continue;   // ⭐ D118 (⑤b)
-    if (e.tipus === 'Belepes' || e.tipus === 'KoinoLetrehozas' || e.tipus === 'Bekoltozes') azonossag.push(e.azonosito);   // ⭐ D118 (④a)
+    if (e.tipus === 'Belepes' || e.tipus === 'KoinoLetrehozas' || e.tipus === 'Bekapcsolodas') azonossag.push(e.azonosito);   // ⭐ D118 (④a)
     if (e.tipus !== 'TudatpontRendezes') continue;
     const m = pontEsemenyMerlege(e, allas, folytonos, beallitas.tudatpontKeret,
       typeof beallitas.koino === 'string' && esemenyKoinoja(e) !== beallitas.koino);

@@ -158,7 +158,7 @@ function javasoltCim(e, g) {
  * @param {string} koino
  * @param {number} [most] - a tartó órája
  * @param {Set<string>} [osok] - ⭐ D118 (⑤a): a koinó őseinek nevei — a hozott entitás bejegyzése az ős eseményeit hordozza
- *        (a születését, a költözők hozott pontjait); a szerzők tagságát a tartó külön nézi (④b — a nem költöző nem tag)
+ *        (a születését, a bekapcsolódók hozott pontjait); a szerzők tagságát a tartó külön nézi (④b — a nem bekapcsolódó nem tag)
  * @returns {{rendben: boolean, ok?: string, cim?: string, hely?: bigint, frissesseg?: number}}
  */
 export function bejegyzesTartalma(b, koino, most = Date.now(), osok = null) {

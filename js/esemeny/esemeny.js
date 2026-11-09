@@ -474,7 +474,7 @@ export function alakiHiba(esemeny) {
           || t.lanc.length > 1024) {
         return 'a gyermek születése a létrehozó tagsági bizonyítékát hozza ({ horgony, lanc })';
       }
-      // ⭐⭐ D119 (Csaba: „(A) Nem költözik”): a létrehozó a születésével költözik, és a beköltözéshez hasonlóan elhagyhat
+      // ⭐⭐ D119 (Csaba: „(A) Nem költözik”): a létrehozó a születésével bekapcsolódik, és a bekapcsolódáshoz hasonlóan elhagyhat
       // (KZ3 (A)) — a program a koino-verzió kártyáira tett pontjait magától elhagyja (a kártya a szülő ügye).
       const el = esemeny.adat?.elhagy;
       if (el !== undefined && (!Array.isArray(el) || el.length > 1024 || !el.every(azonositoAlaku))) {
@@ -483,7 +483,7 @@ export function alakiHiba(esemeny) {
     } else if (t !== undefined) {
       return 'tagsági bizonyíték csak a szülőt megnevező születésen állhat';
     } else if (esemeny.adat?.elhagy !== undefined) {
-      return 'elhagyott pont csak a gyermek születésén állhat (a létrehozó a születésével költözik)';
+      return 'elhagyott pont csak a gyermek születésén állhat (a létrehozó a születésével bekapcsolódik)';
     }
     // ⭐⭐ D119 (①a): a koinó PROGRAMJA — a kód-csomag jegyzékének hivatkozása (a kód neve); csak új alakban.
     const pr = esemeny.adat?.program;
@@ -497,23 +497,21 @@ export function alakiHiba(esemeny) {
       return 'a koinó magja a mag-jegyzék hivatkozása ({ lenyomat, bajt }) — csak új alakú születésen';
     }
   }
-  // ⭐⭐ D118 (④a): a KÖLTÖZÉS két eseménye — az alakjuk (a bizonyítékot a kapu nézi, a koinó és a szülő születésével).
-  if (esemeny.tipus === 'Kikoltozes') {
-    if (!azonositoAlaku(esemeny.adat?.gyermek)) return 'a kiköltözés a gyermek koinó nevét mondja';
-    if (!azonositoAlaku(esemeny.entitas)) return 'a kiköltözés a saját azonosság-szeletembe szól (a horgonyomhoz)';
-  }
-  if (esemeny.tipus === 'Bekoltozes') {
+  // ⭐⭐ D118 (a költözés alakja) → ⭐⭐ D127 (a bekapcsolódás: a szülőben megmaradsz): EGY esemény, a gyermekben — az alakja (a
+  // bizonyítékot a kapu nézi, a koinó és a szülő születésével). A szülőben nem írunk semmit (D127/KÖ4 (A)): a bekapcsolódó ott marad
+  // a teljes súlyával, és tovább dolgozhat — a két koinó párhuzamos.
+  if (esemeny.tipus === 'Bekapcsolodas') {
     const a = esemeny.adat ?? {};
-    if (esemeny.entitas !== null) return 'a beköltözés a saját szeletét nyitja (ez a horgonyom a gyermekben)';
-    if (!azonositoAlaku(a.szulo) || !azonositoAlaku(a.kikoltozes)) return 'a beköltözés a szülőt és a kiköltözést nevezi meg';
+    if (esemeny.entitas !== null) return 'a bekapcsolódás a saját szeletét nyitja (ez a horgonyom a gyermekben)';
+    if (!azonositoAlaku(a.szulo)) return 'a bekapcsolódás a szülőt nevezi meg';
     if (!a.lanc || typeof a.lanc !== 'object' || !Number.isSafeInteger(a.lanc.sorszam) || a.lanc.sorszam < 1
         || !azonositoAlaku(a.lanc.azonosito)) {
-      return 'a beköltözés a szülőbeli láncom vágás előtti utolsó eseményét nevezi meg ({ sorszam, azonosito })';
+      return 'a bekapcsolódás a szülőbeli láncom vágás előtti utolsó eseményét nevezi meg ({ sorszam, azonosito })';
     }
     const t = a.szuloTagsag;
     if (!t || typeof t !== 'object' || Array.isArray(t) || !azonositoAlaku(t.horgony) || !Array.isArray(t.lanc)
         || t.lanc.length > 1024) {
-      return 'a beköltözés a tagsági bizonyítékomat hozza a szülőből ({ horgony, lanc })';
+      return 'a bekapcsolódás a tagsági bizonyítékomat hozza a szülőből ({ horgony, lanc })';
     }
     if (a.elhagy !== undefined && (!Array.isArray(a.elhagy) || a.elhagy.length > 1024 || !a.elhagy.every(azonositoAlaku))) {
       return 'az elhagyott pontok listája entitás-azonosítók listája';

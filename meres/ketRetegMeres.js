@@ -1,6 +1,6 @@
 // meres/ketRetegMeres.js
 
-// Felelősség: ⭐⭐ A 83. MÉRÉS — A KÉT RÉTEG ÁRA (D118, a költözés ③, 2026-10-24).
+// Felelősség: ⭐⭐ A 83. MÉRÉS — A KÉT RÉTEG ÁRA (D118, a bekapcsolódás ③, 2026-10-24).
 //
 // Mennyibe kerül egy szülőre épülő koinó képe (`koinoKepe`) a szülő nélkülihez képest? A múlt rétege egy állapot-számítás a
 // múlt eseményein; a múlt nem változik, csak bővül — ezért gyorsítótárban van. A mérés:

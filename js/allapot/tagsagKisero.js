@@ -61,7 +61,7 @@ export async function szerzoTagsagaTarbol(tar, koino, szerzo, koinoSzuletes = nu
   const sajat = (await sajatLancEsemenyei(tar, szerzo)).filter((e) => esemenyKoinoja(e) === koino);
   const horgonyok = new Set();
   for (const e of sajat) {
-    if (HORGONY_TIPUSOK.has(e.tipus)) horgonyok.add(e.azonosito);   // ⭐ D118 (④a): a beköltözés is
+    if (HORGONY_TIPUSOK.has(e.tipus)) horgonyok.add(e.azonosito);   // ⭐ D118 (④a): a bekapcsolódás is
     if (e.tipus === TAGSAGI_CSOMAG && typeof e.entitas === 'string') horgonyok.add(e.entitas);
   }
   // ⛔ A koinó születése (a MIÉNK) az első: egy hamis koinó-létrehozás egy csomagban így nem ad tagságot (mint a kapunál).

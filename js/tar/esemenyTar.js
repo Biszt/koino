@@ -37,8 +37,8 @@ import { LEZARASI_OSSZEGZES, lezarasiOsszegzesAlakja } from '../allapot/lezarasi
 // ⭐ D93/2: a tagsági csomag tartalma is a kapun megy át.
 import { TAGSAGI_CSOMAG, tagsagiCsomagEllenorzese } from '../allapot/tagsag.js';
 // ⭐⭐ D118 (②a): a gyermek születésének bizonyítéka (a szülő születésével együtt).
-import { gyermekSzuleteseE, gyermekSzuletesEllenorzese, koinoNezete, bekoltozesE, bekoltozesEllenorzese,
-  bekoltozesekEllenorzese, lancNezete, koinoVerzioEllenorzese } from '../allapot/koinoLanc.js';
+import { gyermekSzuleteseE, gyermekSzuletesEllenorzese, koinoNezete, bekapcsolodasE, bekapcsolodasEllenorzese,
+  bekapcsolodasokEllenorzese, lancNezete, koinoVerzioEllenorzese } from '../allapot/koinoLanc.js';
 
 // ===================================
 // ESEMÉNY MENTÉSE
@@ -105,8 +105,8 @@ export async function esemenyMentese(tar, esemeny, beallitas = {}) {
   // ----- 1/a3. ⭐ D93/2: A TAGSÁGI CSOMAG — a lánc másolatai is ugyanazon a próbán, és tagságot kell adniuk -----
   if (esemeny.tipus === TAGSAGI_CSOMAG) {
     const csomag = await tagsagiCsomagEllenorzese(esemeny);
-    // ⛔ D118 (④a): a csomagban utazó beköltözés is a születésekkel (különben egy hamis beköltözés ingyen tagságot adna).
-    const bek = csomag.rendben ? await bekoltozesekEllenorzese(esemeny.adat?.lanc, tar) : csomag;
+    // ⛔ D118 (④a): a csomagban utazó bekapcsolódás is a születésekkel (különben egy hamis bekapcsolódás ingyen tagságot adna).
+    const bek = csomag.rendben ? await bekapcsolodasokEllenorzese(esemeny.adat?.lanc, tar) : csomag;
     if (!bek.rendben) {
       console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: bek.ok });
       return { mentve: false, ok: bek.ok };
@@ -134,9 +134,9 @@ export async function esemenyMentese(tar, esemeny, beallitas = {}) {
     }
   }
 
-  // ----- 1/a5. ⭐⭐ D118 (④a): A BEKÖLTÖZÉS — a koinó és a szülő születésével, a vágáskori tagsági bizonyítékkal -----
-  if (bekoltozesE(esemeny)) {
-    const bk = await bekoltozesEllenorzese(esemeny, (await tar.esemeny(esemenyKoinoja(esemeny))) ?? null,
+  // ----- 1/a5. ⭐⭐ D118 (④a): A BEKAPCSOLÓDÁS — a koinó és a szülő születésével, a vágáskori tagsági bizonyítékkal -----
+  if (bekapcsolodasE(esemeny)) {
+    const bk = await bekapcsolodasEllenorzese(esemeny, (await tar.esemeny(esemenyKoinoja(esemeny))) ?? null,
       (await tar.esemeny(esemeny.adat.szulo)) ?? null, tar);
     if (!bk.rendben) {
       console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: bk.ok });
@@ -384,8 +384,8 @@ export async function horgonyok(tar, koino, entitas, sajatSzerzo, darab = 1) {
 
 /**
  * ⭐⭐ D118 (⑤b): HOVA KERÜL a szerző új saját eseménye egy koinóban — a koinóbeli LÁNCA végére (`koinoLanc.js`
- * `lancNezete`: a koinó saját eseményei, és ha költözött, a hozott előtag); a beköltözésé a saját adatából (a szülőbeli
- * lánc-pontja után — a láncom ott még nem a gyermeké, a kapu ellenőrizte). ⛔ A nem költöző szülőbeli múltja nem a
+ * `lancNezete`: a koinó saját eseményei, és ha bekapcsolódott, a hozott előtag); a bekapcsolódásé a saját adatából (a szülőbeli
+ * lánc-pontja után — a láncom ott még nem a gyermeké, a kapu ellenőrizte). ⛔ A nem bekapcsolódó szülőbeli múltja nem a
  * gyermekbeli lánca: az ott 1-ről indul (különben a tár legnagyobb sorszáma után folytatná, akármelyik koinóé — és ha a
  * múltja később érkezik, a két lánc azonos sorszámai elágazásnak látszanának). A művelet és az író (az ELAVULT) ezt hívja.
  * @param {Object} tar
@@ -396,7 +396,7 @@ export async function horgonyok(tar, koino, entitas, sajatSzerzo, darab = 1) {
  * @returns {Promise<{elozo: string|null, sorszam: number}>}
  */
 export async function ujSajatHelye(tar, szerzo, koino, tipus = null, adat = null) {
-  if (tipus === 'Bekoltozes' && typeof adat?.lanc?.azonosito === 'string' && Number.isSafeInteger(adat.lanc.sorszam)) {
+  if (tipus === 'Bekapcsolodas' && typeof adat?.lanc?.azonosito === 'string' && Number.isSafeInteger(adat.lanc.sorszam)) {
     return { elozo: adat.lanc.azonosito, sorszam: adat.lanc.sorszam + 1 };
   }
   // ⭐ A koinó SZÜLETÉSE (új alakban a koinó-mezője üres — a koinó még nincs): a helyét a hívó adja a tárral — a gyermekéé a

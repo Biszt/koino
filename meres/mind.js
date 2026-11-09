@@ -67,12 +67,12 @@ import lancGyoker from './lancGyokerProba.js';
 import ellentmondas from './ellentmondasProba.js';
 // ⭐ Az észlelő (D82) — a beérkezett események körül bizonyítható ellentmondások.
 import eszlelo from './eszleloProba.js';
-// ⭐⭐ D118 (a költözés ②a): a gyermek születése és a születések lánca
+// ⭐⭐ D118 (a bekapcsolódás ②a): a gyermek születése és a születések lánca
 import koinoLanc from './koinoLancProba.js';
-// ⭐⭐ D118 (a költözés ③): a koinó képe két rétegben
+// ⭐⭐ D118 (a bekapcsolódás ③): a koinó képe két rétegben
 import ketReteg from './ketRetegProba.js';
-// ⭐⭐ D118 (a költözés ④a): a beköltözés
-import koltozes from './koltozesProba.js';
+// ⭐⭐ D118 (a bekapcsolódás ④a): a bekapcsolódás
+import bekapcsolodas from './bekapcsolodasProba.js';
 // ⭐⭐ D119 (①a): a koino-verzió és a kód-csomag
 import koinoVerzio from './koinoVerzioProba.js';
 // ⭐ A döntési csomag (D85 T3, a (B)) — a csak-G1-nézet a csomaggal ugyanazt számolja.
@@ -178,7 +178,7 @@ const PROBAK = [
   { nev: 'eszlelo', futtat: eszlelo },
   { nev: 'koinolanc', futtat: koinoLanc },
   { nev: 'ketreteg', futtat: ketReteg },
-  { nev: 'koltozes', futtat: koltozes },
+  { nev: 'bekapcsolodas', futtat: bekapcsolodas },
   { nev: 'koinoverzio', futtat: koinoVerzio }
 ];
 
@@ -202,7 +202,7 @@ const CSOPORTOK = {
   // a kanonikus alak, a kulcs, az aláírt esemény és a tár (az íróval)
   alap: ['kanonikus', 'kulcs', 'esemeny', 'tar', 'iro', 'atmeneti', 'keresotar', 'keresomegujitas'],
   // események → állapot: entitások, döntéshozatal, szabályok, egyezmények, tagság
-  allapot: ['allapot', 'javaslat', 'szabaly', 'egyezmeny', 'dontesicsomag', 'lezarasiosszegzes', 'osszpont', 'felszabaditas', 'identitas', 'tagsag', 'ertesites', 'felderites', 'koinolanc', 'ketreteg', 'koltozes', 'koinoverzio'],
+  allapot: ['allapot', 'javaslat', 'szabaly', 'egyezmeny', 'dontesicsomag', 'lezarasiosszegzes', 'osszpont', 'felszabaditas', 'identitas', 'tagsag', 'ertesites', 'felderites', 'koinolanc', 'ketreteg', 'bekapcsolodas', 'koinoverzio'],
   // a felületnek felelő réteg
   felulet: ['kapu', 'pakli', 'ter', 'csereallapot'],
   // két készülék között: a párbeszéd, a kézi út, a társak, a kapu, a kötések, a tábla, a DHT

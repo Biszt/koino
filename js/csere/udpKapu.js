@@ -420,7 +420,7 @@ export async function udpKapuNyitasa(beallitas) {
      * A cél munkája — és a végén: tényleg a várt társ volt-e (`jo`)?
      * ⭐ D119 (⑤): ha a munka kimondja, hogy a társ EZEN a címén nem ott van, ahol keressük (`eredmeny.masutt` — egy
      * másik, független család kapuja ugyanazon a készüléken), a cél nem számít elértnek, és a csoport következő címe jön.
-     * ⛔ Különben a kör a társat a rossz portján „elérte”, és a jót soha nem hívta (a költözés kézi próbájának 3. lelete).
+     * ⛔ Különben a kör a társat a rossz portján „elérte”, és a jót soha nem hívta (a bekapcsolódás kézi próbájának 3. lelete).
      */
     const munkatFigyel = (a, igeret) => {
       a.igeret = igeret;

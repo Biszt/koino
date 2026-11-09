@@ -1,5 +1,9 @@
 # A KÖLTÖZÉS ÁTVIZSGÁLÁSA (D66, D118 — 2026-10-24)
 
+> ⭐ **2026-11-08 óta: BEKAPCSOLÓDÁS (D127 — a szülőben megmaradsz, a két koinó párhuzamos).** Ez a dokumentum a történet, a
+> régi szóval. A program már akkor is így számolt (a „kiköltözés” a szülőben a súlyt nem vette el); a D127 a szót, a kiírásokat és a
+> mag eseményeit igazította hozzá (a szülőbeli esemény megszűnt).
+
 > Csaba (2026-10-23): *„rendben. akkor legyen a kőltözés, de mielött elkezdjük beszéljük át, alapossan.”* Ez a lap az
 > átbeszélés eredménye az építés előtt: mi a költözés, mi dőlt el (D118), mire épít a meglévő gépből, mit talált a
 > felmérés (egy mért lelet — 3. szakasz), hogyan áll össze, mi maradt Csabánál (KZ1–KZ5), és milyen sorrendben épül.

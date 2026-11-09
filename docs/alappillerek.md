@@ -1900,4 +1900,9 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     lapon, fej nélküli Chrome-mal mérve: a nézetből semmi nem jut ki (a lap kontrollja kijut), a lap kulcsa nem jut el hozzá, a
     kérdéseire jó választ kap · ⛔ az építés lelete: a Chrome a sandbox-keretet külön folyamatba teszi (a próba a keret saját
     munkamenetén éri el); egy második, engedékeny CSP (`default-src *`) a `data:`/`blob:` képet is tiltja — a feloldás csak szigorít ·
-    ⏭️ a terepi próba (a telefon böngészője).
+    ✅ a terepi próba (2026-11-08, közös wifin — Brave, Android): a nézetből semmi nem jutott a laptopra, a kontroll igen.
+250. **2026-11-08 · D127 — a bekapcsolódás: a szülőben megmaradsz, a két koinó párhuzamos** → **a „költözés” helyett „bekapcsolódás”,
+    mindenhol, a magban is: egy esemény a gyermekben (`Bekapcsolodas`), a szülőben semmi; a bekapcsolódó a szülőben a teljes súlyával
+    megmarad, és tovább dolgozik — egy próba őrzi** · ⭐ a program már így számolt (a D118 „kiköltözése” a súlyt nem vette el) — csak a
+    szó, a kiírások és a leírás mondtak áthelyezést · ⛔ a mag változott: új koinó-családdal indulunk · ⏸️ a pénz és a koinók
+    kapcsolata a tervező ágé.

@@ -48,7 +48,7 @@ import {
 import { pontEsemenyMerlege } from './szabalyok.js';
 import { AZONOSITO_MINTA, azonositoAlaku } from '../esemeny/esemeny.js';
 import { koinoSzabalyai, ALAP_SZABALYOK } from '../esemeny/koinoSzabalyok.js';
-import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a költöző hozott előtagjával)
+import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a bekapcsolódó hozott előtagjával)
 
 export const NAPLO_FAJTA = 'naplo';
 export const KIOSZTAS_FAJTA = 'kiosztas';
@@ -279,9 +279,9 @@ async function illikALanchoz(tar, nezet, a) {
  */
 async function allapotIg(tar, koino, szerzo, meddig, tarolo) {
   const keret = await koinoKerete(tar, koino);
-  // ⭐⭐ D118 (⑤b): a szerző LÁNCA a koinóban — a költözőé a hozott előtaggal (a napló a teljes láncot fedi), a kiosztás a
+  // ⭐⭐ D118 (⑤b): a szerző LÁNCA a koinóban — a bekapcsolódóé a hozott előtaggal (a napló a teljes láncot fedi), a kiosztás a
   // jelen réteg szerint (a hozott pontok a számított összeggel, az elhagyottak nélkül). Eddig a koinó nevére szűrt: a
-  // költöző lánca az 1. sorszámon „nem ép” volt, és a gyermekbeli eseményei lánc-gyökér nélkül születtek.
+  // bekapcsolódó lánca az 1. sorszámon „nem ép” volt, és a gyermekbeli eseményei lánc-gyökér nélkül születtek.
   const nezet = await lancNezete(tar, koino, szerzo);
   let tarbeli = memoria.get(tar);
   if (!tarbeli) { tarbeli = new Map(); memoria.set(tar, tarbeli); }
@@ -292,7 +292,7 @@ async function allapotIg(tar, koino, szerzo, meddig, tarolo) {
   const fajlbol = tarolo ? await fajlbolAllapot(await tarolo.olvas().catch(() => null), szerzo) : null;
   for (const jelolt of [tarbeli.get(szerzo), fajlbol]) {
     // ⭐ D118/2: a kép a koinó keretével készült — ha azóta megjött a születés (más kerettel), a lánc újraszámolja.
-    // ⭐ D118 (⑤b): és a lánc nézetével (ha azóta költöztem, más a lánc és a kiosztás).
+    // ⭐ D118 (⑤b): és a lánc nézetével (ha azóta bekapcsolódtam, más a lánc és a kiosztás).
     if (jelolt && jelolt.sorszam <= meddig && jelolt.keret === keret && (jelolt.nezet ?? '') === nezet.kulcs
         && await illikALanchoz(tar, nezet, jelolt)) {
       a = jelolt; break;

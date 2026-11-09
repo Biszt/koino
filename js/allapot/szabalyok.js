@@ -345,13 +345,13 @@ export function pontEsemenyMerlege(e, allas, folytonos, keret = TUDATPONT_KERET,
 
   // ----- ⭐⭐ D118 (④a, KZ3): A HOZOTT PONT-ESEMÉNY -----
   // Az ős láncából jött pont-esemény a gyermek jelenében: a bemondása (és az önbizonyítása) a SZÜLŐ keretéről és kiosztásáról
-  // szól — a gyermekben a költöző elhagyhatott belőle (KZ3 (A)), és a keret más lehet. Itt a számított összeg dönt.
+  // szól — a gyermekben a bekapcsolódó elhagyhatott belőle (KZ3 (A)), és a keret más lehet. Itt a számított összeg dönt.
   if (hozott) {
     const regiH = allas.pontok.get(e.adat.entitas) ?? 0;
     const ujOsszegH = allas.osszeg - regiH + pont;
     if (ujOsszegH > keret) {
       return { elvetve: 'a hozott pont túllépné a gyermek keretét (' + ujOsszegH + ' / ' + keret
-        + ') — KZ3: a beköltözéskor el kell hagyni belőle' };
+        + ') — KZ3: a bekapcsolódáskor el kell hagyni belőle' };
     }
     return { entitas: e.adat.entitas, pont, ujOsszeg: ujOsszegH };
   }
@@ -449,8 +449,8 @@ function leszarmazottE(entitas, os, szulok) {
 }
 
 export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
-  // ⭐⭐ D118 (⑤b): a koinó képe adja — a láncok a lánc-ág szerint (a nem költöző ős-eseménye külön ág), és a láncon ismert,
-  // de a jelen rétegből kizárt sorszámok (a költöző hozott tagsági csomagja, az ős születése, az elhagyott pontja) nem hézagok.
+  // ⭐⭐ D118 (⑤b): a koinó képe adja — a láncok a lánc-ág szerint (a nem bekapcsolódó ős-eseménye külön ág), és a láncon ismert,
+  // de a jelen rétegből kizárt sorszámok (a bekapcsolódó hozott tagsági csomagja, az ős születése, az elhagyott pontja) nem hézagok.
   const lancAga = typeof beallitas.lancAga === 'function' ? beallitas.lancAga : (e) => e.szerzo;
   const ismertSorszamok = beallitas.ismertSorszamok instanceof Map ? beallitas.ismertSorszamok : null;
   /** A [tol, ig) sorszámok mind ismertek-e a szerző láncán (csak a jelen réteg hagyta ki őket)? */

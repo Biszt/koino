@@ -39,7 +39,7 @@ import {
 import { NAPLO_FAJTA, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ, lancAllapotaLancbol, koinoKerete } from './lancGyoker.js';
 import { esemenyEllenorzese, AZONOSITO_MINTA, esemenyKoinoja } from '../esemeny/esemeny.js';
 import { ellentmondasEllenorzese } from './ellentmondas.js';
-import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a költöző hozott előtagjával)
+import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a bekapcsolódó hozott előtagjával)
 
 // ===================================
 // A PARAMÉTEREK — ⚠️ egyik sem állapot-befolyásoló (D66): csak azt szabják meg, mennyit kérdezünk
@@ -70,7 +70,7 @@ function naploGyokere(e) {
 
 /** A szerző nálam lévő eseményei (a koinóból) és a feje. */
 async function szerzoNalam(tar, koino, sz) {
-  // ⭐ D118 (⑤b): a koinóbeli lánca — a költözőé a hozott előtaggal (a fej napló-gyökere azt is elköti).
+  // ⭐ D118 (⑤b): a koinóbeli lánca — a bekapcsolódóé a hozott előtaggal (a fej napló-gyökere azt is elköti).
   const nezet = await lancNezete(tar, koino, sz);
   const lanc = (await tar.szerzoLanca(sz)).filter((e) => e && nezet.tagja(e) && Number.isSafeInteger(e.sorszam));
   let fej = null;
@@ -260,7 +260,7 @@ export function lancKiszolgalo({ tar, koino }) {
    * @returns {Promise<{lanc: Array<Object>, fejNalam: boolean}|null>}
    */
   async function lancFejtol(sz, d, fejAz) {
-    // ⭐ D118 (⑤b): a koinóbeli lánca (a költözőé a hozott előtaggal) — és a kiosztás a lánc nézete szerint (a `k` lista).
+    // ⭐ D118 (⑤b): a koinóbeli lánca (a bekapcsolódóé a hozott előtaggal) — és a kiosztás a lánc nézete szerint (a `k` lista).
     const nezet = await lancNezete(tar, koino, sz);
     const fej = await tar.esemeny(fejAz);
     if (fej && fej.szerzo === sz && nezet.tagja(fej) && fej.sorszam === d + 1) {
@@ -323,7 +323,7 @@ export function lancKiszolgalo({ tar, koino }) {
         }
         if (q.r) v.c = (await naploKovetkezetesseg(NAPLO_FAJTA, levelek, q.r, 0, memo)).ut;
         if (q.k === 1) {
-          // ⭐ D118/2: a koinó kerete · ⭐ (⑤b): a kiosztás a lánc nézete szerint (a költözőé a hozott pontokkal)
+          // ⭐ D118/2: a koinó kerete · ⭐ (⑤b): a kiosztás a lánc nézete szerint (a bekapcsolódóé a hozott pontokkal)
           const a = await lancAllapotaLancbol(l.lanc.slice(0, q.d), await koinoKerete(tar, koino), l.nezet);
           const lista = a ? allapotLista(a.kiosztasFa) : null;
           if (lista && lista.length <= LISTA_KORLAT) v.k = lista.map((t) => [t.kulcs, t.osszegek[0]]);

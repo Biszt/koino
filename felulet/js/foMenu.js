@@ -39,8 +39,8 @@ import { aktivEntitasLekerese, aktivEntitasMentese, tokenLekerese } from './util
 import { apiGet } from './utils/apiHelper.js';
 // ⭐ D112 ⑤: a felderítések ablaka (koinós többlet — a prototípusban nincs felderítés).
 import { felderitesekMegnyitasa, felderitesInditasa } from './koinoFelderites.js';
-// ⭐ D118 (⑥): a költözés ablaka (koinós többlet — a prototípusban nincs költözés).
-import { koltozesMegnyitasa } from './koinoKoltozes.js';
+// ⭐ D118 (⑥): a bekapcsolódás ablaka (koinós többlet — a prototípusban nincs bekapcsolódás).
+import { bekapcsolodasMegnyitasa } from './koinoBekapcsolodas.js';
 // ⭐⭐ D119 (①b): az új koino-verzió (gyermek-koinó) űrlapja.
 import { koinoVerzioMegnyitasa } from './koinoVerzio.js';
 // ⭐⭐ D125: a program ezen a készüléken (a telepítés eredménye és a visszaút)
@@ -118,8 +118,8 @@ export class FoMenu {
       { ikon: '🧩', felirat: 'Nézetek…', akcio: () => nezetekMegnyitasa() },
       // ⭐ A koinós többlet (5.6): a belépő tér — a koinók, amiket ismerek (a prototípusban a „koinó” mint fogalom nem volt)
       ...(this.terMegnyitasa ? [{ ikon: '🌐', felirat: 'A tér — a koinóim', akcio: () => this._terMegnyitasa() }] : []),
-      // ⭐ D118 (⑥): a költözés egy gyermek-koinóba (a sikeres költözés után a tér nyitható — ott a családfa)
-      { ikon: '🧳', felirat: 'Költözés…', akcio: () => koltozesMegnyitasa({
+      // ⭐ D118 (⑥): a bekapcsolódás egy gyermek-koinóba (a sikeres bekapcsolódás után a tér nyitható — ott a családfa)
+      { ikon: '🌿', felirat: 'Bekapcsolódás…', akcio: () => bekapcsolodasMegnyitasa({
         terMegnyitasa: this.terMegnyitasa ? () => this._terMegnyitasa() : null }) },
       // ⭐⭐ D119 (①b): egy gyermek-koinó a koino-verzió kártyájával (a kód a futó program)
       { ikon: '🧬', felirat: 'Új koino-verzió (gyermek)…', akcio: () => koinoVerzioMegnyitasa({

@@ -6405,7 +6405,36 @@ saját keret üzenete, egyszerre ≤ 4 kérdés úton, a `megnyit` után „🧩
 `meres/nezetProba.js` (7) — benne a valódi lapon, fej nélküli Chrome-mal, KONTROLLAL mért elszigetelés; 18 rontás. ⛔ Az építés
 lelete: (1) a Chrome a sandbox-keretet KÜLÖN FOLYAMATBA teszi — a próba a keret saját DevTools-munkamenetén éri el (`Target.setAutoAttach`);
 (2) egy második, „engedékeny” CSP (`default-src *`) a `data:` és a `blob:` képet is tiltja (a böngésző a kettőt metszi, a `*` ezeket nem
-fedi) — a feloldási kísérlet csak szigorít. ⏭️ A terepi próba (a telefon böngészője).
+fedi) — a feloldási kísérlet csak szigorít. ✅ **A terepi próba (2026-11-08, közös wifin):** a telefon böngészőjén (Brave, Android)
+a próba-nézet a koinó kártyáit mutatta, a kijutási utak mind zárva, a `data:` kép betöltött — a laptop figyelőjébe a nézetből semmi
+nem érkezett, a KONTROLL (egy közönséges lapról ugyanazok a kérések, egy másik eredetre) viszont megérkezett.
+
+### D127. A BEKAPCSOLÓDÁS: „A SZÜLŐBEN MEGMARADSZ — A KÉT KOINÓ PÁRHUZAMOS” (2026-11-08)
+
+*Csaba (a PR5 terepi próbája közben): „én azt hittem, hogy a kőltözés, másol, nem áthelyez. én így értelmeztem azt, hogy közös a
+múlt. min egy párhuzamos valóság, amik között az e-ember váltogatni tud, és akár mind kettőben, is aktív lehet. A kőltözés szó nem is
+jó rá.” — A kódból kiderült: a program már így számolt (a D118 — a költözés alakja — „kiköltözése” a szülőben a súlyt nem vette el, a
+számítás nem is használta); csak a szó, a kiírások és a leírás mondtak áthelyezést. (Claude először a szóból tévesen azt mondta, hogy
+a szülőben a pontok elvesznek — a kód mást mutatott.)*
+
+**A döntés** (Csaba, 2026-11-08):
+1. **KÖ1 — a szó: bekapcsolódás** (*„rendben”*): az e-ember egy gyermek-koinóba bekapcsolódik — a szülőben megmarad; a mag
+   változása is így megy (egy új számítású koinó, amibe bekapcsolódnak).
+2. **KÖ2 — mindenhol, a magban is** (*„ne maradjon ott sem. még bátran variálhatjuk a magot is. akárhányszór indulhatunk teljessen
+   új koino családdal.”*): az esemény `Bekapcsolodas`, a parancs `bekapcsolodas`, a lap „🌿 Bekapcsolódás…”.
+3. **KÖ3 — egy próba őrzi a modellt** (*„rendben”*): a bekapcsolódó a szülőben megmarad a teljes súlyával, és tovább dolgozhat.
+4. **KÖ4 (A) — egy esemény, a gyermekben:** a szülőben nem írunk semmit (a gyermekről a koino-verzió kártya szól — D119; hogy ki
+   hova kapcsolódott be, azt a gyermek tára tudja).
+5. ⏸️ **A pénz és a koinók kapcsolata** (a D118/6 a pénz kivezetését ide kötötte): *„még kérdőjeles. ezt majd a tervezős fork-ban
+   megtervezzük.”* — a tudatpont koinónként külön keret (másolható), a pénz nem.
+
+*Az építés (2026-11-08 — elágazás 250):* a mag (`esemeny.js` — a `Bekapcsolodas` alakja a `kikoltozes` mező nélkül, a `Kikoltozes`
+megszűnt; `koinoLanc.js`, `ketReteg.js`, `tagsag.js`, `esemenyTar.js` és a többi: a nevek), `muveletek.js` (`bekapcsolodas`, a
+`kikoltozes` művelet nincs), `koino.js` (`bekapcsolodasVegrehajtasa` — a szülőben semmi; a `bekapcsolodas` parancs; `/api/bekapcsolodas`),
+a tér (`ter.js` — innen hova kapcsolódtam be: a gyermekek kártyáiból), a lap (`koinoBekapcsolodas.js` + css, a családfa, a
+koino-verzió űrlap szövege). A próba: `bekapcsolodasProba.js` (a KÖ3: a szülőben a pontok és a vágás utáni esemény számítanak, a
+gyermekben a hozott súly), a parancssor-próba (a szülőben B a bekapcsolódás után is tag, a pontja áll, és tovább ír). ⛔ A mag
+változott: a régi koinók „más számítást” mutatnak — új koinó-családdal indulunk.
 
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 

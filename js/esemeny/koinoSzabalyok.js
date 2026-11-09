@@ -1,12 +1,12 @@
 // js/esemeny/koinoSzabalyok.js
 
-// Felelősség: ⭐⭐ D118/2 (a költözés ①b, 2026-10-24) — A KOINÓ SZABÁLYAI A SZÜLETÉSÉBEN, nem a programban.
+// Felelősség: ⭐⭐ D118/2 (a bekapcsolódás ①b, 2026-10-24) — A KOINÓ SZABÁLYAI A SZÜLETÉSÉBEN, nem a programban.
 //
 // Az állapotot befolyásoló számok (a tudatpont-keret, a kategória-korlát, a tanúsítás-szám, a felhatalmazás
 // alapértéke, a küszöbök alapértékei) a koinó születésének (`KoinoLetrehozas`) `szabalyok` mezőjébe kerülnek. Ettől:
 //   · egy szabály-változás nem programváltozás, hanem egy új koinó születése ugyanazzal a programmal (D25 1. mód,
 //     D13/b paraméter-pluralizmus);
-//   · a szülő múltját (a költözés) ugyanaz a kód számolja, a szülő szabályaival;
+//   · a szülő múltját (a bekapcsolódás) ugyanaz a kód számolja, a szülő szabályaival;
 //   · a 15. mérés néma kettéhasadása (ugyanaz a koinó-név, más állandó a két gépen) szerkezetileg megszűnik — az
 //     állandó a koinóhoz kötött, és a koinó neve a születés lenyomata (D118/2, `esemeny.js`).
 //

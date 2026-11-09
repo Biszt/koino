@@ -51,7 +51,7 @@ export const MEGHIVO_ELETTARTAM = 30 * 24 * 3600 * 1000;
  * nem sikerül (nincs hálózat), kimondja, és a meglévő indul. A futó régi koinót a `termux/telepit.sh` állítja le (`pkill` — ezért a
  * `procps`). ⛔ Idézőjel nincs benne: egy üzenetküldő a „kacskaringósra” cserélhetné.
  * ⭐ 2026-11-06: a P2P koino saját tárban él (`Biszt/koino` — a program a tár gyökere), a telefonon a `~/koino` mappában; a régi
- * (`~/koino_1.1`) helyről futó koinót is a `termux/telepit.sh` állítja le (a költözés).
+ * (`~/koino_1.1`) helyről futó koinót is a `termux/telepit.sh` állítja le (a program helye is költözött).
  */
 export const TELEPITO_SOR = 'yes | pkg upgrade && pkg install -y nodejs git procps && { if [ -d ~/koino ]; then '
   + 'git -C ~/koino fetch --depth 1 origin main && git -C ~/koino reset --hard FETCH_HEAD '

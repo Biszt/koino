@@ -67,7 +67,7 @@
    fogalom nem létezett, tehát nincs mit átemelni. Csak a meglévő változókra épül. */
 @import './components/koinoKartya.css';
 @import './components/koinoFelderites.css';
-@import './components/koinoKoltozes.css';
+@import './components/koinoBekapcsolodas.css';
 @import './components/koinoVerzio.css';
 @import './components/koinoTelepites.css';
 @import './components/koinoNezet.css';
