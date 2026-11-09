@@ -83,7 +83,7 @@ a személyé. Egy 500 fős település kasszája így évente ~400 000 koinost k
    a saját láncán bizonyítja (a hely-választásával), a kör pedig a pont-tulajdonosokra korlátos (7. szakasz, ET-9/2).
 3. **A kasszák egyenlege és az osztalék maga is koinó-szintű szám.** Az osztalékhoz tudni kell a létező pénz összegét és a 2. lépcsősök
    számát; egy ország kasszájához az összes befizető részét. Egy készülék ezt egy nagy koinóban nem tudja megszámolni — ezt a napi köteg
-   (az ET-8, a köteg-gyökér) mondhatja ki, mint az egyenlegeket. → **a kasszák az ET-8 után építhetők**, a pénzzel együtt.
+   (az ET-8 napi köre — ET-8/2) mondja ki, mint az egyenlegeket. → **a kasszák az ET-8 után építhetők**, a pénzzel együtt.
 4. **A koinó-család kasszája:** egy kassza egy koinóban él; a család többi koinójából kivezetéssel lehet bele fizetni (a szülőben
    megszűnik, a kassza koinójában megjelenik — ET-7/4). Egy közös családi pénzkönyv ellentmondana az ET-7/4-nek (minden koinónak saját
    könyve), és a verziók pénz-szabályai eltérhetnek.

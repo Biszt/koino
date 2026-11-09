@@ -3,8 +3,8 @@
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült; a számokat egy rövid számolás adja, a
 szimuláció az építőé (10. szakasz). A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** ✅ ET-8/1, ET-8/3, ET-8/4, ET-8/5 eldöntve (Csaba, 2026-11-09: *„a többit elfogadom”* — mind (A)) · ⏸️ ET-8/2: Csaba
-> szerint az évi kör túl ritka — a napi számolás ára és a javított alak az 5. szakaszban.
+> **Állapot:** ✅ **eldöntve** (Csaba, 2026-11-09) — ET-8/1, ET-8/3, ET-8/4, ET-8/5 (A); ET-8/2: **naponta** (5.1) · ⏭️ átadható (11.
+> szakasz).
 >
 > Csaba (2026-11-08): *„A köteg-gyökér elfogadása az utolsó valódi kutatási kérdés — ezt fejtsd ki.”* — és (2026-11-09): *„rendben, akkor
 > vágjunk bele, az et-8-ba.”*
@@ -19,8 +19,9 @@ fölöslegessé — és egy harmadik indokolja, hogy ne is ezt építsük:
    1”*): ha egy számlát csak a gazdája költhet, a kettős költés ellen elég, ha **a küldő nem mutathat két különböző folytatást** — és ehhez
    nem kell, hogy mindenki megegyezzen mindenben, csak néhány **tanú**, akik nem nyugtáznak két különböző lépést ugyanarra a helyre. A
    koinóban ez már félig megvan: minden e-embernek saját lánca van, és a kettős lánc bizonyítéka is (**D80–D82**).
-2. **A koinó-szintű számokhoz** (az osztalékhoz a létező pénz és a 2. lépcsősök száma) **nem kell naponta megegyezni**: elég **évente
-   egyszer**, egy kis, véletlenül kiválasztott kör aláírásával — és abból egy évre rögzített napi osztalék jár mindenkinek.
+2. **A koinó-szintű számokhoz** (az osztalékhoz a létező pénz és a 2. lépcsősök száma) **nem kell az egész állapotról megegyezni**: elég,
+   ha **naponta egy kis, véletlenül kiválasztott kör** aláírja a két számot (a régiók napi változásából számolva) — és abból jár a holnapi
+   osztalék mindenkinek (ET-8/2 — eredetileg évente javasoltam, Csaba javítására naponta: 5.1).
 3. **Az egész állapot ujjlenyomata egy nagy koinóban ki sem számolható** — ezt a szakasz4 terve már kimondta: *„a szeletelés óta egyetlen
    készülék sem ismer minden eseményt, tehát »a közösség állapotának lenyomata« milliárdnál nem is számítható ki — arra építeni a 9.
    szabályt sértené.”*
@@ -86,14 +87,15 @@ csaló tanú kell Anna 32 tanúja közül. *(A kettős nyugta ráadásul maga a 
 **A véglegesség** ezzel a nyugták összegyűlésének ideje — percek vagy órák (a tanúk nem mind online). Ez belefér a D16 lassúságába, és a
 nagyobb összegnél amúgy is ott a várakozási ablak.
 
-## 5. Az osztalék számai — évente egy kis kör
+## 5. Az osztalék számai — egy kis kör (✅ naponta — 5.1)
 
 Az osztalék (ET-7) a létező pénz 10%-a, egyenlően a 2. lépcsősök között — ehhez két koinó-szintű szám kell: **a létező pénz összege** és
 **a 2. lépcsősök száma**. Ezt egy készülék egy nagy koinóban nem tudja megszámolni. Ha viszont minden gép mást számolna, mindenki más
 osztalékot írna jóvá — a pénzkönyv szétesne. Tehát egy **közös** szám kell.
 
-**A javaslat:** évente egyszer egy **véletlen, kicsi kör** (pl. 64 2. lépcsős tag, ugyanúgy a DHT-ról, az év számának lenyomatához
-legközelebbiek) mindenki a saját tudásából kiszámolja a két számot, és **legalább kétharmaduk ugyanazt az értéket írja alá** (ha kicsit
+**Az első javaslat** *(⛔ két ponton javítva az 5.1-ben: naponta, és a számlálás a régiók napi változásából)*: évente egyszer egy
+**véletlen, kicsi kör** (pl. 64 2. lépcsős tag, ugyanúgy a DHT-ról, az év számának lenyomatához legközelebbiek) mindenki a saját
+tudásából kiszámolja a két számot, és **legalább kétharmaduk ugyanazt az értéket írja alá** (ha kicsit
 eltérnek, a középső értéket). Ebből jön az évre rögzített **napi osztalék**, amit mindenki gépe a saját láncán magának jóváír (és a kasszák
 részét — ET-9). Ha a kör egy évben nem áll össze, az előző évi érték marad.
 
@@ -163,24 +165,38 @@ megszünteti azt a pénzt” — így a tanúk nyugtájával válik ellenőrizhe
 - **ET-8/1 — Az átutalás:** (A) ⭐ tanú-nyugtákkal, konszenzus nélkül — állandó tanú-kör (pl. 32, ebből 22 nyugta), a DHT-ról, 2. lépcsős
   tagokból; (B) napi köteg-gyökér, amit egy választott kör aláír (a D21 eredeti terve) — minden pénzmozgást egy napi közös állapotba
   zár, ami egy nagy koinóban egy gépen sem számolható ki.
-- **ET-8/2 — Az osztalék számai** (⏸️ Csaba: az évi túl ritka): (A) ⭐ **naponta** egy véletlen kis kör mondja ki (kétharmados
+- ✅ **ET-8/2 — Az osztalék számai** (Csaba: *„igen.”*): (A) ⭐ **naponta** egy véletlen kis kör mondja ki (kétharmados
   aláírással), a régiók napi változásából; a holnapi osztalék a mai számokból; ha nincs kör, az előző napi érték (5.1); (B) hetente;
   ~~évente~~ (az első évben ~0-t mondana); (C) előre megírt ütemterv, kör nélkül (gyors növekedésnél eltér a 10%-tól).
 - **ET-8/3 — A kasszák egyenlege:** (A) ⭐ a kifizetési javaslat hozza a bizonyítékát (összegző fa, szúrópróba), a kassza kifizetései a
-  saját szeletében, sorrendben; (B) a kasszák egyenlegét is az évi kör mondja ki (de akkor a kifizetés évente egyszer mehetne).
+  saját szeletében, sorrendben; (B) a kasszák egyenlegét is a kör mondja ki (egy összeg minden kasszára — nagyobb napi teher).
 - **ET-8/4 — A tanúk és a kör kiválasztása:** (A) ⭐ a DHT-n, a lenyomathoz legközelebbi 2. lépcsős tagok — bárki kiszámolja, senki nem
   választja; (B) ellenőrizhető sorsolással (mindenki maga sorsol, és bizonyítja — az Algorand mintája; a beépített kriptográfiával
   mérendő).
 - **ET-8/5 — A D17 felülvizsgálata:** (A) ⭐ elfogadod, hogy a pénzhez nem kell globális konszenzus — csak küldőnkénti következetesség
-  (tanúk) és évenként egy kis kör a koinó-szintű számokra; (B) maradjon a D17 eredeti alakja (a pénzhez globális egyetértés kell).
+  (tanúk) és egy kis kör a koinó-szintű számokra (✅ naponta); (B) maradjon a D17 eredeti alakja (a pénzhez globális egyetértés kell).
 
 ## 10. Mérendő (az építőnek — szimulációval, mielőtt kód készül)
 
 - **A tanú-kör mérete és a nyugta-küszöb** (16/32/64) a csalók arányának függvényében — a kettős költés esélye és a nyugták
   összegyűlésének ideje (a mai terepi elérhetőséggel: a telefonok alszanak).
 - **A DHT-közelség kijátszása:** mennyibe kerül egy támadónak, hogy egy kiszemelt e-ember tanú-körébe sok csalót juttasson.
-- **Az évi kör:** a két szám eltérése a kör tagjai között (a hiányzó tudás miatt), és hogy kétharmad aláírás összegyűlik-e.
+- **A napi kör és a régiók számlálása:** a régiók napi összegző fája (méret, szúrópróba), és hogy kétharmad aláírás naponta összegyűlik-e
+  (a telefonok alszanak).
 - **A kassza bizonyítéka:** a befizetések összegző fája egy nagy kasszánál — méret és a szúrópróba ára.
+
+## 11. Az átadás (az építőnek)
+
+**A döntések** (Csaba, 2026-11-09): **ET-8/1** az átutalás tanú-nyugtákkal, konszenzus nélkül (állandó tanú-kör, pl. 32, ebből 22
+nyugta) · **ET-8/2** az osztalék két koinó-szintű száma **naponta**, egy véletlen kis kör kétharmados aláírásával, a régiók napi
+változásából (összegző fa, szúrópróba); a holnapi osztalék a mai számokból, kör nélkül az előző napi érték · **ET-8/3** a kassza
+kifizetése hozza a bizonyítékát · **ET-8/4** a tanúk és a kör a DHT-ról, a lenyomathoz legközelebbi 2. lépcsős tagok · **ET-8/5** a D17
+felülvizsgálva: a pénzhez nem kell globális konszenzus — csak küldőnkénti következetesség és a napi kör a koinó-szintű számokra (a D21
+napi köteg-gyökere nem épül meg).
+
+**A következő építési lépés:** a 10. szakasz szimulációi (a tanú-kör mérete, a DHT-közelség kijátszása, a napi kör és a régiók
+számlálása, a kassza bizonyítéka) — **előbb a mérés**. Ez a pénz (ET-7) és a kasszák (ET-9) alapja: azok ez után épülhetnek, a D11 (az
+identitás éles bizonyítása) mellett. A D-számot az építő adja.
 
 *Irodalom, ha mélyebbre kell: Guerraoui, Kuznetsov, Monti, Pavlovič, Seredinschi: „The Consensus Number of a Cryptocurrency” (PODC 2019)
 és „AT2: Asynchronous Trustworthy Transfers”; „Scalable Byzantine Reliable Broadcast” (DISC 2019 — a mintavételes tanú-kör); Gilad és
@@ -191,3 +207,4 @@ mtsai: „Algorand” (SOSP 2017 — a sorsolt bizottság); a KERI tanú-nyugtá
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-8/1 – ET-8/5 Csabánál.
 - **2026-11-09** — ✅ ET-8/1, ET-8/3, ET-8/4, ET-8/5 (A). Csaba: az évi kör túl ritka → a napi kör ára (kb. 5 KB/nap/gép) és egy javítás:
   a két számot a kör sem tudja a saját gépén megszámolni — a napi változás régiónként, összegző fával (5.1).
+- **2026-11-09** — ✅ ET-8/2: naponta (Csaba: *„igen.”*) — az ET-8 eldöntve, átadható (11.).

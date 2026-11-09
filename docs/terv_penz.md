@@ -116,7 +116,7 @@ egyenleget; a költöző pénze kivezetéssel jön át (egy az egyhez); az indul
 
 **Az építés feltételei:** a D11 (az identitás éles bizonyítása) és az ET-8 (ki mondja ki, melyik pénzmozgás érvényes). ⚠️ Egy lelet a
 kasszák tervezéséből (ET-9): **az osztalék maga is két koinó-szintű számot kíván** — a létező pénz összegét (M) és a 2. lépcsősök számát
-(N) —, ezeket egy készülék egy nagy koinóban nem tudja helyben megszámolni. Ezt is a napi köteg (ET-8) mondhatja ki.
+(N) —, ezeket egy készülék egy nagy koinóban nem tudja helyben megszámolni. Ezt a napi kör mondja ki (ET-8/2 — naponta, a régiók napi változásából).
 
 ## Napló
 
