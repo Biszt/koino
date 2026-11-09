@@ -3,7 +3,7 @@
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
 > **Állapot:** ✅ **ET-12/1 – ET-12/4 eldöntve** (A), **ET-12/5 (B)** (Csaba, 2026-11-09: *„ezzel az a baj, hogy csak a 2. lépcsősöknek van
-> pénztárcája. a többivel egyet értek.”*) · ⏸️ **ET-12/6** (a ki nem fizethető rész) Csabánál · az átadás: 7. szakasz.
+> pénztárcája. a többivel egyet értek.”*), **ET-12/6 (A)** (Csaba: *„rendben.”*) — ✅ **mind eldöntve** · az átadás: 7. szakasz.
 >
 > Csaba (2026-11-09): *„még eszembe jutott valami, ami kimaradt. az öröklési rendszer. azt hiszem, már erről is beszéltünk korábban.”*
 
@@ -53,8 +53,9 @@
 - **Az örökös csak 2. lépcsős lehet** (vagy egy kassza) — **pénztárcája csak a 2. lépcsősnek van** (Csaba, 2026-11-09; ET-12/5). *(Az első
   változatban tévesen az állt, hogy pénzt bárki tarthat.)* A jegyzéket a lapod aláíráskor ellenőrzi, de mert lepecsételt, a végrehajtáskor
   a program újra megnézi: **a halál megállapításakor** élő 2. lépcsős-e a megnevezett. Ha nem (közben meghalt, vagy még nem érte el a 2.
-  lépcsőt) → ⏸️ ET-12/6.
-- **Aki még nem 2. lépcsős** (pl. a gyermeked): ⏸️ ET-12/6 dönti el, beírható-e előre.
+  lépcsőt), a része arányosan a többi örökösé; ha egy sem marad, a település kasszájáé (ET-12/6).
+- **Aki még nem 2. lépcsős** (pl. a gyermeked), az előre beírható — de csak akkor örököl, ha a halál megállapításakor már élő 2. lépcsős;
+  a lap ezt aláíráskor jelzi (ET-12/6). *Ha a gyermeked még kicsi, nevezz meg mellé egy felnőttet is, akiben megbízol.*
 
 ## 4. Végrendelet nélkül
 
@@ -94,7 +95,8 @@ határt átlép) — aki nem nevez meg senkit, annak a pénze a közösé lesz.
   ha egy sem marad, a végrendelet nélküli szabály jön (a település kasszája) — nincs várakozó, befagyott pénz; (B) a ki nem fizethető rész
   **vár** (pl. legfeljebb 5 évig), hogy a megnevezett elérje a 2. lépcsőt, utána a település kasszájába — családbarátabb egy árva
   gyermeknek, de évekig nyitott állapot és befagyott pénz; (C) csak 2. lépcsős írható be (az (A), az előre beírás lehetősége nélkül).
-  *Tipp mindhárom esetben: ha a gyermeked még kicsi, nevezz meg mellé egy felnőttet is, akiben megbízol.*
+  *Tipp mindhárom esetben: ha a gyermeked még kicsi, nevezz meg mellé egy felnőttet is, akiben megbízol.* → ✅ **(A)** — Csaba:
+  *„rendben.”*
 
 ## 7. A döntések és az átadás (Csaba, 2026-11-09)
 
@@ -102,7 +104,9 @@ határt átlép) — aki nem nevez meg senkit, annak a pénze a közösé lesz.
 megerősítése kell), közben a pénz befagy · **ET-12/2** a végrendelet egy örökös-jegyzék (azonosságok és kasszák arányokkal, a fizetési
 kulccsal aláírva, bármikor módosítható) · **ET-12/3** lepecsételt (a láncon csak a lenyomata; a halál után bárki bemutathatja) · **ET-12/4**
 végrendelet nélkül a támogatott település kasszájába (ha nincs, a koinó kasszájába), és a lap mindenkit megkér, hogy nevezzen meg örököst
-· **ET-12/5** örökös csak 2. lépcsős (vagy kassza) lehet · ⏸️ **ET-12/6** nyitva.
+· **ET-12/5** örökös csak 2. lépcsős (vagy kassza) lehet · **ET-12/6** a jegyzékbe bármely azonosság előre beírható, de csak az kap, aki a
+halál megállapításakor élő 2. lépcsős; a többiek része arányosan a többi örökösé, ha egy sem marad, a település kasszájáé (nincs várakozó,
+befagyott pénz).
 
 **A közös dokumentumokba (az építőnek):**
 - a **D20 — öröklés: a pénz igen, a tudatpont és az azonosság soha** módosul: végrendelet nélkül nem a közvetlen leszármazottaké (a koinó
@@ -120,3 +124,4 @@ végrendelet nélkül a támogatott település kasszájába (ha nincs, a koinó
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-12/1 – ET-12/5 Csabánál.
 - **2026-11-09** — ✅ ET-12/1 – ET-12/4 (A), ET-12/5 (B): pénztárcája csak a 2. lépcsősnek van (az első változat tévedése javítva); ⏸️
   ET-12/6 (a ki nem fizethető rész) felvéve.
+- **2026-11-09** — ✅ ET-12/6 (A) — az öröklés teljesen eldöntve (7. szakasz).
