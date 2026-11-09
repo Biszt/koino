@@ -2,8 +2,8 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** ✅ ET-1/1 – ET-1/4 eldöntve (Csaba, 2026-11-09: *„a többivel egyetértek”* — mind (A)) · ⏸️ ET-1/5 és ET-1/6: Csaba
-> felvetései és a vélemény a 7. szakaszban.
+> **Állapot:** ✅ **eldöntve** (Csaba, 2026-11-09) — ET-1/1 – ET-1/4 (A), ET-1/5 és ET-1/6 Csaba felvetése szerint (7. szakasz) · ⏭️
+> átadható az építőnek (8. szakasz).
 >
 > Csaba (2026-11-08), a kiinduló kép „az általános javaslat a közösség álláspontja; az egyezményéhez csatlakozni, tiltakozni, ütközést
 > jelölni lehet” sorára: *„ez még nincsen rendesen megtervezve, ugye? ezt a tervről beszéljünk majd.”*
@@ -157,8 +157,28 @@ megbízni.
 - ⚠️ **Ami kell hozzá:** a gépnek meglegyenek az akkori szavazatok (ha a szeletet nem tartja, a kérelem hozza — D76); a titkos szavazásnál az
   akkori állás az akkor utoljára kinyílt köteg (ET-2/4).
 
+## 8. Az átadás (az építőnek)
+
+**A döntések** (Csaba, 2026-11-09):
+- **ET-1/1** — az első szélesebb körben terjesztett koinóban van általános javaslat, a 4. szakasz alakjában;
+- **ET-1/2** — egy döntés a szerkesztési gépezettel (titkos szavazással), az elfogadás tény; utána élő hatály: a szavazatok
+  változhatnak, a lap a mostani támogatottságot mutatja (támogat · ellenez · néma);
+- **ET-1/3** — szavazni a szülő gondolat pont-tulajdonosai szavazhatnak (helyben számolható);
+- **ET-1/4** — a csatlakozás és a tiltakozás titkos szavazat; a nyilvános kiállás önkéntes, és nem számít bele;
+- **ET-1/5** — ✅ *„rendben, így jó lesz.”* — **nincs külön ütközés-jelölés**: az ütközést egy gondolat mondja ki (ha kell, egy saját
+  gondolattípussal), az egyik egyezmény **gyerekeként**, a másikra entitás-hivatkozással; az `Allasfoglalas` esemény megszűnik;
+- **ET-1/6** — ✅ **alap esetben nincs címke** (a mostani számok látszanak); **egy adott napra** az állás újraszámolható
+  hivatkozásként kérhető és megosztható (az egyezmény és a dátum), és arra a napra címkét kap (*„2027. március 1-jén: a küszöb
+  felett”*).
+
+**A következő építési lépés:** egy átvizsgálás (a mai `Allaspont` és `Allasfoglalas` kivezetése, a lezárás utáni szavazatok és a
+„mostani állás” a számításban, a múltbeli időpont állása a titkos szavazás kötegeivel, a lap: az általános javaslat létrehozása, a három
+szám, az „📷 Az állás egy adott napon…”). ⚠️ A mag változása — az ET-2-vel és az ET-3-mal **egy költözésben**, az első szélesebb körben
+terjesztett koinó előtt. A D-számot az építő adja.
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-1/1 – ET-1/6 Csabánál.
 - **2026-11-09** — ✅ ET-1/1 – ET-1/4 (A). Csaba két felvetése: az ütközés-jelölés helyett egy gondolat (a vélemény: egyetértek, az
   egyik egyezmény gyerekeként), és a címke helyett az állás egy adott napon (a vélemény: jó, de hivatkozásként, nem képként — 7.).
+- **2026-11-09** — ✅ Csaba: *„rendben, így jó lesz.”* — ET-1/5 és ET-1/6 a 7. szakasz szerint; az ET-1 eldöntve, átadható (8.).
