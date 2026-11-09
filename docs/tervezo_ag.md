@@ -298,7 +298,7 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
   —, kriptopénz, vagy egy tehén, eper, vagy bármilyen ingóság). ezek jegyezve lesznek, és ezek fogják meghatározni a koinos értékét.”*
   → 🔍 **a terv: [`terv_piac.md`](terv_piac.md)** (2026-11-09) — ⭐ egy kölcsönösen aláírt ügylet (a koinos és az ellenérték), az
   átutalás erre hivatkozik, mindkét fél visszaigazolja; Csaba limit-ötlete: páronként egy kezdő határ (a fejenkénti átlagból), minden
-  rendben lezárt ügylet után +50%; az ár tájékoztató medián. ⏸️ ET-10/1 – ET-10/5 Csabánál.
+  rendben lezárt ügylet után +50%; az ár tájékoztató medián. ✅ **Eldöntve** (2026-11-09, mind (A)) — az építés a pénzzel, az ET-8 után.
 - **ET-11 — Az átutalás ablaka és összeghatára** (D16). → 🔍 **a terv: [`terv_atutalas.md`](terv_atutalas.md)** (2026-11-09) — ⭐ nagy
   átutalás: egy nap alatt az egyenleg 10%-a fölött; 72 órás ablak; megállítani a többi készülék és a csere-kulcs tudja, azonnal; az
   értesítés a többi készülékre megy. ✅ **Eldöntve** (2026-11-09) — Csaba egyszerűsítése: **nincs várakozási ablak** (a D16
@@ -331,6 +331,7 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — ✅ **ET-10/1 – ET-10/5** (A) — a piac eldöntve. Nyitva: ET-5 (a hálózati beállítások), ET-6 (a sürgősségi út).
 - **2026-11-09** — **ET-10** megtervezve: [`terv_piac.md`](terv_piac.md) (Csaba limit-ötletével: páronként, +50% rendben lezárt
   ügyletenként); ⏸️ ET-10/1 – ET-10/5 Csabánál.
 - **2026-11-09** — ✅ **ET-11 eldöntve:** nincs várakozási ablak (a D16 felülvizsgálva); a koino saját kódja minden átutaláskor (a

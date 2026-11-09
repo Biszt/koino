@@ -2,7 +2,8 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-10/1 – ET-10/5 Csabánál (6. szakasz).
+> **Állapot:** ✅ **eldöntve** (Csaba, 2026-11-09: *„rendben, elfogadom a javaslataidat”* — ET-10/1 – ET-10/5 mind (A)) · az építés a
+> pénzzel együtt, az ET-8 után (8. szakasz).
 >
 > Csaba (2026-11-09): *„a piacot úgy képzeltem el, hogy az is csak egy tranzakció, csak a piacon keresztül ellenértéket is meg kell adni (ez
 > lehet bármi: fiat pénz — akár készpénzben —, kriptopénz, vagy egy tehén, eper, vagy bármilyen ingóság). ezek jegyezve lesznek, és ezek
@@ -84,6 +85,17 @@ részletes leírás elhagyható. ⚠️ Ha valaki nem akarja, hogy a vásárlás
 - **A jogi kérdések** (adó, pénzügyi szabályozás) — a koino nem tervez jogi védelemre (8. szabály); a koinók maguk felelnek a saját
   környezetükért.
 
+## 8. A döntések és az átadás (Csaba, 2026-11-09)
+
+**ET-10/1** az ajánlat egy entitás a „Piac” ág alatt (a létrehozó pontja tartja életben, D14) · **ET-10/2** az ügylet kölcsönösen aláírt
+megállapodás (a koinos és az ellenérték: fajta, mennyiség, egység, leírás), az átutalás erre hivatkozik, mindkét fél visszaigazolja
+(*„teljesült”* / *„probléma”*) · **ET-10/3** a limit páronként: a kezdő határ a fejenkénti átlag 10%-a, minden visszaigazolt ügylet után
++50%, probléma után vissza a kezdőre · **ET-10/4** az ár tájékoztató egységenkénti medián, minden gép a saját ismert ügyleteiből · **ET-10/5**
+az ügylet a koinón belül nyilvános, a leírás elhagyható.
+
+**Az építés:** a pénzzel (ET-7), a kasszákkal (ET-9) és a fizetési kulccsal (ET-11) együtt, az ET-8 után. A D-számot az építő adja.
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-10/1 – ET-10/5 Csabánál.
+- **2026-11-09** — ✅ ET-10/1 – ET-10/5 mind (A) (8. szakasz).
