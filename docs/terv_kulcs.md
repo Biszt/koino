@@ -167,6 +167,12 @@ a jelszó is: egyelőre új regisztráció, kimondva. Az elv (ET-3/1): a helyre�
 összefésülése, az őrzők megmaradása, a jelszavas darab-visszaadás a beépített kriptográfiával). ⚠️ A mag változása — **az első éles
 koinó előtt**; a D-számot az építő adja (ET-3/2 – ET-3/6).
 
+## 10. Kiegészítés az ET-11-ből (2026-11-09)
+
+A pénz átutalásához egy **fizetési kulcs** is kell: minden e-embernek egy, ami a készülékein csak a koino saját kódjával titkosítva van
+meg; az átutaláson ennek az aláírása is ott van (a tanúk csak így nyugtázzák). A készülékkulcs marad a mindennapi, automatikus eseményekre.
+Ha a kód elveszett, a csere-kulccsal új fizetési kulcs és új kód adható meg. Részletek: [`terv_atutalas.md`](terv_atutalas.md) 9.
+
 ## Napló
 
 - **2026-11-08** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-3/2 – ET-3/6 Csabánál.

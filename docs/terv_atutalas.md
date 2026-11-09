@@ -2,8 +2,8 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ✅ ET-11/3, ET-11/4 (Csaba, 2026-11-09) · ⏸️ ET-11/1, ET-11/2, ET-11/5 és a piac — Csaba válaszai és a
-> javított javaslat a 7. szakaszban.
+> **Állapot:** ✅ **eldöntve** (Csaba, 2026-11-09): **nincs várakozási ablak** (a 8. szakasz (A)) — a védelem a koino saját kódja minden
+> átutalás véglegesítésekor, a nyomonkövethetőség és a kulcs-szerkezet (9. szakasz). Az 1–7. szakasz a döntés előtti gondolatmenet.
 
 ## 1. A rövid válasz
 
@@ -159,6 +159,29 @@ jelszóval védett — ET-3). A telefon-tolvaj így nem tud küldeni. Ez helyi d
   fiókjának van ablaka.
 - **(C) a teljes D16** — a 7. szakasz alakja (ablak az összeg szerint, a megállítás lopás-bejelentés).
 
+## 9. A döntés és az átadás (Csaba, 2026-11-09)
+
+Csaba: *„igazad van, de szerintem nem a készülék PIN-kódja, hanem a koinóba beépített biztonsági rendszer, ami azonosítja a küldőt. ez
+lehet csak egy megadott kód. a banki alkalmazások is csak azt kérnek, az utalás véglegesítésekor. egyetértek az (A)-val.”*
+
+**A döntés:**
+- **Nincs várakozási ablak** — a **D16 — a pénz lassú, nyilvános és megtámadható** ablaka nem épül meg (a D16 felülvizsgálva). Az átutalás a
+  tanú-nyugták után végleges (ET-8); a piaci ügylet is — az eladónak nincs mitől tartania.
+- **A koino saját kódja:** minden átutalás véglegesítésekor a koino kéri az e-ember által megadott kódot (mint a banki alkalmazások).
+- **Az értesítés marad** (ET-11/4): ha egy készüléked pénzt küld, a többi szól — így egy ellopott készüléket azonnal kizárhatsz (ET-3).
+- **A kassza kifizetése** (ET-11/5): nincs külön ablak — a szavazás a védelem.
+
+**Hogy a kód valódi védelem legyen** (a megvalósítás javaslata): ha a kód csak egy kérdés a lapon, aki a kulcsfájlt kimásolja, megkerüli.
+Ezért a kód **egy külön fizetési kulcsot nyit**: minden e-embernek van egy fizetési kulcsa, ami a készülékein csak a kódjával titkosítva
+van meg; egy átutaláson ennek az aláírása is ott kell legyen, és a tanúk (ET-8) csak így nyugtázzák. A készülékkulcs (ET-3) marad a
+mindennapi, automatikus eseményekre (az őrjárat kód nélkül is tud dolgozni). Ha a kódot elfelejted, a csere-kulccsal új fizetési kulcsot
+és új kódot adsz meg (ET-3).
+
+**Amit ez nem véd ki:** ha a tolvaj a készüléket ÉS a kódot is megszerzi, az ellopott pénzt a program nem hozza vissza — a koinón belül a
+nyoma megmarad (a címzett ismert azonosság), a koinón kívüli eladásnál nem.
+
+**Az átadás:** a pénzzel (ET-7) együtt, az ET-8 után; a fizetési kulcs az ET-3 kulcs-szerkezetébe illeszkedik. A D-számot az építő adja.
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-11/1 – ET-11/5 Csabánál.
@@ -167,3 +190,5 @@ jelszóval védett — ET-3). A telefon-tolvaj így nem tud küldeni. Ez helyi d
   készüléket); ET-11/5 elmagyarázva, a javaslat javítva: nincs külön ablak (7.).
 - **2026-11-09** — Csaba: *„lehet, hogy túl bonyolítjuk”* — az egyetlen eset, ahol a nyom nem segít (a kívülálló telefon-tolvaj online
   eladása); az egyszerűbb védelem: PIN a nagyobb átutaláshoz; három lehetőség (8.).
+- **2026-11-09** — ✅ Csaba: (A) — nincs ablak; a védelem a koino saját kódja minden átutalás véglegesítésekor (nem a készülék PIN-je). A
+  megvalósítás javaslata: a kód egy külön fizetési kulcsot nyit (9.).
