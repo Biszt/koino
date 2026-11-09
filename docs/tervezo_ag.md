@@ -275,7 +275,11 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
   kapcsolati tengerben elfoglalt helyét, bizonyosság szempontjából? Nem volna egy rossz következmény, ha szükségesek lennének a
   bemutatkozó bulik.”* Kapcsolódik: D18/3 (folytonos igazolás — Csaba ötlete, 2026-08-25), D44 (a tanúsítási keret), D49 (a jelzés
   tájékoztat, nem jogosít), D50/D62 (a bemutatkozások), D55, és a méréssel kizárt irányok (`fejlesztesi_terv_fazis2.md`, a D49 után).
-- **ET-5 — A hálózati beállítások menüpont:** *„részletes, hálózati beállítások menüpontot is terveznünk kell majd.”*
+- **ET-5 — A hálózati beállítások menüpont:** *„részletes, hálózati beállítások menüpontot is terveznünk kell majd.”* → 🔍 **a terv:
+  [`terv_halozat.md`](terv_halozat.md)** (2026-11-09) — ⭐ egy „🌐 Hálózat” menüpont öt résszel és a `halozat` parancs; csak a
+  készülék saját számai állíthatók (a közös — a mag, a kopogás üteme, a kifutás, az elsőbbség — látszik, a miértjével); alsó határ a
+  kiszolgálásnál, takarékos mód, havi figyelmeztetés (nem leállás), készülékenként egy beállítás. Költözés nem kell (D123: a szabad
+  réteg). ⏸️ ET-5/1 – ET-5/6 Csabánál.
 - **ET-6 — Az elismerés és a sürgősségi út** (N9 — elismerés-entitás + kinevezési rendszer): ✅ **ET-6/1** — az elismerés egyelőre
   nem kell; a sürgősségi út nyitva.
 - **ET-7 — A pénz a koinó-családban** (D10, D16, N10): 100 000 koinos egy év alatt; a 10% alapja (a kiosztott, vagy a járandóság is);
@@ -337,6 +341,8 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — **ET-5** megtervezve: [`terv_halozat.md`](terv_halozat.md) (a mai kapcsolók a kódból összegyűjtve); ⏸️ ET-5/1 –
+  ET-5/6 Csabánál.
 - **2026-11-09** — ✅ **ET-12/6** (A) — az öröklés eldöntve. Nyitva: ET-5 (a hálózati beállítások), ET-6 (a sürgősségi út).
 - **2026-11-09** — ✅ **ET-12/1 – ET-12/4** (A), **ET-12/5** (B) — Csaba: pénztárcája csak a 2. lépcsősnek van (ez az átutalásra és a
   piacra is áll); ⏸️ ET-12/6 (a ki nem fizethető rész).
