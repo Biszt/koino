@@ -279,7 +279,9 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
 - **ET-6 — Az elismerés és a sürgősségi út** (N9 — elismerés-entitás + kinevezési rendszer): ✅ **ET-6/1** — az elismerés egyelőre
   nem kell; a sürgősségi út nyitva.
 - **ET-7 — A pénz a koinó-családban** (D10, D16, N10): 100 000 koinos egy év alatt; a 10% alapja (a kiosztott, vagy a járandóság is);
-  a paraméterek módosítása a D66 után.
+  a paraméterek módosítása a D66 után. → 🔍 **a terv: [`terv_penz.md`](terv_penz.md)** (2026-11-09) — ⭐ a 10% a létező pénzre; a
+  szabályok a születésben, a változás költözés; minden koinónak saját pénzkönyve, a költöző pénze kivezetéssel átjön, az induló összeg
+  és az osztalék a jelenléttel megy (egyszer jár). ⏸️ ET-7/1 – ET-7/4 Csabánál.
 - **ET-8 — A köteg-gyökér és a konszenzus** (D17, D21, N8).
 
 ## 4. Átvezetendő javítások a közös dokumentumokba (az építőnek)
@@ -308,6 +310,8 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — Csaba: *„rendben.”* — az ET-1, ET-2, ET-3 egy költözésben, az első szélesebb körben terjesztett koinó előtt; a
+  kezdést Csaba mondja meg az építőnek. **ET-7** megtervezve: [`terv_penz.md`](terv_penz.md); ⏸️ ET-7/1 – ET-7/4 Csabánál.
 - **2026-11-09** — ✅ **ET-1 eldöntve** (ET-1/1 – ET-1/4 (A); ET-1/5: nincs külön ütközés-jelölés, gondolattal; ET-1/6: címke csak egy
   adott napra) — átadható az építőnek. ⭐ Az ET-1, az ET-2 és az ET-3 mind a magot érinti: egy költözésben, az első szélesebb körben
   terjesztett koinó előtt.
