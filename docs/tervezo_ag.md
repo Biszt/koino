@@ -238,6 +238,9 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
 *Csaba 2026-11-08-i kérései és kérdései. A sorrend Csabáé.*
 
 - **ET-1 — Az általános javaslat és egyezmény** (D27): *„ez még nincsen rendessen megtervezve, ugye? ezt a tervről beszéljünk majd.”*
+  → 🔍 **a terv: [`terv_altalanos.md`](terv_altalanos.md)** (2026-11-09) — a D27 → D64 → D66 útja ellentmondásos; ⭐ ugyanaz a döntési
+  gépezet (titkos szavazással), az elfogadás tény, utána élő hatály (a szavazatok változhatnak, a lap: támogat · ellenez · néma), a kör
+  a szülő tulajdonosai, következmény nélkül. ⏸️ ET-1/1 – ET-1/6 Csabánál.
 - **ET-2 — A szavazás, és a titkos, de ellenőrizhető szavazás** (D2): *„ezt is beszéljük át.”* → 🔍 **a terv:
   [`terv_szavazas.md`](terv_szavazas.md)** (2026-11-08) — a mai szavazás nyílt; a titkos szavazás megoldható (titkosított szavazat,
   csak az összeg nyílik, véletlen összesítők a jogosultak közül), de a menet közbeni eredmény (a bizonyossági mutató) miatt csak
@@ -304,6 +307,7 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — **ET-1** megtervezve: [`terv_altalanos.md`](terv_altalanos.md); ⏸️ ET-1/1 – ET-1/6 Csabánál.
 - **2026-11-09** — ✅ **ET-2/1 – ET-2/6** eldöntve (titkos, önkéntes nyíltsággal; a csomag (A)) — az ET-2 átadható az építőnek.
 - **2026-11-08** — ✅ **ET-2/6:** a tartózkodás a támogatottsági arányt nem módosítja, a részvételt növeli → a bizonyosság nő, a
   döntési idő rövidül.
