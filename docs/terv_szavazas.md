@@ -3,7 +3,7 @@
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-08. Programkód nem készült; amit csak mérés dönthet el, az a
 7. szakaszban „mérendő”. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · Csaba első válaszai (2026-11-08): a tartózkodás nem maradhat a prototípus szerint (ET-2/6 — a javítás:
+> **Állapot:** ✅ **eldöntve** (2026-11-09: ET-2/1 – ET-2/6 — az átadás: 11. szakasz) · Csaba első válaszai (2026-11-08): a tartózkodás nem maradhat a prototípus szerint (ET-2/6 — a javítás:
 > 8. szakasz); ha titkos, akkor az első, szélesebb körben terjesztett koinótól, ideiglenes nyílt szakasz nélkül (ET-2/1); a titkos vagy
 > nyílt etikai kérdése még nyitott (9. szakasz). ⏸️ ET-2/1 – ET-2/6 Csabánál.
 >
@@ -203,7 +203,25 @@ két út ugyanazt védi:
 
 ⭐ **Ezért a négy kérdés egy csomagban dönthető el:** ET-2/2 (A) — a tartalom titkos, a részvétel látszik; ET-2/3 (A) — titkosított
 szavazat, csak az összeg nyílik, véletlen összesítők a jogosultak közül; ET-2/4 (A) — az összeg kötegekben nyílik; ET-2/5 (A) — kis
-csoportban is titkosított, a lap kimondja, hogy ott gyenge a titok.
+csoportban is titkosított, a lap kimondja, hogy ott gyenge a titok. ✅ Csaba (2026-11-09): *„igen.”*
+
+## 11. Az átadás (az építőnek)
+
+**A döntések** (Csaba, 2026-11-08/09):
+- **ET-2/1** — titkos szavazás, önkéntes nyíltsággal, az első szélesebb körben terjesztett koinótól (ideiglenes nyílt szakasz nélkül);
+- **ET-2/2** — a tartalom titkos, a részvétel (ki szavazott) látszik;
+- **ET-2/3** — titkosított szavazat, csak az összeg nyílik ki, a jogosultak közül a javaslat azonosítójából számolt véletlennel
+  kiválasztott összesítők;
+- **ET-2/4** — az összeg kötegekben nyílik ki (legalább *m* új szavazat, vagy ha minden jogosult szavazott, vagy a határidőkor); a
+  lezárás ideje a legutóbb kinyílt összegből;
+- **ET-2/5** — kis csoportban is titkosított; a lap kimondja, hogy ott gyenge a titok;
+- **ET-2/6** — a tartózkodás a támogatottságba nem, a részvételbe igen: a bizonyosságot növeli, a döntési időt rövidíti (a következménye
+  — kevés igen sok tartózkodás mellett is gyorsan elfogad — *„nem probléma”*).
+
+**A következő építési lépés:** egy átvizsgálás a 7. szakasz méréseivel (a kriptográfia a beépítettel, a szavazat mérete, az összesítők
+elérhetősége, a valódi jogosulti létszámok → *m* és *n*, *t* kiinduló értéke). ⚠️ A mag változása (a szavazat alakja és
+`javaslatSzamitas.js`) — **az első szélesebb körben terjesztett koinó előtt**, az ET-3-mal (a kulcs) együtt érdemes egy költözésbe
+tenni. A D-számot az építő adja.
 
 ## Napló
 
@@ -212,5 +230,6 @@ csoportban is titkosított, a lap kimondja, hogy ott gyenge a titok.
   az etikai kérdés még nyitott (a két oldal: 9.).
 - **2026-11-08** — ✅ **ET-2/1** (Csaba): titkos, önkéntes nyíltsággal; a tartózkodás következménye *„nem probléma”*. Csaba kérdése
   az ET-2/2–5-re: *„csak a szavazó azonosíthatóságát kell védeni, nem?”* — a válasz a 10. szakaszban.
+- **2026-11-09** — ✅ **ET-2/2 – ET-2/5** egy csomagban (A) (Csaba: *„igen.”*); az ET-2 eldöntve, átadható (11. szakasz).
 - **2026-11-08** — ✅ **ET-2/6** (Csaba): a tartózkodás a támogatottságba nem, a részvételbe igen — a bizonyosságot növeli, a döntési
   időt rövidíti (a javaslatom, hogy lassítson, helyesbítve).

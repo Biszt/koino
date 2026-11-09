@@ -242,7 +242,9 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
   [`terv_szavazas.md`](terv_szavazas.md)** (2026-11-08) — a mai szavazás nyílt; a titkos szavazás megoldható (titkosított szavazat,
   csak az összeg nyílik, véletlen összesítők a jogosultak közül), de a menet közbeni eredmény (a bizonyossági mutató) miatt csak
   kötegekben, és kis csoportban nem ad titkot; ⭐ az első koinóban nyílt, a titkos a koinó születésében választható szabály. Lelet: a
-  tartózkodás ma az elfogadás ellen hat. ⏸️ ET-2/1 – ET-2/6 Csabánál.
+  tartózkodás ma az elfogadás ellen hat. ✅ **Eldöntve** (2026-11-08/09): titkos szavazás önkéntes nyíltsággal, az első szélesebb körben
+  terjesztett koinótól; a tartalom titkos, a részvétel látszik; csak az összeg nyílik, kötegekben; a tartózkodás a részvételbe számít,
+  a támogatottságba nem — ⏭️ átadható az építőnek.
 - **ET-3 — A kulcs: több készülék és a helyreállítás** (D15 — a kulcs hitelesít, nem titkol; D82 — a kettős lánc: nem büntet): *„ha
   valaki elhagyja? több készülékről is tudja használni a kulcsát?”* → 🔍 **a terv: [`terv_kulcs.md`](terv_kulcs.md)** (2026-11-08) —
   három kulcs (készülékkulcs, az azonosság kulcsa, előre lekötött csere-kulcs), a csere-kulcs darabolva, jelszóval, véletlen
@@ -302,6 +304,7 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-09** — ✅ **ET-2/1 – ET-2/6** eldöntve (titkos, önkéntes nyíltsággal; a csomag (A)) — az ET-2 átadható az építőnek.
 - **2026-11-08** — ✅ **ET-2/6:** a tartózkodás a támogatottsági arányt nem módosítja, a részvételt növeli → a bizonyosság nő, a
   döntési idő rövidül.
 - **2026-11-08** — **ET-4/2:** marad a D57 (legalább N felhatalmazás, N a 2. lépcsősök mediánja). Az ET-4 ezzel lezárult: a 2. lépcső
