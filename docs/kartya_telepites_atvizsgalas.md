@@ -1,7 +1,8 @@
 # Telepítés a kártyáról — átvizsgálás (D123 ④, PR5 — 2026-11-07, kód nélkül)
 
 > **Állapot:** ✅ **D125** (Csaba, 2026-11-07: *„mindet elfogadom, mehetünk tovább.”* — TK1–TK5 mind (A)) · ✅ az építés ①–③
-> (elágazás 247) · ⏭️ ④ a terepi próba (7.). Az elv a D123-ban eldőlt (PR5 (B)): *„a kártya kód-csomagjából egy új
+> (elágazás 247) · ✅ ④ a terepi próba (2026-11-08 — a telefonon a telepítés és a visszaút is lement; a lelete: a
+> csere után a telefon nem nyit új fület → `koino lap`, és a Termuxban a címek koppintásra megnyílnak — elágazás 251). Az elv a D123-ban eldőlt (PR5 (B)): *„a kártya kód-csomagjából egy új
 > programmappa a régi MELLÉ (minden fájl a lenyomata szerint ellenőrizve, a jegyzék lenyomata a kártya `kod`-ja), az e-ember maga
 > indítja, a lap előtte megmutatja, ki tette fel, hány pont van rajta és mi változott (rétegenként); a régi mappa megmarad
 > (visszaút), az adat mappán kívül van.”* Ez az átvizsgálás azt nézi meg, HOL és HOGYAN — a kód és a **91. mérés** alapján

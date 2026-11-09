@@ -477,6 +477,63 @@ proba('⭐⭐⭐ A TELEFON CSERÉJE (`termux/csere.sh`, a valódi `indit.sh`-val
   }
 });
 
+// ===== ⭐ A TELEFON: `koino lap` és a kattintható címek (Csaba, 2026-11-09 — a PR5 terepi próbájának lelete) =====
+
+// Rontás: (a) a `koino lap` a régi (első) címet adja → a második futás címe helyett az első → bukik; (b) nem nézi, hogy a felület
+// felel-e → a leállt felületre is „A lap: …” → bukik; (c) a telepítő a meglévő beállítást is felülírja / kétszer írja be → bukik.
+proba('⭐ a TELEFON (sh): `koino lap` a FUTÓ felület címét adja (egy újraindulás után az újat), leállt felületnél kimondja; a telepítő a kattintható címeket bekapcsolja — egyszer, és a kimondott beállításhoz nem nyúl', async () => {
+  let shVan = false;
+  try { shVan = execFileSync('sh', ['-c', 'echo igen'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() === 'igen'; } catch { shVan = false; }
+  if (!shVan) { process.stdout.write('    (nincs sh — a telefon parancsainak próbája kihagyva)\n'); return true; }
+  const otthon = await ujMappa('koino-tel-lap-');
+  const ut = (x) => join(otthon, x).replace(/\\/g, '/');
+  const adat = join(otthon, 'koino-adat');
+  await mkdir(adat, { recursive: true });
+  const { createServer } = await import('node:http');
+  const kiszolgalo = createServer((k, v) => v.end('x'));
+  await new Promise((kesz) => kiszolgalo.listen(0, '127.0.0.1', kesz));
+  const port = kiszolgalo.address().port;
+  // a napló: egy régebbi indítás címe, utána a mostanié (az indító a naplót újraírja — itt mindkettő benne, a mostani a végén)
+  await writeFile(join(adat, 'felulet.log'), 'A felület fut.\n  http://127.0.0.1:' + port + '/?kulcs=REGI_KULCS\n'
+    + 'A felület fut.\n  http://127.0.0.1:' + port + '/?kulcs=UJ_KULCS\n');
+  const sh = (ervek, env = {}) => new Promise((kesz) => {
+    const p = spawn('sh', ervek, { env: { ...process.env, KOINO_ADAT: ut('koino-adat'), KOINO_FELULET_PORT: String(port), ...env },
+      stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+    let ki = '';
+    p.stdout.on('data', (d) => { ki += d; });
+    p.stderr.on('data', (d) => { ki += d; });
+    p.on('close', (kod) => kesz({ kod, ki }));
+  });
+  const indito = join(GYOKER, 'termux', 'indit.sh').replace(/\\/g, '/');
+  const fut = await sh([indito, 'lap']);
+  kiszolgalo.close();
+  await varj(300);
+  const nemFut = await sh([indito, 'lap']);
+  // a telepítő: egy ál-Termux ($PREFIX/bin), üres otthon — a beállítás egyszer kerül be; a kimondott `false` marad
+  const prefix = join(otthon, 'prefix');
+  await mkdir(join(prefix, 'bin'), { recursive: true });
+  const telepito = join(GYOKER, 'termux', 'telepit.sh').replace(/\\/g, '/');
+  const tenv = { PREFIX: prefix.replace(/\\/g, '/'), HOME: ut('otthon'), KOINO_INDITAS: 'nem' };
+  await mkdir(join(otthon, 'otthon'), { recursive: true });
+  const t1 = await sh([telepito], tenv);
+  const t2 = await sh([telepito], tenv);
+  const tul = await readFile(join(otthon, 'otthon', '.termux', 'termux.properties'), 'utf8').catch(() => '');
+  await mkdir(join(otthon, 'masik', '.termux'), { recursive: true });
+  await writeFile(join(otthon, 'masik', '.termux', 'termux.properties'), 'terminal-onclick-url-open = false\n');
+  await sh([telepito], { ...tenv, HOME: ut('masik') });
+  const masik = await readFile(join(otthon, 'masik', '.termux', 'termux.properties'), 'utf8');
+  const jo = {
+    fut: fut.kod === 0 && fut.ki.includes('A lap: http://127.0.0.1:' + port + '/?kulcs=UJ_KULCS') && !fut.ki.includes('REGI_KULCS'),
+    nemFut: nemFut.kod === 1 && /most nem fut/.test(nemFut.ki),
+    beallitas: (tul.match(/^terminal-onclick-url-open = true$/gm) ?? []).length === 1 && /koppintásra megnyílnak/.test(t1.ki)
+      && !/koppintásra megnyílnak/.test(t2.ki) && /koino lap/.test(t1.ki),
+    kimondott: masik === 'terminal-onclick-url-open = false\n'
+  };
+  const ok = Object.values(jo).every(Boolean);
+  if (!ok) process.stderr.write('    (' + JSON.stringify({ jo, fut, nemFut, t1: t1.ki.slice(-300), tul, masik }) + ')\n');
+  return ok;
+});
+
 export default async function (csendes) {
   const eredmeny = await futtatas(csendes);
   for (const m of mappak) await rm(m, { recursive: true, force: true }).catch(() => {});

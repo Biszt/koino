@@ -1906,3 +1906,8 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     megmarad, és tovább dolgozik — egy próba őrzi** · ⭐ a program már így számolt (a D118 „kiköltözése” a súlyt nem vette el) — csak a
     szó, a kiírások és a leírás mondtak áthelyezést · ⛔ a mag változott: új koinó-családdal indulunk · ⏸️ a pénz és a koinók
     kapcsolata a tervező ágé.
+251. **2026-11-08/09 · a PR5 (D125 — telepítés a kártyáról) terepi próbája: a telefon a kártyáról telepít és visszafordít** → **a
+    csere a telefonon hibátlan (`pkill`, a mappák, a háttérben indulás, 30 mp-en belül felel; a visszaút is); ⛔ de a háttérben induló
+    program Androidon nem nyit új fület, és a régi fül a régi jelszóval nem jut tovább → `koino lap` (Csaba: „legyen a (B)”), és a
+    telepítő a Termuxban a kiírt címeket koppintásra nyithatóvá teszi (`terminal-onclick-url-open`)** · ⭐ a PR4 (D126) terepen is: a
+    telefon Brave-jén a nézetből semmi nem jutott ki, a kontroll igen.

@@ -64,7 +64,21 @@ cat > "$PREFIX/bin/koino" <<EOF
 exec sh "$KONYVTAR/termux/indit.sh" "\$@"
 EOF
 chmod 700 "$PREFIX/bin/koino"
-echo "✓ Telepítve. A következő indításhoz elég ennyi: koino"
+echo "✓ Telepítve. A következő indításhoz elég ennyi: koino  (a futó program lapja: koino lap)"
+
+# ===== ⭐ A KATTINTHATÓ CÍMEK (Csaba, 2026-11-09: „tudjuk őket kattínthatóvá tenni, hogy ne keljen kimásólni?”) =====
+#
+# A Termux a kiírt címet koppintásra megnyitja, ha a beállításaiban `terminal-onclick-url-open = true` (Termux 0.118 óta) — e nélkül
+# csak hosszú nyomás → „More…” → „Select URL”. Ha a beállítás még nincs a fájlban, felvesszük; ha valaki kimondta (akár `false`-ra),
+# nem nyúlunk hozzá.
+TULAJDONSAGOK="$HOME/.termux/termux.properties"
+if ! grep -q "^[[:space:]]*terminal-onclick-url-open" "$TULAJDONSAGOK" 2>/dev/null; then
+  if mkdir -p "$HOME/.termux" \
+      && printf '\n# koino (2026-11-09): a kiírt címek koppintásra megnyílnak\nterminal-onclick-url-open = true\n' >> "$TULAJDONSAGOK"; then
+    echo "✓ A Termuxban a kiírt címek mostantól koppintásra megnyílnak."
+    command -v termux-reload-settings >/dev/null 2>&1 && termux-reload-settings
+  fi
+fi
 echo
 if [ "$KOINO_INDITAS" = "nem" ]; then
   echo "(KOINO_INDITAS=nem — nem indítom el)"

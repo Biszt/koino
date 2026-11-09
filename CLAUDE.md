@@ -77,7 +77,10 @@ indít, és ha 30 mp alatt nem felel, visszafordít; az eredmény az adat-mappa 
 koinónként, a figyelmeztetés), a fő menü „🧬 A program ezen a készüléken…” (a visszaút), és az eredmény a betöltéskor. ⛔ Mérve: a
 leválasztott PowerShell konzol nélkül azonnal kilép (`Start-Process` indítja); a base64url név kötőjellel is kezdődhet (környezetben
 megy); a lap kulcsa indításonként új — a régi fül a régi kulcsával figyel. `meres/telepitesProba.js` (8, a `parancssor` csoportban),
-16 rontás. ⏭️ **A terepi próba** (a telefon leállítása — `pkill` — és a háttérben indulás; egy kártya egy másik készülékről).
+16 rontás. ✅ **A terepi próba** (2026-11-08, közös wifin): a telefon a laptop kártyájáról telepített (`pkill`, a mappák, a háttérben
+indulás — a lapján „koino (B)”), és a visszaút is lement. ⛔ A lelete: a háttérben induló program Androidon nem nyit új fület, a régi
+fül a régi jelszóval nem jut tovább → ✅ `koino lap` (Csaba: *„legyen a (B)”*) és a Termuxban a kiírt címek koppintásra megnyílnak (a
+telepítő bekapcsolja: `terminal-onclick-url-open`); elágazás 251.
 ✅ **D123 ⑤ — PR4, a közösség feltöltött nézetei: D126, MEGÉPÜLT** — előbb ÁTVIZSGÁLVA ([`nezetek_atvizsgalas.md`](docs/nezetek_atvizsgalas.md), **92. mérés** —
 `meres/nezetMeres.js`): a nézet-kártya a mag nélkül megy (a mai kapu egy új típust beenged, a kép megőrzi, egy új MEZŐT eldob — a
 kód a kártya szövegében egy csatolt HTML-fájl, azt a mai szállítás viszi); a böngésző négy réteggel szigetel (`sandbox="allow-scripts"`
@@ -104,7 +107,7 @@ magban is (`Bekapcsolodas`; a szülőbeli `Kikoltozes` megszűnt — ott semmi n
 (lent: *„költözés” → „bekapcsolódás”*). Egy próba őrzi: a bekapcsolódó a szülőben a teljes súlyával megmarad, és tovább ír. ⛔ A mag
 változott — új koinó-családdal indulunk. ⏸️ A pénz és a koinók kapcsolata: a tervező ágé.
 
-**Az állapot:** **1439 önpróba** (67 próba-fájl; a legutóbbi teljes soron 1439/1439 zöld — 2026-11-09, a D127 után) · 381 fájl / 7518,7 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1440 önpróba** (67 próba-fájl; a legutóbbi teljes soron 1439/1439 zöld — 2026-11-09, a D127 után; utána +1: a telefon `koino lap`-ja) · 381 fájl / 7524,8 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

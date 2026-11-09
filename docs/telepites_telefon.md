@@ -59,6 +59,11 @@ yes | pkg upgrade && pkg install -y nodejs git procps && { if [ -d ~/koino ]; th
 **Ezután minden indításhoz elég ennyi a Termuxban:** `koino` — leállítás: **Ctrl+C**. A program parancsai ugyanazzal az
 adattal: `koino belep`, `koino meghiv <horgony>`, `koino ter` …
 
+⭐ **A futó program lapja: `koino lap`** (2026-11-09). A lap jelszava minden indításkor új — egy program-csere (a kártyáról
+telepítés, a visszaút) után a régi fül „jelszó kell”-t mond, és a háttérben induló program a telefonon nem tud új fület nyitni. A
+`koino lap` kiírja és megnyitja a futó program lapját; ha nem fut, megmondja. ⭐ **A kiírt címek koppintásra megnyílnak:** a telepítő
+bekapcsolja a Termux `terminal-onclick-url-open` beállítását (a `~/.termux/termux.properties`-ben — ha már kimondtad, nem nyúl hozzá).
+
 ⚠️ **Hogy az Android ne állítsa le a háttérben:** Beállítások → Alkalmazások → Termux → Akkumulátor → **Nem korlátozott**.
 A koino futás közben ébren tartja a telefont (`termux-wake-lock`), és a Termux értesítést mutat — amíg ez látszik, fut.
 

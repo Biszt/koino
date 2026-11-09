@@ -84,7 +84,9 @@ export async function telepitesMegnyitasa({ kartya = null } = {}) {
         kuld: 'A csere indul…',
         leallt: '⏳ A program leállt, a mappák helyet cserélnek, és az új indul — a lapja egy ÚJ fülön nyílik meg.',
         ujraindult: '✓ A program újraindult. A lapja egy új fülön nyílt meg (ott olvasod az eredményt — ha az új 30 mp alatt nem felelt '
-          + 'volna, a régi fut újra). Ez a fül bezárható.',
+          + 'volna, a régi fut újra). Ez a fül bezárható.'
+          // ⭐ (a PR5 terepi próbájának lelete, 2026-11-08): a telefonon a háttérben induló program nem tud új fület nyitni
+          + (el?.hely?.platform === 'termux' ? ' Ha a telefonon nem nyílt meg új fül: a Termuxban írd be: koino lap' : ''),
         'nem-indult': '⚠ A program leállt, de két perc alatt nem indult újra. Indítsd el kézzel (az asztali „koino” ikon, vagy a Termuxban: '
           + 'koino) — az eredmény a koino-adat mappa telepites.json fájljában.',
         'nem-allt-le': '⚠ A program nem állt le — a csere talán el sem indult. Nézd meg a koino-adat mappa telepites.log fájlját.'

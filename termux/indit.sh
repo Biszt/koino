@@ -13,6 +13,7 @@
 # becenévvel az őrjárat egy üres, régi alakú koinót nyitna (a ⑦ terepi próba 2. lelete).
 #
 # ⭐ ARGUMENTUMMAL a program parancsa fut, ugyanazzal az adat-mappával: `koino belep`, `koino meghiv <horgony>`, `koino ter`.
+# ⭐ `koino lap`: a futó program lapja (a címe a felület naplójából — egy csere után is), megnyitva.
 # ⭐⭐ D122: ha az első argumentum egy MEGHÍVÓ (`koino-meghivo:2:…` — a meghívó telepítő sorának vége), előbb elfogadja (csatlakozás,
 # a meghívó készüléke társnak, belépés), aztán indul: a lap már a koinóban nyílik, és a következő csere után tag vagy.
 #
@@ -37,6 +38,23 @@ MEGHIVO=""
 case "$1" in
   *koino-meghivo:*) MEGHIVO="$1"; shift ;;
 esac
+
+# ===== ⭐ `koino lap` — a FUTÓ program lapja (Csaba, 2026-11-09 — a PR5 terepi próbájának lelete) =====
+#
+# A lap jelszava indításonként új: egy csere (a kártyáról telepítés, a visszaút) után a régi fül nem jut tovább, és a háttérben
+# induló program Androidon nem tud új fület nyitni (mérve: a füleid száma nem nőtt). Ez a parancs a futó felület naplójából veszi
+# a címet, és megnyitja — ha a felület nem felel, kimondja.
+if [ "$1" = "lap" ]; then
+  CIM=$(grep -o "http://127.0.0.1:$FELULET_PORT/?kulcs=[A-Za-z0-9_-]*" "$KOINO_ADAT/felulet.log" 2>/dev/null | tail -n 1)
+  if [ -z "$CIM" ] || ! node -e "require('net').connect($FELULET_PORT,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))" \
+      >/dev/null 2>&1; then
+    echo "⚠ A koino lapja most nem fut — indítás: koino"
+    exit 1
+  fi
+  echo "A lap: $CIM"
+  command -v termux-open-url >/dev/null 2>&1 && termux-open-url "$CIM"
+  exit 0
+fi
 
 # ===== ARGUMENTUMMAL: a program parancsa =====
 if [ $# -gt 0 ]; then

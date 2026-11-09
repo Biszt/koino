@@ -6374,7 +6374,14 @@ eredmény az adat-mappa `telepites.json`-ja), a lap (`felulet/js/koinoTelepites.
 „🧬 A program ezen a készüléken…” ablaka a visszaúttal, az eredmény a betöltéskor). ⛔ Mérve: a leválasztott PowerShell konzol nélkül
 azonnal kilép (a szkriptet egy `Start-Process` indítja); a kártya és a kód base64url neve környezetben megy (egy kötőjellel kezdődőt a
 PowerShell paraméternévnek venne); a lap kulcsa indításonként új — a régi fül a régi kulcsával figyel. A próba: `telepitesProba.js` (8),
-16 rontás. ⏭️ A terepi próba (a telefon leállítása — `pkill` — és a háttérben indulás).
+16 rontás. ✅ **A terepi próba:** a telefon (Termux, közös wifin, 2026-11-08) a laptopról feltöltött koino-verzió kártyáról (a „B” program: csak a felület más)
+elkérte a kódot (381 fájl, 7,5 MB), telepítette — a futó koinót leállította (`pkill`), a régit a `koino-regi`-be tette, az újat a
+háttérben indította, és az felelt (a lapján „koino (B)”) —, majd a visszaút ugyanígy lement. ⛔ A lelete: a háttérben induló program
+Androidon NEM nyit új fület (a füleid száma nem nőtt), a régi fül pedig a régi jelszóval nem jut tovább — a csere után a lapot
+csak kézzel lehetett megtalálni. ✅ Csaba: *„legyen a (B)”* — a `koino lap` parancs (a futó program lapja, a felület naplójából;
+ha nem fut, kimondja), a lap a telefonon ezt mondja a csere után; és (Csaba: *„a termux amikor kiírja az új lineket, tudjuk őket
+kattínthatóvá tenni, hogy ne keljen kimásólni?”*) a telepítő bekapcsolja a Termux `terminal-onclick-url-open` beállítását (ha még
+nincs kimondva): a kiírt címek koppintásra megnyílnak. A próba: `telepitesProba.js` (sh-val), 3 rontás. (Elágazás 251.)
 
 ### D126. A KÖZÖSSÉG FELTÖLTÖTT NÉZETEI: „A KÁRTYA SZÖVEGÉBEN, A SAJÁT KOINÓJÁBAN, NÉGY RÉTEG MÖGÖTT” (2026-11-08)
 
