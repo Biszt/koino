@@ -2,7 +2,8 @@
 
 *A tervező ág dokumentuma ([`tervezo_ag.md`](tervezo_ag.md)), 2026-11-09. Programkód nem készült. A D-számok mellett a döntés címe áll.*
 
-> **Állapot:** 🔍 tervezve · ⏸️ ET-1/1 – ET-1/6 Csabánál (6. szakasz).
+> **Állapot:** ✅ ET-1/1 – ET-1/4 eldöntve (Csaba, 2026-11-09: *„a többivel egyetértek”* — mind (A)) · ⏸️ ET-1/5 és ET-1/6: Csaba
+> felvetései és a vélemény a 7. szakaszban.
 >
 > Csaba (2026-11-08), a kiinduló kép „az általános javaslat a közösség álláspontja; az egyezményéhez csatlakozni, tiltakozni, ütközést
 > jelölni lehet” sorára: *„ez még nincsen rendesen megtervezve, ugye? ezt a tervről beszéljünk majd.”*
@@ -114,6 +115,50 @@ egy módosító vagy törlő javaslattal.*
   — *„a következtetést az emberek vonják le”* (Csaba, D27/6); (B) egy számított címke: „hatályos” / „hatályát vesztette” (a tény
   marad, a címke csak bejelent).
 
+## 7. Csaba két felvetése (2026-11-09)
+
+### 7.1 Az ütközés-jelölés helyett egy gondolat (ET-1/5)
+
+Csaba: *„lehet, hogy kivehetnénk, mert nem biztos, hogy van fontos szerepe, mert bárki létrehozhat, mondjuk egy olyan gondolattípust,
+aminek az a neve, hogy egyezmények ütközése, majd létrehoz egy gondolatot, ezzel a típussal, amiben entitás-hivatkozással megjelöli az
+egyezményt, amivel szerinte ütközik. mielőtt kivesszük, mondd el a véleményedet.”*
+
+**A vélemény: egyetértek — vegyük ki.** A gondolat a jobb eszköz, és többet tud, mint a külön jelölés:
+- **ugyanaz a gépezet, nem új él** (D66): gondolat, gondolattípus, entitás-hivatkozás — mind megvan;
+- **a jelölés maga is súlyt kap:** pontot lehet rá tenni (mennyien gondolják így), vitatható (gyerekei lehetnek), és ha senkit nem érdekel,
+  elfelejtődik (D14) — a külön jelölés csak egy név volt egy listán;
+- **a mag kisebb lesz:** az `Allasfoglalas` esemény teljesen megszűnhet (a csatlakozás és a tiltakozás az ET-1/4 óta szavazat).
+
+**Egy dologra érdemes figyelni — a láthatóság:** a külön jelölés az egyezmény saját szeletébe került, ezért az egyezmény kártyája
+mutatta volna. Egy gondolat szövegében álló hivatkozást viszont a hivatkozott egyezmény nem „tud”: a koinóban nincs visszafelé mutató
+kérdés („ki hivatkozik rám?” — ez a kereső-réteg kérdése). ⭐ **A megoldás a gépezeten belül:** az ütközés-gondolat az egyik egyezmény
+**gyereke** legyen (D27/5: *„az egyezménynek is lehetnek gyerekei, ahol az e-emberek megvitatják a témát”*) — így annak a fájában
+látszik —, és a másikra hivatkozással mutasson. Ha mindkét oldalon látszania kell, két gondolat (mindkét egyezmény alatt egy).
+
+### 7.2 A címke helyett az állás egy adott napon (ET-1/6)
+
+Csaba: *„ha a címke tényleg ütközik a skálázhatósággal, vagy nagyon drága, akkor nem kell címke. viszont nekem eszembe jutott egy
+olyan, hogy alap esetben nincsen címkéje, de felderítéssel »screenshotolhatja« az akkori állást, amit megoszthat másokkal, hogy ebben a
+dátumban ez volt az állás, és arra a dátumra kaphat címkét. erről mi a véleményed?”*
+
+**Előbb a kérdésre:** a címke **nem drága és nem ütközik a skálázással** — az ET-1/3 óta a kör a szülő saját tulajdonosai (egy szelet),
+a mostani állás helyben számolható, a címke egy összehasonlítás (a mostani támogatottság a küszöbhöz). Az ellene szóló ok nem a költség
+volt, hanem a jelentés: *„a következtetést az emberek vonják le”* (D27/6).
+
+**A felvetésről: jó ötlet — egy pontosítással.** A koinóban az állás nem egy kép, hanem **számítás** (D17): ugyanabból az eseményhalmazból
+bárki ugyanazt kapja, egy múltbeli időpontra is (a szavazatoknak ideje van, a titkos szavazás kötegei aláírt események). Ezért a
+„képernyőkép” helyett egy **hivatkozás** a jobb: *„az egyezmény állása 2027. március 1-jén”* — aki megkapja, a saját gépén kiszámolja, és
+ugyanazt látja. ⭐ Így **nem lehet meghamisítani** (egy kép hamisítható, egy számítás nem), nem kell tárolni, és nem kell senkiben
+megbízni.
+- **Alap esetben:** a mostani számok címke nélkül (támogat · ellenez · néma).
+- **Egy időpontra** (a kártyán: „📷 Az állás egy adott napon…”): a számok az akkori állás szerint, **és a címke arra a napra** —
+  *„2027. március 1-jén: a küszöb felett (64% ≥ 51%)”*. Ez tény egy múltbeli pillanatról, nem ítélet a mostaniról (D19).
+- **A megosztás:** a hivatkozás (az egyezmény és a dátum) bemásolható egy gondolatba vagy elküldhető — a másik gépe kiszámolja.
+- ⚠️ **Ami kell hozzá:** a gépnek meglegyenek az akkori szavazatok (ha a szeletet nem tartja, a kérelem hozza — D76); a titkos szavazásnál az
+  akkori állás az akkor utoljára kinyílt köteg (ET-2/4).
+
 ## Napló
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-1/1 – ET-1/6 Csabánál.
+- **2026-11-09** — ✅ ET-1/1 – ET-1/4 (A). Csaba két felvetése: az ütközés-jelölés helyett egy gondolat (a vélemény: egyetértek, az
+  egyik egyezmény gyerekeként), és a címke helyett az állás egy adott napon (a vélemény: jó, de hivatkozásként, nem képként — 7.).
