@@ -4,7 +4,7 @@
 
 > **Állapot:** ✅ **ET-5/1 – ET-5/6 eldöntve**, mind (A) (Csaba, 2026-11-09: *„rendben, elfogadom a javaslataidat.”*) · ➕ Csaba
 > kiegészítése: *„még azt is beállíthatóvá kéne tenni, hogy a nem tudatpontos tárhelyet, mekkorára hagyja tágulni, mielőtt törölné a
-> régieket.”* → 7. szakasz, ⏸️ **ET-5/7** Csabánál.
+> régieket.”* → 7. szakasz, ✅ **ET-5/7 (A)** (Csaba: *„rendben, elfogadom a javaslatodat.”*) — **mind eldöntve** · az átadás: 8. szakasz.
 >
 > Csaba (2026-11-08, a kérés és a korlátok — a kérelem, a kiszolgálási keret, a törzs-határ — összefoglalójánál): *„részletes, hálózati
 > beállítások menüpontot is terveznünk kell majd.”*
@@ -139,6 +139,7 @@ egy beállítás.
 - **ET-5/7 — A nem vállalt adat tárhelye:** (A) ⭐ két szám: a böngészésből megmaradt adat (egy szám az eseményekre és a fájlokra együtt,
   alapból 70 MB) és a felderítések (alapból 1 GB); a határok: alul 10 MB, felül a szabad hely fele; ha a lemez megtelik, a program szűkít
   és szól; készülékenként, a koinók közt egyenlően; (B) három külön szám (az események, a fájlok, a felderítések), a mai tárak szerint.
+  → ✅ **(A)** — Csaba: *„rendben, elfogadom a javaslatodat.”*
 
 ## 8. A döntések és az átadás (Csaba, 2026-11-09)
 
@@ -146,7 +147,10 @@ egy beállítás.
 · Tárhely), és a `halozat` parancs · **ET-5/2** csak a készülék saját számai állíthatók, a közös (a mag, a kopogás üteme, a kifutás, az
 elsőbbség szerkezete) látszik a miértjével · **ET-5/3** a keret alsó határa óránként 5 MB és 150 kérés · **ET-5/4** takarékos mód: egy
 kézi kapcsoló, minden a negyedére, nincs DHT-hirdetés és „mindent”; a lap rákérdez, ha a böngésző mobilnetet jelez · **ET-5/5** a havi
-adatkeret figyelmeztet, nem állít le · **ET-5/6** készülékenként egy beállítás, a keret a futó koinók közt egyenlően · ⏸️ **ET-5/7** nyitva.
+adatkeret figyelmeztet, nem állít le · **ET-5/6** készülékenként egy beállítás, a keret a futó koinók közt egyenlően · **ET-5/7** a nem
+vállalt adat tárhelye két számmal: a böngészésből megmaradt adat (az események és a fájlok együtt, alapból 70 MB) és a felderítések
+(alapból 1 GB); alul 10 MB, felül a szabad hely fele; ha a lemez megtelik, a program szűkít és szól; készülékenként, a koinók közt
+egyenlően; a takarékos mód nem szűkíti, a „mindent” készüléknél szürke.
 
 **Az építés:** a szabad rétegben (D123) — költözés nélkül, bármikor, a többi témától függetlenül. A D-számot az építő adja.
 
@@ -154,3 +158,4 @@ adatkeret figyelmeztet, nem állít le · **ET-5/6** készülékenként egy beá
 
 - **2026-11-09** — a terv elkészült (a tervező ág, kód nélkül); ⏸️ ET-5/1 – ET-5/6 Csabánál.
 - **2026-11-09** — ✅ ET-5/1 – ET-5/6 mind (A); Csaba kiegészítése (a nem vállalt adat tárhelye) → 7. szakasz, ⏸️ ET-5/7.
+- **2026-11-09** — ✅ ET-5/7 (A) — a hálózati beállítások teljesen eldöntve (8. szakasz).
