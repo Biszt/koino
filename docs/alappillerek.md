@@ -1917,4 +1917,4 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     fölött (tanúsítvány); a szerző marad az azonosság, a lánc a (szerző, készülék) páré** · ⭐ a szavazat már ma időrendben számít · ⛔ a
     WebCrypto X25519 csonkol — a jelszavas visszaadáshoz saját létra · a tervező ág válasza: KU3–KU6 (A), az átfolyás és a kizárás
     kiegészítése, a hálózati kulcs-helyesbítés (igaz) · ⛔ az átfolyás határ nélkül egy ellopott készüléket tölt (93. (g)) — ⭐ fogadó-oldali
-    határ · ⏸️ KU1–KU7 Csabánál (`kulcs_atvizsgalas.md` 8.).
+    határ · ✅ **D128** (Csaba: „minden javaslatodat elfogadom” — KU1–KU7 ⭐; `kulcs_atvizsgalas.md` 8.).

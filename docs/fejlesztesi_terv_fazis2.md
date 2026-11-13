@@ -6443,6 +6443,48 @@ koino-verzió űrlap szövege). A próba: `bekapcsolodasProba.js` (a KÖ3: a sz�
 gyermekben a hozott súly), a parancssor-próba (a szülőben B a bekapcsolódás után is tag, a pontja áll, és tovább ír). ⛔ A mag
 változott: a régi koinók „más számítást” mutatnak — új koinó-családdal indulunk.
 
+### D128. A KULCS: TÖBB KÉSZÜLÉK ÉS A HELYREÁLLÍTÁS — „KÉSZÜLÉKKULCSOK AZ AZONOSSÁG ALATT” (ET-3, 2026-11-13)
+
+*A tervező ág terve ([`terv_kulcs.md`](terv_kulcs.md) — Csaba, 2026-11-08: „mindet elfogadom” — ET-3/2 – ET-3/6 (A)); az építő
+átvizsgálása a 93. méréssel ([`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) — Csaba, 2026-11-13: „kezdjük az et-3-al, de még a
+kódírás elött nézzük át a tervet, részletessen.”); a tervező ág válasza (8. szakasz); Csaba: **„rendben, minden javaslatodat
+elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
+
+**A döntés:**
+1. **Három kulcs** (ET-3/2 — a több készülék útja: (A)): a **készülékkulcs** (minden készüléknek saját — ezzel ír a mindennapokban), az
+   **azonosság kulcsa** (a mai kulcs — a név nem változik; csak KEZEL: felvesz, kizár — KU6 (A)), és a **csere-kulcs** (előre lekötve,
+   csak a lenyomata a láncon — KERI-minta). ⭐ Az első készülék is a saját készülékkulcsával ír: így az azonosság kulcsa papírra tehető.
+2. **Az esemény:** a `szerzo` marad az AZONOSSÁG; új aláírt mező a **`keszulek`** (a készülékkulcs nyilvános része), az aláírás a
+   készülékkulccsal; a lánc (sorszám, előző, lánc-gyökér) a **(szerző, készülék)** páré. A tagság, a meghívás, a tanúsítás, a szavazat
+   az azonosságé (a szavazatnál ma is az utolsó számít — nincs teendő).
+3. **A készülék-tanúsítvány koinók FÖLÖTT** (KU2 (A); ET-3/4 (A) — csak az azonosság kulcsa vesz fel): az azonosság kulcsa aláírja,
+   koinótól függetlenül; egy koinóban a készülék első eseménye hozza, és ha hiányzik, a kérelem elkéri (+57 B eseményenként).
+4. **A kizárás** is koinók fölötti tanúsítvány: koinónként kimondja, a készülék láncából meddig érvényes; **ahol egy koinó nincs
+   felsorolva, ott a kizárt készülék egyetlen eseménye sem számít** (a tervező kiegészítése) — visszamenőleges, kimondva: nem a szabály
+   szigorítása (D47), hanem annak kimondása, hogy azok az események nem tőled jöttek. A készülékek találkozáskor a koinó-listájukat is
+   kicserélik.
+5. **A tudatpont-keret készülékenként osztott** (KU1 (B) — az ET-3/3 (A) „közös keret” helyett, mert a D42 (a bemondott összeg) „egyetlen
+   eseményből eldől”-jét a közös keret elvenné — 93. (b)): az első készüléké alapból az egész. **A keret magától átfolyik** a
+   készülékek között, amikor találkoznak: az átadást a több szabad ponttal rendelkező készülék írja alá, a fogadó a saját láncában
+   veszi át. **Egy fogadó-oldali határig** (KU1 (a)): a határ az ADÓ készülék szabálya (a lapon állítható), fölötte az adó megkérdez —
+   93. (g): határ nélkül egy ellopott készülék a többi összes szabad pontját magához húzná. Egy készülék csak a maga tett pontjait
+   rendezi át; a másikét az hajtja végre, amikor legközelebb fut, és a lap kimondja.
+6. **Egy kizárt készülék pontjai** (KU7 (A)): a kizárás megnevez egy **örököst** (a másik készülékedet), az koinónként átveszi a kizárt
+   készülék vágásig érvényes elhelyezéseit és a szabad részét — a pontok a gondolatokon maradnak.
+7. **A kulcscsere** (KU3 (A)): koinók fölötti tanúsítvány, a csere-kulcs írja alá (új azonosság-kulcs, új lekötés); **a név marad** — a
+   mostani kezelő kulcsot a cserék lánca mondja meg.
+8. **A fizetési kulcs** (KU4 (A); ET-11 — az átutalás): a nyilvános része már az azonosság születésében lekötve — a pénz így nem kíván
+   új koinó-családot, és egy tolvaj nem köthetné le előbb a sajátját.
+9. **A sorrend** (KU5 (A); az ET-3/5 — a csere-kulcs mentése — áll, csak a sorrend ez): most a mag, a csere-kulcs lekötése, a kulcscsere
+   és a papír- vagy fájl-mentés (a lapon is); a darabolt hálózati mentés később, saját átvizsgálással (nem mag). Ha minden elveszett,
+   a jelszó is: új regisztráció, kimondva (ET-3/6 (A)).
+10. **A hálózat:** a csere kézfogása és a kereső megújítása a készülékkulccsal (a hirdetőtábla már ma a készülék tábla-kulcsával ír —
+    D6 —, a meghívó rekesze a meghívóból számolt kulccsal).
+
+*Az építés sorrendje:* ① a mag (a `keszulek` mező és a (szerző, készülék) lánc, a tanúsítvány és a kizárás az örökössel, a keret az
+átadással, a sorrend az azonosság eseményei között) → ② a csere-kulcs és a kulcscsere, a mentés (a lapon is) → ③ a hálózat → ④ a lap
+(„📱 Készülékeim”) → ⑤ a próbák és a terep (a laptop és a telefon mint egy azonosság). ⛔ A mag változik → új koinó-család.
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem

@@ -115,9 +115,9 @@ két-készülékest hazugnak lát), a készülékenként osztott megtartja; a k�
 WebCrypto X25519 csonkol (saját létra kell). A tervező ág válasza (8. szakasz): a KU3–KU6-ban (A); két kiegészítés — a keret magától
 átfolyik a készülékek között (⛔ határ nélkül egy ellopott készülék a többi összes szabad pontját magához húzza — 93. (g); ⭐ egy
 fogadó-oldali határ az adó készülék szabályaként), és a kizárásban fel nem sorolt koinóban a kizárt készülék semmit nem számít; a
-helyesbítése igaz (a tábla és a rekesz már ma sem a személyes kulccsal ír — a hálózati rész két helyre szűkül). ⏸️ **KU1–KU7
-Csabánál** (a keret és az átfolyás határa, a felvétel, a név a kulcscsere után, a fizetési kulcs, a sorrend, az azonosság kulcsa a
-mindennapokban, egy elveszett készülék pontjai).
+helyesbítése igaz (a tábla és a rekesz már ma sem a személyes kulccsal ír — a hálózati rész két helyre szűkül). ✅ **Eldöntve: D128 —
+a kulcs: több készülék és a helyreállítás** (Csaba, 2026-11-13: *„rendben, minden javaslatodat elfogadom. mehetünk tovább.”* — KU1–KU7
+mind ⭐). 🚧 **Az építés: ① a mag** → ② a csere-kulcs → ③ a hálózat → ④ a lap → ⑤ a terep.
 
 **Az állapot:** **1440 önpróba** (67 próba-fájl; a legutóbbi teljes soron 1439/1439 zöld — 2026-11-09, a D127 után; utána +1: a telefon `koino lap`-ja) · 382 fájl / 7550,1 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi

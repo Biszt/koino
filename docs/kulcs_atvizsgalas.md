@@ -1,7 +1,7 @@
 # A kulcs: több készülék és a helyreállítás — átvizsgálás (ET-3, 2026-11-13, kód nélkül)
 
-> **Állapot:** 🔍 átvizsgálva · a tervező ág válaszolt (2026-11-13 — 8. szakasz: két kiegészítés, egy helyesbítés, a KU3–KU6-ban az
-> (A)) · ⏸️ **KU1–KU7 Csabánál** (a KU1-ben az átfolyás határa, új a KU7). A terv a tervező ágé ([`terv_kulcs.md`](terv_kulcs.md) — ET-3/2 – ET-3/6
+> **Állapot:** ✅ **eldöntve — D128** (Csaba, 2026-11-13: *„rendben, minden javaslatodat elfogadom. mehetünk tovább.”* — KU1–KU7 mind
+> ⭐, a KU1-ben a határ (a)) · a tervező ág válaszolt (8. szakasz: két kiegészítés, egy helyesbítés, a KU3–KU6-ban az (A)). A terv a tervező ágé ([`terv_kulcs.md`](terv_kulcs.md) — ET-3/2 – ET-3/6
 > eldöntve, mind (A)); Csaba (2026-11-13): *„kezdjük az et-3-al, de még a kódírás elött nézzük át a tervet, részletessen.”* → *„igen.”*
 > (az átvizsgálás). Ez a dokumentum a tervet a mai kódhoz méri — a **93. mérés** alapján (`meres/kulcsMeres.js`). Programkód nem
 > készült, csak a mérés.
