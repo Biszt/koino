@@ -5374,7 +5374,7 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ## 93. ⭐ A KULCS: TÖBB KÉSZÜLÉK ÉS A HELYREÁLLÍTÁS — mit kíván a mai kód? (ET-3 átvizsgálása, 2026-11-13, a laptopon)
 
-*`node meres/kulcsMeres.js [a–f]` — a tervező ág ET-3 terve (`docs/terv_kulcs.md`) a kódhoz mérve; az átvizsgálás:
+*`node meres/kulcsMeres.js [a–g]` — a tervező ág ET-3 terve (`docs/terv_kulcs.md`) a kódhoz mérve; az átvizsgálás:
 `docs/kulcs_atvizsgalas.md`.*
 
 - **(a) A mai elágazás** (két készülék egy kulccsal, a valódi `elagazasokFeloldasa`): 2+2 → 2 elveszett, 6+4 → 4, 10+10 → 10, 20+6 → 6
@@ -5394,6 +5394,19 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 eldől”*) venné el; a készülékenként osztott keret megtartja. A készülék felvétele a koinók fölött kell érvényes legyen (egy koinótól
 független tanúsítvány, koinónként egyszer — nem eseményenként). A hálózati darabolt mentés nem mag, és a kriptográfiája saját
 számolást kíván.
+
+**Kiegészítés (2026-11-13, (g) — a tervező ág javaslatára: a keret magától átfolyik a készülékek között, a több szabad ponttal
+rendelkező ad):** egy modell (a mag kódja még nincs): a keret 10 000, a laptop 5000 elhelyezve + 4000 szabad, a telefon 1000 szabad;
+találkozáskor a különbség fele megy át.
+- **Ellopott telefon, ami minden szabad pontját azonnal elhelyezi — határ nélkül:** a tolvajnál 1 találkozás után 3000, 2 után 4000, 5
+  után 4875, 10 után 4996 — ⛔ **a laptop teljes szabad keretét magához húzza** (a saját részének ötszörösét); a lopás ellen a
+  készülékenkénti keret így semmit sem ér.
+- **Egy fogadó-oldali határral** (a fogadó része — elhelyezett + szabad — legfeljebb ennyi lehet): 3000-es határnál a tolvajnál 3000
+  marad, 2000-esnél 2000, akárhány találkozás után.
+- **A becsületes használat ugyanazzal a határral** (a telefon naponta 300-at tesz le, a 3. naptól 150-et levesz, esténként találkozik a
+  laptoppal): 10 napból egyszer sem akadt el, se 3000-es, se 2000-es határral.
+
+⭐ **A lelet:** az átfolyás csak határral biztonságos — a határ a lopáskor elveszhető legtöbb pont.
 
 ---
 

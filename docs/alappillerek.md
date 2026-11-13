@@ -1915,4 +1915,6 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     azonosság alatt, előre lekötött csere-kulcs, mentés papíron és darabolva); de a keret és a csalás bizonyítéka ma EGY láncra épül —
     a közös keret a D42 lényegét (egyetlen eseményből eldől) venné el, a készülékenként osztott megtartja; a készülék felvétele koinók
     fölött (tanúsítvány); a szerző marad az azonosság, a lánc a (szerző, készülék) páré** · ⭐ a szavazat már ma időrendben számít · ⛔ a
-    WebCrypto X25519 csonkol — a jelszavas visszaadáshoz saját létra · ⏸️ KU1–KU6 Csabánál (`kulcs_atvizsgalas.md`).
+    WebCrypto X25519 csonkol — a jelszavas visszaadáshoz saját létra · a tervező ág válasza: KU3–KU6 (A), az átfolyás és a kizárás
+    kiegészítése, a hálózati kulcs-helyesbítés (igaz) · ⛔ az átfolyás határ nélkül egy ellopott készüléket tölt (93. (g)) — ⭐ fogadó-oldali
+    határ · ⏸️ KU1–KU7 Csabánál (`kulcs_atvizsgalas.md` 8.).

@@ -16,8 +16,11 @@
 //       tetszőleges görbe-szorzás: a WebCrypto X25519-e a skalárt „csonkolja” (clamping) — mérve egy saját BigInt-létrával; a
 //       titok-megosztás (7 darab, bármely 3) és a jelszó-nyújtás (PBKDF2) ideje.
 //   (f) AZ ŐRZŐK MEGMARADÁSA — modell: n őrző, k kell, p az egy évi megmaradás; havi újraosztással és nélküle.
+//   (g) A KERET ÁTFOLYÁSA (a tervező kiegészítése, 2026-11-13) — ha két készülék találkozáskor MAGÁTÓL kiegyenlíti a szabad
+//       pontjait (a több szabad ponttal rendelkező ad), mennyit húz magához egy ELLOPOTT készülék, ami minden szabad pontját
+//       azonnal elhelyezi; határ nélkül és egy készülékenkénti felső határral; és a becsületes használat ugyanezzel a határral.
 //
-// Futtatás: node meres/kulcsMeres.js [a|b|c|d|e|f]   (argumentum nélkül mind)
+// Futtatás: node meres/kulcsMeres.js [a|b|c|d|e|f|g]   (argumentum nélkül mind)
 
 import { kiir } from './naplo.js';
 import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
@@ -313,5 +316,54 @@ if (resz('b')) bemondott();
 if (resz('c')) await meret();
 if (resz('d')) osszefesules();
 if (resz('e')) await kripto();
+// ===================================
+// (g) A KERET ÁTFOLYÁSA
+// ===================================
+//
+// Modell (nem a mag kódja — az még nincs): egy készülék része = a ráhelyezett + a szabad pontjai. Találkozáskor a több szabad
+// ponttal rendelkező ad a kevesebbnek, a különbség felét — de a fogadó része (elhelyezett + szabad) nem lépheti túl a `hatar`-t.
+
+function talalkozas(ado, kapo, hatar) {
+  const fel = Math.floor((ado.szabad - kapo.szabad) / 2);
+  const fer = hatar - (kapo.elhelyezett + kapo.szabad);
+  const atad = Math.max(0, Math.min(fel, fer));
+  ado.szabad -= atad; kapo.szabad += atad;
+  return atad;
+}
+
+function atfolyas() {
+  kiir('\n(g) A KERET ÁTFOLYÁSA — a keret 10 000; a laptop: 5000 elhelyezve + 4000 szabad, a telefon: 1000 szabad');
+  const MERFOK = [1, 2, 5, 10, 20, 50];
+  for (const hatar of [Infinity, 3000, 2000]) {
+    const laptop = { elhelyezett: 5000, szabad: 4000 };
+    const telefon = { elhelyezett: 0, szabad: 1000 };
+    const sor = [];
+    for (let t = 1; t <= 50; t++) {
+      // ⛔ a tolvaj: minden szabad pontját azonnal a sajátjára teszi (a lánca szerint ez szabályos — a része az övé)
+      telefon.elhelyezett += telefon.szabad; telefon.szabad = 0;
+      if (laptop.szabad > telefon.szabad) talalkozas(laptop, telefon, hatar);
+      if (MERFOK.includes(t)) sor.push(t + '. után ' + (telefon.elhelyezett + telefon.szabad));
+    }
+    kiir('  ellopott telefon, határ ' + (hatar === Infinity ? 'NINCS' : hatar) + ' → a tolvajnál: ' + sor.join(' · ')
+      + ' (a laptop szabadja a végén: ' + laptop.szabad + ')');
+  }
+  // ✓ a becsületes használat ugyanazzal a határral: a telefon naponta 300-at tesz le, és este találkozik a laptoppal
+  for (const hatar of [3000, 2000]) {
+    const laptop = { elhelyezett: 5000, szabad: 4000 };
+    const telefon = { elhelyezett: 0, szabad: 1000 };
+    let akadt = 0;
+    for (let nap = 1; nap <= 10; nap++) {
+      const akar = 300;
+      if (telefon.szabad < akar) { akadt++; } else { telefon.szabad -= akar; telefon.elhelyezett += akar; }
+      // ⭐ amit levesz (a sajátjáról), az visszaszabadul — itt a 3. naptól naponta 150
+      if (nap >= 3) { const le = Math.min(150, telefon.elhelyezett); telefon.elhelyezett -= le; telefon.szabad += le; }
+      if (laptop.szabad > telefon.szabad) talalkozas(laptop, telefon, hatar);
+    }
+    kiir('  becsületes telefon, határ ' + hatar + ': 10 napból ' + akadt + ' napon nem tudta letenni a 300-at; a végén a telefonon '
+      + telefon.elhelyezett + ' elhelyezve + ' + telefon.szabad + ' szabad, a laptop szabadja ' + laptop.szabad);
+  }
+}
+
 if (resz('f')) orzok();
+if (resz('g')) atfolyas();
 kiir('');

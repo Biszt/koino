@@ -112,10 +112,14 @@ változott — új koinó-családdal indulunk. ⏸️ A pénz és a koinók kapc
 keret (ET-3/3 (A)) a D42 (a bemondott összeg) lényegét, az „egyetlen eseményből eldől”-t venné el (mérve: a mai gépezet egy becsületes
 két-készülékest hazugnak lát), a készülékenként osztott megtartja; a készülék felvétele koinók fölött kell érvényes legyen (tanúsítvány,
 +57 B eseményenként); a szerző marad az azonosság, a lánc a (szerző, készülék) páré; a darabolt hálózati mentés nem mag (később), és a
-WebCrypto X25519 csonkol (saját létra kell). ⏸️ **KU1–KU6 Csabánál** (a keret, a felvétel, a név a kulcscsere után, a fizetési kulcs, a
-sorrend, az azonosság kulcsa a mindennapokban).
+WebCrypto X25519 csonkol (saját létra kell). A tervező ág válasza (8. szakasz): a KU3–KU6-ban (A); két kiegészítés — a keret magától
+átfolyik a készülékek között (⛔ határ nélkül egy ellopott készülék a többi összes szabad pontját magához húzza — 93. (g); ⭐ egy
+fogadó-oldali határ az adó készülék szabályaként), és a kizárásban fel nem sorolt koinóban a kizárt készülék semmit nem számít; a
+helyesbítése igaz (a tábla és a rekesz már ma sem a személyes kulccsal ír — a hálózati rész két helyre szűkül). ⏸️ **KU1–KU7
+Csabánál** (a keret és az átfolyás határa, a felvétel, a név a kulcscsere után, a fizetési kulcs, a sorrend, az azonosság kulcsa a
+mindennapokban, egy elveszett készülék pontjai).
 
-**Az állapot:** **1440 önpróba** (67 próba-fájl; a legutóbbi teljes soron 1439/1439 zöld — 2026-11-09, a D127 után; utána +1: a telefon `koino lap`-ja) · 382 fájl / 7545,9 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1440 önpróba** (67 próba-fájl; a legutóbbi teljes soron 1439/1439 zöld — 2026-11-09, a D127 után; utána +1: a telefon `koino lap`-ja) · 382 fájl / 7550,1 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8
@@ -925,8 +929,9 @@ node meres/kodCsomagMeres.js [régi-commit]  # ⭐ A KÓD-CSOMAG (84., D119): a 
                                  # 331 fájl / 6,4 MB (egyben tömörítve 1,9 MB), a jegyzék 28,5 KB; egy új verzió ~1–2,5 MB
 node meres/magMeres.js [kezdő-commit]  # ⭐ A SZÁMÍTÁS MAGJÁNAK STABILITÁSA (89., D123): a mag (a kép és a kapu import-zárványa)
                                  # commitonként a git-ből — 10-24 óta 36 commitból 4 változtatta, mind kóddal (komment csak: 0)
-node meres/kulcsMeres.js [a–f]  # ⭐ A KULCS (93., ET-3): a mai elágazás (két készülék egy kulccsal), a bemondott összeg két láncon,
-                                 # az esemény mérete a készülék-mezővel, a láncok összefésülése, a kriptográfia (X25519 csonkol), az őrzők
+node meres/kulcsMeres.js [a–g]  # ⭐ A KULCS (93., ET-3): a mai elágazás (két készülék egy kulccsal), a bemondott összeg két láncon,
+                                 # az esemény mérete a készülék-mezővel, a láncok összefésülése, a kriptográfia (X25519 csonkol), az őrzők,
+                                 # (g) a keret átfolyása (egy ellopott készülék határ nélkül / határral)
 node meres/csaladCsereMeres.js [k ...]  # ⭐ A CSALÁDI CSERE ÁRA (85., D119 ③; 86., D120): két készülék, k koinós család —
                                  # a „nincs újdonság” csere koinónként ~2,2 KB / ~200 ms (lineáris), a nyitás `cs` jele koinónként
                                  # +46 B; a nem vállaló a kártyák kódjából csak a jegyzéket hozza (29,5 KB — a D120 előtt 6,5 MB)
