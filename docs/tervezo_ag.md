@@ -254,7 +254,8 @@ társak, a Struktúra, a Síkidom, a Keresés. A parancssor mindent tud, amit a 
   valaki elhagyja? több készülékről is tudja használni a kulcsát?”* → 🔍 **a terv: [`terv_kulcs.md`](terv_kulcs.md)** (2026-11-08) —
   három kulcs (készülékkulcs, az azonosság kulcsa, előre lekötött csere-kulcs), a csere-kulcs darabolva, jelszóval, véletlen
   őrzőknél; ⚠️ a mag változása (az első éles koinó előtt). ✅ **ET-3/2 – ET-3/6 mind (A)** (Csaba, 2026-11-08: *„mindet
-  elfogadom”*) — ⏭️ átadható az építőnek.
+  elfogadom”*) — ⏭️ átadható az építőnek. ⚠️ **2026-11-13: az építő átnézése** (a [`terv_kulcs.md`](terv_kulcs.md) 11. szakasza) —
+  ⏸️ **ET-3/3 újra** (⭐ most a (B): készülékenkénti, magától áramló keret), és új kérdések: ET-3/7 – ET-3/9.
   - ⭐ **A több készülék** — Csaba: *„ne felejtsük el megtervezni, mert ez is fontos.”* Az első irány: a fő kulcs minden készüléknek
     saját, aláírt alkulcsot ad (minden készüléknek saját lánca — nincs elágazás).
   - ✅ **ET-3/1** (Csaba, 2026-11-08): a helyreállításhoz **választott bizottság nélküli** megoldást keresünk — *„egy randomizált,
@@ -346,6 +347,10 @@ Csaba helyreigazításai (2026-11-08) a tervező ág első összefoglalójára �
 - **2026-11-08** — **ET-2** megtervezve: [`terv_szavazas.md`](terv_szavazas.md); ⏸️ ET-2/1 – ET-2/6 Csabánál.
 - **2026-11-08** — Csaba az ET-2-ről: a tartózkodás nem maradhat (javaslat: részvétel, de nem dönt, csak lassít); ha titkos, az
   elejétől (nincs ideiglenes nyílt szakasz); az etikai kérdés nyitott. A mostani koinók teszt koinók; ideiglenes megoldást kerülünk.
+- **2026-11-13** — **ET-3: az építő átnézése** (az ET-3 kódolása előtt): a tudatpont-keret és a csalás bizonyítéka (D42, D63, D78, D79,
+  D81) egy láncra épül → a közös keret (ET-3/3 (A)) egy becsületes, két készülékes embert vádolna meg; ⏸️ **ET-3/3 újra** (⭐ most a (B):
+  készülékenkénti, magától áramló keret), új kérdések: ET-3/7 (a felvétel/kizárás a koinók fölött), ET-3/8 (a fizetési kulcs lekötése
+  most), ET-3/9 (két készülék szavazata). [`terv_kulcs.md`](terv_kulcs.md) 11. szakasz.
 - **2026-11-09** — ✅ **ET-6/2 – ET-6/7** (A) — a vészfék eldöntve. ⭐ **A napirend minden pontja eldöntve** (ET-1 – ET-12).
 - **2026-11-09** — **ET-6** (a sürgősségi út) megtervezve: [`terv_vesfek.md`](terv_vesfek.md) — vészfék a napi körrel; ⏸️ ET-6/2 –
   ET-6/7 Csabánál.
