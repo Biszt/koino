@@ -1911,3 +1911,8 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     program Androidon nem nyit új fület, és a régi fül a régi jelszóval nem jut tovább → `koino lap` (Csaba: „legyen a (B)”), és a
     telepítő a Termuxban a kiírt címeket koppintásra nyithatóvá teszi (`terminal-onclick-url-open`)** · ⭐ a PR4 (D126) terepen is: a
     telefon Brave-jén a nézetből semmi nem jutott ki, a kontroll igen.
+252. **2026-11-13 · ET-3 (a kulcs: több készülék és a helyreállítás) átvizsgálva (93. mérés)** → **a terv iránya jó (készülékkulcsok az
+    azonosság alatt, előre lekötött csere-kulcs, mentés papíron és darabolva); de a keret és a csalás bizonyítéka ma EGY láncra épül —
+    a közös keret a D42 lényegét (egyetlen eseményből eldől) venné el, a készülékenként osztott megtartja; a készülék felvétele koinók
+    fölött (tanúsítvány); a szerző marad az azonosság, a lánc a (szerző, készülék) páré** · ⭐ a szavazat már ma időrendben számít · ⛔ a
+    WebCrypto X25519 csonkol — a jelszavas visszaadáshoz saját létra · ⏸️ KU1–KU6 Csabánál (`kulcs_atvizsgalas.md`).

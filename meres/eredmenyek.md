@@ -5372,6 +5372,31 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 93. ⭐ A KULCS: TÖBB KÉSZÜLÉK ÉS A HELYREÁLLÍTÁS — mit kíván a mai kód? (ET-3 átvizsgálása, 2026-11-13, a laptopon)
+
+*`node meres/kulcsMeres.js [a–f]` — a tervező ág ET-3 terve (`docs/terv_kulcs.md`) a kódhoz mérve; az átvizsgálás:
+`docs/kulcs_atvizsgalas.md`.*
+
+- **(a) A mai elágazás** (két készülék egy kulccsal, a valódi `elagazasokFeloldasa`): 2+2 → 2 elveszett, 6+4 → 4, 10+10 → 10, 20+6 → 6
+  — minden ütköző sorszámon egy esemény elvész, a két ágból vegyesen; és minden esetben 1–2 árva pont (a gondolata elveszett).
+- **(b) A bemondott összeg két láncon** (a valódi `pontEsemenyMerlege`, keret 10 000, laptop 8000, telefon offline 1000): egynek
+  számolva a becsületes telefon ⛔ „ellentmond a saját láncának (1000, a láncából 9000)”; a saját rálátásán ✓, de a közös keret egy
+  külön, minden lánc-ismeretet kívánó ellenőrzés; készülékenként osztott kerettel (9000 + 1000) mindkettő ✓, a túllépés egyetlen
+  eseményből ⛔ (a D42 megmarad).
+- **(c) Az esemény mérete:** 624 B → a `keszulek` mezővel 681 B (+57), beágyazott tanúsítvánnyal 947 B (+323, +52%); a tanúsítvány 251 B.
+- **(d) A láncok összefésülése** (2–3 készülék, a láthatóság szerint, holtversenyben a kisebb azonosító): 100 000 esemény 23–29 ms.
+- **(e) A kriptográfia** (Node 22): Ed25519, X25519, HKDF, AES-GCM ✓; PBKDF2 600 000 kör 183 ms; ⛔ a WebCrypto X25519 a skalárt
+  csonkolja (a saját létra a csonkolttal 20/20, a nyerssel 1/20 egyezik) → a jelszavas visszaadáshoz saját BigInt-létra (2,2 ms);
+  Shamir GF(256) 7/3: 0,7 ms, 3 darabból vissza, 2-ből nem.
+- **(f) Az őrzők** (modell): 7/3, egy őrző egy év múlva 50%-ban elérhető → újraosztás nélkül 77%, havi újraosztással 99,99%.
+
+⭐ **A lelet:** a keret és a csalás bizonyítéka ma EGY láncra épül — a közös keret (ET-3/3 (A)) a D42 lényegét (*„egyetlen eseményből
+eldől”*) venné el; a készülékenként osztott keret megtartja. A készülék felvétele a koinók fölött kell érvényes legyen (egy koinótól
+független tanúsítvány, koinónként egyszer — nem eseményenként). A hálózati darabolt mentés nem mag, és a kriptográfiája saját
+számolást kíván.
+
+---
+
 ## 92. ⭐ A FELTÖLTÖTT NÉZET — hordozza-e a mai program, és elszigeteli-e a böngésző? (D123 ⑤, PR4 — a közösség feltöltött nézetei, 2026-11-08, a laptopon)
 
 *`nezetMeres.js` (a terv: `docs/nezetek_atvizsgalas.md` 2.). (a) Egy nézet-kártya három alakban a mai kapun, a koinó képén, a mai
