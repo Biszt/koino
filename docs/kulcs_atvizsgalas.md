@@ -198,5 +198,45 @@ kulcsa, D6; `meghivoRekesz.js`: a meghívóból számolt kulcspár; `titkositas.
 **8.4 Az építésben:** az ① magba az átadás (az adó és a fogadó eseménye) és a kizárás örököse (KU7) is bekerül; a határ a ④ lapé
 („📱 Készülékeim”: a részek, a határok, a függő átrendezések — *„a laptop hajtja végre, amikor legközelebb fut”*).
 
+## 9. Az ① mag szerkezete (az építés terve — D128 után, 2026-11-13)
+
+**9.1 Két kulcs az eseményen.** A `szerzo` az azonosság (a név); új aláírt mező a **`keszulek`** (a készülékkulcs nyilvános része — mindig
+jelen, és nem lehet a szerző: KU6 (A)); az aláírás a készülékkulccsal. **A lánc kulcsa** a (szerző, készülék) pár — a D118 `lancAga`
+horgára: minden, ami LÁNCOT néz (a tár indexe, a sorszám, az előző, az elágazás, az idő-monotonitás, a lánc-gyökér, a D42-állás, az
+író), ezt kérdezi; ami az AZONOSSÁGOT (a tagság, a horgony, a meghívás, a tanúsítás, a szavazat, az ellentmondás vádlottja), az a
+szerzőt. A pontok (lánc, entitás) szerint állnak, az azonosság pontja egy entitáson ezek összege.
+
+**9.2 A készülék-tanúsítvány** (koinók fölött): `{ azonossag, keszulek, nev, ido }` + az azonosság kulcsának aláírása. **Egy koinóban így
+utazik:** az első készüléké a horgonyában (a `Belepes`, a `KoinoLetrehozas`, a `Bekapcsolodas` hozza), a többié egy
+`KeszulekBemutatas` eseményben (a készülék első eseménye a koinóban — az azonosság horgony-szeletébe). **A kapu** egy eseményt csak
+akkor enged be, ha a (szerző, készülék) tanúsítványa ismert — a tárból, vagy maga az esemény hozza; különben „hiányzik” (a csere
+elkéri, mint ma a gyermek születését). ⭐ Így minden számítás — a tagság és a meghívás is — csak tanúsított eseményt lát: egy hamis
+szerzőjű esemény be sem jut. A tagsági csomag a nem-horgony készülékek tanúsítványát is viszi.
+
+**9.3 A keret** (KU1): láncónként. Az alap a koinó kerete annak a láncnak, amelyik az azonosság horgonyát írta (abban a koinóban az
+„első készülék” az, amelyikkel beléptél), a többié 0. A lánc-gyökér harmadik összegzése a **kapott** (adónként a halmozottan átvett
+pont) → a D42: `kiosztva ≤ alap + kapott`, egyetlen eseményből. **Az átadás** (`KeretAtadas`, az adó láncában): a kiosztás-fában a fogadó
+készülék alatt a halmozott átadott pont (a bemondott összege ezzel nő). **Az átvétel** (`KeretAtvetel`, a fogadó láncában): az adó
+aláírt átadását hozza, és a kapott-fában az adó értékét a halmozott átadottra emeli — ugyanazt kétszer nem lehet átvenni, mert a
+halmozott érték nem nő tőle. **A határ** az adó őrjáratának szabálya (a lapon állítható — 8.1).
+
+**9.4 A kizárás és az örökös** (KU7): a kizárás-tanúsítvány (az azonosság kulcsa írja alá) megnevezi a készüléket, koinónként a vágást
+(sorszám) és az örököst. Egy `KeszulekKizaras` esemény hozza a koinóidba (az örökös írja, mindegyikbe). A felsorolt koinóban a vágás
+utáni, a kizárt kulccsal írt események nem számítanak, és **a láncot az örökös folytatja** (a vágás utáni sorszámokon az örökös kulcsa ír
+alá): a lánc pontjai és a része így nála vannak, és átrendezheti őket. A fel nem sorolt koinóban a kizárt készülék egyetlen eseménye
+sem számít (8.2). Ahova a kizárás még nem ért el, ott addig számít (6.) — a terjesztése a ③ hálózaté.
+
+**9.5 A sorrend az azonosság eseményei között** — ⏸️ **javaslat, Csabáé (az ①b előtt):** ahol az azonosság UTOLSÓ állítása számít (az
+érték javaslat, az állásfoglalás, a profil), ott ma a lánc sorszáma dönt — két készülék láncának sorszámai viszont nem összevethetők. A
+4. szakasz 3. pontja a `latott` mintáját javasolta (minden esemény mondja, a többi készülékem láncából meddig látott). ⭐ Az építés
+egyszerűbbet javasol: **az idő dönt, mint a szavazatnál ma** (holtversenyben az azonosító) — egy szabály a szavazattal, új mező és új
+bájt nélkül; és csak a TE két állításod közül választ (egy rosszul járó óra a saját eseményeid sorrendjét keverheti meg, másét nem —
+a lap figyelmeztet, ha a készülékeid órái eltérnek).
+
+**9.6 A lépések** (mindegyik után a teljes próbasor): **①a** az esemény `keszulek` mezője, a lánc kulcsa mindenhol, a készülékkulcs a
+gépen és a horgonyba ágyazott tanúsítvány — egy készülékkel minden úgy megy, mint ma · **①b** a második készülék (a bemutatás, a kapu,
+a pontok és az utolsó állítás az azonosságra, a `keszulek` parancs; a próba: két készülék egy azonossággal, offline is) · **①c** a keret
+(a kapott-fa, az átadás és az átvétel, az átfolyás a határral) · **①d** a kizárás és az örökös.
+
 *Kapcsolódik:* [`terv_kulcs.md`](terv_kulcs.md) (a tervező ág — ET-3), [`terv_atutalas.md`](terv_atutalas.md) (ET-11 — a fizetési kulcs),
 `meres/eredmenyek.md` 93., `js/kulcs/kulcsTar.js`, `js/allapot/szabalyok.js` (D42), `js/allapot/allapotSzamitas.js` (az elágazás).
