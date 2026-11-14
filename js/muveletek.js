@@ -22,13 +22,14 @@
 // Használják: koino.js (a parancssori arc).
 
 import {
-  TUDATPONT_KERET, ALLASOK, pontEsemenyMerlege, javaslatEntitasai, erintettek, toredekAzonosito
+  TUDATPONT_KERET, ALLASOK, javaslatEntitasai, erintettek, toredekAzonosito, lancLepese, ujLancAllas, keretAtvetelMerlege
 } from './allapot/szabalyok.js';
 // ⭐ D78 (az A pillér 2. lépése): a lánc-gyökér — a szerző esemény előtti naplója és kiosztása.
-import { lancUjEsemenyhez, lancKerete } from './allapot/lancGyoker.js';
+import { lancUjEsemenyhez, lancAlapKerete, lancAlapjai } from './allapot/lancGyoker.js';
+import { alapokAlapja } from './allapot/tagsag.js';
 // ⭐ D80: az ellentmondás bizonyítéka — a bejelentés előtt magunk is ellenőrizzük.
 import { ellentmondasEllenorzese } from './allapot/ellentmondas.js';
-import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO, lancKulcsa } from './esemeny/esemeny.js';
+import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO, lancKulcsa, PONT_TIPUSOK } from './esemeny/esemeny.js';
 import { lancNezete } from './allapot/koinoLanc.js';   // ⭐ D118 (③, ⑤b): a szerző lánca a koinóban, a jelen réteg szerint
 import { koinoSzabalyai, teljesSzabalyok } from './esemeny/koinoSzabalyok.js';
 import { kanonikusBajtok } from './esemeny/kanonikusAlak.js';
@@ -228,7 +229,8 @@ export async function ellentmondasBejelentese(kornyezet, adat) {
       + 'KoinoLetrehozas nálunk) — a bizonyíték nem helyezhető el (D80).');
   }
   const vad = await ellentmondasEllenorzese(adat, kornyezet.koino,
-    { tudatpontKeret: await lancKerete(kornyezet.tar, kornyezet.koino, lancKulcsa(adat?.esemeny), adat?.kit),   // ⭐⭐ D128: a vádolt láncáé
+    // ⭐⭐ D128: a vádolt LÁNCÁNAK alapja — a kapottját a vádolt esemény aláírt előképe adja hozzá (`ellentmondas.js`).
+    { tudatpontKeret: await lancAlapKerete(kornyezet.tar, kornyezet.koino, lancKulcsa(adat?.esemeny), adat?.kit),
       tanusitvany: kornyezet.tar });   // ⭐⭐ D128: a vádolt készülékének tanúsítványa a tárból
   if (!vad.rendben) throw new Error('A bizonyíték nem áll meg: ' + vad.ok);
   return esemenytTeszek(kornyezet, 'Ellentmondas', adat, { entitas: horgony });
@@ -301,7 +303,10 @@ async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
   // szeletek között is lelepleződik, D63) és kiosztását hordozza; a PONT-esemény az entitása régi
   // értékének bizonyítékát is (D81: a bizonyíték az eseménnyel utazik — a bemondott összeg a szerző
   // nélkül is ellenőrizhető, D42). Ha a saját lánc nem ép, null (mint a D78 előtti eseményeké).
-  const pontEntitas = tipus === 'TudatpontRendezes' && typeof adat?.entitas === 'string' ? adat.entitas : null;
+  // ⭐⭐ D128 (9.9): a keret átadása is pont-esemény (a levele a fogadó készülék kulcsa); az ÁTVÉTEL a kapott-fa bizonyítékát hozza
+  // (az adó levelének régi értékét — `beallitas.kapottKulcs`).
+  const pontEntitas = PONT_TIPUSOK.has(tipus) && typeof adat?.entitas === 'string' ? adat.entitas : null;
+  const kapottKulcs = tipus === 'KeretAtvetel' && typeof beallitas.kapottKulcs === 'string' ? beallitas.kapottKulcs : null;
   // ⭐ D85/2 (T2): a SZAVAZAT a jogának bizonyítékát hozza — részenként az érintettre és a
   // javaslat-entitásra (a `szavazas` adja meg a kulcsokat).
   // ⭐ D85 T3 előfeltétele: a JAVASLAT is — érintettenként a javaslattevő pontjára.
@@ -309,10 +314,12 @@ async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
     && beallitas.bizonyitekKulcsok.length ? beallitas.bizonyitekKulcsok : null;
   // ⭐ D118 (⑤b): a BEKAPCSOLÓDÁS nem horgonyoz — a lánc nézete a bekapcsolódással változik (előtte a szülőbeli előtag még nem a
   // gyermekbeli láncom), a következő eseményem már a hozott kiosztást köti.
-  const { lancGyoker, bizonyitek } = tipus === 'Bekapcsolodas' ? { lancGyoker: null, bizonyitek: null }
+  const { lancGyoker, bizonyitek, kapottBizonyitek } = tipus === 'Bekapcsolodas'
+    ? { lancGyoker: null, bizonyitek: null, kapottBizonyitek: null }
     : await lancUjEsemenyhez(kornyezet.tar, kornyezet.koino, sajatLanc(kornyezet),
-      veg.sorszam, kornyezet.lancTarolo ?? null, pontEntitas ?? szavazatKulcsok);
-  const vegsoAdat = (pontEntitas || szavazatKulcsok) && bizonyitek ? { ...adat, bizonyitek } : adat;
+      veg.sorszam, kornyezet.lancTarolo ?? null, pontEntitas ?? szavazatKulcsok, kapottKulcs);
+  const vegsoAdat = (pontEntitas || szavazatKulcsok) && bizonyitek ? { ...adat, bizonyitek }
+    : kapottKulcs && kapottBizonyitek ? { ...adat, bizonyitek: kapottBizonyitek } : adat;
   return esemenyLetrehozasa(
     { koino: kornyezet.koino, tipus, adat: vegsoAdat, entitas, entitasSorszam, latott, lancGyoker,
       ...(beallitas.ido !== undefined ? { ido: beallitas.ido } : {}), ...veg },
@@ -341,6 +348,7 @@ async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
  * @returns {Promise<{osszeg: number, regi: number}>}
  */
 async function sajatKiosztott(kornyezet, entitas) {
+  const { alap, alapok } = await sajatAlapjaim(kornyezet);
   // ⭐⭐ D118 (③): a JELEN réteg szerint — a bekapcsolódó (a létrehozó) szülőbeli pontjai is a láncom (a hozott kiosztás);
   // ugyanaz a szabály, amit a szabály-réteg a koinó képében lát (`jelenbenSzamit`), különben a bemondott összeg
   // ellentmondana a láncomnak.
@@ -349,11 +357,9 @@ async function sajatKiosztott(kornyezet, entitas) {
   // láncon lévő, de a jelenből kizárt esemény ismert sorszám, nem hézag.
   const nezet = await lancNezete(kornyezet.tar, kornyezet.koino, sajatLanc(kornyezet));
   const lanc = (await sajatLancEsemenyei(kornyezet.tar, sajatLanc(kornyezet))).filter(nezet.tagja);
-  // ⭐ D118/2: a keret a koinóé (a születéséből) — ⭐⭐ D128 (9.9): és a LÁNCÉ (a készülékemé: az alap, ha én írtam a horgonyt) —
-  // ugyanaz, amit a szabály-réteg használ.
-  const keret = await sajatKeretem(kornyezet);
-
-  const allas = { osszeg: 0, pontok: new Map() };
+  // ⭐ D118/2: a keret a koinóé (a születéséből) — ⭐⭐ D128 (9.9): és a LÁNCÉ (a készülékemé): az alap (ha én írtam a horgonyt) +
+  // a kapott (az átvételeim) — eseményenként, ugyanaz, amit a szabály-réteg használ (`lancLepese`).
+  const allas = ujLancAllas();
   // ⭐ A folytonosságot is ugyanúgy követjük, mint a szabály (a saját láncunk rendes esetben
   // hézagtalan — de ha nem, az ítéletnek akkor is egyeznie kell).
   let folytonos = true;
@@ -362,20 +368,34 @@ async function sajatKiosztott(kornyezet, entitas) {
   for (const e of lanc) {
     if (e.sorszam !== vartSorszam) folytonos = false;
     vartSorszam = e.sorszam + 1;
-    if (e.tipus !== 'TudatpontRendezes' || !nezet.szamit(e)) continue;
+    if (!nezet.szamit(e)) continue;
 
     // ⛔⛔ UGYANAZ AZ ÍTÉLET, NEM A MÁSOLATA (2026-09-26, 43. mérés): a szabály-réteg
     // függvényét hívjuk. Egy korábbi saját másolat az ELVETETT bemondást (pl. egy régi,
     // `kiosztva` nélküli eseményt) beleszámolta — és onnantól minden új pont-eseményünk
     // „ellentmondott a saját láncának".
     // ⭐ D118 (④a): a hozott (az ős láncából jött) pont-esemény a számított összeggel — ugyanaz, mint a szabály-rétegben.
-    const merleg = pontEsemenyMerlege(e, allas, folytonos, keret, nezet.hozott(e));
-    if (merleg.elvetve) continue;   // ami nem számít, az a régi értéket hagyja érvényben
-    allas.pontok.set(merleg.entitas, merleg.pont);
-    allas.osszeg = merleg.ujOsszeg;
+    // ⭐⭐ D128 (9.9): a lépés a pont-eseményt (a keret átadását is) és az átvételt is könyveli; ami nem számít, az a régi értéket
+    // hagyja érvényben.
+    lancLepese(allas, e, folytonos, alap, alapok, nezet.hozott(e));
   }
 
-  return { osszeg: allas.osszeg, regi: allas.pontok.get(entitas) ?? 0 };
+  return { osszeg: allas.osszeg, regi: allas.pontok.get(entitas) ?? 0, keret: alap + allas.kapottOsszeg, allas, folytonos,
+    alapok };
+}
+
+/**
+ * ⭐⭐ D128 (9.9): a láncaim ALAPJA ebben a koinóban — a sajátomé (a koinó kerete, ha ez a készülék írta az azonosságom
+ * horgonyát; különben 0), és a többi készülékemé (az átvételek ítéletéhez). A koinó kerete, ha a környezet szabályt ad.
+ * @returns {Promise<{alap: number, alapok: Object}>}
+ */
+async function sajatAlapjaim(kornyezet) {
+  if (kornyezet.koinoSzabalyok) {
+    const k = kornyezet.koinoSzabalyok.tudatpontKeret;
+    return { alap: k, alapok: { keret: k, horgonyLanca: null } };
+  }
+  const alapok = await lancAlapjai(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
+  return { alap: alapokAlapja(alapok, sajatLanc(kornyezet)), alapok };
 }
 
 /**
@@ -385,19 +405,121 @@ async function sajatKiosztott(kornyezet, entitas) {
  * @returns {Promise<number>}
  */
 export async function szabadTudatpontjaim(kornyezet) {
-  const { osszeg } = await sajatKiosztott(kornyezet, null);
-  return (await sajatKeretem(kornyezet)) - osszeg;
+  const { osszeg, keret } = await sajatKiosztott(kornyezet, null);
+  return keret - osszeg;
 }
 
 /**
- * ⭐⭐ D128 (9.9): a SAJÁT LÁNCOM (készülékem) kerete ebben a koinóban — az alap: a koinó kerete, ha ez a készülék írta az
- * azonosságom horgonyát; különben 0 (a többi az átvétellel jön). A koinó kerete, ha a környezet régi alakú (nincs tára).
+ * ⭐⭐ D128 (9.9): a SAJÁT LÁNCOM (készülékem) kerete ebben a koinóban — az alap (a koinó kerete, ha ez a készülék írta az
+ * azonosságom horgonyát; különben 0) + a kapott (amit a többi készülékemtől átvettem).
  * @param {Object} kornyezet
  * @returns {Promise<number>}
  */
 export async function sajatKeretem(kornyezet) {
-  if (kornyezet.koinoSzabalyok) return kornyezet.koinoSzabalyok.tudatpontKeret;
-  return lancKerete(kornyezet.tar, kornyezet.koino, sajatLanc(kornyezet), kornyezet.szerzo);
+  return (await sajatKiosztott(kornyezet, null)).keret;
+}
+
+// ===================================
+// ⭐⭐ D128 (9.9): A KERET ÁTADÁSA ÉS ÁTVÉTELE (két készülékem között)
+// ===================================
+//
+// A keret készülékenként osztott (KU1 (B)): az első készüléké alapból az egész, a többié 0. A keret az ÁTADÁSSAL mozog: az adó a
+// saját láncán aláírja (`KeretAtadas` — pont-esemény, a levele a fogadó kulcsa, a pontja a HALMOZOTT átadott összeg), a fogadó
+// a saját láncán átveszi (`KeretAtvetel` — az adó aláírt átadását hozza). Mindkettő egy eseményből ellenőrizhető (D42, D81). ⭐ A
+// visszaadás a másik irányú átadás. ⏭️ Az átfolyás (ki, mikor, mennyit — a határral) a (2c); a két készülék találkozása a ③.
+
+/**
+ * A keret ÁTADÁSA egy másik készülékemnek: a `tobblet` pontot a szabad részemből — a fogadó kulcsán a halmozott összeg nő.
+ * @param {Object} kornyezet
+ * @param {string} kinek - a fogadó készülék kulcsa (az azonosságom tanúsította — a tanúsítványa nálam van)
+ * @param {number} tobblet - hány pontot adok most (pozitív egész)
+ * @returns {Promise<Object>} az aláírt `KeretAtadas`
+ */
+export async function keretAtadasa(kornyezet, kinek, tobblet) {
+  console.log('muveletek.keretAtadasa - KEZDÉS', { kinek, tobblet });
+  if (!Number.isSafeInteger(tobblet) || tobblet < 1) throw new Error('Az átadott tudatpont csak pozitív egész lehet.');
+  if (kinek === sajatLanc(kornyezet)) throw new Error('Önmagadnak nem adhatsz keretet — a fogadó egy másik készüléked.');
+  const t = await tarTanusitvanya(kornyezet.tar, kinek);
+  if (!t || t.azonossag !== kornyezet.szerzo) {
+    throw new Error('A fogadó nem a te készüléked — a tanúsítványa az azonosságodtól nincs meg nálam.');
+  }
+  const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
+  if (!horgony) throw new Error('Ebben a koinóban nincs azonosság-szeleted (nem léptél be) — nincs mit átadni.');
+  // ⭐ D70: az adat függvény — a bemondott összeg a friss láncomból.
+  const adat = async () => {
+    const { osszeg, regi, keret } = await sajatKiosztott(kornyezet, kinek);
+    const kiosztva = osszeg + tobblet;
+    if (kiosztva > keret) {
+      throw new Error('Ennyi szabad tudatpontod nincs. Kereted ' + keret + ', ebből ' + osszeg + ' kiosztva.');
+    }
+    return { entitas: kinek, pont: regi + tobblet, kiosztva };
+  };
+  const uj = await esemenytTeszek(kornyezet, 'KeretAtadas', adat, { entitas: horgony });
+  console.log('muveletek.keretAtadasa - VÉGE', { azonosito: uj.azonosito, pont: uj.adat.pont });
+  return uj;
+}
+
+/**
+ * ⭐⭐ D128 (8.1, KU1 (a)): AZ ÁTFOLYÁS MÉRTÉKE — két készülékem találkozásakor a több szabad ponttal rendelkező a különbség FELÉT
+ * adja, de a fogadó RÉSZE (elhelyezett + szabad) nem lépheti túl a határt. ⭐ A határ az ADÓ szabálya (a lapon állítható — ④): egy
+ * ellopott készülék így legfeljebb a határig gyűjthet, akárhányszor találkozik a becsületessel (93. (g): határ nélkül a tolvajnál
+ * 10 találkozás után 4996 lett a saját 1000-es része helyett). A mag nem tud róla — a mag csak az átadást ellenőrzi.
+ * @param {{adoSzabad: number, kapoSzabad: number, kapoResze: number, hatar: number}} a
+ * @returns {number} hány pontot ad (0, ha semennyit)
+ */
+export function atfolyasMerteke({ adoSzabad, kapoSzabad, kapoResze, hatar }) {
+  const fel = Math.floor((adoSzabad - kapoSzabad) / 2);
+  const fer = hatar - kapoResze;
+  return Math.max(0, Math.min(fel, fer));
+}
+
+/**
+ * ⭐⭐ D128 (8.1): AZ ÁTFOLYÁS egy másik készülékem felé — a láncaink állásából (a táramban lévő láncából) annyit adok át, amennyit
+ * az `atfolyasMerteke` mond. ⚠️ A még át nem vett átadásaim (amit adtam, de a lánca még nem vett át) a részéhez és a szabadjához
+ * számítanak — különben minden találkozáskor újra adnék. ⏭️ A találkozás (mikor fut) a hálózattal jön (③), a határ a lappal (④).
+ * @param {Object} kornyezet
+ * @param {string} kinek - a másik készülékem kulcsa
+ * @param {{hatar: number}} beallitas - a fogadó határa (az én szabályom)
+ * @returns {Promise<{merteke: number, atadas: Object|null}>}
+ */
+export async function keretAtfolyasa(kornyezet, kinek, { hatar }) {
+  console.log('muveletek.keretAtfolyasa - KEZDÉS', { kinek, hatar });
+  if (!Number.isSafeInteger(hatar) || hatar < 0) throw new Error('A határ csak nemnegatív egész lehet.');
+  const en = await sajatKiosztott(kornyezet, kinek);
+  const o = await sajatKiosztott({ ...kornyezet, keszulek: kinek }, null);   // a fogadó lánca — ahogy a táramban áll
+  const fuggo = Math.max(0, en.regi - (o.allas.kapott.get(sajatLanc(kornyezet)) ?? 0));
+  const merteke = atfolyasMerteke({ adoSzabad: en.keret - en.osszeg, kapoSzabad: o.keret - o.osszeg + fuggo,
+    kapoResze: o.keret + fuggo, hatar });
+  const atadas = merteke > 0 ? await keretAtadasa(kornyezet, kinek, merteke) : null;
+  console.log('muveletek.keretAtfolyasa - VÉGE', { merteke, fuggo });
+  return { merteke, atadas };
+}
+
+/**
+ * A keret ÁTVÉTELE: egy másik készülékem nekem szóló átadását a saját láncomba veszem — a kapottam az adótól a halmozott
+ * összegre nő. A tanúsítványát mellékelem, ha az átadás nem hozza (a kapu az átadás aláírását is ellenőrzi).
+ * @param {Object} kornyezet
+ * @param {Object} atadas - az adó aláírt `KeretAtadas`-a
+ * @returns {Promise<Object>} az aláírt `KeretAtvetel`
+ */
+export async function keretAtvetele(kornyezet, atadas) {
+  console.log('muveletek.keretAtvetele - KEZDÉS', { atadas: atadas?.azonosito });
+  if (atadas?.tipus !== 'KeretAtadas' || atadas.szerzo !== kornyezet.szerzo || atadas.adat?.entitas !== sajatLanc(kornyezet)) {
+    throw new Error('Ez nem egy másik készülékednek nekem szóló keret-átadása.');
+  }
+  const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
+  if (!horgony) throw new Error('Ebben a koinóban nincs azonosság-szeleted (nem léptél be).');
+  const ado = lancKulcsa(atadas);
+  // ⭐ Előre ugyanaz az ítélet, amit a számítás mond majd (`keretAtvetelMerlege`) — egy nem számító átvételt nem írunk alá.
+  const { allas, folytonos, alapok } = await sajatKiosztott(kornyezet, null);
+  const elore = keretAtvetelMerlege({ tipus: 'KeretAtvetel', szerzo: kornyezet.szerzo, keszulek: sajatLanc(kornyezet),
+    adat: { atadas } }, allas, folytonos, alapok);
+  if (elore.elvetve) throw new Error('Az átvétel nem számítana: ' + elore.elvetve);
+  const t = atadas.tanusitvany ? null : await tarTanusitvanya(kornyezet.tar, ado);
+  const uj = await esemenytTeszek(kornyezet, 'KeretAtvetel', { atadas, ...(t ? { tanusitvanyok: [t] } : {}) },
+    { entitas: horgony, kapottKulcs: ado });
+  console.log('muveletek.keretAtvetele - VÉGE', { azonosito: uj.azonosito });
+  return uj;
 }
 
 // ===================================
@@ -1017,9 +1139,9 @@ export async function tudatpontRendezese(kornyezet, entitas, pont, szerep = 'akt
   // friss láncból újraszámolja a bemondott összeget, mielőtt újra aláírna.
   const adat = async () => {
     // A tudatpont ÁTRENDEZHETŐ: ami ezen az entitáson már ott van, az nem „új" kiadás.
-    const { osszeg, regi } = await sajatKiosztott(kornyezet, entitas);
+    // ⭐ D118/2: a koinó kerete — ⭐⭐ D128 (9.9): a készülékemé (az alap + a kapott).
+    const { osszeg, regi, keret } = await sajatKiosztott(kornyezet, entitas);
     const kiosztva = osszeg - regi + pont;
-    const keret = await sajatKeretem(kornyezet);   // ⭐ D118/2: a koinó kerete — ⭐⭐ D128 (9.9): a készülékemé
 
     if (kiosztva > keret) {
       throw new Error(

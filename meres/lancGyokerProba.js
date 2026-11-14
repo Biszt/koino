@@ -27,8 +27,8 @@ import { lancVege, kovetkezoEntitasSorszam, koinoEsemenyei } from '../js/tar/ese
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
 import { javaslatokSzamitasa } from '../js/allapot/javaslatSzamitas.js';
 import {
-  lancGyokerLancbol, lancGyokerKetGyokerbol, lancGyokerUjEsemenyhez, lancUjEsemenyhez, azonosLancGyoker,
-  KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ, NAPLO_FAJTA
+  lancGyokerLancbol, lancGyokerGyokerekbol, lancGyokerUjEsemenyhez, lancUjEsemenyhez, azonosLancGyoker,
+  KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ, NAPLO_FAJTA, KAPOTT_FAJTA, KAPOTT_HOSSZ
 } from '../js/allapot/lancGyoker.js';
 import { uresOsszegzes, allapotValtozasa } from '../js/esemeny/osszegzoFa.js';
 
@@ -79,7 +79,8 @@ proba('⭐ AZ ELSŐ ESEMÉNY GYÖKERE az üres napló és az üres kiosztás len
   const { tar, kornyezet } = await ujKornyezet();
   await koinoLetrehozasa(kornyezet, 'Első');
   const [elso] = await sajatLancEsemenyei(tar, kornyezet.kulcspar.keszulek);
-  const vart = lancGyokerKetGyokerbol(await uresOsszegzes(NAPLO_FAJTA, 0), await uresOsszegzes(KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ));
+  const vart = lancGyokerGyokerekbol(await uresOsszegzes(NAPLO_FAJTA, 0), await uresOsszegzes(KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ),
+    await uresOsszegzes(KAPOTT_FAJTA, KAPOTT_HOSSZ));
   return elso.sorszam === 1 && azonosLancGyoker(elso.lancGyoker, vart) && elso.lancGyoker.naplo.d === 0;
 });
 

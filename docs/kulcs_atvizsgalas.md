@@ -266,13 +266,40 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
   túl), az átvétel sem számít.
 - **Az átfolyás** (8.1) az adó szabálya (a határral) — a művelet adja; a két készülék találkozása (a hálózat) a ③-ban köti be.
 - **Az építés — (2a) az alap** (2026-11-14): `tagsag.js` `alapHorgony` (az azonosság horgonyai közül a LEGKORÁBBI — idő, holtversenyben
-  a kisebb azonosító; ha egy második készülék később maga is belép, a keret marad az elsőé) és `lancAlapja` (a szabály-réteg
-  láncónkénti kerete), `lancGyoker.js` `lancKerete` (ugyanaz a tárból — a lánc-gyökér, a művelet, a kapu és az észlelő vád-ellenőrzése
+  a kisebb azonosító; ha egy második készülék később maga is belép, a keret marad az elsőé) és `azonossagAlapjai`/`alapokAlapja` (a szabály-réteg
+  láncónkénti kerete — ADATKÉNT, nem beadott függvényként: D123 PR2), `lancGyoker.js` `lancAlapjai`/`lancAlapKerete` (ugyanaz a tárból — a lánc-gyökér, a művelet, a kapu és az észlelő vád-ellenőrzése
   ezt kérdezi), `muveletek.js` `sajatKeretem` (a szabad pontjaim és a pont-rendezés a KÉSZÜLÉKEM keretével). Ha a horgony nincs meg
   nálunk, a lánc kerete a koinóé (a tagság nélküli pont úgysem számít — D93/1). A próba: `keszulekProba.js` „A KERET A HORGONY
   LÁNCÁÉ” és „A MŰVELET IS A LÁNC KERETÉVEL SZÁMOL” (7 rontás). ⚠️ A vád-ellenőrzés kerete (a bemondás és a folytonosság vádja a
   keretet túllépő pont-eseménynél) most a lánc alapja — próbát a (2b)-vel kap, amikor a kapott miatt a lánc kerete egy ESEMÉNYHEZ
   kötött érték lesz (a vádpontkori kapott, a lánc-gyökérből), nem a láncé egészében.
+- **Az építés — (2b) a kapott** (2026-11-14). Az átadás (`KeretAtadas`) a pont-esemény gépezetével (`esemeny.js` `PONT_TIPUSOK`: a
+  kiosztás-fa levele, a bemondott összeg — D42 —, a saját bizonyíték — D81 —, a vád), és HALMOZOTT: a szabály a csökkenőt elveti
+  (`pontEsemenyMerlege`). Az alakja lánc-gyökeret kíván (különben egy eseményből nem ellenőrizhető). A visszaadás a másik irányú
+  átadás.
+  · **A lánc-gyökér** `{ naplo, kiosztas, kapott }` (`lancGyoker.js` `KAPOTT_FAJTA`, `lancGyokerGyokerekbol`); a gyorsítótár a kapottat is
+    tartja (3. változat), és a lánc alapjához köti a képét.
+  · **EGY FORRÁS:** `szabalyok.js` `lancLepese` (a pont-esemény a kiosztásra, az átvétel a kapottra; a keret az esemény előtt az
+    alap + a kapott) — a szabály-réteg, a saját lánc-gyökér és a művelet (`sajatKiosztott`) ugyanezt hívja. Hézagnál a kapott az
+    esemény aláírt kapott-gyökeréből (mint a D81-nél az összeg).
+  · **Az átvétel ítélete egy eseményből** (`keretAtvetelMerlege`): az átadás az azonosság egy másik készülékének ide szóló
+    `KeretAtadas`-a, a saját bizonyítékával megáll, és belefér az adó akkori keretébe (az alapja + az aláírt kapottja); a fogadó
+    levele csak NŐHET (az ismételt átvétel nem hoz semmit). Az adó bizonyított vádpontja után az átadásai nem számítanak.
+  · **A kapu** az átvétel átadásának aláírását és tanúsítványát (a tárból vagy a mellékelt `tanusitvanyok`-ból) és a kapott-fa
+    bizonyítékát nézi (`keretAtvetelOnbizonyitasa`).
+  · **A vád** (`ellentmondas.js`): a hívó a lánc ALAPJÁT adja, a kapottat a vádolt esemény aláírt előképe (a vádpontkori kapott).
+    ⏭️ A kapott-fa folytonosságának vádja (két szomszédos esemény kapott-gyökere nem egymásból jön) a (2c) után, saját lépésben.
+  · **A művelet:** `keretAtadasa(kornyezet, kinek, tobblet)`, `keretAtvetele(kornyezet, atadas)` (előre ugyanazzal az ítélettel —
+    nem számító átvételt nem ír alá); `sajatKeretem` = az alap + a kapott. A keret mozgása koinónként él: a gyermek jelenébe nem
+    jön át (`koinoLanc.js` `JELENBOL_KIZART`).
+  · A próba: `keszulekProba.js` „A KERET ÁTADÁSA ÉS ÁTVÉTELE”, „A KERET NEM SZAPORODHAT”, „CSAK A MÁSIK KÉSZÜLÉKEM IDE SZÓLÓ
+    ÁTADÁSA”, „AZ ÁTVÉTEL EGY ESEMÉNYBŐL ELLENŐRIZHETŐ” (20 rontás — a (2a) próbái az adatként átadott alappal újra).
+- **Az építés — (2c) az átfolyás** (2026-11-14): `muveletek.js` `atfolyasMerteke` (a 93. (g) modellje: a több szabad ponttal
+  rendelkező a különbség FELÉT adja, de a fogadó része — elhelyezett + szabad — nem lépheti túl a határt) és `keretAtfolyasa(kornyezet,
+  kinek, { hatar })` (a két lánc állásából a táramban; a még át nem vett átadásom a fogadó részéhez és szabadjához számít — különben
+  minden találkozáskor újra adnék). A próba: „AZ ÁTFOLYÁS A HATÁRIG” (3 rontás). ⏭️ Hogy MIKOR fut (a két készülék találkozása), az
+  a ③; a határ beállítása a ④ lapé. ❓ A határ ALAPÉRTÉKE nyitott — Csaba dönti el, amikor a ③ magától futtatja (a 93. (g) a 10 000-es
+  keretnél 2000-et és 3000-et mért).
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

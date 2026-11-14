@@ -16,7 +16,7 @@ import { probaGyujtemeny, tesztKeszulek, probaTanusitvanyok } from './probaFutta
 import { esemenyTarNyitasa, fajlBlobTarolo, lancTarolo } from '../js/tar/fajlTar.js';
 import { sajatLancEsemenyei, esemenyMentese } from '../js/tar/esemenyTar.js';
 import { koinoLetrehozasa, gondolatLetrehozasa, tudatpontRendezese } from '../js/muveletek.js';
-import { lancAllapotaLancbol, lancGyokerKetGyokerbol, lancUjEsemenyhez, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ } from '../js/allapot/lancGyoker.js';
+import { lancAllapotaLancbol, lancGyokerGyokerekbol, lancUjEsemenyhez, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ } from '../js/allapot/lancGyoker.js';
 import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
 import { allapotLista, ujAllapotFa, allapotBeallitas, allapotGyokere } from '../js/esemeny/osszegzoFa.js';
 import {
@@ -205,7 +205,7 @@ proba('⭐⭐ D79: a teljes kiosztás-lista — a hazug fa listájából a NEGAT
   const utolso = lanc[lanc.length - 1];
   const e = await esemenyLetrehozasa({ koino: KOINO, tipus: 'GondolatLetrehozas', adat: { cim: 'Csaló' }, entitas: null,
     entitasSorszam: 1, elozo: utolso.azonosito, sorszam: utolso.sorszam + 1,
-    lancGyoker: lancGyokerKetGyokerbol(igaz.naploGyoker, await allapotGyokere(csaloFa)) }, X.kulcspar);
+    lancGyoker: lancGyokerGyokerekbol(igaz.naploGyoker, await allapotGyokere(csaloFa), igaz.kapottGyoker) }, X.kulcspar);
   await atvesz(X.tar, [e]);
   const H = await keszulek();
   await atvesz(H.tar, [e]);

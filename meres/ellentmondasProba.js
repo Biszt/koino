@@ -28,7 +28,7 @@ import {
   koinoLetrehozasa, gondolatLetrehozasa, tudatpontRendezese, belepes, ellentmondasBejelentese
 } from '../js/muveletek.js';
 import {
-  lancAllapotaLancbol, lancGyokerKetGyokerbol, lancUjEsemenyhez, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ
+  lancAllapotaLancbol, lancGyokerGyokerekbol, lancUjEsemenyhez, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ
 } from '../js/allapot/lancGyoker.js';
 import { ellentmondasEllenorzese } from '../js/allapot/ellentmondas.js';
 import {
@@ -158,7 +158,7 @@ proba('⭐⭐ A HAMIS FOLYTONOSSÁG bizonyítéka átmegy — a következő esem
   const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   // A csaló a következő eseményben a napló igaz gyökerét, de a pont ELŐTTI kiosztást köti el.
   const igaz = await lancAllapotaLancbol(lanc);
-  const hamis = lancGyokerKetGyokerbol(igaz.naploGyoker, pont.lancGyoker.kiosztas);
+  const hamis = lancGyokerGyokerekbol(igaz.naploGyoker, pont.lancGyoker.kiosztas, igaz.kapottGyoker);
   const kov = await kezzelAlair(k, 'GondolatLetrehozas', { cim: 'Hamis gyökérrel' }, { lancGyoker: hamis });
   const r = await ellentmondasEllenorzese({ kit: k.szerzo, fajta: 'folytonossag', vadpont: kov.sorszam,
     esemeny: pont, kovetkezo: kov }, KOINO, { tanusitvany: k.tar });
@@ -175,7 +175,7 @@ proba('⭐⭐ A NEGATÍV LEVÉL bizonyítéka átmegy — a rejtett −5000 egy 
   for (const l of allapotLista(igaz.kiosztasFa)) await allapotBeallitas(csaloFa, l.kulcs, null, l.osszegek);
   await allapotBeallitas(csaloFa, 'nem-letezo-entitas', null, [-5000]);
   const e = await kezzelAlair(k, 'GondolatLetrehozas', { cim: 'Negatív levéllel' },
-    { lancGyoker: lancGyokerKetGyokerbol(igaz.naploGyoker, await allapotGyokere(csaloFa)) });
+    { lancGyoker: lancGyokerGyokerekbol(igaz.naploGyoker, await allapotGyokere(csaloFa), igaz.kapottGyoker) });
   const r = await ellentmondasEllenorzese({ kit: k.szerzo, fajta: 'negativ', vadpont: e.sorszam, esemeny: e,
     kulcs: 'nem-letezo-entitas', bizonyitek: await allapotBizonyitek(csaloFa, 'nem-letezo-entitas') }, KOINO, { tanusitvany: k.tar });
   return r.rendben && r.vadpont === e.sorszam;
@@ -300,7 +300,7 @@ proba('⭐⭐ A HAMIS ELŐKÉPŰ PONT-ESEMÉNY — önmagában következetes, cs
   const hamisFa = await igazFa(lanc, pont.sorszam - 1);                   // a pont ELŐTTI kiosztás (g1: 45)
   const kov = await kezzelAlair(k, 'TudatpontRendezes',
     { entitas: g2.azonosito, pont: 30, szerep: 'aktiv', kiosztva: 75 },   // 45 − 0 + 30: a hamis fához hibátlan
-    { entitas: g2.azonosito, lancGyoker: lancGyokerKetGyokerbol(igaz.naploGyoker, await allapotGyokere(hamisFa)),
+    { entitas: g2.azonosito, lancGyoker: lancGyokerGyokerekbol(igaz.naploGyoker, await allapotGyokere(hamisFa), igaz.kapottGyoker),
       bizonyitek: await allapotBizonyitek(hamisFa, g2.azonosito) });
   // Hézag a csaló láncában (a g2 születése hiányzik): a láncból számolt ellenőrzés nem ítélhet.
   const hezagos = async () => (await koinoEsemenyei(k.tar, KOINO)).filter((e) => !(e.szerzo === k.szerzo && e.sorszam === 3));

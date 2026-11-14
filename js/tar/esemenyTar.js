@@ -31,7 +31,8 @@ import { esemenyEllenorzese, elagazasE, szelet, esemenyKoinoja, azonositoAlaku, 
 // ⭐ D80: az `Ellentmondas` esemény TARTALMA is a kapun megy át (önmagát igazoló bizonyíték).
 import { ellentmondasEllenorzese } from '../allapot/ellentmondas.js';
 // ⭐ D81: a pont-esemény a saját bizonyítékát hozza — a kapu ellenőrzi, hogy illik a lánc-gyökeréhez.
-import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa, lancKerete } from '../allapot/lancGyoker.js';
+import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa, keretAtvetelOnbizonyitasa, lancAlapKerete }
+  from '../allapot/lancGyoker.js';
 import { CSOMAG_TIPUS, dontesiCsomagEllenorzese } from '../allapot/dontesiCsomag.js';
 // ⭐ D95/1: a lezárási összegzés alakja.
 import { LEZARASI_OSSZEGZES, lezarasiOsszegzesAlakja } from '../allapot/lezarasiOsszegzes.js';
@@ -126,7 +127,7 @@ function beagyazottak(e) {
   if (Array.isArray(a.lanc)) a.lanc.slice(0, 1024).forEach(hozza);
   if (Array.isArray(a.esemenyek)) a.esemenyek.slice(0, 1024).forEach(hozza);
   if (Array.isArray(a.szuloTagsag?.lanc)) a.szuloTagsag.lanc.slice(0, 1024).forEach(hozza);
-  for (const mezo of ['szuletes', 'esemeny', 'masik', 'kovetkezo']) hozza(a[mezo]);
+  for (const mezo of ['szuletes', 'esemeny', 'masik', 'kovetkezo', 'atadas']) hozza(a[mezo]);   // ⭐⭐ D128: az átvétel átadása
   return lista;
 }
 
@@ -164,6 +165,17 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
   if (!onbizonyitas.rendben) {
     console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: onbizonyitas.ok });
     return { mentve: false, ok: onbizonyitas.ok };
+  }
+
+  // ⭐⭐ D128 (9.9): a KERET ÁTVÉTELE — a hozott átadás ép, aláírt, tanúsított esemény (a tanúsítványa a tárból vagy mellékelve), a
+  // saját bizonyítékával; és az átvétel bizonyítéka a saját kapott-gyökeréhez illik. Az ítélet (számít-e) a számításé.
+  if (esemeny.tipus === 'KeretAtvetel') {
+    const at = await esemenyEllenorzese(esemeny.adat.atadas, { tanusitvany: kereso });
+    const kv = at.rendben ? await keretAtvetelOnbizonyitasa(esemeny) : { rendben: false, ok: 'az átadás nem ép: ' + at.ok };
+    if (!kv.rendben) {
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: kv.ok });
+      return { mentve: false, ok: kv.ok };
+    }
   }
 
   // ⭐ D85/2 (T2): a szavazat és a javaslat hozott bizonyítékai a saját lánc-gyökeréhez illenek-e.
@@ -242,7 +254,7 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
     // ⭐ D118/2: a koinó kerete a tárból (a születés azonosítója maga a koinó neve); ha nincs meg, a mai érték.
     const vad = await ellentmondasEllenorzese(esemeny.adat, esemeny.koino,
       // ⭐⭐ D128 (9.9): a vádolt LÁNCÁNAK kerete (az alap — a horgony lánca kapja).
-      { tudatpontKeret: await lancKerete(tar, esemeny.koino, lancKulcsa(esemeny.adat?.esemeny), esemeny.adat?.kit),
+      { tudatpontKeret: await lancAlapKerete(tar, esemeny.koino, lancKulcsa(esemeny.adat?.esemeny), esemeny.adat?.kit),
         tanusitvany: (k) => tarTanusitvanya(tar, k) });
     // ⚠️ A vádpontot (vagy elágazásnál a vesztest) a bejelentő mondja be — az ellenőrzés vetette össze.
     if (!vad.rendben) {

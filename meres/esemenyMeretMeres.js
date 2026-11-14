@@ -14,7 +14,8 @@ import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
 import {
   levelOsszegzes, naploGyokere, ujAllapotFa, allapotBeallitas, allapotGyokere, allapotBizonyitek
 } from '../js/esemeny/osszegzoFa.js';
-import { lancGyokerKetGyokerbol, NAPLO_FAJTA, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ } from '../js/allapot/lancGyoker.js';
+import { lancGyokerGyokerekbol, NAPLO_FAJTA, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ, KAPOTT_FAJTA, KAPOTT_HOSSZ }
+  from '../js/allapot/lancGyoker.js';
 
 const kiir = console.log;
 console.log = () => {};
@@ -57,7 +58,10 @@ kiir('Lánc-gyökér nélkül (null):  gondolat ' + bajt(await gondolat(null)) +
 for (const n of [10, 100, 1000, 10000]) {
   const fa = ujAllapotFa(KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ);
   for (let i = 0; i < n; i++) await allapotBeallitas(fa, azon(i), null, [1 + (i % 50)]);
-  const lancGyoker = lancGyokerKetGyokerbol(naplo, await allapotGyokere(fa));
+  // ⭐⭐ D128 (9.9): a kapott-fa egy átvétellel (a legtöbb készüléknek egy-két adója van).
+  const kapottFa = ujAllapotFa(KAPOTT_FAJTA, KAPOTT_HOSSZ);
+  await allapotBeallitas(kapottFa, azon(n + 1), null, [500]);
+  const lancGyoker = lancGyokerGyokerekbol(naplo, await allapotGyokere(fa), await allapotGyokere(kapottFa));
   // Átlag több entitás bizonyítékán (a mélység kulcsonként kicsit más).
   let osszeg = 0, lepes = 0;
   const minta = 20;

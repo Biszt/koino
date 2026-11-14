@@ -24,7 +24,7 @@ import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
 import {
   koinoLetrehozasa, gondolatLetrehozasa, tudatpontRendezese, ellentmondasokBejelentese
 } from '../js/muveletek.js';
-import { lancAllapotaLancbol, lancGyokerKetGyokerbol, lancUjEsemenyhez } from '../js/allapot/lancGyoker.js';
+import { lancAllapotaLancbol, lancGyokerGyokerekbol, lancUjEsemenyhez } from '../js/allapot/lancGyoker.js';
 import { allapotBizonyitek, allapotGyokere } from '../js/esemeny/osszegzoFa.js';
 import { ellentmondasokKeresese } from '../js/allapot/eszlelo.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
@@ -103,7 +103,7 @@ proba('⭐⭐ A HAMIS FOLYTONOSSÁGOT BÁRMELYIK OLDALRÓL MEGTALÁLJA — ha cs
   const igaz = await lancAllapotaLancbol(lanc);
   // A következő pont-esemény a pont ELŐTTI kiosztásra épít — önmagában hibátlan (45 − 0 + 30 = 75).
   const kov = await kezzelAlair(k, 'TudatpontRendezes', { entitas: g2.azonosito, pont: 30, szerep: 'aktiv', kiosztva: 75 }, {
-    lancGyoker: lancGyokerKetGyokerbol(igaz.naploGyoker, await allapotGyokere(elotte.kiosztasFa)),
+    lancGyoker: lancGyokerGyokerekbol(igaz.naploGyoker, await allapotGyokere(elotte.kiosztasFa), igaz.kapottGyoker),
     bizonyitek: await allapotBizonyitek(elotte.kiosztasFa, g2.azonosito) });
   const csakKov = await ellentmondasokKeresese(k.tar, KOINO, [kov]);
   const csakPont = await ellentmondasokKeresese(k.tar, KOINO, [pont]);

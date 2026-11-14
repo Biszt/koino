@@ -41,7 +41,8 @@ import {
   allapotBizonyitekEllenorzese, allapotValtozasa, osszegzesAlakja
 } from '../esemeny/osszegzoFa.js';
 import { KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ } from './lancGyoker.js';
-import { pontEsemenyMerlege } from './szabalyok.js';
+import { pontEsemenyMerlege, TUDATPONT_KERET } from './szabalyok.js';
+import { PONT_TIPUSOK } from '../esemeny/esemeny.js';
 
 export const ELLENTMONDAS_FAJTAK = Object.freeze(['bemondas', 'folytonossag', 'negativ', 'elagazas']);
 
@@ -85,12 +86,15 @@ async function pontHatasa(e, elotte, bizonyitek, keret) {
   const regi = b.van ? b.osszegek[0] : 0;
   const osszeg = elotte.kiosztas.o[0];
   // ⭐ D118/2: a koinó kerete (a hívó adja; ha nem, a mai érték) — ugyanaz, amivel a szerző a saját gyökerénél ítél.
-  return { regi, osszeg, merleg: pontEsemenyMerlege(e, { osszeg, pontok: new Map([[entitas, regi]]) }, true, keret) };
+  // ⭐⭐ D128 (9.9): a hívó a lánc ALAPJÁT adja — a kerete az esemény előtt az alap + az aláírt előkép kapottja.
+  const kapott = elotte.kapott?.o?.[0] ?? 0;
+  return { regi, osszeg,
+    merleg: pontEsemenyMerlege(e, { osszeg, pontok: new Map([[entitas, regi]]) }, true, (keret ?? TUDATPONT_KERET) + kapott) };
 }
 
 /** A pont-esemény utáni kiosztás-gyökér a szerző szabálya szerint (amit elvet, az nem változtat). */
 async function utanaKiosztas(e, elotte, bizonyitek, keret) {
-  if (e.tipus !== 'TudatpontRendezes') return elotte.kiosztas;
+  if (!PONT_TIPUSOK.has(e.tipus)) return elotte.kiosztas;   // ⭐⭐ D128: a keret átadása is pont-esemény
   const h = await pontHatasa(e, elotte, bizonyitek, keret);
   if (!h) return null;
   if (h.merleg.elvetve) return elotte.kiosztas;
@@ -144,7 +148,7 @@ export async function ellentmondasEllenorzese(adat, koino, beallitas = {}) {
 
   let vadpont;
   if (fajta === 'bemondas') {
-    if (e.tipus !== 'TudatpontRendezes') return nem('a bemondás csak pont-eseményé lehet');
+    if (!PONT_TIPUSOK.has(e.tipus)) return nem('a bemondás csak pont-eseményé lehet');
     const { pont, kiosztva } = e.adat ?? {};
     if (!Number.isSafeInteger(pont) || pont < 0 || !Number.isSafeInteger(kiosztva) || kiosztva < 0) {
       return nem('a pont-esemény alakja hibás (azt a szabály amúgy is elveti)');

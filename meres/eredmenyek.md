@@ -5372,6 +5372,25 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 94. ⭐ AZ ESEMÉNY MÉRETE A D128 UTÁN — a készülék mezője és a harmadik gyökér (a kapott) ára (D128 ①b (2b), 2026-11-14, a laptopon)
+
+*Az 53. mérés megismételve (`esemenyMeretMeres.js`), a D128 után: minden esemény a KÉSZÜLÉK kulcsát is hordozza (`keszulek`), és a
+lánc-gyökér a harmadik gyökeret is (`kapott` — a többi készülékemtől átvett keret, adónként).*
+
+```
+                                   |  gondolat  |  pont-esemény  |  az 53.-ban (gondolat / pont)
+lánc-gyökér nélkül (null)          |    723 B   |     634 B      |   647 B /   558 B
+kiosztás    10 entitáson           |    952 B   |   1 298 B      |   799 B / 1 145 B
+kiosztás   100 entitáson           |    955 B   |   1 523 B      |   802 B / 1 370 B
+kiosztás 1 000 entitáson           |    957 B   |   1 759 B      |   804 B / 1 606 B
+kiosztás 10 000 entitáson (keret)  |    959 B   |   2 016 B      |   806 B / 1 863 B
+```
+
+⭐ **A lelet:** a `keszulek` mező eseményenként **+76 B**, a harmadik gyökér **+~75 B** (a lánc-gyökér 155 B → 229 B); együtt
+**~+150 B** minden lánc-gyökeres eseményen. A pont-esemény a bizonyítékkal 1,3–2,0 KB. ⚠️ Ez a D128 ára: a kulcs papírra tehető, a
+telefon a saját kulcsával ír, és a keret egy eseményből ellenőrizhető marad (`kiosztva ≤ alap + kapott`). A tanúsítvány (281 B — „telefon” névvel, mérve)
+csak a lánc első eseményén utazik, és a láncán kívül a kísérőben.
+
 ## 93. ⭐ A KULCS: TÖBB KÉSZÜLÉK ÉS A HELYREÁLLÍTÁS — mit kíván a mai kód? (ET-3 átvizsgálása, 2026-11-13, a laptopon)
 
 *`node meres/kulcsMeres.js [a–g]` — a tervező ág ET-3 terve (`docs/terv_kulcs.md`) a kódhoz mérve; az átvizsgálás:

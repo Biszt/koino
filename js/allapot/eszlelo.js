@@ -24,7 +24,7 @@
 
 import { esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 import { ellentmondasEllenorzese } from './ellentmondas.js';
-import { lancKerete } from './lancGyoker.js';
+import { lancAlapKerete } from './lancGyoker.js';
 
 /**
  * A megadott események körül bizonyítható ellentmondások — ellenőrizve, ismétlés nélkül.
@@ -41,7 +41,7 @@ export async function ellentmondasokKeresese(tar, koino, esemenyek) {
   const probal = async (kulcs, adat) => {
     if (talalt.has(kulcs)) return;
     // ⭐⭐ D128 (9.9): a vádolt LÁNCÁNAK kerete (az alap).
-    const keret = { tudatpontKeret: await lancKerete(tar, koino, lancKulcsa(adat.esemeny), adat.kit), tanusitvany };
+    const keret = { tudatpontKeret: await lancAlapKerete(tar, koino, lancKulcsa(adat.esemeny), adat.kit), tanusitvany };
     if ((await ellentmondasEllenorzese(adat, koino, keret)).rendben) talalt.set(kulcs, adat);
   };
   // ⭐⭐ D128: egy pont egy LÁNCON (a készülékén) — a vádolt (`kit`) az azonosság.

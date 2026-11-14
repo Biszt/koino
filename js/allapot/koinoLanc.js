@@ -289,7 +289,10 @@ export function koinohozTartozik(e, koino, szuletesek, osok) {
 // ⭐ A BEKAPCSOLÓDÓK nemzedékenként: a létrehozó a SZÜLETÉSÉVEL bekapcsolódik (a születés az ő láncát folytatja — a lánc-pontja a
 // születés sorszáma); a többiek bekapcsolódása a ④.
 
-const JELENBOL_KIZART = new Set(['KoinoLetrehozas', 'DontesiCsomag', 'LezarasiOsszegzes', 'TagsagiCsomag']);
+// ⭐⭐ D128 (9.9): a keret mozgása (átadás, átvétel) koinónként él — a gyermek jelenébe nem jön át (a gyermek keretét a saját
+// horgonya osztja ki).
+const JELENBOL_KIZART = new Set(['KoinoLetrehozas', 'DontesiCsomag', 'LezarasiOsszegzes', 'TagsagiCsomag',
+  'KeretAtadas', 'KeretAtvetel']);
 const MINDENKIE = new Set(['GondolatLetrehozas', 'Ellentmondas']);
 
 /**

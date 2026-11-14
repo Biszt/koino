@@ -36,7 +36,8 @@ import {
   levelOsszegzes, osszegzesAlakja, azonosOsszegzes, naploBizonyitek, naploBizonyitekEllenorzese, naploKovetkezetesseg,
   naploKovetkezetessegEllenorzese, ujAllapotFa, allapotBeallitas, allapotGyokere, allapotBizonyitek, allapotLista
 } from '../esemeny/osszegzoFa.js';
-import { NAPLO_FAJTA, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ, lancAllapotaLancbol, lancKerete } from './lancGyoker.js';
+import { NAPLO_FAJTA, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ, lancAllapotaLancbol, lancAlapKerete, lancAlapjai } from './lancGyoker.js';
+import { alapokAlapja } from './tagsag.js';
 import { esemenyEllenorzese, AZONOSITO_MINTA, esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 import { ellentmondasEllenorzese } from './ellentmondas.js';
 import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a bekapcsolódó hozott előtagjával)
@@ -158,7 +159,7 @@ export async function lancValaszokFeldolgozasa({ tar, koino, tarolo }, kerdesek,
   // ⭐ D118/2: a koinó kerete — ⭐⭐ D128 (9.9): a vádolt LÁNCÁÉ (az alap); a készülék-tanúsítványok a tárból.
   const tanusitvany = (k) => tar.tanusitvany?.(k) ?? null;
   const vadRendben = async (adat) => (await ellentmondasEllenorzese(adat, koino,
-    { tudatpontKeret: await lancKerete(tar, koino, lancKulcsa(adat.esemeny), adat.kit), tanusitvany })).rendben;
+    { tudatpontKeret: await lancAlapKerete(tar, koino, lancKulcsa(adat.esemeny), adat.kit), tanusitvany })).rendben;
   const lista = Array.isArray(valaszok) ? valaszok.filter((v) => v && typeof v === 'object') : [];
   const elagazas = async (kit, esemeny, masik) => {
     const adat = { kit, fajta: 'elagazas', esemeny, masik,
@@ -330,7 +331,8 @@ export function lancKiszolgalo({ tar, koino }) {
         if (q.k === 1) {
           // ⭐ D118/2: a koinó kerete — ⭐⭐ D128 (9.9): a láncé · ⭐ (⑤b): a kiosztás a lánc nézete szerint (a bekapcsolódóé a
           // hozott pontokkal)
-          const a = await lancAllapotaLancbol(l.lanc.slice(0, q.d), await lancKerete(tar, koino, q.sz), l.nezet);
+          const alapjai = await lancAlapjai(tar, koino, l.lanc[0]?.szerzo ?? null);   // ⭐⭐ D128 (9.9): az alap + a kapott
+          const a = await lancAllapotaLancbol(l.lanc.slice(0, q.d), alapokAlapja(alapjai, q.sz), l.nezet, alapjai);
           const lista = a ? allapotLista(a.kiosztasFa) : null;
           if (lista && lista.length <= LISTA_KORLAT) v.k = lista.map((t) => [t.kulcs, t.osszegek[0]]);
         }

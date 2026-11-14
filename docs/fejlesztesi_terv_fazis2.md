@@ -6502,9 +6502,11 @@ szabály-rétegben, a lánc-gyökérben, a lánc-ellenőrzésben, a bekapcsolód
 
 *Az építés — ①b (2026-11-14, folyamatban):* **(1)** az azonosság utolsó állítása (`kesobbiAllitas`: egy láncon a sorszám, két
 készülék között az idő — 9.5); **(2a)** a keret alapja láncónként: a koinó kerete a horgonyt író készülék láncáé, a többié 0
-(`tagsag.js` `alapHorgony`/`lancAlapja`, `lancGyoker.js` `lancKerete`, `muveletek.js` `sajatKeretem`). Hátra: (2b) a kapott (a
-lánc-gyökér harmadik összegzése, az átadás és a `KeretAtvetel`), (2c) az átfolyás a határral, (3) a pontok összegzése
-azonosságonként, (4) a szavazás. A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.8–9.9.
+(`tagsag.js` `alapHorgony`/`azonossagAlapjai`, `lancGyoker.js` `lancAlapjai`, `muveletek.js` `sajatKeretem`); **(2b)** a kapott: a lánc-gyökér
+harmadik fája, a `KeretAtadas` (halmozott — saját típus, hogy egy eseményből eldőljön, hogy nem csökkenhet) és a `KeretAtvetel`
+(az adó aláírt átadását hozza, egy eseményből ellenőrizhető), `szabalyok.js` `lancLepese` (egy forrás a szabálynak, a saját
+gyökérnek és a műveletnek), `muveletek.js` `keretAtadasa`/`keretAtvetele`; **(2c)** az átfolyás (`atfolyasMerteke`, `keretAtfolyasa` — a különbség fele, a
+fogadó határáig; a határ alapértéke nyitott, a ③-mal). Hátra: (3) a pontok összegzése azonosságonként, (4) a szavazás. A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.8–9.9.
 
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 

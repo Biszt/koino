@@ -565,9 +565,17 @@ export function koinoSzuleteseListabol(esemenyek, koino = null) {
 export function lancElokepAlakja(x, sorszam) {
   const osszegzes = (y, hossz) => !!y && typeof y === 'object' && Object.keys(y).length === 3
     && osszegzesAlakja(y, hossz);
-  return !!x && typeof x === 'object' && !Array.isArray(x) && Object.keys(x).length === 2
-    && osszegzes(x.naplo, 0) && osszegzes(x.kiosztas, 1) && x.naplo.d === sorszam - 1;
+  // ⭐⭐ D128 (9.9): a HARMADIK gyökér a kapott (a többi készülékemtől átvett keret — adónként a halmozott összeg).
+  return !!x && typeof x === 'object' && !Array.isArray(x) && Object.keys(x).length === 3
+    && osszegzes(x.naplo, 0) && osszegzes(x.kiosztas, 1) && osszegzes(x.kapott, 1) && x.naplo.d === sorszam - 1;
 }
+
+/**
+ * ⭐⭐ D128 (9.9): a PONT-ESEMÉNYEK — amik a kiosztás-fában egy levelet állítanak (a bemondott összeggel, D42; a saját
+ * bizonyítékukkal, D81): a gondolatra tett pont és a keret ÁTADÁSA egy másik készülékemnek (a levél kulcsa a fogadó készülék
+ * kulcsa). ⚠️ Az átadás nem gondolat-pont: az állapot a gondolatok pontjai közé nem számolja (csak a `TudatpontRendezes`-t).
+ */
+export const PONT_TIPUSOK = new Set(['TudatpontRendezes', 'KeretAtadas']);
 
 /**
  * ⭐ AZ ALAKI ELLENŐRZÉS ÖNMAGÁBAN — szinkron és olcsó (2026-09-24, 40. mérés).
@@ -698,7 +706,7 @@ export function alakiHiba(esemeny) {
   // események, és ha a szerző saját lánca nem ép). ⛔ Pontosan két összegzés, és a napló darabja a
   // sorszám − 1 (annyi eseménye volt előtte): egy alak van, nem kettő.
   if (esemeny.lancGyoker !== null && !lancElokepAlakja(esemeny.lancGyoker, esemeny.sorszam)) {
-    return 'a lancGyoker csak a két gyökér (napló, kiosztás) vagy null lehet';
+    return 'a lancGyoker csak a három gyökér (napló, kiosztás, kapott) vagy null lehet';
   }
 
   // ----- ⛔ D77: A SZÜLETÉS SZÜLŐJE — mert az is szelet-kulcs lesz -----
@@ -753,6 +761,24 @@ export function alakiHiba(esemeny) {
   }
   if (esemeny.tipus === 'TagsagiCsomag' && (!Array.isArray(esemeny.adat?.lanc) || !azonositoAlaku(esemeny.entitas))) {
     return 'a tagsági csomag a horgonyhoz szól, és a lánc eseményeit hordozza';
+  }
+  // ⭐⭐ D128 (9.9): a KERET ÁTADÁSA — az azonosság egy MÁSIK készülékének (a kulcsa a kiosztás-fa levele), és csak a lánc-gyökérrel
+  // (a saját bizonyítékával): így egyetlen eseményből ellenőrizhető (D42, D81) — az átvétel ezt hozza.
+  if (esemeny.tipus === 'KeretAtadas') {
+    const a = esemeny.adat;
+    if (!a || !azonositoAlaku(a.entitas) || a.entitas === esemeny.keszulek || esemeny.lancGyoker === null) {
+      return 'a keret-átadás egy másik készülék kulcsának szól, és a lánc-gyökerével (a saját bizonyítékával) jár';
+    }
+  }
+  // ⭐⭐ D128 (9.9): a KERET ÁTVÉTELE — az azonosság egy másik készülékének EZ a készülék szóló átadását hozza (ugyanebből a
+  // koinóból), a lánc-gyökérrel (a kapott-fa bizonyítékával).
+  if (esemeny.tipus === 'KeretAtvetel') {
+    const at = esemeny.adat?.atadas;
+    if (!at || typeof at !== 'object' || Array.isArray(at) || at.tipus !== 'KeretAtadas' || at.szerzo !== esemeny.szerzo
+      || at.adat?.entitas !== esemeny.keszulek || lancKulcsa(at) === esemeny.keszulek
+      || esemenyKoinoja(at) !== esemenyKoinoja(esemeny) || esemeny.lancGyoker === null) {
+      return 'a keret-átvétel az azonosság egy másik készülékének ide szóló átadását hozza, a lánc-gyökerével';
+    }
   }
   // ⭐ D94: a 2. lépcső bemondása — a saját horgonyhoz szól, és a tanúsítások azonosítóit hordozza (1–16, ismétlés nélkül).
   if (esemeny.tipus === 'LepcsoBemondas') {

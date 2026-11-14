@@ -32,12 +32,13 @@
 
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
-import { koinoSzuleteseListabol, esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
+import { koinoSzuleteseListabol, esemenyKoinoja, lancKulcsa, PONT_TIPUSOK } from '../esemeny/esemeny.js';
 // ⭐ D93/1: a tagság (egy forrás — `tagsag.js`).
-import { tagsagiIndex, szerzoTagsaga, lancAlapja } from './tagsag.js';
+import { tagsagiIndex, szerzoTagsaga, azonossagAlapjai, alapokAlapja } from './tagsag.js';
 
 /** A döntés eseményei — csak az ellenőrzött tag szerzőé számít (D93/1). */
-export const TAGSAG_KELL = new Set(['TudatpontRendezes', 'Javaslat', 'Szavazat', 'ErtekJavaslat', 'Allasfoglalas']);
+export const TAGSAG_KELL = new Set(['TudatpontRendezes', 'Javaslat', 'Szavazat', 'ErtekJavaslat', 'Allasfoglalas',
+  'KeretAtadas', 'KeretAtvetel']);   // ⭐⭐ D128 (9.9): a keret mozgása is csak tagé
 
 // ===================================
 // A TUDATPONT-KERET
@@ -387,6 +388,17 @@ export function pontEsemenyMerlege(e, allas, folytonos, keret = TUDATPONT_KERET,
   const regi = allas.pontok.get(e.adat.entitas) ?? 0;
   const ujOsszeg = allas.osszeg - regi + pont;
 
+  // ----- ⭐⭐ D128 (9.9): A KERET ÁTADÁSA HALMOZOTT — nem csökkenhet -----
+  // A fogadó a halmozott összeget veszi át (a kapott-fában az adó levele ennyi); ha az adó visszavehetné, ugyanaz a pont két
+  // készüléken is számítana. A visszaadás a MÁSIK irányú átadás. ⭐ Egy eseményből eldől: az átadás mindig hozza a saját
+  // bizonyítékát (az alakja lánc-gyökeret kíván, a kapu a bizonyítékot) — a régi értéke a sajátjából.
+  if (e.tipus === 'KeretAtadas') {
+    const elozo = sajat ? sajat.regi : regi;
+    if (pont < elozo) {
+      return { elvetve: 'a keret-átadás halmozott — nem csökkenhet (' + elozo + ' → ' + pont + ')' };
+    }
+  }
+
   // ----- ⭐⭐ A BEMONDÁS ÖSSZEVETÉSE A SAJÁT LÁNCÁVAL -----
   //
   // ITT VÁLIK A HALLGATÁS ÁTADHATÓ BIZONYÍTÉKKÁ. Aki elhallgat egy pont-eseményt,
@@ -417,6 +429,111 @@ export function pontEsemenyMerlege(e, allas, folytonos, keret = TUDATPONT_KERET,
   }
 
   return { jelzes, entitas: e.adat.entitas, pont, ujOsszeg };
+}
+
+// ===================================
+// ⭐⭐ D128 (9.9): A KERET ÁTVÉTELE ÉS A LÁNC EGY LÉPÉSE
+// ===================================
+//
+// Egy lánc (egy készülék) kerete egy eseményénél = az ALAPJA (a koinó kerete, ha ez a lánc írta az azonosság horgonyát; különben
+// 0) + a KAPOTT (a többi készülékétől eddig átvett — a lánc-gyökér harmadik fája, adónként a halmozott összeg). Az átvétel
+// (`KeretAtvetel`) az adó aláírt átadását hozza; az ítélete EGY eseményből dől el, mint a pont-eseményé (D42, D81).
+// ⭐ EGY FORRÁS: a `lancLepese`-t hívja a szabály-réteg, a saját lánc-gyökér (`lancGyoker.js`) és a művelet (`sajatKiosztott`) —
+// különben a saját gyökerünk ellentmondana annak, amit a másik gép számol.
+
+/** Egy új (üres) lánc-állás: a kiosztás (entitás/készülék → pont) és a kapott (adó készülék → halmozott). */
+export function ujLancAllas() {
+  return { osszeg: 0, pontok: new Map(), kapott: new Map(), kapottOsszeg: 0 };
+}
+
+/**
+ * Az átvétel SAJÁT bizonyítéka (a D81 mintája): a kapott-fa aláírt gyökerének összege és az adó levelének régi értéke (a
+ * bizonyíték végpontjából; ha a végpont nem az adóé, 0 — ez a hiány bizonyítéka). ⚠️ A kapu ellenőrizte, hogy a bizonyíték a
+ * gyökérhez illik (`keretAtvetelOnbizonyitasa`). Null, ha nem hozza.
+ * @returns {{osszeg: number, regi: number}|null}
+ */
+export function kapottOnbizonyitas(e) {
+  const k = e?.lancGyoker?.kapott;
+  const b = e?.adat?.bizonyitek;
+  if (!k || typeof k !== 'object' || !Array.isArray(k.o) || !b || typeof b !== 'object') return null;
+  const ado = lancKulcsa(e.adat?.atadas);
+  const vp = b.vegpont;
+  const regi = vp && vp.kulcs === ado && Array.isArray(vp.osszegek) ? vp.osszegek[0] : 0;
+  if (!Number.isSafeInteger(k.o[0]) || !Number.isSafeInteger(regi)) return null;
+  return { osszeg: k.o[0], regi };
+}
+
+/**
+ * ⭐⭐ AZ ÁTVÉTEL ÍTÉLETE — egy eseményből, mint a pont-eseményé:
+ *   · az ÁTADÁS maga: az azonosság egy MÁSIK készülékének EZ a lánc (készülék) szóló `KeretAtadas`-a, ami a saját bizonyítékával
+ *     megáll — a bemondott összege kijön az aláírt előző állapotából, és belefér az adó akkori keretébe (az alapja + az aláírt
+ *     kapottja); és nem csökken (`pontEsemenyMerlege`);
+ *   · a fogadó kapottja: az adó levele a halmozott összegre nő — ha nem nő, az átvétel nem hoz semmit (elvetve).
+ * @param {Object} e - a `KeretAtvetel`
+ * @param {Object} allas - a lánc állása (`ujLancAllas`)
+ * @param {boolean} folytonos - hézagtalanul ismerjük-e a láncot eddig
+ * @param {{keret: number, horgonyLanca: string|null}} alapok - az azonosság láncainak alapjai (`tagsag.js` `azonossagAlapjai`)
+ * @returns {{elvetve: string}|{ado: string, pont: number, ujOsszeg: number}}
+ */
+export function keretAtvetelMerlege(e, allas, folytonos, alapok) {
+  const at = e.adat?.atadas;
+  if (!at || typeof at !== 'object' || at.tipus !== 'KeretAtadas' || at.szerzo !== e.szerzo
+    || at.adat?.entitas !== lancKulcsa(e) || lancKulcsa(at) === lancKulcsa(e)) {
+    return { elvetve: 'az átvétel nem az azonosság egy másik készülékének ide szóló keret-átadását hozza' };
+  }
+  // ----- Az átadás: egy eseményből — az adó kerete az átadáskor: az alapja + az aláírt kapottja -----
+  const sajatA = onbizonyitas(at);
+  const adoKapott = at.lancGyoker?.kapott?.o?.[0];
+  if (!sajatA || !Number.isSafeInteger(adoKapott)) {
+    return { elvetve: 'az átadás nem hordozza a saját bizonyítékát (D81) — egy eseményből nem ellenőrizhető' };
+  }
+  const ado = lancKulcsa(at);
+  const adoMerleg = pontEsemenyMerlege(at, { osszeg: sajatA.osszeg, pontok: new Map([[at.adat.entitas, sajatA.regi]]) }, true,
+    alapokAlapja(alapok, ado) + adoKapott);
+  if (adoMerleg.elvetve) return { elvetve: 'az átadás nem számít: ' + adoMerleg.elvetve };
+
+  // ----- A fogadó kapottja: a régi érték a saját bizonyítékából (hézagnál is), különben a láncából -----
+  const sajat = kapottOnbizonyitas(e);
+  const lancbol = allas.kapott.get(ado) ?? 0;
+  if (sajat && folytonos && (sajat.regi !== lancbol || sajat.osszeg !== allas.kapottOsszeg)) {
+    return { elvetve: 'az átvétel aláírt előképe ellentmond a saját láncának (kapott: ' + sajat.osszeg + ' / '
+      + allas.kapottOsszeg + ')' };
+  }
+  const regi = sajat ? sajat.regi : lancbol;
+  const elotte = sajat ? sajat.osszeg : allas.kapottOsszeg;
+  const pont = at.adat.pont;
+  if (pont <= regi) {
+    return { elvetve: 'az átvétel nem hoz újat (átadva összesen ' + pont + ', már átvéve ' + regi + ')' };
+  }
+  return { ado, pont, ujOsszeg: elotte - regi + pont };
+}
+
+/**
+ * ⭐⭐ A LÁNC EGY LÉPÉSE — egy esemény hatása a lánc állására (a pont-esemény a kiosztásra, az átvétel a kapottra). A keret az
+ * esemény ELŐTT: az alap + a kapott (hézagnál, ha az esemény hozza, az aláírt kapott-gyökeréből — mint a D81-nél az összeg; a
+ * hozott — az ős láncából jött — eseménynél a jelen állásból).
+ * @returns {Object|null} a mérleg (`elvetve` / `jelzes`), vagy null, ha az esemény a keretet nem érinti
+ */
+export function lancLepese(allas, e, folytonos, alap, alapok, hozott = false) {
+  if (PONT_TIPUSOK.has(e.tipus)) {
+    const alairt = e.lancGyoker?.kapott?.o?.[0];
+    const kapott = !folytonos && !hozott && Number.isSafeInteger(alairt) ? alairt : allas.kapottOsszeg;
+    const merleg = pontEsemenyMerlege(e, allas, folytonos, alap + kapott, hozott);
+    if (!merleg.elvetve) {
+      allas.pontok.set(merleg.entitas, merleg.pont);
+      allas.osszeg = merleg.ujOsszeg;
+    }
+    return merleg;
+  }
+  if (e.tipus === 'KeretAtvetel') {
+    const merleg = keretAtvetelMerlege(e, allas, folytonos, alapok);
+    if (!merleg.elvetve) {
+      allas.kapott.set(merleg.ado, merleg.pont);
+      allas.kapottOsszeg = merleg.ujOsszeg;
+    }
+    return merleg;
+  }
+  return null;
 }
 
 // ===================================
@@ -584,12 +701,12 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
 
   for (const lanc of lancok.values()) {
     const rendezett = [...lanc].sort((a, b) => a.sorszam - b.sorszam);
-    // ⭐⭐ D128 (9.9): a lánc kerete — az alap (a koinó kerete, ha ez a lánc írta az azonosság horgonyát; különben 0).
-    const lancKeret = rendezett.length
-      ? lancAlapja(tidx, rendezett[0].szerzo, lancKulcsa(rendezett[0]), koinoSzabalyok.tudatpontKeret)
-      : koinoSzabalyok.tudatpontKeret;
-    const pontok = new Map();            // entitás → a szerző jelenlegi pontja rajta
-    let osszeg = 0;                      // mennyit osztott ki eddig összesen
+    // ⭐⭐ D128 (9.9): a lánc alapja (a koinó kerete, ha ez a lánc írta az azonosság horgonyát; különben 0) — a kerete az alap + a
+    // kapott (az átvételei), eseményenként (`lancLepese`).
+    const alapok = rendezett.length ? azonossagAlapjai(tidx, rendezett[0].szerzo, koinoSzabalyok.tudatpontKeret)
+      : { keret: koinoSzabalyok.tudatpontKeret, horgonyLanca: null };
+    const lancAlap = rendezett.length ? alapokAlapja(alapok, lancKulcsa(rendezett[0])) : koinoSzabalyok.tudatpontKeret;
+    const lancAllas = ujLancAllas();     // a kiosztás (entitás → pont, az összeg) és a kapott (adó → halmozott)
 
     // ⭐ ISMERJÜK-E A LÁNCOT HÉZAGTALANUL EDDIG A PONTIG?
     // Ez dönti el, hogy egy eltérő bemondás BIZONYÍTOTT ellentmondás-e, vagy csak a mi
@@ -606,8 +723,9 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
 
 
       // ===== 1. SZABÁLY: A TUDATPONT-KERET =====
-      // ⭐ Az ítélet a `pontEsemenyMerlege`-ben él — a művelet-réteg UGYANAZT hívja (lent).
-      if (e.tipus === 'TudatpontRendezes') {
+      // ⭐ Az ítélet a `pontEsemenyMerlege`-ben él — a művelet-réteg UGYANAZT hívja (lent). ⭐⭐ D128 (9.9): a keret átadása is
+      // pont-esemény, az átvétele a kapottat állítja — mindkettő a `lancLepese`-n át.
+      if (PONT_TIPUSOK.has(e.tipus) || e.tipus === 'KeretAtvetel') {
         // ⛔ D79/D80: a bizonyított ellentmondástól a szerző pont-eseményei nem számítanak.
         const vadpont = vadpontok.get(lancKulcsa(e));
         if (vadpont !== undefined && e.sorszam >= vadpont) {
@@ -615,16 +733,19 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
             + '. eseményétől a pontjai nem számítanak');
           continue;
         }
+        // ⛔ ⭐⭐ D128: az átvétel sem, ha az ADÓ lánca az átadásig bizonyítottan hazudott.
+        const at = e.tipus === 'KeretAtvetel' ? e.adat?.atadas : null;
+        const adoVadpont = at && typeof at === 'object' ? vadpontok.get(lancKulcsa(at)) : undefined;
+        if (adoVadpont !== undefined && at.sorszam >= adoVadpont) {
+          kivetel(e, 'az átadó készülék láncában bizonyított ellentmondás van (D80) — a ' + adoVadpont
+            + '. eseményétől az átadásai nem számítanak');
+          continue;
+        }
         // ⭐ D118 (④a): az ős eseménye a gyermek jelenében HOZOTT (a koinó a születése neve — a jelen bemenetében egyedül az övé).
         const hozott = koinoNeve !== null && esemenyKoinoja(e) !== koinoNeve;
-        const merleg = pontEsemenyMerlege(e, { osszeg, pontok }, folytonos, lancKeret, hozott);
+        const merleg = lancLepese(lancAllas, e, folytonos, lancAlap, alapok, hozott);
         if (merleg.jelzes) nemEllenorizheto(e, merleg.jelzes);
-        if (merleg.elvetve) {
-          kivetel(e, merleg.elvetve);
-          continue;   // a régi érték marad érvényben
-        }
-        pontok.set(merleg.entitas, merleg.pont);
-        osszeg = merleg.ujOsszeg;
+        if (merleg.elvetve) kivetel(e, merleg.elvetve);   // a régi érték marad érvényben
         continue;
       }
 
@@ -729,7 +850,7 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
         const hozott = hozottSajatPontok(e);
         const hianyzo = hozott
           ? kik.find((r) => (hozott.get(r.entitas) ?? 0) <= 0)
-          : kik.find((r) => (pontok.get(r.entitas) ?? 0) <= 0);
+          : kik.find((r) => (lancAllas.pontok.get(r.entitas) ?? 0) <= 0);
         if (hianyzo) {
           kivetel(e, hozott
             ? 'a javaslattevő nem bizonyította, hogy minden érintett entitáson van tudatpontja'
@@ -832,7 +953,7 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
 
         // Van-e pontom a hatókör gyökerén VAGY bármely leszármazottján?
         let jogosult = false;
-        for (const [entitas, pont] of pontok) {
+        for (const [entitas, pont] of lancAllas.pontok) {
           if (pont <= 0) continue;
           if (leszarmazottE(entitas, hatokorGyokere, szulok)) { jogosult = true; break; }
         }

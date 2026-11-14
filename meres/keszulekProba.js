@@ -9,6 +9,11 @@
 //   · két készülék egy azonossággal: azonos sorszámuk nem elágazás, mindkét lánc bejut és számít;
 //   · ⭐ (①b (2a)) a keret a horgony láncáé: a belépést író készülék kapja a koinó keretét, a többié 0 — a szabály-réteg és a tár
 //     (a művelet, a vád) ugyanazt mondja;
+//   · ⭐ (①b (2b)) a keret átadása és átvétele: a fogadó kerete nő (a lánc-gyökér kapott-fája), az adóé fogy; a csökkenő átadás, a
+//     kereten túli átadás átvétele és az ismételt átvétel nem számít; a hamis kapott-bizonyíték a kapun elbukik; és az átvétel
+//     az adó lánca nélkül, egyetlen eseményből ellenőrizhető;
+//   · ⭐ (①b (2c)) az átfolyás: a különbség fele, a fogadó határáig — a még át nem vett átadás is a részéhez számít; egy tolvaj a
+//     határnál megáll (a 93. (g) modellje);
 //   · a készülék a gépen: létrejön, újranyitáskor ugyanaz, másik azonosságnál új;
 //   · a csomag tanúsítvány-keresője csak a hiteles, a szerzőt és a készüléket nevező tanúsítványt veszi fel.
 //
@@ -28,9 +33,15 @@ import { lenyomat, bajtokBase64Url } from '../js/esemeny/kanonikusAlak.js';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { esemenyMentese, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
-import { lancKerete } from '../js/allapot/lancGyoker.js';
+import { lancAlapKerete } from '../js/allapot/lancGyoker.js';
 import { TUDATPONT_KERET } from '../js/allapot/szabalyok.js';
-import { tudatpontRendezese, szabadTudatpontjaim } from '../js/muveletek.js';
+import { tudatpontRendezese, szabadTudatpontjaim, keretAtadasa, keretAtvetele, keretAtfolyasa, atfolyasMerteke }
+  from '../js/muveletek.js';
+import { ujSajatHelye } from '../js/tar/esemenyTar.js';
+import { lancUjEsemenyhez, KAPOTT_FAJTA, KAPOTT_HOSSZ } from '../js/allapot/lancGyoker.js';
+import { ujAllapotFa, allapotBizonyitek } from '../js/esemeny/osszegzoFa.js';
+import { ellentmondasEllenorzese } from '../js/allapot/ellentmondas.js';
+import { keretAtvetelMerlege, ujLancAllas } from '../js/allapot/szabalyok.js';
 import { sajatSzavazat } from '../js/allapot/javaslatSzamitas.js';
 
 const { proba, futtatas } = probaGyujtemeny('A készülék és a tanúsítványa (D128 — ET-3)');
@@ -248,17 +259,17 @@ proba('⭐⭐ A KERET A HORGONY LÁNCÁÉ (9.9) — a belépést író készül�
   // A tár: a belépés (a horgony) a laptop láncán — két menetben (a lánc eleje előbb, a tanúsítvány miatt).
   for (let i = 0; i < 2; i++) for (const e of lista) await esemenyMentese(tar, e);
   const belepes = lista.find((e) => e.tipus === 'Belepes' && e.szerzo === laptop.szerzo);
-  const laptopKerete = await lancKerete(tar, KOINO, laptop.keszulek);
-  const telefonKerete = await lancKerete(tar, KOINO, telefon.keszulek);
+  const laptopKerete = await lancAlapKerete(tar, KOINO, laptop.keszulek);
+  const telefonKerete = await lancAlapKerete(tar, KOINO, telefon.keszulek);
   // ⭐ Ha a telefon KÉSŐBB maga is belép (egy második horgony), a keret marad a laptopé — a LEGKORÁBBI horgony dönt.
   const masodik = await telefon.tesz('Belepes', {}, belepes.ido + 1000);
   const lista2 = [...lista, masodik];
   const ent2 = allapotSzamitasa(lista2).entitasok.get(g.azonosito);
   for (let i = 0; i < 2; i++) await esemenyMentese(tar, masodik);
-  const telefonKerete2 = await lancKerete(tar, KOINO, telefon.keszulek);
+  const telefonKerete2 = await lancAlapKerete(tar, KOINO, telefon.keszulek);
   return belepes?.keszulek === laptop.keszulek && ent?.osszesPont === 10 && !!elvetett && /keret/.test(elvetett.ok)
     && laptopKerete === TUDATPONT_KERET && telefonKerete === 0
-    && ent2?.osszesPont === 10 && telefonKerete2 === 0 && (await lancKerete(tar, KOINO, laptop.keszulek)) === TUDATPONT_KERET;
+    && ent2?.osszesPont === 10 && telefonKerete2 === 0 && (await lancAlapKerete(tar, KOINO, laptop.keszulek)) === TUDATPONT_KERET;
 });
 
 proba('⭐⭐ A MŰVELET IS A LÁNC KERETÉVEL SZÁMOL (9.9) — a telefonnak 0 szabad pontja van, és a pont-rendezése elutasítva; a laptop a teljes kerettel ír', async () => {
@@ -277,6 +288,155 @@ proba('⭐⭐ A MŰVELET IS A LÁNC KERETÉVEL SZÁMOL (9.9) — a telefonnak 0 
   const uj = await tudatpontRendezese(kornyezete(laptop), g.azonosito, 20);
   return telefonSzabad === 0 && /Kereted 0/.test(telefonHiba ?? '') && laptopSzabad === TUDATPONT_KERET - 10
     && uj?.adat?.pont === 20 && uj.keszulek === laptop.keszulek;
+});
+
+// ===================================
+// 4/b. ⭐⭐ A KERET ÁTADÁSA ÉS ÁTVÉTELE (①b (2b) — 9.9)
+// ===================================
+
+/** Egy laptop (a belépéssel — a teljes kerettel), egy telefon (ugyanaz az azonosság), egy gondolat a laptop 10 pontjával — tárban. */
+async function ketKeszulek() {
+  const tar = await ujTar();
+  const laptop = await ujEember(KOINO);
+  const telefon = await ujEember(KOINO, await tesztKeszulek('telefon', laptop.kulcspar.azonossagKulcspar));
+  const g = await laptop.tesz('GondolatLetrehozas', { cim: 'Közös' });
+  const lp = await laptop.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 10 });
+  const lista = await tagokkal([g, lp]);
+  for (let i = 0; i < 2; i++) for (const e of lista) await esemenyMentese(tar, e);
+  // A két készülék találkozott (③): egymás tanúsítványát ismerik — a telefoné így a laptop tárában is megvan.
+  await tar.tanusitvanyFelvetele(telefon.kulcspar.tanusitvany);
+  const kornyezete = (ki) => ({ koino: KOINO, kulcspar: ki.kulcspar, szerzo: ki.szerzo, tar });
+  return { tar, laptop, telefon, g, kL: kornyezete(laptop), kT: kornyezete(telefon) };
+}
+
+/**
+ * Egy esemény a művelet NÉLKÜL — a lánc végére, a lánc-gyökérrel és a bizonyítékkal (amit a művelet nem írna alá: a csökkenő átadás,
+ * a kereten túli átadás, az ismételt vagy hamis bizonyítékú átvétel). `kapottKulcs`: átvételnél az adó (a kapott-fa bizonyítéka).
+ */
+async function nyersen(tar, ember, tipus, adat, { kapottKulcs = null, hamisKapott = false, bizonyitekKulcs = null } = {}) {
+  const veg = await ujSajatHelye(tar, ember.keszulek, KOINO, tipus, adat);
+  // `bizonyitekKulcs`: az átadás bizonyítéka egy MÁSIK levélé (a hamis bizonyíték).
+  const r = await lancUjEsemenyhez(tar, KOINO, ember.keszulek, veg.sorszam, null,
+    tipus === 'KeretAtadas' ? bizonyitekKulcs ?? adat.entitas : null, kapottKulcs);
+  // A hamis: az üres kapott-fa bizonyítéka (mintha még semmit nem vettem volna át) — a valódi gyökérhez nem illik.
+  const kapottB = hamisKapott ? await allapotBizonyitek(ujAllapotFa(KAPOTT_FAJTA, KAPOTT_HOSSZ), kapottKulcs) : r.kapottBizonyitek;
+  const bizonyitek = tipus === 'KeretAtadas' ? r.bizonyitek : kapottB;
+  return esemenyLetrehozasa({ koino: KOINO, tipus, adat: { ...adat, bizonyitek }, entitas: null, entitasSorszam: 1, latott: [],
+    lancGyoker: r.lancGyoker, ...veg }, ember.kulcspar);
+}
+
+proba('⭐⭐ A KERET ÁTADÁSA ÉS ÁTVÉTELE (9.9) — a laptop átad, a telefon átveszi: a telefon kerete nő (a kapott-fában), a laptopé fogy; az állapot mindhármat számolja', async () => {
+  const { tar, laptop, telefon, g, kL, kT } = await ketKeszulek();
+  const telefonElotte = await szabadTudatpontjaim(kT);
+  const a1 = await keretAtadasa(kL, telefon.keszulek, 300);
+  const laptopUtana = await szabadTudatpontjaim(kL);
+  const v1 = await keretAtvetele(kT, a1);
+  const telefonUtana = await szabadTudatpontjaim(kT);
+  const tp = await tudatpontRendezese(kT, g.azonosito, 50);
+  // A második átadás halmozott: a fogadó levele 300 → 400.
+  const a2 = await keretAtadasa(kL, telefon.keszulek, 100);
+  const v2 = await keretAtvetele(kT, a2);
+  const telefonVegul = await szabadTudatpontjaim(kT);
+  let ujra = null;
+  try { await keretAtvetele(kT, a1); } catch (h) { ujra = h.message; }
+  // A következő eseménye már a 400-as kapottat köti (a gyorsítótárból folytatva).
+  const tp2 = await tudatpontRendezese(kT, g.azonosito, 60);
+  const allapot = allapotSzamitasa(await koinoEsemenyei(tar, KOINO));
+  const kiesett = new Set(allapot.kivetelek.map((k) => k.azonosito));
+  // ⛔ A becsületes telefon ellen nincs vád: a pontja a kapott keretével számít, a következő eseménye ezt az állapotot köti. A vád
+  // a lánc ALAPJÁT kapja (0) — a kapottat az esemény aláírt előképe adja hozzá.
+  const vad = await ellentmondasEllenorzese({ kit: telefon.szerzo, fajta: 'folytonossag', vadpont: v2.sorszam, esemeny: tp,
+    kovetkezo: v2 }, KOINO, { tudatpontKeret: 0, tanusitvany: (k) => tar.tanusitvany(k) });
+  return v2.elozo === tp.azonosito && vad.rendben === false && /nincs ellentmondás/.test(vad.ok ?? '') && telefonElotte === 0 && a1.adat.pont === 300 && a1.adat.kiosztva === 310 && laptopUtana === TUDATPONT_KERET - 310
+    && telefonUtana === 300 && tp.lancGyoker.kapott.o[0] === 300 && a2.adat.pont === 400 && v2.lancGyoker.kapott.o[0] === 300
+    && telefonVegul === 350 && /nem számítana/.test(ujra ?? '')
+    && tp2.lancGyoker.kapott.o[0] === 400 && [a1, v1, tp, a2, v2, tp2].every((e) => !kiesett.has(e.azonosito)) && laptop.szerzo === telefon.szerzo;
+});
+
+proba('⛔⛔ A KERET NEM SZAPORODHAT — a csökkenő átadás, a kereten túli átadás átvétele és az ismételt átvétel nem számít; a hamis kapott-bizonyíték a kapun elbukik', async () => {
+  const { tar, laptop, telefon, g, kL, kT } = await ketKeszulek();
+  const a1 = await keretAtadasa(kL, telefon.keszulek, 300);
+  const v1 = await keretAtvetele(kT, a1);
+  // ⛔ Egy átadás, aminek a bizonyítéka egy másik levélé (a gondolaté): a kapu elveti (D81).
+  const rosszBiz = await nyersen(tar, laptop, 'KeretAtadas', { entitas: telefon.keszulek, pont: 900, kiosztva: 910 },
+    { bizonyitekKulcs: g.azonosito });
+  const m0 = await esemenyMentese(tar, rosszBiz);
+  // ⛔ A laptop „visszaveszi”: a halmozott átadás 300 → 100 (a telefon a 300-at már átvette).
+  const csokkent = await nyersen(tar, laptop, 'KeretAtadas', { entitas: telefon.keszulek, pont: 100, kiosztva: 10 + 100 });
+  const m1 = await esemenyMentese(tar, csokkent);
+  // ⛔ A telefon többet ad vissza, mint a kerete (300): 400 — a laptop átvétele nem számíthat.
+  const tullep = await nyersen(tar, telefon, 'KeretAtadas', { entitas: laptop.keszulek, pont: 400, kiosztva: 400 });
+  const m2 = await esemenyMentese(tar, tullep);
+  let elore = null;
+  try { await keretAtvetele(kL, tullep); } catch (h) { elore = h.message; }
+  const tulAtvetel = await nyersen(tar, laptop, 'KeretAtvetel', { atadas: tullep }, { kapottKulcs: telefon.keszulek });
+  const m3 = await esemenyMentese(tar, tulAtvetel);
+  // ⛔ Ugyanaz az átadás másodszor.
+  const ismetelt = await nyersen(tar, telefon, 'KeretAtvetel', { atadas: a1 }, { kapottKulcs: laptop.keszulek });
+  const m4 = await esemenyMentese(tar, ismetelt);
+  // ⛔ A hamis kapott-bizonyíték (mintha még semmit nem vett volna át) — a kapu elveti.
+  const a2 = await keretAtadasa(kL, telefon.keszulek, 50);
+  const hamis = await nyersen(tar, telefon, 'KeretAtvetel', { atadas: a2 }, { kapottKulcs: laptop.keszulek, hamisKapott: true });
+  const m5 = await esemenyMentese(tar, hamis);
+  // ⛔ Egy átírt átadás (a pontja 5000 — az aláírás nem illik rá): a kapu elveti.
+  const hamisAtadas = await nyersen(tar, telefon, 'KeretAtvetel', { atadas: { ...a2, adat: { ...a2.adat, pont: 5000 } } },
+    { kapottKulcs: laptop.keszulek });
+  const m6 = await esemenyMentese(tar, hamisAtadas);
+  const allapot = allapotSzamitasa(await koinoEsemenyei(tar, KOINO));
+  const ok = (e) => allapot.kivetelek.find((k) => k.azonosito === e.azonosito)?.ok ?? '';
+  // A telefon saját lánc-gyökere sem számolja a kereten túli átadását (a következő eseménye a 0-s kiosztást köti).
+  return ismetelt.lancGyoker.kiosztas.o[0] === 0 && !m0.mentve && m1.mentve && m2.mentve && m3.mentve && m4.mentve && !m5.mentve && !m6.mentve && !!v1
+    && /halmozott/.test(ok(csokkent)) && /keretet/.test(ok(tullep)) && /átadás nem számít/.test(ok(tulAtvetel))
+    && /nem hoz újat/.test(ok(ismetelt)) && /nem számítana/.test(elore ?? '');
+});
+
+proba('⛔ CSAK A MÁSIK KÉSZÜLÉKEM IDE SZÓLÓ ÁTADÁSA VEHETŐ ÁT — a kapu (az alak) és a számítás is elveti a máshová szólót; az önmagának szóló átadást az alak', async () => {
+  const { tar, laptop, telefon, kL } = await ketKeszulek();
+  const a1 = await keretAtadasa(kL, telefon.keszulek, 300);
+  // A laptop maga venné át a telefonnak szóló (és a saját) átadását.
+  const rossz = await nyersen(tar, laptop, 'KeretAtvetel', { atadas: a1 }, { kapottKulcs: laptop.keszulek });
+  const m1 = await esemenyMentese(tar, rossz);
+  const szamitas = keretAtvetelMerlege(rossz, ujLancAllas(), true, { keret: TUDATPONT_KERET, horgonyLanca: null });
+  // Az önmagának szóló átadás.
+  const onmaga = await nyersen(tar, laptop, 'KeretAtadas', { entitas: laptop.keszulek, pont: 10, kiosztva: 320 });
+  const m2 = await esemenyMentese(tar, onmaga);
+  return !m1.mentve && /átvétel/.test(m1.ok ?? '') && /ide szóló/.test(szamitas.elvetve ?? '') && !m2.mentve
+    && /másik készülék/.test(m2.ok ?? '');
+});
+
+proba('⭐⭐ AZ ÁTVÉTEL EGY ESEMÉNYBŐL ELLENŐRIZHETŐ — az adó lánca nélkül is: a telefon pontja a kapott keretével számít', async () => {
+  const { laptop, telefon, g, kL, kT } = await ketKeszulek();
+  const a1 = await keretAtadasa(kL, telefon.keszulek, 200);
+  const v1 = await keretAtvetele(kT, a1);
+  const tp = await tudatpontRendezese(kT, g.azonosito, 150);
+  // Egy harmadik gép csak a gondolatot, a laptop első pontját és a telefon láncát látja — a laptop átadását csak az átvételben.
+  const lista = await tagokkal([g, v1, tp]);
+  const allapot = allapotSzamitasa(lista);
+  const kiesett = new Set(allapot.kivetelek.map((k) => k.azonosito));
+  return !lista.some((e) => e.azonosito === a1.azonosito) && !kiesett.has(v1.azonosito) && !kiesett.has(tp.azonosito)
+    && v1.keszulek === telefon.keszulek && laptop.keszulek !== telefon.keszulek;
+});
+
+proba('⭐⭐ AZ ÁTFOLYÁS A HATÁRIG (8.1 — 93. (g)) — a különbség fele, a fogadó része a határig; a függő átadás is számít; a tolvaj a határnál megáll', async () => {
+  // A modell: a 93. (g) ellopott telefonja — minden szabad pontját azonnal elhelyezi; határ 2000-nél ott marad.
+  let laptopSzabad = 4000, telefonResz = 1000;
+  for (let t = 0; t < 10; t++) {
+    const m = atfolyasMerteke({ adoSzabad: laptopSzabad, kapoSzabad: 0, kapoResze: telefonResz, hatar: 2000 });
+    laptopSzabad -= m; telefonResz += m;
+  }
+  // Ha a határ messze van, a különbség FELE (a kettő szabadja kiegyenlítődik): 1000 és 200 → 400.
+  const fele = atfolyasMerteke({ adoSzabad: 1000, kapoSzabad: 200, kapoResze: 200, hatar: 5000 });
+  // A művelet: a laptop 9990 szabad, a telefon 0 — a határ 3000.
+  const { g, telefon, kL, kT } = await ketKeszulek();
+  const elso = await keretAtfolyasa(kL, telefon.keszulek, { hatar: 3000 });
+  const ujra = await keretAtfolyasa(kL, telefon.keszulek, { hatar: 3000 });   // a telefon még nem vette át: nem ad újra
+  await keretAtvetele(kT, elso.atadas);
+  const atvetelUtan = await keretAtfolyasa(kL, telefon.keszulek, { hatar: 3000 });
+  await tudatpontRendezese(kT, g.azonosito, 2500);                            // a telefon elhelyez — a része 3000 marad
+  const elhelyezesUtan = await keretAtfolyasa(kL, telefon.keszulek, { hatar: 3000 });
+  return fele === 400 && telefonResz === 2000 && laptopSzabad === 3000
+    && elso.merteke === 3000 && elso.atadas?.adat?.pont === 3000 && ujra.merteke === 0 && ujra.atadas === null
+    && atvetelUtan.merteke === 0 && elhelyezesUtan.merteke === 0 && (await szabadTudatpontjaim(kT)) === 500;
 });
 
 // ===================================

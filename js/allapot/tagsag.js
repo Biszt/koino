@@ -99,7 +99,7 @@ export function tagsagiIndex(esemenyek, koino = null) {
 // Egy azonosság több készülékkel ír; a tudatpont-keret készülékenként osztott (KU1 (B)). Az ALAP — a koinó teljes kerete —
 // annak a láncnak jár, amelyik az azonosság HORGONYÁT írta ebben a koinóban (a belépés, a születés, a bekapcsolódás); minden más
 // láncé 0, és az átvétellel kap (9.9). ⭐ Ha több horgony van (pl. két készülékről lépett be), a LEGKORÁBBI (idő, holtversenyben a
-// kisebb azonosító) — EGY szabály a szabály-rétegnek és a műveletnek (`lancGyoker.js` `lancKerete`).
+// kisebb azonosító) — EGY szabály a szabály-rétegnek és a műveletnek (`lancGyoker.js` `lancAlapjai`).
 
 /** Az azonosság alap-horgonya a horgony-eseményei közül (a legkorábbi) — vagy null. */
 export function alapHorgony(horgonyEsemenyek) {
@@ -112,18 +112,19 @@ export function alapHorgony(horgonyEsemenyek) {
 }
 
 /**
- * Egy lánc ALAP-kerete a tagsági indexből: a koinó kerete, ha a lánc írta az azonosság alap-horgonyát; 0, ha egy másik lánca;
- * a koinó kerete, ha az azonosságnak nincs ismert horgonya (a tagság nélküli pont úgysem számít — D93/1).
- * @param {Object} idx - `tagsagiIndex`
- * @param {string} szerzo
- * @param {string} lanc - `lancKulcsa`
- * @param {number} keret - a koinó kerete
- * @returns {number}
+ * Egy azonosság láncainak ALAPJAI adatként (⛔ D123 PR2: nem beadott függvény — a mag maga számol belőle): a koinó kerete és a
+ * horgony lánca (null, ha nem ismert — akkor mindegyik láncé a koinó kerete: a tagság nélküli pont úgysem számít — D93/1).
+ * @returns {{keret: number, horgonyLanca: string|null}}
  */
-export function lancAlapja(idx, szerzo, lanc, keret) {
+export function azonossagAlapjai(idx, szerzo, keret) {
   const h = alapHorgony((idx.szerzoHorgonyai.get(szerzo) ?? []).map((az) => idx.horgonyok.get(az)));
-  if (!h) return keret;
-  return lancKulcsa(h) === lanc ? keret : 0;
+  return { keret, horgonyLanca: h ? lancKulcsa(h) : null };
+}
+
+/** Egy lánc alapja az azonosság alapjaiból (`azonossagAlapjai`, `lancGyoker.js` `lancAlapjai`). */
+export function alapokAlapja(alapok, lanc) {
+  if (!alapok) return 0;
+  return alapok.horgonyLanca === null || alapok.horgonyLanca === undefined || lanc === alapok.horgonyLanca ? alapok.keret : 0;
 }
 
 function szerzohoz(idx, szerzo, az) {
