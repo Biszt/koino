@@ -85,7 +85,7 @@ proba('⭐⭐ a megújítás újrahasznosul, amíg érvényes a mai csomagra és
   const t = csomagTulajdonosai(esemenyek, g.szuletes.azonosito);
   const elso = sorosRend(g.szuletes.azonosito, t)[0];
   const ember = elso === g.a.szerzo ? g.a : g.b;
-  const jwk = await crypto.subtle.exportKey('jwk', ember.kulcspar.privateKey);
+  const jwk = await crypto.subtle.exportKey('jwk', ember.kulcspar.azonossagKulcspar.privateKey);
   const T0 = Date.now();
   const regi = megujitasKeszitese(jwk, ember.szerzo, { koino: KOINO, g: g.szuletes.azonosito, esemenyek, ido: T0 });
   const alap = { koino: KOINO, g: g.szuletes.azonosito, esemenyek, szerzo: ember.szerzo, regi };

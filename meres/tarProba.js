@@ -16,7 +16,7 @@ import {
   esemenyMentese, esemenyLekerese, lancVege, lancEllenorzese,
   sajatLancEsemenyei, koinoEsemenyei
 } from '../js/tar/esemenyTar.js';
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tesztKeszulek } from './probaFuttato.js';
 
 const { proba, futtatas } = probaGyujtemeny('A tár-réteg próbája');
 
@@ -25,14 +25,14 @@ const MAPPA = await mkdtemp(join(tmpdir(), 'koino-proba-'));
 const KOINO = 'proba';
 const tar = await esemenyTarNyitasa(KOINO, MAPPA);
 
-const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-const nyersKulcs = await crypto.subtle.exportKey('raw', kulcspar.publicKey);
-let s = ''; for (const b of new Uint8Array(nyersKulcs)) s += String.fromCharCode(b);
-const SZERZO = btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const kulcspar = await tesztKeszulek();
+// ⭐⭐ D128: a szerző az azonosság, a lánc a készüléké.
+const SZERZO = kulcspar.azonossag;
+const LANC = kulcspar.keszulek;
 
 /** Segéd: a lánc végére fűz egy eseményt (mentés nélkül). */
 async function ujEsemeny(adat, tipus = 'GondolatLetrehozas') {
-  const veg = await lancVege(tar, SZERZO);
+  const veg = await lancVege(tar, LANC);
   return esemenyLetrehozasa({ koino: KOINO, tipus, adat, ...veg }, kulcspar);
 }
 
@@ -46,7 +46,7 @@ proba('Az esemény elmentődik és visszaolvasható', async () => {
 });
 
 proba('Az ISMÉTELT mentés nem hiba (ugyanaz a gondolat = ugyanaz a név)', async () => {
-  const elso = (await sajatLancEsemenyei(tar, SZERZO))[0];
+  const elso = (await sajatLancEsemenyei(tar, LANC))[0];
   const eredmeny = await esemenyMentese(tar, elso);
   return eredmeny.mentve === true && eredmeny.marMegvolt === true;
 });
@@ -65,21 +65,21 @@ proba('HAMISÍTOTT esemény NEM kerül a tárba', async () => {
 
 proba('Üres láncnál a következő esemény az 1. (előzmény nélkül)', async () => {
   const idegen = await ujEember(KOINO);
-  const veg = await lancVege(tar, idegen.szerzo);
+  const veg = await lancVege(tar, idegen.kulcspar.keszulek);
   return veg.elozo === null && veg.sorszam === 1;
 });
 
 proba('A lánc épül: három esemény egymás után, hézag nélkül', async () => {
   await esemenyMentese(tar, await ujEsemeny({ cim: 'Második', meret: 200 }));
   await esemenyMentese(tar, await ujEsemeny({ cim: 'Harmadik', meret: 300 }));
-  const lanc = await sajatLancEsemenyei(tar, SZERZO);
+  const lanc = await sajatLancEsemenyei(tar, LANC);
   const sorszamok = lanc.map((e) => e.sorszam);
   // 1,2,3… (a hamisított nem került be, ezért nem hagyott lyukat)
   return sorszamok.every((sz, i) => sz === i + 1) && lanc.length >= 3;
 });
 
 proba('Minden esemény az ELŐZŐRE mutat', async () => {
-  const lanc = await sajatLancEsemenyei(tar, SZERZO);
+  const lanc = await sajatLancEsemenyei(tar, LANC);
   for (let i = 1; i < lanc.length; i++) {
     if (lanc[i].elozo !== lanc[i - 1].azonosito) return false;
   }
@@ -87,7 +87,7 @@ proba('Minden esemény az ELŐZŐRE mutat', async () => {
 });
 
 proba('Az ép lánc ellenőrzése: ép', async () => {
-  const e = await lancEllenorzese(tar, SZERZO);
+  const e = await lancEllenorzese(tar, LANC);
   return e.ep === true && e.hezagok.length === 0 && e.elagazasok.length === 0;
 });
 
@@ -96,7 +96,7 @@ proba('Az ép lánc ellenőrzése: ép', async () => {
 proba('ELÁGAZÁS: a mentés jelzi az ellentmondást', async () => {
   // Ugyanarra a pontra két különböző esemény — mintha valaki két különböző dolgot
   // mutatna két különböző embernek
-  const veg = await lancVege(tar, SZERZO);
+  const veg = await lancVege(tar, LANC);
   const egyik = await esemenyLetrehozasa(
     { koino: KOINO, tipus: 'GondolatLetrehozas', adat: { cim: 'Neked ezt', meret: 10 }, ...veg }, kulcspar);
   const masik = await esemenyLetrehozasa(
@@ -110,7 +110,7 @@ proba('ELÁGAZÁS: a mentés jelzi az ellentmondást', async () => {
 });
 
 proba('A lánc-ellenőrzés is megtalálja az elágazást', async () => {
-  const e = await lancEllenorzese(tar, SZERZO);
+  const e = await lancEllenorzese(tar, LANC);
   return e.ep === false && e.elagazasok.length === 1;
 });
 
@@ -368,8 +368,8 @@ async function tarValaszai(t, esemenyek) {
   for (const e of esemenyek) {
     ki.push((await t.esemeny(e.azonosito))?.azonosito ?? '-');
     ki.push((await t.szeletEsemenyei(szelet(e))).map((x) => x.azonosito).join(','));
-    ki.push((await t.sorszamSzerint(e.szerzo, e.sorszam)).map((x) => x.azonosito).join(','));
-    ki.push((await t.szerzoLanca(e.szerzo)).map((x) => x.azonosito).join(','));
+    ki.push((await t.sorszamSzerint(e.keszulek, e.sorszam)).map((x) => x.azonosito).join(','));
+    ki.push((await t.lancEsemenyei(e.keszulek)).map((x) => x.azonosito).join(','));
   }
   ki.push(JSON.stringify((await t.szeletek()).sort((a, b) => (a.szelet < b.szelet ? -1 : 1))));
   return ki.join('|');
@@ -413,7 +413,7 @@ proba('⭐ A PILLANATKÉP UTÁN ÍRT ESEMÉNY IS LÁTSZIK — a megnyitás a fá
     && t.mutatoAllapota().esemeny === 7
     && (await t.esemeny(uj.azonosito))?.azonosito === uj.azonosito
     && szeletje.includes(uj.azonosito)
-    && (await lancVege(t, anna.szerzo)).sorszam === uj.sorszam + 1;
+    && (await lancVege(t, anna.kulcspar.keszulek)).sorszam === uj.sorszam + 1;
 });
 
 proba('⛔⛔ A FÁJLHOZ NEM ILLŐ PILLANATKÉP NEM TÉVESZT MEG — se kicserélt fájlnál, se elcsúszott vagy rossz bejegyzésnél', async () => {
@@ -471,6 +471,9 @@ proba('⭐ A SZELET LENYOMATA: sorrend-független, testet nem kér, és a szelet
   const { hely, anna, g1, g2, esemenyek } = await mutatosTar();
   // Ugyanaz a hat esemény, fordított sorrendben, egy másik tárban.
   const forditott = await esemenyTarNyitasa(KOINO, join(MAPPA, 'mutato-fordított-' + (++mutatoMappaSzam)));
+  // ⭐⭐ D128: a lánc első eseménye hozza a készülék tanúsítványát — ami előtte jön, az „hiányzik” (a csere újra kéri): itt egy
+  // második kör hozza be.
+  for (const e of [...esemenyek].reverse()) await esemenyMentese(forditott, e);
   for (const e of [...esemenyek].reverse()) await esemenyMentese(forditott, e);
   const eredeti = await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 1 });
   const kepbol = await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 1 });
@@ -535,8 +538,8 @@ proba('⭐⭐ A SZÜLETÉSEK A SZÜLŐ ALATT (C 7.) — a képből is, és a ré
   await ir(kepFajl, JSON.stringify({ ...kep, v: 1, e: kep.e.map((x) => x.slice(0, 6)) }));
   const regiKeppel = await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 100 });
   // ⛔ D85: a 2. változatú kép (EGY szülő-index, -1 = nincs) sem hihető el — a 3. a bejelentés helyeinek
-  // LISTÁJA. A tár a fájlból épít újat.
-  await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 1 });     // friss 3. változatú kép
+  // LISTÁJA; ⭐⭐ D128: a 4. a lánc kulcsát (a készüléket), az azonosságot és a tanúsítvány jelét is. A tár a fájlból épít újat.
+  await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 1 });     // friss 4. változatú kép
   const kep3 = JSON.parse(await readFile(kepFajl, 'utf8'));
   await ir(kepFajl, JSON.stringify({ ...kep3, v: 2, e: kep3.e.map((x) => [...x.slice(0, 6), x[6][0] ?? -1]) }));
   const ketteskeppel = await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 100 });
@@ -545,7 +548,7 @@ proba('⭐⭐ A SZÜLETÉSEK A SZÜLŐ ALATT (C 7.) — a képből is, és a ré
     && kepbol.mutatoAllapota().pillanatkepbol === true
     && regiKeppel.mutatoAllapota().pillanatkepbol === false
     && await valaszok(regiKeppel) === vart
-    && kep3.v === 3
+    && kep3.v === 4
     && ketteskeppel.mutatoAllapota().pillanatkepbol === false
     && await valaszok(ketteskeppel) === vart;
 });

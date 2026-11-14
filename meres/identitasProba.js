@@ -21,7 +21,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tesztKeszulek } from './probaFuttato.js';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { esemenyMentese } from '../js/tar/esemenyTar.js';
 import {
@@ -98,6 +98,16 @@ async function belepo() {
   const eember = await ujEember(KOINO);
   const esemeny = await eember.tesz('Belepes', {});
   return { eember, horgony: esemeny.azonosito, esemeny };
+}
+
+/**
+ * ⭐⭐ D128: ugyanannak az azonosságnak egy MÁSIK készüléke, a lánca első eseményével (az hozza a tanúsítványát) — a „hiányzó
+ * lánc” próbáihoz: a horgony (az első készülék belépése) nincs meg, a második készülék eseményei mégis bejutnak a kapun.
+ */
+async function masikKeszulekkel(x) {
+  const eember = await ujEember(KOINO, await tesztKeszulek('telefon', x.eember.kulcspar.azonossagKulcspar));
+  const elso = await eember.tesz('GondolatLetrehozas', { cim: 'A telefonról', meret: 1, szulo: null });
+  return { ...x, eember, elso };
 }
 
 /**
@@ -265,8 +275,10 @@ proba('⭐ A HIÁNYZÓ MEGHÍVÓI LÁNC is „nem ellenőrizhető"', async () =>
   const a = await alapito();
   const b = await belepo();
   const c = await belepo();
-  // B-t behívta A, C-t behívta B — de B belépését nem mentjük el.
-  await ment(tar, a.esemeny, c.esemeny, await meghivas(b, c));
+  // B-t behívta A, C-t behívta B — de B belépését nem mentjük el. (⭐⭐ D128: B a másik készülékéről hív — annak a
+  // tanúsítványa megvan, a horgonya nem.)
+  const b2 = await masikKeszulekkel(b);
+  await ment(tar, a.esemeny, c.esemeny, b2.elso, await meghivas(b2, c));
 
   const eredmeny = await tagE(tar, KOINO, c.horgony);
   return eredmeny.igen === false && eredmeny.ellenorizheto === false;
@@ -496,9 +508,12 @@ proba('⭐ A HIÁNYZÓ TANÚSÍTÓI LÁNC is „nem ellenőrizhető", nem elutas
   const uj = await belepo();
 
   const allitasok = [];
-  for (let i = 0; i < TANUSITAS_KELL; i++) allitasok.push(await tanusitas(kor[i], uj));
+  // ⭐⭐ D128: a kör tagjai (a létrehozón kívül) a MÁSIK készülékükről tanúsítanak — annak a tanúsítványa megvan, a belépésük nem.
+  const tanusitok = [kor[0]];
+  for (let i = 1; i < TANUSITAS_KELL; i++) tanusitok.push(await masikKeszulekkel(kor[i]));
+  for (const t of tanusitok) allitasok.push(await tanusitas(t, uj));
   // ⚠️ Az alapító kör belépéseit NEM mentjük el — csak a létrehozást.
-  await ment(tar, esemenyek[0], uj.esemeny, ...allitasok);
+  await ment(tar, esemenyek[0], uj.esemeny, ...tanusitok.slice(1).map((t) => t.elso), ...allitasok);
 
   const eredmeny = await lepcso2E(tar, KOINO, uj.horgony);
   return eredmeny.igen === false && eredmeny.ellenorizheto === false;

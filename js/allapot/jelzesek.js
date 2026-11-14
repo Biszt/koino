@@ -62,7 +62,7 @@
 // teljesült-e. *Egy kimondott feltételt, amiről a program hallgat, nem lehet teljesíteni.*
 
 import { esemenyKoinoja } from '../esemeny/esemeny.js';
-import { entitasEsemenyei, sajatLancEsemenyei, esemenyLekerese } from '../tar/esemenyTar.js';
+import { entitasEsemenyei, azonossagEsemenyei, esemenyLekerese } from '../tar/esemenyTar.js';
 
 // A rólam szóló, számító állítás-fajták — ugyanaz a három, amit az `identitas.js` néz.
 const ALLITASOK = ['Meghivas', 'Felhatalmazas', 'Tanusitas'];
@@ -91,7 +91,7 @@ export const ONALLO_KUSZOB = 3;
  */
 async function sajatAllitasai(tar, koino, horgony, en) {
   if (typeof tar.bejelentesek !== 'function') {
-    return (await sajatLancEsemenyei(tar, en)).filter((e) => esemenyKoinoja(e) === koino);
+    return (await azonossagEsemenyei(tar, en)).filter((e) => esemenyKoinoja(e) === koino);   // ⭐⭐ D128: minden készülékemé
   }
   const ki = new Map();
   for (const e of [...await entitasEsemenyei(tar, koino, horgony), ...await tar.bejelentesek(horgony)]) {

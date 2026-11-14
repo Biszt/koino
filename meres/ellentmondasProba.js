@@ -20,7 +20,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny, taggaTesz } from './probaFuttato.js';
+import { probaGyujtemeny, taggaTesz, tesztKeszulek } from './probaFuttato.js';
 import { esemenyTarNyitasa, fajlBlobTarolo, lancTarolo } from '../js/tar/fajlTar.js';
 import { sajatLancEsemenyei, esemenyMentese, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
@@ -41,8 +41,8 @@ const { proba, futtatas } = probaGyujtemeny('Az ellentmondás bizonyítéka (D79
 const KOINO = 'ellentmondas-proba';
 
 async function ujKulcs() {
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   return { kulcspar, szerzo };
 }
 
@@ -72,13 +72,13 @@ async function elet(k, alapit = true) {
  * eseménynél a helyes bizonyítékkal (D81) — a hívó adja az adatot (akár hazugat).
  */
 async function kezzelAlair(k, tipus, adat, beallitas = {}) {
-  const lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   const utolso = lanc[lanc.length - 1];
   const sorszam = utolso.sorszam + 1;
   // ⚠️ A bizonyíték nem pont-eseményhez is kérhető (`bizonyitekKulcs` — az álcázott esemény próbájához),
   // és megadható készen (`bizonyitek` — a hamis fából, a csaló előképéhez).
   const pontE = beallitas.bizonyitekKulcs ?? (tipus === 'TudatpontRendezes' ? adat.entitas : null);
-  const helyes = await lancUjEsemenyhez(k.tar, KOINO, k.szerzo, sorszam, null, pontE);
+  const helyes = await lancUjEsemenyhez(k.tar, KOINO, k.kulcspar.keszulek, sorszam, null, pontE);
   const lancGyoker = beallitas.lancGyoker ?? helyes.lancGyoker;
   const bizonyitek = beallitas.bizonyitek ?? helyes.bizonyitek;
   const e = await esemenyLetrehozasa({ koino: KOINO, tipus, adat: pontE ? { ...adat, bizonyitek } : adat,
@@ -114,13 +114,13 @@ proba('⛔⛔ A GARANCIA: BECSÜLETES LÁNCON EGYETLEN VÁD SEM MEGY ÁT — egy
   await kezzelAlair(k, 'TudatpontRendezes', { entitas: g1.azonosito, pont: 99, szerep: 'aktiv' }, { entitas: g1.azonosito });
   await tudatpontRendezese(k, g1.azonosito, 12);
   await gondolatLetrehozasa(k, { cim: 'Utána' });
-  const lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
 
   let probalt = 0;
   const atment = [];
   const vad = async (adat) => {
     probalt++;
-    if ((await ellentmondasEllenorzese(adat, KOINO)).rendben) atment.push(adat.fajta + '@' + adat.vadpont);
+    if ((await ellentmondasEllenorzese(adat, KOINO, { tanusitvany: k.tar })).rendben) atment.push(adat.fajta + '@' + adat.vadpont);
   };
   for (let i = 0; i < lanc.length; i++) {
     const e = lanc[i];
@@ -145,8 +145,9 @@ proba('⛔⛔ A GARANCIA: BECSÜLETES LÁNCON EGYETLEN VÁD SEM MEGY ÁT — egy
 // ===================================
 
 proba('⭐⭐ A HAZUG BEMONDÁS bizonyítéka átmegy — EGYETLEN esemény a bizonyíték (D81)', async () => {
-  const { adat, hazug } = await hazugBemondas();
-  const r = await ellentmondasEllenorzese(adat, KOINO);
+  const { adat, hazug, k } = await hazugBemondas();
+  // ⭐⭐ D128: a vádolt esemény készülékének tanúsítványa a tárból (a lánc első eseménye hozta).
+  const r = await ellentmondasEllenorzese(adat, KOINO, { tanusitvany: k.tar });
   return r.rendben && r.vadpont === hazug.sorszam;
 });
 
@@ -154,20 +155,20 @@ proba('⭐⭐ A HAMIS FOLYTONOSSÁG bizonyítéka átmegy — a következő esem
   const k = await ujKornyezet();
   const { g1 } = await elet(k);
   const pont = await tudatpontRendezese(k, g1.azonosito, 70);
-  const lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   // A csaló a következő eseményben a napló igaz gyökerét, de a pont ELŐTTI kiosztást köti el.
   const igaz = await lancAllapotaLancbol(lanc);
   const hamis = lancGyokerKetGyokerbol(igaz.naploGyoker, pont.lancGyoker.kiosztas);
   const kov = await kezzelAlair(k, 'GondolatLetrehozas', { cim: 'Hamis gyökérrel' }, { lancGyoker: hamis });
   const r = await ellentmondasEllenorzese({ kit: k.szerzo, fajta: 'folytonossag', vadpont: kov.sorszam,
-    esemeny: pont, kovetkezo: kov }, KOINO);
+    esemeny: pont, kovetkezo: kov }, KOINO, { tanusitvany: k.tar });
   return r.rendben && r.vadpont === kov.sorszam;
 });
 
 proba('⭐⭐ A NEGATÍV LEVÉL bizonyítéka átmegy — a rejtett −5000 egy nem létező entitáson', async () => {
   const k = await ujKornyezet();
   await elet(k);
-  const lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   const igaz = await lancAllapotaLancbol(lanc);
   // A csaló fája: az igaz kiosztás + egy −5000-es levél.
   const csaloFa = ujAllapotFa(KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ);
@@ -176,7 +177,7 @@ proba('⭐⭐ A NEGATÍV LEVÉL bizonyítéka átmegy — a rejtett −5000 egy 
   const e = await kezzelAlair(k, 'GondolatLetrehozas', { cim: 'Negatív levéllel' },
     { lancGyoker: lancGyokerKetGyokerbol(igaz.naploGyoker, await allapotGyokere(csaloFa)) });
   const r = await ellentmondasEllenorzese({ kit: k.szerzo, fajta: 'negativ', vadpont: e.sorszam, esemeny: e,
-    kulcs: 'nem-letezo-entitas', bizonyitek: await allapotBizonyitek(csaloFa, 'nem-letezo-entitas') }, KOINO);
+    kulcs: 'nem-letezo-entitas', bizonyitek: await allapotBizonyitek(csaloFa, 'nem-letezo-entitas') }, KOINO, { tanusitvany: k.tar });
   return r.rendben && r.vadpont === e.sorszam;
 });
 
@@ -188,7 +189,7 @@ proba('⛔⛔ A HAMIS VÁD A KAPUN ELBUKIK — átírt esemény (előkép is), m
   const { k, g1, adat } = await hazugBemondas();
   const bejelento = await ujKornyezet(k.tar);
   const masik = await ujKulcs();
-  let lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  let lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   const becsuletesPont = lanc.find((e) => e.tipus === 'TudatpontRendezes');
   const [p1, p2] = lanc.filter((e) => e.tipus === 'TudatpontRendezes');
   // Egy lánc-gyökér NÉLKÜLI (régi alakú) esemény; egy NEM pont-esemény pont-szerű adattal; egy negatív pontú.
@@ -199,7 +200,7 @@ proba('⛔⛔ A HAMIS VÁD A KAPUN ELBUKIK — átírt esemény (előkép is), m
     { bizonyitekKulcs: g1.azonosito });
   const negativ = await kezzelAlair(k, 'TudatpontRendezes', { entitas: g1.azonosito, pont: -5, szerep: 'aktiv', kiosztva: 10 },
     { entitas: g1.azonosito });
-  lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   // A koholt levél: a bejelentő SAJÁT fája egy negatív levéllel — a becsületes esemény gyökeréhez nem illik.
   const koholt = ujAllapotFa(KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ);
   for (const l of allapotLista(await igazFa(lanc, becsuletesPont.sorszam - 1))) await allapotBeallitas(koholt, l.kulcs, null, l.osszegek);
@@ -242,7 +243,7 @@ proba('⭐⭐ A BEJELENTÉS A VÁDOLT AZONOSSÁG-SZELETÉBE KERÜL — alapító
   const { k, adat } = await hazugBemondas();
   const bejelento = await ujKornyezet(k.tar);
   const vad = await ellentmondasBejelentese(bejelento, adat);
-  const alapitas = (await sajatLancEsemenyei(k.tar, k.szerzo)).find((e) => e.tipus === 'KoinoLetrehozas');
+  const alapitas = (await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek)).find((e) => e.tipus === 'KoinoLetrehozas');
   // Egy belépett tag csal.
   const tag = await ujKornyezet(k.tar);
   const horgony = await belepes(tag);
@@ -294,7 +295,7 @@ proba('⭐⭐ A HAMIS ELŐKÉPŰ PONT-ESEMÉNY — önmagában következetes, cs
   const k = await ujKornyezet();
   const { g1, g2 } = await elet(k);
   const pont = await tudatpontRendezese(k, g1.azonosito, 70);           // g1: 45 → 70
-  const lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   const igaz = await lancAllapotaLancbol(lanc);
   const hamisFa = await igazFa(lanc, pont.sorszam - 1);                   // a pont ELŐTTI kiosztás (g1: 45)
   const kov = await kezzelAlair(k, 'TudatpontRendezes',

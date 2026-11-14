@@ -19,7 +19,7 @@ import {
 import { koinoLetrehozasa, gondolatLetrehozasa, tudatpontRendezese, javaslatLetrehozasa,
   kezdoPontokElosztasa } from '../js/muveletek.js';
 
-import { probaGyujtemeny, ujEember, tagokkal } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tagokkal, tesztKeszulek } from './probaFuttato.js';
 
 const { proba, futtatas } = probaGyujtemeny('A szabály-réteg próbája');
 
@@ -97,9 +97,8 @@ proba('A NEGATÍV és a tört tudatpont sem számít', async () => {
 proba('⛔⛔ EGY ELVETETT PONT-ESEMÉNY UTÁN AZ ÚJ MÉG SZÁMÍT — a művelet és a szabály egy forrásból',
   async () => {
     const tar = await esemenyTarNyitasa(KOINO, await mkdtemp(join(tmpdir(), 'koino-szabaly-')));
-    const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-    const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey))
-      .toString('base64url');
+    const kulcspar = await tesztKeszulek();
+    const szerzo = kulcspar.azonossag;
     const kornyezet = { koino: KOINO, kulcspar, szerzo, tar };
 
     await koinoLetrehozasa(kornyezet, 'Régi koino');
@@ -111,8 +110,8 @@ proba('⛔⛔ EGY ELVETETT PONT-ESEMÉNY UTÁN AZ ÚJ MÉG SZÁMÍT — a művel
       koino: KOINO, tipus: 'TudatpontRendezes',
       adat: { entitas: regi.azonosito, pont: 100, szerep: 'aktiv' },
       entitas: regi.azonosito,
-      entitasSorszam: await kovetkezoEntitasSorszam(tar, KOINO, szerzo, regi.azonosito),
-      latott: [], ...(await lancVege(tar, szerzo))
+      entitasSorszam: await kovetkezoEntitasSorszam(tar, KOINO, kulcspar.keszulek, regi.azonosito),
+      latott: [], ...(await lancVege(tar, kulcspar.keszulek))
     }, kulcspar);
     if (!(await esemenyMentese(tar, regiPont)).mentve) return false;
 
@@ -133,8 +132,8 @@ proba('⛔⛔ EGY ELVETETT PONT-ESEMÉNY UTÁN AZ ÚJ MÉG SZÁMÍT — a művel
 // pontnak a szavazat ELŐTT kell lennie a láncban, és ugyanazt az időbélyeget kell viselnie.
 proba('⭐⭐ D85: a javaslattevő pontja a javaslatra / a töredékeire kerül — a szavazata ELŐTT', async () => {
   const tar = await esemenyTarNyitasa(KOINO, await mkdtemp(join(tmpdir(), 'koino-szabaly-')));
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   const kornyezet = { koino: KOINO, kulcspar, szerzo, tar };
   await koinoLetrehozasa(kornyezet, 'Javaslattevő');
   const a = await gondolatLetrehozasa(kornyezet, { cim: 'A' });

@@ -206,12 +206,16 @@ horgára: minden, ami LÁNCOT néz (a tár indexe, a sorszám, az előző, az el
 író), ezt kérdezi; ami az AZONOSSÁGOT (a tagság, a horgony, a meghívás, a tanúsítás, a szavazat, az ellentmondás vádlottja), az a
 szerzőt. A pontok (lánc, entitás) szerint állnak, az azonosság pontja egy entitáson ezek összege.
 
-**9.2 A készülék-tanúsítvány** (koinók fölött): `{ azonossag, keszulek, nev, ido }` + az azonosság kulcsának aláírása. **Egy koinóban így
-utazik:** az első készüléké a horgonyában (a `Belepes`, a `KoinoLetrehozas`, a `Bekapcsolodas` hozza), a többié egy
-`KeszulekBemutatas` eseményben (a készülék első eseménye a koinóban — az azonosság horgony-szeletébe). **A kapu** egy eseményt csak
-akkor enged be, ha a (szerző, készülék) tanúsítványa ismert — a tárból, vagy maga az esemény hozza; különben „hiányzik” (a csere
-elkéri, mint ma a gyermek születését). ⭐ Így minden számítás — a tagság és a meghívás is — csak tanúsított eseményt lát: egy hamis
-szerzőjű esemény be sem jut. A tagsági csomag a nem-horgony készülékek tanúsítványát is viszi.
+**9.2 A készülék-tanúsítvány** (koinók fölött): `{ azonossag, keszulek, nev, ido }` + az azonosság kulcsának aláírása. **Egy koinóban
+a készülék láncának ELSŐ eseménye hozza** — egy új burkolat-mezőben, a `tanusitvany`-ban (mindig jelen; csak a lánc első eseményén nem
+üres: az 1. sorszámon, a `Bekapcsolodas`-on és a gyermek születésén, ami a szülőbeli láncot folytatja). *(Az építés pontosítása: egy
+külön bemutató esemény a lánc sorszámait eltolná; így a második készülék is ugyanúgy hozza, mint az első — a horgonytól
+függetlenül.)* **A kapu** egy eseményt csak akkor enged be, ha a tanúsítványa ismert — a tárból, vagy maga az esemény hozza; különben
+„hiányzik” (a csere elkéri, mint ma a gyermek születését). ⭐ Így minden számítás — a tagság és a meghívás is — csak tanúsított eseményt
+lát: egy hamis szerzőjű esemény be sem jut. A csomagokba ágyazott eseményeknél (a tagsági csomag, a vád bizonyítéka, a gyermek
+születése…) ugyanez: a tanúsítvány a csomagból vagy a tárból. **A lánc kulcsa a gyakorlatban a készülék kulcsa** (43 jel, mint
+minden azonosító — a csere így kimondhatja): egy készüléket csak egy azonosság tanúsíthat, a kapu a második azonosság tanúsítványát
+elutasítja.
 
 **9.3 A keret** (KU1): láncónként. Az alap a koinó kerete annak a láncnak, amelyik az azonosság horgonyát írta (abban a koinóban az
 „első készülék” az, amelyikkel beléptél), a többié 0. A lánc-gyökér harmadik összegzése a **kapott** (adónként a halmozottan átvett
@@ -226,17 +230,39 @@ utáni, a kizárt kulccsal írt események nem számítanak, és **a láncot az 
 alá): a lánc pontjai és a része így nála vannak, és átrendezheti őket. A fel nem sorolt koinóban a kizárt készülék egyetlen eseménye
 sem számít (8.2). Ahova a kizárás még nem ért el, ott addig számít (6.) — a terjesztése a ③ hálózaté.
 
-**9.5 A sorrend az azonosság eseményei között** — ⏸️ **javaslat, Csabáé (az ①b előtt):** ahol az azonosság UTOLSÓ állítása számít (az
+**9.5 A sorrend az azonosság eseményei között** — ✅ **eldöntve: az idő** (Csaba, 2026-11-14: *„legyen az idő, mehetünk tovább”*): ahol az azonosság UTOLSÓ állítása számít (az
 érték javaslat, az állásfoglalás, a profil), ott ma a lánc sorszáma dönt — két készülék láncának sorszámai viszont nem összevethetők. A
 4. szakasz 3. pontja a `latott` mintáját javasolta (minden esemény mondja, a többi készülékem láncából meddig látott). ⭐ Az építés
 egyszerűbbet javasol: **az idő dönt, mint a szavazatnál ma** (holtversenyben az azonosító) — egy szabály a szavazattal, új mező és új
 bájt nélkül; és csak a TE két állításod közül választ (egy rosszul járó óra a saját eseményeid sorrendjét keverheti meg, másét nem —
 a lap figyelmeztet, ha a készülékeid órái eltérnek).
 
-**9.6 A lépések** (mindegyik után a teljes próbasor): **①a** az esemény `keszulek` mezője, a lánc kulcsa mindenhol, a készülékkulcs a
-gépen és a horgonyba ágyazott tanúsítvány — egy készülékkel minden úgy megy, mint ma · **①b** a második készülék (a bemutatás, a kapu,
+**9.6 A lépések** (mindegyik után a teljes próbasor): **①a** az esemény `keszulek` és `tanusitvany` mezője, a lánc kulcsa mindenhol, a készülékkulcs a
+gépen és a tanúsítvány a kapuban — egy készülékkel minden úgy megy, mint ma · **①b** a második készülék (a felvétel,
 a pontok és az utolsó állítás az azonosságra, a `keszulek` parancs; a próba: két készülék egy azonossággal, offline is) · **①c** a keret
 (a kapott-fa, az átadás és az átvétel, az átfolyás a határral) · **①d** a kizárás és az örökös.
+
+**9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
+- **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor
+  NÉLKÜLE utazik: egy szelet a cserében, egy tagsági kísérő, egy kérelem vagy egy összegző válasza, egy döntési csomag, egy
+  kereső-bejegyzés. A fogadónál a lánc első eseménye (más szeleté) gyakran nincs meg — és a kapu ezért elutasította volna (a
+  próbasor 1276 próbájából 84 bukott ezen). ⭐ A megoldás három darab:
+  - **a kísérő burok** (`esemeny.js` `KISERO_MEZO` = `kiseroTanusitvany`): a küldő az esemény mellé teszi a készülék tanúsítványát,
+    egy ALÁÍRATLAN mezőben (nincs a lenyomatban — az esemény neve és aláírása változatlan); a kapu ellenőrzi (önmagát igazolja), és
+    az eseményt NÉLKÜLE menti. A vonal készülékenként az első küldött eseményhez teszi (`kiseroAdo`), a kérelem, az összegző és a
+    kereső-bejegyzés minden eseményhez (ott a fogadó egyenként ellenőriz);
+  - **a csomagok** a belső eseményeik tanúsítványát viszik (a döntési és a tagsági csomag `tanusitvanyok` mezője), és a kapu a
+    csomag beágyazott eseményeinek tanúsítványából a csomag szerzőjét is igazolja;
+  - **a készülék tanúsítvány-jegyzéke** (`tar/tanusitvanyJegyzek.js`, `<adat>/tanusitvanyok.jsonl` — koinótól független, mert a
+    tanúsítvány is az): amit a kapu mellékelve kapott (vagy a lánc első eseményéből), azt feljegyzi; a tár ebből is felel, és az
+    átmeneti tár eldobott eseményével a tudás nem vész el.
+- **A várakozó sor:** ami a tanúsítványa előtt érkezik (a köteg sorrendje nem a láncé), azt a kapu tárolónként egy korlátos,
+  memóriabeli sorba teszi, és amint a tanúsítvány bejön, újra a kapura engedi (`esemenyTar.js`). A csere kötegében a tanúsítványt
+  hozó események mennek előre. ⚠️ Egy cserén belül később bejött eseményt a futó csere állása még nem hirdet — a következő igen.
+- **A lánc kulcsa a csere állásában** is a készüléké (a mező neve `szerzo` maradt — a ③ hálózati lépés nevezi át).
+- **A kézfogás** még az azonosság kulcsával bizonyít — a ③ teszi át a készülékkulcsra.
+- **A D124 (a protokoll nyelvváltozata) két „valódi régi program” próbája** ismert hiba: a git-ből vett régi program a D128 előtti
+  család — a mai eseményt (a készülék írja alá) elveti, és a mai kapu a régit; az első D128 utáni régi programmal áll helyre.
 
 *Kapcsolódik:* [`terv_kulcs.md`](terv_kulcs.md) (a tervező ág — ET-3), [`terv_atutalas.md`](terv_atutalas.md) (ET-11 — a fizetési kulcs),
 `meres/eredmenyek.md` 93., `js/kulcs/kulcsTar.js`, `js/allapot/szabalyok.js` (D42), `js/allapot/allapotSzamitas.js` (az elágazás).

@@ -33,10 +33,11 @@
 // Használják: koino.js (a `hozd`, az állapot két tárból, a felderítés), a próbák.
 
 import { mkdir, readdir, readFile, appendFile, writeFile, unlink, rename, stat, open } from 'node:fs/promises';
-import { join } from 'node:path';
-import { alakiHiba, szelet, azonositoAlaku, bejelentesHelyei, esemenyKoinoja } from '../esemeny/esemeny.js';
+import { join, dirname } from 'node:path';
+import { alakiHiba, szelet, azonositoAlaku, bejelentesHelyei, esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 import { koinoEsemenyei, koinoBemenete } from './esemenyTar.js';
 import { koinoNezete } from '../allapot/koinoLanc.js';   // ⭐ D118 (③)
+import { tanusitvanyJegyzek } from './tanusitvanyJegyzek.js';   // ⭐⭐ D128
 
 /** Az átmeneti tár mérete — kiinduló érték, készülékenként állítható (nem állapot-befolyásoló, D66). */
 export const ATMENETI_KORLAT = 20 * 1024 * 1024;
@@ -68,7 +69,10 @@ export async function atmenetiTarNyitasa(koino, mappa, beallitas = {}) {
 
   const esemenyek = new Map();      // azonosító → esemény
   const szeletek = new Map();       // kulcs → { azonositok: Set, bajt }
-  const sorszamok = new Map();      // "szerző|sorszám" → [esemény]
+  const sorszamok = new Map();      // "lánc|sorszám" → [esemény] (⭐⭐ D128: a lánc a készüléké — `lancKulcsa`)
+  const tanusitok = new Map();      // ⭐⭐ D128: készülék → az esemény, ami a tanúsítványát hozta
+  // ⭐⭐ D128: a láncukon kívül érkezett események tanúsítványai — a KÉSZÜLÉK jegyzéke (`<adat>`), ugyanaz, mint a tartós táré.
+  const jegyzek = tanusitvanyJegyzek(dirname(mappa));
   const olvasva = new Map();        // fájlnév → ennyi bájtját olvastuk be (a `frissit` innen folytatja)
   let megnezett = {};
   let rogzitett = {};               // ⭐ D112 ②: szelet → { felderítés-azonosító → mikor rögzítette }
@@ -85,9 +89,10 @@ export async function atmenetiTarNyitasa(koino, mappa, beallitas = {}) {
     const sz = szeletek.get(k);
     sz.azonositok.add(e.azonosito);
     sz.bajt += sorBajt;
-    const sk = e.szerzo + '|' + e.sorszam;
+    const sk = lancKulcsa(e) + '|' + e.sorszam;
     if (!sorszamok.has(sk)) sorszamok.set(sk, []);
     sorszamok.get(sk).push(e);
+    if (e.tanusitvany && !tanusitok.has(lancKulcsa(e))) tanusitok.set(lancKulcsa(e), e);
     return true;
   };
 
@@ -128,9 +133,10 @@ export async function atmenetiTarNyitasa(koino, mappa, beallitas = {}) {
     for (const az of sz.azonositok) {
       const e = esemenyek.get(az);
       esemenyek.delete(az);
-      const sk = e.szerzo + '|' + e.sorszam;
+      const sk = lancKulcsa(e) + '|' + e.sorszam;
       const lista = (sorszamok.get(sk) ?? []).filter((x) => x.azonosito !== az);
       if (lista.length) sorszamok.set(sk, lista); else sorszamok.delete(sk);
+      if (tanusitok.get(lancKulcsa(e))?.azonosito === az) tanusitok.delete(lancKulcsa(e));
     }
     szeletek.delete(kulcs);
     valtozasSzam++;
@@ -265,7 +271,11 @@ export async function atmenetiTarNyitasa(koino, mappa, beallitas = {}) {
 
     // ----- a kapu (`esemenyMentese`) három kérdése — ugyanaz a felület, mint a tartós táré -----
     async esemeny(azonosito) { return esemenyek.get(azonosito) ?? null; },
-    async sorszamSzerint(szerzo, sorszam) { return [...(sorszamok.get(szerzo + '|' + sorszam) ?? [])]; },
+    async sorszamSzerint(lanc, sorszam) { return [...(sorszamok.get(lanc + '|' + sorszam) ?? [])]; },
+    /** ⭐⭐ D128: egy készülék tanúsítványa (a kapu kérdezi) — ha egy itt lévő esemény hozta. */
+    async tanusitvany(keszulek) { return tanusitok.get(keszulek)?.tanusitvany ?? jegyzek.keres(keszulek); },
+    /** ⭐⭐ D128: a lánca nélkül érkezett esemény tanúsítványa a jegyzékbe (a kapu hívja, ellenőrzés után). */
+    tanusitvanyFelvetele(t) { return jegyzek.felvesz(t); },
     async hozzafuz(e) {
       const sor = JSON.stringify(e);
       if (!felvesz(e, Buffer.byteLength(sor, 'utf8') + 1)) return;

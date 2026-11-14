@@ -31,7 +31,9 @@
 import { mkdir, readFile, appendFile, writeFile, readdir, access, rm, stat, open, rename, utimes } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 
-import { szelet, bejelentesHelyei } from '../esemeny/esemeny.js';
+import { szelet, bejelentesHelyei, lancKulcsa } from '../esemeny/esemeny.js';
+// ⭐⭐ D128: a láncukon kívül érkezett események tanúsítványai — a készülék mappájában (koinótól független).
+import { tanusitvanyJegyzek } from './tanusitvanyJegyzek.js';
 import { bajtLenyomat } from '../esemeny/kanonikusAlak.js';
 import { rendezettHalmaz, halmazLenyomata } from '../esemeny/halmaz.js';
 
@@ -102,7 +104,7 @@ export const KEP_KUSZOB = 1000;
 
 // A pillanatkép alakjának változata. ⚠️ Ha a mutató mezői változnak, ez nő — a régi képet a tár
 // eldobja, és egyszer a fájlból épít újat (a kép tiszta gyorsítótár).
-const KEP_VALTOZAT = 3;
+const KEP_VALTOZAT = 4;
 
 // ⭐ Ennél több hiányzó testet egyetlen, sorban olvasással hozunk (mint a teljes betöltés);
 // kevesebbet egyenként, a nyitott fájl adott helyéről.
@@ -173,6 +175,8 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
   const mappa = join(hely, koino);
   await mkdir(mappa, { recursive: true });
   const fajl = join(mappa, 'esemenyek.jsonl');
+  // ⭐⭐ D128: a tanúsítvány-jegyzék a KÉSZÜLÉKÉ (a koinók mappái fölött) — egy tanúsítvány minden koinóban érvényes.
+  const jegyzek = tanusitvanyJegyzek(hely);
   const kepFajl = join(mappa, 'mutato.json');
   // ⭐ D75/1, D73: a tár ritka ÚJRAÍRÁSÁNAK (a tömörítés) jele — ha egy másik folyamat átírta a fájlt, a mi mutatónk
   // eltolásai érvénytelenek: a `frissit()` ezt a jelből tudja meg, és a mutatót a fájlból újraépíti.
@@ -189,7 +193,10 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
   // a fájl következő olvasása pótolja; addig a teste úgyis a memóriában van.
   let sorrend = [];                       // a beérkezés (a fájl) sorrendjében — a `betolt()`-nek
   let azonositoSzerint = new Map();       // azonosító → bejegyzés
-  let szerzoSzerint = new Map();          // szerző → bejegyzések
+  // ⭐⭐ D128: a LÁNC a készüléké (`lancKulcsa`) — a `z` a lánc kulcsa, az `y` az azonosság (a szerző).
+  let szerzoSzerint = new Map();          // lánc (készülék) → bejegyzések
+  let azonossagSzerint = new Map();       // ⭐⭐ D128: azonosság (szerző) → bejegyzések (minden készülékéé)
+  let tanusitvanySzerint = new Map();     // ⭐⭐ D128: készülék → az első bejegyzés, ami a tanúsítványát hozza
   let szeletSzerint = new Map();          // szelet-kulcs → bejegyzések
   // ⭐ A C 7. pontja (a gyerek-bejelentés), D85/1, D85/3 óta általánosan: szelet → a hozzá BEJELENTETT
   // események (a gyerekek születése, a javaslatok, a szavazatok — `bejelentesHelyei`). A legfelső szintű
@@ -227,6 +234,8 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     sorrend.push(b);
     azonositoSzerint.set(b.a, b);
     hozza(szerzoSzerint, b.z, b);
+    hozza(azonossagSzerint, b.y, b);
+    if (b.t && !tanusitvanySzerint.has(b.z)) tanusitvanySzerint.set(b.z, b);
     // ⭐ A SZELET-KULCS type-független szabálya (`esemeny.js`): vagy meg van mondva, vagy az
     // esemény a saját szeletét nyitja. A tárolónak ennyit kell tudnia a domainről.
     hozza(szeletSzerint, b.s, b);
@@ -249,7 +258,8 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
   }
 
   const bejegyzesEsemenybol = (e, o, h) =>
-    ({ o, h, a: e.azonosito, z: e.szerzo, n: e.sorszam, s: szelet(e), p: bejelentesHelyei(e) });
+    ({ o, h, a: e.azonosito, z: lancKulcsa(e), n: e.sorszam, s: szelet(e), p: bejelentesHelyei(e), y: e.szerzo,
+      t: e.tanusitvany ? 1 : 0 });
 
   /**
    * A fájl egy darabjának sorai a mutatóba (és a testek a memóriába). ⚠️ A darab egész
@@ -291,6 +301,8 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     sorrend = [];
     azonositoSzerint = new Map();
     szerzoSzerint = new Map();
+    azonossagSzerint = new Map();
+    tanusitvanySzerint = new Map();
     szeletSzerint = new Map();
     bejelentesSzerint = new Map();
     pontSzerint = new Map();
@@ -342,7 +354,9 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     // a bejelentés helyeinek LISTÁJÁT — a régebbit eldobjuk, és a mutató a fájlból épül újra (egyszer).
     if (!kep || kep.v !== KEP_VALTOZAT || !Number.isInteger(kep.fedett) || kep.fedett < 0) return false;
     if (!Array.isArray(kep.szerzok) || !Array.isArray(kep.szeletek) || !Array.isArray(kep.e)) return false;
-    return kep.e.every((x) => Array.isArray(x) && x.length === 7
+    // ⭐⭐ D128 (4. változat): a lánc kulcsa (a készülék), mellette az azonosság (7.) és a tanúsítvány jele (8.).
+    return kep.e.every((x) => Array.isArray(x) && x.length === 9
+      && Number.isInteger(x[7]) && x[7] >= 0 && x[7] < kep.szerzok.length && (x[8] === 0 || x[8] === 1)
       && Array.isArray(x[6]) && x[6].every((i) => Number.isInteger(i) && i >= 0 && i < kep.szeletek.length)
       && Number.isInteger(x[0]) && x[0] >= 0 && Number.isInteger(x[1]) && x[1] > 0
       && typeof x[2] === 'string'
@@ -390,7 +404,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     mutatoUritese();
     for (const x of kep.e) {
       bejegyez({ o: x[0], h: x[1], a: x[2], z: kep.szerzok[x[3]], n: x[4], s: kep.szeletek[x[5]],
-        p: x[6].map((i) => kep.szeletek[i]) });
+        p: x[6].map((i) => kep.szeletek[i]), y: kep.szerzok[x[7]], t: x[8] });
     }
     ismertMeret = kep.fedett;
     return true;
@@ -416,7 +430,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     };
     const e = bejegyzesek.map((b) =>
       [b.o, b.h, b.a, szama(szerzoSzama, szerzok, b.z), b.n, szama(szeletSzama, szeletek, b.s),
-        b.p.map((k) => szama(szeletSzama, szeletek, k))]);
+        b.p.map((k) => szama(szeletSzama, szeletek, k)), szama(szerzoSzama, szerzok, b.y), b.t]);
     const kep = {
       v: KEP_VALTOZAT,
       fedett: ismertMeret,
@@ -442,7 +456,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
   function testetBevesz(b, bajtok) {
     try {
       const e = JSON.parse(bajtok.toString('utf8'));
-      if (e?.azonosito !== b.a || e.szerzo !== b.z || e.sorszam !== b.n || szelet(e) !== b.s
+      if (e?.azonosito !== b.a || lancKulcsa(e) !== b.z || e.szerzo !== b.y || e.sorszam !== b.n || szelet(e) !== b.s
           || bejelentesHelyei(e).join('|') !== b.p.join('|')) {
         return false;
       }
@@ -584,9 +598,34 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
       return e;
     },
 
-    /** EGY szerző eseményei (a fájl sorrendjében). */
-    async szerzoLanca(szerzo) {
-      return testekKellenek(() => szerzoSzerint.get(szerzo) ?? []);
+    /** ⭐⭐ D128: EGY LÁNC (egy készülék — `lancKulcsa`) eseményei (a fájl sorrendjében). */
+    async lancEsemenyei(lanc) {
+      return testekKellenek(() => szerzoSzerint.get(lanc) ?? []);
+    },
+
+    /** ⭐⭐ D128: EGY AZONOSSÁG (szerző) eseményei — minden készülékéé (a fájl sorrendjében). */
+    async azonossagEsemenyei(szerzo) {
+      return testekKellenek(() => azonossagSzerint.get(szerzo) ?? []);
+    },
+
+    /**
+     * ⭐⭐ D128: egy készülék tanúsítványa — abból az eseményből, ami a tárban elsőként hozta (a kapu ellenőrizte).
+     * @param {string} keszulek
+     * @returns {Promise<Object|null>}
+     */
+    async tanusitvany(keszulek) {
+      if (!tanusitvanySzerint.has(keszulek)) return jegyzek.keres(keszulek);
+      const [e] = await testekKellenek(() => [tanusitvanySzerint.get(keszulek)]);
+      return e?.tanusitvany ?? null;
+    },
+
+    /**
+     * ⭐⭐ D128: egy (a lánca első eseménye NÉLKÜL érkezett esemény hozta) tanúsítvány a jegyzékbe — a kapu hívja, ellenőrzés után.
+     * @param {Object} t
+     * @returns {Promise<boolean>}
+     */
+    tanusitvanyFelvetele(t) {
+      return jegyzek.felvesz(t);
     },
 
     /** EGY szelet (entitás) eseményei. */
@@ -594,7 +633,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
       return testekKellenek(() => szeletSzerint.get(entitas) ?? []);
     },
 
-    /** Egy pont a szerző láncán — rendes esetben egy esemény, elágazásnál több. */
+    /** Egy pont egy láncon (⭐⭐ D128: a készülék kulcsa) — rendes esetben egy esemény, elágazásnál több. */
     async sorszamSzerint(szerzo, sorszam) {
       return testekKellenek(() => szerzoPontjai(szerzo).get(sorszam) ?? []);
     },
@@ -815,6 +854,31 @@ export function kulcsTarolo(hely = alapHely()) {
     },
 
     /** @param {Object} leiras */
+    async ir(leiras) {
+      await mkdir(hely, { recursive: true });
+      await writeFile(fajl, JSON.stringify(leiras, null, 2), 'utf8');
+    }
+  };
+}
+
+/**
+ * ⭐⭐ D128: A KÉSZÜLÉK tárolója (`keszulek.json`) — a készülékkulcs és a tanúsítványa (`kulcs/keszulek.js`). A kulcs
+ * (`kulcs.json`) mellett, ugyanúgy: aki a fájlhoz hozzáfér, ezzel a készülékkel írhat a nevedben (amíg ki nem zárod).
+ * @param {string} [hely]
+ * @returns {{olvas: Function, ir: Function, fajl: string}}
+ */
+export function keszulekTarolo(hely = alapHely()) {
+  const fajl = join(hely, 'keszulek.json');
+  return {
+    fajl,
+    async olvas() {
+      try {
+        return JSON.parse(await readFile(fajl, 'utf8'));
+      } catch (hiba) {
+        if (hiba.code === 'ENOENT') return null;
+        throw hiba;
+      }
+    },
     async ir(leiras) {
       await mkdir(hely, { recursive: true });
       await writeFile(fajl, JSON.stringify(leiras, null, 2), 'utf8');

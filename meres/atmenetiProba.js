@@ -53,9 +53,10 @@ proba('⭐⭐ a korlát fölött a LEGRÉGEBBEN MEGNÉZETT szelet megy — a meg
   const hely = await mappa();
   let ora = 1000;
   const { g } = await haromGondolat();
-  const egyBajt = Buffer.byteLength(JSON.stringify(g[0])) + 1;
+  // ⭐⭐ D128: az első gondolat (a lánc első eseménye) a tanúsítványt is hozza — nagyobb; a korlát a valódi méretekből.
+  const meret = (e) => Buffer.byteLength(JSON.stringify(e)) + 1;
   // Két szelet fér el, három nem.
-  const at = await atmenetiTarNyitasa(KOINO, hely, { korlat: Math.floor(egyBajt * 2.5), most: () => ora });
+  const at = await atmenetiTarNyitasa(KOINO, hely, { korlat: meret(g[0]) + meret(g[1]) + Math.floor(meret(g[1]) / 2), most: () => ora });
   await esemenyMentese(at, g[0]); ora += 10;           // ELSO   @1000
   await esemenyMentese(at, g[1]); ora += 10;           // MASODIK @1010
   await at.megnezve(g[0].azonosito); ora += 10;        // ELSO megnézve @1020 → a MASODIK a legrégebbi
@@ -75,9 +76,11 @@ proba('⭐⭐ D112 ②: a RÖGZÍTETT szelet a böngészés kiszorításából k
   const anna = await ujEember(KOINO);
   const g = [];
   for (const cim of ['A1', 'A2', 'A3', 'A4']) g.push(await anna.tesz('GondolatLetrehozas', { cim, meret: 10 }));
-  const egy = Buffer.byteLength(JSON.stringify(g[0])) + 1;
-  // a böngészés kerete: 1 szelet; a rögzítetteké: 2 szelet
-  const at = await atmenetiTarNyitasa(KOINO, hely, { korlat: Math.floor(egy * 1.5), rogzitettKorlat: Math.floor(egy * 2.5), most: () => ora });
+  // ⭐⭐ D128: az első gondolat (A1, a lánc első eseménye) a tanúsítványt is hozza — nagyobb; a keretek a valódi méretekből.
+  const meret = (e) => Buffer.byteLength(JSON.stringify(e)) + 1;
+  const egy = meret(g[1]);
+  // a böngészés kerete: 1 szelet; a rögzítetteké: 2 szelet (az A1 és egy rendes)
+  const at = await atmenetiTarNyitasa(KOINO, hely, { korlat: Math.floor(egy * 1.5), rogzitettKorlat: meret(g[0]) + egy + Math.floor(egy / 2), most: () => ora });
   const megvan = (i) => at.mind().some((e) => e.azonosito === g[i].azonosito);
   await esemenyMentese(at, g[0]); ora += 10;                // A1 @1000
   await at.rogzites([g[0].azonosito], 'F1'); ora += 10;     // A1 rögzítve (F1 @1010)

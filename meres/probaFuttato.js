@@ -123,8 +123,52 @@ export function probaGyujtemeny(cim) {
 // Minden próba-fájlnak kell egy „valaki", aki aláír. Egy helyen van, hogy a próbák ne
 // másolják — és mert ha a lánc-építés szabálya változik, itt egy helyen kövessük.
 
-import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
+import { esemenyLetrehozasa, kiseroval } from '../js/esemeny/esemeny.js';
 import { TUDATPONT_KERET, javaslatEntitasai } from '../js/allapot/szabalyok.js';
+import { ujKeszulek } from '../js/kulcs/keszulek.js';
+
+/**
+ * ⭐⭐ D128: egy próba-KÉSZÜLÉK — egy friss azonosság, és alatta egy tanúsított készülékkulcs (`kulcs/keszulek.js` `eszkoz`).
+ * Az `esemenyLetrehozasa` ezt várja: a szerző az azonosság, az aláíró a készülék. Az azonosság kulcspárja is visszajön
+ * (`azonossagKulcspar`) — a második készülék tanúsításához.
+ * @param {string} [nev]
+ * @param {CryptoKeyPair} [azonossagKulcspar] - meglévő azonosság (a második készülékhez); alapból egy új
+ * @returns {Promise<Object>} eszköz (+ `azonossagKulcspar`)
+ */
+export async function tesztKeszulek(nev = 'próba', azonossagKulcspar = null) {
+  const az = azonossagKulcspar ?? await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const k = { ...(await ujKeszulek(az, nev)), azonossagKulcspar: az };
+  PROBA_TANUSITVANYOK.set(k.keszulek, k.tanusitvany);
+  return k;
+}
+
+/** ⭐⭐ D128: a próba-készülékek tanúsítványai (készülék → tanúsítvány). */
+const PROBA_TANUSITVANYOK = new Map();
+
+/**
+ * ⭐⭐ D128: az események készülékeinek tanúsítványai — amit a valóságban a küldő MELLÉKEL, ha egy esemény a láncán kívül utazik
+ * (`esemenyMentese(tar, e, { tanusitvanyok })`). A próbák ezzel adnak át egy lánc közepéről vett eseményt.
+ * @param {Array<Object>} esemenyek
+ * @returns {Array<Object>}
+ */
+/**
+ * ⭐⭐ D128: az esemény a kísérő tanúsítvánnyal (a burokban — ahogy egy válasz küldője adja: `kiseroAdo`), ha nem a lánc első
+ * eseménye. A próbák válaszolói ezzel adják az eseményeket.
+ * @param {Object|null} e
+ * @returns {Object|null}
+ */
+export function probaKiseroval(e) {
+  return e ? kiseroval(e, PROBA_TANUSITVANYOK.get(e.keszulek) ?? null) : e;
+}
+
+export function probaTanusitvanyok(esemenyek) {
+  const ki = new Map();
+  for (const e of esemenyek ?? []) {
+    const t = PROBA_TANUSITVANYOK.get(e?.keszulek);
+    if (t && !ki.has(e.keszulek)) ki.set(e.keszulek, t);
+  }
+  return [...ki.values()];
+}
 
 /**
  * A SZELET-KULCS kitalálása a típusból — ugyanaz a szabály, amit a `muveletek.js` követ.
@@ -160,11 +204,11 @@ function szeletKulcs(tipus, adat) {
  * @param {string} [koino]
  * @returns {Promise<{szerzo: string, kulcspar: CryptoKeyPair, tesz: Function, elagaztat: Function}>}
  */
-export async function ujEember(koino = 'proba') {
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const nyers = await crypto.subtle.exportKey('raw', kulcspar.publicKey);
-  let s = ''; for (const b of new Uint8Array(nyers)) s += String.fromCharCode(b);
-  const szerzo = btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+export async function ujEember(koino = 'proba', keszulek = null) {
+  // ⭐⭐ D128: az e-ember egy azonosság, és egy tanúsított készülékkel ír (a lánc a készüléké). Egy meglévő készülék is adható
+  // (pl. ugyanannak az azonosságnak egy második készüléke — `tesztKeszulek(nev, ember.kulcspar.azonossagKulcspar)`).
+  const kulcspar = keszulek ?? await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
 
   let sorszam = 0, elozo = null;
   let utolsoSorszam = 0, utolsoElozo = null;   // az utolsó esemény helye (az elágazáshoz)
@@ -219,6 +263,7 @@ export async function ujEember(koino = 'proba') {
   const ember = {
     szerzo,
     kulcspar,
+    keszulek: kulcspar.keszulek,   // ⭐⭐ D128: a lánc kulcsa
 
     /**
      * ⭐ D118/2: az új alakú koinó születése üres koinó-mezővel megy (`ujEember('')`), utána az alapító a koinó NEVÉN — a

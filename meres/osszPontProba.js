@@ -9,7 +9,7 @@
 // teljes szúrópróba VALÓDI aláírt eseményekkel: a becsületes fejléc átmegy, a felfújt lebukik, a más entitás
 // eseménye és a hiányos válasz elbukik, a hiányzó esemény nem hiba, csak kimondott.
 
-import { probaGyujtemeny, ujEember, tagokkal } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tagokkal, probaKiseroval } from './probaFuttato.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
 import {
   osszPontokSzamitasa, gyerekJegyzek, reszfaLevelei, reszfaKarbantarto, mintaHelyek, fejlecMintai,
@@ -151,7 +151,7 @@ async function valodiAllapot() {
   }
   esemenyek.push(await anna.tesz('TudatpontRendezes', { entitas: g2.azonosito, pont: 5 }));
   const allapot = await allapotSzamitasa(await tagokkal(esemenyek));
-  return { allapot, esemenyek, x: x.azonosito, terkep: new Map(esemenyek.map((e) => [e.azonosito, e])) };
+  return { allapot, esemenyek, x: x.azonosito, terkep: new Map(esemenyek.map((e) => [e.azonosito, probaKiseroval(e)])) };   // ⭐⭐ D128: a kísérő tanúsítvánnyal (ahogy a válasz hozza)
 }
 
 async function fejlec(allapot, x) {

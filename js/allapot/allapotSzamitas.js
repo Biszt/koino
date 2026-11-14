@@ -31,7 +31,7 @@
 
 import { szabalyokErvenyesitese, erintettek, elsoErintett, javaslatEntitasai } from './szabalyok.js';
 import { csomagokKibontasa } from './dontesiCsomag.js';
-import { koinoSzuleteseListabol } from '../esemeny/esemeny.js';
+import { koinoSzuleteseListabol, lancKulcsa } from '../esemeny/esemeny.js';
 import { koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
 
 // ===================================
@@ -82,6 +82,8 @@ function javaslatCime(adat) {
 export function rendezettBemenet(esemenyek) {
   return [...esemenyek].sort((a, b) => {
     if (a.szerzo !== b.szerzo) return a.szerzo < b.szerzo ? -1 : 1;
+    // ⭐⭐ D128: egy azonosságon belül láncónként (készülékenként) — a sorszám csak egy láncon belül sorrend.
+    if (lancKulcsa(a) !== lancKulcsa(b)) return lancKulcsa(a) < lancKulcsa(b) ? -1 : 1;
     if (a.sorszam !== b.sorszam) return a.sorszam - b.sorszam;
     return a.azonosito < b.azonosito ? -1 : a.azonosito > b.azonosito ? 1 : 0;
   });
@@ -110,10 +112,10 @@ export function rendezettBemenet(esemenyek) {
  * @returns {{ervenyesek: Array<Object>, ellentmondasok: Array<Object>}}
  */
 export function elagazasokFeloldasa(esemenyek, lancAga = null) {
-  const kulcsSzerint = new Map();      // "szerzo|sorszam" → események
+  const kulcsSzerint = new Map();      // "lánc|sorszam" → események (⭐⭐ D128: a lánc a készüléké)
   for (const e of esemenyek) {
     // ⭐ D118 (⑤b): a lánc-ág szerint (a koinó képe adja) — a nem bekapcsolódó ős-eseménye külön ág, nem a gyermekbeli lánca.
-    const kulcs = (lancAga ? lancAga(e) : e.szerzo) + '|' + e.sorszam;
+    const kulcs = (lancAga ? lancAga(e) : lancKulcsa(e)) + '|' + e.sorszam;
     if (!kulcsSzerint.has(kulcs)) kulcsSzerint.set(kulcs, []);
     kulcsSzerint.get(kulcs).push(e);
   }
@@ -169,7 +171,7 @@ export function elagazasokFeloldasa(esemenyek, lancAga = null) {
 export function idoEllentmondasokKeresese(ervenyesek, lancAga = null) {
   const szerzonkent = new Map();
   for (const e of ervenyesek) {
-    const ag = lancAga ? lancAga(e) : e.szerzo;
+    const ag = lancAga ? lancAga(e) : lancKulcsa(e);
     if (!szerzonkent.has(ag)) szerzonkent.set(ag, []);
     szerzonkent.get(ag).push(e);
   }

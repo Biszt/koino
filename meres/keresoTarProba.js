@@ -24,7 +24,7 @@ import {
 import { cimKulcsai, bejegyzesHelye, regiobaEsik } from '../js/csere/keresoReteg.js';
 import { lenyomatDarabja } from '../js/csere/cimjegyzek.js';
 import { megujitasKeszitese, MEGUJITAS_ELETTARTAM } from '../js/tar/keresoMegujitas.js';
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, probaKiseroval } from './probaFuttato.js';
 
 const { proba, futtatas } = probaGyujtemeny('A KERESŐ-TÁR (D107 L1 — a kereső-réteg ③a)');
 
@@ -83,18 +83,20 @@ proba('⛔ K3: legalább két KÜLÖNBÖZŐ tulajdonos pozitív pontja kell, err
   const tar = await keresoTarNyitasa(KOINO, await ujMappa());
   const { szerzok, szuletes, pontEsemenyek } = await gondolatTulajdonosokkal('Közös park');
   const k = cimKulcsai('Közös park')[0];
-  const egy = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: [szuletes, pontEsemenyek[0], pontEsemenyek[0]], m: null });
-  const egyedul = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: [szuletes, pontEsemenyek[0]], m: null });
+  // ⭐⭐ D128: a bejegyzés eseményei a készülékük tanúsítványával utaznak (ahogy a felajánló adja — `kiseroAdo`).
+  const kb = (lista) => lista.map(probaKiseroval);
+  const egy = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: kb([szuletes, pontEsemenyek[0], pontEsemenyek[0]]), m: null });
+  const egyedul = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: kb([szuletes, pontEsemenyek[0]]), m: null });
   const masik = await szerzok[1].tesz('GondolatLetrehozas', { cim: 'Más', meret: 1 });
   const masikPont = await szerzok[1].tesz('TudatpontRendezes', { entitas: masik.azonosito, pont: 5 });
-  const rosszHelyre = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: [szuletes, pontEsemenyek[0], masikPont], m: null });
-  const idegen = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: [szuletes, ...pontEsemenyek, masik], m: null });
+  const rosszHelyre = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: kb([szuletes, pontEsemenyek[0], masikPont]), m: null });
+  const idegen = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: kb([szuletes, ...pontEsemenyek, masik]), m: null });
   // ⚠️ Az alak-ellenőrzés a túl rövid csomagot már elveti — ezért egy ALAKRA hibátlan csomag is kell, amelyben csak a
   // tulajdonosok száma kevés (a születés, egy pont, és egy ugyanazt a címet adó javaslat): ez a TARTALOM szabályát méri.
   const javaslat = await szerzok[1].tesz('Javaslat', {
     erintettek: [{ entitas: szuletes.azonosito, muvelet: 'Modositas', valtozas: { cim: 'Közös park' } }], fajta: 'szerkesztesi'
   });
-  const egyTulajdonos = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: [szuletes, pontEsemenyek[0], javaslat], m: null });
+  const egyTulajdonos = await bejegyzesBefogadasa(tar, { k, s: 0, g: szuletes.azonosito, esemenyek: kb([szuletes, pontEsemenyek[0], javaslat]), m: null });
   return BEJEGYZES_TULAJDONOS_MIN === 2 && !egy.uj && !egyedul.uj && /nem erre/.test(rosszHelyre.ok) && /idegen/.test(idegen.ok)
     && !egyTulajdonos.uj && /kevesebb tulajdonos/.test(egyTulajdonos.ok) && tar.darab() === 0;
 });
@@ -120,7 +122,7 @@ proba('⭐⛔ A megújítás (L3): a tulajdonosé érvényes és ÚJ elem (a ré
   const { szerzok, szuletes, pontEsemenyek } = await gondolatTulajdonosokkal('Közös park');
   const [regi] = bejegyzesekEpitese({ szuletes, pontEsemenyek });
   await bejegyzesBefogadasa(tar, regi);
-  const jwk = async (e) => crypto.subtle.exportKey('jwk', e.kulcspar.privateKey);
+  const jwk = async (e) => crypto.subtle.exportKey('jwk', e.kulcspar.azonossagKulcspar.privateKey);
   const kulcs = await jwk(szerzok[1]);
   const [uj] = bejegyzesekEpitese({ szuletes, pontEsemenyek,
     megujitas: (esemenyek) => megujitasKeszitese(kulcs, szerzok[1].szerzo, { koino: KOINO, g: szuletes.azonosito, esemenyek,

@@ -467,7 +467,8 @@ const KIMONDOTT_BEADOTT = new Map([
   ['js/allapot/szabalyok.js:lancAga', 'ugyanaz, a szabály-rétegben'],
   ['js/allapot/lezarasiOsszegzes.js:esemenyOlvas', 'a lezárási összegzés mintáinak kiszolgálása (D95/1) — a teljes tartó olvassa a saját tárából'],
   ['js/allapot/lezarasiOsszegzes.js:tagE', 'a lezárási összegzés ellenőrzése (D95/1) — a nem ellenőrizhető tagság nem hiba, csak nem igazol'],
-  ['js/esemeny/szovegDarab.js:olvas', 'a szöveg feloldása a megjelenítéshez — a számítás a hivatkozást viszi (D72)']
+  ['js/esemeny/szovegDarab.js:olvas', 'a szöveg feloldása a megjelenítéshez — a számítás a hivatkozást viszi (D72)'],
+  ['js/esemeny/esemeny.js:tanusitvany', '⭐⭐ D128: a készülék-tanúsítvány keresője (a tár, a csomag) — nem döntés: a tanúsítvány önmagát igazolja (az azonosság kulcsa írta alá), a kereső csak megtalálja']
 ]);
 function beadottFuggvenyek(ut, forras) {
   const ki = new Set();

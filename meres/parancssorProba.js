@@ -18,9 +18,9 @@
 // egy ember ülne le elé. Lassabb, mint a többi próba (folyamat-indítás), ezért kevés van
 // belőle: csak a **teljes körök**, amiknek kézzel végigjárhatónak kell lenniük.
 
-import { probaGyujtemeny } from './probaFuttato.js';
+import { probaGyujtemeny, tesztKeszulek } from './probaFuttato.js';
 import { execFile, spawn } from 'node:child_process';
-import { mkdtemp, rm, readFile, writeFile, readdir, mkdir, cp } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile, readdir, mkdir, cp, copyFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 // ⭐ A néma DHT-gép és a néma tükör próbájához (40. mérés): egy foglalat, ami hall, de nem felel.
@@ -370,7 +370,7 @@ proba('⛔⛔ D118/2 (a lelet): a második születés a kézi úton sem veszi á
       if (!g) return false;
       const sorok = [];
       for (let i = 0; i < 6; i++) {
-        const kp = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+        const kp = await tesztKeszulek();
         const adat = { nev: 'Hamis koinó', leiras: null, alapitok: [], zart: false };
         sorok.push(JSON.stringify(await esemenyLetrehozasa({ koino: K, tipus: 'KoinoLetrehozas', adat, elozo: null, sorszam: 1 }, kp)));
         sorok.push(JSON.stringify(await esemenyLetrehozasa({ koino: '', tipus: 'KoinoLetrehozas', adat, elozo: null, sorszam: 1 }, kp)));
@@ -2997,6 +2997,8 @@ proba('⛔ a hosszan futó vendég a cserében megkapott koinó-születést azon
 // ⭐⭐ D98/2–4: A LÁNC-KÖR A VALÓDI CSERÉBEN — a két ágú szerző (2026-10-09)
 // ===================================
 //
+// ⭐⭐ D128: az elágazás ma csak úgy keletkezik, ha ugyanaz a KÉSZÜLÉKKULCS két gépen van (a `keszulek.json` átmásolva) — az
+// azonosság kulcsának visszatöltése a második gépen SAJÁT készülékkulcsot ad (külön lánc, nincs elágazás: ezt a D128 oldotta meg).
 // X (az alapító) két készüléken ugyanazzal a kulccsal ír (A1, A2): a közös előtag után A1 a G-re tesz pontot (a 6.
 // esemény), A2 a G2-re (az ő 6.-a) és a G-re (a 7.). H („alap” módban) csak a G-t vállalja: A1-től megkapja X 6. eseményét,
 // A2-től a 7.-et — a két ág eseményei KÜLÖNBÖZŐ sorszámon találkoznak nála (az észlelő ezt nem látja). ⭐ A lánc-kör A2-t
@@ -3018,6 +3020,7 @@ proba('⭐⭐ D98/2–4: a két ágú szerző eseményei egy harmadik készülé
       await fut(a1, 'kivisz', join(a1, 'mind.jsonl'));
       await fut(a1, 'mentes', join(a1, 'kulcs-mentes.json'));
       await fut(a2, 'visszatolt', join(a1, 'kulcs-mentes.json'), 'felulir');
+      await copyFile(join(a1, 'keszulek.json'), join(a2, 'keszulek.json'));   // ⭐⭐ D128: ugyanaz a készülékkulcs is
       await fut(a2, 'behoz', join(a1, 'mind.jsonl'));
       await fut(h, 'behoz', join(a1, 'mind.jsonl'));
       await fut(h, 'pont', g, '3');                          // H a G-t vállalja (a G2-t nem)
@@ -3046,7 +3049,7 @@ proba('⭐⭐ D98/2–4: a két ágú szerző eseményei egy harmadik készülé
         // a bizonyíték a két k. esemény (az A ágé és a B ágé) — a B ág k.-a csak a lánc-körből jöhetett
         bizonyitek: !!vad && [vad.adat.esemeny?.azonosito, vad.adat.masik?.azonosito].sort().join()
           === [aAg.azonosito, bAg.azonosito].sort().join(),
-        feljegyezve: !!feljegyzes?.szerzok?.[x]
+        feljegyezve: !!feljegyzes?.szerzok?.[aAg?.keszulek]   // ⭐⭐ D128: a lánc-ellenőrzés láncónként (a készülék kulcsa) jegyez
       };
       if (!Object.values(ki).every(Boolean)) {
         process.stdout.write('  lánc-kör — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ')
@@ -4019,22 +4022,22 @@ proba('⭐⭐ AZ ELLENTMONDÁS A KÉZI ÚTON — az ép vád a másik készülé
     // ----- A csaló: egy kis élet, és egy hazug bemondás (helyes gyökérrel, rossz összeggel) -----
     const tar = await esemenyTarNyitasa('sajat', csalo);
     const kulcs = async () => {
-      const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-      return { kulcspar, szerzo: Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url') };
+      const kulcspar = await tesztKeszulek();
+      return { kulcspar, szerzo: kulcspar.azonossag };
     };
     const k = { koino: 'sajat', tar, darabTar: fajlBlobTarolo('sajat', csalo), ...await kulcs() };
     await koinoLetrehozasa(k, 'Csalo koino');
     const g = await gondolatLetrehozasa(k, { cim: 'Egy gondolat' });
     await tudatpontRendezese(k, g.azonosito, 30);
-    let lanc = await sajatLancEsemenyei(tar, k.szerzo);
+    let lanc = await sajatLancEsemenyei(tar, k.kulcspar.keszulek);
     const utolso = lanc[lanc.length - 1];
     // ⭐ D81: a helyes lánc-gyökérrel és bizonyítékkal — csak a bemondás hazug (a kapu így beengedi).
-    const { lancGyoker, bizonyitek } = await lancUjEsemenyhez(tar, 'sajat', k.szerzo, utolso.sorszam + 1, null, g.azonosito);
+    const { lancGyoker, bizonyitek } = await lancUjEsemenyhez(tar, 'sajat', k.kulcspar.keszulek, utolso.sorszam + 1, null, g.azonosito);
     const hazug = await esemenyLetrehozasa({ koino: 'sajat', tipus: 'TudatpontRendezes', entitas: g.azonosito,
       entitasSorszam: 9, adat: { entitas: g.azonosito, pont: 80, szerep: 'aktiv', kiosztva: 5, bizonyitek },
       elozo: utolso.azonosito, sorszam: utolso.sorszam + 1, lancGyoker }, k.kulcspar);
     await esemenyMentese(tar, hazug);
-    lanc = await sajatLancEsemenyei(tar, k.szerzo);
+    lanc = await sajatLancEsemenyei(tar, k.kulcspar.keszulek);
 
     // ----- A vád: ép és hamis (a hamis egy becsületes pont-eseményt vádol) — D81: az esemény elég -----
     const bejelento = await kulcs();
@@ -4069,15 +4072,15 @@ proba('⭐⭐ AZ ELLENTMONDÁS A KÉZI ÚTON — az ép vád a másik készülé
 /** Egy csaló koinója a lemezen: alapítás, egy gondolat, egy pont — és egy hazug bemondás (D81). */
 async function csaloKoino(hely, beallitas = {}) {
   const tar = await esemenyTarNyitasa('sajat', hely);
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const kulcspar = await tesztKeszulek();
   const k = { koino: 'sajat', tar, darabTar: fajlBlobTarolo('sajat', hely), kulcspar,
-    szerzo: Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url') };
+    szerzo: kulcspar.azonossag };
   await koinoLetrehozasa(k, 'Csalo koino', undefined, undefined, beallitas);
   const g = await gondolatLetrehozasa(k, { cim: 'Egy gondolat' });
   await tudatpontRendezese(k, g.azonosito, 30);
-  const lanc = await sajatLancEsemenyei(tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(tar, k.kulcspar.keszulek);
   const utolso = lanc[lanc.length - 1];
-  const { lancGyoker, bizonyitek } = await lancUjEsemenyhez(tar, 'sajat', k.szerzo, utolso.sorszam + 1, null, g.azonosito);
+  const { lancGyoker, bizonyitek } = await lancUjEsemenyhez(tar, 'sajat', k.kulcspar.keszulek, utolso.sorszam + 1, null, g.azonosito);
   const hazug = await esemenyLetrehozasa({ koino: 'sajat', tipus: 'TudatpontRendezes', entitas: g.azonosito,
     entitasSorszam: 9, adat: { entitas: g.azonosito, pont: 80, szerep: 'aktiv', kiosztva: 5, bizonyitek },
     elozo: utolso.azonosito, sorszam: utolso.sorszam + 1, lancGyoker }, kulcspar);

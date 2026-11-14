@@ -55,7 +55,7 @@ export const KIOSZTAS_FAJTA = 'kiosztas';
 export const KIOSZTAS_HOSSZ = 1;
 
 // A gyorsítótár alakjának változata (ha a tartalma változik, nő — a régit eldobjuk).
-const TAR_VALTOZAT = 1;
+const TAR_VALTOZAT = 2;   // ⭐⭐ D128: a gyorsítótár egy LÁNCÉ (a készüléké), nem a szerzőé
 
 /**
  * A lánc-gyökér a két gyökérből (D81: maguk az összegzések — csak a `l`, `d`, `o` mezőjük).
@@ -218,13 +218,13 @@ const memoria = new WeakMap();
 
 // ⚠️ A `kiosztasFa` (a kiosztás FÁJA) csak a memóriában él — a fájl a pontokat tartja, a fa a
 // bizonyítékhoz kérésre épül belőlük (egy pont-eseménynél).
-const uresAllapot = (szerzo) => ({
-  szerzo, sorszam: 0, utolso: null, naplo: ujNaplo(NAPLO_FAJTA),
+const uresAllapot = (lanc) => ({
+  lanc, sorszam: 0, utolso: null, naplo: ujNaplo(NAPLO_FAJTA),
   osszeg: 0, pontok: new Map(), kiosztasGyoker: null, kiosztasFa: null
 });
 
 /** A gyorsítótár tartalmának ellenőrző-lenyomata (a csendes sérülés ellen). */
-const ellenorzoje = (adat) => lenyomat(['lanc-gyorsitotar', adat.v, adat.szerzo, adat.sorszam, adat.utolso,
+const ellenorzoje = (adat) => lenyomat(['lanc-gyorsitotar', adat.v, adat.lanc, adat.sorszam, adat.utolso,
   adat.csucsok, adat.osszeg, adat.pontok, adat.kiosztasGyoker, adat.nezet ?? '']);
 
 /**
@@ -232,8 +232,8 @@ const ellenorzoje = (adat) => lenyomat(['lanc-gyorsitotar', adat.v, adat.szerzo,
  * gyökeret adna, a szerző egy HAMIS gyökeret írna alá, és egy szúrópróba (D79) csalásnak látná. Ezért
  * a tartalmát egy ellenőrző-lenyomat köti, és a belső számai is egyezzenek.
  */
-async function fajlbolAllapot(adat, szerzo) {
-  if (!adat || adat.v !== TAR_VALTOZAT || adat.szerzo !== szerzo) return null;
+async function fajlbolAllapot(adat, lanc) {
+  if (!adat || adat.v !== TAR_VALTOZAT || adat.lanc !== lanc) return null;
   try {
     if (adat.ell !== await ellenorzoje(adat)) return null;
   } catch {
@@ -253,13 +253,13 @@ async function fajlbolAllapot(adat, szerzo) {
   // ⚠️ A keret nélküli (régebbi) fájl a mai kerettel készült.
   const keret = adat.keret ?? ALAP_SZABALYOK.tudatpontKeret;
   if (!Number.isSafeInteger(keret)) return null;
-  return { szerzo, sorszam: adat.sorszam, utolso: adat.utolso ?? null, naplo, osszeg: adat.osszeg, pontok,
+  return { lanc, sorszam: adat.sorszam, utolso: adat.utolso ?? null, naplo, osszeg: adat.osszeg, pontok,
     kiosztasGyoker: adat.kiosztasGyoker, kiosztasFa: null, keret, nezet: typeof adat.nezet === 'string' ? adat.nezet : '' };
 }
 
 async function fajlba(a) {
   const adat = {
-    v: TAR_VALTOZAT, szerzo: a.szerzo, sorszam: a.sorszam, utolso: a.utolso, csucsok: a.naplo.csucsok,
+    v: TAR_VALTOZAT, lanc: a.lanc, sorszam: a.sorszam, utolso: a.utolso, csucsok: a.naplo.csucsok,
     osszeg: a.osszeg, pontok: [...a.pontok], kiosztasGyoker: a.kiosztasGyoker, keret: a.keret, nezet: a.nezet ?? ''
   };
   return { ...adat, ell: await ellenorzoje(adat) };
@@ -268,7 +268,7 @@ async function fajlba(a) {
 /** Illik-e az állapot a lánchoz: a lefedett utolsó sorszámon tényleg az az (egyetlen) esemény áll? */
 async function illikALanchoz(tar, nezet, a) {
   if (a.sorszam === 0) return true;
-  const ott = (await tar.sorszamSzerint(a.szerzo, a.sorszam)).filter(nezet.tagja);
+  const ott = (await tar.sorszamSzerint(a.lanc, a.sorszam)).filter(nezet.tagja);
   return ott.length === 1 && ott[0].azonosito === a.utolso;
 }
 
@@ -277,20 +277,20 @@ async function illikALanchoz(tar, nezet, a) {
  * láncból pótolva.
  * @returns {Promise<Object|null>} null, ha a saját lánc nem ép (hézag, elágazás, szakadás)
  */
-async function allapotIg(tar, koino, szerzo, meddig, tarolo) {
+async function allapotIg(tar, koino, lanc, meddig, tarolo) {
   const keret = await koinoKerete(tar, koino);
   // ⭐⭐ D118 (⑤b): a szerző LÁNCA a koinóban — a bekapcsolódóé a hozott előtaggal (a napló a teljes láncot fedi), a kiosztás a
   // jelen réteg szerint (a hozott pontok a számított összeggel, az elhagyottak nélkül). Eddig a koinó nevére szűrt: a
   // bekapcsolódó lánca az 1. sorszámon „nem ép” volt, és a gyermekbeli eseményei lánc-gyökér nélkül születtek.
-  const nezet = await lancNezete(tar, koino, szerzo);
+  const nezet = await lancNezete(tar, koino, lanc);
   let tarbeli = memoria.get(tar);
   if (!tarbeli) { tarbeli = new Map(); memoria.set(tar, tarbeli); }
 
   // ----- Honnan indulunk: memória → fájl → üres -----
   let a = null;
   // ⚠️ A fájl hibája nem hiba: a gyorsítótár elhagyható, a lánc pótolja.
-  const fajlbol = tarolo ? await fajlbolAllapot(await tarolo.olvas().catch(() => null), szerzo) : null;
-  for (const jelolt of [tarbeli.get(szerzo), fajlbol]) {
+  const fajlbol = tarolo ? await fajlbolAllapot(await tarolo.olvas().catch(() => null), lanc) : null;
+  for (const jelolt of [tarbeli.get(lanc), fajlbol]) {
     // ⭐ D118/2: a kép a koinó keretével készült — ha azóta megjött a születés (más kerettel), a lánc újraszámolja.
     // ⭐ D118 (⑤b): és a lánc nézetével (ha azóta bekapcsolódtam, más a lánc és a kiosztás).
     if (jelolt && jelolt.sorszam <= meddig && jelolt.keret === keret && (jelolt.nezet ?? '') === nezet.kulcs
@@ -298,7 +298,7 @@ async function allapotIg(tar, koino, szerzo, meddig, tarolo) {
       a = jelolt; break;
     }
   }
-  if (!a) a = { ...uresAllapot(szerzo), keret, nezet: nezet.kulcs };
+  if (!a) a = { ...uresAllapot(lanc), keret, nezet: nezet.kulcs };
   const indulo = a.sorszam;
 
   // ----- A hiányzó vég a láncból -----
@@ -309,7 +309,7 @@ async function allapotIg(tar, koino, szerzo, meddig, tarolo) {
   let utolso = a.utolso;
   let uj = naplo;
   for (let s = a.sorszam + 1; s <= meddig; s++) {
-    const ott = (await tar.sorszamSzerint(szerzo, s)).filter(nezet.tagja);
+    const ott = (await tar.sorszamSzerint(lanc, s)).filter(nezet.tagja);
     if (ott.length !== 1 || (ott[0].elozo ?? null) !== utolso) {
       console.warn('lancGyoker - a saját lánc nem ép (hézag, elágazás vagy szakadás) — nem horgonyzunk',
         { sorszam: s, talalat: ott.length });
@@ -321,11 +321,11 @@ async function allapotIg(tar, koino, szerzo, meddig, tarolo) {
   }
   const kiosztasFa = pontValtozott ? await kiosztasFaja(pontok) : a.kiosztasFa;
   const kesz = {
-    szerzo, sorszam: meddig, utolso, naplo: uj, osszeg: allas.osszeg, pontok, kiosztasFa, keret, nezet: nezet.kulcs,
+    lanc, sorszam: meddig, utolso, naplo: uj, osszeg: allas.osszeg, pontok, kiosztasFa, keret, nezet: nezet.kulcs,
     kiosztasGyoker: pontValtozott ? await allapotGyokere(kiosztasFa) : a.kiosztasGyoker
   };
 
-  tarbeli.set(szerzo, kesz);
+  tarbeli.set(lanc, kesz);
   if (tarolo && meddig !== indulo) {
     await tarolo.ir(await fajlba(kesz)).catch((hiba) =>
       console.warn('lancGyoker - a gyorsítótár nem írható (nem baj, a lánc pótolja)', { hiba: hiba.message }));
@@ -339,15 +339,15 @@ async function allapotIg(tar, koino, szerzo, meddig, tarolo) {
  *
  * @param {Object} tar
  * @param {string} koino
- * @param {string} szerzo
+ * @param {string} lanc - ⭐⭐ D128: a lánc kulcsa (a készülék kulcsa — `lancKulcsa`)
  * @param {number} sorszam - az új esemény sorszáma (a lánc vége + 1)
  * @param {Object} [tarolo] - a gyorsítótár fájlja (`lancTarolo`); nélküle csak a memória
  * @param {string|Array<string>|null} [entitas] - pont-eseménynél az entitás (a régi értékének
  *        bizonyítéka); szavazatnál a kulcsok listája (D85/2) — kulcsonként egy bizonyíték
  * @returns {Promise<{lancGyoker: Object|null, bizonyitek: Object|null}>} null-ok, ha a saját lánc nem ép
  */
-export async function lancUjEsemenyhez(tar, koino, szerzo, sorszam, tarolo = null, entitas = null) {
-  const a = await allapotIg(tar, koino, szerzo, sorszam - 1, tarolo);
+export async function lancUjEsemenyhez(tar, koino, lanc, sorszam, tarolo = null, entitas = null) {
+  const a = await allapotIg(tar, koino, lanc, sorszam - 1, tarolo);
   if (!a) return { lancGyoker: null, bizonyitek: null };
   const lancGyoker = lancGyokerKetGyokerbol(await naploCsucsGyokere(a.naplo), a.kiosztasGyoker);
   let bizonyitek = null;
@@ -366,6 +366,6 @@ export async function lancUjEsemenyhez(tar, koino, szerzo, sorszam, tarolo = nul
 }
 
 /** A lánc-gyökér egy új saját eseményhez (a bizonyíték nélkül). */
-export async function lancGyokerUjEsemenyhez(tar, koino, szerzo, sorszam, tarolo = null) {
-  return (await lancUjEsemenyhez(tar, koino, szerzo, sorszam, tarolo)).lancGyoker;
+export async function lancGyokerUjEsemenyhez(tar, koino, lanc, sorszam, tarolo = null) {
+  return (await lancUjEsemenyhez(tar, koino, lanc, sorszam, tarolo)).lancGyoker;
 }

@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createSocket } from 'node:dgram';
 
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, probaTanusitvanyok } from './probaFuttato.js';
 import { esemenyTarNyitasa, tagsagFuggoTarolo } from '../js/tar/fajlTar.js';
 import { esemenyMentese } from '../js/tar/esemenyTar.js';
 import { csereUdpResen, szeletUdpResen, kezfogasUdpResen, udpKapcsolat } from '../js/csere/udpVonal.js';
@@ -40,7 +40,7 @@ async function udpParos() {
 
 async function tar(esemenyek) {
   const t = await esemenyTarNyitasa(KOINO, await ujMappa());
-  for (const e of esemenyek) await esemenyMentese(t, e);
+  for (const e of esemenyek) await esemenyMentese(t, e, { tanusitvanyok: probaTanusitvanyok([e]) });   // ⭐⭐ D128: a tanúsítvánnyal
   return t;
 }
 
@@ -194,9 +194,12 @@ proba('⭐⭐ D75/3: amit csak LÁTTAM (az átmeneti táramban), azt is kiszolg�
   const v = await vilag();
   const g = await v.c.tesz('GondolatLetrehozas', { cim: 'Látott', meret: 10 });
   const futas = async (kiszolgalo) => {
-    const tartos = await tar([v.szuletes]);
-    const atmeneti = await atmenetiTarNyitasa(KOINO, await ujMappa());
-    await esemenyMentese(atmeneti, g);                       // csak láttam — az átmenetiben
+    // ⭐⭐ D128: az átmeneti tár a tartós mellett (`<adat>/<koino>/atmeneti`) — a tanúsítvány-jegyzékük a készüléké, közös.
+    const hely = await ujMappa();
+    const tartos = await esemenyTarNyitasa(KOINO, hely);
+    await esemenyMentese(tartos, v.szuletes);
+    const atmeneti = await atmenetiTarNyitasa(KOINO, join(hely, KOINO));
+    await esemenyMentese(atmeneti, g, { tanusitvanyok: probaTanusitvanyok([g]) });                       // csak láttam — az átmenetiben
     const kero = await tar([v.szuletes]);
     const p = await udpParos();
     try {

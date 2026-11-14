@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createSocket } from 'node:dgram';
 
-import { probaGyujtemeny } from './probaFuttato.js';
+import { probaGyujtemeny, tesztKeszulek } from './probaFuttato.js';
 import {
   ujEgyszeriKulcs, kezfogasCsomag, kezfogasCsomagbol, munkamenetKulcsai, csomagTitkositasa,
   csomagKititkositasa, kezfogasAlairasa, kezfogasAlairasEllenorzese, TITKOS_JEL, KF_JEL,
@@ -98,8 +98,8 @@ async function udpParos() {
 async function tarGondolattal(cim, reszlet = null) {
   const mappa = await mkdtemp(join(tmpdir(), 'koino-titkos-'));
   const tar = await esemenyTarNyitasa(KOINO, mappa);
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   const k = { koino: KOINO, kulcspar, szerzo, tar, lancTarolo: null };
   if (cim) {
     const szul = await koinoLetrehozasa(k, 'Titkos koinó');
@@ -107,7 +107,7 @@ async function tarGondolattal(cim, reszlet = null) {
     // ⭐ D93/3: a kapu-próbáknak a szeletek neve is kell (a születés és a gondolat).
     if (reszlet) Object.assign(reszlet, { szuletes: szul.azonosito, gondolat: g.azonosito });
   }
-  if (reszlet) Object.assign(reszlet, { szerzo, jwk: await crypto.subtle.exportKey('jwk', kulcspar.privateKey) });
+  if (reszlet) Object.assign(reszlet, { szerzo, jwk: await crypto.subtle.exportKey('jwk', kulcspar.azonossagKulcspar.privateKey) });   // ⭐⭐ D128: a kézfogás (még) az azonosság kulcsával
   return tar;
 }
 

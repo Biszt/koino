@@ -17,7 +17,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny, taggaTesz } from './probaFuttato.js';
+import { probaGyujtemeny, taggaTesz, tesztKeszulek } from './probaFuttato.js';
 import { esemenyTarNyitasa, fajlBlobTarolo, lancTarolo } from '../js/tar/fajlTar.js';
 import { esemenyMentese, lancVege, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { esemenyLetrehozasa, szelet, bejelentesHelyei } from '../js/esemeny/esemeny.js';
@@ -28,7 +28,7 @@ import {
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
 import { javaslatokSzamitasa } from '../js/allapot/javaslatSzamitas.js';
 import { toredekAzonosito } from '../js/allapot/szabalyok.js';
-import { CSOMAG_TIPUS, celSzeletebenVan, celbolHianyzik, dontesBemenete } from '../js/allapot/dontesiCsomag.js';
+import { CSOMAG_TIPUS, celSzeletebenVan, celbolHianyzik, dontesBemenete, dontesiCsomagEllenorzese } from '../js/allapot/dontesiCsomag.js';
 
 const { proba, futtatas } = probaGyujtemeny('A döntési csomag (D85 T3, a (B))');
 
@@ -36,8 +36,8 @@ const KOINO = 'csomag-proba';
 const KESOBB = () => Date.now() + 30 * 86400 * 1000;   // minden döntési időn túl
 
 async function ujSzereplo(tar, mappa, lanccal = true) {
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   return { koino: KOINO, kulcspar, szerzo, tar, darabTar: fajlBlobTarolo(KOINO, mappa),
     lancTarolo: lanccal ? lancTarolo(KOINO, mappa) : null };
 }
@@ -216,7 +216,7 @@ proba('⛔⛔ a kapu elveti a hamis, az idegen, a rossz helyű és a javaslat n�
   const minta = kiadva.find((e) => e.adat.cel === g1);
   const minden = await koinoEsemenyei(tar, KOINO);
   const kezzel = async (adat, entitas) => {
-    const veg = await lancVege(tar, A.szerzo);
+    const veg = await lancVege(tar, A.kulcspar.keszulek);
     const e = await esemenyLetrehozasa({ koino: KOINO, tipus: CSOMAG_TIPUS, adat, entitas, entitasSorszam: 1,
       latott: [], lancGyoker: null, ...veg }, A.kulcspar);
     return esemenyMentese(tar, e);
@@ -231,12 +231,15 @@ proba('⛔⛔ a kapu elveti a hamis, az idegen, a rossz helyű és a javaslat n�
     ['a cél saját pont-eseménye', await kezzel({ ...minta.adat, esemenyek: [...belso, cPontjaG1] }, tk1), /nem ennek/],
     ['rossz töredékben', await kezzel(minta.adat, toredekAzonosito(j, g2)), /töredékének/],
     ['a javaslat nélkül', await kezzel({ ...minta.adat, esemenyek: belso.slice(1) }, tk1), /javaslatot/],
-    ['egy érintettes javaslathoz', await kezzel({ javaslat: egyErintettes.azonosito, cel: g2,
+    ['egy érintettes javaslathoz', await kezzel({ javaslat: egyErintettes.azonosito, cel: g2, tanusitvanyok: [],
       esemenyek: [egyErintettes, belso[1]] }, toredekAzonosito(egyErintettes.azonosito, g2)), /egy érintettes/]
   ];
   const rossz = esetek.filter(([, v, minta]) => v.mentve !== false || !minta.test(v.ok ?? '')).map(([nev]) => nev);
   if (rossz.length) console.log('    (rosszul ítélt esetek: ' + rossz.join(', ') + ')');
-  return rossz.length === 0;
+  // ⭐⭐ D128: a csomag a belső eseményei tanúsítványát maga hozza — tár nélkül (a cél tartójánál a láncuk nincs meg) is megáll.
+  const tarNelkul = (await dontesiCsomagEllenorzese(minta)).rendben === true;
+  if (!tarNelkul) console.log('    (a csomag tár nélkül nem áll meg)');
+  return rossz.length === 0 && tarNelkul;
 });
 
 export default futtatas;

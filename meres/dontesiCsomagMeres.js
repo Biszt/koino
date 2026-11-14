@@ -13,6 +13,7 @@
 // sok entitáson pontot tartó szavazó eseménye nagyobb (53–54. mérés: pont +~0,7 KB, szavazat +~1,5 KB).
 //
 // Futtatás: node meres/dontesiCsomagMeres.js [N ...]   (alapból 10 100 1000)
+import { tesztKeszulek } from './probaFuttato.js';   // ⭐⭐ D128: tanúsított próba-készülék
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -34,8 +35,8 @@ const KB = (b) => (b / 1024).toFixed(1).replace('.', ',') + ' KB';
 const HOSSZU = { elfogadasiKuszob: 51, reszveteliKuszob: 0, minimumDontesiIdo: 86400, maximumDontesiIdo: 604800 };
 
 async function ujKornyezet(tar) {
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   return { koino: KOINO, kulcspar, szerzo, tar };
 }
 

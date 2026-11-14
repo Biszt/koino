@@ -26,7 +26,7 @@
 // Használják: a szabály-réteg (`szabalyok.js`), az `identitas.js`, a kapu (`esemenyTar.js`), a művelet-réteg (a
 // csomag kiadása), a próbák.
 
-import { esemenyEllenorzese, azonositoAlaku, esemenyKoinoja, koinoSzuleteseListabol } from '../esemeny/esemeny.js';
+import { esemenyEllenorzese, azonositoAlaku, esemenyKoinoja, koinoSzuleteseListabol, tanusitvanyKereso } from '../esemeny/esemeny.js';
 
 /**
  * A meghívási lánc legnagyobb mélysége (D59 biztonsági szelepe — a bizonyíték hosszának őre). ⭐ D113 (Csaba,
@@ -218,17 +218,21 @@ export function tagsagiLanc(idx, horgony) {
  * ⭐ A TAGSÁGI CSOMAG ELLENŐRZÉSE (a kapu hívja): a csomag a SZERZŐ saját azonosság-szeletébe szól (`entitas` = az ő
  * horgonya), minden belső esemény hiteles (aláírás), ugyanannak a koinónak a lánc-típusa, és a lánc EZEN a szabályon
  * tagságot ad a horgonynak. Egy hamis belső esemény az egészet elveti.
+ * ⭐⭐ D128: a belső események készülék-tanúsítványa a csomagból (a láncok első eseményei) vagy az `alap`-ból (a kapu: a tár).
+ * @param {Object} esemeny
+ * @param {Object|Function|null} [alap]
  * @returns {Promise<{rendben: boolean, ok?: string, melyseg?: number}>}
  */
-export async function tagsagiCsomagEllenorzese(esemeny) {
+export async function tagsagiCsomagEllenorzese(esemeny, alap = null) {
   const lanc = esemeny?.adat?.lanc;
   if (!Array.isArray(lanc) || !lanc.length || lanc.length > CSOMAG_ESEMENY_KORLAT) return { rendben: false, ok: 'hibás tagsági csomag' };
   if (!azonositoAlaku(esemeny.entitas)) return { rendben: false, ok: 'a tagsági csomag a horgonyhoz szól' };
+  const kereso = await tanusitvanyKereso(lanc, alap, Array.isArray(esemeny.adat?.tanusitvanyok) ? esemeny.adat.tanusitvanyok.slice(0, CSOMAG_ESEMENY_KORLAT) : []);
   for (const b of lanc) {
     if (!b || typeof b !== 'object' || !LANC_TIPUSOK.has(b.tipus) || esemenyKoinoja(b) !== esemenyKoinoja(esemeny)) {
       return { rendben: false, ok: 'a tagsági csomagban idegen esemény' };
     }
-    const al = await esemenyEllenorzese(b);
+    const al = await esemenyEllenorzese(b, { tanusitvany: kereso });
     if (!al.rendben) return { rendben: false, ok: 'a tagsági csomag egy eseménye nem hiteles: ' + al.ok };
   }
   const idx = tagsagiIndex(lanc, esemeny.koino);

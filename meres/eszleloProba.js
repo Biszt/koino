@@ -17,7 +17,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny } from './probaFuttato.js';
+import { probaGyujtemeny, tesztKeszulek } from './probaFuttato.js';
 import { esemenyTarNyitasa, fajlBlobTarolo, lancTarolo } from '../js/tar/fajlTar.js';
 import { sajatLancEsemenyei, esemenyMentese, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
@@ -36,8 +36,8 @@ const KOINO = 'eszlelo-proba';
 async function ujKornyezet(tar = null) {
   const mappa = await mkdtemp(join(tmpdir(), 'koino-eszlelo-'));
   tar ??= await esemenyTarNyitasa(KOINO, mappa);
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   return { koino: KOINO, kulcspar, szerzo, tar, darabTar: fajlBlobTarolo(KOINO, mappa), lancTarolo: lancTarolo(KOINO, mappa) };
 }
 
@@ -53,11 +53,11 @@ async function elet(k) {
 
 /** Egy saját eseményt ír alá a lánc végére (a helyes gyökérrel és bizonyítékkal, vagy a megadottal). */
 async function kezzelAlair(k, tipus, adat, beallitas = {}) {
-  const lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   const utolso = lanc[lanc.length - 1];
   const sorszam = utolso.sorszam + 1;
   const pontE = tipus === 'TudatpontRendezes' ? adat.entitas : null;
-  const helyes = await lancUjEsemenyhez(k.tar, KOINO, k.szerzo, sorszam, null, pontE);
+  const helyes = await lancUjEsemenyhez(k.tar, KOINO, k.kulcspar.keszulek, sorszam, null, pontE);
   const e = await esemenyLetrehozasa({ koino: KOINO, tipus,
     adat: pontE ? { ...adat, bizonyitek: beallitas.bizonyitek ?? helyes.bizonyitek } : adat,
     entitas: pontE, entitasSorszam: 50 + sorszam, elozo: utolso.azonosito, sorszam,
@@ -98,7 +98,7 @@ proba('⭐⭐ A HAMIS FOLYTONOSSÁGOT BÁRMELYIK OLDALRÓL MEGTALÁLJA — ha cs
   const k = await ujKornyezet();
   const { g1, g2 } = await elet(k);
   const pont = await tudatpontRendezese(k, g1.azonosito, 70);
-  const lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   const elotte = await lancAllapotaLancbol(lanc.slice(0, pont.sorszam - 1));
   const igaz = await lancAllapotaLancbol(lanc);
   // A következő pont-esemény a pont ELŐTTI kiosztásra épít — önmagában hibátlan (45 − 0 + 30 = 75).
@@ -111,27 +111,28 @@ proba('⭐⭐ A HAMIS FOLYTONOSSÁGOT BÁRMELYIK OLDALRÓL MEGTALÁLJA — ha cs
   return egy(csakKov) && egy(csakPont);
 });
 
-proba('⛔ AKINEK NINCS NÁLUNK HORGONYA, ARRÓL NEM JELENT — csak számolja', async () => {
+proba('⛔ AKINEK NINCS NÁLUNK HORGONYA, ARRÓL NEM JELENT — ⭐⭐ D128: az eseménye be sem jut (a horgony hozza a tanúsítványát)', async () => {
   const k = await ujKornyezet();
   const { g1 } = await elet(k);
   const hazug = await kezzelAlair(k, 'TudatpontRendezes', { entitas: g1.azonosito, pont: 60, szerep: 'aktiv', kiosztva: 10 });
-  // Egy MÁSIK tár, amibe csak a hazug esemény került (a csaló horgonya nem).
+  // Egy MÁSIK tár, amibe csak a hazug esemény menne (a csaló horgonya nem). ⭐⭐ D128: a lánc első eseménye (itt a horgony)
+  // hozza a készülék tanúsítványát — nélküle a kapu „hiányzik”-ot mond, és az esemény nem jut be: nincs miről jelenteni.
   const masikTar = (await ujKornyezet()).tar;
-  await esemenyMentese(masikTar, hazug);
+  const m = await esemenyMentese(masikTar, hazug);
   const figyelo = await ujKornyezet(masikTar);
   const b = await ellentmondasokBejelentese(figyelo, await ellentmondasokKeresese(masikTar, KOINO, [hazug]));
-  return b.bejelentve === 0 && b.nincsHorgony === 1;
+  return m.mentve === false && m.hianyzik === true && b.bejelentve === 0;
 });
 
 proba('⭐⭐⭐ D82: AZ ELÁGAZÁS — három készülék mást-mást látott, a bizonyíték után UGYANAZT számolja', async () => {
   // A csaló egy pontról két eseményt ír alá (két ág): az egyik g1-re tesz, a másik g2-re.
   const k = await ujKornyezet();
   const { g1, g2 } = await elet(k);
-  const lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   const utolso = lanc[lanc.length - 1];
   const sorszam = utolso.sorszam + 1;
   const ag = async (entitas, pont, kiosztva) => {
-    const h = await lancUjEsemenyhez(k.tar, KOINO, k.szerzo, sorszam, null, entitas);
+    const h = await lancUjEsemenyhez(k.tar, KOINO, k.kulcspar.keszulek, sorszam, null, entitas);
     return esemenyLetrehozasa({ koino: KOINO, tipus: 'TudatpontRendezes', entitas, entitasSorszam: 90,
       adat: { entitas, pont, szerep: 'aktiv', kiosztva, bizonyitek: h.bizonyitek },
       elozo: utolso.azonosito, sorszam, lancGyoker: h.lancGyoker }, k.kulcspar);
@@ -174,7 +175,7 @@ proba('⭐⭐⭐ D82: AZ ELÁGAZÁS — három készülék mást-mást látott, 
 proba('⛔⛔ A HAMIS ELÁGAZÁS-BIZONYÍTÉK ELBUKIK — nem azonos sorszám, ugyanaz az esemény kétszer, rossz vesztes, idegen szerző', async () => {
   const k = await ujKornyezet();
   const { g1, g2 } = await elet(k);
-  const lanc = await sajatLancEsemenyei(k.tar, k.szerzo);
+  const lanc = await sajatLancEsemenyei(k.tar, k.kulcspar.keszulek);
   const utolso = lanc[lanc.length - 1];
   const ag = async (kp, szerzo, entitas) => {
     const h = await lancUjEsemenyhez(k.tar, KOINO, szerzo, utolso.sorszam + 1, null, entitas);
@@ -182,14 +183,14 @@ proba('⛔⛔ A HAMIS ELÁGAZÁS-BIZONYÍTÉK ELBUKIK — nem azonos sorszám, u
       adat: { entitas, pont: 5, szerep: 'aktiv', kiosztva: 50, bizonyitek: h.bizonyitek },
       elozo: utolso.azonosito, sorszam: utolso.sorszam + 1, lancGyoker: h.lancGyoker }, kp);
   };
-  const a = await ag(k.kulcspar, k.szerzo, g1.azonosito);
-  const b = await ag(k.kulcspar, k.szerzo, g2.azonosito);
+  const a = await ag(k.kulcspar, k.kulcspar.keszulek, g1.azonosito);
+  const b = await ag(k.kulcspar, k.kulcspar.keszulek, g2.azonosito);
   const [ny, v] = a.azonosito < b.azonosito ? [a, b] : [b, a];
   const idegen = await ujKornyezet(k.tar);
   const idegenAg = await esemenyLetrehozasa({ koino: KOINO, tipus: 'GondolatLetrehozas', adat: { cim: 'x' },
     elozo: null, sorszam: ny.sorszam }, idegen.kulcspar);
   const { ellentmondasEllenorzese } = await import('../js/allapot/ellentmondas.js');
-  const ell = async (adat) => (await ellentmondasEllenorzese(adat, KOINO)).rendben;
+  const ell = async (adat) => (await ellentmondasEllenorzese(adat, KOINO, { tanusitvany: k.tar })).rendben;
   const alap = { kit: k.szerzo, fajta: 'elagazas', esemeny: ny, masik: v, vesztes: v.azonosito };
   const esetek = [
     ['ép', await ell(alap), true],

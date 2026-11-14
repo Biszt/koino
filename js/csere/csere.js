@@ -29,7 +29,7 @@
 // Használják: a csere-vonal (`beolvasztas`), a kézi út (`fajlCsere.js`) és a csereProba.js.
 
 import { lenyomat } from '../esemeny/kanonikusAlak.js';
-import { alakiHiba, esemenyKoinoja, azonositoAlaku } from '../esemeny/esemeny.js';
+import { alakiHiba, esemenyKoinoja, azonositoAlaku, lancKulcsa } from '../esemeny/esemeny.js';
 import { koinoEsemenyei, esemenyMentese } from '../tar/esemenyTar.js';
 import { koinoNezete, ujAlakuSzuletesE } from '../allapot/koinoLanc.js';
 
@@ -105,10 +105,12 @@ export async function allasOsszeallitasa(tar, koino) {
   // ⛔ Csak az alakilag érvényeset (lásd fent, 40. mérés).
   const esemenyek = await csereLatoEsemenyek(tar, koino);
 
+  // ⭐⭐ D128: LÁNCONKÉNT (a készülék kulcsa — `lancKulcsa`): a sorszám egy láncon belül sorrend. ⚠️ Az állás mezőjének neve
+  // `szerzo` maradt (a vonal alakja — a ③ hálózati lépés nevezi át), az értéke a lánc kulcsa.
   const szerzonkent = new Map();
   for (const e of esemenyek) {
-    if (!szerzonkent.has(e.szerzo)) szerzonkent.set(e.szerzo, []);
-    szerzonkent.get(e.szerzo).push(e);
+    if (!szerzonkent.has(lancKulcsa(e))) szerzonkent.set(lancKulcsa(e), []);
+    szerzonkent.get(lancKulcsa(e)).push(e);
   }
 
   const szerzok = [];
@@ -295,7 +297,7 @@ export async function valaszOsszeallitasa(tar, kerelem) {
   const esemenyek = await csereLatoEsemenyek(tar, kerelem.koino);
   const kertek = new Map(kerelem.szerzok.map((sz) => [sz.szerzo, new Set(sz.sorszamok)]));
 
-  const valasz = esemenyek.filter((e) => kertek.get(e.szerzo)?.has(e.sorszam));
+  const valasz = esemenyek.filter((e) => kertek.get(lancKulcsa(e))?.has(e.sorszam));   // ⭐⭐ D128: láncónként
 
   console.log('valaszOsszeallitasa - VÉGE', { esemenyek: valasz.length });
   return valasz;
@@ -355,6 +357,8 @@ export async function beolvasztas(tar, esemenyek, koino) {
       sorban = [...elore, ...esemenyek.filter((e) => !eloreSet.has(e))];
     }
   }
+  // ⭐⭐ D128: ha egy lánc eseményei a tanúsítványt hozó első esemény ELŐTT jönnek a kötegben, a kapu várakozó sora beengedi őket,
+  // amint az megérkezik (`esemenyTar.js`) — a köteg sorrendjén itt nem kell igazítani.
 
   for (const esemeny of sorban) {
     // ----- IDEGEN KOINO: be sem visszük a kapuig -----
@@ -377,8 +381,10 @@ export async function beolvasztas(tar, esemenyek, koino) {
 
     uj++;
     ujAzonositok.push(esemeny.azonosito);
+    // ⭐⭐ D128: ami a tanúsítványára várt, és ettől most bejött.
+    if (Array.isArray(eredmeny.kesobbBejottek)) { uj += eredmeny.kesobbBejottek.length; ujAzonositok.push(...eredmeny.kesobbBejottek); }
     if (eredmeny.elagazas) {
-      elagazasok.push({ szerzo: esemeny.szerzo, sorszam: esemeny.sorszam });
+      elagazasok.push({ szerzo: esemeny.szerzo, lanc: lancKulcsa(esemeny), sorszam: esemeny.sorszam });
     }
   }
 

@@ -14,7 +14,7 @@ import { join } from 'node:path';
 import { createSocket } from 'node:dgram';
 import { createHash, randomBytes } from 'node:crypto';
 
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, probaTanusitvanyok } from './probaFuttato.js';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { esemenyMentese } from '../js/tar/esemenyTar.js';
 import { csereUdpResen } from '../js/csere/udpVonal.js';
@@ -68,7 +68,8 @@ async function szuletesek(n) {
 
 async function tar(esemenyek) {
   const t = await esemenyTarNyitasa(KOINO, await ujMappa());
-  for (const e of esemenyek) await esemenyMentese(t, e);
+  // ⭐⭐ D128: a lánc közepéről vett esemény a tanúsítványával (a próba-készülékek jegyzékéből — ahogy a kísérő hozná).
+  for (const e of esemenyek) await esemenyMentese(t, e, { tanusitvanyok: probaTanusitvanyok([e]) });
   return t;
 }
 

@@ -12,7 +12,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny } from './probaFuttato.js';
+import { probaGyujtemeny, tesztKeszulek, probaTanusitvanyok } from './probaFuttato.js';
 import { esemenyTarNyitasa, fajlBlobTarolo, lancTarolo } from '../js/tar/fajlTar.js';
 import { sajatLancEsemenyei, esemenyMentese } from '../js/tar/esemenyTar.js';
 import { koinoLetrehozasa, gondolatLetrehozasa, tudatpontRendezese } from '../js/muveletek.js';
@@ -30,8 +30,8 @@ const mappak = [];
 const ujMappa = async () => { const m = await mkdtemp(join(tmpdir(), 'koino-lancell-')); mappak.push(m); return m; };
 
 async function ujKulcs() {
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   return { kulcspar, szerzo };
 }
 
@@ -56,13 +56,14 @@ async function elet(k) {
 /** Néhány esemény átvétele egy másik tárba (ugyanazon a kapun). */
 async function atvesz(tar, esemenyek) {
   for (const e of esemenyek) {
-    const m = await esemenyMentese(tar, e);
+    // ⭐⭐ D128: a lánc közepéről vett esemény a tanúsítványával utazik (a valóságban a küldő mellékeli).
+    const m = await esemenyMentese(tar, e, { tanusitvanyok: probaTanusitvanyok([e]) });
     if (!m.mentve && !m.marMegvolt) throw new Error('nem menthető: ' + m.ok);
   }
 }
 
 /** Egy kérdés-válasz kör: H kérdez X-ről, a kiszolgáló (a szerző tára) felel. */
-async function kor(H, tarolo, szerzo, kiszolgalo, beallitas = {}) {
+async function kor(H, tarolo, szerzo, kiszolgalo, beallitas = {}) {   // ⭐⭐ D128: a `szerzo` itt a lánc kulcsa (a készüléké)
   const k = { tar: H.tar, koino: KOINO, tarolo, ...beallitas };
   const kerdesek = await lancKerdesek(k, [szerzo]);
   const valaszok = kiszolgalo ? await kiszolgalo.valasz(JSON.parse(JSON.stringify(kerdesek))) : [];
@@ -78,19 +79,19 @@ proba('⭐⭐ a becsületes szerző mindent igazol (a fej és a többi esemény)
   const X = await keszulek();
   const { g1 } = await elet(X);
   const H = await keszulek();
-  let lanc = await sajatLancEsemenyei(X.tar, X.szerzo);
+  let lanc = await sajatLancEsemenyei(X.tar, X.kulcspar.keszulek);
   await atvesz(H.tar, [lanc[1], lanc[3], lanc[4]]);
   const tarolo = memoriaLancTarolo();
   const kiszolgalo = lancKiszolgalo({ tar: X.tar, koino: KOINO });
-  const elso = await kor(H, tarolo, X.szerzo, kiszolgalo, { veletlen: () => 1 });
+  const elso = await kor(H, tarolo, X.kulcspar.keszulek, kiszolgalo, { veletlen: () => 1 });
   // a szerző dolgozik tovább; H megkapja az új fejet és egy köztes eseményt
   await tudatpontRendezese(X, g1.azonosito, 40);
   await gondolatLetrehozasa(X, { cim: 'Harmadik' });
   await gondolatLetrehozasa(X, { cim: 'Negyedik' });
-  lanc = await sajatLancEsemenyei(X.tar, X.szerzo);
+  lanc = await sajatLancEsemenyei(X.tar, X.kulcspar.keszulek);
   await atvesz(H.tar, [lanc[5], lanc[7]]);
-  const masodik = await kor(H, tarolo, X.szerzo, kiszolgalo, { veletlen: () => 1 });
-  const harmadik = await kor(H, tarolo, X.szerzo, kiszolgalo, { veletlen: () => 1 });
+  const masodik = await kor(H, tarolo, X.kulcspar.keszulek, kiszolgalo, { veletlen: () => 1 });
+  const harmadik = await kor(H, tarolo, X.kulcspar.keszulek, kiszolgalo, { veletlen: () => 1 });
   const allas = await lancEllenorzesAllasa(tarolo);
   return elso.igazolt === 3 && elso.leletek.length === 0 && elso.fuggo === 0
     && masodik.kerdesek[0].r === lanc[4].sorszam - 1 && masodik.kerdesek[0].i.length === 2   // a régi fej + a köztes (6.)
@@ -103,17 +104,17 @@ proba('⭐ a szerző oldala a részfa-gyorsítótárral ugyanazt adja, mint nél
   const X = await keszulek();
   await elet(X);
   for (let i = 0; i < 70; i++) await gondolatLetrehozasa(X, { cim: 'G' + i });
-  const lanc = await sajatLancEsemenyei(X.tar, X.szerzo);
+  const lanc = await sajatLancEsemenyei(X.tar, X.kulcspar.keszulek);
   const H = await keszulek();
   await atvesz(H.tar, [lanc[2], lanc[40], lanc[68], lanc[lanc.length - 1]]);
   const kiszolgalo = lancKiszolgalo({ tar: X.tar, koino: KOINO });
   const tarolo = memoriaLancTarolo();
-  const kerdesek = await lancKerdesek({ tar: H.tar, koino: KOINO, tarolo }, [X.szerzo]);
+  const kerdesek = await lancKerdesek({ tar: H.tar, koino: KOINO, tarolo }, [X.kulcspar.keszulek]);
   const egyszer = JSON.stringify(await kiszolgalo.valasz(kerdesek));
   const ujra = JSON.stringify(await kiszolgalo.valasz(kerdesek));                 // a gyorsítótárból
   const friss = JSON.stringify(await lancKiszolgalo({ tar: X.tar, koino: KOINO }).valasz(kerdesek));
   const r = await lancValaszokFeldolgozasa({ tar: H.tar, koino: KOINO, tarolo }, kerdesek, JSON.parse(ujra));
-  const sajat = await lancKerdesek({ tar: H.tar, koino: KOINO, tarolo: memoriaLancTarolo(), sajat: X.szerzo }, [X.szerzo]);
+  const sajat = await lancKerdesek({ tar: H.tar, koino: KOINO, tarolo: memoriaLancTarolo(), sajat: X.kulcspar.keszulek }, [X.kulcspar.keszulek]);
   return egyszer === ujra && ujra === friss && r.igazolt === 4 && r.fuggo === 0 && sajat.length === 0;
 });
 
@@ -126,19 +127,19 @@ async function ketAg() {
   const A = await keszulek();
   const { g1, g2 } = await elet(A);
   const B = await keszulek({ kulcspar: A.kulcspar, szerzo: A.szerzo });
-  await atvesz(B.tar, await sajatLancEsemenyei(A.tar, A.szerzo));
+  await atvesz(B.tar, await sajatLancEsemenyei(A.tar, A.kulcspar.keszulek));
   await tudatpontRendezese(A, g1.azonosito, 50);         // az A ág: 6. esemény
   await gondolatLetrehozasa(A, { cim: 'A ág' });          // 7.
   await tudatpontRendezese(B, g2.azonosito, 50);         // a B ág: 6. esemény (más)
   await gondolatLetrehozasa(B, { cim: 'B ág' });          // 7.
-  return { A, B, la: await sajatLancEsemenyei(A.tar, A.szerzo), lb: await sajatLancEsemenyei(B.tar, B.szerzo) };
+  return { A, B, la: await sajatLancEsemenyei(A.tar, A.kulcspar.keszulek), lb: await sajatLancEsemenyei(B.tar, B.kulcspar.keszulek) };
 }
 
 proba('⭐⭐ a két ág egy tartónál: a FEJ nem a szerzőé (a másik ágról) — a válaszból elágazás-bizonyíték lesz', async () => {
   const { A, B, la, lb } = await ketAg();
   const H = await keszulek();
   await atvesz(H.tar, [la[3], lb[6]]);                   // a fej a B ág 7. eseménye
-  const r = await kor(H, memoriaLancTarolo(), A.szerzo, lancKiszolgalo({ tar: A.tar, koino: KOINO }));
+  const r = await kor(H, memoriaLancTarolo(), A.kulcspar.keszulek, lancKiszolgalo({ tar: A.tar, koino: KOINO }));
   const l = r.leletek[0];
   return r.leletek.length === 1 && l.fajta === 'elagazas' && l.esemeny.azonosito === lb[6].azonosito
     && l.masik.azonosito === la[6].azonosito && r.fuggo === 1;
@@ -148,7 +149,7 @@ proba('⭐⭐ a két ág egy tartónál: egy RÉGEBBI esemény a másik ágról 
   const { A, la, lb } = await ketAg();
   const H = await keszulek();
   await atvesz(H.tar, [lb[5], la[6]]);                   // a fej az A ág 7.-e; a B ág 6.-a régebbi
-  const r = await kor(H, memoriaLancTarolo(), A.szerzo, lancKiszolgalo({ tar: A.tar, koino: KOINO }));
+  const r = await kor(H, memoriaLancTarolo(), A.kulcspar.keszulek, lancKiszolgalo({ tar: A.tar, koino: KOINO }));
   const l = r.leletek[0];
   return r.leletek.length === 1 && l.fajta === 'elagazas' && l.esemeny.azonosito === lb[5].azonosito
     && l.masik.azonosito === la[5].azonosito;
@@ -160,11 +161,11 @@ proba('⛔ a két ágú szerző: a régi (a MÁSIK ágon ellenőrzött) fej az �
   const tarolo = memoriaLancTarolo();
   // H először a B ágról tud (a B készülék felel), aztán az A ág fejét kapja meg, és az A készülék felel
   await atvesz(H.tar, [lb[6]]);
-  await kor(H, tarolo, A.szerzo, lancKiszolgalo({ tar: B.tar, koino: KOINO }));
+  await kor(H, tarolo, A.kulcspar.keszulek, lancKiszolgalo({ tar: B.tar, koino: KOINO }));
   await gondolatLetrehozasa(A, { cim: 'A ág tovább' });
-  const la2 = await sajatLancEsemenyei(A.tar, A.szerzo);
+  const la2 = await sajatLancEsemenyei(A.tar, A.kulcspar.keszulek);
   await atvesz(H.tar, [la2[7]]);
-  const r = await kor(H, tarolo, A.szerzo, lancKiszolgalo({ tar: A.tar, koino: KOINO }));
+  const r = await kor(H, tarolo, A.kulcspar.keszulek, lancKiszolgalo({ tar: A.tar, koino: KOINO }));
   // a B ág 7.-e (a régi fej) a kérdések elején van, és ellentmond
   return r.kerdesek[0].r === lb[6].sorszam - 1 && r.leletek.length === 1 && r.leletek[0].masik.azonosito === la[6].azonosito;
 });
@@ -176,12 +177,12 @@ proba('⛔ a két ágú szerző: a régi (a MÁSIK ágon ellenőrzött) fej az �
 proba('⛔ a hallgatás és a koholt bizonyíték nem igazol — függőben marad (nem vád), és a következő körben újra kérdezzük', async () => {
   const X = await keszulek();
   await elet(X);
-  const lanc = await sajatLancEsemenyei(X.tar, X.szerzo);
+  const lanc = await sajatLancEsemenyei(X.tar, X.kulcspar.keszulek);
   const H = await keszulek();
   await atvesz(H.tar, [lanc[1], lanc[4]]);
   const tarolo = memoriaLancTarolo();
-  const hallgat = await kor(H, tarolo, X.szerzo, null);
-  const kerdesek = await lancKerdesek({ tar: H.tar, koino: KOINO, tarolo }, [X.szerzo]);
+  const hallgat = await kor(H, tarolo, X.kulcspar.keszulek, null);
+  const kerdesek = await lancKerdesek({ tar: H.tar, koino: KOINO, tarolo }, [X.kulcspar.keszulek]);
   const valasz = await lancKiszolgalo({ tar: X.tar, koino: KOINO }).valasz(kerdesek);
   valasz[0].i[0].ut = valasz[0].i[0].ut.map((p) => ({ ...p, l: p.l.slice(0, 42) + (p.l[42] === 'A' ? 'B' : 'A') }));
   valasz[0].f = 0;                                        // a fej sincs megerősítve
@@ -194,7 +195,7 @@ proba('⛔ a hallgatás és a koholt bizonyíték nem igazol — függőben mara
 proba('⭐⭐ D79: a teljes kiosztás-lista — a hazug fa listájából a NEGATÍV LEVÉL bizonyítéka; a becsületes listából semmi', async () => {
   const X = await keszulek();
   await elet(X);
-  const lanc = await sajatLancEsemenyei(X.tar, X.szerzo);
+  const lanc = await sajatLancEsemenyei(X.tar, X.kulcspar.keszulek);
   const igaz = await lancAllapotaLancbol(lanc);
   // a csaló a következő eseményben egy −500-as levelet is elköt
   const csaloFa = ujAllapotFa(KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ);
@@ -209,7 +210,7 @@ proba('⭐⭐ D79: a teljes kiosztás-lista — a hazug fa listájából a NEGAT
   const H = await keszulek();
   await atvesz(H.tar, [e]);
   const tarolo = memoriaLancTarolo();
-  const kerdesek = await lancKerdesek({ tar: H.tar, koino: KOINO, tarolo, veletlen: () => 0 }, [X.szerzo]);
+  const kerdesek = await lancKerdesek({ tar: H.tar, koino: KOINO, tarolo, veletlen: () => 0 }, [X.kulcspar.keszulek]);
   // a becsületes kiszolgáló a láncból számol: a lista nem adja a csaló gyökerét → nincs bizonyíték
   const becsuletes = await lancKiszolgalo({ tar: X.tar, koino: KOINO }).valasz(kerdesek);
   const r1 = await lancValaszokFeldolgozasa({ tar: H.tar, koino: KOINO, tarolo: memoriaLancTarolo() }, kerdesek, becsuletes);

@@ -17,7 +17,8 @@
 //
 // Használják: koino.js (a csere beállításai, a kézi út kísérői, a B1 mintáinak tagsága), a próbák.
 
-import { sajatLancEsemenyei } from '../tar/esemenyTar.js';
+// ⭐⭐ D128: a tagság az AZONOSSÁGÉ — minden készülékének eseményei (`azonossagEsemenyei`).
+import { azonossagEsemenyei } from '../tar/esemenyTar.js';
 import { tagsagiIndex, szerzoTagsaga, tagsagiLanc, TAGSAGI_CSOMAG, LANC_TIPUSOK, HORGONY_TIPUSOK } from './tagsag.js';
 import { tagsagiEsemenyekGyujtese } from './identitas.js';
 import { TAGSAG_KELL } from './szabalyok.js';
@@ -58,7 +59,7 @@ const szerzoAlaku = (x) => typeof x === 'string' && AZONOSITO_MINTA.test(x);
  * @returns {Promise<{r: Object, idx: Object}>} `r` = `szerzoTagsaga`
  */
 export async function szerzoTagsagaTarbol(tar, koino, szerzo, koinoSzuletes = null) {
-  const sajat = (await sajatLancEsemenyei(tar, szerzo)).filter((e) => esemenyKoinoja(e) === koino);
+  const sajat = (await azonossagEsemenyei(tar, szerzo)).filter((e) => esemenyKoinoja(e) === koino);
   const horgonyok = new Set();
   for (const e of sajat) {
     if (HORGONY_TIPUSOK.has(e.tipus)) horgonyok.add(e.azonosito);   // ⭐ D118 (④a): a bekapcsolódás is
@@ -97,9 +98,9 @@ export async function tagsagiKiserok(tar, koino, szerzok, { koinoSzuletes = null
   let bajt = 0;
   for (const sz of (Array.isArray(szerzok) ? szerzok : []).filter(szerzoAlaku).slice(0, szerzoKorlat)) {
     if (ki.size >= korlat || bajt >= bajtKorlat) break;
-    const csomag = (await sajatLancEsemenyei(tar, sz))
+    const csomag = (await azonossagEsemenyei(tar, sz))
       .filter((e) => esemenyKoinoja(e) === koino && e.tipus === TAGSAGI_CSOMAG)
-      .sort((a, b) => b.sorszam - a.sorszam)[0];
+      .sort((a, b) => (b.ido - a.ido) || (b.sorszam - a.sorszam))[0];
     let sajat = csomag ? [csomag] : null;
     if (!sajat) {
       const { r, idx } = await szerzoTagsagaTarbol(tar, koino, sz, koinoSzuletes);
@@ -181,7 +182,7 @@ export function tagsagKerdo({ tar, koino, tarolo, koinoSzuletes = async () => nu
       }
       // ⭐ A SAJÁT tagságom: ha van meghívásom (valaki a szeletembe tette), de a láncom nem bizonyítható, kérdezem.
       if (sajatSzerzo && !ismert.has(sajatSzerzo)) {
-        const sajat = (await sajatLancEsemenyei(tar, sajatSzerzo)).filter((e) => esemenyKoinoja(e) === koino && e.tipus === 'Belepes');
+        const sajat = (await azonossagEsemenyei(tar, sajatSzerzo)).filter((e) => esemenyKoinoja(e) === koino && e.tipus === 'Belepes');
         for (const b of sajat) {
           const meghivott = (await tar.szeletEsemenyei(b.azonosito)).some((e) => e.tipus === 'Meghivas' && e.adat?.kit === sajatSzerzo);
           if (meghivott) { jeloltek.add(sajatSzerzo); break; }

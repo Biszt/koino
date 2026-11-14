@@ -45,9 +45,15 @@ import {
   lepcso2E, ervenyesTanusitasaim, alapitoHorgony, ujIdentitasNezet, LEPCSO_BEMONDAS
 } from './allapot/identitas.js';
 import {
-  esemenyMentese, ujSajatHelye, sajatLancEsemenyei,
+  esemenyMentese, ujSajatHelye, sajatLancEsemenyei, azonossagEsemenyei, tarTanusitvanya,
   kovetkezoEntitasSorszam, horgonyok, esemenyLekerese, entitasEsemenyei, koinoEsemenyei
 } from './tar/esemenyTar.js';
+
+/**
+ * ⭐⭐ D128: a környezet SAJÁT LÁNCA — a készülékem kulcsa (a `kulcspar` egy tanúsított készülék: `kulcs/keszulek.js` `eszkoz`).
+ * A lánc (a sorszám, az előző, a lánc-gyökér, az entitás-sorszám) ezé; a `szerzo` az azonosságom.
+ */
+const sajatLanc = (kornyezet) => kornyezet.keszulek ?? kornyezet.kulcspar?.keszulek;
 import { allapotSzamitasa } from './allapot/allapotSzamitas.js';
 import { javaslatokSzamitasa } from './allapot/javaslatSzamitas.js';
 import {
@@ -194,7 +200,9 @@ export async function koinomSzabalyai(kornyezet) {
  * @returns {Promise<string|null>}
  */
 export async function azonossagHorgonya(tar, koino, szerzo) {
-  const lanc = (await sajatLancEsemenyei(tar, szerzo)).filter((e) => esemenyKoinoja(e) === koino);
+  // ⭐⭐ D128: az azonosság MINDEN készülékének eseményei (a horgonyt bármelyik írhatta) — a legkorábbi idő szerint.
+  const lanc = (await azonossagEsemenyei(tar, szerzo)).filter((e) => esemenyKoinoja(e) === koino)
+    .sort((a, b) => (a.ido - b.ido) || (a.azonosito < b.azonosito ? -1 : 1));
   const belepes = lanc.find((e) => e.tipus === 'Belepes');
   if (belepes) return belepes.azonosito;
   // ⭐ D118 (④a): a bekapcsolódóé a bekapcsolódása, a létrehozóé (az alapítóé) a születés.
@@ -212,14 +220,17 @@ export async function azonossagHorgonya(tar, koino, szerzo) {
  * @param {Object} adat - a bizonyíték (`ellentmondas.js`: kit, fajta, vadpont, és a fajta anyaga)
  */
 export async function ellentmondasBejelentese(kornyezet, adat) {
-  const vad = await ellentmondasEllenorzese(adat, kornyezet.koino,
-    { tudatpontKeret: (await koinomSzabalyai(kornyezet)).tudatpontKeret });   // ⭐ D118/2
-  if (!vad.rendben) throw new Error('A bizonyíték nem áll meg: ' + vad.ok);
-  const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, adat.kit);
+  // ⭐ Előbb a hely: akinek nincs nálunk azonosság-szelete, arról nincs hova bejelenteni (⭐⭐ D128: és a készülékének
+  // tanúsítványa sincs meg — a bizonyítéka nálunk úgysem ellenőrizhető).
+  const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, adat?.kit);
   if (!horgony) {
     throw new Error('A vádoltnak nincs azonosság-szelete ebben a koinóban (se Belepes, se '
       + 'KoinoLetrehozas nálunk) — a bizonyíték nem helyezhető el (D80).');
   }
+  const vad = await ellentmondasEllenorzese(adat, kornyezet.koino,
+    { tudatpontKeret: (await koinomSzabalyai(kornyezet)).tudatpontKeret,   // ⭐ D118/2
+      tanusitvany: kornyezet.tar });   // ⭐⭐ D128: a vádolt készülékének tanúsítványa a tárból
+  if (!vad.rendben) throw new Error('A bizonyíték nem áll meg: ' + vad.ok);
   return esemenytTeszek(kornyezet, 'Ellentmondas', adat, { entitas: horgony });
 }
 
@@ -259,13 +270,13 @@ const ELAVULT_PROBAK = 20;
 async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
   const { entitas = null, horgonyozzunk = false } = beallitas;
   // ⭐ D118 (⑤b): a koinóbeli láncom végére (a nem bekapcsolódó gyermekbeli lánca 1-ről indul; a bekapcsolódás a lánc-pontja után).
-  const veg = await ujSajatHelye(kornyezet.tar, kornyezet.szerzo, kornyezet.koino, tipus, adat);
+  const veg = await ujSajatHelye(kornyezet.tar, sajatLanc(kornyezet), kornyezet.koino, tipus, adat);
 
   // A saját szeletét nyitó eseménynél az entitás-sorszám mindig 1 — nincs mihez képest
   // hányadiknak lennie, hiszen a szelet most keletkezik.
   const entitasSorszam = entitas === null
     ? 1
-    : await kovetkezoEntitasSorszam(kornyezet.tar, kornyezet.koino, kornyezet.szerzo, entitas);
+    : await kovetkezoEntitasSorszam(kornyezet.tar, kornyezet.koino, sajatLanc(kornyezet), entitas);
 
   // A horgony csak ott ér valamit, ahol van mihez kötni: a saját szeletét nyitó eseménynél
   // a szelet még üres.
@@ -299,7 +310,7 @@ async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
   // ⭐ D118 (⑤b): a BEKAPCSOLÓDÁS nem horgonyoz — a lánc nézete a bekapcsolódással változik (előtte a szülőbeli előtag még nem a
   // gyermekbeli láncom), a következő eseményem már a hozott kiosztást köti.
   const { lancGyoker, bizonyitek } = tipus === 'Bekapcsolodas' ? { lancGyoker: null, bizonyitek: null }
-    : await lancUjEsemenyhez(kornyezet.tar, kornyezet.koino, kornyezet.szerzo,
+    : await lancUjEsemenyhez(kornyezet.tar, kornyezet.koino, sajatLanc(kornyezet),
       veg.sorszam, kornyezet.lancTarolo ?? null, pontEntitas ?? szavazatKulcsok);
   const vegsoAdat = (pontEntitas || szavazatKulcsok) && bizonyitek ? { ...adat, bizonyitek } : adat;
   return esemenyLetrehozasa(
@@ -336,8 +347,8 @@ async function sajatKiosztott(kornyezet, entitas) {
   // ⭐ ④a: a saját bekapcsolódásom (a láncomban) mondja meg, mit hozok — a lánc-pontot és az elhagyott pontokat.
   // ⭐ D118 (⑤b): a LÁNCOM (a hozott előtaggal) adja a folytonosságot, a jelen réteg a súlyt — mint a szabály-rétegben, ahol a
   // láncon lévő, de a jelenből kizárt esemény ismert sorszám, nem hézag.
-  const nezet = await lancNezete(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
-  const lanc = (await sajatLancEsemenyei(kornyezet.tar, kornyezet.szerzo)).filter(nezet.tagja);
+  const nezet = await lancNezete(kornyezet.tar, kornyezet.koino, sajatLanc(kornyezet));
+  const lanc = (await sajatLancEsemenyei(kornyezet.tar, sajatLanc(kornyezet))).filter(nezet.tagja);
   // ⭐ D118/2: a keret a koinóé (a születéséből) — ugyanaz, amit a szabály-réteg használ.
   const keret = (await koinomSzabalyai(kornyezet)).tudatpontKeret;
 
@@ -612,7 +623,14 @@ export async function tagsagiCsomagKiadasa(kornyezet) {
     const m = horgonyTagsaga(tagsagiIndex(e.adat.lanc, kornyezet.koino), horgony);
     if (m.igen && m.melyseg <= r.melyseg) return { kiadva: false, ok: 'már van csomagom (' + m.melyseg + '. szint)', melyseg: m.melyseg };
   }
-  const esemeny = await esemenytTeszek(kornyezet, TAGSAGI_CSOMAG, { lanc }, { entitas: horgony });
+  // ⭐⭐ D128: a lánc eseményeinek (és a sajátomnak) a készülék-tanúsítványa is — a lánc egy eseménye nem mindig az írója
+  // láncának első eseménye (pl. egy meghívó másik készülékről hív).
+  const tanusitvanyok = [];
+  for (const k of new Set([...lanc.filter((x) => !x.tanusitvany).map((x) => x.keszulek), sajatLanc(kornyezet)])) {
+    const t = await tarTanusitvanya(kornyezet.tar, k);
+    if (t) tanusitvanyok.push(t);
+  }
+  const esemeny = await esemenytTeszek(kornyezet, TAGSAGI_CSOMAG, { lanc, tanusitvanyok }, { entitas: horgony });
   return { kiadva: true, ok: 'kiadva (' + r.melyseg + '. szint, ' + lanc.length + ' esemény)', melyseg: r.melyseg, esemeny };
 }
 
@@ -1370,8 +1388,15 @@ export async function dontesiCsomagokKiadasa(kornyezet, beallitas = {}) {
       const hianyzik = celbolHianyzik(bemenet, cel)
         .filter((e) => e.azonosito !== j.azonosito && !marOtt.has(e.azonosito));
       for (const darab of csomagokra(hianyzik, korlat - bajt(j))) {
+        // ⭐⭐ D128: a belső események készülékeinek tanúsítványai (a lánc első eseménye a cél tartójánál nincs meg).
+        const belul = [j, ...darab];
+        const tanusitvanyok = [];
+        for (const k of new Set(belul.filter((x) => !x.tanusitvany).map((x) => x.keszulek))) {
+          const t = await tarTanusitvanya(kornyezet.tar, k);
+          if (t) tanusitvanyok.push(t);
+        }
         kiadva.push(await esemenytTeszek(kornyezet, CSOMAG_TIPUS,
-          { javaslat: j.azonosito, cel, esemenyek: [j, ...darab] }, { entitas: toredek }));
+          { javaslat: j.azonosito, cel, esemenyek: belul, tanusitvanyok }, { entitas: toredek }));
       }
     }
   }

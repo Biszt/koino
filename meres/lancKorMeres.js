@@ -11,6 +11,7 @@
 // ⚠️ EZ NEM ÖNPRÓBA (számokat ad), és nem kerül a `mind.js`-be.
 //   node meres/lancKorMeres.js [n1 n2 ...]     → alapból 100 1000 5000
 
+import { tesztKeszulek } from './probaFuttato.js';   // ⭐⭐ D128: tanúsított próba-készülék
 import { kiir } from './naplo.js';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -29,8 +30,8 @@ const kb = (b) => (b < 1024 ? b + ' B' : (b / 1024).toFixed(1) + ' KB');
 async function keszulek() {
   const mappa = await mkdtemp(join(tmpdir(), 'koino-lanckor-'));
   const tar = await esemenyTarNyitasa(KOINO, mappa);
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   return { mappa, k: { koino: KOINO, kulcspar, szerzo, tar, darabTar: fajlBlobTarolo(KOINO, mappa), lancTarolo: lancTarolo(KOINO, mappa) } };
 }
 
@@ -43,7 +44,7 @@ async function egyMeret(n) {
       if (i % 4 === 0 && gondolatok.length) await tudatpontRendezese(X.k, gondolatok[i % gondolatok.length].azonosito, 1 + (i % 7));
       else gondolatok.push(await gondolatLetrehozasa(X.k, { cim: 'G' + i }));
     }
-    const lanc = await sajatLancEsemenyei(X.k.tar, X.k.szerzo);
+    const lanc = await sajatLancEsemenyei(X.k.tar, X.k.kulcspar.keszulek);
     for (const tart of [1, 8]) {
       const H = await keszulek();
       try {

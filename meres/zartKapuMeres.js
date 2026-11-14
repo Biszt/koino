@@ -82,7 +82,7 @@ async function tarSzuletessel(szuletes) {
 
 /** A személyes aláíró egy `ujEember`-hez (a kulcsa JWK-ban). */
 async function alairo(r, horgony) {
-  const jwk = await crypto.subtle.exportKey('jwk', r.kulcspar.privateKey);
+  const jwk = await crypto.subtle.exportKey('jwk', r.kulcspar.azonossagKulcspar.privateKey);
   return (atirat) => ({ sz: r.szerzo, h: horgony, a: szemelyesKezfogasAlairasa(jwk, KOINO, atirat) });
 }
 

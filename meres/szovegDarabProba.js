@@ -21,7 +21,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny, ujEember, tagokkal, emberTaggaTarban } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tagokkal, emberTaggaTarban, tesztKeszulek } from './probaFuttato.js';
 import {
   szovegDarabra, szovegDarabbol, szovegHivatkozasE, azonosSzoveg, hivatkozasTorzse
 } from '../js/esemeny/szovegDarab.js';
@@ -47,9 +47,8 @@ const KOINO = 'szovegdarab-proba';
 async function ujKornyezet() {
   const mappa = await mkdtemp(join(tmpdir(), 'koino-szovegdarab-'));
   const tar = await esemenyTarNyitasa(KOINO, mappa);
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey))
-    .toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   const darabTar = fajlBlobTarolo(KOINO, mappa);
   const kornyezet = { koino: KOINO, kulcspar, szerzo, tar, darabTar };
   await koinoLetrehozasa(kornyezet, 'Szöveg-darab próba');

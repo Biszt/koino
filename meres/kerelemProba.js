@@ -10,7 +10,7 @@
 // kimondva; (4) a nem tartott entitás bemondott össz-ponttal, gyökér nélkül jön (`forras`); (5) a törzs
 // lenyomatai.
 
-import { probaGyujtemeny, ujEember, tagokkal } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tagokkal, probaKiseroval } from './probaFuttato.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
 import { reszfaKarbantarto, OSSZPONT_FA, RESZFA_HOSSZ, reszfaLevelei, osszPontokSzamitasa, gyerekJegyzek } from '../js/allapot/osszPont.js';
 import { ujAllapotFa, allapotBeallitas, allapotGyokere } from '../js/esemeny/osszegzoFa.js';
@@ -100,7 +100,8 @@ async function vilag() {
   return { allapot, terkep, nagy, kicsi, g1, g2, g3, unoka, j: j.azonosito, es };
 }
 
-const olvaso = (terkep) => async (az) => terkep.get(az) ?? null;
+// ⭐⭐ D128: a válaszoló az eseményeket a készülékük tanúsítványával adja (`kiseroAdo` — a próbában `probaKiseroval`).
+const olvaso = (terkep) => async (az) => probaKiseroval(terkep.get(az) ?? null);
 
 proba('⭐ a gyökér fejlécei EGY SZINTEN (m nélkül): a legfelső szintűek össz-pont szerint — és a kérdező mintákkal ellenőrzi', async () => {
   const v = await vilag();

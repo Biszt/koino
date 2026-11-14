@@ -6480,10 +6480,21 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
    a jelszó is: új regisztráció, kimondva (ET-3/6 (A)).
 10. **A hálózat:** a csere kézfogása és a kereső megújítása a készülékkulccsal (a hirdetőtábla már ma a készülék tábla-kulcsával ír —
     D6 —, a meghívó rekesze a meghívóból számolt kulccsal).
+11. **A sorrend az azonosság eseményei között** (Csaba, 2026-11-14: *„legyen az idő, mehetünk tovább”*): ahol az azonosság UTOLSÓ
+    állítása számít (az érték javaslat, az állásfoglalás, a profil), ott — mint a szavazatnál — az IDŐ dönt (holtversenyben az
+    azonosító); két készülék láncának sorszáma nem összevethető. Egy rosszul járó óra csak a saját két állításod sorrendjét keverheti
+    meg — a lap figyelmeztet, ha a készülékeid órái eltérnek.
 
 *Az építés sorrendje:* ① a mag (a `keszulek` mező és a (szerző, készülék) lánc, a tanúsítvány és a kizárás az örökössel, a keret az
 átadással, a sorrend az azonosság eseményei között) → ② a csere-kulcs és a kulcscsere, a mentés (a lapon is) → ③ a hálózat → ④ a lap
 („📱 Készülékeim”) → ⑤ a próbák és a terep (a laptop és a telefon mint egy azonosság). ⛔ A mag változik → új koinó-család.
+
+*Az építés — ①a (2026-11-14):* `js/kulcs/keszulek.js` (a tanúsítvány, a készülék a gépen — `keszulek.json`), az esemény
+`keszulek` és `tanusitvany` mezője (`tanusitvanyKell`), `lancKulcsa` (a lánc a készüléké) a tárban, a kapuban, az elágazásban, a
+szabály-rétegben, a lánc-gyökérben, a lánc-ellenőrzésben, a bekapcsolódásban és a cserében; a kapu csak tanúsított eseményt enged be
+(egy készüléket egy azonosság tanúsíthat); a láncán kívül utazó esemény a tanúsítványával (a kísérő burok, a csomagok
+`tanusitvanyok` mezője, a készülék tanúsítvány-jegyzéke — `tar/tanusitvanyJegyzek.js`), és a várakozó sor. A próba:
+`keszulekProba.js` (8). A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.7.
 
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 

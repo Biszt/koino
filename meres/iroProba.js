@@ -20,7 +20,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny } from './probaFuttato.js';
+import { probaGyujtemeny, tesztKeszulek } from './probaFuttato.js';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { iroTarNyitasa } from '../js/tar/iro.js';
 import { esemenyMentese, lancVege } from '../js/tar/esemenyTar.js';
@@ -34,9 +34,8 @@ const KOINO = 'proba';
 /** Egy eldobható mappa és egy kulcs — egy „készülék". */
 async function keszulek() {
   const hely = await mkdtemp(join(tmpdir(), 'koino-iro-'));
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey))
-    .toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   return { hely, kulcspar, szerzo };
 }
 
@@ -149,7 +148,7 @@ proba('⛔ A SAJÁT ELAVULT ESEMÉNYT AZ ÍRÓ VISSZAUTASÍTJA („ELAVULT") —
     await koinoLetrehozasa(ka, 'Elavult');
     // B a lánc mostani végét látja — de mielőtt írna, A még egyet ír.
     await b.frissit();
-    const regiVeg = await lancVege(b, k.szerzo);
+    const regiVeg = await lancVege(b, k.kulcspar.keszulek);
     await gondolatLetrehozasa(ka, { cim: 'Közben A írt' });
     const elavult = await esemenyLetrehozasa({ koino: KOINO, tipus: 'GondolatLetrehozas',
       adat: { cim: 'B a régi végről', meret: 1 }, ...regiVeg }, k.kulcspar);

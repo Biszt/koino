@@ -37,7 +37,7 @@ import {
   naploKovetkezetessegEllenorzese, ujAllapotFa, allapotBeallitas, allapotGyokere, allapotBizonyitek, allapotLista
 } from '../esemeny/osszegzoFa.js';
 import { NAPLO_FAJTA, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ, lancAllapotaLancbol, koinoKerete } from './lancGyoker.js';
-import { esemenyEllenorzese, AZONOSITO_MINTA, esemenyKoinoja } from '../esemeny/esemeny.js';
+import { esemenyEllenorzese, AZONOSITO_MINTA, esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 import { ellentmondasEllenorzese } from './ellentmondas.js';
 import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a bekapcsolódó hozott előtagjával)
 
@@ -68,11 +68,11 @@ function naploGyokere(e) {
   return n && osszegzesAlakja(n, 0) && n.d === e.sorszam - 1 ? n : null;
 }
 
-/** A szerző nálam lévő eseményei (a koinóból) és a feje. */
+/** Egy LÁNC nálam lévő eseményei (a koinóból) és a feje. ⭐⭐ D128: az `sz` a lánc kulcsa (a készülék kulcsa). */
 async function szerzoNalam(tar, koino, sz) {
   // ⭐ D118 (⑤b): a koinóbeli lánca — a bekapcsolódóé a hozott előtaggal (a fej napló-gyökere azt is elköti).
   const nezet = await lancNezete(tar, koino, sz);
-  const lanc = (await tar.szerzoLanca(sz)).filter((e) => e && nezet.tagja(e) && Number.isSafeInteger(e.sorszam));
+  const lanc = (await tar.lancEsemenyei(sz)).filter((e) => e && nezet.tagja(e) && Number.isSafeInteger(e.sorszam));
   let fej = null;
   for (const e of lanc) if (naploGyokere(e) && (!fej || e.sorszam > fej.sorszam)) fej = e;
   return { lanc, fej };
@@ -155,15 +155,18 @@ export async function lancValaszokFeldolgozasa({ tar, koino, tarolo }, kerdesek,
   const leletek = [];
   let igazolt = 0, fuggo = 0;
   const jegyzek = lancJegyzekVagasa(await tarolo.olvas());
-  const keret = { tudatpontKeret: await koinoKerete(tar, koino) };   // ⭐ D118/2: a koinó kerete
+  // ⭐ D118/2: a koinó kerete; ⭐⭐ D128: a készülék-tanúsítványok a tárból.
+  const keret = { tudatpontKeret: await koinoKerete(tar, koino), tanusitvany: (k) => tar.tanusitvany?.(k) ?? null };
   const lista = Array.isArray(valaszok) ? valaszok.filter((v) => v && typeof v === 'object') : [];
   const elagazas = async (kit, esemeny, masik) => {
     const adat = { kit, fajta: 'elagazas', esemeny, masik,
       vesztes: esemeny.azonosito < masik.azonosito ? masik.azonosito : esemeny.azonosito };
     if ((await ellentmondasEllenorzese(adat, koino, keret)).rendben) leletek.push(adat);
   };
-  const sajatEsemenye = async (e, sz, sorszam) => !!e && typeof e === 'object' && e.szerzo === sz && esemenyKoinoja(e) === koino
-    && e.sorszam === sorszam && (await esemenyEllenorzese(e)).rendben === true;
+  // ⭐⭐ D128: az `sz` a lánc (a készülék) — a vádolt (`kit`) az esemény szerzője, az azonosság.
+  const sajatEsemenye = async (e, sz, sorszam) => !!e && typeof e === 'object' && lancKulcsa(e) === sz
+    && esemenyKoinoja(e) === koino && e.sorszam === sorszam
+    && (await esemenyEllenorzese(e, { tanusitvany: keret.tanusitvany })).rendben === true;
 
   for (const q of kerdesek) {
     const a = lista.find((v) => v.sz === q.sz && v.d === q.d);
@@ -174,7 +177,7 @@ export async function lancValaszokFeldolgozasa({ tar, koino, tarolo }, kerdesek,
 
     // ----- A FEJ: a d+1. esemény az övé? -----
     let fejRendben = a.f === 1;
-    if (!fejRendben && await sajatEsemenye(a.f, q.sz, q.d + 1) && a.f.azonosito !== q.f) await elagazas(q.sz, fej, a.f);
+    if (!fejRendben && await sajatEsemenye(a.f, q.sz, q.d + 1) && a.f.azonosito !== q.f) await elagazas(fej.szerzo, fej, a.f);
 
     // ----- A KÖVETKEZETESSÉG: a régi ellenőrzött gyökér a mostaninak előtagja? -----
     const kovetkezetes = q.r && st.gy && Array.isArray(a.c)
@@ -188,7 +191,7 @@ export async function lancValaszokFeldolgozasa({ tar, koino, tarolo }, kerdesek,
       if (!t) continue;
       if (t.e) {
         const nalam = await tar.esemeny(az);
-        if (nalam && await sajatEsemenye(t.e, q.sz, s) && t.e.azonosito !== az) await elagazas(q.sz, nalam, t.e);
+        if (nalam && await sajatEsemenye(t.e, q.sz, s) && t.e.azonosito !== az) await elagazas(nalam.szerzo, nalam, t.e);
         continue;
       }
       if (Array.isArray(t.ut) && await naploBizonyitekEllenorzese(NAPLO_FAJTA, await levelOsszegzes(NAPLO_FAJTA, az),
@@ -211,7 +214,7 @@ export async function lancValaszokFeldolgozasa({ tar, koino, tarolo }, kerdesek,
       if (jo && azonosOsszegzes(await allapotGyokere(fa), fej.lancGyoker.kiosztas)) {
         const negativ = a.k.find((t) => t[1] <= 0);
         if (negativ) {
-          const adat = { kit: q.sz, fajta: 'negativ', vadpont: fej.sorszam, esemeny: fej, kulcs: negativ[0],
+          const adat = { kit: fej.szerzo, fajta: 'negativ', vadpont: fej.sorszam, esemeny: fej, kulcs: negativ[0],
             bizonyitek: await allapotBizonyitek(fa, negativ[0]) };
           if ((await ellentmondasEllenorzese(adat, koino, keret)).rendben) leletek.push(adat);
         }
@@ -263,13 +266,13 @@ export function lancKiszolgalo({ tar, koino }) {
     // ⭐ D118 (⑤b): a koinóbeli lánca (a bekapcsolódóé a hozott előtaggal) — és a kiosztás a lánc nézete szerint (a `k` lista).
     const nezet = await lancNezete(tar, koino, sz);
     const fej = await tar.esemeny(fejAz);
-    if (fej && fej.szerzo === sz && nezet.tagja(fej) && fej.sorszam === d + 1) {
+    if (fej && lancKulcsa(fej) === sz && nezet.tagja(fej) && fej.sorszam === d + 1) {
       const lanc = new Array(d + 1);
       lanc[d] = fej;
       let jo = true;
       for (let s = d; s >= 1; s--) {
         const e = await tar.esemeny(lanc[s].elozo);
-        if (!e || e.szerzo !== sz || !nezet.tagja(e) || e.sorszam !== s) { jo = false; break; }
+        if (!e || lancKulcsa(e) !== sz || !nezet.tagja(e) || e.sorszam !== s) { jo = false; break; }
         lanc[s - 1] = e;
       }
       if (jo && (lanc[0].elozo ?? null) === null) return { lanc, fejNalam: true, nezet };

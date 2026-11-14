@@ -20,7 +20,7 @@ const { proba, futtatas } = probaGyujtemeny('A KERESŐ-BEJEGYZÉS MEGÚJÍTÁSA 
 const KOINO = 'kereso-megujitas-proba';
 const NAP = 24 * 3600 * 1000;
 
-const jwk = async (ember) => crypto.subtle.exportKey('jwk', ember.kulcspar.privateKey);
+const jwk = async (ember) => crypto.subtle.exportKey('jwk', ember.kulcspar.azonossagKulcspar.privateKey);
 
 async function csomag(pontok = [30, 20]) {
   const emberek = [];

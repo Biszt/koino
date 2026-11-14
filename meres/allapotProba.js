@@ -5,7 +5,7 @@
 
 import { allapotSzamitasa, median, szetosztottPontok } from '../js/allapot/allapotSzamitas.js';
 
-import { probaGyujtemeny, ujEember, tagokkal } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tagokkal, tesztKeszulek } from './probaFuttato.js';
 // ⭐ D89/2: a zárt/nyílt koinó — valódi művelettel és a kapuval.
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -313,8 +313,8 @@ proba('Az ISMERETLEN esemény-típus nem töri el a számítást', async () => {
 
 async function zartKoino(beallitas) {
   const tar = await esemenyTarNyitasa('zart-proba', await mkdtemp(join(tmpdir(), 'koino-zart-')));
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   const k = { koino: 'zart-proba', kulcspar, szerzo, tar, lancTarolo: null };
   const e = await koinoLetrehozasa(k, 'Próba', null, undefined, beallitas);
   return { tar, k, e, allapot: allapotSzamitasa(await koinoEsemenyei(tar, 'zart-proba')) };
@@ -333,7 +333,7 @@ proba('⭐⭐ D89/2: a koinó alapból ZÁRT, a nyílt kimondható, és a mező 
 
 proba('⛔ D89/2: a nem igaz/hamis zártságot a kapu elveti (egy alak van, nem kettő)', async () => {
   const { tar, k } = await zartKoino();
-  const veg = await lancVege(tar, k.szerzo);
+  const veg = await lancVege(tar, k.kulcspar.keszulek);
   const hamis = await esemenyLetrehozasa({ koino: 'zart-proba', tipus: 'KoinoLetrehozas',
     adat: { nev: 'X', leiras: null, alapitok: [], zart: 'igen' }, entitas: null, entitasSorszam: 1,
     latott: [], lancGyoker: null, ...veg }, k.kulcspar);

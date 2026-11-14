@@ -6,7 +6,7 @@
 //
 // Futtatás: node meres/mind.js lezarasiosszegzes
 
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tesztKeszulek, probaKiseroval } from './probaFuttato.js';
 import { javaslatokSzamitasa } from '../js/allapot/javaslatSzamitas.js';
 import {
   lezarasiOsszegzesEpitese, lezarasiSzamokEllenorzese, lezarasiMintaHelyek, lezarasiMintakValasza,
@@ -55,7 +55,8 @@ async function vilag({ tulajdonos = 30, szavazo = 12, ertek = 9 } = {}) {
     esemenyek.push(...await emberek[i].szavaz(j, { szavazat: tipusok[i % tipusok.length] }, T0 + 300 + i));
   }
   const terkep = new Map(esemenyek.map((e) => [e.azonosito, e]));
-  return { esemenyek, g, j, emberek, olvas: async (az) => terkep.get(az) ?? null };
+  // ⭐⭐ D128: a teljes tartó a mintákat a készülékük tanúsítványával adja (`kiseroAdo` — a próbában `probaKiseroval`).
+  return { esemenyek, g, j, emberek, olvas: async (az) => probaKiseroval(terkep.get(az) ?? null) };
 }
 
 const mindenkiTag = async () => true;
@@ -157,8 +158,8 @@ proba('⭐⭐ a KIHAGYOTT bizonyítékos szavazat panasza érvényes — a műve
   try {
     const tar = await esemenyTarNyitasa('proba', mappa);
     const kornyezet = async () => {
-      const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-      const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+      const kulcspar = await tesztKeszulek();
+      const szerzo = kulcspar.azonossag;
       return { koino: 'proba', kulcspar, szerzo, tar, lancTarolo: null };
     };
     const a = await kornyezet(), b = await kornyezet(), c = await kornyezet();
@@ -175,10 +176,11 @@ proba('⭐⭐ a KIHAGYOTT bizonyítékos szavazat panasza érvényes — a műve
     const bSzavazat = esemenyek.find((e) => e.tipus === 'Szavazat' && e.szerzo === b.szerzo);
     // A csaló kihagyja B szavazatát.
     const { osszegzes, epito } = await lezarasiOsszegzesEpitese(esemenyek.filter((e) => e !== bSzavazat), j, g.azonosito);
-    const panasz = await kimaradtSzavazat(osszegzes, j, bSzavazat, await szavazatFaBizonyitek(epito, b.szerzo));
+    // ⭐⭐ D128: a panaszos a saját szavazatát a készüléke tanúsítványával adja.
+    const panasz = await kimaradtSzavazat(osszegzes, j, probaKiseroval(bSzavazat), await szavazatFaBizonyitek(epito, b.szerzo));
     // a becsületes (B-vel épült) összegzésre ugyanez a panasz nem érvényes (B benne van)
     const becsuletes = await lezarasiOsszegzesEpitese(esemenyek, j, g.azonosito);
-    const hamisPanasz = await kimaradtSzavazat(becsuletes.osszegzes, j, bSzavazat,
+    const hamisPanasz = await kimaradtSzavazat(becsuletes.osszegzes, j, probaKiseroval(bSzavazat),
       await szavazatFaBizonyitek(becsuletes.epito, b.szerzo));
     return bSzavazat?.lancGyoker != null && panasz === true && hamisPanasz === false;
   } finally {
@@ -191,8 +193,8 @@ proba('⛔⛔ a JOGOSULATLAN (pont nélküli) bizonyítékos szavazat a fában e
   try {
     const tar = await esemenyTarNyitasa('proba', mappa);
     const kornyezet = async () => {
-      const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-      const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+      const kulcspar = await tesztKeszulek();
+      const szerzo = kulcspar.azonossag;
       return { koino: 'proba', kulcspar, szerzo, tar, lancTarolo: null };
     };
     const a = await kornyezet(), b = await kornyezet(), d = await kornyezet();
@@ -216,7 +218,7 @@ proba('⛔⛔ a JOGOSULATLAN (pont nélküli) bizonyítékos szavazat a fában e
       fak: { ...osszegzes.fak, szavazat: szFa, nevezo: await allapotGyokere(epito.nevezoFa) } };
     hamis.reszLezaras = allasSzamokbol(j, hamis.szamok, hamis.szamok.nevezo, hamis.kuszobok).lezarasIdeje;
     hamis.lezaras = Math.max(hamis.lezaras, hamis.reszLezaras);
-    const olvas = async (az) => esemenyek.find((e) => e.azonosito === az) ?? null;
+    const olvas = async (az) => probaKiseroval(esemenyek.find((e) => e.azonosito === az) ?? null);
     const helyek = lezarasiMintaHelyek(hamis, 32);
     const mintak = await lezarasiMintakValasza(epito, helyek, olvas);
     const e = await lezarasiOsszegzesEllenorzese({ osszegzes: hamis, javaslatEsemeny: j, helyek, mintak, tagE: mindenkiTag });
@@ -298,7 +300,7 @@ proba('⭐⭐ több érintettnél: a NAGY rész az összegzésből, a KIS rész 
   const { osszegzes, epito } = await lezarasiOsszegzesEpitese(esemenyek, j, g.azonosito);
   const helyek = lezarasiMintaHelyek(osszegzes);
   const e = await lezarasiOsszegzesEllenorzese({ osszegzes, javaslatEsemeny: j, helyek,
-    mintak: await lezarasiMintakValasza(epito, helyek, async (az) => terkep.get(az) ?? null), tagE: mindenkiTag });
+    mintak: await lezarasiMintakValasza(epito, helyek, async (az) => probaKiseroval(terkep.get(az) ?? null)), tagE: mindenkiTag });
   const vele = javaslatokSzamitasa(osszegzoNezete(esemenyek, [g.azonosito]), { entitasok: new Map() }, most,
     { osszegzesek: new Map([[j.azonosito + '|' + g.azonosito, { osszegzes, allas: e.allas }]]) }).get(j.azonosito);
   const kicsiT = teljes.reszek.find((r) => r.entitas === h.azonosito);
@@ -319,9 +321,10 @@ proba('⭐ a KAPU: a jó alakú lezárási összegzés bemegy (a javaslat szelet
     const jo = await ki.tesz('LezarasiOsszegzes', osszegzes, undefined, { entitas: j.azonosito });
     const rosszHely = await ki.tesz('LezarasiOsszegzes', osszegzes, undefined, { entitas: g.azonosito });
     const rosszAlak = await ki.tesz('LezarasiOsszegzes', { ...osszegzes, fak: null }, undefined, { entitas: j.azonosito });
-    const a1 = await esemenyMentese(tar, jo);
-    const a2 = await esemenyMentese(tar, rosszHely);
-    const a3 = await esemenyMentese(tar, rosszAlak);
+    // ⭐⭐ D128: a lánc közepéről jövő esemény a tanúsítványával (a kísérő burokban).
+    const a1 = await esemenyMentese(tar, probaKiseroval(jo));
+    const a2 = await esemenyMentese(tar, probaKiseroval(rosszHely));
+    const a3 = await esemenyMentese(tar, probaKiseroval(rosszAlak));
     return a1.mentve === true && a2.mentve === false && a3.mentve === false && bejelentesHelyei(jo).includes(g.azonosito);
   } finally {
     await rm(mappa, { recursive: true, force: true });

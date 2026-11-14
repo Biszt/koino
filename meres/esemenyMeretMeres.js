@@ -9,6 +9,7 @@
 //
 // Futtatás: node meres/esemenyMeretMeres.js
 
+import { tesztKeszulek } from './probaFuttato.js';   // ⭐⭐ D128: tanúsított próba-készülék
 import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
 import {
   levelOsszegzes, naploGyokere, ujAllapotFa, allapotBeallitas, allapotGyokere, allapotBizonyitek
@@ -20,7 +21,7 @@ console.log = () => {};
 console.warn = () => {};
 
 const bajt = (x) => Buffer.byteLength(JSON.stringify(x), 'utf8');
-const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+const kulcspar = await tesztKeszulek();
 const azon = (i, jel = 'E') => String(i).padStart(43, jel);
 
 // Egy 1000 eseményes napló gyökere (a napló mérete a gyökér összegzésén nem változtat: d egy szám).

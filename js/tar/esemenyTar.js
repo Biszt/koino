@@ -26,7 +26,8 @@
 //
 // Használják: muveletek.js és minden, ami eseményt olvas.
 
-import { esemenyEllenorzese, elagazasE, szelet, esemenyKoinoja, azonositoAlaku, koinoVerzioE } from '../esemeny/esemeny.js';
+import { esemenyEllenorzese, elagazasE, szelet, esemenyKoinoja, azonositoAlaku, koinoVerzioE, lancKulcsa, tanusitvanyKereso,
+  KISERO_MEZO, kiseroNelkul, kiseroval } from '../esemeny/esemeny.js';
 // ⭐ D80: az `Ellentmondas` esemény TARTALMA is a kapun megy át (önmagát igazoló bizonyíték).
 import { ellentmondasEllenorzese } from '../allapot/ellentmondas.js';
 // ⭐ D81: a pont-esemény a saját bizonyítékát hozza — a kapu ellenőrzi, hogy illik a lánc-gyökeréhez.
@@ -58,12 +59,101 @@ import { gyermekSzuleteseE, gyermekSzuletesEllenorzese, koinoNezete, bekapcsolod
  */
 export async function esemenyMentese(tar, esemeny, beallitas = {}) {
   console.log('esemenyMentese - KEZDÉS', { azonosito: esemeny?.azonosito, tipus: esemeny?.tipus });
+  // ⭐⭐ D128: a kísérő tanúsítvány (az utazó esemény burka) a mellékeltek közé — az esemény NÉLKÜLE megy tovább.
+  const kisero = esemeny && typeof esemeny === 'object' ? esemeny[KISERO_MEZO] : null;
+  if (kisero) {
+    esemeny = kiseroNelkul(esemeny);
+    beallitas = { ...beallitas, tanusitvanyok: [...(Array.isArray(beallitas.tanusitvanyok) ? beallitas.tanusitvanyok : []), kisero] };
+  }
+  const r = await esemenyMenteseEgy(tar, esemeny, beallitas);
+  // ⭐⭐ D128: A VÁRAKOZÓK — ha most egy tanúsítvány jött be (a lánc első eseménye, vagy egy mellékelt), a rá várók újra a kapun.
+  if (r.mentve && !r.marMegvolt && r.ujTanusitvany) {
+    const bejottek = await varakozokUjra(tar, r.ujTanusitvany);
+    if (bejottek.length) r.kesobbBejottek = bejottek;
+  }
+  if (r.hianyzik && esemeny && typeof esemeny.keszulek === 'string') varakozoba(tar, esemeny, beallitas);
+  delete r.ujTanusitvany;
+  return r;
+}
 
+// ===================================
+// ⭐⭐ D128: A TANÚSÍTVÁNYRA VÁRÓK
+// ===================================
+//
+// Egy szelet eseményei sokszor ELŐBB érkeznek, mint a szerzőjük láncának első eseménye (a tagsági kísérő a csere végén jön,
+// egy kérelem válasza más úton). A kapu ezeket „hiányzik”-kal visszautasítja — ⭐ de nem felejti el: tárolónként egy korlátos,
+// memóriabeli sorba teszi, és amint a készülék tanúsítványa bejön, újra a kapun engedi őket. ⚠️ Nem tartós: egy újraindítás
+// után a csere újra elkéri (a „hiányzik” rendes útja). Korlátos (9. szabály): készülékenként és összesen is.
+
+const VARAKOZO_KESZULEKENKENT = 512;
+const VARAKOZO_OSSZESEN = 8192;
+const varakozok = new WeakMap();   // tár → Map(készülék → Map(azonosító → { esemeny, beallitas }))
+
+function varakozoba(tar, esemeny, beallitas) {
+  if (!tar || typeof tar !== 'object') return;
+  let m = varakozok.get(tar);
+  if (!m) { m = new Map(); varakozok.set(tar, m); }
+  let osszes = 0;
+  for (const v of m.values()) osszes += v.size;
+  if (osszes >= VARAKOZO_OSSZESEN) return;
+  let k = m.get(esemeny.keszulek);
+  if (!k) { k = new Map(); m.set(esemeny.keszulek, k); }
+  if (k.size < VARAKOZO_KESZULEKENKENT) k.set(esemeny.azonosito, { esemeny, beallitas: { tanusitvanyok: beallitas.tanusitvanyok } });
+}
+
+async function varakozokUjra(tar, keszulek) {
+  const m = varakozok.get(tar);
+  const k = m?.get(keszulek);
+  if (!k) return [];
+  m.delete(keszulek);
+  const bejottek = [];
+  for (const { esemeny, beallitas } of k.values()) {
+    const r = await esemenyMentese(tar, esemeny, beallitas);
+    if (r.mentve && !r.marMegvolt) bejottek.push(esemeny.azonosito, ...(r.kesobbBejottek ?? []));
+  }
+  return bejottek;
+}
+
+/**
+ * ⭐⭐ D128: egy csomag BEÁGYAZOTT eseményei — a tanúsítványaik a csomag szerzőjét is igazolhatják (a tagsági csomag a szerző
+ * saját belépését hozza; egy tanúsítvány önmagát igazolja, akárhonnan jön).
+ */
+function beagyazottak(e) {
+  const a = e?.adat;
+  if (!a || typeof a !== 'object') return [];
+  const lista = [];
+  const hozza = (x) => { if (x && typeof x === 'object' && !Array.isArray(x)) lista.push(x); };
+  if (Array.isArray(a.lanc)) a.lanc.slice(0, 1024).forEach(hozza);
+  if (Array.isArray(a.esemenyek)) a.esemenyek.slice(0, 1024).forEach(hozza);
+  if (Array.isArray(a.szuloTagsag?.lanc)) a.szuloTagsag.lanc.slice(0, 1024).forEach(hozza);
+  for (const mezo of ['szuletes', 'esemeny', 'masik', 'kovetkezo']) hozza(a[mezo]);
+  return lista;
+}
+
+async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
   // ----- 1. ELLENŐRZÉS -----
-  const ellenorzes = await esemenyEllenorzese(esemeny);
+  // ⭐⭐ D128: az aláírás a készüléké, és a készülék tanúsítványa vagy az eseményben van (a lánc első eseménye), vagy a
+  // tárban (a kapu korábban beengedte). Ha egyik sincs: „hiányzik” — nem mentjük, a csere elkérheti. ⭐ Így a tárba
+  // csak tanúsított esemény jut, és minden számítás (a tagság, a meghívás is) csak ilyet lát.
+  // ⭐⭐ D128: egy esemény a láncán KÍVÜL is utazhat (csomagban, mintában, válaszban) — akkor a tanúsítványát a küldő mellékeli
+  // (`beallitas.tanusitvanyok`). ⛔ A tár tudása elsőbb: egy ismert készüléket a mellékelt tanúsítvány nem köthet máshoz.
+  // ⭐ A csomag beágyazott eseményeinek és a döntési csomag külön hozott tanúsítványai is (egy tanúsítvány önmagát igazolja).
+  const mellekelt = await tanusitvanyKereso(beagyazottak(esemeny), null,
+    [...(Array.isArray(beallitas.tanusitvanyok) ? beallitas.tanusitvanyok : []),
+      ...(Array.isArray(esemeny?.adat?.tanusitvanyok) ? esemeny.adat.tanusitvanyok.slice(0, 1024) : [])]);
+  const kereso = async (k) => (await tarTanusitvanya(tar, k)) ?? (await mellekelt(k));
+  const ellenorzes = await esemenyEllenorzese(esemeny, { tanusitvany: kereso });
   if (!ellenorzes.rendben) {
     console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: ellenorzes.ok });
-    return { mentve: false, ok: ellenorzes.ok };
+    return { mentve: false, ok: ellenorzes.ok, ...(ellenorzes.hianyzik ? { hianyzik: true } : {}) };
+  }
+  // ⛔ D128: egy készüléket csak EGY azonosság tanúsíthat — így egy lánc egy azonosságé (`lancKulcsa`).
+  if (esemeny.tanusitvany) {
+    const meglevo = await tarTanusitvanya(tar, esemeny.keszulek);
+    if (meglevo && meglevo.azonossag !== esemeny.szerzo) {
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA: a készülék másé)');
+      return { mentve: false, ok: 'a készüléket már egy másik azonosság tanúsította' };
+    }
   }
 
   // ----- 1/a. ⭐ D81: A PONT-ESEMÉNY BIZONYÍTÉKA -----
@@ -88,7 +178,7 @@ export async function esemenyMentese(tar, esemeny, beallitas = {}) {
   // egyenként jött volna, és csak a döntés bemenete lehet benne (`dontesiCsomag.js`). Egy hamis belső
   // esemény az egész csomagot elveti.
   if (esemeny.tipus === CSOMAG_TIPUS) {
-    const csomag = await dontesiCsomagEllenorzese(esemeny);
+    const csomag = await dontesiCsomagEllenorzese(esemeny, tar);
     if (!csomag.rendben) {
       console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: csomag.ok });
       return { mentve: false, ok: csomag.ok };
@@ -104,7 +194,7 @@ export async function esemenyMentese(tar, esemeny, beallitas = {}) {
 
   // ----- 1/a3. ⭐ D93/2: A TAGSÁGI CSOMAG — a lánc másolatai is ugyanazon a próbán, és tagságot kell adniuk -----
   if (esemeny.tipus === TAGSAGI_CSOMAG) {
-    const csomag = await tagsagiCsomagEllenorzese(esemeny);
+    const csomag = await tagsagiCsomagEllenorzese(esemeny, tar);
     // ⛔ D118 (④a): a csomagban utazó bekapcsolódás is a születésekkel (különben egy hamis bekapcsolódás ingyen tagságot adna).
     const bek = csomag.rendben ? await bekapcsolodasokEllenorzese(esemeny.adat?.lanc, tar) : csomag;
     if (!bek.rendben) {
@@ -151,7 +241,7 @@ export async function esemenyMentese(tar, esemeny, beallitas = {}) {
   if (esemeny.tipus === 'Ellentmondas') {
     // ⭐ D118/2: a koinó kerete a tárból (a születés azonosítója maga a koinó neve); ha nincs meg, a mai érték.
     const vad = await ellentmondasEllenorzese(esemeny.adat, esemeny.koino,
-      { tudatpontKeret: await koinoKerete(tar, esemeny.koino) });
+      { tudatpontKeret: await koinoKerete(tar, esemeny.koino), tanusitvany: (k) => tarTanusitvanya(tar, k) });
     // ⚠️ A vádpontot (vagy elágazásnál a vesztest) a bejelentő mondja be — az ellenőrzés vetette össze.
     if (!vad.rendben) {
       console.log('esemenyMentese - VÉGE (HAMIS VÁD)', { ok: vad.ok });
@@ -172,10 +262,21 @@ export async function esemenyMentese(tar, esemeny, beallitas = {}) {
     return { mentve: true, marMegvolt: true };
   }
 
+  // ----- 2/b. ⭐⭐ D128: A MELLÉKELT TANÚSÍTVÁNY A JEGYZÉKBE — ha ezzel ment át (a tár még nem ismerte) -----
+  let ujTanusitvany = esemeny.tanusitvany ? esemeny.keszulek : null;
+  // ⭐ A lánc első eseményének tanúsítványa is a jegyzékbe (ha a tárnak van): az átmeneti tár eldobhatja az eseményt, a
+  // tanúsítvány tudása ettől nem vész el.
+  if (esemeny.tanusitvany && typeof tar.tanusitvanyFelvetele === 'function') await tar.tanusitvanyFelvetele(esemeny.tanusitvany);
+  if (!esemeny.tanusitvany && typeof tar.tanusitvanyFelvetele === 'function' && !(await tarTanusitvanya(tar, esemeny.keszulek))) {
+    const t = await mellekelt(esemeny.keszulek);
+    if (t && await tar.tanusitvanyFelvetele(t)) ujTanusitvany = esemeny.keszulek;
+  }
+
   // ----- 3. ELÁGAZÁS-KERESÉS: a kettős cselekvés leleplezése -----
   // Szintén célzott kérdés: elég a szerző láncának EGYETLEN pontját megnézni — oda
   // ütközhet be egy második esemény.
-  const ottLevok = await tar.sorszamSzerint(esemeny.szerzo, esemeny.sorszam);
+  // ⭐⭐ D128: a lánc a készüléké — két készülék azonos sorszáma nem ütközés.
+  const ottLevok = await tar.sorszamSzerint(lancKulcsa(esemeny), esemeny.sorszam);
   const utkozo = ottLevok.find((meglevo) => elagazasE(meglevo, esemeny));
 
   // ----- 4. MENTÉS -----
@@ -200,11 +301,44 @@ export async function esemenyMentese(tar, esemeny, beallitas = {}) {
       masik: esemeny.azonosito
     });
     console.log('esemenyMentese - VÉGE (elmentve, de ELLENTMONDÁS)');
-    return { mentve: true, elagazas: { egyik: utkozo, masik: esemeny } };
+    return { mentve: true, elagazas: { egyik: utkozo, masik: esemeny }, ujTanusitvany };
   }
 
   console.log('esemenyMentese - VÉGE (elmentve)');
-  return { mentve: true };
+  return { mentve: true, ujTanusitvany };
+}
+
+/**
+ * ⭐⭐ D128: egy készülék tanúsítványa a tárból — ha a tár tud ilyet (minden mai tár tud; egy régi, tanúsítvány nélküli
+ * tárnál null, és akkor csak a lánc első eseménye mehet át).
+ * @returns {Promise<Object|null>}
+ */
+export async function tarTanusitvanya(tar, keszulek) {
+  if (typeof tar?.tanusitvany !== 'function') return null;
+  // ⭐ Egy MÁSIK folyamat (az író, a második ablak) által beengedett tanúsítványt a készülék jegyzéke is tudja
+  // (`tanusitvanyJegyzek.js` — a kapu oda is feljegyzi), ezért itt nem kell a tárat a fájlból frissíteni.
+  return (await tar.tanusitvany(keszulek)) ?? null;
+}
+
+/**
+ * ⭐⭐ D128: A KÍSÉRŐ TANÚSÍTVÁNY ADÓJA — egy küldés (egy csere, egy válasz) idejére: minden készülék ELSŐ küldött eseménye
+ * mellé a tanúsítványát teszi (a burokba — `esemeny.js` `KISERO_MEZO`), ha az esemény nem a lánc első eseménye. A fogadó kapuja
+ * ebből feljegyzi, a többi eseményhez már onnan veszi. `minden: true` — minden eseményhez (ahol a fogadó egyenként ellenőriz,
+ * kapu nélkül: a kérelem és az összegzés válasza).
+ * @param {Object} tar
+ * @param {{minden?: boolean}} [beallitas]
+ * @returns {Function} async (esemény) → esemény (a burokkal)
+ */
+export function kiseroAdo(tar, { minden = false } = {}) {
+  const adott = new Set();
+  return async (e) => {
+    if (!e || typeof e !== 'object' || e.tanusitvany || e[KISERO_MEZO] || typeof e.keszulek !== 'string') return e;
+    if (!minden && adott.has(e.keszulek)) return e;
+    const t = await tarTanusitvanya(tar, e.keszulek);
+    if (!t) return e;
+    adott.add(e.keszulek);
+    return kiseroval(e, t);
+  };
 }
 
 /** Egy (a kapun már átment) `Ellentmondas` eseményben hordozott események — ugyanazon a kapun át. */
@@ -232,25 +366,37 @@ export async function esemenyLekerese(tar, azonosito) {
 }
 
 /**
- * Egy szerző adott sorszámú eseményei.
+ * Egy LÁNC adott sorszámú eseményei (⭐⭐ D128: a lánc a készüléké — `lancKulcsa`).
  * (Rendes esetben legfeljebb egy — ha több, az elágazás.)
  * @param {Object} tar
- * @param {string} szerzo
+ * @param {string} lanc - a lánc kulcsa (a készülék kulcsa)
  * @param {number} sorszam
  * @returns {Promise<Array<Object>>}
  */
-export async function sorszamSzerint(tar, szerzo, sorszam) {
-  return tar.sorszamSzerint(szerzo, sorszam);
+export async function sorszamSzerint(tar, lanc, sorszam) {
+  return tar.sorszamSzerint(lanc, sorszam);
 }
 
 /**
- * Egy szerző ÖSSZES eseménye, sorszám szerint növekvő sorrendben.
+ * Egy LÁNC ÖSSZES eseménye, sorszám szerint növekvő sorrendben (⭐⭐ D128: egy készülék lánca).
  * @param {Object} tar
- * @param {string} szerzo
+ * @param {string} lanc - a lánc kulcsa (a készülék kulcsa)
  * @returns {Promise<Array<Object>>}
  */
-export async function sajatLancEsemenyei(tar, szerzo) {
-  return (await tar.szerzoLanca(szerzo)).sort((a, b) => a.sorszam - b.sorszam);
+export async function sajatLancEsemenyei(tar, lanc) {
+  return (await tar.lancEsemenyei(lanc)).sort((a, b) => a.sorszam - b.sorszam);
+}
+
+/**
+ * ⭐⭐ D128: egy AZONOSSÁG minden eseménye — minden készülékéé (a tagság, a horgony, a profil az azonosságé).
+ * ⚠️ Sorrend nélkül (két készülék sorszáma nem összevethető): a hívó szűr és rendez.
+ * @param {Object} tar
+ * @param {string} szerzo - az azonosság
+ * @returns {Promise<Array<Object>>}
+ */
+export async function azonossagEsemenyei(tar, szerzo) {
+  if (typeof tar.azonossagEsemenyei === 'function') return tar.azonossagEsemenyei(szerzo);
+  return (await tar.betolt()).filter((e) => e.szerzo === szerzo);
 }
 
 /**
@@ -330,13 +476,13 @@ export async function entitasEsemenyei(tar, koino, entitas) {
  *
  * @param {Object} tar
  * @param {string} koino
- * @param {string} szerzo
+ * @param {string} lanc - ⭐⭐ D128: a lánc (a készülék) — az entitás-sorszám a lánc része, mint a sorszám
  * @param {string} entitas
  * @returns {Promise<number>}
  */
-export async function kovetkezoEntitasSorszam(tar, koino, szerzo, entitas) {
+export async function kovetkezoEntitasSorszam(tar, koino, lanc, entitas) {
   const sajatjai = (await entitasEsemenyei(tar, koino, entitas))
-    .filter((e) => e.szerzo === szerzo);
+    .filter((e) => lancKulcsa(e) === lanc);
   if (!sajatjai.length) return 1;
   return Math.max(...sajatjai.map((e) => e.entitasSorszam ?? 1)) + 1;
 }
@@ -360,7 +506,7 @@ export async function kovetkezoEntitasSorszam(tar, koino, szerzo, entitas) {
  * @param {Object} tar
  * @param {string} koino
  * @param {string} entitas
- * @param {string} sajatSzerzo - a saját kulcsunk (a sajátjainkat kihagyjuk)
+ * @param {string} sajatSzerzo - az azonosságunk (a sajátjainkat kihagyjuk — ⭐⭐ D128: minden készülékünkét)
  * @param {number} [darab] - hány horgony (alap: 1 — ennyi elég a „azután" bizonyításához)
  * @returns {Promise<Array<string>>}
  */
@@ -389,13 +535,13 @@ export async function horgonyok(tar, koino, entitas, sajatSzerzo, darab = 1) {
  * gyermekbeli lánca: az ott 1-ről indul (különben a tár legnagyobb sorszáma után folytatná, akármelyik koinóé — és ha a
  * múltja később érkezik, a két lánc azonos sorszámai elágazásnak látszanának). A művelet és az író (az ELAVULT) ezt hívja.
  * @param {Object} tar
- * @param {string} szerzo
+ * @param {string} lancKulcs - ⭐⭐ D128: a saját lánc kulcsa (a készülékem kulcsa — `lancKulcsa`)
  * @param {string} koino
  * @param {string|null} [tipus]
  * @param {Object|null} [adat]
  * @returns {Promise<{elozo: string|null, sorszam: number}>}
  */
-export async function ujSajatHelye(tar, szerzo, koino, tipus = null, adat = null) {
+export async function ujSajatHelye(tar, lancKulcs, koino, tipus = null, adat = null) {
   if (tipus === 'Bekapcsolodas' && typeof adat?.lanc?.azonosito === 'string' && Number.isSafeInteger(adat.lanc.sorszam)) {
     return { elozo: adat.lanc.azonosito, sorszam: adat.lanc.sorszam + 1 };
   }
@@ -403,9 +549,9 @@ export async function ujSajatHelye(tar, szerzo, koino, tipus = null, adat = null
   // létrehozó szülőbeli láncának vége után (`koino.js` `ujKoinoSzuletese` az ideiglenes tárba csak azt teszi), a szülő
   // nélkülié 1. ⛔ A koinó láncán keresve semmit nem találna (mérve: a gyermek születése 1-es sorszámot kapott, és a
   // létrehozó hozott múltja nem jutott át a kapun).
-  if (tipus === 'KoinoLetrehozas') return lancVege(tar, szerzo);
-  const nezet = await lancNezete(tar, koino, szerzo);
-  const lanc = (await sajatLancEsemenyei(tar, szerzo)).filter(nezet.tagja);
+  if (tipus === 'KoinoLetrehozas') return lancVege(tar, lancKulcs);
+  const nezet = await lancNezete(tar, koino, lancKulcs);
+  const lanc = (await sajatLancEsemenyei(tar, lancKulcs)).filter(nezet.tagja);
   if (!lanc.length) return { elozo: null, sorszam: 1 };
   const utolso = lanc[lanc.length - 1];
   return { elozo: utolso.azonosito, sorszam: utolso.sorszam + 1 };
@@ -415,13 +561,13 @@ export async function ujSajatHelye(tar, szerzo, koino, tipus = null, adat = null
  * Megmondja, hova fűzzük a következő saját eseményt.
  *
  * @param {Object} tar
- * @param {string} szerzo
+ * @param {string} lanc - ⭐⭐ D128: a lánc kulcsa (a készülék kulcsa)
  * @returns {Promise<{elozo: string|null, sorszam: number}>}
  */
-export async function lancVege(tar, szerzo) {
-  console.log('lancVege - KEZDÉS', { szerzo: szerzo.slice(0, 8) + '…' });
+export async function lancVege(tar, lanc) {
+  console.log('lancVege - KEZDÉS', { lanc: lanc.slice(0, 8) + '…' });
 
-  const esemenyek = await sajatLancEsemenyei(tar, szerzo);
+  const esemenyek = await sajatLancEsemenyei(tar, lanc);
   if (esemenyek.length === 0) {
     console.log('lancVege - VÉGE (üres lánc, ez lesz az első)');
     return { elozo: null, sorszam: 1 };
@@ -446,13 +592,13 @@ export async function lancVege(tar, szerzo) {
  *   - SZAKADÁS: az `elozo` nem a tényleges előző eseményre mutat.
  *
  * @param {Object} tar
- * @param {string} szerzo
+ * @param {string} lanc - ⭐⭐ D128: a lánc kulcsa (a készülék kulcsa)
  * @returns {Promise<{ep: boolean, hosszu: number, hezagok: Array<number>, elagazasok: Array<number>, szakadasok: Array<number>}>}
  */
-export async function lancEllenorzese(tar, szerzo) {
-  console.log('lancEllenorzese - KEZDÉS', { szerzo: szerzo.slice(0, 8) + '…' });
+export async function lancEllenorzese(tar, lanc) {
+  console.log('lancEllenorzese - KEZDÉS', { lanc: lanc.slice(0, 8) + '…' });
 
-  const esemenyek = await sajatLancEsemenyei(tar, szerzo);
+  const esemenyek = await sajatLancEsemenyei(tar, lanc);
   const hezagok = [];
   const elagazasok = [];
   const szakadasok = [];

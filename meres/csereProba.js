@@ -32,7 +32,7 @@ import {
 import { koinoLetrehozasa, gondolatLetrehozasa, tudatpontRendezese, javaslatLetrehozasa } from '../js/muveletek.js';
 import { kivitelSzovege } from '../js/csere/fajlCsere.js';
 import { egyeztetettEsemenyek, szeletbeTartozik } from '../js/csere/szeletEgyeztetes.js';
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tesztKeszulek } from './probaFuttato.js';
 
 const { proba, futtatas } = probaGyujtemeny('A csere-protokoll próbája');
 
@@ -48,7 +48,11 @@ async function ujTar() {
 
 /** Elment több eseményt egy tárba. */
 async function ment(tar, esemenyek) {
-  for (const e of esemenyek) await esemenyMentese(tar, e);
+  // ⭐⭐ D128: ami a lánca első eseménye (a tanúsítvány) előtt jött, az „hiányzik” — egy második kör hozza be (mint a csere
+  // következő köre).
+  const kesobb = [];
+  for (const e of esemenyek) if ((await esemenyMentese(tar, e)).hianyzik) kesobb.push(e);
+  for (const e of kesobb) await esemenyMentese(tar, e);
 }
 
 /** Egy e-ember első N eseménye, elmentetlenül (hogy szabadon oszthassuk szét). */
@@ -61,6 +65,7 @@ async function lanc(eember, hossz) {
 }
 
 /** Egy szerző sora az állásban. */
+// ⭐⭐ D128: az állás láncónként (a `szerzo` mező a lánc kulcsa — a készüléké).
 const sora = (allas, szerzo) => allas.szerzok.find((sz) => sz.szerzo === szerzo);
 
 /** Egy szerzőtől kért sorszámok. */
@@ -84,8 +89,8 @@ proba('Az állás szerzőnként EGY sor, a legnagyobb sorszámmal', async () => 
 
   const allas = await allasOsszeallitasa(tar, KOINO);
   return allas.szerzok.length === 2
-      && sora(allas, anna.szerzo).legnagyobb === 3
-      && sora(allas, bela.szerzo).legnagyobb === 1;
+      && sora(allas, anna.keszulek).legnagyobb === 3
+      && sora(allas, bela.keszulek).legnagyobb === 1;
 });
 
 proba('⭐ UGYANAZ A TUDÁS = UGYANAZ AZ ÁLLÁS (a fájl sorrendje nem számít)', async () => {
@@ -129,7 +134,7 @@ proba('⭐ Aki LE VAN MARADVA, csak a hiányzó tartományt kéri', async () => 
     await allasOsszeallitasa(lemaradt, KOINO),
     await allasOsszeallitasa(teljes, KOINO)
   );
-  return kertek(kerelem, anna.szerzo).join(',') === '3,4,5';
+  return kertek(kerelem, anna.keszulek).join(',') === '3,4,5';
 });
 
 proba('Az ISMERETLEN szerző TELJES láncát kéri', async () => {
@@ -141,7 +146,7 @@ proba('Az ISMERETLEN szerző TELJES láncát kéri', async () => {
     await allasOsszeallitasa(ures, KOINO),
     await allasOsszeallitasa(teljes, KOINO)
   );
-  return kertek(kerelem, anna.szerzo).join(',') === '1,2,3';
+  return kertek(kerelem, anna.keszulek).join(',') === '1,2,3';
 });
 
 proba('⭐ A HÉZAG NEM TŰNIK EL: azonos „legnagyobb" mellett is kéri a lyukat', async () => {
@@ -156,8 +161,8 @@ proba('⭐ A HÉZAG NEM TŰNIK EL: azonos „legnagyobb" mellett is kéri a lyuk
   const sajat = await allasOsszeallitasa(lyukas, KOINO);
   const kerelem = hianyokSzamitasa(sajat, await allasOsszeallitasa(teljes, KOINO));
 
-  return sora(sajat, anna.szerzo).hezagok.join(',') === '3'
-      && kertek(kerelem, anna.szerzo).join(',') === '3';
+  return sora(sajat, anna.keszulek).hezagok.join(',') === '3'
+      && kertek(kerelem, anna.keszulek).join(',') === '3';
 });
 
 proba('Nem kérünk olyat, ami a MÁSIKNAK SINCS meg (az ő hézagát)', async () => {
@@ -171,7 +176,7 @@ proba('Nem kérünk olyat, ami a MÁSIKNAK SINCS meg (az ő hézagát)', async (
     await allasOsszeallitasa(ures, KOINO),
     await allasOsszeallitasa(lyukas, KOINO)
   );
-  return kertek(kerelem, anna.szerzo).join(',') === '1,2,4';
+  return kertek(kerelem, anna.keszulek).join(',') === '1,2,4';
 });
 
 // ===== AZ ELÁGAZÁS: a bizonyíték terjedése =====
@@ -191,7 +196,7 @@ proba('⭐ A nála LÁTOTT elágazást CÉLZOTTAN kérjük el (a bizonyíték ol
   // ⚠️ CSAK a 3-ast kéri, és épp ez a lényeg. Az elágazásról az ujjlenyomat-tartalék is
   // tudomást szerezne — de az a TELJES láncot kérné el. Egy 10 000 eseményes koinóban ez
   // a különbség egyetlen esemény és az egész lánc újratöltése között.
-  return kertek(kerelem, anna.szerzo).join(',') === '3';
+  return kertek(kerelem, anna.keszulek).join(',') === '3';
 });
 
 proba('⭐ A lánc KÖZEPÉN elrejtett elágazás is kiderül (ezért kell ujjlenyomat)', async () => {
@@ -214,10 +219,10 @@ proba('⭐ A lánc KÖZEPÉN elrejtett elágazás is kiderül (ezért kell ujjle
 
   // A „legnagyobb" egyezik, elágazásról egyik sem tud — az ujjlenyomat mégis eltér
   const megtevesztoenEgyforma =
-    sora(a, anna.szerzo).legnagyobb === sora(b, anna.szerzo).legnagyobb
-    && sora(a, anna.szerzo).elagazasok.length === 0
-    && sora(b, anna.szerzo).elagazasok.length === 0
-    && sora(a, anna.szerzo).ujjlenyomat !== sora(b, anna.szerzo).ujjlenyomat;
+    sora(a, anna.keszulek).legnagyobb === sora(b, anna.keszulek).legnagyobb
+    && sora(a, anna.keszulek).elagazasok.length === 0
+    && sora(b, anna.keszulek).elagazasok.length === 0
+    && sora(a, anna.keszulek).ujjlenyomat !== sora(b, anna.keszulek).ujjlenyomat;
 
   // …és a csere fel is deríti: a végén MINDKÉT gép ismeri MINDKÉT eseményt
   const { egyezik } = await csereAmigKell(egyik, masik, KOINO);
@@ -251,11 +256,13 @@ async function regiAlakosPar() {
   const annaE = await lanc(anna, 4);
   const belaE = await lanc(bela, 3);
 
+  // ⭐⭐ D128: Anna láncának ELSŐ eseménye érvényes (a készüléke tanúsítványát hozza — nélküle a lánc többi eseménye be sem
+  // jutna a kapun); a 2. régi alakú.
   const regi = await ujTar();
-  for (const e of [annaE[0], annaE[1], ...belaE]) await regi.hozzafuz(regiAlak(e));
-  await ment(regi, annaE.slice(2));                       // Anna 3,4 — érvényes
+  for (const e of [annaE[1], ...belaE]) await regi.hozzafuz(regiAlak(e));
+  await ment(regi, [annaE[0], ...annaE.slice(2)]);        // Anna 1, 3, 4 — érvényes
   const uj = await ujTar();
-  await ment(uj, annaE.slice(2));                         // csak Anna 3,4
+  await ment(uj, [annaE[0], ...annaE.slice(2)]);          // csak Anna 1, 3, 4
   return { anna, bela, annaE, regi, uj };
 }
 
@@ -263,10 +270,10 @@ proba('⛔⛔ A RÉGI ALAKÚ eseményt a csere NEM hirdeti — a társ nem kéri
   const { anna, bela, regi, uj } = await regiAlakosPar();
   const regiAllas = await allasOsszeallitasa(regi, KOINO);
 
-  // Béla lánca teljesen régi — az állásban nem is szerepel; Anna lánca 3,4, hézag 1,2.
-  const annaSor = sora(regiAllas, anna.szerzo);
-  const allasTiszta = !sora(regiAllas, bela.szerzo)
-    && annaSor.legnagyobb === 4 && annaSor.hezagok.join(',') === '1,2';
+  // Béla lánca teljesen régi — az állásban nem is szerepel; Anna lánca 1,3,4, hézag 2.
+  const annaSor = sora(regiAllas, anna.keszulek);
+  const allasTiszta = !sora(regiAllas, bela.keszulek)
+    && annaSor.legnagyobb === 4 && annaSor.hezagok.join(',') === '2';
 
   // ⭐ A DÖNTŐ ÁLLÍTÁS: az új tár SEMMIT nem kér (terepen: 9 eseményt kért körönként).
   const ujKeri = hianyokSzamitasa(await allasOsszeallitasa(uj, KOINO), regiAllas);
@@ -296,7 +303,7 @@ proba('⭐ …DE A PRÓBA NEM VAK: egy ÚJ, érvényes esemény ugyanabban a lá
   const ujKeri = hianyokSzamitasa(
     await allasOsszeallitasa(uj, KOINO), await allasOsszeallitasa(regi, KOINO));
   const valasz = await valaszOsszeallitasa(regi, ujKeri);
-  return kertek(ujKeri, anna.szerzo).join(',') === '5'
+  return kertek(ujKeri, anna.keszulek).join(',') === '5'
     && valasz.length === 1 && valasz[0].sorszam === 5;
 });
 
@@ -305,9 +312,11 @@ proba('⛔ A régi alakú eseményt a válasz SEM küldi el — egy régebbi tá
   const { anna, bela, regi } = await regiAlakosPar();
   const valasz = await valaszOsszeallitasa(regi, {
     koino: KOINO,
-    szerzok: [{ szerzo: anna.szerzo, sorszamok: [1, 2, 3] }, { szerzo: bela.szerzo, sorszamok: [1, 2, 3] }]
+    szerzok: [{ szerzo: anna.keszulek, sorszamok: [1, 2, 3] }, { szerzo: bela.keszulek, sorszamok: [1, 2, 3] }]
   });
-  return valasz.length === 1 && valasz[0].szerzo === anna.szerzo && valasz[0].sorszam === 3;
+  // ⭐⭐ D128: Anna 1. eseménye érvényes (a lánc eleje), a 2. régi alakú — a válasz az 1-et és a 3-at adja.
+  return valasz.length === 2 && valasz.every((e) => e.szerzo === anna.szerzo)
+    && valasz.map((e) => e.sorszam).sort().join(',') === '1,3';
 });
 
 // ===== A VÁLASZ ÉS A BEOLVASZTÁS =====
@@ -320,7 +329,7 @@ proba('A válasz CSAK a kért eseményeket adja', async () => {
   await ment(tar, await lanc(bela, 2));
 
   const valasz = await valaszOsszeallitasa(tar, {
-    koino: KOINO, szerzok: [{ szerzo: anna.szerzo, sorszamok: [2] }]
+    koino: KOINO, szerzok: [{ szerzo: anna.keszulek, sorszamok: [2] }]
   });
   return valasz.length === 1 && valasz[0].szerzo === anna.szerzo && valasz[0].sorszam === 2;
 });
@@ -2078,10 +2087,10 @@ proba('⭐⭐ A BÖNGÉSZŐ-LEKÉRÉS CSAK A KÉRT SZELETET HOZZA', async () => 
 // gondolatával — D17) — az első gondolat saját eseményeit viszont nem. A kivitel ugyanezt a halmazt viszi.
 proba('⭐⭐ D85: a javaslat és a szavazat a SAJÁT szeletében — és az érintett szeletével együtt érkezik', async () => {
   const szolgalo = await ujTar();
-  const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-  const szerzo = Buffer.from(await crypto.subtle.exportKey('raw', kulcspar.publicKey)).toString('base64url');
+  const kulcspar = await tesztKeszulek();
+  const szerzo = kulcspar.azonossag;
   const kornyezet = { koino: KOINO, kulcspar, szerzo, tar: szolgalo };
-  await koinoLetrehozasa(kornyezet, 'Bejelentés');
+  const szuletes = await koinoLetrehozasa(kornyezet, 'Bejelentés');
   const g1 = await gondolatLetrehozasa(kornyezet, { cim: 'Első' });
   const g2 = await gondolatLetrehozasa(kornyezet, { cim: 'Második' });
   await tudatpontRendezese(kornyezet, g1.azonosito, 100);
@@ -2104,6 +2113,8 @@ proba('⭐⭐ D85: a javaslat és a szavazat a SAJÁT szeletében — és az ér
 
   // ⭐ A VONALON: a másik készülék csak a második gondolat szeletét kéri.
   const kero = await ujTar();
+  // ⭐⭐ D128: a koinó születése minden tagnál megvan (azzal lépett be) — és az alapító készülékének tanúsítványát is hozza.
+  await esemenyMentese(kero, szuletes);
   await szeletResen(szolgalo, kero, g2.azonosito);
   const nala = (await koinoEsemenyei(kero, KOINO)).map((e) => e.azonosito);
   const vonalJo = nala.includes(g2.azonosito) && nala.includes(j.azonosito)
@@ -2568,7 +2579,8 @@ proba('⭐⭐ D109 (KK4): az idegennek a csere a keret maradékáig küld — a 
   const esemenyek = await lanc(anna, 6);
   const egyik = await ujTar(); await ment(egyik, esemenyek);
   const masik = await ujTar();
-  const meret = Buffer.byteLength(JSON.stringify({ uzenet: 'ESEMENY', esemeny: esemenyek[0] })) + 40;
+  // ⭐⭐ D128: a lánc első eseménye a tanúsítványt is hozza (nagyobb) — a mérce egy rendes esemény.
+  const meret = Buffer.byteLength(JSON.stringify({ uzenet: 'ESEMENY', esemeny: esemenyek[1] })) + 40;
   const konyv = [];
   const keret = {
     itelet: async () => ({ szabad: true, kesobb: null, maradekBajt: Math.floor(meret * 2.5) }),

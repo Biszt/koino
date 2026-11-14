@@ -62,6 +62,7 @@
 import { esemenyKoinoja, koinoSzuleteseE, azonositoAlaku } from '../esemeny/esemeny.js';
 import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
 import { esemenyLekerese, entitasEsemenyei, sajatLancEsemenyei } from '../tar/esemenyTar.js';
+import { lancKulcsa } from '../esemeny/esemeny.js';
 // ⭐ D93: a tagság szabálya EGY helyen él (`tagsag.js`) — a szabály-réteg és ez a tár-alapú kérdés ugyanazt hívja.
 import { tagsagiIndex, horgonyTagsaga, MELYSEG_KORLAT, TAGSAGI_CSOMAG, PROFIL } from './tagsag.js';
 // ⭐ D94: a szúrópróba véletlenje — az ELLENŐRZŐ választ, kriptográfiai véletlennel (nem a bizonyító).
@@ -728,7 +729,8 @@ async function tanusitoFelhatalmazoi(tar, koino, tanusitoHorgony, nezet, tanusit
   // KÜLÖN, rendszeres állítás, amit nem lehet eseményenként visszadátumozni. Aki elkerülné,
   // annak SOHA nem szabadna elismernie, hogy lát — és az már a ritmusból lóg ki.
   if (Number.isInteger(tanusitasEsemeny?.sorszam)) {
-    const lanc = (await sajatLancEsemenyei(tar, tanusito.szerzo))
+    // ⭐⭐ D128: a tanúsítás LÁNCÁN (ugyanazon a készüléken) — a sorszám csak egy láncon belül sorrend.
+    const lanc = (await sajatLancEsemenyei(tar, lancKulcsa(tanusitasEsemeny)))
       .filter((e) => esemenyKoinoja(e) === koino
                   && e.tipus === 'Lattam'
                   && e.entitas === tanusitoHorgony

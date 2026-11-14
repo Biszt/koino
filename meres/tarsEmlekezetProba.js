@@ -14,7 +14,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createSocket } from 'node:dgram';
 
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, probaTanusitvanyok } from './probaFuttato.js';
 import { esemenyTarNyitasa, emlekezetTarolo } from '../js/tar/fajlTar.js';
 import { esemenyMentese } from '../js/tar/esemenyTar.js';
 import { csereUdpResen } from '../js/csere/udpVonal.js';
@@ -53,7 +53,7 @@ proba('⭐ a változott kulcsok a feljegyzés óta: a szelet, a bejelentési hel
   const ures = valtozottKulcsok(tar, f, { szuletes: szuletes.azonosito });
   const g2 = await sz.tesz('GondolatLetrehozas', { cim: 'G2', meret: 10, szulo: g1.azonosito });
   const g3 = await sz.tesz('GondolatLetrehozas', { cim: 'G3', meret: 10 });
-  for (const e of [g2, g3, szuletes]) await esemenyMentese(tar, e);
+  for (const e of [g2, g3, szuletes]) await esemenyMentese(tar, e, { tanusitvanyok: probaTanusitvanyok([e]) });
   const v = valtozottKulcsok(tar, f, { szuletes: szuletes.azonosito });
   const vart = [g1.azonosito, g2.azonosito, g3.azonosito, GYOKER_KULCS, KOINO_SZULETES_KULCS, szuletes.azonosito].sort();
   // a szűrő a változottakra hat, a maradékra nem
@@ -68,7 +68,7 @@ proba('⛔ nincs lista: feljegyzés nélkül, más generációnál, ha a tár r�
   const f = emlekezetFeljegyzes(tar, []);
   const sok = [];
   for (let i = 0; i < VALTOZOTT_KORLAT + 1; i++) sok.push(await sz.tesz('GondolatLetrehozas', { cim: 'S' + i, meret: 10 }));
-  for (const e of sok) await esemenyMentese(tar, e);
+  for (const e of sok) await esemenyMentese(tar, e, { tanusitvanyok: probaTanusitvanyok([e]) });
   const nagyMaradek = emlekezetFeljegyzes(tar, sok.map((e) => e.azonosito));
   return valtozottKulcsok(tar, null) === null
     && valtozottKulcsok(tar, { ...f, g: f.g + 1 }) === null
@@ -167,14 +167,15 @@ proba('⭐⭐ a második csere után a változott szelet AZ ELSŐ SZINT NÉLKÜL
   const masik = await ujEember(KOINO);
   const aUj = await masik.tesz('TudatpontRendezes', { entitas: v.kozosek[10].azonosito, pont: 3 });
   const bUj = await masik.tesz('TudatpontRendezes', { entitas: v.kozosek[200].azonosito, pont: 4 });
-  await esemenyMentese(v.tarA, aUj);
-  await esemenyMentese(v.tarB, bUj);
+  await esemenyMentese(v.tarA, aUj, { tanusitvanyok: probaTanusitvanyok([aUj]) });
+  await esemenyMentese(v.tarB, bUj, { tanusitvanyok: probaTanusitvanyok([bUj]) });
   const r = await csere(v);
   const megjott = !!(await v.tarA.esemeny(bUj.azonosito)) && !!(await v.tarB.esemeny(aUj.azonosito));
   // rontás: ugyanez emlékezet nélkül (egy friss világban) — ott az első szint fut
   const w = await vilag(300);
   await csere(w, { emlekezet: false });
-  await esemenyMentese(w.tarB, await masik.tesz('TudatpontRendezes', { entitas: w.kozosek[7].azonosito, pont: 2 }));
+  const wUj = await masik.tesz('TudatpontRendezes', { entitas: w.kozosek[7].azonosito, pont: 2 });
+  await esemenyMentese(w.tarB, wUj, { tanusitvanyok: probaTanusitvanyok([wUj]) });   // ⭐⭐ D128: a tanúsítvánnyal
   const nelkul = await csere(w, { emlekezet: false });
   const ujra = await csere(v);
   return megjott && r.fUt && !r.elsoSzint && !r.meres.has('ELTERO') && nelkul.elsoSzint && !nelkul.fUt
@@ -187,7 +188,7 @@ proba('⛔⛔ a HAZUG (hiányos) lista nem árt: a kívüli lenyomat eltér, a r
   await csere(v);
   const masik = await ujEember(KOINO);
   const bUj = await masik.tesz('TudatpontRendezes', { entitas: v.kozosek[50].azonosito, pont: 3 });
-  await esemenyMentese(v.tarB, bUj);
+  await esemenyMentese(v.tarB, bUj, { tanusitvanyok: probaTanusitvanyok([bUj]) });
   // B „elfelejti”, hogy változott: a feljegyzése a MOSTANI állásra mutat (a listája üres lesz)
   const hazug = { olvas: async () => ({ ...emlekezetFeljegyzes(v.tarB, []) }), ir: async () => {} };
   const r = await csere(v, { eB: hazug });
@@ -198,13 +199,13 @@ proba('⭐ a MARADÉK: ahol az egyik fél nem vesz részt, az a következő cser
   // a közös halmaz nélkül: A mindenben részt vesz, B egy szeletben nem (az A-nál van) — a nyitó lenyomat sosem egyezik
   const v = await vilag(100);
   const x = await v.szerzo.tesz('GondolatLetrehozas', { cim: 'csak A', meret: 10 });
-  await esemenyMentese(v.tarA, x);
+  await esemenyMentese(v.tarA, x, { tanusitvanyok: probaTanusitvanyok([x]) });
   const pB = new Set(v.p);                                   // B: csak a közös 100 (x nem)
   await csere(v, { kozos: false, pA: null, pB });
   await csere(v, { kozos: false, pA: null, pB });
   const masik = await ujEember(KOINO);
   const aUj = await masik.tesz('TudatpontRendezes', { entitas: v.kozosek[9].azonosito, pont: 3 });
-  await esemenyMentese(v.tarA, aUj);
+  await esemenyMentese(v.tarA, aUj, { tanusitvanyok: probaTanusitvanyok([aUj]) });
   const r = await csere(v, { kozos: false, pA: null, pB });
   return !!(await v.tarB.esemeny(aUj.azonosito)) && !(await v.tarB.esemeny(x.azonosito)) && r.fUt && !r.elsoSzint;
 });

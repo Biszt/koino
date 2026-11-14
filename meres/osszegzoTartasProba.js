@@ -12,7 +12,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createSocket } from 'node:dgram';
 
-import { probaGyujtemeny, ujEember, tagokkal } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tagokkal, probaTanusitvanyok } from './probaFuttato.js';
+import { kiseroAdo } from '../js/tar/esemenyTar.js';   // ⭐⭐ D128
 import { esemenyTarNyitasa, osszegzesTarolo } from '../js/tar/fajlTar.js';
 import { esemenyMentese } from '../js/tar/esemenyTar.js';
 import { csereUdpResen } from '../js/csere/udpVonal.js';
@@ -70,20 +71,22 @@ async function vilag({ hazug = false } = {}) {
   for (const e of [...esemenyek, lez]) await esemenyMentese(tarA, e);
   const mappaB = await ujMappa();
   const tarB = await esemenyTarNyitasa(KOINO, mappaB);
-  for (const e of [g, bPont]) await esemenyMentese(tarB, e);
+  for (const e of [g, bPont]) await esemenyMentese(tarB, e, { tanusitvanyok: probaTanusitvanyok([e]) });   // ⭐⭐ D128
   return { tarA, tarB, mappaB, g, j, b, emberek, esemenyek, allapot, szamitok, lez };
 }
 
 /** A két szerep a valódi cserén — visszaadja a két eredményt és B tárolóját. */
 async function csere(v, { bUjEsemeny = null } = {}) {
   const tarolo = osszegzesTarolo(KOINO, v.mappaB);
-  if (bUjEsemeny) await esemenyMentese(v.tarB, bUjEsemeny);
+  const adA = kiseroAdo(v.tarA, { minden: true });
+  if (bUjEsemeny) await esemenyMentese(v.tarB, bUjEsemeny, { tanusitvanyok: probaTanusitvanyok([bUjEsemeny]) });
   const tarto = teljesTarto({
     teljesE: async (k) => k === v.g.azonosito,
     kep: async () => ({ allapot: v.allapot, szamitok: v.szamitok, bemondasok: new Map() }),
     karbantarto: reszfaKarbantarto(),
-    esemenyOlvas: (az) => v.tarA.esemeny(az),
-    lezarasiEsemenyek: async (k) => (await v.tarA.bejelentesek(k)).filter((e) => e.tipus === LEZARASI_OSSZEGZES)
+    // ⭐⭐ D128: a teljes tartó az eseményeket a készülékük tanúsítványával adja (mint a program — `kiseroAdo`).
+    esemenyOlvas: async (az) => adA(await v.tarA.esemeny(az)),
+    lezarasiEsemenyek: async (k) => Promise.all((await v.tarA.bejelentesek(k)).filter((e) => e.tipus === LEZARASI_OSSZEGZES).map(adA))
   });
   const fogado = kuldoFogado({ tar: v.tarA, fogadhato: async (k) => k === v.g.azonosito });
   const kerdo = osszegzoKerdo({ tarolo, szeletek: async () => [v.g.azonosito], tagE: async () => true,
@@ -164,7 +167,9 @@ async function meghivasVilaga({ bNalMar = false, regi = false } = {}) {
   for (const e of [letrehozas, belepesA, meghivasA, belepesB, belepesC, meghivasB, meghivasC]) await esemenyMentese(tarA, e);
   // B a koinó születésének szeletét A-val egyezően tudja (F meghívása oda is bejelentődik), és a saját belépését.
   const tarB = await esemenyTarNyitasa(KOINO, await ujMappa());
-  for (const e of [letrehozas, meghivasA, belepesB, ...(bNalMar ? [meghivasB] : [])]) await esemenyMentese(tarB, e);
+  for (const e of [letrehozas, meghivasA, belepesB, ...(bNalMar ? [meghivasB] : [])]) {
+    await esemenyMentese(tarB, e, { tanusitvanyok: probaTanusitvanyok([e]) });   // ⭐⭐ D128: a tanúsítvánnyal
+  }
   return { a, b, tarA, tarB, letrehozas, belepesA, belepesB, belepesC, meghivasB, meghivasC };
 }
 

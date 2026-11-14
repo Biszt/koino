@@ -36,7 +36,7 @@
 // Használják: tar/esemenyTar.js (a kapu: az `Ellentmondas` esemény tartalma), a próbák; (a hálózati
 // részben) az automatikus ellenőrző, ami a szerzőtől kapott előképből építi a bizonyítékot.
 
-import { esemenyEllenorzese, lancElokepAlakja, esemenyKoinoja } from '../esemeny/esemeny.js';
+import { esemenyEllenorzese, lancElokepAlakja, esemenyKoinoja, lancKulcsa, tanusitvanyKereso } from '../esemeny/esemeny.js';
 import {
   allapotBizonyitekEllenorzese, allapotValtozasa, osszegzesAlakja
 } from '../esemeny/osszegzoFa.js';
@@ -51,10 +51,10 @@ const nem = (ok) => ({ rendben: false, ok });
 // AZ ÉPÍTŐKÖVEK
 // ===================================
 
-/** A szerző egy aláírt eseménye — ép-e, az övé-e, ebből a koinóból-e? */
-async function szerzoEsemenye(e, kit, koino) {
+/** A szerző egy aláírt eseménye — ép-e, az övé-e (⭐⭐ D128: a készüléke tanúsított), ebből a koinóból-e? */
+async function szerzoEsemenye(e, kit, koino, kereso) {
   if (!e || typeof e !== 'object' || e.szerzo !== kit || esemenyKoinoja(e) !== koino) return false;
-  return (await esemenyEllenorzese(e)).rendben === true;
+  return (await esemenyEllenorzese(e, { tanusitvany: kereso })).rendben === true;
 }
 
 /**
@@ -119,12 +119,17 @@ export async function ellentmondasEllenorzese(adat, koino, beallitas = {}) {
   const { kit, fajta } = adat;
   if (!ELLENTMONDAS_FAJTAK.includes(fajta)) return nem('ismeretlen fajta: ' + fajta);
   const e = adat.esemeny;
-  if (!await szerzoEsemenye(e, kit, koino)) return nem('a vádolt esemény nem a vádolt ép, aláírt eseménye');
+  // ⭐⭐ D128: a vádolt események készülékének tanúsítványa a bizonyítékból vagy a hívótól (a kapu: a tár).
+  const kereso = await tanusitvanyKereso([adat.esemeny, adat.masik, adat.kovetkezo].filter((x) => x && typeof x === 'object'),
+    beallitas.tanusitvany ?? null);
+  if (!await szerzoEsemenye(e, kit, koino, kereso)) return nem('a vádolt esemény nem a vádolt ép, aláírt eseménye');
 
   // ----- ⭐ D82: AZ ELÁGAZÁS — nem vád: a két ág egy helyre hozása (lánc-gyökér sem kell hozzá) -----
   if (fajta === 'elagazas') {
     const m = adat.masik;
-    if (!await szerzoEsemenye(m, kit, koino)) return nem('a másik ág nem a szerző ép, aláírt eseménye');
+    if (!await szerzoEsemenye(m, kit, koino, kereso)) return nem('a másik ág nem a szerző ép, aláírt eseménye');
+    // ⭐⭐ D128: elágazás csak EGY láncon van — két készülék azonos sorszáma nem az.
+    if (lancKulcsa(m) !== lancKulcsa(e)) return nem('nem elágazás: két készülék lánca (D128)');
     if (m.sorszam !== e.sorszam || m.azonosito === e.azonosito) {
       return nem('nem elágazás: nem ugyanarról a sorszámról szóló két különböző esemény');
     }
@@ -150,8 +155,10 @@ export async function ellentmondasEllenorzese(adat, koino, beallitas = {}) {
     vadpont = e.sorszam;
   } else if (fajta === 'folytonossag') {
     const k = adat.kovetkezo;
-    if (!await szerzoEsemenye(k, kit, koino)) return nem('a következő esemény nem a vádolt ép, aláírt eseménye');
-    if (k.sorszam !== e.sorszam + 1 || k.elozo !== e.azonosito) return nem('a két esemény nem közvetlenül követi egymást');
+    if (!await szerzoEsemenye(k, kit, koino, kereso)) return nem('a következő esemény nem a vádolt ép, aláírt eseménye');
+    if (lancKulcsa(k) !== lancKulcsa(e) || k.sorszam !== e.sorszam + 1 || k.elozo !== e.azonosito) {
+      return nem('a két esemény nem közvetlenül követi egymást');
+    }
     const kovetkezoElotte = elokepe(k);
     if (!kovetkezoElotte) return nem('a következő esemény nem hordozza a lánc-gyökerét');
     const vart = await utanaKiosztas(e, elotte, e.adat?.bizonyitek, keret);

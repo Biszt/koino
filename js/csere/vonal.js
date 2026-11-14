@@ -50,6 +50,8 @@
 // foglalat-szerű kapcsolatot kap (a UDP-résen: `udpVonal.js` → `udpKapcsolat`).
 
 import { koinoSzuleteseE } from '../esemeny/esemeny.js';
+// ⭐⭐ D128: az utazó esemény mellé a készülék tanúsítványa (a fogadónál a lánca első eseménye gyakran nincs meg).
+import { kiseroAdo } from '../tar/esemenyTar.js';
 // ⭐⭐ D124 (PR6 ①): a nyelvváltozat — a jel minden munka első üzenetében, és a társé ellenőrizve, mielőtt bármi újat tennénk.
 import { sajatNyelv, nyelvJel, nyelvEllenorzese, nyelvKeszlet } from './nyelvValtozat.js';
 // ⭐⭐ D124 ④: a fordító-szél — a közös nyelv eldőlte után az üzenetsor fordít (a régi társnak a régi alakra), és a közös
@@ -691,7 +693,8 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
           : await egyeztetettEsemenyek(tar, koino, vonalKulcsa(k.kulcs));
         if (!kertek.length && await atvesz()) { /* átvettük */ } else {
           // Eseményenként külön üzenet — így egy nagy szelet sem ütközik a sorhossz-korlátba.
-          for (const esemeny of kertek) kuld({ uzenet: 'ESEMENY', esemeny });
+          const ad = kiseroAdo(tar);   // ⭐⭐ D128
+          for (const esemeny of kertek) kuld({ uzenet: 'ESEMENY', esemeny: await ad(esemeny) });
           // ⭐ D95/2: a döntési események szerzőinek tagsági kísérői is (a kérő a szerzők azonosság-szeletét nem tartja) —
           // ⛔ a nem tagnak (zárt koinó) nem: az harmadik felek láncát mutatná meg.
           const kiserok = kertek.length && !tarsKorlatozva && kiszolgalo?.kiserok ? (await kiszolgalo.kiserok(kertek)) ?? [] : [];
@@ -699,7 +702,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
           let kiseroDb = 0;
           for (const esemeny of kiserok) {
             if (!esemeny || vanMar.has(esemeny.azonosito)) continue;
-            kuld({ uzenet: 'ESEMENY', esemeny });
+            kuld({ uzenet: 'ESEMENY', esemeny: await ad(esemeny) });
             kiseroDb++;
           }
           kuldott += kertek.length + kiseroDb;
@@ -1129,7 +1132,10 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     const oveKert = szerzoLista((await varj('TAGSAGKEREK')).szerzok);
     if (!sajatKert.length && !oveKert.length) return;
     const valasz = !korlat && oveKert.length ? (await hivas('tagsagValasz', oveKert)) ?? [] : [];
-    kuld({ uzenet: 'TAGSAGCSOMAGOK', esemenyek: (Array.isArray(valasz) ? valasz : []).slice(0, TAGSAG_ESEMENY_KORLAT) });
+    const adT = kiseroAdo(tar);   // ⭐⭐ D128
+    const kiserok = [];
+    for (const e of (Array.isArray(valasz) ? valasz : []).slice(0, TAGSAG_ESEMENY_KORLAT)) kiserok.push(await adT(e));
+    kuld({ uzenet: 'TAGSAGCSOMAGOK', esemenyek: kiserok });
     const be = await varj('TAGSAGCSOMAGOK');
     if (!sajatKert.length) return;
     const kapott = (Array.isArray(be.esemenyek) ? be.esemenyek : []).filter((e) => e && typeof e === 'object')
@@ -1200,7 +1206,8 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     const felajanlott = new Set(sajatKul.flatMap((x) => (Array.isArray(x.sajat) ? x.sajat : [])));
     const kertSajat = (Array.isArray(be.kerem) ? be.kerem : []).filter((az) => felajanlott.has(az)).slice(0, KUL_ESEMENY_KORLAT);
     const sajatEsemenyek = [];
-    for (const az of kertSajat) { const e = await tar.esemeny(az); if (e) sajatEsemenyek.push(e); }
+    const adS = kiseroAdo(tar);   // ⭐⭐ D128
+    for (const az of kertSajat) { const e = await tar.esemeny(az); if (e) sajatEsemenyek.push(await adS(e)); }
     kuld({ uzenet: 'OSSZEGZESMINTAKEREK', kerdesek, esemenyek: sajatEsemenyek });
     // ⭐ D95/3: KÉZBESÍTVE — amit elküldtem (a társ kérte), és amiről azt mondta, már megvan (csak a felajánlottakból).
     kezbesitve = [...new Set([...sajatEsemenyek.map((e) => e.azonosito),
@@ -1445,9 +1452,10 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     if (e) kuldesre.set(a, e);
   }
   let atadva = 0;
+  const ad = kiseroAdo(tar);   // ⭐⭐ D128: készülékenként az első mellé a tanúsítvány
   for (const e of kuldesre.values()) {
     if (!keretbeFer(e)) continue;
-    kuld({ uzenet: 'ESEMENY', esemeny: e });
+    kuld({ uzenet: 'ESEMENY', esemeny: await ad(e) });
     atadva++;
   }
   for (const a of bejegyzesKuldesre) await bejegyzesKuldese(a);
@@ -1475,7 +1483,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     if (typeof a !== 'string' || !adhatok.has(a)) continue;
     if (regioIdk.has(a)) { await bejegyzesKuldese(a); continue; }
     const e = await tar.esemeny(a);
-    if (e && keretbeFer(e)) { kuld({ uzenet: 'ESEMENY', esemeny: e }); valaszolt++; }
+    if (e && keretbeFer(e)) { kuld({ uzenet: 'ESEMENY', esemeny: await ad(e) }); valaszolt++; }
   }
   kuld({ uzenet: 'KESZ' });
   kuldott += valaszolt;

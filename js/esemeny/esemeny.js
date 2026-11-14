@@ -25,6 +25,8 @@ import { lenyomat, base64UrlBajtok, bajtokBase64Url } from './kanonikusAlak.js';
 import { osszegzesAlakja } from './osszegzoFa.js';
 // ⭐ D119 (①a): a koinó programja és a koino-verzió kódja egy darab-hivatkozás (a kód-csomag jegyzéke — `tar/kodCsomag.js`).
 import { szovegHivatkozasE } from './szovegDarab.js';
+// ⭐⭐ D128: a készülék-tanúsítvány (az azonosság kulcsa írja alá — koinók fölött).
+import { tanusitvanyAlakiHibaja, tanusitvanyEllenorzese } from '../kulcs/keszulek.js';
 
 const ALGORITMUS = 'Ed25519';
 
@@ -89,11 +91,44 @@ const ALGORITMUS = 'Ed25519';
 // A `null` marad a régi (D78 előtti) eseményeké, és azé, akinek a saját lánca nem ép.
 // ⭐ És ez pontosan az a csere, amit a 2026-09-02-i döntés olcsónak mondott: egy `null` helyén
 // egy érték — a régi események érvényesek maradnak.
+//
+// ===== ⭐⭐ D128 (2026-11-13): KÉT ÚJ MEZŐ — A KÉSZÜLÉK =====
+//
+//   keszulek    — a KÉSZÜLÉKKULCS nyilvános része: ez írja alá az eseményt, és a lánc (sorszám, előző,
+//                 lánc-gyökér) a készüléké. A `szerzo` marad az AZONOSSÁG (a név nem változik) — a tagság, a
+//                 meghívás, a tanúsítás, a szavazat őt nevezi. ⛔ A kettő nem lehet ugyanaz (KU6 (A)).
+//   tanusitvany — a készülék-tanúsítvány (`kulcs/keszulek.js`): az azonosság kulcsa aláírja, hogy a készülék az
+//                 övé. ⭐ CSAK a lánc ELSŐ eseményén áll (`tanusitvanyKell`), máshol `null` — a kapu onnan ismeri
+//                 meg, és a többi eseményt a tárban lévőhöz méri (KU2 (A): a tanúsítvány nem utazik minden eseményben).
 const TARTALOM_MEZOK = [
-  'koino', 'tipus', 'szerzo', 'elozo', 'sorszam', 'ido',
-  'entitas', 'entitasSorszam', 'latott', 'lancGyoker',
+  'koino', 'tipus', 'szerzo', 'keszulek', 'elozo', 'sorszam', 'ido',
+  'entitas', 'entitasSorszam', 'latott', 'lancGyoker', 'tanusitvany',
   'adat'
 ];
+
+/**
+ * ⭐⭐ D128: A LÁNC KULCSA — a készülék kulcsa. Minden, ami LÁNCOT néz (a tár indexe, a sorszám, az előző, az
+ * elágazás, az idő-monotonitás, a lánc-gyökér, a D42 állása, az író), ezt kérdezi; ami az AZONOSSÁGOT, az a
+ * `szerzo`-t. ⭐ 43 jel, mint minden azonosító — a csere így kimondhatja. Egy készüléket csak egy azonosság
+ * tanúsíthat (a kapu a másodikat elutasítja), így egy lánc egy azonosságé.
+ * @param {Object} e
+ * @returns {string}
+ */
+export function lancKulcsa(e) {
+  return e?.keszulek;
+}
+
+/**
+ * ⭐⭐ D128: hozza-e az esemény a készülék tanúsítványát? — a lánc ELSŐ eseménye: az 1. sorszám, a bekapcsolódás
+ * (a szülőbeli láncot folytatja a gyermekben) és a gyermek születése (a létrehozó szülőbeli láncát folytatja). EGY
+ * szabály az aláírásnak és a kapunak.
+ * @param {{sorszam: number, tipus: string, adat?: Object}} e
+ * @returns {boolean}
+ */
+export function tanusitvanyKell(e) {
+  return e?.sorszam === 1 || e?.tipus === 'Bekapcsolodas'
+    || (e?.tipus === 'KoinoLetrehozas' && e?.adat?.szulo !== undefined);
+}
 
 /**
  * ⭐ A SZELET-KULCS — melyik entitáshoz tartozik az esemény.
@@ -224,21 +259,28 @@ function tartalomResz(esemeny) {
  * @param {string|null} [leiras.entitas] - a SZELET-KULCS; null = az esemény a saját szeletét nyitja
  * @param {number} [leiras.entitasSorszam] - hányadik eseményem ezen az entitáson (alap: 1)
  * @param {Array<string>} [leiras.latott] - idegen események, amiket már ismertem (horgony)
- * @param {CryptoKeyPair} kulcspar - a saját kulcspár
+ * @param {Object} kulcspar - ⭐⭐ D128: a KÉSZÜLÉK (`kulcs/keszulek.js` `eszkoz`): kulcspár + `azonossag` + `tanusitvany`
  * @returns {Promise<Object>} az aláírt esemény
  */
 export async function esemenyLetrehozasa(leiras, kulcspar) {
   console.log('esemenyLetrehozasa - KEZDÉS', { tipus: leiras.tipus, sorszam: leiras.sorszam });
 
-  // ----- A SZERZŐ: a nyilvános kulcs -----
-  // Nem név, nem fiók: a személyazonosság maga a kulcs (D15).
+  // ----- ⭐⭐ D128: A SZERZŐ AZ AZONOSSÁG, AZ ALÁÍRÓ A KÉSZÜLÉK -----
+  // Nem név, nem fiók: a személyazonosság maga a kulcs (D15) — az azonosság kulcsa; a mindennapi aláírás a
+  // készüléké, a tanúsítvánnyal.
   const nyersKulcs = await crypto.subtle.exportKey('raw', kulcspar.publicKey);
-  const szerzo = bajtokBase64Url(new Uint8Array(nyersKulcs));
+  const keszulek = bajtokBase64Url(new Uint8Array(nyersKulcs));
+  const szerzo = kulcspar.azonossag;
+  if (typeof szerzo !== 'string' || kulcspar.tanusitvany?.keszulek !== keszulek
+      || kulcspar.tanusitvany?.azonossag !== szerzo) {
+    throw new Error('esemenyLetrehozasa: a kulcspár nem tanúsított készülék (D128 — kulcs/keszulek.js eszkoz)');
+  }
 
   const gondolat = {
     koino: leiras.koino,
     tipus: leiras.tipus,
     szerzo,
+    keszulek,
     elozo: leiras.elozo ?? null,
     sorszam: leiras.sorszam,
     // Az idő a SZERZŐ órája — tájékoztató adat, soha nem bizonyíték. A sorrendet a
@@ -254,6 +296,8 @@ export async function esemenyLetrehozasa(leiras, kulcspar) {
     latott: Array.isArray(leiras.latott) ? [...leiras.latott] : [],
     // ⏸️ LEFOGLALT HELY — a jelentése a Szakasz 4-ben dől el (lásd fent). Addig `null`.
     lancGyoker: leiras.lancGyoker ?? null,
+    // ⭐⭐ D128: a lánc első eseménye hozza a készülék tanúsítványát (`tanusitvanyKell`).
+    tanusitvany: tanusitvanyKell(leiras) ? kulcspar.tanusitvany : null,
 
     adat: leiras.adat
   };
@@ -295,10 +339,18 @@ export async function esemenyLetrehozasa(leiras, kulcspar) {
  * FONTOS, MIT NEM NÉZ: hogy a szerző jogosult-e a műveletre, hogy a lánc folytonos-e,
  * és hogy az idő igaz-e. Azok külön kérdések (tár-réteg, állapot-réteg).
  *
+ * ⭐⭐ D128: AZ ALÁÍRÓ A KÉSZÜLÉK, ÉS A KÉSZÜLÉK AZ AZONOSSÁGÉ. Az aláírás a `keszulek` kulcsával készül; hogy a
+ * készülék a `szerzo`-é, azt a tanúsítvány mondja meg — vagy maga az esemény hozza (a lánc első eseménye), vagy
+ * a hívó adja (`beallitas.tanusitvany`: a készülék kulcsa → a már ELLENŐRZÖTT tanúsítvány vagy null — a kapu a
+ * tárból, egy csomag ellenőrzője a csomagból és a tárból). ⛔ Ha egyik sincs, az esemény NEM rendben
+ * (`hianyzik: true` — a csere elkérheti): egy hamis szerzőjű esemény így semmilyen úton nem megy át. Aki csak az
+ * aláírást kérdezi (és az esemény útja úgyis a kapun megy), az kimondja: `csakAlairas: true`.
+ *
  * @param {Object} esemeny
- * @returns {Promise<{rendben: boolean, ok?: string}>}
+ * @param {{tanusitvany?: Function, csakAlairas?: boolean}} [beallitas]
+ * @returns {Promise<{rendben: boolean, ok?: string, hianyzik?: boolean}>}
  */
-export async function esemenyEllenorzese(esemeny) {
+export async function esemenyEllenorzese(esemeny, beallitas = {}) {
   // ----- ALAKI ELLENŐRZÉS -----
   const alaki = alakiHiba(esemeny);
   if (alaki) return { rendben: false, ok: alaki };
@@ -314,10 +366,10 @@ export async function esemenyEllenorzese(esemeny) {
     return { rendben: false, ok: 'az azonosító nem a gondolat lenyomata (a gondolat megváltozott)' };
   }
 
-  // ----- 2. AZ ALÁÍRÁS A SZERZŐ KULCSÁVAL KÉSZÜLT-E? -----
+  // ----- 2. AZ ALÁÍRÁS A KÉSZÜLÉK KULCSÁVAL KÉSZÜLT-E? (D128) -----
   try {
     const nyilvanosKulcs = await crypto.subtle.importKey(
-      'raw', base64UrlBajtok(esemeny.szerzo), { name: ALGORITMUS }, false, ['verify']
+      'raw', base64UrlBajtok(esemeny.keszulek), { name: ALGORITMUS }, false, ['verify']
     );
     const rendben = await crypto.subtle.verify(
       { name: ALGORITMUS },
@@ -325,12 +377,90 @@ export async function esemenyEllenorzese(esemeny) {
       base64UrlBajtok(esemeny.alairas),
       new TextEncoder().encode(esemeny.azonosito)
     );
-    if (!rendben) return { rendben: false, ok: 'az aláírás nem a szerzőé' };
+    if (!rendben) return { rendben: false, ok: 'az aláírás nem a készüléké' };
   } catch (hiba) {
     return { rendben: false, ok: 'az aláírás nem ellenőrizhető: ' + hiba.message };
   }
 
+  // ----- 3. ⭐⭐ D128: A KÉSZÜLÉK AZ AZONOSSÁGÉ-E? -----
+  if (esemeny.tanusitvany !== null) {
+    // A lánc első eseménye hozza — az alakja (és hogy a szerzőt és a készüléket nevezi) az `alakiHiba`-ban már megvolt.
+    const t = await tanusitvanyEllenorzese(esemeny.tanusitvany);
+    if (!t.rendben) return { rendben: false, ok: 'a készülék tanúsítványa: ' + t.ok };
+    return { rendben: true };
+  }
+  if (beallitas.csakAlairas === true) return { rendben: true };
+  let t = typeof beallitas.tanusitvany === 'function' ? await beallitas.tanusitvany(esemeny.keszulek) : null;
+  // ⭐ A KÍSÉRŐ TANÚSÍTVÁNY (az utazó esemény aláíratlan burka — `KISERO_MEZO`): ha a hívó nem tud tanúsítványt, a küldő
+  // mellékelhette. ⛔ A hívó tudása elsőbb (egy ismert készüléket a kísérő nem köthet máshoz) — ezért csak ha az nem tud.
+  if (!t && esemeny[KISERO_MEZO] && typeof esemeny[KISERO_MEZO] === 'object'
+      && (await tanusitvanyEllenorzese(esemeny[KISERO_MEZO])).rendben) {
+    t = esemeny[KISERO_MEZO];
+  }
+  if (!t) return { rendben: false, ok: 'a készülék tanúsítványa nem ismert (a lánc első eseménye hozza)', hianyzik: true };
+  if (t.azonossag !== esemeny.szerzo || t.keszulek !== esemeny.keszulek) {
+    return { rendben: false, ok: 'a készülék egy másik azonosság tanúsítványát viseli' };
+  }
   return { rendben: true };
+}
+
+// ===================================
+// ⭐⭐ D128: A KÍSÉRŐ TANÚSÍTVÁNY — az utazó esemény burka
+// ===================================
+//
+// Egy esemény a láncán KÍVÜL is utazik (egy szelet a cserében, egy kísérő, egy kérelem válasza, egy minta, egy
+// kereső-bejegyzés) — a fogadónál a lánca első eseménye (a tanúsítvány) gyakran nincs meg. ⭐ A küldő ilyenkor az esemény mellé
+// teszi a készülék tanúsítványát: egy ALÁÍRATLAN burok-mezőben (nincs a lenyomatban — az esemény neve és aláírása változatlan).
+// A kapu ellenőrzi (önmagát igazolja — az azonosság kulcsa írta alá), feljegyzi a jegyzékbe, és az eseményt NÉLKÜLE menti.
+
+/** A kísérő tanúsítvány mezője (a burokban — nem a lenyomatolt rész). */
+export const KISERO_MEZO = 'kiseroTanusitvany';
+
+/** Az esemény a kísérő tanúsítvány nélkül (a tárolt alak). */
+export function kiseroNelkul(e) {
+  if (!e || typeof e !== 'object' || !(KISERO_MEZO in e)) return e;
+  const { [KISERO_MEZO]: _, ...tiszta } = e;
+  return tiszta;
+}
+
+/**
+ * Az esemény a kísérő tanúsítvánnyal (ha nem a lánc első eseménye — az úgyis hozza).
+ * @param {Object} e
+ * @param {Object|null} t - a készülék tanúsítványa
+ */
+export function kiseroval(e, t) {
+  if (!e || typeof e !== 'object' || e.tanusitvany || !t || t.keszulek !== e.keszulek) return e;
+  return { ...e, [KISERO_MEZO]: t };
+}
+
+/**
+ * ⭐⭐ D128: EGY TANÚSÍTVÁNY-KERESŐ az `esemenyEllenorzese`-nek — egy CSOMAG (beágyazott események: a tagsági lánc, a vád
+ * bizonyítéka, a döntési csomag…) láncainak első eseményei hozzák a tanúsítványt (itt ellenőrizve), a többit az `alap` adja
+ * (egy tár — a kapué —, vagy egy másik kereső). ⛔ Ami egyikben sincs, annak az eseménye nem megy át: egy csomagba ágyazott
+ * hamis szerzőjű esemény így sem hamisíthat tagságot.
+ * @param {Array<Object>} esemenyek - a csomag eseményei
+ * @param {Object|Function|null} [alap] - egy tár (`tanusitvany(keszulek)`) vagy egy kereső függvény
+ * @param {Array<Object>} [nyersek] - a csomag által KÜLÖN hozott tanúsítványok (pl. a döntési csomagé — a belső események láncának
+ *   közepéről valók, a láncuk első eseménye nincs a csomagban); itt ellenőrizve
+ * @returns {Promise<Function>} keszulek → tanúsítvány | null
+ */
+export async function tanusitvanyKereso(esemenyek, alap = null, nyersek = []) {
+  const sajat = new Map();
+  for (const e of esemenyek ?? []) {
+    const k = e?.[KISERO_MEZO];
+    if (k && typeof k === 'object' && !sajat.has(k.keszulek) && k.keszulek === e.keszulek && k.azonossag === e.szerzo
+        && (await tanusitvanyEllenorzese(k)).rendben) sajat.set(k.keszulek, k);
+    const t = e?.tanusitvany;
+    if (!t || typeof t !== 'object' || sajat.has(e.keszulek) || t.keszulek !== e.keszulek || t.azonossag !== e.szerzo) continue;
+    if ((await tanusitvanyEllenorzese(t)).rendben) sajat.set(e.keszulek, t);
+  }
+  for (const t of Array.isArray(nyersek) ? nyersek : []) {
+    if (!t || typeof t !== 'object' || sajat.has(t.keszulek)) continue;
+    if ((await tanusitvanyEllenorzese(t)).rendben) sajat.set(t.keszulek, t);
+  }
+  const tovabb = typeof alap === 'function' ? alap
+    : typeof alap?.tanusitvany === 'function' ? (k) => alap.tanusitvany(k) : null;
+  return async (k) => sajat.get(k) ?? (tovabb ? ((await tovabb(k)) ?? null) : null);
 }
 
 /**
@@ -445,11 +575,28 @@ export function alakiHiba(esemeny) {
   // szabály-réteg ne tudjon rájuk támaszkodni. Egy alak van, nem kettő.
   // (A `null` érvényes érték: az `entitas: null` azt jelenti, „a saját szeletét nyitja".)
   for (const mezo of [
-    'koino', 'tipus', 'szerzo', 'sorszam', 'ido',
-    'entitas', 'entitasSorszam', 'latott', 'lancGyoker',
+    'koino', 'tipus', 'szerzo', 'keszulek', 'sorszam', 'ido',
+    'entitas', 'entitasSorszam', 'latott', 'lancGyoker', 'tanusitvany',
     'azonosito', 'alairas'
   ]) {
     if (esemeny[mezo] === undefined) return 'hiányzó mező: ' + mezo;
+  }
+
+  // ----- ⭐⭐ D128: AZ AZONOSSÁG ÉS A KÉSZÜLÉK -----
+  // Két nyilvános kulcs, és nem ugyanaz (KU6 (A): az azonosság csak kezel). A tanúsítvány a lánc első eseményén áll
+  // (`tanusitvanyKell`), ott a szerzőt és a készüléket nevezi — máshol null (egy alak van, nem kettő).
+  if (!azonositoAlaku(esemeny.szerzo) || !azonositoAlaku(esemeny.keszulek)) return 'a szerző és a készülék egy-egy nyilvános kulcs';
+  if (esemeny.keszulek === esemeny.szerzo) return 'a készülék kulcsa nem lehet az azonosság kulcsa (D128)';
+  if (!Number.isSafeInteger(esemeny.sorszam) || esemeny.sorszam < 1) return 'a sorszam csak 1-nél nem kisebb egész lehet';
+  if (tanusitvanyKell(esemeny)) {
+    const t = esemeny.tanusitvany;
+    const h = tanusitvanyAlakiHibaja(t);
+    if (h) return 'a lánc első eseménye a készülék tanúsítványát hozza: ' + h;
+    if (t.azonossag !== esemeny.szerzo || t.keszulek !== esemeny.keszulek) {
+      return 'a tanúsítvány a szerzőt és a készüléket nevezi';
+    }
+  } else if (esemeny.tanusitvany !== null) {
+    return 'tanúsítványt csak a lánc első eseménye hoz';
   }
 
   // ----- ⭐⭐ D118/2: A KOINÓ NEVE -----
@@ -622,7 +769,8 @@ export function alakiHiba(esemeny) {
  * @returns {boolean} igaz, ha a kettő elágazás (ellentmondás)
  */
 export function elagazasE(egyik, masik) {
-  return egyik.szerzo === masik.szerzo
+  // ⭐⭐ D128: egy lánc a (szerző, készülék) páré — két készülék azonos sorszáma nem elágazás.
+  return egyik.szerzo === masik.szerzo && lancKulcsa(egyik) === lancKulcsa(masik)
     && esemenyKoinoja(egyik) === esemenyKoinoja(masik)
     && egyik.sorszam === masik.sorszam
     && egyik.azonosito !== masik.azonosito;

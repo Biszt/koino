@@ -228,7 +228,8 @@ export function sajatKuldo({ tar, koino, szerzo, halmazkent, kezbesitett = async
     async lista(szabad = () => true) {
       const kesz = await kezbesitett();
       const hatar = most() - KULDES_ELETTARTAM;
-      const sajat = (await tar.szerzoLanca(szerzo))
+      // ⭐⭐ D128: az azonosságom eseményei (minden készülékemé — ami nálam van, azt felajánlhatom).
+      const sajat = (typeof tar.azonossagEsemenyei === 'function' ? await tar.azonossagEsemenyei(szerzo) : [])
         .filter((e) => esemenyKoinoja(e) === koino && !kesz.has(e.azonosito) && Number.isSafeInteger(e.ido) && e.ido >= hatar)
         .sort((a, b) => b.sorszam - a.sorszam);
       const szeletenkent = new Map();       // szelet → a felajánlott azonosítók

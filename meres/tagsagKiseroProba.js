@@ -13,7 +13,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createSocket } from 'node:dgram';
 
-import { probaGyujtemeny, ujEember, tagokkal } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tagokkal, probaTanusitvanyok } from './probaFuttato.js';
 import { esemenyTarNyitasa, tagsagFuggoTarolo } from '../js/tar/fajlTar.js';
 import { esemenyMentese, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { csereUdpResen } from '../js/csere/udpVonal.js';
@@ -57,8 +57,12 @@ async function vilag({ csomaggal = true, bNalMind = false } = {}) {
   const mind = await tagokkal([letrehozas, g, aPont, bPont, cPont, xPont]);
   const idx = tagsagiIndex(mind, KOINO);
   const horgonya = (ki) => mind.find((e) => e.tipus === 'Belepes' && e.szerzo === ki.szerzo).azonosito;
-  const csomag = async (ki) => ki.tesz(TAGSAGI_CSOMAG, { lanc: tagsagiLanc(idx, horgonya(ki)) }, undefined,
-    { entitas: horgonya(ki) });
+  // ⭐⭐ D128: a csomag a lánca (és a saját) készülékeinek tanúsítványát is hozza — ahogy a művelet adja ki (`tagsagiCsomagKiadasa`).
+  const csomag = async (ki) => {
+    const lanc = tagsagiLanc(idx, horgonya(ki));
+    return ki.tesz(TAGSAGI_CSOMAG, { lanc, tanusitvanyok: probaTanusitvanyok([...lanc, { keszulek: ki.keszulek }]) }, undefined,
+      { entitas: horgonya(ki) });
+  };
   const cCsomag = await csomag(c);
   const xCsomag = await csomag(x);
 

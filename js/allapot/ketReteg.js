@@ -25,7 +25,7 @@ import { allapotSzamitasa } from './allapotSzamitas.js';
 import { javaslatokSzamitasa } from './javaslatSzamitas.js';
 import { szerkesztesiEgyezmenyekAlkalmazasa } from './szerkesztesiVegrehajtas.js';
 import { lancBekapcsolodoi, jelenbenSzamit, lancbanVan } from './koinoLanc.js';
-import { esemenyKoinoja, azonositoAlaku, koinoSzuleteseE } from '../esemeny/esemeny.js';
+import { esemenyKoinoja, azonositoAlaku, koinoSzuleteseE, lancKulcsa } from '../esemeny/esemeny.js';
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 
 // ===================================
@@ -70,7 +70,7 @@ export function lancBemenetbol(esemenyek, koino) {
  * @param {Map} [beallitas.osszegzesek] - a jelen réteg ellenőrzött lezárási összegzései (D95/1)
  * @param {Set<string>} [beallitas.csakAtmeneti] - a D14 kivétele (B/2)
  * @param {Function} [beallitas.nemTartott] - a D14 kivétele (D97)
- * @param {Map<string, number>} [beallitas.bekapcsolodok] - a legfelső bekapcsolódás további bekapcsolódói (a ③ próbáinak; a ④-ig)
+ * @param {Map<string, number>} [beallitas.bekapcsolodok] - a legfelső bekapcsolódás további bekapcsolódói — lánc (⭐⭐ D128: készülék) → pont (a ③ próbáinak; a ④-ig)
  * @returns {Promise<{allapot: Object, javaslatok: Map, mult: Object|null}>} a `mult`: a szülő vágáskori képe (ha van)
  */
 export async function koinoKepe(esemenyek, beallitas = {}) {
@@ -98,14 +98,15 @@ async function nemzedekKepe(esemenyek, lanc, bekapcsolodok, i, most, beallitas) 
   // ág: nem elágazás és nem idő-visszalépés a gyermekbeli láncához képest; és a láncon lévő, de a jelenből kizárt esemény (a
   // tagsági csomag, az ős születése, az elhagyott pont) ismert sorszám, nem hézag — különben a bekapcsolódó hazug bemondása csak
   // jelzés volna (mérve).
-  const lancAga = (e) => (lancbanVan(e, lanc, i, bekapcsolodok) ? e.szerzo : e.szerzo + '|' + esemenyKoinoja(e));
+  // ⭐⭐ D128: a lánc a készüléké (`lancKulcsa`).
+  const lancAga = (e) => (lancbanVan(e, lanc, i, bekapcsolodok) ? lancKulcsa(e) : lancKulcsa(e) + '|' + esemenyKoinoja(e));
   const ismertSorszamok = new Map();
   // ⭐ D119 (A): az elhagyott pont (a láncon van, a jelenből kizárt) entitása — a D14 ítélhet róla (a bekapcsolódó 0-t hoz rá).
   const elhagyottPontok = new Set();
   for (const e of esemenyek) {
     if (!lancbanVan(e, lanc, i, bekapcsolodok) || jelenbenSzamit(e, lanc, i, bekapcsolodok)) continue;
-    if (!ismertSorszamok.has(e.szerzo)) ismertSorszamok.set(e.szerzo, new Set());
-    ismertSorszamok.get(e.szerzo).add(e.sorszam);
+    if (!ismertSorszamok.has(lancKulcsa(e))) ismertSorszamok.set(lancKulcsa(e), new Set());
+    ismertSorszamok.get(lancKulcsa(e)).add(e.sorszam);
     if (e.tipus === 'TudatpontRendezes' && azonositoAlaku(e.adat?.entitas)) elhagyottPontok.add(e.adat.entitas);
   }
   const kep = await haromFazis(bemenet, lanc[i].azonosito, most, { ...beallitas, lancAga, ismertSorszamok, elhagyottPontok },

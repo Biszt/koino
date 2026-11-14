@@ -191,9 +191,22 @@ async function teljesEset() {
  * Kétfelé osztja az eseményeket — VÁLTAKOZVA, hogy mindkét lánc lyukas legyen.
  * Ez a legrosszabb eset: nem „az egyik lemaradt", hanem mindkettő hiányosan tud.
  */
+/**
+ * ⭐⭐ D128: egy készülék kezdő tudása — a láncok első eseményeivel (a tanúsítványokkal) együtt, ahogy a valóságban a tagság
+ * mindenkinél megvan (a tagsági kísérő hozza). Nélkülük a lánc többi eseménye be sem jutna a kapun.
+ */
+function lancElejeivel(minden, resz) {
+  const ki = [...minden.filter((e) => e.tanusitvany)];
+  for (const e of resz) if (!ki.includes(e)) ki.push(e);
+  return ki;
+}
+
 function ketfele(esemenyek) {
-  const egyike = esemenyek.filter((_, i) => i % 2 === 0);
-  const masike = esemenyek.filter((_, i) => i % 2 === 1);
+  // ⭐⭐ D128: a láncok ELSŐ eseményei (a készülékek tanúsítványai — itt a koinó születése és a szerzők első eseménye)
+  // mindkét gépen megvannak, mint a valóságban a tagság (a tagsági kísérő hozza); a többi felváltva oszlik meg. Nélkülük a
+  // lánc többi eseménye be sem jutna a kapun.
+  const egyike = esemenyek.filter((e, i) => e.tanusitvany || i % 2 === 0);
+  const masike = esemenyek.filter((e, i) => e.tanusitvany || i % 2 === 1);
   return { egyike, masike };
 }
 
@@ -442,9 +455,9 @@ proba('⭐ HÁROM KÉSZÜLÉK: a harmadik is ugyanoda jut, láncolt cserével', 
   const { esemenyek } = await teljesEset();
   const harmad = Math.ceil(esemenyek.length / 3);
 
-  const a = await ujTar(); await ment(a, esemenyek.slice(0, harmad));
-  const b = await ujTar(); await ment(b, esemenyek.slice(harmad, 2 * harmad));
-  const c = await ujTar(); await ment(c, esemenyek.slice(2 * harmad));
+  const a = await ujTar(); await ment(a, lancElejeivel(esemenyek, esemenyek.slice(0, harmad)));
+  const b = await ujTar(); await ment(b, lancElejeivel(esemenyek, esemenyek.slice(harmad, 2 * harmad)));
+  const c = await ujTar(); await ment(c, lancElejeivel(esemenyek, esemenyek.slice(2 * harmad)));
 
   await csereDroton(a, b);
   await csereDroton(b, c);
@@ -476,8 +489,8 @@ proba('⭐⭐ A POSTALÁDA (D34): Anna és Béla SOHA nem beszélt, mégis ugyan
   const { esemenyek } = await teljesEset();
   const fele = Math.ceil(esemenyek.length / 2);
 
-  const anna = await ujTar(); await ment(anna, esemenyek.slice(0, fele));
-  const bela = await ujTar(); await ment(bela, esemenyek.slice(fele));
+  const anna = await ujTar(); await ment(anna, lancElejeivel(esemenyek, esemenyek.slice(0, fele)));
+  const bela = await ujTar(); await ment(bela, lancElejeivel(esemenyek, esemenyek.slice(fele)));
   const cili = await ujTar();                       // a postaláda: ÜRESEN indul
 
   // ⭐ CSAK CILI FOGAD. Anna és Béla csak a kopogás idejére nyit kaput — végig ők kezdenek.

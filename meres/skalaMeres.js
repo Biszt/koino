@@ -39,6 +39,7 @@
 // EGYSZER futtatjuk különböző méretű tárakon. Így a jelenséget megmérjük anélkül, hogy
 // megfizetnénk.
 
+import { tesztKeszulek } from './probaFuttato.js';   // ⭐⭐ D128: tanúsított próba-készülék
 import { kiir } from './naplo.js';
 
 import { mkdir, rm, writeFile, stat } from 'node:fs/promises';
@@ -132,7 +133,7 @@ export async function tarGyartasa(darab, hely) {
   // ----- KULCSOK -----
   const emberek = [];
   for (let i = 0; i < fok; i++) {
-    const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+    const kulcspar = await tesztKeszulek();
     emberek.push({
       kulcspar,
       elozo: null,          // a lánc vége, MEMÓRIÁBAN (ezért gyors)
@@ -464,7 +465,7 @@ async function egyMeret(darab, hely) {
   // A valódi `esemenyMentese`-t EGYSZER futtatjuk ezen a táron. Ha ez az idő a tár
   // méretével nő, akkor N esemény beírása NÉGYZETES — és ez a fal jóval a tárolás előtt
   // jön el.
-  const ujEmber = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const ujEmber = await tesztKeszulek();
   const ujEsemeny = await esemenyLetrehozasa(
     { koino: KOINO, tipus: 'GondolatLetrehozas', elozo: null, sorszam: 1,
       adat: { tipus: 'Gondolat', cim: 'mérő esemény', szoveg: null, szulo: null, meret: 42 } },

@@ -32,7 +32,7 @@
 
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
-import { koinoSzuleteseListabol, esemenyKoinoja } from '../esemeny/esemeny.js';
+import { koinoSzuleteseListabol, esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 // ⭐ D93/1: a tagság (egy forrás — `tagsag.js`).
 import { tagsagiIndex, szerzoTagsaga } from './tagsag.js';
 
@@ -451,11 +451,12 @@ function leszarmazottE(entitas, os, szulok) {
 export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
   // ⭐⭐ D118 (⑤b): a koinó képe adja — a láncok a lánc-ág szerint (a nem bekapcsolódó ős-eseménye külön ág), és a láncon ismert,
   // de a jelen rétegből kizárt sorszámok (a bekapcsolódó hozott tagsági csomagja, az ős születése, az elhagyott pontja) nem hézagok.
-  const lancAga = typeof beallitas.lancAga === 'function' ? beallitas.lancAga : (e) => e.szerzo;
+  // ⭐⭐ D128: alapból a lánc a készüléké (`lancKulcsa`) — a tagság marad szerzőnként (az azonosságé).
+  const lancAga = typeof beallitas.lancAga === 'function' ? beallitas.lancAga : lancKulcsa;
   const ismertSorszamok = beallitas.ismertSorszamok instanceof Map ? beallitas.ismertSorszamok : null;
-  /** A [tol, ig) sorszámok mind ismertek-e a szerző láncán (csak a jelen réteg hagyta ki őket)? */
-  const ismertHezag = (szerzo, tol, ig) => {
-    const ism = ismertSorszamok?.get(szerzo);
+  /** A [tol, ig) sorszámok mind ismertek-e a láncon (csak a jelen réteg hagyta ki őket)? ⭐⭐ D128: a lánc a készüléké. */
+  const ismertHezag = (lanc, tol, ig) => {
+    const ism = ismertSorszamok?.get(lanc);
     if (!ism || ig <= tol) return false;
     for (let s = tol; s < ig; s++) if (!ism.has(s)) return false;
     return true;
@@ -550,12 +551,15 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
   // lépés: aki a bizonyítékot látja, ugyanazt számolja (D17).
   // ⚠️ Az ELÁGAZÁS bizonyítéka (D82) itt nem szerepel: nincs vádpontja, és a két ágát a kapu már
   // bevette (`esemenyTar.js`) — a választást az `elagazasokFeloldasa` teszi, mindenhol ugyanúgy.
+  // ⭐⭐ D128: a vádpont egy LÁNC sorszáma (a vádolt esemény készülékéé) — a vádolt többi készülékének láncát nem érinti
+  // (a keret is készülékenként osztott: a hazug bemondás egy lánc könyvelése).
   const vadpontok = new Map();
   for (const e of esemenyek) {
     if (e.tipus !== 'Ellentmondas') continue;
     const { kit, vadpont } = e.adat ?? {};
-    if (typeof kit !== 'string' || !Number.isSafeInteger(vadpont) || vadpont < 1) continue;
-    if (!vadpontok.has(kit) || vadpont < vadpontok.get(kit)) vadpontok.set(kit, vadpont);
+    const lanc = lancKulcsa(e.adat?.esemeny);
+    if (typeof kit !== 'string' || typeof lanc !== 'string' || !Number.isSafeInteger(vadpont) || vadpont < 1) continue;
+    if (!vadpontok.has(lanc) || vadpont < vadpontok.get(lanc)) vadpontok.set(lanc, vadpont);
   }
 
   // ----- ⭐⭐ D93/1: A DÖNTÉSBEN CSAK AZ ELLENŐRZÖTT TAG SZÁMÍT -----
@@ -591,7 +595,7 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
     let vartSorszam = 1;
 
     for (const e of rendezett) {
-      if (e.sorszam !== vartSorszam && !ismertHezag(e.szerzo, vartSorszam, e.sorszam)) folytonos = false;
+      if (e.sorszam !== vartSorszam && !ismertHezag(lancKulcsa(e), vartSorszam, e.sorszam)) folytonos = false;
       vartSorszam = e.sorszam + 1;
       // ⭐ D93/1: ami a tagság miatt már kiesett, azt a többi szabály nem nézi (nem könyveljük, nem vádoljuk kétszer).
       if (kiesettek.has(e.azonosito)) continue;
@@ -601,7 +605,7 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
       // ⭐ Az ítélet a `pontEsemenyMerlege`-ben él — a művelet-réteg UGYANAZT hívja (lent).
       if (e.tipus === 'TudatpontRendezes') {
         // ⛔ D79/D80: a bizonyított ellentmondástól a szerző pont-eseményei nem számítanak.
-        const vadpont = vadpontok.get(e.szerzo);
+        const vadpont = vadpontok.get(lancKulcsa(e));
         if (vadpont !== undefined && e.sorszam >= vadpont) {
           kivetel(e, 'bizonyított ellentmondás a saját láncában (D80) — a ' + vadpont
             + '. eseményétől a pontjai nem számítanak');

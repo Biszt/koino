@@ -49,7 +49,7 @@ import { tmpdir } from 'node:os';
 import { rm } from 'node:fs/promises';
 
 import { esemenyMentese, ujSajatHelye } from './esemenyTar.js';
-import { esemenyKoinoja } from '../esemeny/esemeny.js';
+import { esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 
 // Egy kérés legfeljebb ennyi ideig vár az íróra. ⚠️ Az író sorban dolgozik: egy nagy csere
 // közben a kérés sorra vár — ezért nem pár ezredmásodperc.
@@ -199,7 +199,7 @@ export function iroTarNyitasa(belso, { mappa, jelez = () => {} }) {
       if (ujSajat) {
         // ⭐ A SAJÁT ÚJ ESEMÉNY CSAK A LÁNC VÉGÉRE: ez zárja ki az elágazást.
         // ⭐ D118 (⑤b): a koinóbeli láncom vége (a nem bekapcsolódó gyermekbeli lánca 1-ről indul; a bekapcsolódásé a lánc-pontja után).
-        const veg = await ujSajatHelye(belso, esemeny.szerzo, esemenyKoinoja(esemeny), esemeny.tipus, esemeny.adat);
+        const veg = await ujSajatHelye(belso, lancKulcsa(esemeny), esemenyKoinoja(esemeny), esemeny.tipus, esemeny.adat);
         if (esemeny.sorszam !== veg.sorszam || (esemeny.elozo ?? null) !== veg.elozo) {
           throw kodosHiba('ELAVULT', 'elavult lánc-vég (a ' + esemeny.sorszam
             + '. helyre szánt esemény — a lánc vége most a ' + veg.sorszam + '. hely)');
@@ -291,9 +291,13 @@ export function iroTarNyitasa(belso, { mappa, jelez = () => {} }) {
     fajl: belso.fajl,
     betolt: () => belso.betolt(),
     esemeny: (azonosito) => belso.esemeny(azonosito),
-    szerzoLanca: (szerzo) => belso.szerzoLanca(szerzo),
+    lancEsemenyei: (lanc) => belso.lancEsemenyei(lanc),
+    // ⭐⭐ D128: egy azonosság minden készülékének eseményei, és egy készülék tanúsítványa.
+    azonossagEsemenyei: (szerzo) => belso.azonossagEsemenyei(szerzo),
+    tanusitvany: (keszulek) => belso.tanusitvany(keszulek),
+    tanusitvanyFelvetele: (t) => belso.tanusitvanyFelvetele(t),
     szeletEsemenyei: (entitas) => belso.szeletEsemenyei(entitas),
-    sorszamSzerint: (szerzo, sorszam) => belso.sorszamSzerint(szerzo, sorszam),
+    sorszamSzerint: (lanc, sorszam) => belso.sorszamSzerint(lanc, sorszam),
     // ⭐ D73: a szeletek jegyzéke és egy szelet lenyomata — olvasás, a belső tárból.
     szeletek: () => belso.szeletek(),
     szeletLenyomata: (szelet) => belso.szeletLenyomata(szelet),

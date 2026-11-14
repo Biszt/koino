@@ -26,6 +26,7 @@ import {
 } from '../js/kulcs/kulcsTar.js';
 import { esemenyLetrehozasa, esemenyEllenorzese } from '../js/esemeny/esemeny.js';
 import { probaGyujtemeny } from './probaFuttato.js';
+import { ujKeszulek } from '../js/kulcs/keszulek.js';   // ⭐⭐ D128
 
 const { proba, futtatas } = probaGyujtemeny('A kulcs-réteg próbája — a személyazonosság');
 
@@ -69,10 +70,11 @@ proba('⭐⭐ ÉS A BIZONYÍTÉK NEM A SZÖVEG: a visszatöltött kulccsal alá�
     const uj = memoriaTarolo();
     const { kulcspar } = await kulcsparVisszatoltese(uj, await kulcsparKimentese(eredeti));
 
+    // ⭐⭐ D128: az azonosság kulcsa nem ír a mindennapokban — tanúsít egy készüléket, és az ír a nevében.
     const esemeny = await esemenyLetrehozasa({
       koino: 'proba', tipus: 'GondolatLetrehozas', adat: { cim: 'A hazatérés' },
       elozo: null, sorszam: 1
-    }, kulcspar);
+    }, await ujKeszulek(kulcspar, 'új telefon'));
 
     const ellenorzes = await esemenyEllenorzese(esemeny);
     return ellenorzes.rendben === true && esemeny.szerzo === szerzo;
@@ -256,7 +258,7 @@ proba('⭐ A leírásból visszaállított kulcspár ÖNMAGÁBAN is működik (a
     const esemeny = await esemenyLetrehozasa({
       koino: 'proba', tipus: 'GondolatLetrehozas', adat: { cim: 'próba' },
       elozo: null, sorszam: 1
-    }, vissza);
+    }, await ujKeszulek(vissza, 'próba'));   // ⭐⭐ D128: a visszaállított kulcs tanúsít egy készüléket
 
     return (await esemenyEllenorzese(esemeny)).rendben === true;
   });

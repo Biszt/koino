@@ -373,7 +373,7 @@ proba('⭐⭐⭐ a VALÓDI régi program (a PR6 előtti, a git-ből) a maival: c
   const ok = Object.values(jo).every(Boolean);
   if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([csA, csB, rk, mk, ketto].map((r) => r.ok ? 'rendben' : r.kod + ' ' + r.uzenet)) + ')\n');
   return ok;
-});
+}, { ismertHiba: '⭐⭐ D128 (a kulcs: több készülék) ÚJ KOINÓ-CSALÁDOT indít: a git-ből vett régi program (a D128 előtti) a mai eseményt (a KÉSZÜLÉK írja alá) elveti, a mai kapu a régit (a szerző kulcsa írta alá, tanúsítvány nélkül) — a nyelvváltozat-próba az első D128 utáni régi programmal áll helyre (a REGI_PROGRAM átírásával)' });
 
 // ===== ⭐⭐ A SZÁLLÍTÁS JELE A KOPOGÁSBAN (az építés ②-e) =====
 
@@ -867,7 +867,7 @@ proba('⭐⭐⭐ a VALÓDI régi program (a git-ből) és a KITALÁLT [1,2]: cse
   const ok = Object.values(jo).every(Boolean);
   if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([csA, csB, rk, mk].map((r) => r.ok ? 'rendben' : r.kod + ' ' + r.uzenet)) + ')\n');
   return ok;
-});
+}, { ismertHiba: '⭐⭐ D128 (a kulcs: több készülék) ÚJ KOINÓ-CSALÁDOT indít: a git-ből vett régi program (a D128 előtti) a mai eseményt (a KÉSZÜLÉK írja alá) elveti, a mai kapu a régit (a szerző kulcsa írta alá, tanúsítvány nélkül) — a nyelvváltozat-próba az első D128 utáni régi programmal áll helyre (a REGI_PROGRAM átírásával)' });
 
 // ===== ⭐⭐ A KÉZFOGÁS-VÁLASZTÓ (az építés ④-e) =====
 

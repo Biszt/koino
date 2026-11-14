@@ -25,7 +25,8 @@
 // Hálózatot nem importál. Használják: `tar/esemenyTar.js` (a kapu), `csere/csere.js` (a lánc a beolvasztásban),
 // `csere/fajlCsere.js` (a kézi út), `koino.js` (a létrehozás, a születés-szelet).
 
-import { esemenyEllenorzese, esemenyKoinoja, koinoSzuleteseE, azonositoAlaku, koinoVerzioE } from '../esemeny/esemeny.js';
+import { esemenyEllenorzese, esemenyKoinoja, koinoSzuleteseE, azonositoAlaku, koinoVerzioE, lancKulcsa, tanusitvanyKereso }
+  from '../esemeny/esemeny.js';
 import { tagsagiIndex, horgonyTagsaga, tagsagiLanc, LANC_TIPUSOK, CSOMAG_ESEMENY_KORLAT } from './tagsag.js';
 
 /** A létrehozó tagsági láncának legnagyobb hossza — ugyanaz, mint a tagsági csomagé (D113). */
@@ -103,6 +104,8 @@ export async function szuloTagsagaEllenorzese(b, szerzo, szuloSzuletes, vagas = 
       || b.lanc.length > SZULO_TAGSAG_KORLAT) {
     return { rendben: false, ok: 'a tagsági bizonyíték hiányzik vagy hibás (KZ2)' };
   }
+  // ⭐⭐ D128: a lánc eseményeinek készülék-tanúsítványa a bizonyítékból (és a szülő születéséből), vagy a tárból.
+  const kereso = await tanusitvanyKereso([szuloSzuletes, ...b.lanc].filter((x) => x && typeof x === 'object'), tar);
   for (const x of b.lanc) {
     // ⚠️ A szülő születése nem lehet benne (arra a `szulo` mutat) — és más koinó-születés sem.
     if (!x || typeof x !== 'object' || !LANC_TIPUSOK.has(x.tipus) || x.tipus === 'KoinoLetrehozas'
@@ -112,7 +115,7 @@ export async function szuloTagsagaEllenorzese(b, szerzo, szuloSzuletes, vagas = 
     if (vagas !== null && !(Number.isSafeInteger(x.ido) && x.ido <= vagas)) {
       return { rendben: false, ok: 'a tagsági bizonyíték egy eseménye a vágás utáni (a vágáskori tagság számít — D118/3)' };
     }
-    const al = await esemenyEllenorzese(x);
+    const al = await esemenyEllenorzese(x, { tanusitvany: kereso });
     if (!al.rendben) return { rendben: false, ok: 'a tagsági bizonyíték egy eseménye nem hiteles: ' + al.ok };
     if (bekapcsolodasE(x)) {
       if (!tar) return { rendben: false, ok: 'a tagsági bizonyíték egy bekapcsolódása a születések nélkül nem ellenőrizhető' };
@@ -241,7 +244,8 @@ export async function koinoNezete(tar, koino, kapottak = null) {
   // ős neve → a vágása: az óra (a tőle örökölt nemzedék születése) és a lánc-pont (annak a születésnek a szerzője és sorszáma)
   const osok = new Map();
   for (let i = 1; i < lanc.length; i++) {
-    osok.set(lanc[i].azonosito, { vagas: lanc[i - 1].ido, szerzo: lanc[i - 1].szerzo, sorszam: lanc[i - 1].sorszam });
+    // ⭐⭐ D128: a lánc-pont a születést író KÉSZÜLÉK láncán van (`lancKulcsa`).
+    osok.set(lanc[i].azonosito, { vagas: lanc[i - 1].ido, lanc: lancKulcsa(lanc[i - 1]), sorszam: lanc[i - 1].sorszam });
   }
   const bekapcsolodok = lancBekapcsolodoi(lanc);
   const nezet = { koino, teljes, lanc, szuletesek, tartozik: (e) => koinohozTartozik(e, koino, szuletesek, osok),
@@ -258,7 +262,7 @@ export async function koinoNezete(tar, koino, kapottak = null) {
  * @param {Object} e
  * @param {string} koino
  * @param {Set<string>} szuletesek - a lánc születései
- * @param {Map<string, {vagas: number, szerzo: string, sorszam: number}>} osok
+ * @param {Map<string, {vagas: number, lanc: string, sorszam: number}>} osok
  */
 export function koinohozTartozik(e, koino, szuletesek, osok) {
   if (!e || typeof e !== 'object') return false;
@@ -267,8 +271,8 @@ export function koinohozTartozik(e, koino, szuletesek, osok) {
   if (szuletesek.has(e.azonosito)) return true;
   const o = osok.get(k);
   if (!o) return false;
-  // ⭐ A létrehozó a lánc-pontja szerint (a sorszám), mindenki más az óra szerint.
-  if (e.szerzo === o.szerzo) return Number.isSafeInteger(e.sorszam) && e.sorszam < o.sorszam;
+  // ⭐ A létrehozó LÁNCA a lánc-pontja szerint (a sorszám), minden más (⭐⭐ D128: a létrehozó többi készüléke is) az óra szerint.
+  if (lancKulcsa(e) === o.lanc) return Number.isSafeInteger(e.sorszam) && e.sorszam < o.sorszam;
   return Number.isSafeInteger(e.ido) && e.ido <= o.vagas;
 }
 
@@ -289,8 +293,9 @@ const JELENBOL_KIZART = new Set(['KoinoLetrehozas', 'DontesiCsomag', 'LezarasiOs
 const MINDENKIE = new Set(['GondolatLetrehozas', 'Ellentmondas']);
 
 /**
- * A bekapcsolódók nemzedékenként: `[k]` = a `lanc[k + 1]` → `lanc[k]` bekapcsolódás szerzői a lánc-pontjukkal (szerző → az első
- * sorszám, ami már a gyermeké). ⭐ A létrehozó a születésével (a születés sorszáma).
+ * A bekapcsolódók nemzedékenként: `[k]` = a `lanc[k + 1]` → `lanc[k]` bekapcsolódás LÁNCAI a lánc-pontjukkal (lánc → az első
+ * sorszám, ami már a gyermeké). ⭐ A létrehozó a születésével (a születés sorszáma). ⭐⭐ D128: a lánc a készüléké — egy
+ * azonosság minden készüléke a saját bekapcsolódásával hozza a láncát.
  * @param {Array<Object>} lanc - a születések a gyermektől a gyökér felé
  * @param {Map<string, number>} [tobbi] - a legfelső bekapcsolódás további bekapcsolódói (a ③ próbáinak — a bekapcsolódás a ④)
  * @returns {Array<Map<string, number>>}
@@ -298,17 +303,17 @@ const MINDENKIE = new Set(['GondolatLetrehozas', 'Ellentmondas']);
 export function lancBekapcsolodoi(lanc, tobbi = null, esemenyek = null) {
   return lanc.slice(0, -1).map((sz, k) => {
     // ⭐ D119 (A): a létrehozó is elhagyhat (a születése `elhagy`-a — a koino-verzió kártyáira tett pontja nem bekapcsolódik).
-    const m = new Map([[sz.szerzo, { pont: sz.sorszam,
+    const m = new Map([[lancKulcsa(sz), { pont: sz.sorszam,
       elhagy: new Set(Array.isArray(sz.adat?.elhagy) ? sz.adat.elhagy : []) }]]);
     // ⭐⭐ ④a: a BEKAPCSOLÓDÁSOK (a gyermek eseményei a bemenetből) — a lánc-pont a bekapcsolódás sorszáma (az előtte lévő
     // szülőbeli eseményeit hozza), és az elhagyott entitásokra a hozott pont nem jön (KZ3 (A)).
     for (const e of esemenyek ?? []) {
       if (!bekapcsolodasE(e) || esemenyKoinoja(e) !== sz.azonosito || e.adat?.szulo !== lanc[k + 1].azonosito) continue;
-      if (m.has(e.szerzo)) continue;   // a létrehozó a születésével bekapcsolódott; egy szerzőnek egy bekapcsolódása számít
-      m.set(e.szerzo, { pont: e.sorszam, elhagy: new Set(Array.isArray(e.adat.elhagy) ? e.adat.elhagy : []) });
+      if (m.has(lancKulcsa(e))) continue;   // a létrehozó a születésével bekapcsolódott; egy láncnak egy bekapcsolódása számít
+      m.set(lancKulcsa(e), { pont: e.sorszam, elhagy: new Set(Array.isArray(e.adat.elhagy) ? e.adat.elhagy : []) });
     }
     if (k === 0 && tobbi) {
-      for (const [szerzo, pont] of tobbi) if (!m.has(szerzo)) m.set(szerzo, { pont, elhagy: new Set() });
+      for (const [l, pont] of tobbi) if (!m.has(l)) m.set(l, { pont, elhagy: new Set() });
     }
     return m;
   });
@@ -336,8 +341,8 @@ export function lancbanVan(e, lanc, i, bekapcsolodok) {
   if (k === lanc[i]?.azonosito) return true;
   const j = nemzedeke(lanc, i, k);
   if (j < 0) return false;
-  for (let m = i; m < j; m++) if (!bekapcsolodok[m]?.get(e.szerzo)) return false;
-  return Number.isSafeInteger(e.sorszam) && e.sorszam < bekapcsolodok[j - 1].get(e.szerzo).pont;
+  for (let m = i; m < j; m++) if (!bekapcsolodok[m]?.get(lancKulcsa(e))) return false;
+  return Number.isSafeInteger(e.sorszam) && e.sorszam < bekapcsolodok[j - 1].get(lancKulcsa(e)).pont;
 }
 
 /**
@@ -348,18 +353,18 @@ export function lancbanVan(e, lanc, i, bekapcsolodok) {
  * eseményei. A lánc-vég, a lánc-gyökér, a művelet összege és a lánc-ellenőrzés ezt hívja — egy szabály.
  * @param {Object} tar
  * @param {string} koino
- * @param {string} szerzo
+ * @param {string} lancKulcs - ⭐⭐ D128: a lánc kulcsa (a készülék kulcsa)
  * @returns {Promise<{tagja: Function, szamit: Function, hozott: Function, kulcs: string}>}
  */
-export async function lancNezete(tar, koino, szerzo) {
+export async function lancNezete(tar, koino, lancKulcs) {
   const sajat = (e) => esemenyKoinoja(e) === koino;
   const egyszeru = { tagja: sajat, szamit: sajat, hozott: () => false, kulcs: '' };
-  if (!azonositoAlaku(koino) || typeof tar?.szerzoLanca !== 'function') return egyszeru;
+  if (!azonositoAlaku(koino) || typeof tar?.lancEsemenyei !== 'function') return egyszeru;
   const { lanc } = await koinoNezete(tar, koino);
   if (lanc.length < 2) return egyszeru;
-  const bekapcsolodok = lancBekapcsolodoi(lanc, null, await tar.szerzoLanca(szerzo));
+  const bekapcsolodok = lancBekapcsolodoi(lanc, null, await tar.lancEsemenyei(lancKulcs));
   const kulcs = lanc.map((sz) => sz.azonosito).join(',') + '|' + bekapcsolodok.map((m) => {
-    const k = m.get(szerzo);
+    const k = m.get(lancKulcs);
     return k ? k.pont + ':' + [...k.elhagy].sort().join(',') : '-';
   }).join(';');
   return {
@@ -390,7 +395,7 @@ export function jelenbenSzamit(e, lanc, i, bekapcsolodok) {
   if (!lancbanVan(e, lanc, i, bekapcsolodok)) return false;
   // ⭐ KZ3 (A): amit a bekapcsolódó a bekapcsolódásakor elhagyott, arra a hozott pontja nem jön (egyik nemzedéken át sem).
   if (e.tipus === 'TudatpontRendezes') {
-    for (let m = i; m < j; m++) if (bekapcsolodok[m].get(e.szerzo).elhagy.has(e.adat?.entitas)) return false;
+    for (let m = i; m < j; m++) if (bekapcsolodok[m].get(lancKulcsa(e)).elhagy.has(e.adat?.entitas)) return false;
   }
   return true;
 }

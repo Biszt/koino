@@ -11,7 +11,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, probaKiseroval } from './probaFuttato.js';
 import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { esemenyMentese, koinoBemenete } from '../js/tar/esemenyTar.js';
@@ -408,7 +408,7 @@ proba('⭐⭐ D118 (⑤a): a vállalás a hozott entitásokra — a bekapcsolód
     const el = await bekapcsolodas({ gyermekKeret: 150 });
     const elhagyva = await el.B.elagaztat('Bekapcsolodas', { ...el.bek.adat, elhagy: [el.Y.azonosito] });
     const tar = await tarba(el, elhagyva);
-    const sajat = await tar.szerzoLanca(el.B.szerzo);
+    const sajat = await tar.lancEsemenyei(el.B.kulcspar.keszulek);
     // ⭐ ⑤b: a láncom (a hozott előtaggal) és a jelen réteg szűrője — mint a parancssorban (`sajatLancomNezete`)
     const { nezet, lanc } = await bLanca(tar, el);
     const jelen = lanc.filter(nezet.szamit);
@@ -431,7 +431,8 @@ proba('⭐ D118 (⑤a): a hozott entitás kereső-bejegyzése a gyermekben — a
     const g = await B.tesz('GondolatLetrehozas', { cim: 'Közösségi kert', meret: 10 }, T0 + 10);
     const bp = await B.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 100 }, T0 + 11);
     const ap = await A.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 50 }, T0 + 12);
-    const b = bejegyzesekEpitese({ szuletes: g, pontEsemenyek: [bp, ap] })[0];
+    // ⭐⭐ D128: A pont-eseménye a lánca közepéről (az első eseménye a szülő születése) — a tanúsítványával utazik.
+    const b = bejegyzesekEpitese({ szuletes: g, pontEsemenyek: [bp, probaKiseroval(ap)] })[0];
     if (!b) return false;
     const K = 'K'.repeat(43);
     const vele = bejegyzesTartalma({ ...b, m: null }, K, T0 + 100, new Set([P.azonosito]));
@@ -471,8 +472,8 @@ proba('⭐ D118 (⑤a): az átmeneti tár az ős eseményét is megtartja (a ké
 
 /** B láncának eseményei a koinóban (a hozott előtaggal), sorszám szerint. */
 async function bLanca(tar, s) {
-  const nezet = await lancNezete(tar, s.K.azonosito, s.B.szerzo);
-  return { nezet, lanc: (await tar.szerzoLanca(s.B.szerzo)).filter(nezet.tagja).sort((a, b) => a.sorszam - b.sorszam) };
+  const nezet = await lancNezete(tar, s.K.azonosito, s.B.kulcspar.keszulek);
+  return { nezet, lanc: (await tar.lancEsemenyei(s.B.kulcspar.keszulek)).filter(nezet.tagja).sort((a, b) => a.sorszam - b.sorszam) };
 }
 
 proba('⭐⭐ D118 (⑤b): a bekapcsolódó gyermekbeli eseménye LÁNC-GYÖKERET hordoz — a napló a szülőbeli előtagot is fedi, a kiosztás a hozott (az elhagyott nélkül); és a hazug bemondása a hozott tagsági csomag mellett is ELVETVE, nem csak jelzés',
@@ -561,7 +562,7 @@ proba('⭐⭐ D118 (⑤b): a LÁNC-ELLENŐRZÉS a bekapcsolódott láncon — a 
     const tar = await tarba(el, elhagyva);
     await tudatpontRendezese({ koino: el.K.azonosito, kulcspar: el.B.kulcspar, szerzo: el.B.szerzo, tar }, el.Y.azonosito, 30);
     const kerdesek = await lancKerdesek({ tar, koino: el.K.azonosito, tarolo: memoriaLancTarolo(), veletlen: () => 0 },
-      [el.B.szerzo]);
+      [el.B.kulcspar.keszulek]);   // ⭐⭐ D128: a kérdés egy láncról (a készülékéről)
     const valaszok = await lancKiszolgalo({ tar, koino: el.K.azonosito }).valasz(kerdesek);
     const tarolo = memoriaLancTarolo();
     const r = await lancValaszokFeldolgozasa({ tar, koino: el.K.azonosito, tarolo }, kerdesek, valaszok);

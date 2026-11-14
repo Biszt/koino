@@ -107,7 +107,7 @@ async function szuloEsGyermek({ bBekapcsolodik = false } = {}) {
   B.koinotValt(K.azonosito);
   const bBe = await B.tesz('Belepes', {}, VAGAS + 200);
   k.push(bBe, await A.tesz('Meghivas', { kit: B.szerzo, sajatBelepes: K.azonosito }, VAGAS + 201, { entitas: bBe.azonosito }));
-  const bekapcsolodok = bBekapcsolodik ? new Map([[B.szerzo, bBe.sorszam]]) : null;
+  const bekapcsolodok = bBekapcsolodik ? new Map([[B.keszulek, bBe.sorszam]]) : null;   // ⭐⭐ D128: a lánc a készüléké
   return { A, B, C, P, K, X, Y, Z, J1, J2, J3, J4, p, k, bekapcsolodok, sajat: k[1], utana };
 }
 

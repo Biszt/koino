@@ -22,7 +22,7 @@
 // Használják: muveletek.js (a bejelentés), koino.js (a csere és a kézi út után, és az `ellenoriz`
 // parancs), a próbák.
 
-import { esemenyKoinoja } from '../esemeny/esemeny.js';
+import { esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 import { ellentmondasEllenorzese } from './ellentmondas.js';
 import { koinoKerete } from './lancGyoker.js';
 
@@ -36,17 +36,20 @@ import { koinoKerete } from './lancGyoker.js';
  */
 export async function ellentmondasokKeresese(tar, koino, esemenyek) {
   const talalt = new Map();                  // kulcs → adat (egy lelet egyszer)
-  const keret = { tudatpontKeret: await koinoKerete(tar, koino) };   // ⭐ D118/2: a koinó kerete
+  // ⭐ D118/2: a koinó kerete; ⭐⭐ D128: a készülék-tanúsítványok a tárból.
+  const keret = { tudatpontKeret: await koinoKerete(tar, koino), tanusitvany: (k) => tar.tanusitvany?.(k) ?? null };
   const probal = async (kulcs, adat) => {
     if (talalt.has(kulcs)) return;
     if ((await ellentmondasEllenorzese(adat, koino, keret)).rendben) talalt.set(kulcs, adat);
   };
-  const ott = async (szerzo, sorszam) => (await tar.sorszamSzerint(szerzo, sorszam)).filter((x) => esemenyKoinoja(x) === koino);
+  // ⭐⭐ D128: egy pont egy LÁNCON (a készülékén) — a vádolt (`kit`) az azonosság.
+  const ott = async (lanc, sorszam) => (await tar.sorszamSzerint(lanc, sorszam)).filter((x) => esemenyKoinoja(x) === koino);
 
   for (const e of esemenyek) {
     if (!e || esemenyKoinoja(e) !== koino || e.tipus === 'Ellentmondas') continue;
     const kit = e.szerzo;
-    const itt = await ott(kit, e.sorszam);
+    const lanc = lancKulcsa(e);
+    const itt = await ott(lanc, e.sorszam);
 
     // ----- ELÁGAZÁS (D82): ugyanarról a sorszámról több esemény — a kisebb azonosító nyer -----
     if (itt.length > 1) {
@@ -65,13 +68,13 @@ export async function ellentmondasokKeresese(tar, koino, esemenyek) {
 
     // ----- FOLYTONOSSÁG: az előzővel és a következővel (ha egyértelmű és láncolt) -----
     if (e.sorszam > 1) {
-      const elozo = await ott(kit, e.sorszam - 1);
+      const elozo = await ott(lanc, e.sorszam - 1);
       if (elozo.length === 1 && e.elozo === elozo[0].azonosito) {
         await probal('folytonossag|' + e.azonosito,
           { kit, fajta: 'folytonossag', vadpont: e.sorszam, esemeny: elozo[0], kovetkezo: e });
       }
     }
-    const kovetkezo = await ott(kit, e.sorszam + 1);
+    const kovetkezo = await ott(lanc, e.sorszam + 1);
     if (kovetkezo.length === 1 && kovetkezo[0].elozo === e.azonosito) {
       await probal('folytonossag|' + kovetkezo[0].azonosito,
         { kit, fajta: 'folytonossag', vadpont: kovetkezo[0].sorszam, esemeny: e, kovetkezo: kovetkezo[0] });

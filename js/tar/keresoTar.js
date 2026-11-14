@@ -412,10 +412,10 @@ export async function keresoTarNyitasa(koino, mappa, beallitas = {}) {
     async esemeny(azonosito) {
       return fuggo.get(azonosito) ?? esemenyek.get(azonosito)?.e ?? null;
     },
-    async sorszamSzerint(szerzo, sorszam) {
+    async sorszamSzerint(lanc, sorszam) {   // ⭐⭐ D128: a lánc a készüléké
       const ki = [];
-      for (const { e } of esemenyek.values()) if (e.szerzo === szerzo && e.sorszam === sorszam) ki.push(e);
-      for (const e of fuggo.values()) if (e.szerzo === szerzo && e.sorszam === sorszam) ki.push(e);
+      for (const { e } of esemenyek.values()) if (e.keszulek === lanc && e.sorszam === sorszam) ki.push(e);
+      for (const e of fuggo.values()) if (e.keszulek === lanc && e.sorszam === sorszam) ki.push(e);
       return ki;
     },
     async hozzafuz(e) {
@@ -589,8 +589,11 @@ export async function bejegyzesBefogadasa(keresoTar, nyers) {
   const b = bejegyzesAlakja(nyers);
   if (!b) return { uj: false, ok: 'nem bejegyzés alakú' };
   try {
+    // ⭐⭐ D128: a bejegyzés eseményeinek tanúsítványai — a láncuk első eseményei (pl. a születés) és a kísérők hozzák; a
+    // kereső-tár nem tart láncot, ezért a bejegyzés egészéből adjuk minden eseménynek.
+    const tanusitvanyok = b.esemenyek.flatMap((e) => [e.tanusitvany, e.kiseroTanusitvany]).filter((t) => t && typeof t === 'object');
     for (const e of b.esemenyek) {
-      const r = await esemenyMentese(keresoTar, e);
+      const r = await esemenyMentese(keresoTar, e, { tanusitvanyok });
       if (!r.mentve) return { uj: false, ok: 'egy esemény nem ment át a kapun: ' + r.ok };
     }
     return await keresoTar.felvesz(b);

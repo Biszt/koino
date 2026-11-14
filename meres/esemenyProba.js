@@ -6,14 +6,14 @@
 import {
   esemenyLetrehozasa, esemenyEllenorzese, elagazasE, bejelentesHelyei, esemenyKoinoja, koinoSzuleteseE, koinoSzuleteseListabol
 } from '../js/esemeny/esemeny.js';
-import { probaGyujtemeny } from './probaFuttato.js';
+import { probaGyujtemeny, tesztKeszulek } from './probaFuttato.js';
 import { koinoSzabalyai, ALAP_SZABALYOK, teljesSzabalyok, szabalyokAlakiHibaja } from '../js/esemeny/koinoSzabalyok.js';
 
 const { proba, futtatas } = probaGyujtemeny('Az aláírt esemény próbája');
 
 // Két külön kulcspár: egy „sajátunk" és egy „idegen", a hamisítás próbájához
-const kulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
-const idegenKulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+const kulcspar = await tesztKeszulek();
+const idegenKulcspar = await tesztKeszulek();
 
 // Egy minta-esemény, amivel a legtöbb próba dolgozik
 const alapLeiras = {

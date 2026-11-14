@@ -117,9 +117,13 @@ WebCrypto X25519 csonkol (saját létra kell). A tervező ág válasza (8. szaka
 fogadó-oldali határ az adó készülék szabályaként), és a kizárásban fel nem sorolt koinóban a kizárt készülék semmit nem számít; a
 helyesbítése igaz (a tábla és a rekesz már ma sem a személyes kulccsal ír — a hálózati rész két helyre szűkül). ✅ **Eldöntve: D128 —
 a kulcs: több készülék és a helyreállítás** (Csaba, 2026-11-13: *„rendben, minden javaslatodat elfogadom. mehetünk tovább.”* — KU1–KU7
-mind ⭐). 🚧 **Az építés: ① a mag** → ② a csere-kulcs → ③ a hálózat → ④ a lap → ⑤ a terep.
+mind ⭐; 9.5 — az azonosság utolsó állítása: *„legyen az idő”*). 🚧 **Az építés: ① a mag** (✅ **①a** — a készülék és a
+tanúsítványa: a szerző az azonosság, a lánc a készüléké — `lancKulcsa`; a lánc első eseménye hozza a tanúsítványt, a kapu csak
+tanúsítottat enged be; a láncán kívül utazó esemény a **kísérő burokkal** (`kiseroTanusitvany` — aláíratlan, a kapu leveszi), a csomagok
+`tanusitvanyok` mezőjével, a készülék **tanúsítvány-jegyzékével** (`<adat>/tanusitvanyok.jsonl`) és a **várakozó sorral**; ⏭️ ①b a második
+készülék, ①c a keret, ①d a kizárás) → ② a csere-kulcs → ③ a hálózat → ④ a lap → ⑤ a terep. Részletek: `kulcs_atvizsgalas.md` 9.7.
 
-**Az állapot:** **1440 önpróba** (67 próba-fájl; a legutóbbi teljes soron 1439/1439 zöld — 2026-11-09, a D127 után; utána +1: a telefon `koino lap`-ja) · 382 fájl / 7550,1 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1449 önpróba** (68 próba-fájl; a legutóbbi teljes soron 1447/1447 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-14, a D128 ①a után) · 385 fájl / 7625,4 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

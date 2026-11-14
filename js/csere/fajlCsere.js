@@ -48,7 +48,7 @@
 
 import { esemenyKoinoja, azonositoAlaku } from '../esemeny/esemeny.js';
 import { szuletesLanc } from '../allapot/koinoLanc.js';   // ⭐ D118 (②a)
-import { koinoEsemenyei, sajatLancEsemenyei } from '../tar/esemenyTar.js';
+import { koinoEsemenyei, azonossagEsemenyei } from '../tar/esemenyTar.js';
 import { egyeztetettEsemenyek, vonalKulcsa } from './szeletEgyeztetes.js';
 import { beolvasztas } from './csere.js';
 import { szovegHivatkozasE } from '../esemeny/szovegDarab.js';
@@ -103,7 +103,7 @@ export async function kivitelSzovege(tar, koino, beallitas = {}) {
       throw new Error('A „sajat" hatókörhöz a saját kulcsom kell — add meg a szerzőt.');
     }
     // ⭐ Célzott kérdés a tárhoz (nem `betolt()`): a 3.2 óta a lánc kérdezhető.
-    esemenyek = (await sajatLancEsemenyei(tar, beallitas.szerzo))
+    esemenyek = (await azonossagEsemenyei(tar, beallitas.szerzo))   // ⭐⭐ D128: minden készülékem eseménye
       .filter((e) => esemenyKoinoja(e) === koino);
 
   } else if (hatokor === 'mind') {

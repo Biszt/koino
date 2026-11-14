@@ -20,7 +20,7 @@ import { terKartyai, koinoKartyaja, RENDEZESEK } from '../js/allapot/ter.js';
 import { esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
 import { teljesSzabalyok } from '../js/esemeny/koinoSzabalyok.js';
 
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tesztKeszulek } from './probaFuttato.js';
 
 const { proba, futtatas } = probaGyujtemeny('A BELÉPŐ TÉR (Szakasz 5.6)');
 
@@ -176,9 +176,12 @@ proba('⚠️ A HIÁNYZÓ LÁNC nem „nem tag", hanem NEM ELLENŐRIZHETŐ — k
   // egy P2P hálózaton: a lánc egy darabja még nem ért ide.
   const ismeretlen = await ujEember('falu');
   const nemMentett = await ismeretlen.tesz('Belepes', {});     // szándékosan NEM mentjük
+  // ⭐⭐ D128: a meghívást az ismeretlen MÁSIK készüléke írja — annak a lánca (és a tanúsítványa) megvan nálunk, a horgonya nem.
+  const masodik = await ujEember('falu', await tesztKeszulek('telefon', ismeretlen.kulcspar.azonossagKulcspar));
+  await esemenyMentese(tar, await masodik.tesz('GondolatLetrehozas', { cim: 'A telefonról', meret: 1, szulo: null }));
 
   const uj = await belep(tar, 'falu');
-  await meghiv(tar, { eember: ismeretlen, horgony: nemMentett.azonosito }, uj,
+  await meghiv(tar, { eember: masodik, horgony: nemMentett.azonosito }, uj,
     nemMentett.azonosito);
 
   const k = await koinoKartyaja(hely, 'falu');

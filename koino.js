@@ -92,7 +92,7 @@ import { randomUUID, randomInt } from 'node:crypto';
 import { basename, dirname, join, resolve, sep } from 'node:path';
 
 import {
-  esemenyTarNyitasa, koinoBecenevFeloldasa, koinoBecenevKijelolese, koinoBecenevei, kulcsTarolo, tarsakTarolo, szeletJegyzekTarolo,
+  esemenyTarNyitasa, koinoBecenevFeloldasa, koinoBecenevKijelolese, koinoBecenevei, kulcsTarolo, keszulekTarolo, tarsakTarolo, szeletJegyzekTarolo,
   udpCimTarolo,
   tablaKulcsTarolo, kotesTarolo,
   felszabaditasTarolo, alapHely,
@@ -156,10 +156,14 @@ import {
   // ⭐ A KÉZI ÚT MÁSIK FELE (2026-09-15): eddig csak KIMENTENI lehetett a kulcsot.
   kulcsparVisszatoltese
 } from './js/kulcs/kulcsTar.js';
-import { koinoEsemenyei, sajatLancEsemenyei, esemenyLekerese, esemenyMentese, entitasEsemenyei, lancVege } from './js/tar/esemenyTar.js';
+import { koinoEsemenyei, sajatLancEsemenyei, esemenyLekerese, esemenyMentese, entitasEsemenyei, lancVege, azonossagEsemenyei }
+  from './js/tar/esemenyTar.js';
+// ⭐⭐ D128: a készülékkulcs és a tanúsítványa.
+import { keszulekBiztositasa } from './js/kulcs/keszulek.js';
+import { kiseroAdo } from './js/tar/esemenyTar.js';
 // ⭐ B/2: a szelet-kulcs (az előléptetéshez).
 import {
-  szelet, esemenyEllenorzese, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, koinoSzuleteseE, koinoSzuleteseListabol,
+  szelet, esemenyEllenorzese, tanusitvanyKereso, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, koinoSzuleteseE, koinoSzuleteseListabol,
   KOINO_VERZIO, koinoVerzioE
 } from './js/esemeny/esemeny.js';
 // ⭐⭐ D119 (①a): a kód-csomag — a futó program kódja a koino-verzió kártyájára, és a koinó programjával összevetve.
@@ -462,8 +466,15 @@ if (parancs === 'visszatolt') {
   }
 }
 
-const { kulcspar, ujE } = await kulcsparBiztositasa(tarolo);
-const szerzo = await nyilvanosKulcsSzovegesen(kulcspar.publicKey);
+// ⭐⭐ D128 (ET-3 — a kulcs: több készülék és a helyreállítás): KÉT KULCS. Az AZONOSSÁG kulcsa (a régi kulcs — a nevem, a
+// `kulcs.json`) csak kezel: tanúsítja a készülékkulcsot; a mindennapi aláírás a KÉSZÜLÉKÉ (`keszulek.json`), a saját láncán.
+// ⚠️ A készülék neve a láncra kerül (a tanúsítványban) — ezért nem a gép neve (D6: személyes adat soha a láncra), csak a fajtája.
+const { kulcspar: azonossagKulcspar, ujE } = await kulcsparBiztositasa(tarolo);
+const szerzo = await nyilvanosKulcsSzovegesen(azonossagKulcspar.publicKey);
+const { eszkoz: kulcspar } = await keszulekBiztositasa(keszulekTarolo(), azonossagKulcspar,
+  process.env.KOINO_KESZULEK_NEV || (process.platform === 'android' ? 'telefon' : 'számítógép'));
+/** ⭐⭐ D128: a SAJÁT LÁNCOM kulcsa — a készülékemé (a sorszám, a lánc vége, a lánc-gyökér ezé). */
+const KESZULEK = kulcspar.keszulek;
 
 /**
  * ⭐⭐ D123 (PR3): egy kód-jegyzék MAGJA (koinó-független — a gyár előtt): a jegyzék fájljaiból (a fájl-tárból, az utak
@@ -828,7 +839,7 @@ async function koinoVerzioKeszitese(szuloErv, { nev, leiras = null, nyilt = fals
   // ----- 2. a gyermek születése a programmal (a létrehozó szülőbeli láncát folytatja — ②a) -----
   const szuletes = await ujKoinoSzuletese(nev, leiras, { zart: gyermek.zart, profil, szabalyok: gyermek.szabalyok,
     szulo: P, szuloTagsag: gyermek.szuloTagsag, program: kod, elhagy: gyermek.elhagy }, gyermek.osSzuletesek, gyermek.lancVeg,
-  gyermek.kitoltes);
+  gyermek.kitoltes, gyermek.lancEleje);
   // ----- 3. a koino-verzió a szülőben, és a pont rá -----
   const kv = await koinoVerzioLetrehozasa(kornyezetP, { szuletes, leiras, kodBajt });
   await tudatpontRendezese(kornyezetP, kv.azonosito, pont, 'aktiv');
@@ -1162,7 +1173,7 @@ function koinoErvei(tobbi) {
  * mappájába mentjük, ugyanazon a kapun. Ugyanaz a művelet (`koinoLetrehozasa`), csak a koinó-mezője üres.
  * @returns {Promise<Object>} a születés eseménye (`azonosito` = a koinó neve)
  */
-async function ujKoinoSzuletese(nev, leiras, beallitas, osSzuletesek = [], lancVeg = null, kitoltes = []) {
+async function ujKoinoSzuletese(nev, leiras, beallitas, osSzuletesek = [], lancVeg = null, kitoltes = [], lancEleje = null) {
   const ideiglenes = await mkdtemp(join(tmpdir(), 'koino-szuletes-'));
   try {
     const ures = await esemenyTarNyitasa('uj', ideiglenes);
@@ -1172,6 +1183,11 @@ async function ujKoinoSzuletese(nev, leiras, beallitas, osSzuletesek = [], lancV
     // — a lánca a vágásig közös. ⛔ Új lánc (1-es sorszám) a szülőbeli 1-essel ütközne, amint a múltja a gyermekbe ér
     // (elágazás — a saját becsületes láncát vádolná).
     if (lancVeg) {
+      // ⭐⭐ D128: a lánc vége csak a készülék tanúsítványával megy át a kapun — azt a lánc első eseménye hozza.
+      if (lancEleje && lancEleje.azonosito !== lancVeg.azonosito) {
+        const me = await esemenyMentese(ures, lancEleje);
+        if (!me.mentve) throw new Error('A szülőbeli láncod eleje nem olvasható be: ' + me.ok);
+      }
       const mv = await esemenyMentese(ures, lancVeg);
       if (!mv.mentve) throw new Error('A szülőbeli láncod vége nem olvasható be: ' + mv.ok);
     }
@@ -1254,7 +1270,7 @@ async function bekapcsolodasElokeszitese(cel, elhagyToredekek = [], { elonezet =
   }
   if (ksz.adat?.szulo !== KOINO) throw new Error('A(z) ' + rovidAzonosito(K) + ' nem ennek a koinónak a gyermeke.');
   if (ksz.szerzo === szerzo) throw new Error('A gyermek létrehozója vagy: a születéseddel már bekapcsolódtál.');
-  const gyermekbeliLancom = ktar ? (await sajatLancEsemenyei(ktar, szerzo)).filter((e) => esemenyKoinoja(e) === K) : [];
+  const gyermekbeliLancom = ktar ? (await sajatLancEsemenyei(ktar, KESZULEK)).filter((e) => esemenyKoinoja(e) === K) : [];
   if (gyermekbeliLancom.some((e) => e.tipus === 'Bekapcsolodas')) throw new Error('Már bekapcsolódtál ebbe a gyermekbe.');
   // ⛔ D118 (⑤b): a bekapcsolódás a gyermekbeli láncom ELSŐ eseménye (4.5) — aki ott már nem bekapcsolódóként él (meghívással), az
   // nem bekapcsolódhat: a két lánc elágazna. ⚠️ Mielőtt bármi íródna, kimondjuk.
@@ -1264,7 +1280,7 @@ async function bekapcsolodasElokeszitese(cel, elhagyToredekek = [], { elonezet =
   }
   const vagas = ksz.ido;
   // ----- a lánc-pontom: a vágás előtti utolsó eseményem (a szülő tárában) -----
-  const lancom = await sajatLancEsemenyei(tar, szerzo);
+  const lancom = await sajatLancEsemenyei(tar, KESZULEK);
   let c = null;
   for (const e of lancom) { if (!(Number.isSafeInteger(e.ido) && e.ido <= vagas)) break; c = e; }
   if (!c) throw new Error('A vágáskor még nem voltál a szülőben (az első eseményed a gyermek születése utáni).');
@@ -1304,7 +1320,7 @@ async function bekapcsolodasVegrehajtasa(cel, elhagyToredekek = [], fajl = null)
   // ----- 1. az első kitöltés — a gyermek kapuján (a koinó-szabály szerint) -----
   const be = await beolvasztas(k.ktar, k.vitt, k.K);
   // ----- 2. a bekapcsolódás a gyermekben — a láncom vége ott most a lánc-pontom -----
-  const veg = await lancVege(k.ktar, szerzo);
+  const veg = await lancVege(k.ktar, KESZULEK);
   if (veg.elozo !== k.c.azonosito) {
     throw new Error('A gyermek tárában a láncom vége nem a lánc-pontom (' + rovidAzonosito(k.c.azonosito) + ') — a bekapcsolódás'
       + ' nem folytatható (próbáld újra).');
@@ -1371,7 +1387,9 @@ async function gyermekSzuletesElokeszitese(szuloErv, { nyilt, szabalyok }) {
   if (!pszuletes || !koinoSzuleteseE(pszuletes, P)) {
     throw new Error('A szülő (' + rovidAzonosito(P) + ') születése nincs meg ezen a készüléken — előbb csatlakozz hozzá.');
   }
-  const lanc = (await sajatLancEsemenyei(ptar, szerzo)).filter((e) => esemenyKoinoja(e) === P);
+  // ⭐⭐ D128: a horgony az azonosságé (bármelyik készülékem írhatta) — a legkorábbi idő szerint.
+  const lanc = (await azonossagEsemenyei(ptar, szerzo)).filter((e) => esemenyKoinoja(e) === P)
+    .sort((a, b) => (a.ido - b.ido) || (a.azonosito < b.azonosito ? -1 : 1));
   const horgony = lanc.find((e) => e.tipus === 'Belepes')?.azonosito
     ?? lanc.find((e) => e.tipus === 'Bekapcsolodas')?.azonosito   // ⭐ ④a: a szülőbe bekapcsolódtam
     ?? (pszuletes.szerzo === szerzo ? P : null);
@@ -1388,7 +1406,7 @@ async function gyermekSzuletesElokeszitese(szuloErv, { nyilt, szabalyok }) {
   const { lanc: osok, teljes } = await szuletesLanc(ptar, P);
   if (!teljes) throw new Error('A szülő születés-lánca nincs meg teljesen ezen a készüléken.');
   // ⭐ a létrehozó lánca a szülő tárában — a vége (a gyermek születése ezt folytatja: a lánc-pontja)
-  const sajatLanc = await sajatLancEsemenyei(ptar, szerzo);
+  const sajatLanc = await sajatLancEsemenyei(ptar, KESZULEK);
   const lancVeg = sajatLanc.at(-1) ?? null;
   // ⭐⭐ ④b: a létrehozó is a születésével bekapcsolódik — a hozott múltja (az első kitöltés) és a KZ3 (a gyermek kerete)
   // ⭐⭐ D119 (A): a koino-verzió kártyáira tett pontja a szülőben marad — a születés `elhagy`-ában (a számítás ebből tudja)
@@ -1396,7 +1414,9 @@ async function gyermekSzuletesElokeszitese(szuloErv, { nyilt, szabalyok }) {
   const mult = lancVeg ? await hozottMult(ptar, P, sajatLanc, lancVeg, elhagy, teljesSzabalyok(egyesitett).tudatpontKeret)
     : { vitt: [], hozottOsszeg: 0 };
   return { szulo: P, szuloSzuletes: pszuletes, szuloTagsag, szabalyok: egyesitett, zart: zart || !nyilt,
-    osSzuletesek: [...osok].reverse(), lancVeg, kitoltes: mult.vitt, hozottOsszeg: mult.hozottOsszeg, elhagy };
+    osSzuletesek: [...osok].reverse(), lancVeg, kitoltes: mult.vitt, hozottOsszeg: mult.hozottOsszeg, elhagy,
+    // ⭐⭐ D128: a láncom első eseménye — a készülékem tanúsítványát hozza (a születés ideiglenes tárában kell).
+    lancEleje: sajatLanc.find((e) => e.tanusitvany) ?? null };
 }
 
 /** ⭐ D118/2 (①b): a koinó szabályai egy sorban (`kulcs=érték`, a küszöbök is). */
@@ -1458,6 +1478,9 @@ const keresoTar = await keresoTarNyitasa(KOINO, join(alapHely(), KOINO), { tagE:
 const atmenetiCel = {
   esemeny: async (az) => (await tar.esemeny(az)) ?? atmeneti.esemeny(az),
   sorszamSzerint: (sz, n) => atmeneti.sorszamSzerint(sz, n),
+  // ⭐⭐ D128: a tanúsítvány bármelyik tárból (a tartós tárban a lánc első eseménye már ott lehet).
+  tanusitvany: async (k) => (await tar.tanusitvany(k)) ?? atmeneti.tanusitvany(k),
+  tanusitvanyFelvetele: (t) => atmeneti.tanusitvanyFelvetele(t),
   hozzafuz: (e) => atmeneti.hozzafuz(e)
 };
 
@@ -1547,7 +1570,12 @@ async function sajatBejegyzesek(allapot) {
       jegyzekValtozott = true;
       return m;
     };
-    ki.push(...bejegyzesekEpitese({ szuletes, javaslat, pontEsemenyek, megujitas }));
+    // ⭐⭐ D128: a bejegyzés eseményei a készülékük tanúsítványával utaznak (a régió tartója a láncukat nem tartja).
+    const ad = kiseroAdo(atmenetiCel, { minden: true });
+    const kiserovel = [];
+    for (const e of pontEsemenyek) kiserovel.push(await ad(e));
+    ki.push(...bejegyzesekEpitese({ szuletes: await ad(szuletes), javaslat: javaslat ? await ad(javaslat) : null,
+      pontEsemenyek: kiserovel, megujitas }));
   }
   if (jegyzekValtozott) await felajanlasJegyzekIrasa(jegyzek);
   return ki;
@@ -1886,8 +1914,8 @@ async function sajatVallalasa(allapot) {
  * cserélném őket).
  */
 async function sajatLancomNezete() {
-  const nezet = await lancNezete(tar, KOINO, szerzo);
-  return { lanc: (await sajatLancEsemenyei(tar, szerzo)).filter(nezet.tagja), szamit: nezet.szamit };
+  const nezet = await lancNezete(tar, KOINO, KESZULEK);
+  return { lanc: (await sajatLancEsemenyei(tar, KESZULEK)).filter(nezet.tagja), szamit: nezet.szamit };
 }
 
 /**
@@ -1994,7 +2022,8 @@ function feloldas(toredek, lehetosegek) {
  * ⚠️ Az ALAPÍTÓ kivétel: neki a `KoinoLetrehozas` a horgonya (ő a rekurzió alapesete).
  */
 async function sajatHorgonyom() {
-  const lanc = await sajatLancEsemenyei(tar, szerzo);
+  // ⭐⭐ D128: a horgony az azonosságé — minden készülékem eseményei közül, a legkorábbi idő szerint.
+  const lanc = (await azonossagEsemenyei(tar, szerzo)).sort((a, b) => (a.ido - b.ido) || (a.azonosito < b.azonosito ? -1 : 1));
   const belepesem = lanc.find((e) => esemenyKoinoja(e) === KOINO && e.tipus === 'Belepes');
   if (belepesem) return belepesem.azonosito;
   // ⭐ D118 (④a): a bekapcsolódóé a bekapcsolódása.
@@ -3775,7 +3804,7 @@ async function rajKorCeljaim(res) {
   const kf = await ketFokAllapota();
   const reszvetel = await reszvetelHalmazom(kf);
   if (!reszvetel) return [];
-  const lanc = (await sajatLancEsemenyei(tar, szerzo)).filter((e) => esemenyKoinoja(e) === KOINO);
+  const lanc = (await sajatLancEsemenyei(tar, KESZULEK)).filter((e) => esemenyKoinoja(e) === KOINO);
   const utolso = lanc.length ? lanc[lanc.length - 1].sorszam : 0;
   if (res.rajKor.sajatUtolso !== null && utolso > res.rajKor.sajatUtolso) {
     valtozottFeljegyzese(res.rajKor, lanc.filter((e) => e.sorszam > res.rajKor.sajatUtolso).map((e) => szelet(e))
@@ -4349,13 +4378,18 @@ function lancKiszolgaloja() {
 async function lancKerdeseim(ujak, tarsAlairo) {
   const tarolo = lancEllenorzesTarolo(KOINO);
   const jeloltek = [];
+  // ⭐⭐ D128: a kérdés egy LÁNCRÓL szól (a készülékéről): a társ azonosságának nálam ismert láncai, és a kapott események láncai.
   const ismert = tarsAlairo ? await lancTarsSzerzoje(tarolo, tarsAlairo) : null;
-  if (ismert) jeloltek.push(ismert);
+  if (ismert) {
+    for (const e of (await azonossagEsemenyei(tar, ismert)).slice(0, 4096)) {
+      if (esemenyKoinoja(e) === KOINO && typeof e.keszulek === 'string' && !jeloltek.includes(e.keszulek)) jeloltek.push(e.keszulek);
+    }
+  }
   for (const az of Array.isArray(ujak) ? ujak.slice(0, 512) : []) {
     const e = await tar.esemeny(az);
-    if (typeof e?.szerzo === 'string') jeloltek.push(e.szerzo);
+    if (typeof e?.keszulek === 'string') jeloltek.push(e.keszulek);
   }
-  return lancKerdesek({ tar, koino: KOINO, tarolo, sajat: szerzo }, jeloltek);
+  return lancKerdesek({ tar, koino: KOINO, tarolo, sajat: KESZULEK }, jeloltek);
 }
 
 /** A válaszok feldolgozása és a bizonyítékok bejelentése (ismétlés nélkül — `ellentmondasokBejelentese`). */
@@ -5059,10 +5093,13 @@ function kerelemKiszolgaloja() {
       // ⭐ D109 (KK1): a kiszolgáló képe a gyorsítótárból (a tartott-kérdés és a fejléc-kép is) — egy kérés ára a lista hossza.
       const { allapot, tartott, bemondasok: bem, fejlec } = await kiszolgaloKepe();
       const tartja = tartott(k.kulcs);
+      // ⭐⭐ D128: a válasz eseményei a készülékük tanúsítványával utaznak (a kérdező egyenként ellenőrzi, a láncuk nélkül).
+      const ad = kiseroAdo(atmenetiCel, { minden: true });
+      const kiseroOlvas = async (az) => ad(await esemenyKetTarbol(az));
       const { valasz, fak, letrehozoAz, listazott } = await fejlecekValasza({ allapot, kulcs: k.kulcs, n: k.n, m: k.m === true,
-        utan: k.utan ?? null, tartott, karbantarto: kerelemKarbantarto, esemenyOlvas: esemenyKetTarbol, bemondasok: bem, kep: fejlec });
+        utan: k.utan ?? null, tartott, karbantarto: kerelemKarbantarto, esemenyOlvas: kiseroOlvas, bemondasok: bem, kep: fejlec });
       return { valasz, tartja,
-        mintak: (kert, megvan) => mintakValasza({ fak, kert, megvan, esemenyOlvas: esemenyKetTarbol, letrehozoAz, listazott }) };
+        mintak: (kert, megvan) => mintakValasza({ fak, kert, megvan, esemenyOlvas: kiseroOlvas, letrehozoAz, listazott }) };
     },
     /** ⭐ D92/1 (c): átveszem-e továbbadásra? (nem kaptam már meg, a számláló enged, van hely) */
     async atvesz(k, honnan) {
@@ -5301,8 +5338,11 @@ async function ketFokBeallitasai(allapot = null) {
       return kepEmlek;
     },
     karbantarto: kerelemKarbantarto,
-    esemenyOlvas: (az) => esemenyLekerese(tar, az),
-    lezarasiEsemenyek: async (k) => (await tar.bejelentesek(k)).filter((e) => e.tipus === LEZARASI_OSSZEGZES),
+    // ⭐⭐ D128: a minták eseményei a készülékük tanúsítványával utaznak (az összegző egyenként ellenőrzi).
+    esemenyOlvas: (() => { const ad = kiseroAdo(tar, { minden: true }); return async (az) => ad(await esemenyLekerese(tar, az)); })(),
+    // ⭐⭐ D128: az összegzés és a javaslata is a készülék tanúsítványával utazik (az összegző egyenként ellenőrzi).
+    lezarasiEsemenyek: async (k) => { const ad = kiseroAdo(tar, { minden: true });
+      return Promise.all((await tar.bejelentesek(k)).filter((e) => e.tipus === LEZARASI_OSSZEGZES).map(ad)); },
     epitoGyorsitotar: lezarasEpitoGyorsitotar
   });
   if (lezarasEpitoGyorsitotar.size > 256) lezarasEpitoGyorsitotar.clear();
@@ -5372,7 +5412,7 @@ async function lezarasiOsszegzesekKiadasa() {
   if (![...elo.fokok].some(([k, f]) => f === 'teljes' && (elo.jegyzek.get(k) ?? 0) > KETFOK.kuszob)) return 0;
   const { allapot, javaslatok } = await kepetKeszit();
   const kf = await ketFokAllapota(allapot);
-  const kiadott = new Set((await sajatLancEsemenyei(tar, szerzo))
+  const kiadott = new Set((await azonossagEsemenyei(tar, szerzo))
     .filter((e) => esemenyKoinoja(e) === KOINO && e.tipus === LEZARASI_OSSZEGZES)
     .map((e) => e.adat?.javaslat + '|' + e.adat?.entitas));
   let db = 0;
@@ -5404,7 +5444,8 @@ async function lezarasiOsszegzesekKiadasa() {
 // bizonyítania — a hétköznapi csere nem drágul (6. szabály). ⚠️ Helyi feljegyzés, nem terjed, és korlátos.
 
 /** A személyes kulcs titkos fele (JWK) — a kézfogás aláírásához, szinkron (`node:crypto`). */
-const szemelyesJwk = (await kulcsparLeirasa(kulcspar)).privatKulcs;
+// ⚠️ D128: a kézfogás ma még az AZONOSSÁG kulcsával bizonyít (a ③ teszi át a készülékkulcsra, a tanúsítvánnyal).
+const szemelyesJwk = (await kulcsparLeirasa(azonossagKulcspar)).privatKulcs;
 const AZONOSSAG_KORLAT = 256;
 const azonossagFajl = () => join(alapHely(), KOINO, 'azonossagok.json');
 /** Akit a folyamat életében tagnak láttunk (szerző → igaz) — a tagság nem vész el. */
@@ -5535,8 +5576,12 @@ async function tagsagItelete(szemely, csomag = null) {
   const szuletes = await koinoSzuletese();
   const lista = szuletes ? [szuletes] : [];
   if (typeof szemely.h === 'string') lista.push(...await tagsagiEsemenyekGyujtese(tar, KOINO, szemely.h));
+  // ⭐⭐ D128: a csomag a lánca és a saját készülékének tanúsítványát is hozza (`tanusitvanyok`), a tár is tudhatja.
+  const csomagKereso = async () => tanusitvanyKereso(Array.isArray(csomag?.adat?.lanc) ? csomag.adat.lanc : [], tar,
+    Array.isArray(csomag?.adat?.tanusitvanyok) ? csomag.adat.tanusitvanyok : []);
   if (csomag && csomag.tipus === TAGSAGI_CSOMAG && csomag.szerzo === szemely.sz && esemenyKoinoja(csomag) === KOINO
-    && (await esemenyEllenorzese(csomag)).rendben && (await tagsagiCsomagEllenorzese(csomag)).rendben
+    && (await esemenyEllenorzese(csomag, { tanusitvany: await csomagKereso() })).rendben
+    && (await tagsagiCsomagEllenorzese(csomag, tar)).rendben
     && (await bekapcsolodasokEllenorzese(csomag.adat?.lanc, tar)).rendben) {   // ⛔ D118 (④a)
     lista.push(csomag);
   }
@@ -5544,7 +5589,7 @@ async function tagsagItelete(szemely, csomag = null) {
   // ellenőrzés, mint a csomagban utazóé: hiteles, az övé, ennek a koinónak a bekapcsolódása, és a koinó és a szülő születésével
   // igazolt (a vágáskori tagsága a szülőben).
   if (csomag && csomag.tipus === 'Bekapcsolodas' && csomag.szerzo === szemely.sz && csomag.azonosito === szemely.h
-    && esemenyKoinoja(csomag) === KOINO && (await esemenyEllenorzese(csomag)).rendben
+    && esemenyKoinoja(csomag) === KOINO && (await esemenyEllenorzese(csomag, { tanusitvany: (k) => tar.tanusitvany(k) })).rendben
     && (await bekapcsolodasokEllenorzese([csomag], tar)).rendben) {
     lista.push(csomag);
   }
@@ -6427,7 +6472,7 @@ async function allapotKiirasa(napokMulva) {
     + rovidAzonosito(szerzo) + ')' + SZIN.vege);
   kiir(SZIN.halvany + 'tudatpontjaid: ' + szetosztottPontok(allapot, szerzo) + ' / '
     + (allapot.koino?.szabalyok?.tudatpontKeret ?? TUDATPONT_KERET)   // ⭐ D118/2: a koinó kerete
-    + ' · eseményeid: ' + (await sajatLancEsemenyei(tar, szerzo)).length
+    + ' · eseményeid: ' + (await azonossagEsemenyei(tar, szerzo)).filter((e) => esemenyKoinoja(e) === KOINO).length
     + ' · esemény összesen: ' + esemenyek.length
     + (napokMulva ? ' · NÉZET: ' + napokMulva + ' nap múlva' : '') + SZIN.vege);
 
@@ -7152,7 +7197,7 @@ try {
     case 'mentes': {
       const hova = ervek[0];
       if (!hova) throw new Error('Hova mentsem? node koino.js mentes <fájl>');
-      await writeFile(hova, await kulcsparKimentese(kulcspar), 'utf8');
+      await writeFile(hova, await kulcsparKimentese(azonossagKulcspar), 'utf8');   // ⭐⭐ D128: az azonosság kulcsa
       kiir('Elmentve: ' + hova);
       kiir(SZIN.nem + 'Aki ezt a fájlt megszerzi, a nevedben tud aláírni. Őrizd biztos helyen.' + SZIN.vege);
       // ⭐ ÉS MEGMONDJUK, MIRE JÓ. Egy mentés, amiről nem tudod, hogyan hozható vissza,

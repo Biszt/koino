@@ -83,6 +83,8 @@ proba('⭐ UGYANAZT a fájlt kétszer behozni nem csinál semmit (a duplikátum 
 
 proba('⛔⛔ A FÁJLBAN ÁTÍRT esemény ELBUKIK a kapun — a többi bemegy', async () => {
   const { tar: egyik, ki: anna } = await ujKoino();
+  // ⭐⭐ D128: az első gondolat a lánc első eseménye (a készülék tanúsítványát hozza) — a hamisítás egy KÉSŐBBI eseményt ér.
+  await gondolat(egyik, anna, 'Első gondolat');
   await gondolat(egyik, anna, 'Közös kút');
 
   const { tar: masik } = await ujKoino();
@@ -92,8 +94,8 @@ proba('⛔⛔ A FÁJLBAN ÁTÍRT esemény ELBUKIK a kapun — a többi bemegy', 
   const hamis = szoveg.replace('Közös kút', 'Közös kút MIENK');
   const e = await behozatalSzovegbol(masik, KOINO, hamis);
 
-  // A meghamisított esemény elutasítva, a tudatpont-esemény (érintetlen) bement.
-  return e.elutasitva.length === 1 && e.uj === 1
+  // A meghamisított esemény elutasítva, a többi (érintetlen) bement.
+  return e.elutasitva.length === 1 && e.uj === 3
     && /lenyomat/.test(e.elutasitva[0].ok);
 });
 

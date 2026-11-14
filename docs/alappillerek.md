@@ -1918,3 +1918,8 @@ nyomán a kifutás (D104, 153.). ⏭️ A ⑦, a kereső-réteg: az alakja eldő
     WebCrypto X25519 csonkol — a jelszavas visszaadáshoz saját létra · a tervező ág válasza: KU3–KU6 (A), az átfolyás és a kizárás
     kiegészítése, a hálózati kulcs-helyesbítés (igaz) · ⛔ az átfolyás határ nélkül egy ellopott készüléket tölt (93. (g)) — ⭐ fogadó-oldali
     határ · ✅ **D128** (Csaba: „minden javaslatodat elfogadom” — KU1–KU7 ⭐; `kulcs_atvizsgalas.md` 8.).
+253. **2026-11-14 · D128 ①a — a készülék és a tanúsítványa a magban** → **a szerző az azonosság, a lánc a készüléké (`keszulek` +
+    `lancKulcsa`), a lánc első eseménye hozza a tanúsítványt, a kapu csak tanúsított eseményt enged be** · ⛔ a láncán kívül utazó
+    esemény (csere, kísérő, kérelem, összegző, csomag, kereső-bejegyzés) tanúsítvány nélkül elakadt volna (84 bukás) → ⭐ a kísérő burok
+    (aláíratlan, a kapu leveszi), a csomagok `tanusitvanyok` mezője, a készülék tanúsítvány-jegyzéke, a várakozó sor · ⚠️ a D124 két
+    „valódi régi program” próbája ismert hiba (más család) · 9.5: Csaba — „legyen az idő” (az azonosság utolsó állítása időrendben).

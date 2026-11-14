@@ -54,7 +54,8 @@
 // (`csomagokKibontasa`), a művelet-réteg (a csomag kiadása), a 55. mérés, a próbák.
 
 import { erintettek, toredekAzonosito } from './szabalyok.js';
-import { esemenyEllenorzese, szelet, bejelentesHelyei, azonositoAlaku, esemenyKoinoja } from '../esemeny/esemeny.js';
+import { esemenyEllenorzese, szelet, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, tanusitvanyKereso } from '../esemeny/esemeny.js';
+import { tanusitvanyAlakiHibaja } from '../kulcs/keszulek.js';
 import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa } from './lancGyoker.js';
 // ⭐ D93/1: a résztvevők tagsági bizonyítéka is a csomagba kerül (a cél tartója különben nem ellenőrizhetné őket).
 import { tagsagiIndex, szerzoTagsaga, tagsagiLanc } from './tagsag.js';
@@ -195,15 +196,23 @@ export function celbolHianyzik(bemenet, cel) {
  * @param {Object} e - a `DontesiCsomag` esemény
  * @returns {Promise<{rendben: boolean, ok?: string}>}
  */
-export async function dontesiCsomagEllenorzese(e) {
+export async function dontesiCsomagEllenorzese(e, alap = null) {
   if (e?.tipus !== CSOMAG_TIPUS) return { rendben: true };
   const hiba = (ok) => ({ rendben: false, ok: 'a döntési csomag ' + ok });
   const a = e.adat;
   if (!a || typeof a !== 'object' || Array.isArray(a)) return hiba('adata nem objektum');
-  if (Object.keys(a).sort().join(',') !== 'cel,esemenyek,javaslat') return hiba('mezői nem a várt hármas');
+  // ⭐⭐ D128: a negyedik mező a belső események készülékeinek TANÚSÍTVÁNYAI — a cél tartójánál a láncuk első eseménye
+  // nincs meg (D81: a bizonyíték az eseménnyel utazik). Legfeljebb eseményenként egy; a méret-korlát az eseményeké.
+  if (Object.keys(a).sort().join(',') !== 'cel,esemenyek,javaslat,tanusitvanyok') return hiba('mezői nem a várt négyes');
   if (!azonositoAlaku(a.javaslat) || !azonositoAlaku(a.cel)) return hiba('javaslata vagy célja nem azonosító');
   if (!Array.isArray(a.esemenyek) || a.esemenyek.length < 2) return hiba('üres (a javaslaton kívül semmit nem hoz)');
-  if (bajt(a) > CSOMAG_BAJT_KORLAT + CSOMAG_JAVASLAT_TARTALEK) return hiba('túl nagy');
+  if (!Array.isArray(a.tanusitvanyok) || a.tanusitvanyok.length > a.esemenyek.length
+      || a.tanusitvanyok.some((t) => tanusitvanyAlakiHibaja(t) !== null)) {
+    return hiba('tanúsítványai hibásak (eseményenként legfeljebb egy, mind készülék-tanúsítvány)');
+  }
+  if (bajt({ cel: a.cel, esemenyek: a.esemenyek, javaslat: a.javaslat }) > CSOMAG_BAJT_KORLAT + CSOMAG_JAVASLAT_TARTALEK) {
+    return hiba('túl nagy');
+  }
 
   const javaslat = a.esemenyek.find((x) => x?.azonosito === a.javaslat);
   if (!javaslat || javaslat.tipus !== 'Javaslat') return hiba('nem hozza magát a javaslatot');
@@ -223,6 +232,9 @@ export async function dontesiCsomagEllenorzese(e) {
     for (const l of tagsagiLanc(tidx, x.azonosito) ?? []) lancokon.add(l.azonosito);
   }
   const latott = new Set();
+  // ⭐⭐ D128: a belső események készülék-tanúsítványa a csomagból (a láncok első eseményei és a `tanusitvanyok` mező) vagy az
+  // `alap`-ból (a kapu: a tár).
+  const kereso = await tanusitvanyKereso(a.esemenyek, alap, a.tanusitvanyok);
   for (const x of a.esemenyek) {
     if (!x || typeof x !== 'object' || Array.isArray(x)) return hiba('egy belső eleme nem esemény');
     if (latott.has(x.azonosito)) return hiba('egy eseményt kétszer hoz');
@@ -230,7 +242,7 @@ export async function dontesiCsomagEllenorzese(e) {
     if (esemenyKoinoja(x) !== esemenyKoinoja(e)) return hiba('más koinó eseményét hozza');
     if (TAGSAGI_TIPUSOK.has(x.tipus)) {
       if (!lancokon.has(x.azonosito)) return hiba('olyan tagsági eseményt hoz, ami egyik résztvevő láncán sincs');
-      const v = await esemenyEllenorzese(x);
+      const v = await esemenyEllenorzese(x, { tanusitvany: kereso });
       if (!v.rendben) return hiba('egy belső eseménye nem áll meg: ' + v.ok);
       continue;
     }
@@ -240,7 +252,8 @@ export async function dontesiCsomagEllenorzese(e) {
         : x.tipus === 'GondolatLetrehozas' ? masok.has(x.azonosito)
           : masok.has(x.adat?.entitas);   // pont- és küszöb-esemény: a TÖBBI érintetten
     if (!ide) return hiba('olyan eseményt hoz, ami nem ennek a döntésnek a bemenete (vagy a cél szeletében van)');
-    for (const proba of [esemenyEllenorzese, pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa]) {
+    const tanusitott = (y) => esemenyEllenorzese(y, { tanusitvany: kereso });
+    for (const proba of [tanusitott, pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa]) {
       const v = await proba(x);
       if (!v.rendben) return hiba('egy belső eseménye nem áll meg: ' + v.ok);
     }

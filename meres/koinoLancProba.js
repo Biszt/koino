@@ -10,7 +10,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tesztKeszulek } from './probaFuttato.js';
 import { esemenyEllenorzese, esemenyLetrehozasa } from '../js/esemeny/esemeny.js';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { esemenyMentese } from '../js/tar/esemenyTar.js';
@@ -136,7 +136,7 @@ proba('⛔ KZ2: a HAMIS bizonyíték elbukik — átírt esemény, más horgonya
 // ===================================
 
 proba('⛔ D118 (②a): a szülő csak új alakú születésen állhat, a bizonyítékával — az alak a kapun (aláírás után is)', async () => {
-  const kp = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const kp = await tesztKeszulek();
   const alap = { tipus: 'KoinoLetrehozas', elozo: null, sorszam: 1 };
   const P = 'A'.repeat(43);
   const adat = (tobbi) => ({ nev: 'X', leiras: null, alapitok: [], zart: true, ...tobbi });
