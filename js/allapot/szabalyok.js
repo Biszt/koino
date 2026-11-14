@@ -34,7 +34,7 @@ import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
 import { koinoSzuleteseListabol, esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 // ⭐ D93/1: a tagság (egy forrás — `tagsag.js`).
-import { tagsagiIndex, szerzoTagsaga } from './tagsag.js';
+import { tagsagiIndex, szerzoTagsaga, lancAlapja } from './tagsag.js';
 
 /** A döntés eseményei — csak az ellenőrzött tag szerzőé számít (D93/1). */
 export const TAGSAG_KELL = new Set(['TudatpontRendezes', 'Javaslat', 'Szavazat', 'ErtekJavaslat', 'Allasfoglalas']);
@@ -584,6 +584,10 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
 
   for (const lanc of lancok.values()) {
     const rendezett = [...lanc].sort((a, b) => a.sorszam - b.sorszam);
+    // ⭐⭐ D128 (9.9): a lánc kerete — az alap (a koinó kerete, ha ez a lánc írta az azonosság horgonyát; különben 0).
+    const lancKeret = rendezett.length
+      ? lancAlapja(tidx, rendezett[0].szerzo, lancKulcsa(rendezett[0]), koinoSzabalyok.tudatpontKeret)
+      : koinoSzabalyok.tudatpontKeret;
     const pontok = new Map();            // entitás → a szerző jelenlegi pontja rajta
     let osszeg = 0;                      // mennyit osztott ki eddig összesen
 
@@ -613,7 +617,7 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
         }
         // ⭐ D118 (④a): az ős eseménye a gyermek jelenében HOZOTT (a koinó a születése neve — a jelen bemenetében egyedül az övé).
         const hozott = koinoNeve !== null && esemenyKoinoja(e) !== koinoNeve;
-        const merleg = pontEsemenyMerlege(e, { osszeg, pontok }, folytonos, koinoSzabalyok.tudatpontKeret, hozott);
+        const merleg = pontEsemenyMerlege(e, { osszeg, pontok }, folytonos, lancKeret, hozott);
         if (merleg.jelzes) nemEllenorizheto(e, merleg.jelzes);
         if (merleg.elvetve) {
           kivetel(e, merleg.elvetve);

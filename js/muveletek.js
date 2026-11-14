@@ -25,10 +25,10 @@ import {
   TUDATPONT_KERET, ALLASOK, pontEsemenyMerlege, javaslatEntitasai, erintettek, toredekAzonosito
 } from './allapot/szabalyok.js';
 // ⭐ D78 (az A pillér 2. lépése): a lánc-gyökér — a szerző esemény előtti naplója és kiosztása.
-import { lancUjEsemenyhez } from './allapot/lancGyoker.js';
+import { lancUjEsemenyhez, lancKerete } from './allapot/lancGyoker.js';
 // ⭐ D80: az ellentmondás bizonyítéka — a bejelentés előtt magunk is ellenőrizzük.
 import { ellentmondasEllenorzese } from './allapot/ellentmondas.js';
-import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO } from './esemeny/esemeny.js';
+import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO, lancKulcsa } from './esemeny/esemeny.js';
 import { lancNezete } from './allapot/koinoLanc.js';   // ⭐ D118 (③, ⑤b): a szerző lánca a koinóban, a jelen réteg szerint
 import { koinoSzabalyai, teljesSzabalyok } from './esemeny/koinoSzabalyok.js';
 import { kanonikusBajtok } from './esemeny/kanonikusAlak.js';
@@ -228,7 +228,7 @@ export async function ellentmondasBejelentese(kornyezet, adat) {
       + 'KoinoLetrehozas nálunk) — a bizonyíték nem helyezhető el (D80).');
   }
   const vad = await ellentmondasEllenorzese(adat, kornyezet.koino,
-    { tudatpontKeret: (await koinomSzabalyai(kornyezet)).tudatpontKeret,   // ⭐ D118/2
+    { tudatpontKeret: await lancKerete(kornyezet.tar, kornyezet.koino, lancKulcsa(adat?.esemeny), adat?.kit),   // ⭐⭐ D128: a vádolt láncáé
       tanusitvany: kornyezet.tar });   // ⭐⭐ D128: a vádolt készülékének tanúsítványa a tárból
   if (!vad.rendben) throw new Error('A bizonyíték nem áll meg: ' + vad.ok);
   return esemenytTeszek(kornyezet, 'Ellentmondas', adat, { entitas: horgony });
@@ -349,8 +349,9 @@ async function sajatKiosztott(kornyezet, entitas) {
   // láncon lévő, de a jelenből kizárt esemény ismert sorszám, nem hézag.
   const nezet = await lancNezete(kornyezet.tar, kornyezet.koino, sajatLanc(kornyezet));
   const lanc = (await sajatLancEsemenyei(kornyezet.tar, sajatLanc(kornyezet))).filter(nezet.tagja);
-  // ⭐ D118/2: a keret a koinóé (a születéséből) — ugyanaz, amit a szabály-réteg használ.
-  const keret = (await koinomSzabalyai(kornyezet)).tudatpontKeret;
+  // ⭐ D118/2: a keret a koinóé (a születéséből) — ⭐⭐ D128 (9.9): és a LÁNCÉ (a készülékemé: az alap, ha én írtam a horgonyt) —
+  // ugyanaz, amit a szabály-réteg használ.
+  const keret = await sajatKeretem(kornyezet);
 
   const allas = { osszeg: 0, pontok: new Map() };
   // ⭐ A folytonosságot is ugyanúgy követjük, mint a szabály (a saját láncunk rendes esetben
@@ -385,7 +386,18 @@ async function sajatKiosztott(kornyezet, entitas) {
  */
 export async function szabadTudatpontjaim(kornyezet) {
   const { osszeg } = await sajatKiosztott(kornyezet, null);
-  return (await koinomSzabalyai(kornyezet)).tudatpontKeret - osszeg;
+  return (await sajatKeretem(kornyezet)) - osszeg;
+}
+
+/**
+ * ⭐⭐ D128 (9.9): a SAJÁT LÁNCOM (készülékem) kerete ebben a koinóban — az alap: a koinó kerete, ha ez a készülék írta az
+ * azonosságom horgonyát; különben 0 (a többi az átvétellel jön). A koinó kerete, ha a környezet régi alakú (nincs tára).
+ * @param {Object} kornyezet
+ * @returns {Promise<number>}
+ */
+export async function sajatKeretem(kornyezet) {
+  if (kornyezet.koinoSzabalyok) return kornyezet.koinoSzabalyok.tudatpontKeret;
+  return lancKerete(kornyezet.tar, kornyezet.koino, sajatLanc(kornyezet), kornyezet.szerzo);
 }
 
 // ===================================
@@ -1007,7 +1019,7 @@ export async function tudatpontRendezese(kornyezet, entitas, pont, szerep = 'akt
     // A tudatpont ÁTRENDEZHETŐ: ami ezen az entitáson már ott van, az nem „új" kiadás.
     const { osszeg, regi } = await sajatKiosztott(kornyezet, entitas);
     const kiosztva = osszeg - regi + pont;
-    const keret = (await koinomSzabalyai(kornyezet)).tudatpontKeret;   // ⭐ D118/2: a koinó kerete
+    const keret = await sajatKeretem(kornyezet);   // ⭐ D118/2: a koinó kerete — ⭐⭐ D128 (9.9): a készülékemé
 
     if (kiosztva > keret) {
       throw new Error(

@@ -333,7 +333,9 @@ export async function ujEember(koino = 'proba', keszulek = null) {
     }
   };
   // ⭐ D93: a próba-segéd nyilvántartja az e-embereit (a `tagokkal` ezekkel írja alá a belépést).
-  EMBEREK.set(szerzo, ember);
+  // ⭐⭐ D128 (9.9): egy azonosság ELSŐ készüléke marad a nyilvántartásban — a `tagokkal` vele íratja a belépést (a horgonyt), így a
+  // koinó kerete az övé (mint a valóságban: az a készülék lépett be); a második készülék kerete 0.
+  if (!EMBEREK.has(szerzo)) EMBEREK.set(szerzo, ember);
   return ember;
 }
 

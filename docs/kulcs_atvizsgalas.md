@@ -250,6 +250,30 @@ a bizonyítékok (a fejléc levelei) láncónként · **(4)** a szavazás: a ké
 Mind folyamaton belüli próbával (két készülék, egy azonosság, offline is). A második készülék LÉTREHOZÁSA (a parancs, a lap, a
 kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a hálózaton egy készülék él.
 
+**9.9 A keret pontos alakja** (az ①b (2) terve, 2026-11-14 — a 9.3 megvalósítása):
+- **Egy lánc kerete = az alap + a kapott.** Az **alap** a koinó kerete annak a láncnak, amelyik az azonosság HORGONYÁT írta ebben a
+  koinóban (a `Belepes`, a `KoinoLetrehozas`, a `Bekapcsolodas` — a tagság úgyis tudja), minden más láncé 0. A **kapott** a
+  lánc-gyökér HARMADIK összegzése (`{ naplo, kiosztas, kapott }`): adó készülékenként a halmozottan átvett pont — a gyökér összege
+  a kapott összesen. ⭐ Így a D42 (a bemondott összeg) továbbra is egyetlen eseményből dönt: `kiosztva ≤ alap + kapott`.
+- **Az átadás** (`KeretAtadas` — a 9.3 szerint saját típus) **a pont-esemény gépezetével:** a kiosztás-fában a levele a FOGADÓ
+  KÉSZÜLÉK kulcsa, a pontja a halmozottan átadott összeg; az adó bemondott összege ettől nő — a D42 és a D81 (a bizonyíték az
+  eseménnyel utazik) változatlan. ⭐ Miért nem `TudatpontRendezes`: a halmozott átadás nem csökkenhet (különben a fogadó által már
+  átvett pont az adónál is felszabadulna), és ezt egy eseményből csak a típus mondhatja meg — egy készülékkulcs és egy
+  entitás-azonosító alakra ugyanaz; az azonosság gondolat-pontjai közé pedig nem is tartozik.
+- **Az átvétel** (`KeretAtvetel`, a fogadó láncán): hozza az adó aláírt átadását (ugyanannak az azonosságnak egy készüléke, a fogadó
+  kulcsának szól), és a kapott-fában az adó levelét a halmozott összegre emeli (a régi értékének bizonyítékával, mint a pont-esemény).
+  ⛔ Ugyanazt kétszer átvenni nem lehet nyerni: a levél a halmozott összeg, nem nő tőle. Ha az átadás maga elbukik (az adó keretén
+  túl), az átvétel sem számít.
+- **Az átfolyás** (8.1) az adó szabálya (a határral) — a művelet adja; a két készülék találkozása (a hálózat) a ③-ban köti be.
+- **Az építés — (2a) az alap** (2026-11-14): `tagsag.js` `alapHorgony` (az azonosság horgonyai közül a LEGKORÁBBI — idő, holtversenyben
+  a kisebb azonosító; ha egy második készülék később maga is belép, a keret marad az elsőé) és `lancAlapja` (a szabály-réteg
+  láncónkénti kerete), `lancGyoker.js` `lancKerete` (ugyanaz a tárból — a lánc-gyökér, a művelet, a kapu és az észlelő vád-ellenőrzése
+  ezt kérdezi), `muveletek.js` `sajatKeretem` (a szabad pontjaim és a pont-rendezés a KÉSZÜLÉKEM keretével). Ha a horgony nincs meg
+  nálunk, a lánc kerete a koinóé (a tagság nélküli pont úgysem számít — D93/1). A próba: `keszulekProba.js` „A KERET A HORGONY
+  LÁNCÁÉ” és „A MŰVELET IS A LÁNC KERETÉVEL SZÁMOL” (7 rontás). ⚠️ A vád-ellenőrzés kerete (a bemondás és a folytonosság vádja a
+  keretet túllépő pont-eseménynél) most a lánc alapja — próbát a (2b)-vel kap, amikor a kapott miatt a lánc kerete egy ESEMÉNYHEZ
+  kötött érték lesz (a vádpontkori kapott, a lánc-gyökérből), nem a láncé egészében.
+
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor
   NÉLKÜLE utazik: egy szelet a cserében, egy tagsági kísérő, egy kérelem vagy egy összegző válasza, egy döntési csomag, egy

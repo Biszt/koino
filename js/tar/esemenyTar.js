@@ -31,7 +31,7 @@ import { esemenyEllenorzese, elagazasE, szelet, esemenyKoinoja, azonositoAlaku, 
 // ⭐ D80: az `Ellentmondas` esemény TARTALMA is a kapun megy át (önmagát igazoló bizonyíték).
 import { ellentmondasEllenorzese } from '../allapot/ellentmondas.js';
 // ⭐ D81: a pont-esemény a saját bizonyítékát hozza — a kapu ellenőrzi, hogy illik a lánc-gyökeréhez.
-import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa, koinoKerete } from '../allapot/lancGyoker.js';
+import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa, lancKerete } from '../allapot/lancGyoker.js';
 import { CSOMAG_TIPUS, dontesiCsomagEllenorzese } from '../allapot/dontesiCsomag.js';
 // ⭐ D95/1: a lezárási összegzés alakja.
 import { LEZARASI_OSSZEGZES, lezarasiOsszegzesAlakja } from '../allapot/lezarasiOsszegzes.js';
@@ -241,7 +241,9 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
   if (esemeny.tipus === 'Ellentmondas') {
     // ⭐ D118/2: a koinó kerete a tárból (a születés azonosítója maga a koinó neve); ha nincs meg, a mai érték.
     const vad = await ellentmondasEllenorzese(esemeny.adat, esemeny.koino,
-      { tudatpontKeret: await koinoKerete(tar, esemeny.koino), tanusitvany: (k) => tarTanusitvanya(tar, k) });
+      // ⭐⭐ D128 (9.9): a vádolt LÁNCÁNAK kerete (az alap — a horgony lánca kapja).
+      { tudatpontKeret: await lancKerete(tar, esemeny.koino, lancKulcsa(esemeny.adat?.esemeny), esemeny.adat?.kit),
+        tanusitvany: (k) => tarTanusitvanya(tar, k) });
     // ⚠️ A vádpontot (vagy elágazásnál a vesztest) a bejelentő mondja be — az ellenőrzés vetette össze.
     if (!vad.rendben) {
       console.log('esemenyMentese - VÉGE (HAMIS VÁD)', { ok: vad.ok });

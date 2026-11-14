@@ -7,6 +7,8 @@
 //   · a kapu csak tanúsított eseményt enged be: a lánc első eseménye nélkül „hiányzik”; egy idegen azonosság nevében írt esemény
 //     (saját vagy semmilyen tanúsítvánnyal) elbukik; egy készüléket csak egy azonosság tanúsíthat;
 //   · két készülék egy azonossággal: azonos sorszámuk nem elágazás, mindkét lánc bejut és számít;
+//   · ⭐ (①b (2a)) a keret a horgony láncáé: a belépést író készülék kapja a koinó keretét, a többié 0 — a szabály-réteg és a tár
+//     (a művelet, a vád) ugyanazt mondja;
 //   · a készülék a gépen: létrejön, újranyitáskor ugyanaz, másik azonosságnál új;
 //   · a csomag tanúsítvány-keresője csak a hiteles, a szerzőt és a készüléket nevező tanúsítványt veszi fel.
 //
@@ -26,6 +28,9 @@ import { lenyomat, bajtokBase64Url } from '../js/esemeny/kanonikusAlak.js';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { esemenyMentese, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
+import { lancKerete } from '../js/allapot/lancGyoker.js';
+import { TUDATPONT_KERET } from '../js/allapot/szabalyok.js';
+import { tudatpontRendezese, szabadTudatpontjaim } from '../js/muveletek.js';
 import { sajatSzavazat } from '../js/allapot/javaslatSzamitas.js';
 
 const { proba, futtatas } = probaGyujtemeny('A készülék és a tanúsítványa (D128 — ET-3)');
@@ -195,12 +200,12 @@ proba('⭐⭐ KÉT KÉSZÜLÉK, EGY AZONOSSÁG — azonos sorszámuk nem elágaz
   const telefon = await ujEember(KOINO, await tesztKeszulek('telefon', laptop.kulcspar.azonossagKulcspar));
   const l1 = await laptop.tesz('GondolatLetrehozas', { cim: 'A laptopról' });
   const t1 = await telefon.tesz('GondolatLetrehozas', { cim: 'A telefonról' });
-  // A pontjaik (egy gondolat pont nélkül nem él — D14), mindkét készülék a saját láncán.
+  // A pontjaik (egy gondolat pont nélkül nem él — D14) — ⭐ D128 (9.9): a keret a belépést író laptopé, ő ad mindkettőre.
   const lp = await laptop.tesz('TudatpontRendezes', { entitas: l1.azonosito, pont: 10 });
-  const tp = await telefon.tesz('TudatpontRendezes', { entitas: t1.azonosito, pont: 10 });
+  const lt = await laptop.tesz('TudatpontRendezes', { entitas: t1.azonosito, pont: 10 });
   const m1 = await esemenyMentese(tar, l1);
   const m2 = await esemenyMentese(tar, t1);
-  for (const e of [lp, tp]) await esemenyMentese(tar, e);
+  for (const e of [lp, lt]) await esemenyMentese(tar, e);
   const allapot = allapotSzamitasa(await tagokkal(await koinoEsemenyei(tar, KOINO)));
   return laptop.szerzo === telefon.szerzo && laptop.keszulek !== telefon.keszulek
     && l1.sorszam === 1 && t1.sorszam === 1 && !elagazasE(l1, t1)
@@ -227,6 +232,51 @@ proba('⭐⭐ AZ AZONOSSÁG UTOLSÓ ÁLLÍTÁSA (9.5 — „legyen az idő”) �
   const szt = await telefon.tesz('Szavazat', { javaslat: j, szavazat: 'Ellenez' }, 5000);
   const szavazat = sajatSzavazat([szl, szt], j, laptop.szerzo);
   return idoben === 70 && korai === 60 && szavazat === 'Ellenez';
+});
+
+proba('⭐⭐ A KERET A HORGONY LÁNCÁÉ (9.9) — a belépést író készülék kapja a koinó keretét, a másiké 0: a pontja elvetődik; a tár (a művelet és a vád) ugyanígy látja', async () => {
+  const tar = await ujTar();
+  const laptop = await ujEember(KOINO);
+  const telefon = await ujEember(KOINO, await tesztKeszulek('telefon', laptop.kulcspar.azonossagKulcspar));
+  const g = await laptop.tesz('GondolatLetrehozas', { cim: 'Közös' });
+  const lp = await laptop.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 10 });
+  const tp = await telefon.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 5 });
+  const lista = await tagokkal([g, lp, tp]);
+  const allapot = allapotSzamitasa(lista);
+  const ent = allapot.entitasok.get(g.azonosito);
+  const elvetett = allapot.kivetelek.find((k) => k.azonosito === tp.azonosito);
+  // A tár: a belépés (a horgony) a laptop láncán — két menetben (a lánc eleje előbb, a tanúsítvány miatt).
+  for (let i = 0; i < 2; i++) for (const e of lista) await esemenyMentese(tar, e);
+  const belepes = lista.find((e) => e.tipus === 'Belepes' && e.szerzo === laptop.szerzo);
+  const laptopKerete = await lancKerete(tar, KOINO, laptop.keszulek);
+  const telefonKerete = await lancKerete(tar, KOINO, telefon.keszulek);
+  // ⭐ Ha a telefon KÉSŐBB maga is belép (egy második horgony), a keret marad a laptopé — a LEGKORÁBBI horgony dönt.
+  const masodik = await telefon.tesz('Belepes', {}, belepes.ido + 1000);
+  const lista2 = [...lista, masodik];
+  const ent2 = allapotSzamitasa(lista2).entitasok.get(g.azonosito);
+  for (let i = 0; i < 2; i++) await esemenyMentese(tar, masodik);
+  const telefonKerete2 = await lancKerete(tar, KOINO, telefon.keszulek);
+  return belepes?.keszulek === laptop.keszulek && ent?.osszesPont === 10 && !!elvetett && /keret/.test(elvetett.ok)
+    && laptopKerete === TUDATPONT_KERET && telefonKerete === 0
+    && ent2?.osszesPont === 10 && telefonKerete2 === 0 && (await lancKerete(tar, KOINO, laptop.keszulek)) === TUDATPONT_KERET;
+});
+
+proba('⭐⭐ A MŰVELET IS A LÁNC KERETÉVEL SZÁMOL (9.9) — a telefonnak 0 szabad pontja van, és a pont-rendezése elutasítva; a laptop a teljes kerettel ír', async () => {
+  const tar = await ujTar();
+  const laptop = await ujEember(KOINO);
+  const telefon = await ujEember(KOINO, await tesztKeszulek('telefon', laptop.kulcspar.azonossagKulcspar));
+  const g = await laptop.tesz('GondolatLetrehozas', { cim: 'Közös' });
+  const lp = await laptop.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 10 });
+  const lista = await tagokkal([g, lp]);
+  for (let i = 0; i < 2; i++) for (const e of lista) await esemenyMentese(tar, e);
+  const kornyezete = (ki) => ({ koino: KOINO, kulcspar: ki.kulcspar, szerzo: ki.szerzo, tar });
+  const telefonSzabad = await szabadTudatpontjaim(kornyezete(telefon));
+  let telefonHiba = null;
+  try { await tudatpontRendezese(kornyezete(telefon), g.azonosito, 5); } catch (h) { telefonHiba = h.message; }
+  const laptopSzabad = await szabadTudatpontjaim(kornyezete(laptop));
+  const uj = await tudatpontRendezese(kornyezete(laptop), g.azonosito, 20);
+  return telefonSzabad === 0 && /Kereted 0/.test(telefonHiba ?? '') && laptopSzabad === TUDATPONT_KERET - 10
+    && uj?.adat?.pont === 20 && uj.keszulek === laptop.keszulek;
 });
 
 // ===================================

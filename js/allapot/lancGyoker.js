@@ -46,7 +46,8 @@ import {
   allapotBizonyitek, allapotBizonyitekEllenorzese
 } from '../esemeny/osszegzoFa.js';
 import { pontEsemenyMerlege } from './szabalyok.js';
-import { AZONOSITO_MINTA, azonositoAlaku } from '../esemeny/esemeny.js';
+import { AZONOSITO_MINTA, azonositoAlaku, esemenyKoinoja, koinoSzuleteseE, lancKulcsa } from '../esemeny/esemeny.js';
+import { alapHorgony, HORGONY_TIPUSOK } from './tagsag.js';   // ⭐⭐ D128 (9.9): a lánc alapja
 import { koinoSzabalyai, ALAP_SZABALYOK } from '../esemeny/koinoSzabalyok.js';
 import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a bekapcsolódó hozott előtagjával)
 
@@ -209,6 +210,28 @@ export async function koinoKerete(tar, koino) {
   return koinoSzabalyai(szuletes ?? null).tudatpontKeret;
 }
 
+/**
+ * ⭐⭐ D128 (9.9): egy LÁNC (készülék) kerete a tárból — az alap: a koinó kerete, ha ez a lánc írta az azonosság alap-horgonyát
+ * (`tagsag.js` `alapHorgony` — ugyanaz a szabály, mint a szabály-rétegben), 0, ha egy másik lánca; ha a horgony nincs meg nálunk, a
+ * koinó kerete. ⏭️ A kapott (az átvétel) a ①b (2b)-vel jön.
+ * @param {Object} tar
+ * @param {string} koino
+ * @param {string} lanc - a lánc kulcsa (a készüléké)
+ * @param {string|null} [szerzo] - az azonosság (ha nincs megadva, a lánc eseményeiből)
+ * @returns {Promise<number>}
+ */
+export async function lancKerete(tar, koino, lanc, szerzo = null) {
+  const keret = await koinoKerete(tar, koino);
+  if (typeof lanc !== 'string') return keret;
+  const ki = szerzo ?? (typeof tar?.lancEsemenyei === 'function' ? (await tar.lancEsemenyei(lanc))[0]?.szerzo : null);
+  if (typeof ki !== 'string' || typeof tar?.azonossagEsemenyei !== 'function') return keret;
+  const horgonyok = (await tar.azonossagEsemenyei(ki)).filter((e) => HORGONY_TIPUSOK.has(e?.tipus)
+    && (e.tipus !== 'KoinoLetrehozas' ? esemenyKoinoja(e) === koino : koinoSzuleteseE(e, koino)));
+  const h = alapHorgony(horgonyok);
+  if (!h) return keret;
+  return lancKulcsa(h) === lanc ? keret : 0;
+}
+
 // ===================================
 // A GYORSÍTÓTÁRAS ÚT — a szerző minden új eseményénél
 // ===================================
@@ -278,7 +301,7 @@ async function illikALanchoz(tar, nezet, a) {
  * @returns {Promise<Object|null>} null, ha a saját lánc nem ép (hézag, elágazás, szakadás)
  */
 async function allapotIg(tar, koino, lanc, meddig, tarolo) {
-  const keret = await koinoKerete(tar, koino);
+  const keret = await lancKerete(tar, koino, lanc);   // ⭐⭐ D128 (9.9): a lánc kerete (az alap)
   // ⭐⭐ D118 (⑤b): a szerző LÁNCA a koinóban — a bekapcsolódóé a hozott előtaggal (a napló a teljes láncot fedi), a kiosztás a
   // jelen réteg szerint (a hozott pontok a számított összeggel, az elhagyottak nélkül). Eddig a koinó nevére szűrt: a
   // bekapcsolódó lánca az 1. sorszámon „nem ép” volt, és a gyermekbeli eseményei lánc-gyökér nélkül születtek.

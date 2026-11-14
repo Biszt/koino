@@ -26,7 +26,8 @@
 // Használják: a szabály-réteg (`szabalyok.js`), az `identitas.js`, a kapu (`esemenyTar.js`), a művelet-réteg (a
 // csomag kiadása), a próbák.
 
-import { esemenyEllenorzese, azonositoAlaku, esemenyKoinoja, koinoSzuleteseListabol, tanusitvanyKereso } from '../esemeny/esemeny.js';
+import { esemenyEllenorzese, azonositoAlaku, esemenyKoinoja, koinoSzuleteseListabol, tanusitvanyKereso, lancKulcsa }
+  from '../esemeny/esemeny.js';
 
 /**
  * A meghívási lánc legnagyobb mélysége (D59 biztonsági szelepe — a bizonyíték hosszának őre). ⭐ D113 (Csaba,
@@ -89,6 +90,40 @@ export function tagsagiIndex(esemenyek, koino = null) {
     else felvesz(e);
   }
   return idx;
+}
+
+// ===================================
+// ⭐⭐ D128 (9.9): A LÁNC ALAPJA — melyik készülék kapja a koinó keretét
+// ===================================
+//
+// Egy azonosság több készülékkel ír; a tudatpont-keret készülékenként osztott (KU1 (B)). Az ALAP — a koinó teljes kerete —
+// annak a láncnak jár, amelyik az azonosság HORGONYÁT írta ebben a koinóban (a belépés, a születés, a bekapcsolódás); minden más
+// láncé 0, és az átvétellel kap (9.9). ⭐ Ha több horgony van (pl. két készülékről lépett be), a LEGKORÁBBI (idő, holtversenyben a
+// kisebb azonosító) — EGY szabály a szabály-rétegnek és a műveletnek (`lancGyoker.js` `lancKerete`).
+
+/** Az azonosság alap-horgonya a horgony-eseményei közül (a legkorábbi) — vagy null. */
+export function alapHorgony(horgonyEsemenyek) {
+  let h = null;
+  for (const e of horgonyEsemenyek ?? []) {
+    if (!e || !HORGONY_TIPUSOK.has(e.tipus)) continue;
+    if (!h || e.ido < h.ido || (e.ido === h.ido && e.azonosito < h.azonosito)) h = e;
+  }
+  return h;
+}
+
+/**
+ * Egy lánc ALAP-kerete a tagsági indexből: a koinó kerete, ha a lánc írta az azonosság alap-horgonyát; 0, ha egy másik lánca;
+ * a koinó kerete, ha az azonosságnak nincs ismert horgonya (a tagság nélküli pont úgysem számít — D93/1).
+ * @param {Object} idx - `tagsagiIndex`
+ * @param {string} szerzo
+ * @param {string} lanc - `lancKulcsa`
+ * @param {number} keret - a koinó kerete
+ * @returns {number}
+ */
+export function lancAlapja(idx, szerzo, lanc, keret) {
+  const h = alapHorgony((idx.szerzoHorgonyai.get(szerzo) ?? []).map((az) => idx.horgonyok.get(az)));
+  if (!h) return keret;
+  return lancKulcsa(h) === lanc ? keret : 0;
 }
 
 function szerzohoz(idx, szerzo, az) {
