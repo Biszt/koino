@@ -14,6 +14,9 @@
 //     az adó lánca nélkül, egyetlen eseményből ellenőrizhető;
 //   · ⭐ (①b (2c)) az átfolyás: a különbség fele, a fogadó határáig — a még át nem vett átadás is a részéhez számít; egy tolvaj a
 //     határnál megáll (a 93. (g) modellje);
+//   · ⭐ (①b (3)) az azonosság pontja egy entitáson a készülékei pontjainak összege — az állapotban, az össz-pont fejlécében (a
+//     levél a láncok pont-eseményeinek összege, a tartó mintái mindet hozzák) és a döntésben (a tulajdonos, a küszöb);
+//   · ⭐ (①b (4)) a szavazás és a javaslattétel joga készülékenként: ahol a pont a másik készülékemen van, ez előbb 1 pontot tesz rá;
 //   · a készülék a gépen: létrejön, újranyitáskor ugyanaz, másik azonosságnál új;
 //   · a csomag tanúsítvány-keresője csak a hiteles, a szerzőt és a készüléket nevező tanúsítványt veszi fel.
 //
@@ -23,7 +26,13 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny, tesztKeszulek, ujEember, tagokkal } from './probaFuttato.js';
+import { probaGyujtemeny, tesztKeszulek, ujEember, tagokkal, probaKiseroval } from './probaFuttato.js';
+import {
+  osszPontokSzamitasa, reszfaLevelei, reszfaKarbantarto, reszfaGyokere, gyerekJegyzek, mintaHelyek, fejlecMintai,
+  fejlecEllenorzese, OSSZPONT_FA, RESZFA_HOSSZ
+} from '../js/allapot/osszPont.js';
+import { teljesTarto } from '../js/allapot/osszegzoTartas.js';
+import { javaslatokSzamitasa } from '../js/allapot/javaslatSzamitas.js';
 import {
   tanusitvanyKeszitese, tanusitvanyEllenorzese, tanusitvanyAlakiHibaja, eszkoz, keszulekBiztositasa
 } from '../js/kulcs/keszulek.js';
@@ -35,11 +44,11 @@ import { esemenyMentese, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
 import { lancAlapKerete } from '../js/allapot/lancGyoker.js';
 import { TUDATPONT_KERET } from '../js/allapot/szabalyok.js';
-import { tudatpontRendezese, szabadTudatpontjaim, keretAtadasa, keretAtvetele, keretAtfolyasa, atfolyasMerteke }
-  from '../js/muveletek.js';
+import { tudatpontRendezese, szabadTudatpontjaim, keretAtadasa, keretAtvetele, keretAtfolyasa, atfolyasMerteke,
+  javaslatLetrehozasa, szavazas } from '../js/muveletek.js';
 import { ujSajatHelye } from '../js/tar/esemenyTar.js';
 import { lancUjEsemenyhez, KAPOTT_FAJTA, KAPOTT_HOSSZ } from '../js/allapot/lancGyoker.js';
-import { ujAllapotFa, allapotBizonyitek } from '../js/esemeny/osszegzoFa.js';
+import { ujAllapotFa, allapotBizonyitek, allapotBeallitas, allapotGyokere } from '../js/esemeny/osszegzoFa.js';
 import { ellentmondasEllenorzese } from '../js/allapot/ellentmondas.js';
 import { keretAtvetelMerlege, ujLancAllas } from '../js/allapot/szabalyok.js';
 import { sajatSzavazat } from '../js/allapot/javaslatSzamitas.js';
@@ -437,6 +446,128 @@ proba('⭐⭐ AZ ÁTFOLYÁS A HATÁRIG (8.1 — 93. (g)) — a különbség fele
   return fele === 400 && telefonResz === 2000 && laptopSzabad === 3000
     && elso.merteke === 3000 && elso.atadas?.adat?.pont === 3000 && ujra.merteke === 0 && ujra.atadas === null
     && atvetelUtan.merteke === 0 && elhelyezesUtan.merteke === 0 && (await szabadTudatpontjaim(kT)) === 500;
+});
+
+// ===================================
+// 4/c. ⭐⭐ AZ AZONOSSÁG PONTJA A KÉSZÜLÉKEI ÖSSZEGE (①b (3))
+// ===================================
+
+proba('⭐⭐ AZ AZONOSSÁG PONTJA A KÉSZÜLÉKEI ÖSSZEGE (①b (3)) — az állapotban 10 + 50; az össz-pont levele a két pont-esemény összege, a tartó mintái mindkettőt hozzák, a hamis levél lebukik', async () => {
+  const { tar, laptop, telefon, g, kL, kT } = await ketKeszulek();
+  await keretAtvetele(kT, await keretAtadasa(kL, telefon.keszulek, 300));
+  const tp = await tudatpontRendezese(kT, g.azonosito, 50);
+  const minden = await koinoEsemenyei(tar, KOINO);
+  const allapot = allapotSzamitasa(minden);
+  const ent = allapot.entitasok.get(g.azonosito);
+  const kulcs = laptop.szerzo + '|' + g.azonosito;
+  const pe = allapot.pontEsemenyek.get(kulcs);
+  const lp = minden.find((e) => e.tipus === 'TudatpontRendezes' && e.keszulek === laptop.keszulek && e.adat.entitas === g.azonosito);
+  // A fejléc: a tartó (a teljes tartás szerepe) mintákat ad — a minták a szerző levelére esnek, és mindkét pont-eseményt hozzák.
+  const olvas = new Map(minden.map((e) => [e.azonosito, probaKiseroval(e)]));
+  const karbantarto = reszfaKarbantarto();
+  const tarto = teljesTarto({ teljesE: async () => true, kep: async () => ({ allapot, bemondasok: new Map() }), karbantarto,
+    esemenyOlvas: async (az) => olvas.get(az) ?? null, lezarasiEsemenyek: async () => [] });
+  const o = osszPontokSzamitasa(allapot.entitasok);
+  const fa = await reszfaKarbantarto().fa(g.azonosito, reszfaLevelei(g.azonosito, allapot, o, gyerekJegyzek(allapot.entitasok)));
+  const gyoker = await reszfaGyokere(fa);
+  const helyek = mintaHelyek(gyoker.o[0], 8);
+  const valasz = (await tarto.mintak({ szelet: { [g.azonosito]: helyek } })).szelet[g.azonosito];
+  const kapott = new Map(valasz.esemenyek.map((e) => [e.azonosito, e]));
+  const ell = await fejlecEllenorzese({ azonosito: g.azonosito, gyoker, helyek, mintak: valasz.mintak, esemenyek: kapott });
+  // ⛔ A hamis levél: 60-at mond, de csak a laptop 10-es eseményét mutatja — és ugyanazt kétszer (20-ra).
+  const hamis = async (ertek, pont) => {
+    const f = ujAllapotFa(OSSZPONT_FA, RESZFA_HOSSZ);
+    await allapotBeallitas(f, 'p:' + laptop.szerzo, ertek, [pont, 0, 0]);
+    const gy = await allapotGyokere(f);
+    const h = mintaHelyek(gy.o[0], 4);
+    return fejlecEllenorzese({ azonosito: g.azonosito, gyoker: gy, helyek: h, mintak: await fejlecMintai(f, h), esemenyek: olvas });
+  };
+  const egyEsemeny = await hamis({ e: lp.azonosito }, 60);
+  const ketszer = await hamis({ e: [lp.azonosito, lp.azonosito] }, 20);
+  return ent?.hozzajarulok.get(laptop.szerzo)?.pont === 60 && ent.hozzajarulok.get(laptop.szerzo).szerep === 'aktiv'
+    && ent.osszesPont === 60 && allapot.kiosztasok.get(kulcs) === 60
+    && Array.isArray(pe) && pe.length === 2 && pe.includes(tp.azonosito) && pe.includes(lp.azonosito)
+    && gyoker.o[0] === 60 && kapott.has(tp.azonosito) && kapott.has(lp.azonosito) && ell.rendben && ell.ellenorzott === 8
+    && !egyEsemeny.rendben && /mást mond/.test(egyEsemeny.ok ?? '') && !ketszer.rendben && /mást mond/.test(ketszer.ok ?? '');
+});
+
+proba('⭐⭐ A DÖNTÉSBEN IS (①b (3)) — a laptop leveszi a pontját, a telefoné marad: az azonosság tulajdonos, a szavazata számít; a küszöbe a később mondott (a telefoné), nem a nagyobb sorszámú', async () => {
+  // ⚠️ A döntés rétege egymagában (a keret szabálya nélkül — azt a fenti próbák mérik): a próba-segéd eseményei.
+  const t0 = Date.UTC(2026, 0, 1);
+  const NAP = 24 * 3600 * 1000;
+  const laptop = await ujEember(KOINO);
+  const telefon = await ujEember(KOINO, await tesztKeszulek('telefon', laptop.kulcspar.azonossagKulcspar));
+  const b = await ujEember(KOINO);
+  const c = await ujEember(KOINO);
+  const g = await b.tesz('GondolatLetrehozas', { cim: 'Döntendő', meret: 500 }, t0);
+  const lista = [g];
+  const pont = async (ki, p, ido) => lista.push(await ki.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: p, szerep: 'aktiv' }, ido));
+  await pont(b, 10, t0);
+  await pont(c, 10, t0);
+  await pont(telefon, 10, t0 + 1);                        // a telefon lánca: 1.
+  await pont(laptop, 10, t0 + 2);                         // a laptop lánca: 1.
+  await pont(laptop, 0, t0 + 3);                          // a laptop lánca: 2. — leveszi; a telefoné marad
+  const kuszob = (x) => ({ entitas: g.azonosito,
+    ertekek: { elfogadasiKuszob: x, reszveteliKuszob: 0, minimumDontesiIdo: 3600, maximumDontesiIdo: 7200 } });
+  lista.push(await laptop.tesz('ErtekJavaslat', kuszob(60), t0 + 4));   // a laptop lánca: 3.
+  lista.push(await telefon.tesz('ErtekJavaslat', kuszob(90), t0 + 5));  // a telefon lánca: 2. — de KÉSŐBB
+  const javaslat = await b.tesz('Javaslat', { fajta: 'szerkesztesi', erintett: g.azonosito, muvelet: 'Modositas',
+    valtozas: { cim: 'Új cím' }, indoklas: 'Jobb.' }, t0 + 1000);
+  lista.push(javaslat);
+  lista.push(...await b.szavaz(javaslat, { szavazat: 'Tamogat' }, t0 + 2000));
+  lista.push(...await c.szavaz(javaslat, { szavazat: 'Ellenez' }, t0 + 2000));
+  // A javaslaton is: a telefon 1 pontot tesz rá, a laptop rátesz, majd leveszi — az azonosságé a telefon 1 pontja marad.
+  const jp = async (ki, p, ido) => lista.push(await ki.tesz('TudatpontRendezes', { entitas: javaslat.azonosito, pont: p }, ido));
+  await jp(telefon, 1, t0 + 1500);
+  await jp(laptop, 1, t0 + 1600);
+  await jp(laptop, 0, t0 + 1700);
+  lista.push(...await telefon.szavaz(javaslat, { szavazat: 'Tamogat' }, t0 + 2000));
+  // Egy második javaslat, amire az azonosság NEM szavaz: aktív tulajdonosként (a telefon pontja aktív) a nevezőben van.
+  const javaslat2 = await b.tesz('Javaslat', { fajta: 'szerkesztesi', erintett: g.azonosito, muvelet: 'Modositas',
+    valtozas: { cim: 'Más cím' }, indoklas: 'Más.' }, t0 + 1100);
+  lista.push(javaslat2, ...await b.szavaz(javaslat2, { szavazat: 'Tamogat' }, t0 + 2100));
+  const bemenet = await tagokkal(lista);
+  const allapot = allapotSzamitasa(bemenet);
+  const dontesek = javaslatokSzamitasa(bemenet, allapot, t0 + 10 * NAP);
+  const j = dontesek.get(javaslat.azonosito);
+  const j2 = dontesek.get(javaslat2.azonosito);
+  const ok = j?.szavazok === 3 && j.tamogatok === 2 && j.kuszobok?.elfogadasiKuszob === 90 && j.statusz === 'elvetve'
+    && j2?.szavazok === 1 && j2.nevezo === 3;
+  if (!ok) process.stderr.write('    (' + JSON.stringify({ j: [j?.szavazok, j?.tamogatok, j?.kuszobok?.elfogadasiKuszob, j?.statusz],
+    j2: [j2?.szavazok, j2?.nevezo] }) + ')\n');
+  return ok;
+});
+
+proba('⭐⭐ A SZAVAZÁS ÉS A JAVASLAT JOGA KÉSZÜLÉKENKÉNT (12. pont — (A)) — a pont a laptopon van: a telefon előbb magától 1 pontot tesz a gondolatra, és a javaslata, ill. a szavazata számít', async () => {
+  const NAP = 24 * 3600 * 1000;
+  const telefonPontja = (minden, telefon, g) => minden.find((e) => e.tipus === 'TudatpontRendezes' && e.keszulek === telefon.keszulek
+    && e.adat.entitas === g.azonosito);
+  // (a) A telefon tesz javaslatot a laptop gondolatára (a telefonnak itt még nincs pontja).
+  const A = await ketKeszulek();
+  await keretAtvetele(A.kT, await keretAtadasa(A.kL, A.telefon.keszulek, 300));
+  const ja = await javaslatLetrehozasa(A.kT, { erintett: A.g.azonosito, muvelet: 'Modositas', valtozas: { cim: 'Új' }, indoklas: 'x' });
+  const mindenA = await koinoEsemenyei(A.tar, KOINO);
+  const allapotA = allapotSzamitasa(mindenA);
+  const kiesettA = new Set(allapotA.kivetelek.map((k) => k.azonosito));
+  // (b) A laptop tesz javaslatot, a telefon később ellenez — az azonosság utolsó állítása a telefoné.
+  const B = await ketKeszulek();
+  await keretAtvetele(B.kT, await keretAtadasa(B.kL, B.telefon.keszulek, 300));
+  const jb = await javaslatLetrehozasa(B.kL, { erintett: B.g.azonosito, muvelet: 'Modositas', valtozas: { cim: 'Új' }, indoklas: 'x' });
+  const szt = await szavazas(B.kT, jb.azonosito, 'Ellenez');
+  // (c) Egy idegen azonosság gondolata és javaslata: az azonosságomnak sincs rajta pontja — a telefon NEM tesz rá pontot.
+  const idegen = await ujEember(KOINO);
+  const gc = await idegen.tesz('GondolatLetrehozas', { cim: 'Idegen' });
+  const cp = await idegen.tesz('TudatpontRendezes', { entitas: gc.azonosito, pont: 10 });
+  const jc = await idegen.tesz('Javaslat', { fajta: 'szerkesztesi', erintett: gc.azonosito, muvelet: 'Modositas',
+    valtozas: { cim: 'X' }, indoklas: 'y' });
+  for (let i = 0; i < 2; i++) for (const e of await tagokkal([gc, cp, jc])) await esemenyMentese(B.tar, e);
+  await szavazas(B.kT, jc.azonosito, 'Tamogat');
+  const mindenB = await koinoEsemenyei(B.tar, KOINO);
+  const allapotB = allapotSzamitasa(mindenB);
+  const db = javaslatokSzamitasa(allapotB.szamitok, allapotB, Date.now() + 10 * NAP).get(jb.azonosito);
+  return telefonPontja(mindenA, A.telefon, A.g)?.adat?.pont === 1 && !kiesettA.has(ja.azonosito)
+    && telefonPontja(mindenB, B.telefon, B.g)?.adat?.pont === 1 && szt.keszulek === B.telefon.keszulek
+    && db?.szavazok === 1 && db.ellenzok === 1 && db.tamogatok === 0 && !telefonPontja(mindenB, B.telefon, gc);
 });
 
 // ===================================

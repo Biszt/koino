@@ -6506,7 +6506,9 @@ készülék között az idő — 9.5); **(2a)** a keret alapja láncónként: a 
 harmadik fája, a `KeretAtadas` (halmozott — saját típus, hogy egy eseményből eldőljön, hogy nem csökkenhet) és a `KeretAtvetel`
 (az adó aláírt átadását hozza, egy eseményből ellenőrizhető), `szabalyok.js` `lancLepese` (egy forrás a szabálynak, a saját
 gyökérnek és a műveletnek), `muveletek.js` `keretAtadasa`/`keretAtvetele`; **(2c)** az átfolyás (`atfolyasMerteke`, `keretAtfolyasa` — a különbség fele, a
-fogadó határáig; a határ alapértéke nyitott, a ③-mal). Hátra: (3) a pontok összegzése azonosságonként, (4) a szavazás. A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.8–9.9.
+fogadó határáig; a határ alapértéke nyitott, a ③-mal); **(3)** az azonosság pontja egy entitáson a készülékei pontjainak összege (az
+állapot, a döntés, az össz-pont levele — a láncok pont-eseményeivel); **(4)** a szavazás és a javaslattétel joga készülékenként (ahol a
+pont a másik készüléken van, ez előbb 1 pontot tesz rá). Hátra az ①-ből: a kizárás és az örökös (①d). A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.8–9.9.
 
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 

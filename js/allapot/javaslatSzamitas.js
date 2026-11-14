@@ -33,7 +33,7 @@
 
 import { median } from './allapotSzamitas.js';
 import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
-import { koinoSzuleteseListabol, kesobbiAllitas } from '../esemeny/esemeny.js';
+import { koinoSzuleteseListabol, kesobbiAllitas, lancKulcsa } from '../esemeny/esemeny.js';
 import { erintettek, javaslatEntitasai, szavazatSajatPontjai } from './szabalyok.js';
 
 // ===================================
@@ -401,11 +401,28 @@ function reszekSzamitasa(javaslatEsemeny, kik, szavazatok, tudatpontok, ertekJav
   // ⭐ Külön térkép entitásonként (nem összetett kulcs): így a „ki tulajdonos ITT?"
   // kérdés egy lépés, és a rész-állások egymástól függetlenül olvashatók.
   const uresen = () => new Map(entitasok.map((az) => [az, new Map()]));
-  const tulajdonosok = uresen();      // entitás → (szerző → { pont, szerep, sorszam })
+  const tulajdonosok = uresen();      // entitás → (szerző → { pont, szerep, azonosito }) — ⭐⭐ D128: a láncai összege
+  const lancTulajdonosok = uresen();  // ⭐⭐ D128 (①b (3)): entitás → (lánc → { szerzo, pont, szerep, sorszam, azonosito })
   const ertekJavaslatok = uresen();   // entitás → (szerző → { ertekek, sorszam })
   const reszSzavazatok = uresen();    // entitás → (szerző → 'Tamogat' | …)
   const reszSzavazatEsemenyek = uresen(); // ⭐ D95/1: entitás → (szerző → a beszámított szavazat azonosítója)
-  const javaslatTulajdonosok = uresen(); // entitás (a rész) → (szerző → { pont, sorszam }) a javaslat-entitásán
+  const javaslatTulajdonosok = uresen(); // entitás (a rész) → (szerző → { pont }) a javaslat-entitásán — a láncai összege
+  const javaslatLancTulajdonosok = uresen(); // ⭐⭐ D128 (①b (3)): entitás (a rész) → (lánc → { szerzo, pont, sorszam })
+
+  /**
+   * ⭐⭐ D128 (①b (3)): az azonosság pontja egy entitáson = a láncai (készülékei) utolsó pontjainak ÖSSZEGE. A szerep aktív, ha
+   * bármely pozitív lánca aktív; az azonosító (a nevező bizonyítéka — D95/1) a legkisebb azonosítójú pozitív aktív láncáé.
+   */
+  const azonossagPontja = (lancok, szerzo) => {
+    let pont = 0, aktivAz = null, barmelyAz = null;
+    for (const t of lancok.values()) {
+      if (t.szerzo !== szerzo || !(t.pont > 0)) continue;
+      pont += t.pont;
+      if (barmelyAz === null || t.azonosito < barmelyAz) barmelyAz = t.azonosito;
+      if (t.szerep === 'aktiv' && (aktivAz === null || t.azonosito < aktivAz)) aktivAz = t.azonosito;
+    }
+    return { pont, szerep: aktivAz !== null ? 'aktiv' : 'passziv', azonosito: aktivAz ?? barmelyAz };
+  };
   const kulonAgot = uresen();         // entitás → (szerző → kért-e külön ágat)
   const szavazatUtolso = new Map();   // szerző → az eddig figyelembe vett szavazata (⭐⭐ D128: két készülék között az idő dönt)
 
@@ -553,29 +570,38 @@ function reszekSzamitasa(javaslatEsemeny, kik, szavazatok, tudatpontok, ertekJav
     } else if (esemeny.tipus === 'TudatpontRendezes' && reszJavaslata.has(esemeny.adat.entitas)) {
       // ⭐ D85/2: pont a rész javaslat-entitásán — a szavazati jog második feltétele. A nevezőt NEM
       // mozdítja (az az érintett tulajdonosaié), csak azt, hogy kinek a szavazata számít.
-      const terkep = javaslatTulajdonosok.get(reszJavaslata.get(esemeny.adat.entitas));
-      const eddigi = terkep.get(esemeny.szerzo);
+      // ⭐⭐ D128 (①b (3)): láncónként az utolsó (a sorszám egy láncon belül dönt), az azonosságé a láncai összege.
+      const resz = reszJavaslata.get(esemeny.adat.entitas);
+      const lancok = javaslatLancTulajdonosok.get(resz);
+      const eddigi = lancok.get(lancKulcsa(esemeny));
       if (eddigi !== undefined && esemeny.sorszam <= eddigi.sorszam) continue;
-      terkep.set(esemeny.szerzo, { pont: esemeny.adat.pont, sorszam: esemeny.sorszam });
+      lancok.set(lancKulcsa(esemeny), { szerzo: esemeny.szerzo, pont: esemeny.adat.pont, szerep: 'aktiv', sorszam: esemeny.sorszam,
+        azonosito: esemeny.azonosito });
+      javaslatTulajdonosok.get(resz).set(esemeny.szerzo, { pont: azonossagPontja(lancok, esemeny.szerzo).pont });
 
     } else if (esemeny.tipus === 'TudatpontRendezes') {
-      const terkep = tulajdonosok.get(esemeny.adat.entitas);
-      if (!terkep) continue;                       // nem a mi érintettünkről szól
-      const eddigi = terkep.get(esemeny.szerzo);
+      const lancok = lancTulajdonosok.get(esemeny.adat.entitas);
+      if (!lancok) continue;                       // nem a mi érintettünkről szól
+      // ⭐⭐ D128 (①b (3)): láncónként az utolsó (a sorszám egy láncon belül dönt), az azonosságé a láncai összege.
+      const eddigi = lancok.get(lancKulcsa(esemeny));
       if (eddigi !== undefined && esemeny.sorszam <= eddigi.sorszam) continue;
-      terkep.set(esemeny.szerzo, {
+      lancok.set(lancKulcsa(esemeny), {
+        szerzo: esemeny.szerzo,
         pont: esemeny.adat.pont,
         szerep: esemeny.adat.szerep === 'passziv' ? 'passziv' : 'aktiv',
         sorszam: esemeny.sorszam,
         azonosito: esemeny.azonosito
       });
+      tulajdonosok.get(esemeny.adat.entitas).set(esemeny.szerzo, azonossagPontja(lancok, esemeny.szerzo));
 
     } else {
       const terkep = ertekJavaslatok.get(esemeny.adat.entitas);
       if (!terkep) continue;                       // nem a mi érintettünkről szól
+      // ⭐⭐ D128 (9.5): az azonosság utolsó állítása — egy láncon a sorszám, két készülék között az idő (`kesobbiAllitas`).
       const eddigi = terkep.get(esemeny.szerzo);
-      if (eddigi !== undefined && esemeny.sorszam <= eddigi.sorszam) continue;
+      if (eddigi !== undefined && !kesobbiAllitas(esemeny, eddigi.esemeny)) continue;
       terkep.set(esemeny.szerzo, {
+        esemeny,
         ertekek: esemeny.adat.ertekek,
         sorszam: esemeny.sorszam,
         azonosito: esemeny.azonosito

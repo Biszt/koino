@@ -1768,7 +1768,8 @@ export async function sajatHozzarendelesek(tar, koino, beallitas = {}) {
       entitasCim: e?.cim ?? null,
       tudatPontok: pont,
       szerep: e?.hozzajarulok.get(en)?.szerep ?? null,
-      sorszam: sajatSorszam.get(kep.pontEsemenyek?.get(kulcs)) ?? -1
+      // ⭐⭐ D128 (①b (3)): több készülékről a láncok pont-eseményei — a legutóbbi (a legnagyobb sorszámú) számít.
+      sorszam: Math.max(-1, ...[kep.pontEsemenyek?.get(kulcs)].flat().map((x) => sajatSorszam.get(x) ?? -1))
     });
   }
   tetelek.sort((a, b) => (b.sorszam - a.sorszam) || (a.entitasId < b.entitasId ? -1 : a.entitasId > b.entitasId ? 1 : 0));

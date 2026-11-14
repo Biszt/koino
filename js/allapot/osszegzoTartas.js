@@ -163,9 +163,12 @@ export function teljesTarto({ teljesE, kep, karbantarto, esemenyOlvas, lezarasiE
         const esemenyek = [];
         for (const m of mintak) {
           if (!m.kulcs.startsWith('p:')) continue;
+          // ⭐⭐ D128 (①b (3)): több készülékről a láncok pont-eseményei (a levél ezek összege).
           const az = allapot.pontEsemenyek?.get(m.kulcs.slice(2) + '|' + k);
-          const e = az ? await esemenyOlvas(az) : null;
-          if (e) esemenyek.push(e);
+          for (const x of Array.isArray(az) ? az : az ? [az] : []) {
+            const e = await esemenyOlvas(x);
+            if (e) esemenyek.push(e);
+          }
         }
         ki.szelet[k] = { mintak, esemenyek };
       }

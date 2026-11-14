@@ -367,7 +367,8 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
       // passzív figyelő, az nem korlátozza a döntést — ez a modell lényege.
       case 'TudatpontRendezes':
         pontjaIsmert.add(e.adat.entitas);
-        pontok.rogzit(e.szerzo + '|' + e.adat.entitas, e, {
+        // ⭐⭐ D128 (①b (3)): a pont a LÁNCÉ (a készüléké) — láncónként az utolsó; az azonosság pontja a láncai összege (lent).
+        pontok.rogzit(lancKulcsa(e) + '|' + e.adat.entitas, e, {
           pont: e.adat.pont,
           szerep: e.adat.szerep === 'passziv' ? 'passziv' : 'aktiv'
         });
@@ -444,22 +445,37 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
   // egyezmény végrehajtása esemény nélkül is visz át pontot (annak itt nincs saját eseménye — D19: kimondjuk).
   const pontEsemenyek = new Map();
 
-  for (const [kulcs, bejegyzes] of pontok.ertekek) {
+  // ⭐⭐ D128 (①b (3)): AZ AZONOSSÁG PONTJA = A LÁNCAI (készülékei) utolsó pontjainak ÖSSZEGE. A szerep aktív, ha bármely pozitív
+  // lánca aktív; a pont-esemény az egyetlené (egy készüléknél semmi nem változik), több láncnál a pozitívak azonosítói rendezve —
+  // az össz-pont levele ezek összege (`osszPont.js`).
+  const azonossagonkent = new Map();          // "szerző|entitás" → { pont, aktiv, esemenyek }
+  for (const bejegyzes of pontok.ertekek.values()) {
+    const e = bejegyzes.esemeny;
+    const kulcs = e.szerzo + '|' + e.adat.entitas;
+    let o = azonossagonkent.get(kulcs);
+    if (!o) { o = { pont: 0, aktiv: false, esemenyek: [] }; azonossagonkent.set(kulcs, o); }
+    if (!(bejegyzes.ertek.pont > 0)) continue;  // a 0 pont = elvette a pontját (ezen a láncon)
+    o.pont += bejegyzes.ertek.pont;
+    o.esemenyek.push(e.azonosito);
+    if (bejegyzes.ertek.szerep === 'aktiv') o.aktiv = true;
+  }
+
+  for (const [kulcs, o] of azonossagonkent) {
     const [szerzo, entitasAzonosito] = kulcs.split('|');
-    if (bejegyzes.ertek.pont > 0) {
-      kiosztasok.set(kulcs, bejegyzes.ertek.pont);
-      pontEsemenyek.set(kulcs, bejegyzes.esemeny.azonosito);
+    if (o.pont > 0) {
+      kiosztasok.set(kulcs, o.pont);
+      pontEsemenyek.set(kulcs, o.esemenyek.length === 1 ? o.esemenyek[0] : o.esemenyek.sort());
     }
 
     const entitas = entitasok.get(entitasAzonosito);
     if (!entitas) continue;                           // olyan entitásra mutat, amit nem ismerünk
-    if (bejegyzes.ertek.pont <= 0) continue;          // a 0 pont = elvette a pontját
+    if (o.pont <= 0) continue;                        // a 0 pont = elvette a pontját
 
     entitas.hozzajarulok.set(szerzo, {
-      pont: bejegyzes.ertek.pont,
-      szerep: bejegyzes.ertek.szerep
+      pont: o.pont,
+      szerep: o.aktiv ? 'aktiv' : 'passziv'
     });
-    entitas.osszesPont += bejegyzes.ertek.pont;
+    entitas.osszesPont += o.pont;
   }
 
   // ----- KÜSZÖBÖK: A TULAJDONOSOK MEDIÁNJA (D4) -----
@@ -555,7 +571,8 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
     kiosztasok,
     // ⭐ D93/1: a döntés eseményei, amiknek a szerzője nem ellenőrizhető tag — nem számítanak, de kimondjuk (D19).
     tagsagFuggoben,
-    // ⭐ D92/5: "szerző|entitás" → a nyertes pont-esemény azonosítója (az össz-pont szúrópróbájához).
+    // ⭐ D92/5: "szerző|entitás" → a nyertes pont-esemény azonosítója (az össz-pont szúrópróbájához). ⭐⭐ D128 (①b (3)): több
+    // készülékről a láncok nyertes pont-eseményeinek (rendezett) listája — a szerző pontja ezek összege.
     pontEsemenyek,
     // Szabályt sértő események (keret, jogosultság) — szintén jelzés, nem büntetés (D19)
     kivetelek,

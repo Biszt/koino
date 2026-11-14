@@ -300,6 +300,21 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
   minden találkozáskor újra adnék). A próba: „AZ ÁTFOLYÁS A HATÁRIG” (3 rontás). ⏭️ Hogy MIKOR fut (a két készülék találkozása), az
   a ③; a határ beállítása a ④ lapé. ❓ A határ ALAPÉRTÉKE nyitott — Csaba dönti el, amikor a ③ magától futtatja (a 93. (g) a 10 000-es
   keretnél 2000-et és 3000-et mért).
+- **Az építés — (3) az azonosság pontja a készülékei összege** (2026-11-14): a pont a LÁNCÉ (láncónként az utolsó), az azonosság
+  pontja egy entitáson a láncai összege — `allapotSzamitas.js` (a hozzájárulók, a kiosztási főkönyv; a szerep aktív, ha bármely
+  pozitív lánca aktív), `javaslatSzamitas.js` (a tulajdonos, a javaslat-entitás pontja; a nevező bizonyítéka a legkisebb azonosítójú
+  pozitív aktív láncé). Az össz-pont levele a szerzőé marad (az egyezmény átvitele szerzőnként visz pontot), és a láncai
+  pont-eseményeinek ÖSSZEGE: egy készüléknél egy azonosító (semmi nem változik), többnél a lista — a kérdező mindet ellenőrzi
+  (különböző láncok, mind a szerzőé, az összegük a levél; legfeljebb 16), a tartó mindet elküldi (`osszegzoTartas.js`).
+  ⭐ Közben kiderült: a döntés számításában az érték javaslat még a sorszámot nézte két készülék között is (a ①b (1) kimaradt
+  helye) — most az időt (`kesobbiAllitas`). A kereső (K3) bejegyzése tulajdonosonként egy pont-eseményt visz — egy azonosság egyszer
+  számít, a rangsora a legnagyobb láncáé (a lap ④ mondja meg, ha ez számít). A próba: `keszulekProba.js` „AZ AZONOSSÁG PONTJA A
+  KÉSZÜLÉKEI ÖSSZEGE” (az állapot, a fejléc a tartó mintáival, a hamis levél) és „A DÖNTÉSBEN IS” (10 rontás).
+- **Az építés — (4) a szavazás és a javaslattétel joga készülékenként** (12. pont, Csaba: (A)): ahol ennek a készüléknek nincs
+  pontja, de az azonosságnak (egy másik készüléknek) van, a művelet előbb magától 1 pontot tesz rá a saját részéből
+  (`muveletek.js` `keszulekPontjaHaAzonossagome`) — a jog így a saját láncából bizonyítható (D85). Ha a készüléknek nincs szabad
+  pontja, a pont-rendezés kimondja (a keret az átadással jön). A próba: „A SZAVAZÁS ÉS A JAVASLAT JOGA KÉSZÜLÉKENKÉNT” (a javaslat,
+  a szavazat, és az idegen gondolat, ahol nem tesz pontot — 5 rontás).
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

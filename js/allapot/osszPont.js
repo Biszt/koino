@@ -50,7 +50,7 @@ import {
   ujAllapotFa, allapotBeallitas, allapotTorles, allapotGyokere, allapotSulyozottKeresese,
   allapotSulyozottEllenorzese
 } from '../esemeny/osszegzoFa.js';
-import { esemenyEllenorzese } from '../esemeny/esemeny.js';
+import { esemenyEllenorzese, lancKulcsa } from '../esemeny/esemeny.js';
 
 /** A részfa-fa típusa (a lenyomatokban — más fa-típussal nem keverhető). */
 export const OSSZPONT_FA = 'osszpont';
@@ -66,6 +66,9 @@ export const RESZFA_FA_KORLAT = 256;
 
 /** Egy fejléc-válaszban legfeljebb ennyi minta (a kérdező kérése felülről korlátos). */
 export const MINTA_KORLAT = 32;
+
+/** ⭐⭐ D128 (①b (3)): egy szerzői levél legfeljebb ennyi lánc (készülék) pont-eseményének összege lehet. */
+export const PONT_LANC_KORLAT = 16;
 
 // ===================================
 // A FELFELÉ ÖSSZEGZÉS
@@ -227,6 +230,7 @@ export function reszfaLevelei(azonosito, allapot, osszPontok, gyerekek = gyerekJ
   const ki = [];
   for (const [szerzo, h] of e.hozzajarulok) {
     if (!(h.pont > 0)) continue;
+    // ⭐⭐ D128 (①b (3)): több készülékről a láncok pont-eseményeinek listája (a levél ezek összege).
     const esemeny = allapot.pontEsemenyek?.get(szerzo + '|' + azonosito);
     ki.push({ kulcs: 'p:' + szerzo, ertek: esemeny ? { e: esemeny } : { atvitt: true }, osszegek: [h.pont, 0, 0] });
   }
@@ -374,13 +378,22 @@ export async function fejlecEllenorzese({ azonosito, gyoker, helyek, mintak, ese
     if (!m.kulcs.startsWith('p:')) return hiba('ismeretlen levél-fajta');
     if (hely.i !== RESZFA_PONT) return hiba('a szerzői levélre darab-minta esett');
     if (e.ertek?.atvitt === true) { ered.atvitt++; continue; }
-    const esemeny = esemenyek.get(e.ertek?.e);
-    if (!esemeny) { ered.hianyzoEsemeny++; continue; }
+    // ⭐⭐ D128 (①b (3)): a szerző levele a láncai (készülékei) pont-eseményeinek ÖSSZEGE — egy készüléknél egy azonosító, többnél
+    // a lista (különböző láncok, mind a szerzőé, ezen az entitáson; a pontjaik összege a levél).
+    const azonositok = Array.isArray(e.ertek?.e) ? e.ertek.e : [e.ertek?.e];
+    if (!azonositok.length || azonositok.length > PONT_LANC_KORLAT) return hiba('a levél pont-esemény listája hibás');
+    const lista = azonositok.map((az) => esemenyek.get(az));
+    if (lista.some((x) => !x)) { ered.hianyzoEsemeny++; continue; }
     const szerzo = m.kulcs.slice(2);
-    if (esemeny.tipus !== 'TudatpontRendezes' || esemeny.szerzo !== szerzo || esemeny.adat?.entitas !== azonosito
-        || esemeny.adat?.pont !== e.osszegek[0]) return hiba('a pont-esemény mást mond, mint a levél');
-    const al = await esemenyEllenorzese(esemeny);
-    if (!al.rendben) return hiba('a pont-esemény nem hiteles: ' + al.ok);
+    const lancok = new Set(lista.map((x) => lancKulcsa(x)));
+    if (lancok.size !== lista.length || lista.some((x) => x.tipus !== 'TudatpontRendezes' || x.szerzo !== szerzo
+        || x.adat?.entitas !== azonosito) || lista.reduce((s, x) => s + (x.adat?.pont ?? 0), 0) !== e.osszegek[0]) {
+      return hiba('a pont-esemény mást mond, mint a levél');
+    }
+    for (const x of lista) {
+      const al = await esemenyEllenorzese(x);
+      if (!al.rendben) return hiba('a pont-esemény nem hiteles: ' + al.ok);
+    }
     ered.ellenorzott++;
   }
   return ered;

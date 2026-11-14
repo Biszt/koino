@@ -1302,6 +1302,40 @@ export function kezdoPontokElosztasa(osszes, darab) {
  *        vagy a RÉGI alak: { erintett, muvelet, valtozas, indoklas, fajta, pont }
  *        — a `pont` a kezdő tudatpont (alapból töredékenként 1); több érintettnél ennyi oszlik szét
  */
+/**
+ * ⭐⭐ D128 (12. pont — Csaba, 2026-11-14: (A)): mennyi pontja van az AZONOSSÁGOMNAK (bármely készülékemnek) az entitáson — a
+ * tárban lévő láncaim utolsó pont-eseményeiből (láncónként a legnagyobb sorszámú). A szavazás és a javaslattétel ebből tudja,
+ * hogy a jog egy MÁSIK készülékemé: ilyenkor ez a készülék előbb magától 1 pontot tesz rá a saját részéből (a jogot az esemény a
+ * saját láncából bizonyítja — D85). ⚠️ Csak a kiváltó: a jogról a számítás dönt.
+ * @param {Object} kornyezet
+ * @param {string} entitas
+ * @returns {Promise<number>}
+ */
+async function azonossagomPontja(kornyezet, entitas) {
+  const utolso = new Map();   // lánc → az utolsó pont-eseménye ezen az entitáson
+  for (const e of await azonossagEsemenyei(kornyezet.tar, kornyezet.szerzo)) {
+    if (e.tipus !== 'TudatpontRendezes' || e.adat?.entitas !== entitas || esemenyKoinoja(e) !== kornyezet.koino) continue;
+    const eddigi = utolso.get(lancKulcsa(e));
+    if (!eddigi || e.sorszam > eddigi.sorszam) utolso.set(lancKulcsa(e), e);
+  }
+  let osszeg = 0;
+  for (const e of utolso.values()) if (e.adat.pont > 0) osszeg += e.adat.pont;
+  return osszeg;
+}
+
+/**
+ * ⭐⭐ D128 (12. pont): ha ennek a készüléknek nincs pontja az entitáson, de az azonosságomnak (egy másik készülékemnek) van,
+ * 1 pontot tesz rá a saját részéből — a jog így a saját láncából bizonyítható. ⛔ Ha a készüléknek nincs szabad pontja, a
+ * pont-rendezés kimondja (a keret az átadással jön).
+ * @returns {Promise<boolean>} van-e (most már) pontja a készüléknek az entitáson
+ */
+async function keszulekPontjaHaAzonossagome(kornyezet, entitas, ido) {
+  if ((await sajatKiosztott(kornyezet, entitas)).regi > 0) return true;
+  if ((await azonossagomPontja(kornyezet, entitas)) <= 0) return false;
+  await tudatpontRendezese(kornyezet, entitas, 1, 'aktiv', undefined, ido !== undefined ? { ido } : {});
+  return true;
+}
+
 export async function javaslatLetrehozasa(kornyezet, adatok) {
   const { erintett, muvelet, valtozas, indoklas, fajta } = adatok;
   const kezdoPont = Number.isInteger(adatok.pont) && adatok.pont > 0 ? adatok.pont : null;
@@ -1331,6 +1365,9 @@ export async function javaslatLetrehozasa(kornyezet, adatok) {
         : valtozas
     });
   }
+
+  // ⭐⭐ D128 (12. pont): a javaslattétel joga is a KÉSZÜLÉKÉ — ahol a pont egy másik készülékemen van, ez előbb 1 pontot tesz rá.
+  for (const r of erintettek) await keszulekPontjaHaAzonossagome(kornyezet, r.entitas);
 
   const javaslat = await esemenytTeszek(
     kornyezet,
@@ -1452,7 +1489,8 @@ export async function szavazas(kornyezet, javaslat, szavazat, kulonvalasIgeny = 
   const bizonyitekKulcsok = [];
   for (const je of javaslatEntitasai(javaslatEsemeny)) {
     if (!je.resz) continue;
-    if ((await sajatKiosztott(kornyezet, je.resz.entitas)).regi <= 0) continue;   // itt nem jogosult
+    // ⭐⭐ D128 (12. pont, Csaba: (A)): a jog KÉSZÜLÉKENKÉNT — ha a pont egy másik készülékemen van, ez előbb 1 pontot tesz rá.
+    if (!(await keszulekPontjaHaAzonossagome(kornyezet, je.resz.entitas, ido))) continue;   // itt nem jogosult
     // ⭐ T2: a jogosult részek mindkét kulcsára bizonyíték megy a szavazattal.
     bizonyitekKulcsok.push(je.resz.entitas, je.azonosito);
     if ((await sajatKiosztott(kornyezet, je.azonosito)).regi > 0) continue;      // már van pontja rajta
