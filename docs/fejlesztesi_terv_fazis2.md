@@ -6484,6 +6484,10 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
     állítása számít (az érték javaslat, az állásfoglalás, a profil), ott — mint a szavazatnál — az IDŐ dönt (holtversenyben az
     azonosító); két készülék láncának sorszáma nem összevethető. Egy rosszul járó óra csak a saját két állításod sorrendjét keverheti
     meg — a lap figyelmeztet, ha a készülékeid órái eltérnek.
+12. **A szavazat és a javaslat joga készülékenként** (Csaba, 2026-11-14 — (A)): a jogot az esemény a SAJÁT láncából bizonyítja (D85 — egy
+    eseményből); ha a telefon szavazna egy gondolatról, amin csak a laptopnak van pontja, előbb magától 1 pontot tesz rá a saját
+    részéből (ahogy ma a javaslatra), és azzal szavaz. *(A (B) — az azonosság bármelyik láncára hivatkozni — elavult bizonyítékot
+    adna: a laptop közben levehette a pontot.)*
 
 *Az építés sorrendje:* ① a mag (a `keszulek` mező és a (szerző, készülék) lánc, a tanúsítvány és a kizárás az örökössel, a keret az
 átadással, a sorrend az azonosság eseményei között) → ② a csere-kulcs és a kulcscsere, a mentés (a lapon is) → ③ a hálózat → ④ a lap

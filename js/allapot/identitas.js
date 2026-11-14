@@ -62,7 +62,7 @@
 import { esemenyKoinoja, koinoSzuleteseE, azonositoAlaku } from '../esemeny/esemeny.js';
 import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
 import { esemenyLekerese, entitasEsemenyei, sajatLancEsemenyei } from '../tar/esemenyTar.js';
-import { lancKulcsa } from '../esemeny/esemeny.js';
+import { lancKulcsa, kesobbiAllitas } from '../esemeny/esemeny.js';
 // ⭐ D93: a tagság szabálya EGY helyen él (`tagsag.js`) — a szabály-réteg és ez a tár-alapú kérdés ugyanazt hívja.
 import { tagsagiIndex, horgonyTagsaga, MELYSEG_KORLAT, TAGSAGI_CSOMAG, PROFIL } from './tagsag.js';
 // ⭐ D94: a szúrópróba véletlenje — az ELLENŐRZŐ választ, kriptográfiai véletlennel (nem a bizonyító).
@@ -839,7 +839,7 @@ async function lepcsoBemondasa(tar, koino, horgony, horgonyEsemeny, nezet) {
   let legutobbi = null;
   for (const e of szelet) {
     if (e.tipus !== LEPCSO_BEMONDAS || e.szerzo !== horgonyEsemeny.szerzo) continue;
-    if (!legutobbi || e.sorszam > legutobbi.sorszam) legutobbi = e;
+    if (!legutobbi || kesobbiAllitas(e, legutobbi)) legutobbi = e;   // ⭐⭐ D128: két készülék között az idő
   }
   return legutobbi;
 }

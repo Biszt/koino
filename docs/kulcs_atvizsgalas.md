@@ -242,6 +242,14 @@ gépen és a tanúsítvány a kapuban — egy készülékkel minden úgy megy, m
 a pontok és az utolsó állítás az azonosságra, a `keszulek` parancs; a próba: két készülék egy azonossággal, offline is) · **①c** a keret
 (a kapott-fa, az átadás és az átvétel, az átfolyás a határral) · **①d** a kizárás és az örökös.
 
+**9.8 Az ①b sorrendje** (2026-11-14 — Csaba: *„aztán mehetsz is tovább, folytatólagosan a lépésekkel”*; a szavazat joga: **(A)
+készülékenként** — D128 12.): a második készülék pontjai a keret nélkül nem értelmezhetők (az alapszabály nélkül minden készüléknek
+teljes kerete lenne — kétszeres keret), ezért az ①b és az ①c EGY lépés: **(1)** az azonosság utolsó állítása időrendben (9.5) ·
+**(2)** a keret: az alap a horgony láncáé, a többié 0 + a kapott (az átadás és az átvétel) · **(3)** a pontok az azonosságra összegezve,
+a bizonyítékok (a fejléc levelei) láncónként · **(4)** a szavazás: a készülék előbb 1 pontot tesz az érintettre, ha ott nincs pontja.
+Mind folyamaton belüli próbával (két készülék, egy azonosság, offline is). A második készülék LÉTREHOZÁSA (a parancs, a lap, a
+kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a hálózaton egy készülék él.
+
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor
   NÉLKÜLE utazik: egy szelet a cserében, egy tagsági kísérő, egy kérelem vagy egy összegző válasza, egy döntési csomag, egy

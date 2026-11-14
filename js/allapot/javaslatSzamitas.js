@@ -33,7 +33,7 @@
 
 import { median } from './allapotSzamitas.js';
 import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
-import { koinoSzuleteseListabol } from '../esemeny/esemeny.js';
+import { koinoSzuleteseListabol, kesobbiAllitas } from '../esemeny/esemeny.js';
 import { erintettek, javaslatEntitasai, szavazatSajatPontjai } from './szabalyok.js';
 
 // ===================================
@@ -407,7 +407,7 @@ function reszekSzamitasa(javaslatEsemeny, kik, szavazatok, tudatpontok, ertekJav
   const reszSzavazatEsemenyek = uresen(); // ⭐ D95/1: entitás → (szerző → a beszámított szavazat azonosítója)
   const javaslatTulajdonosok = uresen(); // entitás (a rész) → (szerző → { pont, sorszam }) a javaslat-entitásán
   const kulonAgot = uresen();         // entitás → (szerző → kért-e külön ágat)
-  const szavazatSorszam = new Map();  // szerző → az eddig figyelembe vett szavazat-sorszám
+  const szavazatUtolso = new Map();   // szerző → az eddig figyelembe vett szavazata (⭐⭐ D128: két készülék között az idő dönt)
 
   /**
    * ⭐ A NEVEZŐ EGY RÉSZBEN: az entitás aktív tulajdonosai ∪ az itt számító szavazók.
@@ -515,9 +515,9 @@ function reszekSzamitasa(javaslatEsemeny, kik, szavazatok, tudatpontok, ertekJav
     // A saját láncban az utolsó számít: egy kisebb sorszámú esemény nem írhatja felül
     // a nagyobbat (a meggondolás joga előre él, nem visszafelé).
     if (esemeny.tipus === 'Szavazat') {
-      const eddigi = szavazatSorszam.get(esemeny.szerzo);
-      if (eddigi !== undefined && esemeny.sorszam <= eddigi) continue;
-      szavazatSorszam.set(esemeny.szerzo, esemeny.sorszam);
+      const eddigi = szavazatUtolso.get(esemeny.szerzo);
+      if (eddigi !== undefined && !kesobbiAllitas(esemeny, eddigi)) continue;
+      szavazatUtolso.set(esemeny.szerzo, esemeny);
 
       // ⭐⭐ EGY SZAVAZÁS → MINDEN JOGOSULT RÉSZRE, a többi ÁTUGORVA. Szó szerint a
       // prototípus `szavazatService`-e: „jogosultToredekek" / „atugrottToredekek".
@@ -648,13 +648,14 @@ function reszekSzamitasa(javaslatEsemeny, kik, szavazatok, tudatpontok, ertekJav
  * @returns {Map<string, Object>} egyezmény azonosító → { csatlakozok, tiltakozok, utkozesek }
  */
 function hatalyokSzamitasa(esemenyek) {
-  // ⭐ Emberenként az utolsó: a saját láncban a nagyobb sorszám nyer — nem az óra.
+  // ⭐ Emberenként az utolsó: a saját láncban a nagyobb sorszám nyer — nem az óra. ⭐⭐ D128: két készülék között az idő
+  // (`kesobbiAllitas` — a sorszámaik nem összevethetők).
   const utolso = new Map();      // "szerző|egyezmény" → esemény
   for (const e of esemenyek) {
     if (e.tipus !== 'Allasfoglalas') continue;
     const kulcs = e.szerzo + '|' + e.adat.egyezmeny;
     const eddigi = utolso.get(kulcs);
-    if (!eddigi || e.sorszam > eddigi.sorszam) utolso.set(kulcs, e);
+    if (!eddigi || kesobbiAllitas(e, eddigi)) utolso.set(kulcs, e);
   }
 
   const hatalyok = new Map();
@@ -946,6 +947,6 @@ export function sajatSzavazat(esemenyek, javaslatAzonosito, szerzo) {
     .filter((e) => e.szerzo === szerzo);
   if (!sajatok.length) return null;
 
-  const utolso = sajatok.reduce((eddigi, e) => (e.sorszam > eddigi.sorszam ? e : eddigi));
+  const utolso = sajatok.reduce((eddigi, e) => (kesobbiAllitas(e, eddigi) ? e : eddigi));   // ⭐⭐ D128
   return utolso.adat.szavazat;
 }

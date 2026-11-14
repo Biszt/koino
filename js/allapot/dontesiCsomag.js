@@ -54,7 +54,8 @@
 // (`csomagokKibontasa`), a művelet-réteg (a csomag kiadása), a 55. mérés, a próbák.
 
 import { erintettek, toredekAzonosito } from './szabalyok.js';
-import { esemenyEllenorzese, szelet, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, tanusitvanyKereso } from '../esemeny/esemeny.js';
+import { esemenyEllenorzese, szelet, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, tanusitvanyKereso, lancKulcsa, kesobbiAllitas }
+  from '../esemeny/esemeny.js';
 import { tanusitvanyAlakiHibaja } from '../kulcs/keszulek.js';
 import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa } from './lancGyoker.js';
 // ⭐ D93/1: a résztvevők tagsági bizonyítéka is a csomagba kerül (a cél tartója különben nem ellenőrizhetné őket).
@@ -121,9 +122,10 @@ export function dontesBemenete(esemenyek, javaslatEsemeny, lezarasIdeje) {
     const entitas = e.adat?.entitas;
     if (!erintettHalmaz.has(entitas)) continue;
     if (e.ido >= szuletes) { ki.set(e.azonosito, e); continue; }   // az ablak: mind
-    const kulcs = e.szerzo + '|' + entitas + '|' + e.tipus;
+    // ⭐⭐ D128: a pont a KÉSZÜLÉKÉ (láncónként az utolsó), az érték javaslat az azonosságé (az utolsó állítása — `kesobbiAllitas`).
+    const kulcs = (e.tipus === 'TudatpontRendezes' ? lancKulcsa(e) : e.szerzo) + '|' + entitas + '|' + e.tipus;
     const eddigi = elozmeny.get(kulcs);
-    if (!eddigi || e.sorszam > eddigi.sorszam) elozmeny.set(kulcs, e);
+    if (!eddigi || kesobbiAllitas(e, eddigi)) elozmeny.set(kulcs, e);
   }
   for (const e of elozmeny.values()) ki.set(e.azonosito, e);
   // ⭐ D93/1: és a résztvevők tagsági láncai (a döntésben csak az ellenőrzött tag számít).

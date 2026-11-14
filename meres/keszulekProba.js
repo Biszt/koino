@@ -26,6 +26,7 @@ import { lenyomat, bajtokBase64Url } from '../js/esemeny/kanonikusAlak.js';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { esemenyMentese, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
+import { sajatSzavazat } from '../js/allapot/javaslatSzamitas.js';
 
 const { proba, futtatas } = probaGyujtemeny('A készülék és a tanúsítványa (D128 — ET-3)');
 
@@ -205,6 +206,27 @@ proba('⭐⭐ KÉT KÉSZÜLÉK, EGY AZONOSSÁG — azonos sorszámuk nem elágaz
     && l1.sorszam === 1 && t1.sorszam === 1 && !elagazasE(l1, t1)
     && m1.mentve && m2.mentve && !m2.elagazas
     && allapot.entitasok.has(l1.azonosito) && allapot.entitasok.has(t1.azonosito) && allapot.ellentmondasok.length === 0;
+});
+
+proba('⭐⭐ AZ AZONOSSÁG UTOLSÓ ÁLLÍTÁSA (9.5 — „legyen az idő”) — két készülék között az IDŐ dönt (az érték javaslatnál és a szavazatnál), egy láncon a sorszám', async () => {
+  const laptop = await ujEember(KOINO);
+  const telefon = await ujEember(KOINO, await tesztKeszulek('telefon', laptop.kulcspar.azonossagKulcspar));
+  const g = await laptop.tesz('GondolatLetrehozas', { cim: 'Küszöbös' }, 1000);
+  const p = await laptop.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 100 }, 1001);
+  const kuszob = (e) => ({ entitas: g.azonosito, ertekek: { elfogadasiKuszob: e, reszveteliKuszob: 0, minimumDontesiIdo: 60, maximumDontesiIdo: 120 } });
+  // a laptop (a lánca 3.-a) 2000-kor 60-at mond, a telefon (a lánca 1.-e) később, 3000-kor 70-et — a telefoné az utolsó
+  const l60 = await laptop.tesz('ErtekJavaslat', kuszob(60), 2000);
+  const t70 = await telefon.tesz('ErtekJavaslat', kuszob(70), 3000);
+  const idoben = allapotSzamitasa(await tagokkal([g, p, l60, t70])).entitasok.get(g.azonosito)?.kuszobok?.elfogadasiKuszob;
+  // fordítva: a telefoné a korábbi (1500) — a laptopé marad
+  const t70korai = await telefon.tesz('ErtekJavaslat', kuszob(70), 1500);
+  const korai = allapotSzamitasa(await tagokkal([g, p, l60, t70korai])).entitasok.get(g.azonosito)?.kuszobok?.elfogadasiKuszob;
+  // a saját szavazat: a laptop 4000-kor támogat, a telefon 5000-kor ellenez — az ellenzés az utolsó
+  const j = 'J'.repeat(43);
+  const szl = await laptop.tesz('Szavazat', { javaslat: j, szavazat: 'Tamogat' }, 4000);
+  const szt = await telefon.tesz('Szavazat', { javaslat: j, szavazat: 'Ellenez' }, 5000);
+  const szavazat = sajatSzavazat([szl, szt], j, laptop.szerzo);
+  return idoben === 70 && korai === 60 && szavazat === 'Ellenez';
 });
 
 // ===================================

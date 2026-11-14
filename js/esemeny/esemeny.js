@@ -119,6 +119,22 @@ export function lancKulcsa(e) {
 }
 
 /**
+ * ⭐⭐ D128 (9.5 — Csaba: „legyen az idő”): KÉSŐBBI-e az `a` állítás, mint a `b` — ugyanannak az azonosságnak két állítása közül (az
+ * érték javaslat, az állásfoglalás, a szavazat, a 2. lépcső bemondása: ahol az UTOLSÓ számít). EGY szabály minden helyen:
+ *   · egy láncon (egy készüléken) a SORSZÁM dönt — ugyanaz, mint a D128 előtt (egy készüléknél semmi nem változik);
+ *   · két készülék között az IDŐ (a sorszámok nem összevethetők), holtversenyben a nagyobb azonosító.
+ * ⚠️ Egy rosszul járó óra csak a TE két állításod sorrendjét keverheti meg — másét nem (a kulcs az azonosságé).
+ * @param {Object} a
+ * @param {Object} b
+ * @returns {boolean}
+ */
+export function kesobbiAllitas(a, b) {
+  if (lancKulcsa(a) === lancKulcsa(b)) return a.sorszam > b.sorszam;
+  if (a.ido !== b.ido) return a.ido > b.ido;
+  return a.azonosito > b.azonosito;
+}
+
+/**
  * ⭐⭐ D128: hozza-e az esemény a készülék tanúsítványát? — a lánc ELSŐ eseménye: az 1. sorszám, a bekapcsolódás
  * (a szülőbeli láncot folytatja a gyermekben) és a gyermek születése (a létrehozó szülőbeli láncát folytatja). EGY
  * szabály az aláírásnak és a kapunak.

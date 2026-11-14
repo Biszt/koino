@@ -31,7 +31,7 @@
 
 import { szabalyokErvenyesitese, erintettek, elsoErintett, javaslatEntitasai } from './szabalyok.js';
 import { csomagokKibontasa } from './dontesiCsomag.js';
-import { koinoSzuleteseListabol, lancKulcsa } from '../esemeny/esemeny.js';
+import { koinoSzuleteseListabol, lancKulcsa, kesobbiAllitas } from '../esemeny/esemeny.js';
 import { koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
 
 // ===================================
@@ -218,7 +218,8 @@ function utolsoNyer() {
      */
     rogzit(kulcs, esemeny, ertek) {
       const meglevo = ertekek.get(kulcs);
-      if (!meglevo || esemeny.sorszam > meglevo.sorszam) {
+      // ⭐⭐ D128: egy láncon a sorszám, két készülék között az idő (`kesobbiAllitas` — egy szabály minden helyen).
+      if (!meglevo || kesobbiAllitas(esemeny, meglevo.esemeny)) {
         ertekek.set(kulcs, { sorszam: esemeny.sorszam, ertek, esemeny });
       }
     },
