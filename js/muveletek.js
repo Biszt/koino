@@ -1326,6 +1326,21 @@ export async function kizarasBevitele(kornyezet, kizaras) {
 }
 
 /**
+ * ⭐⭐ D128 (②b): a KULCSCSERE bevitele ebbe a koinóba — a születés és a cserék lánca (önmagát igazolja: bárki beviheti, mint a
+ * kizárást), az azonosság szeletébe. A koinó ettől tudja, hogy a régi kulccsal felvett, nem felsorolt készülékek eseményei nem számítanak.
+ * @param {Object} kornyezet
+ * @param {Object} szuletes
+ * @param {Array<Object>} cserek
+ * @returns {Promise<Object>} a `Kulcscsere` esemény
+ */
+export async function kulcscsereBevitele(kornyezet, szuletes, cserek) {
+  console.log('muveletek.kulcscsereBevitele - KEZDÉS', { cserek: cserek?.length });
+  const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, cserek?.[0]?.azonossag);
+  if (!horgony) throw new Error('Az azonosságnak nincs azonosság-szelete ebben a koinóban — a kulcscsere nem helyezhető el.');
+  return esemenytTeszek(kornyezet, 'Kulcscsere', { szuletes, cserek }, { entitas: horgony });
+}
+
+/**
  * Egy készülékem KIZÁRÁSA (az azonosság kulcsával): a tanúsítvány koinónként a vágással és az örökössel, és a bevitele ebbe a
  * koinóba (a többi felsorolt koinóba az örökös viszi — ott is `kizarasBevitele`). ⚠️ Az azonosság kulcsa kell hozzá (KU6:
  * később papírról).

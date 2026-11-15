@@ -32,6 +32,7 @@ import { mkdir, readFile, appendFile, writeFile, readdir, access, rm, stat, open
 import { join, dirname } from 'node:path';
 
 import { szelet, bejelentesHelyei, lancKulcsa } from '../esemeny/esemeny.js';
+import { kezelesAzonossaga } from '../allapot/kizaras.js';   // ⭐⭐ D128 (①d, ②b): a kezelés-események indexe
 // ⭐⭐ D128: a láncukon kívül érkezett események tanúsítványai — a készülék mappájában (koinótól független).
 import { tanusitvanyJegyzek } from './tanusitvanyJegyzek.js';
 import { bajtLenyomat } from '../esemeny/kanonikusAlak.js';
@@ -104,7 +105,7 @@ export const KEP_KUSZOB = 1000;
 
 // A pillanatkép alakjának változata. ⚠️ Ha a mutató mezői változnak, ez nő — a régi képet a tár
 // eldobja, és egyszer a fájlból épít újat (a kép tiszta gyorsítótár).
-const KEP_VALTOZAT = 5;   // ⭐⭐ D128 (①d): a bejegyzés a kizárás azonosságát is tartja (`k`)
+const KEP_VALTOZAT = 6;   // ⭐⭐ D128 (①d): a bejegyzés a kizárás azonosságát is tartja (`k`) — (②b): és a kulcscseréét
 
 // ⭐ Ennél több hiányzó testet egyetlen, sorban olvasással hozunk (mint a teljes betöltés);
 // kevesebbet egyenként, a nyitott fájl adott helyéről.
@@ -197,7 +198,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
   let szerzoSzerint = new Map();          // lánc (készülék) → bejegyzések
   let azonossagSzerint = new Map();       // ⭐⭐ D128: azonosság (szerző) → bejegyzések (minden készülékéé)
   let tanusitvanySzerint = new Map();     // ⭐⭐ D128: készülék → az első bejegyzés, ami a tanúsítványát hozza
-  // ⭐⭐ D128 (①d): azonosság → a kizárásai (a `Kizaras` események bejegyzései — bárki hozta be; a tanúsítvány azonossága szerint).
+  // ⭐⭐ D128 (①d, ②b): azonosság → a KEZELÉS-eseményei (a `Kizaras` és a `Kulcscsere` események — bárki hozta be; az azonosság szerint).
   let kizarasSzerint = new Map();
   let szeletSzerint = new Map();          // szelet-kulcs → bejegyzések
   // ⭐ A C 7. pontja (a gyerek-bejelentés), D85/1, D85/3 óta általánosan: szelet → a hozzá BEJELENTETT
@@ -263,7 +264,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
   const bejegyzesEsemenybol = (e, o, h) =>
     ({ o, h, a: e.azonosito, z: lancKulcsa(e), n: e.sorszam, s: szelet(e), p: bejelentesHelyei(e), y: e.szerzo,
       t: e.tanusitvany ? 1 : 0,
-      k: e.tipus === 'Kizaras' && typeof e.adat?.kizaras?.azonossag === 'string' ? e.adat.kizaras.azonossag : null });
+      k: kezelesAzonossaga(e) });
 
   /**
    * A fájl egy darabjának sorai a mutatóba (és a testek a memóriába). ⚠️ A darab egész
@@ -616,8 +617,10 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
       return testekKellenek(() => azonossagSzerint.get(szerzo) ?? []);
     },
 
-    /** ⭐⭐ D128 (①d): egy azonosság KIZÁRÁSAI — a `Kizaras` események, akárki hozta be (a tanúsítvány azonossága szerint). */
-    async kizarasEsemenyei(azonossag) {
+    /**
+     * ⭐⭐ D128 (①d, ②b): egy azonosság KEZELÉS-eseményei — a kizárásai és a kulcscseréi (`Kizaras`, `Kulcscsere`), akárki hozta be.
+     */
+    async kezelesEsemenyei(azonossag) {
       return testekKellenek(() => kizarasSzerint.get(azonossag) ?? []);
     },
 

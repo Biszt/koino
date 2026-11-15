@@ -6496,6 +6496,8 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
     tanúsított (a tolvaj által felvett készülék is), érvénytelen.
 15. **A csere-kulcs csak a mentésben** (KC3 (A)): a születéskor a készülék megmutatja (papírra: szavak + QR; fájlba), megkéri, hogy
     mentsd el, és utána törli magáról — egy ellopott készülék soha nem viheti.
+16. **A csere-kulcs papíron betűcsoportokban** (Csaba, 2026-11-15 — KC4 (A)): 4 jeles csoportokban (kb. 14 csoport), ellenőrző
+    jeggyel (elírásnál szól), mellette QR — nyelvfüggetlen, szólista nélkül (a BIP39 angol és egy saját magyar szólista helyett).
 
 *Az építés sorrendje:* ① a mag (a `keszulek` mező és a (szerző, készülék) lánc, a tanúsítvány és a kizárás az örökössel, a keret az
 átadással, a sorrend az azonosság eseményei között) → ② a csere-kulcs és a kulcscsere, a mentés (a lapon is) → ③ a hálózat → ④ a lap

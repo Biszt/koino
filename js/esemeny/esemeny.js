@@ -27,6 +27,7 @@ import { osszegzesAlakja } from './osszegzoFa.js';
 import { szovegHivatkozasE } from './szovegDarab.js';
 // ⭐⭐ D128: a készülék-tanúsítvány (az azonosság kulcsa írja alá — koinók fölött).
 import { tanusitvanyAlakiHibaja, tanusitvanyEllenorzese, kizarasAlakiHibaja } from '../kulcs/keszulek.js';
+import { szuletesAlakiHibaja, kulcscsereAlakiHibaja, KULCSCSERE_KORLAT } from '../kulcs/azonossag.js';
 
 const ALGORITMUS = 'Ed25519';
 
@@ -797,6 +798,17 @@ export function alakiHiba(esemeny) {
     const h = a && typeof a === 'object' && !Array.isArray(a) && Object.keys(a).length === 1
       ? kizarasAlakiHibaja(a.kizaras) : 'a kizárás eseménye a kizárás-tanúsítványt hozza ({ kizaras })';
     if (h) return 'a kizárás eseménye: ' + h;
+  }
+  // ⭐⭐ D128 (②b): a KULCSCSERE — az eseménye a születést és a cserék láncát hozza (csak azt); a láncot a kapu ellenőrzi.
+  if (esemeny.tipus === 'Kulcscsere') {
+    const a = esemeny.adat;
+    const cs = a?.cserek;
+    const h = !a || typeof a !== 'object' || Array.isArray(a) || Object.keys(a).sort().join(',') !== 'cserek,szuletes'
+      ? 'a kulcscsere eseménye a születést és a cserék láncát hozza ({ szuletes, cserek })'
+      : szuletesAlakiHibaja(a.szuletes)
+        ?? (!Array.isArray(cs) || !cs.length || cs.length > KULCSCSERE_KORLAT ? 'a cserék lánca 1–' + KULCSCSERE_KORLAT + ' csere'
+          : cs.map(kulcscsereAlakiHibaja).find((x) => x) ?? null);
+    if (h) return 'a kulcscsere eseménye: ' + h;
   }
   // ⭐ D94: a 2. lépcső bemondása — a saját horgonyhoz szól, és a tanúsítások azonosítóit hordozza (1–16, ismétlés nélkül).
   if (esemeny.tipus === 'LepcsoBemondas') {

@@ -39,7 +39,8 @@
 
 import { bajtokBase64Url } from '../esemeny/kanonikusAlak.js';
 // ⭐⭐ D128 (②a — KC1 (A)): az azonosság születése (a név a lenyomata).
-import { ujAzonossag, szuletesKeszitese, szuletesEllenorzese, csereLenyomata, azonossagNeve } from './azonossag.js';
+import { ujAzonossag, szuletesKeszitese, szuletesEllenorzese, csereLenyomata, azonossagNeve, kezeloKulcsLanc, kulcscsereKeszitese }
+  from './azonossag.js';
 
 // ⭐ Változatlanul innen is elérhető marad: aki a kulcs-réteget használja, tipikusan a
 // kulcs olvasható alakja miatt nyúl a bájt-átalakítóhoz is. Egy megvalósítás, két kapu.
@@ -267,17 +268,58 @@ export async function kulcsparKimentese(kulcspar) {
   const leiras = await kulcsparLeirasa(kulcspar);
   const szuletes = kulcspar.szuletes;
   return JSON.stringify(szuletes ? { ...leiras, nev: await azonossagNeve(szuletes), szuletes,
+    ...(kulcspar.cserek?.length ? { cserek: kulcspar.cserek } : {}),   // ⭐⭐ D128 (②b): a kulcscserék lánca is
     ...(kulcspar.fizetesKulcs ? { fizetesKulcs: kulcspar.fizetesKulcs } : {}) } : leiras, null, 2);
 }
 
 /** ⭐⭐ D128 (②a): a leírásból a születés és a fizetési kulcs a kulcspárra — ha a születés ehhez a kulcshoz tartozik. */
 async function azonossagRaTetele(kulcspar, leiras) {
   const kulcs = await nyilvanosKulcsSzovegesen(kulcspar.publicKey);
-  if (leiras?.szuletes && leiras.szuletes.kulcs === kulcs && (await szuletesEllenorzese(leiras.szuletes)).rendben) {
+  if (!leiras?.szuletes || !(await szuletesEllenorzese(leiras.szuletes)).rendben) return kulcspar;
+  // ⭐⭐ D128 (②b): egy kulcscsere UTÁN a tárolt kulcs a lánc VÉGÉN álló kezelő kulcs (nem a születésé) — a lánc a fájlban van.
+  const cserek = Array.isArray(leiras.cserek) ? leiras.cserek : [];
+  const lanc = await kezeloKulcsLanc(leiras.szuletes, cserek, await azonossagNeve(leiras.szuletes));
+  if (lanc.rendben && lanc.kulcsok.at(-1) === kulcs) {
     kulcspar.szuletes = leiras.szuletes;
+    if (cserek.length) kulcspar.cserek = cserek;
     if (leiras.fizetesKulcs) kulcspar.fizetesKulcs = leiras.fizetesKulcs;
   }
   return kulcspar;
+}
+
+/**
+ * ⭐⭐ D128 (②b — 7. pont, 14. pont: KC2 (A)): A KULCSCSERE a gépen — a csere-kulcs (a mentésből) aláírja: új kezelő kulcs, új
+ * lekötés (az új csere-kulcs — kiadásra), és a MEGMARADÓ készülékek. A név marad; a tároló az új kulcsot a lánccal tartja.
+ * @param {Object} tarolo
+ * @param {Object} csereLeiras - a csere-kulcs kiadása (`csereKulcsKiadasa` — `{ mi: 'koino-csere-kulcs', privatKulcs }`)
+ * @param {Array<string>} marado - a megmaradó készülékek kulcsai
+ * @returns {Promise<{kulcspar: CryptoKeyPair, csere: CryptoKeyPair, kulcscsere: Object, cserek: Array<Object>, nev: string}>}
+ */
+export async function kulcscsereVegrehajtasa(tarolo, csereLeiras, marado) {
+  console.log('kulcscsereVegrehajtasa - KEZDÉS', { marado: marado.length });
+  const regi = await kulcsparBetoltese(tarolo);
+  if (!regi?.szuletes) throw new Error('Ezen a gépen nincs születéssel bíró azonosság — nincs mit cserélni.');
+  if (csereLeiras?.mi !== 'koino-csere-kulcs' || !csereLeiras.privatKulcs) throw new Error('Ez nem csere-kulcs (koino-csere-kulcs).');
+  const nev = await azonossagNeve(regi.szuletes);
+  if (csereLeiras.nev && csereLeiras.nev !== nev) throw new Error('Ez a csere-kulcs egy MÁSIK azonosságé.');
+  const privateKey = await crypto.subtle.importKey('jwk', csereLeiras.privatKulcs, { name: ALGORITMUS }, true, ['sign']);
+  const { kty, crv, x } = csereLeiras.privatKulcs;
+  const publicKey = await crypto.subtle.importKey('jwk', { kty, crv, x }, { name: ALGORITMUS }, true, ['verify']);
+  const cserek = regi.cserek ?? [];
+  const lekotes = cserek.length ? cserek[cserek.length - 1].kovetkezo : regi.szuletes.csere;
+  if (await csereLenyomata(x) !== lekotes) {
+    throw new Error('Ez a csere-kulcs nem a mostani lekötés (egy korábbi cseréé, vagy egy másik azonosságé) — vele nem cserélhetsz.');
+  }
+  const uj = () => crypto.subtle.generateKey({ name: ALGORITMUS }, true, ['sign', 'verify']);
+  const [kulcspar, ujCsere] = [await uj(), await uj()];
+  const kulcscsere = await kulcscsereKeszitese({ privateKey, publicKey }, nev, cserek.length + 1,
+    await nyilvanosKulcsSzovegesen(kulcspar.publicKey), await csereLenyomata(await nyilvanosKulcsSzovegesen(ujCsere.publicKey)), marado);
+  const ujCserek = [...cserek, kulcscsere];
+  await tarolo.ir({ ...(await kulcsparLeirasa(kulcspar)), nev, szuletes: regi.szuletes, cserek: ujCserek,
+    ...(regi.fizetesKulcs ? { fizetesKulcs: regi.fizetesKulcs } : {}) });
+  Object.assign(kulcspar, { szuletes: regi.szuletes, cserek: ujCserek, ...(regi.fizetesKulcs ? { fizetesKulcs: regi.fizetesKulcs } : {}) });
+  console.log('kulcscsereVegrehajtasa - VÉGE', { sorszam: kulcscsere.sorszam });
+  return { kulcspar, csere: ujCsere, kulcscsere, cserek: ujCserek, nev };
 }
 
 /**

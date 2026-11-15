@@ -22,7 +22,7 @@
 import {
   kulcsparLetrehozasa, kulcsparBetoltese, kulcsparBiztositasa,
   kulcsparLeirasa, kulcsparLeirasbol, kulcsparKimentese, kulcsparVisszatoltese,
-  nyilvanosKulcsSzovegesen, rovidAzonosito, csereKulcsKiadasa
+  nyilvanosKulcsSzovegesen, rovidAzonosito, csereKulcsKiadasa, kulcscsereVegrehajtasa
 } from '../js/kulcs/kulcsTar.js';
 import { azonossagNeve, csereLenyomata } from '../js/kulcs/azonossag.js';
 import { esemenyLetrehozasa, esemenyEllenorzese } from '../js/esemeny/esemeny.js';
@@ -287,6 +287,28 @@ proba('⭐⭐ (②a) az azonosság SZÜLETÉSSEL jön létre: a csere-kulcs kiad
     && !ujra.ujE && ujra.csere === null && (await azonossagNeve(ujra.kulcspar.szuletes)) === nev
     && regi.szuletettE === true && !!regi.csere && regi.kulcspar.szuletes.kulcs === await nyilvanosKulcsSzovegesen(regiKulcs.publicKey)
     && (await regiTarolo.olvas()).nev === await azonossagNeve(regi.kulcspar.szuletes);
+});
+
+proba('⭐⭐ (②b) a KULCSCSERE a gépen: a csere-kulccsal új kezelő kulcs, a név marad, a lánc a tárolóban (újratöltve és a mentésben is); a régi csere-kulcs és egy idegen nem cserélhet', async () => {
+  const tarolo = memoriaTarolo();
+  const elso = await kulcsparBiztositasa(tarolo);
+  const nev = await azonossagNeve(elso.kulcspar.szuletes);
+  const kiadas = await csereKulcsKiadasa(elso.csere, nev);
+  const r = await kulcscsereVegrehajtasa(tarolo, kiadas, ['K'.repeat(43)]);
+  const ujra = await kulcsparBiztositasa(tarolo);
+  const ujKulcs = await nyilvanosKulcsSzovegesen(r.kulcspar.publicKey);
+  // A mentés a láncot is viszi: egy üres tárolóba visszatöltve ugyanaz.
+  const vissza = await kulcsparVisszatoltese(memoriaTarolo(), await kulcsparKimentese(ujra.kulcspar));
+  let regivel = null;
+  try { await kulcscsereVegrehajtasa(tarolo, kiadas, []); } catch (h) { regivel = h.message; }
+  const idegen = await kulcsparBiztositasa(memoriaTarolo());
+  let idegennel = null;
+  try { await kulcscsereVegrehajtasa(tarolo, await csereKulcsKiadasa(idegen.csere, nev), []); } catch (h) { idegennel = h.message; }
+  return r.nev === nev && r.kulcscsere.sorszam === 1 && ujKulcs !== elso.kulcspar.szuletes.kulcs
+    && !ujra.ujE && ujra.csere === null && (await nyilvanosKulcsSzovegesen(ujra.kulcspar.publicKey)) === ujKulcs
+    && ujra.kulcspar.cserek?.length === 1 && (await azonossagNeve(ujra.kulcspar.szuletes)) === nev
+    && vissza.azonosito === nev && vissza.kulcspar.cserek?.length === 1
+    && /nem a mostani lekötés/.test(regivel ?? '') && /nem a mostani lekötés/.test(idegennel ?? '');
 });
 
 export default async function (csendes) {

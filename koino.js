@@ -153,6 +153,7 @@ import { rajKorAllapot, valtozottFeljegyzese, rajKorCeljai } from './js/csere/ra
 import { iroTarNyitasa } from './js/tar/iro.js';
 import {
   kulcsparBiztositasa, nyilvanosKulcsSzovegesen, rovidAzonosito, kulcsparKimentese, kulcsparLeirasa, csereKulcsKiadasa,
+  kulcscsereVegrehajtasa,   // ⭐⭐ D128 (②b)
   // ⭐ A KÉZI ÚT MÁSIK FELE (2026-09-15): eddig csak KIMENTENI lehetett a kulcsot.
   kulcsparVisszatoltese
 } from './js/kulcs/kulcsTar.js';
@@ -227,6 +228,7 @@ import {
   javaslatLetrehozasa, szavazas, allasfoglalas, TUDATPONT_KERET,
   // ⭐ A SZAKASZ 4 HÉT MŰVELETE (2026-09-12) — eddig egyik sem volt elérhető kézzel.
   belepes, meghivas, felhatalmazas, tanusitas, bemutatkozas, lattam, felhatalmazasVisszavonasa,
+  kulcscsereBevitele,   // ⭐⭐ D128 (②b)
   // ⭐ D82: az észlelt ellentmondások bejelentése (ismétlés nélkül).
   ellentmondasokBejelentese,
   // ⭐ D85 T3: a lezárt, több érintettes döntések csomagja (a (B): a töredék szeletébe).
@@ -7211,6 +7213,24 @@ try {
       kiir('  ' + szerzo);
       kiir(SZIN.halvany + 'A kulcs fájlja: ' + tarolo.fajl + SZIN.vege);
       kiir(SZIN.halvany + 'Az adat helye:  ' + alapHely() + SZIN.vege);
+      break;
+    }
+
+    // ⭐⭐ D128 (②b — 7. pont, KC2 (A)): A KULCSCSERE — ha a kezelő kulcsod elveszett vagy ellopták: a csere-kulcs (a mentésből)
+    // aláírja az új kezelő kulcsot, az új lekötést és a megmaradó készülékeket (alapból EZ a készülék). A név marad; a koinóba a
+    // csere bekerül (a régi kulccsal felvett, nem felsorolt készülékek eseményei nem számítanak); az új csere-kulcs kiadásra megy.
+    case 'kulcscsere': {
+      const honnan = ervek[0];
+      if (!honnan) throw new Error('Melyik a csere-kulcsod? node koino.js kulcscsere <csere-kulcs.json> [a megmaradó készülékek kulcsai…]');
+      const marado = ervek.length > 1 ? ervek.slice(1) : [KESZULEK];
+      const r = await kulcscsereVegrehajtasa(tarolo, JSON.parse(await readFile(honnan, 'utf8')), marado);
+      await writeFile(CSERE_KULCS_FAJL, JSON.stringify(await csereKulcsKiadasa(r.csere, r.nev), null, 2));
+      const e = await kulcscsereBevitele(kornyezet, r.kulcspar.szuletes, r.cserek);
+      kiir(SZIN.jo + 'Kulcscsere kész (a ' + r.kulcscsere.sorszam + '.) — a neved ugyanaz: ' + rovidAzonosito(r.nev) + SZIN.vege);
+      kiir('  Megmaradó készülékek: ' + r.kulcscsere.keszulekek.map((k) => rovidAzonosito(k)).join(', '));
+      kiir('  A koinóba bekerült: ' + rovidAzonosito(e.azonosito));
+      kiir(SZIN.nem + '  Az ÚJ csere-kulcsod: ' + CSERE_KULCS_FAJL + ' — vidd el, és töröld innen. A régi (' + honnan
+        + ') már nem jó semmire.' + SZIN.vege);
       break;
     }
 

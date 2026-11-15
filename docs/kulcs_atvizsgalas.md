@@ -402,8 +402,19 @@ D128 13–15.):
   csak az aláírásokból állt — egy átírt tartalmú, de a régi aláírást hordozó csere a korábbi „rendben” eredményt kapta volna; most a
   teljes tartalom a kulcs (a próba fogta meg). A próba: „A KULCSCSERE LÁNCA” — a tolvaj a régi kulccsal nem cserélhet (a lekötés nem az
   övé), a régi csere-kulcs nem írhatja alá a 2. cserét, az átírt csere, a rossz sorszám, a hiányzó láncszem, a régi kulccsal írt „új”
-  és a lánc nélküli új tanúsítvány elbukik, a kapu és a kézfogás útján is — 8 rontás. ⏭️ ②b (2): a `Kulcscsere` esemény (bárki
-  beviheti), és a régi kulccsal felvett, nem felsorolt készülék eseményei nem számítanak; ②b (3): a művelet és a parancs.
+  és a lánc nélküli új tanúsítvány elbukik, a kapu és a kézfogás útján is — 8 rontás.
+- ✅ **Az építés — ②b (2)–(3) a kulcscsere után; a gépen és a parancs** (2026-11-15): a `Kulcscsere` esemény a születést és a cserék
+  láncát hozza (bárki beviheti, mint a kizárást; a kapu a láncot ellenőrzi), a tár a kizárásokkal egy indexben tartja (`kezelesEsemenyei`,
+  a pillanatkép 6. változata). A számítás (`allapot/kizaras.js` `kizartakSzurese`): egy azonosság LEGUTÓBBI cseréje (a leghosszabb lánc)
+  után a régebbi korszakban tanúsított, nem felsorolt készülék eseményei kiesnek (kimondva: `kizartak`); a csere után az új kulccsal
+  felvett készülék korszaka a hozott cserék száma — az marad. Ha egy készülék korszaka nem ismert (a lánca első eseménye — a
+  tanúsítvánnyal — nincs a bemenetben), az eseménye számít (D19); a kapu a kiesett készülék ÚJ eseményét a tárban lévő tanúsítványa
+  szerint elveti. `kulcsTar.js` `kulcscsereVegrehajtasa`: a csere-kulccsal (a mentésből) új kezelő kulcs és új lekötés, a név marad, a
+  tároló a láncot tartja (betöltéskor a tárolt kulcs a lánc VÉGÉN álló kulcs kell legyen), a mentés a láncot is viszi; a régi (már
+  felhasznált) csere-kulcs nem cserélhet. `muveletek.js` `kulcscsereBevitele`, `koino.js` `kulcscsere <csere-kulcs.json> [készülékek…]`
+  (alapból ez a készülék marad; az új csere-kulcs a `csere-kulcs.json`-ba). A próba: „A KULCSCSERE UTÁN” (két cserével is), kulcs („a
+  KULCSCSERE a gépen”), parancssor (a parancs) — 11 rontás. ⏭️ ②c: a mentés papíron (szavak + QR); a ③-ban a csere és a kizárás
+  terjesztése a készülékek között, a ④ lapon a „📱 Készülékeim”.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

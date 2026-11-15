@@ -294,7 +294,7 @@ export function iroTarNyitasa(belso, { mappa, jelez = () => {} }) {
     lancEsemenyei: (lanc) => belso.lancEsemenyei(lanc),
     // ⭐⭐ D128: egy azonosság minden készülékének eseményei, és egy készülék tanúsítványa.
     azonossagEsemenyei: (szerzo) => belso.azonossagEsemenyei(szerzo),
-    kizarasEsemenyei: (azonossag) => belso.kizarasEsemenyei?.(azonossag) ?? Promise.resolve([]),
+    kezelesEsemenyei: (azonossag) => belso.kezelesEsemenyei?.(azonossag) ?? Promise.resolve([]),
     tanusitvany: (keszulek) => belso.tanusitvany(keszulek),
     tanusitvanyFelvetele: (t) => belso.tanusitvanyFelvetele(t),
     szeletEsemenyei: (entitas) => belso.szeletEsemenyei(entitas),

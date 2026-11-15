@@ -633,7 +633,7 @@ proba('⭐⭐ A KIZÁRÁS ÉS AZ ÖRÖKÖS (①d) — az ellopott telefon vágá
   // ⭐ A kizárások kérdése a képből nyitott tárban csak a kizárás testét tölti be (egyet), nem az azonosság minden eseményét.
   const kizarasokKepbol = await tarKizarasai(kepbol, laptop.szerzo);
   const betoltott = kepbol.mutatoAllapota().betoltottTest;
-  const indexben = [(await lemezrol.kizarasEsemenyei(laptop.szerzo)).length, kizarasokKepbol.size,
+  const indexben = [(await lemezrol.kezelesEsemenyei(laptop.szerzo)).length, kizarasokKepbol.size,
     kepbol.mutatoAllapota().pillanatkepbol, betoltott];
   // ⛔ A kapu: a megváltoztatott kizárás (az aláírás nem illik rá), egy MÁSIK készülékem folytatása (nem az örökös), és a vágás
   // előtti helyre írt folytatás.
@@ -765,6 +765,51 @@ proba('⭐⭐ A KULCSCSERE LÁNCA (②b) — a csere-kulcs írja alá, a kezelő
     && !(await tanusitvanyEllenorzese(regiKulccsal)).rendben && !(await tanusitvanyEllenorzese(lancNelkul)).rendben
     && keszulekKezfogasEllenorzese(ki(telefon.tanusitvany), KOINO, atirat)
     && !keszulekKezfogasEllenorzese(ki(regiKulccsal), KOINO, atirat) && !keszulekKezfogasEllenorzese(ki(lancNelkul), KOINO, atirat);
+});
+
+proba('⭐⭐ A KULCSCSERE UTÁN (②b — KC2 (A)) — a nem felsorolt, régi kulccsal felvett készülék eseményei nem számítanak (bárki bevitte a cserét); a felsorolt és az új kulccsal felvett igen; a kapu a kiesett készülék új eseményét nem engedi be, a hamis cserét elveti', async () => {
+  const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
+  const ujKulcs = () => crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const a = await ujAzonossag();
+  a.kulcspar.szuletes = a.szuletes;
+  const laptopK = await tesztKeszulek('laptop', a.kulcspar);
+  const telefonK = await tesztKeszulek('telefon', a.kulcspar);
+  const laptop = await ujEember(KOINO, laptopK);
+  const telefon = await ujEember(KOINO, telefonK);
+  const idegen = await ujEember(KOINO);
+  const g = await laptop.tesz('GondolatLetrehozas', { cim: 'A laptopé' });
+  const tg = await telefon.tesz('GondolatLetrehozas', { cim: 'A telefoné (ellopták)' });
+  // A csere: a laptop marad, a telefon (ellopták) nem; utána egy tablet az új kulccsal.
+  const [K1, C1] = [await ujKulcs(), await ujKulcs()];
+  const c1 = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(K1), await csereLenyomata(await pub(C1)), [laptopK.keszulek]);
+  K1.szuletes = a.szuletes;
+  K1.cserek = [c1];
+  const tablet = await ujEember(KOINO, await tesztKeszulek('tablet', K1));
+  const tt = await tablet.tesz('GondolatLetrehozas', { cim: 'A tableté (az új kulccsal)' });
+  const csere = await idegen.tesz('Kulcscsere', { szuletes: a.szuletes, cserek: [c1] });   // bárki beviheti
+  const lista = await tagokkal([g, tg, tt]);
+  const nelkule = allapotSzamitasa(lista);
+  const vele = allapotSzamitasa([...lista, csere]);
+  const kiesett = new Set(vele.kizartak.map((k) => k.azonosito));
+  // A 2. csere (a C1-gyel): csak a tablet marad — a két csere-esemény közül a LEGUTÓBBI (a hosszabb lánc) számít: a laptop kiesik.
+  const [K2, C2] = [await ujKulcs(), await ujKulcs()];
+  const c2 = await kulcscsereKeszitese(C1, a.nev, 2, await pub(K2), await csereLenyomata(await pub(C2)), [tablet.keszulek]);
+  const csere2 = await idegen.tesz('Kulcscsere', { szuletes: a.szuletes, cserek: [c1, c2] });
+  const kiesett2 = new Set(allapotSzamitasa([...lista, csere2, csere]).kizartak.map((k) => k.azonosito));
+  // A kapu: a csere után a telefon új eseménye nem jön be, a laptopé igen; a hamis csere (a tolvaj saját csere-kulcsával) elbukik.
+  const tar = await ujTar();
+  for (let i = 0; i < 2; i++) for (const e of [...lista, csere]) await esemenyMentese(tar, e);
+  const telefonUj = await esemenyMentese(tar, await telefon.tesz('GondolatLetrehozas', { cim: 'A tolvaj újabb' }));
+  const laptopUj = await esemenyMentese(tar, await laptop.tesz('GondolatLetrehozas', { cim: 'A laptop újabb' }));
+  const X = await ujKulcs();
+  const hamisC = await kulcscsereKeszitese(X, a.nev, 1, await pub(await ujKulcs()), await csereLenyomata(await pub(await ujKulcs())),
+    [telefonK.keszulek]);
+  const hamis = await esemenyMentese(tar, await idegen.tesz('Kulcscsere', { szuletes: a.szuletes, cserek: [hamisC] }));
+  return nelkule.kizartak.length === 0 && kiesett.has(tg.azonosito) && !kiesett.has(g.azonosito) && !kiesett.has(tt.azonosito)
+    && !telefonUj.mentve && /nem sorolta fel/.test(telefonUj.ok ?? '') && laptopUj.mentve
+    && !hamis.mentve && /kulcscsere nem hiteles/.test(hamis.ok ?? '')
+    && !!alakiHiba({ ...csere, adat: { ...csere.adat, x: 1 } })
+    && kiesett2.has(g.azonosito) && kiesett2.has(tg.azonosito) && !kiesett2.has(tt.azonosito);
 });
 
 // ===================================

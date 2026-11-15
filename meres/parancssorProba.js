@@ -3386,6 +3386,26 @@ proba('⭐⭐ D92/1 (c): a TOVÁBBADÁS — R → P → H, a válasz lépésenk�
 // és kimondja a várakozó eseményeket. A meghívás profil nélkül NEM megy (a parancs megnevezi, mit kérj); a profil
 // után igen. ⭐ A meghívás után UGYANAZ a korábbi szavazat számít (D19: függőben volt, nem elveszett) → ELVETVE (1:1).
 // A vendég a tagsági csomagját kiadja. Viselkedést mérünk: a gazda állapotát.
+proba('⭐⭐ D128 (②b): a `kulcscsere` parancs — a csere-kulccsal új kezelő kulcs, a név marad, a koinóba bekerül, az új csere-kulcs kiadásra megy; a régi csere-kulccsal másodszor nem megy',
+  async () => {
+    const H = await ujKeszulek();
+    await fut(H, 'koino', 'Kulcscsere-próba');
+    const elotte = JSON.parse(await readFile(join(H, 'kulcs.json'), 'utf8'));
+    // A csere-kulcsot „elvitte” (egy másik helyre).
+    const regiCsere = join(H, 'elvitt-csere.json');
+    await copyFile(join(H, 'csere-kulcs.json'), regiCsere);
+    await rm(join(H, 'csere-kulcs.json'));
+    const ki = await fut(H, 'kulcscsere', regiCsere);
+    const utana = JSON.parse(await readFile(join(H, 'kulcs.json'), 'utf8'));
+    const ujCsere = JSON.parse(await readFile(join(H, 'csere-kulcs.json'), 'utf8').catch(() => 'null'));
+    const masodszor = await fut(H, 'kulcscsere', regiCsere);
+    const ok = /Kulcscsere kész/.test(ki) && /A koinóba bekerült/.test(ki) && utana.nev === elotte.nev
+      && utana.privatKulcs.x !== elotte.privatKulcs.x && utana.cserek?.length === 1 && ujCsere?.mi === 'koino-csere-kulcs'
+      && /nem a mostani lekötés/.test(masodszor);
+    if (!ok) process.stderr.write('    (' + JSON.stringify({ ki: ki.slice(-400), masodszor: masodszor.slice(-300) }) + ')\n');
+    return ok;
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();

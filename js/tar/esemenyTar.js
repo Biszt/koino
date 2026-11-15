@@ -30,7 +30,9 @@ import { esemenyEllenorzese, elagazasE, szelet, esemenyKoinoja, azonositoAlaku, 
   KISERO_MEZO, kiseroNelkul, kiseroval } from '../esemeny/esemeny.js';
 // ⭐ D80: az `Ellentmondas` esemény TARTALMA is a kapun megy át (önmagát igazoló bizonyíték).
 import { ellentmondasEllenorzese } from '../allapot/ellentmondas.js';
-import { kizartE, tarKizarasai, KIZARAS_ESEMENY } from '../allapot/kizaras.js';   // ⭐⭐ D128 (①d)
+import { kizartE, tarKizarasai, tarKulcscserei, cserenKivulE, KIZARAS_ESEMENY, KULCSCSERE_ESEMENY }
+  from '../allapot/kizaras.js';   // ⭐⭐ D128 (①d, ②b)
+import { kezeloKulcsLanc, azonossagNeve } from '../kulcs/azonossag.js';
 import { kizarasEllenorzese, kizarasKoinoban } from '../kulcs/keszulek.js';
 // ⭐ D81: a pont-esemény a saját bizonyítékát hozza — a kapu ellenőrzi, hogy illik a lánc-gyökeréhez.
 import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa, keretAtvetelOnbizonyitasa, lancAlapKerete }
@@ -159,6 +161,27 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
     if (!kv.rendben) {
       console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: kv.ok });
       return { mentve: false, ok: 'a kizárás nem hiteles: ' + kv.ok };
+    }
+  }
+  // ⭐⭐ D128 (②b): a KULCSCSERE — a lánc a születésből indul, és minden cserét a lekötött csere-kulcs írt alá (önmagát igazolja:
+  // bárki beviheti). És a kulcscsere UTÁN egy régebbi korszakban tanúsított, nem felsorolt készülék új eseménye nem jön be.
+  if (esemeny.tipus === KULCSCSERE_ESEMENY) {
+    const lc = await kezeloKulcsLanc(esemeny.adat.szuletes, esemeny.adat.cserek, await azonossagNeve(esemeny.adat.szuletes));
+    if (!lc.rendben || esemeny.adat.cserek[0].azonossag !== await azonossagNeve(esemeny.adat.szuletes)) {
+      const ok = 'a kulcscsere nem hiteles: ' + (lc.ok ?? 'a lánc nem ennek a születésnek a része');
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok });
+      return { mentve: false, ok };
+    }
+  }
+  {
+    const cserek = await tarKulcscserei(tar, esemeny.szerzo);
+    if (cserek.size) {
+      const t = esemeny.tanusitvany ?? await tarTanusitvanya(tar, esemeny.keszulek);
+      if (t && cserenKivulE(esemeny, cserek, new Map([[esemeny.keszulek, t.cserek?.length ?? 0]]))) {
+        const ok = 'a készüléket a kulcscsere nem sorolta fel a megmaradók között (D128 ②b — KC2 (A))';
+        console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok });
+        return { mentve: false, ok };
+      }
     }
   }
   if (esemeny.lanc !== undefined) {
