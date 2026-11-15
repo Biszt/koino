@@ -143,6 +143,16 @@ export async function ujAzonossag() {
 //   · `sorszam` — hányadik csere (1, 2, …): a láncot a sorszám és a lekötések fűzik egymáshoz.
 // A NÉV marad (KU3 (A)): a kezelő kulcsot a születés és a cserék lánca mondja meg. A tolvaj, akinél csak a régi kulcs van, nem
 // cserélhet kulcsot — a csere-kulcs nincs nála.
+//
+// ⭐⭐ D128 (②d — 17. pont, 9.13):
+//   · `fizetes` — a fizetési kulcs nyilvános része a csere UTÁN (a születésé a lánc elején): a kulcscsere ezt is cserélheti (a 9.13
+//     (c) rése — a fizetési kulcs titkos fele a kezelő kulcs mellett van, a laptop tolvaja azt is viszi);
+//   · `kovetkezo: null` — a PAPÍR VISSZAVONÁSA (a 2. lépcsőn): a papír aláír egy utolsó bejegyzést, ami a kezelő kulcsot nem cseréli
+//     (`kulcs` = a mostani), és a lekötése „a segítők” — utána csere-kulcs nem írhat alá; a helyreállítás a segítőké (②e).
+//   · A KULCS-KORSZAK a KULCSVÁLTÁSOK száma (`kulcsKorszak`): a visszavonás nem nyit új korszakot — senki nem esik ki miatta.
+//   · Két ág közül (ugyanaz a lekötés két bejegyzést írt alá — csak egy lopott vagy másolt papírral lehet) az ELTÉRÉS HELYÉN álló
+//     bejegyzés ereje dönt (`lancErosebbE`): a visszavonás erősebb a papír kulcscseréjénél (a ②e-ben a segítők mindkettőnél) — a
+//     „hosszabb nyer” helyett, amit a papír tolvaja a saját ágán tetszés szerint megnyerhetett volna (a 9.13 (b) rése).
 
 /** A kulcscsere fajtája. */
 export const KULCSCSERE_TIPUS = 'AzonossagKulcscsere';
@@ -153,12 +163,12 @@ export const KULCSCSERE_KORLAT = 16;
 /** Egy kulcscsere legfeljebb ennyi megmaradó készüléket sorol fel. */
 export const MARADO_KORLAT = 64;
 
-const KULCSCSERE_MEZOK = 'alairas,azonossag,csere,ido,keszulekek,kovetkezo,kulcs,sorszam,tipus';
+const KULCSCSERE_MEZOK = 'alairas,azonossag,csere,fizetes,ido,keszulekek,kovetkezo,kulcs,sorszam,tipus';
 
 /** A kulcscsere aláírt része (ezt írja alá a csere-kulcs). */
 export function kulcscsereTartalma(c) {
   return { tipus: c.tipus, azonossag: c.azonossag, sorszam: c.sorszam, csere: c.csere, kulcs: c.kulcs, kovetkezo: c.kovetkezo,
-    keszulekek: c.keszulekek, ido: c.ido };
+    keszulekek: c.keszulekek, fizetes: c.fizetes, ido: c.ido };
 }
 
 /**
@@ -168,11 +178,15 @@ export function kulcscsereTartalma(c) {
 export function kulcscsereAlakiHibaja(c) {
   if (!c || typeof c !== 'object' || Array.isArray(c)) return 'a kulcscsere egy objektum';
   if (Object.keys(c).sort().join(',') !== KULCSCSERE_MEZOK) {
-    return 'a kulcscsere mezői: tipus, azonossag, sorszam, csere, kulcs, kovetkezo, keszulekek, ido, alairas';
+    return 'a kulcscsere mezői: tipus, azonossag, sorszam, csere, kulcs, kovetkezo, keszulekek, fizetes, ido, alairas';
   }
   if (c.tipus !== KULCSCSERE_TIPUS) return 'ez nem kulcscsere';
-  for (const m of ['azonossag', 'csere', 'kulcs', 'kovetkezo']) {
+  for (const m of ['azonossag', 'csere', 'kulcs', 'fizetes']) {
     if (typeof c[m] !== 'string' || !AZONOSITO.test(c[m])) return 'a kulcscsere ' + m + ' mezője 43 jel';
+  }
+  // ⭐⭐ (②d) a `null` a papír visszavonása (a lekötés ezentúl a segítőké)
+  if (c.kovetkezo !== null && (typeof c.kovetkezo !== 'string' || !AZONOSITO.test(c.kovetkezo))) {
+    return 'a kulcscsere kovetkezo mezője 43 jel (vagy null: a papír visszavonása)';
   }
   if (c.csere === c.kulcs) return 'az új kezelő kulcs nem lehet a csere-kulcs';
   if (!Number.isSafeInteger(c.sorszam) || c.sorszam < 1 || c.sorszam > KULCSCSERE_KORLAT) {
@@ -194,15 +208,17 @@ export function kulcscsereAlakiHibaja(c) {
  * @param {string} azonossag - a név
  * @param {number} sorszam - hányadik csere
  * @param {string} kulcs - az új kezelő kulcs nyilvános része
- * @param {string} kovetkezo - a következő csere-kulcs lenyomata (`csereLenyomata`)
+ * @param {string|null} kovetkezo - a következő csere-kulcs lenyomata (`csereLenyomata`) — ⭐ (②d) `null`: a papír visszavonása
  * @param {Array<string>} keszulekek - a megmaradó készülékek kulcsai
+ * @param {string} fizetes - ⭐ (②d) a fizetési kulcs nyilvános része a csere után
  * @param {number} [ido]
  * @returns {Promise<Object>}
  */
-export async function kulcscsereKeszitese(csereKulcspar, azonossag, sorszam, kulcs, kovetkezo, keszulekek, ido = Date.now()) {
-  console.log('kulcscsereKeszitese - KEZDÉS', { sorszam, marado: keszulekek.length });
+export async function kulcscsereKeszitese(csereKulcspar, azonossag, sorszam, kulcs, kovetkezo, keszulekek, fizetes, ido = Date.now()) {
+  console.log('kulcscsereKeszitese - KEZDÉS', { sorszam, marado: keszulekek.length, visszavonas: kovetkezo === null });
   const csere = bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', csereKulcspar.publicKey)));
-  const c = { tipus: KULCSCSERE_TIPUS, azonossag, sorszam, csere, kulcs, kovetkezo, keszulekek: [...new Set(keszulekek)].sort(), ido };
+  const c = { tipus: KULCSCSERE_TIPUS, azonossag, sorszam, csere, kulcs, kovetkezo, keszulekek: [...new Set(keszulekek)].sort(),
+    fizetes, ido };
   const alairas = await crypto.subtle.sign({ name: ALGORITMUS }, csereKulcspar.privateKey, new TextEncoder().encode(await lenyomat(c)));
   const kesz = { ...c, alairas: bajtokBase64Url(new Uint8Array(alairas)) };
   const hiba = kulcscsereAlakiHibaja(kesz);
@@ -212,13 +228,15 @@ export async function kulcscsereKeszitese(csereKulcspar, azonossag, sorszam, kul
 }
 
 /**
- * ⭐⭐ A KEZELŐ KULCSOK LÁNCA — a születésből és a kulcscserékből: korszakonként a kezelő kulcs (a 0. a születésé) és a megmaradó
- * készülékek (a 0. korszakban nincs ilyen lista). Minden csere: az alakja jó, a név ugyanaz, a sorszáma a következő, a csere-kulcsa
- * az előző lekötésnek felel meg (a lenyomata), és a csere-kulcs írta alá.
+ * ⭐⭐ A KEZELŐ KULCSOK LÁNCA — a születésből és a kulcscserékből: bejegyzésenként a kezelő kulcs (a 0. a születésé), a megmaradó
+ * készülékek (a 0.-ban nincs ilyen lista) és a fizetési kulcs. Minden csere: az alakja jó, a név ugyanaz, a sorszáma a következő, a
+ * csere-kulcsa az előző lekötésnek felel meg (a lenyomata), és a csere-kulcs írta alá. ⭐ (②d) A papír visszavonása után (a lekötés
+ * `null`) csere-kulcs nem írhat alá.
  * @param {Object} szuletes
  * @param {Array<Object>} cserek - a kulcscserék, sorrendben (lehet üres)
  * @param {string} nev - a név (a születés lenyomata)
- * @returns {Promise<{rendben: boolean, ok?: string, kulcsok?: Array<string>, marado?: Array<Array<string>|null>}>}
+ * @returns {Promise<{rendben: boolean, ok?: string, kulcsok?: Array<string>, marado?: Array<Array<string>|null>,
+ *   fizetesek?: Array<string>, lekotes?: string|null}>}
  */
 export async function kezeloKulcsLanc(szuletes, cserek, nev) {
   const sz = await szuletesEllenorzese(szuletes, nev);
@@ -227,12 +245,16 @@ export async function kezeloKulcsLanc(szuletes, cserek, nev) {
   if (!Array.isArray(lista) || lista.length > KULCSCSERE_KORLAT) return { rendben: false, ok: 'a kulcscserék lánca hibás' };
   const kulcsok = [szuletes.kulcs];
   const marado = [null];
+  const fizetesek = [szuletes.fizetes];
   let lekotes = szuletes.csere;
   for (let i = 0; i < lista.length; i++) {
     const c = lista[i];
     const h = kulcscsereAlakiHibaja(c);
     if (h) return { rendben: false, ok: 'a ' + (i + 1) + '. kulcscsere: ' + h };
     if (c.azonossag !== nev || c.sorszam !== i + 1) return { rendben: false, ok: 'a ' + (i + 1) + '. kulcscsere nem ennek a láncnak a része' };
+    if (lekotes === null) {
+      return { rendben: false, ok: 'a ' + (i + 1) + '. kulcscsere: a papírt visszavonták — csere-kulcs már nem írhat alá (D128 17. pont)' };
+    }
     if (await csereLenyomata(c.csere) !== lekotes) {
       return { rendben: false, ok: 'a ' + (i + 1) + '. kulcscsere csere-kulcsa nem a lekötött (a tolvaj nem cserélhet kulcsot)' };
     }
@@ -246,9 +268,67 @@ export async function kezeloKulcsLanc(szuletes, cserek, nev) {
     }
     kulcsok.push(c.kulcs);
     marado.push(c.keszulekek);
+    fizetesek.push(c.fizetes);
     lekotes = c.kovetkezo;
   }
-  return { rendben: true, kulcsok, marado };
+  return { rendben: true, kulcsok, marado, fizetesek, lekotes };
+}
+
+/**
+ * ⭐⭐ D128 (②d): a KULCS-KORSZAK — hány KULCSVÁLTÁS van a láncban, és az utolsó kulcsváltás megmaradó készülékei. A kezelő kulcsot
+ * nem cserélő bejegyzés (a papír visszavonása) nem nyit új korszakot: miatta senki nem esik ki. Szinkron, tiszta (a mag része).
+ * @param {string|undefined} szuletesKulcs - a születés kulcsa (a 0. korszaké)
+ * @param {Array<Object>|undefined} cserek
+ * @returns {{korszak: number, marado: Array<string>|null}}
+ */
+export function kulcsKorszak(szuletesKulcs, cserek) {
+  let korszak = 0;
+  let marado = null;
+  let elozo = szuletesKulcs;
+  for (const c of cserek ?? []) {
+    if (c?.kulcs === elozo) continue;
+    korszak++;
+    marado = Array.isArray(c?.keszulekek) ? c.keszulekek : [];
+    elozo = c?.kulcs;
+  }
+  return { korszak, marado };
+}
+
+/** Egy bejegyzés EREJE két ág eltérésénél: a papír visszavonása (1) erősebb a papír kulcscseréjénél (0). */
+function bejegyzesEreje(c) {
+  return c?.kovetkezo === null ? 1 : 0;
+}
+
+/**
+ * ⭐⭐ D128 (②d): két kulcscsere-lánc közül az ERŐSEBB-e az `a` (ugyanannak a névnek két ága). Ha az egyik a másik eleje, a hosszabb
+ * (a folytatás) erősebb; különben az ELTÉRÉS HELYÉN álló bejegyzés ereje dönt, holtversenyben a kisebb aláírás. ⛔ Nem a hosszabb
+ * ág nyer: a papír tolvaja a saját ágát tetszés szerint hosszabbíthatná (9.13 (b)). Szinkron, tiszta (a mag része).
+ * @param {Array<Object>} a
+ * @param {Array<Object>} b
+ * @returns {boolean}
+ */
+export function lancErosebbE(a, b) {
+  const n = Math.min(a.length, b.length);
+  let i = 0;
+  while (i < n && a[i]?.alairas === b[i]?.alairas) i++;
+  if (i === n) return a.length > b.length;
+  const ea = bejegyzesEreje(a[i]);
+  const eb = bejegyzesEreje(b[i]);
+  if (ea !== eb) return ea > eb;
+  return a[i].alairas < b[i].alairas;
+}
+
+/**
+ * ⭐⭐ D128 (②d): az `elotag` lánc eleje-e a `lanc`-nak (az aláírásaik szerint) — egy tanúsítvány a NYERTES ágon született-e.
+ * @param {Array<Object>|undefined} elotag
+ * @param {Array<string>} alairasok - a nyertes lánc aláírásai
+ * @returns {boolean}
+ */
+export function lancElejeE(elotag, alairasok) {
+  const e = elotag ?? [];
+  if (e.length > alairasok.length) return false;
+  for (let i = 0; i < e.length; i++) if (e[i]?.alairas !== alairasok[i]) return false;
+  return true;
 }
 
 /** A csere-kulcs lenyomata szinkron (a kézfogás láncához — `csere/titkositas.js`). */

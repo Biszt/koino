@@ -3450,6 +3450,31 @@ proba('⭐⭐ D128 (②c): a `papir` — 14 betűcsoport és QR; a `papir kesz` 
     return ok;
   });
 
+// ⭐⭐ D128 (②d — 17. pont, 9.13 5. pont): A PAPÍR VISSZAVONÁSA a parancssorból. Az alapító a koinójában 2. lépcsős (az alapító
+// kör) — az állapot szól, hogy a papírt vonja vissza; a `papir visszavon <kód>` után a csere-kulcs fájlja eltűnik, a visszavonás a
+// koinóba kerül, a papírral se kulcscsere, se kiírás nem megy, és az állapot nem szól többé.
+proba('⭐⭐ D128 (②d): a 2. lépcsőn az állapot szól a papírért; a `papir visszavon <kód>` után a fájl eltűnik, a koinóba bekerül, a papírral se kulcscsere, se kiírás — és az állapot hallgat',
+  async () => {
+    const H = await ujKeszulek();
+    await fut(H, 'koino', 'Visszavonás-próba');
+    const elotte = await fut(H, 'allapot');
+    const kod = (await fut(H, 'papir')).split('\n').filter((l) => /^ {4}[0-9A-Z]{4}( {2}[0-9A-Z]{4}){1,3}$/.test(l)).join(' ').trim()
+      .split(/\s+/);
+    const ki = await fut(H, 'papir', 'visszavon', ...kod);
+    const fajl = await readFile(join(H, 'csere-kulcs.json'), 'utf8').then(() => true, () => false);
+    const cserevel = await fut(H, 'kulcscsere', ...kod);
+    const papirral = await fut(H, 'papir');
+    const utana = await fut(H, 'allapot');
+    const ok = kod.length === 14 && /Elérted a 2\. lépcsőt/.test(elotte)
+      && /visszavontad/.test(ki) && /A koinóba bekerült/.test(ki) && !fajl
+      && /már visszavontad/.test(cserevel) && /már visszavontad/.test(papirral) && !/Elérted a 2\. lépcsőt/.test(utana);
+    if (!ok) {
+      process.stderr.write('    (' + JSON.stringify({ kod, ki: ki.slice(-300), cserevel: cserevel.slice(-200), papirral: papirral.slice(-200),
+        elotte: /Elérted/.test(elotte), utana: /Elérted/.test(utana), fajl }) + ')\n');
+    }
+    return ok;
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();

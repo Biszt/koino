@@ -20,7 +20,7 @@
 // (a saját lánc-gyökér), muveletek.js (a saját lánc), a próbák.
 
 import { kizarasAlakiHibaja, kizarasKoinoban } from '../kulcs/keszulek.js';
-import { kulcscsereAlakiHibaja } from '../kulcs/azonossag.js';
+import { kulcscsereAlakiHibaja, kulcsKorszak, lancErosebbE, lancElejeE } from '../kulcs/azonossag.js';
 import { esemenyKoinoja } from '../esemeny/esemeny.js';
 
 /** A kizárás eseménytípusa. */
@@ -76,53 +76,68 @@ export function kizartE(e, kizarasok) {
 // korszaka a hozott cserék száma — az nem esik ki. ⚠️ Ha egy készülék korszaka nem ismert (a lánca első eseménye — a tanúsítvánnyal
 // — nincs a bemenetben), az eseménye számít: a hiány nem vád (D19); a kapu az ilyen készülék ÚJ eseményeit a tárban lévő
 // tanúsítványa szerint ítéli.
+//
+// ⭐⭐ D128 (②d): a KORSZAK a kulcsváltások száma (`kulcsKorszak` — a papír visszavonása nem nyit újat); két ág közül az ERŐSEBB
+// nyer (`lancErosebbE` — nem a hosszabb); és a VESZTES ágon tanúsított készülék (a tanúsítványa hozta lánc nem a nyertes eleje)
+// kiesik, hacsak a nyertes utolsó kulcsváltása fel nem sorolja — ⛔ a ②b-ben ez a korszak-számon múlt: két egyforma hosszú ág közül
+// a vesztesen felvett készülék korszaka nem volt kisebb, és megmaradt.
 
 /**
- * Az azonosságok legutóbbi kulcscseréje az eseményekből: név → { korszak, marado } — a leghosszabb lánc (holtversenyben a kisebb
- * utolsó aláírás). ⚠️ A lánc aláírásait a kapu ellenőrizte; itt csak az alak.
- * @returns {Map<string, {korszak: number, marado: Set<string>}>}
+ * Az azonosságok NYERTES kulcscsere-lánca az eseményekből: név → { korszak, marado, alairasok } (a korszak a kulcsváltások száma, a
+ * marado az utolsó kulcsváltásé, az alairasok a nyertes lánc bejegyzéseinek aláírásai). ⚠️ A lánc aláírásait a kapu ellenőrizte;
+ * itt csak az alak.
+ * @returns {Map<string, {korszak: number, marado: Set<string>|null, alairasok: Array<string>}>}
  */
 export function kulcscserekEsemenyekbol(esemenyek) {
-  const ki = new Map();
+  const lancok = new Map();
   for (const e of esemenyek ?? []) {
     if (e?.tipus !== KULCSCSERE_ESEMENY) continue;
     const cs = e.adat?.cserek;
     if (!Array.isArray(cs) || !cs.length || cs.some((c) => kulcscsereAlakiHibaja(c))) continue;
     const nev = cs[0].azonossag;
-    const utolso = cs[cs.length - 1];
-    const eddigi = ki.get(nev);
-    if (!eddigi || cs.length > eddigi.korszak || (cs.length === eddigi.korszak && utolso.alairas < eddigi.alairas)) {
-      ki.set(nev, { korszak: cs.length, marado: new Set(utolso.keszulekek), alairas: utolso.alairas });
-    }
+    const eddigi = lancok.get(nev);
+    if (!eddigi || lancErosebbE(cs, eddigi.cs)) lancok.set(nev, { cs, szuletesKulcs: e.adat?.szuletes?.kulcs });
+  }
+  const ki = new Map();
+  for (const [nev, { cs, szuletesKulcs }] of lancok) {
+    const k = kulcsKorszak(szuletesKulcs, cs);
+    ki.set(nev, { korszak: k.korszak, marado: k.marado ? new Set(k.marado) : null, alairasok: cs.map((c) => c.alairas) });
   }
   return ki;
 }
 
+/** Egy tanúsítvány korszaka és a lánca (a tanúsítványban hozott kulcscserék). */
+export function tanusitvanyKorszaka(t) {
+  return { korszak: kulcsKorszak(t?.szuletes?.kulcs, t?.cserek).korszak, cserek: t?.cserek ?? [] };
+}
+
 /**
- * A készülékek KORSZAKA (a tanúsítványuk hozott cseréinek száma) — a láncuk első eseményéből (az hozza a tanúsítványt), és ha a
- * hívó adja, a tár ismert tanúsítványaiból.
+ * A készülékek KORSZAKA és a tanúsítványuk lánca — a láncuk első eseményéből (az hozza a tanúsítványt), és ha a hívó adja, a tár
+ * ismert tanúsítványaiból.
  * @param {Iterable<Object>} esemenyek
  * @param {Map<string, Object>|null} [tanusitvanyok]
- * @returns {Map<string, number>}
+ * @returns {Map<string, {korszak: number, cserek: Array<Object>}>}
  */
 export function keszulekKorszakai(esemenyek, tanusitvanyok = null) {
   const ki = new Map();
   for (const e of esemenyek ?? []) {
-    if (e?.tanusitvany && typeof e.keszulek === 'string') ki.set(e.keszulek, e.tanusitvany.cserek?.length ?? 0);
+    if (e?.tanusitvany && typeof e.keszulek === 'string') ki.set(e.keszulek, tanusitvanyKorszaka(e.tanusitvany));
   }
-  for (const [k, t] of tanusitvanyok ?? []) if (!ki.has(k) && t) ki.set(k, t.cserek?.length ?? 0);
+  for (const [k, t] of tanusitvanyok ?? []) if (!ki.has(k) && t) ki.set(k, tanusitvanyKorszaka(t));
   return ki;
 }
 
 /**
- * Kiesik-e az esemény a kulcscsere miatt: az azonosságának van kulcscseréje, a készüléke nincs a megmaradók között, és egy RÉGEBBI
- * korszakban tanúsították. Ismeretlen korszak: nem esik ki (D19).
+ * Kiesik-e az esemény a kulcscsere miatt: az azonosságának van kulcscseréje, a készüléke nincs a nyertes utolsó kulcsváltásának
+ * megmaradói között, és vagy egy RÉGEBBI korszakban, vagy a VESZTES ágon tanúsították. Ismeretlen korszak: nem esik ki (D19).
  */
 export function cserenKivulE(e, kulcscserek, korszakok) {
   const c = kulcscserek?.get(e?.szerzo);
-  if (!c || typeof e.keszulek !== 'string' || c.marado.has(e.keszulek)) return false;
+  if (!c || typeof e.keszulek !== 'string' || c.marado?.has(e.keszulek)) return false;
   const k = korszakok?.get(e.keszulek);
-  return k !== undefined && k < c.korszak;
+  if (k === undefined) return false;
+  if (!lancElejeE(k.cserek, c.alairasok)) return true;
+  return k.korszak < c.korszak;
 }
 
 /**

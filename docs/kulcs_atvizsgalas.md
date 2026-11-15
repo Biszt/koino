@@ -529,6 +529,50 @@ vonnánk be, akik ismerik, tehát vagy a meghívója, vagy valakik azok közűl,
 vagy a segítőkkel; „a segítők erősebbek”; a papír visszavonása) → **②e** a helyreállítás (a kezdés, a véglegesítés, a megállítás, a két
 kör, a szerepek bizonyítéka) → **②f** a parancsok (a helyreállítás kezdése az új készüléken, a segítés, a megállítás, a papír
 visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a megállítással bővül, és az értesítéssel) → ④ → ⑤.
+- ✅ **Az építés — ②d a papír visszavonása, az erősebb ág, a fizetési kulcs** (2026-11-15): `azonossag.js` — a kulcscsere új
+  mezője a `fizetes` (a fizetési kulcs a csere UTÁN; a születésé a lánc elején — a (c) rés); a `kovetkezo: null` a PAPÍR
+  VISSZAVONÁSA (a kezelő kulcs marad; utána csere-kulcs nem ír alá — `kezeloKulcsLanc`, így a kapu is); a KORSZAK a kulcsváltások
+  száma (`kulcsKorszak` — a visszavonás miatt senki nem esik ki); két ág közül az ELTÉRÉS HELYÉN álló bejegyzés ereje dönt
+  (`lancErosebbE` — a visszavonás erősebb a papír kulcscseréjénél; a ②e-ben a segítők mindkettőnél), nem a hosszabb (a (b) rés:
+  a tolvaj a saját ágát tetszés szerint hosszabbíthatta). `allapot/kizaras.js`: a nyertes lánc aláírásai — a VESZTES ágon tanúsított
+  készülék kiesik (`lancElejeE`), hacsak a nyertes utolsó kulcsváltása fel nem sorolja. ⛔ **Lelet:** a ②b-ben két egyforma hosszú
+  ág közül a vesztesen tanúsított készülék MEGMARADT (a korszak-száma nem volt kisebb a nyertesénél) — a próba fogta meg.
+  `kulcsTar.js`: `papirVisszavonasa` (a papír utolsó aláírása — nem a kezelő kulcsé), `papirEl`; a kulcscsere új fizetési kulcsot
+  ad (a titkos fele a tárolóban). `koino.js`: `papir visszavon <a papír kódja | csere-kulcs.json>` (a fájlt is törli, és a
+  visszavonást a koinóba is beviszi); az állapot (és a `papir`) a 2. lépcsőn szól, amíg a papír él (az alapító — az alapító kör —
+  rögtön 2. lépcsős). A próba: keszulek („A PAPÍR VISSZAVONÁSA ÉS AZ ERŐSEBB ÁG”), kulcs („(②d) a PAPÍR VISSZAVONÁSA a gépen”),
+  parancssor (a parancs és a figyelmeztetés) — 13 rontás. ⏭️ ②e: a helyreállítás a segítőkkel.
+- **A ②e két kérdése** (2026-11-15 — Csaba: *„minden javaslatodat elfogadom, mehetünk tovább.”*): **(1) a segítők EGYSZER
+  cselekszenek** — a kezdéskor jóváhagynak (a kód összevetésével); a készülékük a várakozás után MAGÁTÓL véglegesít, ha közben nem jött
+  megállítás, és ő maga nem vonta vissza a jóváhagyását (a (B) — a végén mindhárom újra — elakadna, ha egyikük épp nem ér rá);
+  **(2) a bemutatkozós út MINDIG választható** (a 30 napos várakozással) — a program nem tudja megállapítani, hogy a meghívó és a
+  tanúsítók „nincsenek meg” (meghaltak, vagy csak nem segítenek); a hosszabb idő a védelem.
+- **A ②e szerkezete** (az építő terve, a kódból — 2026-11-15):
+  · **Hol él a helyreállítás:** abban a koinóban (A), ahol a segítők tagok — az azonosság (X) horgonyának SZELETÉBEN, a meglévő
+    „állítás másról” alakkal (`kit` = X, `sajatBelepes` = a segítő horgonya — mint a meghívás és a tanúsítás, `identitas.js`):
+    `HelyreallitasJovahagyas { kit, sajatBelepes, javaslat, szerep, fazis }` (a `javaslat`: az új kezelő kulcs, az új készülék, az
+    új fizetési kulcs, az 1. lépcsőn az új papír lekötése, a kör, a 2. körben a megállított 1. kör jele; a `fazis`: kezdés,
+    véglegesítés, visszavonás), és `HelyreallitasMegallitas { javaslat }` — X egy meglévő készülékéé. Az új készüléknek még nincs
+    azonossága (nem írhat): a javaslatot a kódjából (a D121 mintája) az első segítő teszi be a jóváhagyásával.
+  · **A szerepek** (az A eseményeiből): régi ismerős = X meghívója vagy tanúsítója (az ő `Meghivas`/`Tanusitas` eseménye X
+    szeletében); bemutatkozó = `Bemutatkozas` X-ről (D62); élő tanúsító = `tanusithatE` (a felhatalmazása él). A szabály: (1. kör)
+    1 régi ismerős + 2 élő tanúsító, vagy 10 bemutatkozó + 2 élő tanúsító — három (ill. tizenkét) KÜLÖNBÖZŐ azonosság; (2. kör) +2
+    élő tanúsító, és CSAK egy megállított 1. kör után (különben egy csaló rögtön a megállíthatatlan 2. körrel kezdene).
+  · **A bizonyíték** (a minden koinóban érvényesség — a D93/2 tagsági csomag mintája): a `Kulcscsere` esemény lánca egy
+    `AzonossagHelyreallitas` bejegyzéssel zárul, és HOZZA a bizonyítékát: A születését, a jóváhagyásokat (mindkét fázist), és a
+    szerepek eseményeit (a meghívást vagy a tanúsítást, a bemutatkozásokat, és az élő tanúsítók láncát a gyökérig — mérve
+    logaritmikus, 12.2). Bármelyik kapu (B koinóé is) a csomagból egy memóriabeli tárat épít, és ugyanazzal a `identitas.js`-sel
+    ellenőrzi (A koinójaként, teljes ellenőrzéssel — szúrópróba nélkül, hogy minden készülék ugyanarra jusson). ⭐ A számítás (a mag)
+    a tagsági csomag mintájára a kapura bízza az aláírásokat és a szerepeket; ő a lánc alakját és a bejegyzések erejét nézi. ⚠️ A
+    maradék kockázat: a csomag összeállítója egy felhatalmazás VISSZAVONÁSÁT kihagyhatja — B koinó nem látja; A koinó készülékei
+    igen, és a várakozás és a megállítás ez ellen is véd.
+  · **A lánc:** a helyreállítás bejegyzése a legerősebb (a 2. kör az 1.-nél is) — `lancErosebbE`; a kezelő kulcs láncát
+    (`kezeloKulcsLanc`) a kapu által ELLENŐRZÖTT helyreállítások halmazával (adatként — D123 PR2) kérdezzük; a kézfogás a tár
+    halmazát kapja.
+  · **Az építés:** **②e1** az események és a szerepek (a jóváhagyás, a megállítás, a visszavonás; a kör és az út szabálya — egy
+    koinóban, a tárból) → **②e2** a lánc bejegyzése és a bizonyíték (a csomag, a kapu, a kezelő kulcs, az erő, a kizárás, a kézfogás)
+    → **②e3** a segítők készülékei (a várakozás utáni magától véglegesítés; az értesítés X készülékein) → **②f** a parancsok (az új
+    készüléken a kérelem kódja és a befejezés; a segítés, a visszavonás, a megállítás).
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

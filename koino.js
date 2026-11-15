@@ -154,6 +154,7 @@ import { iroTarNyitasa } from './js/tar/iro.js';
 import {
   kulcsparBiztositasa, nyilvanosKulcsSzovegesen, rovidAzonosito, kulcsparKimentese, kulcsparLeirasa, csereKulcsKiadasa,
   kulcscsereVegrehajtasa,   // ⭐⭐ D128 (②b)
+  papirVisszavonasa, papirEl,   // ⭐⭐ D128 (②d — 17. pont): a papír visszavonása a 2. lépcsőn
   // ⭐ A KÉZI ÚT MÁSIK FELE (2026-09-15): eddig csak KIMENTENI lehetett a kulcsot.
   kulcsparVisszatoltese
 } from './js/kulcs/kulcsTar.js';
@@ -500,6 +501,18 @@ async function csereKulcsBeolvasasa(ervek) {
     throw new Error('Nincs ilyen fájl, és csere-kódnak sem jó (a kód 14 csoport × 4 jel): ' + ervek[0]);
   }
   return { leiras: await csereKodbol(kod), honnan: 'a papír', tobbi: ervek.slice(i) };
+}
+
+/** ⭐⭐ D128 (②d — 17. pont): a 2. lépcsőn a papírnak már nincs helye — a figyelmeztetés szövege. */
+const PAPIR_INTELEM = '⚠ Elérted a 2. lépcsőt: itt már a segítőid állíthatnak helyre (D128 17. pont), a papírod pedig egy tolvaj'
+  + ' kezében visszaélésre adna módot. Vond vissza: node koino.js papir visszavon <a papír kódja>';
+
+/** ⭐⭐ D128 (②d): ha a papír még él, és ebben a koinóban 2. lépcsős vagyok, a figyelmeztetés (különben null). */
+async function papirIntelme() {
+  if (!papirEl(azonossagKulcspar)) return null;
+  const horgony = await sajatHorgonyom();
+  if (!horgony || !(await lepcso2E(tar, KOINO, horgony, ujIdentitasNezet())).igen) return null;
+  return PAPIR_INTELEM;
 }
 const { eszkoz: kulcspar } = await keszulekBiztositasa(keszulekTarolo(), azonossagKulcspar,
   process.env.KOINO_KESZULEK_NEV || (process.platform === 'android' ? 'telefon' : 'számítógép'));
@@ -6538,6 +6551,8 @@ async function allapotKiirasa(napokMulva) {
       kiir('  ' + jel + SZIN.vege + ' ' + nev.padEnd(12)
         + SZIN.halvany + valasz.ok + ' — ' + mire + SZIN.vege);
     }
+    // ⭐⭐ D128 (②d — 17. pont): a 2. lépcsőn a papír visszavonása — amíg meg nem történik, itt szólunk.
+    if (kerdesek[2][1].igen && papirEl(azonossagKulcspar)) kiir('  ' + SZIN.nem + PAPIR_INTELEM + SZIN.vege);
 
     // ⭐ MEGBÍZÁS, NEM PONTSZÁM (D60): „hányan bízták rá a tanúsítást" — soha nem
     // „becsületesség: N". A különbség nem szépészeti: egy jellem-szám hírnév-rendszerré
@@ -7264,6 +7279,31 @@ try {
     // A `papir kesz <kód>` a LEÍRT kódot összeveti a gépen lévő fájléval, és ha egyezik, a fájlt törli: a csere-kulcs így csak a
     // papíron marad (egy ellopott gép nem viheti), és a törlés előtt kiderül, ha a leírásba hiba csúszott.
     case 'papir': {
+      // ⭐⭐ D128 (②d — 17. pont, 9.13 5. pont): `papir visszavon <a papír kódja | csere-kulcs.json>` — a papír utolsó aláírása (a
+      // kezelő kulcs marad, senki nem esik ki), utána csere-kulcs nem ír alá; a helyreállítás a segítőké. A koinóba is bekerül (a
+      // papír tolvajának ugyanarra a helyre írt cseréje ellen ez az erősebb — `azonossag.js` `lancErosebbE`).
+      if (ervek[0] === 'visszavon') {
+        if (!ervek[1]) {
+          throw new Error('A papír kódjával (vagy a fájllal): node koino.js papir visszavon <a papír kódja | csere-kulcs.json>');
+        }
+        const { leiras } = await csereKulcsBeolvasasa(ervek.slice(1));
+        const r = await papirVisszavonasa(tarolo, leiras);
+        azonossagKulcspar.cserek = r.cserek;
+        if (existsSync(CSERE_KULCS_FAJL)) {
+          const fajlbol = JSON.parse(await readFile(CSERE_KULCS_FAJL, 'utf8').catch(() => 'null'));
+          if (fajlbol?.privatKulcs?.d === leiras.privatKulcs.d) await rm(CSERE_KULCS_FAJL);
+        }
+        kiir(SZIN.jo + 'A papírodat visszavontad — ezentúl a csere-kulcs nem ír alá; a helyreállítás a segítőidé (D128 17. pont).'
+          + SZIN.vege);
+        kiir('  A papírt megsemmisítheted: már semmit nem ér.');
+        const e = await kulcscsereBevitele(kornyezet, r.kulcspar.szuletes, r.cserek);
+        kiir(e ? '  A koinóba bekerült: ' + rovidAzonosito(e.azonosito)
+          : SZIN.halvany + '  Ebben a koinóban nincs azonosság-szeleted — ide nincs mit bevinni.' + SZIN.vege);
+        break;
+      }
+      if (!papirEl(azonossagKulcspar)) {
+        throw new Error('A papírodat már visszavontad (D128 17. pont) — a csere-kulcs nem ír alá többé; a helyreállítás a segítőidé.');
+      }
       if (ervek[0] === 'kesz') {
         if (!existsSync(CSERE_KULCS_FAJL)) throw new Error('A csere-kulcs fájlja már nincs a gépen: ' + CSERE_KULCS_FAJL);
         const fajlbol = JSON.parse(await readFile(CSERE_KULCS_FAJL, 'utf8'));
@@ -7288,6 +7328,8 @@ try {
       kiir('  Írd le a 14 csoportot (a QR ugyanezt hordozza), és tedd el biztos helyre — elírásnál a program szól.');
       kiir('  Ezzel szerezheted vissza az azonosságodat, ha a kulcsod elveszik vagy ellopják: node koino.js kulcscsere <a kód>');
       if (!ervek[0]) kiir(SZIN.nem + '  Ha leírtad: node koino.js papir kesz <a leírt kód> — ha egyezik, a fájlt törlöm a gépről.' + SZIN.vege);
+      const intelem = await papirIntelme();
+      if (intelem) kiir(SZIN.nem + '  ' + intelem + SZIN.vege);
       break;
     }
 

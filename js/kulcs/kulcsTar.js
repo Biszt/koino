@@ -288,15 +288,11 @@ async function azonossagRaTetele(kulcspar, leiras) {
 }
 
 /**
- * ⭐⭐ D128 (②b — 7. pont, 14. pont: KC2 (A)): A KULCSCSERE a gépen — a csere-kulcs (a mentésből) aláírja: új kezelő kulcs, új
- * lekötés (az új csere-kulcs — kiadásra), és a MEGMARADÓ készülékek. A név marad; a tároló az új kulcsot a lánccal tartja.
- * @param {Object} tarolo
- * @param {Object} csereLeiras - a csere-kulcs kiadása (`csereKulcsKiadasa` — `{ mi: 'koino-csere-kulcs', privatKulcs }`)
- * @param {Array<string>} marado - a megmaradó készülékek kulcsai
- * @returns {Promise<{kulcspar: CryptoKeyPair, csere: CryptoKeyPair, kulcscsere: Object, cserek: Array<Object>, nev: string}>}
+ * A gépen lévő azonosság és a PAPÍR (a csere-kulcs) összevetése: az azonosság születéssel bír, a leírás csere-kulcs, ennek az
+ * azonosságnak a mostani lekötése — és ⭐ (②d) a papírt még nem vonták vissza.
+ * @returns {Promise<{regi: Object, nev: string, csereKulcspar: CryptoKeyPair, cserek: Array<Object>}>}
  */
-export async function kulcscsereVegrehajtasa(tarolo, csereLeiras, marado) {
-  console.log('kulcscsereVegrehajtasa - KEZDÉS', { marado: marado.length });
+async function papirAzonossagnak(tarolo, csereLeiras) {
   const regi = await kulcsparBetoltese(tarolo);
   if (!regi?.szuletes) throw new Error('Ezen a gépen nincs születéssel bíró azonosság — nincs mit cserélni.');
   if (csereLeiras?.mi !== 'koino-csere-kulcs' || !csereLeiras.privatKulcs) throw new Error('Ez nem csere-kulcs (koino-csere-kulcs).');
@@ -307,19 +303,66 @@ export async function kulcscsereVegrehajtasa(tarolo, csereLeiras, marado) {
   const publicKey = await crypto.subtle.importKey('jwk', { kty, crv, x }, { name: ALGORITMUS }, true, ['verify']);
   const cserek = regi.cserek ?? [];
   const lekotes = cserek.length ? cserek[cserek.length - 1].kovetkezo : regi.szuletes.csere;
+  if (lekotes === null) {
+    throw new Error('A papírodat már visszavontad (D128 17. pont) — a csere-kulcs nem ír alá többé; a helyreállítás a segítőidé.');
+  }
   if (await csereLenyomata(x) !== lekotes) {
     throw new Error('Ez a csere-kulcs nem a mostani lekötés (egy korábbi cseréé, vagy egy másik azonosságé) — vele nem cserélhetsz.');
   }
+  return { regi, nev, csereKulcspar: { privateKey, publicKey }, cserek };
+}
+
+/**
+ * ⭐⭐ D128 (②b — 7. pont, 14. pont: KC2 (A)): A KULCSCSERE a gépen — a csere-kulcs (a mentésből) aláírja: új kezelő kulcs, új
+ * lekötés (az új csere-kulcs — kiadásra), és a MEGMARADÓ készülékek. A név marad; a tároló az új kulcsot a lánccal tartja. ⭐ (②d) És
+ * új FIZETÉSI kulcs (a régi titkos fele a régi kezelő kulcs mellett volt — aki azt vitte, ezt is: 9.13 (c)).
+ * @param {Object} tarolo
+ * @param {Object} csereLeiras - a csere-kulcs kiadása (`csereKulcsKiadasa` — `{ mi: 'koino-csere-kulcs', privatKulcs }`)
+ * @param {Array<string>} marado - a megmaradó készülékek kulcsai
+ * @returns {Promise<{kulcspar: CryptoKeyPair, csere: CryptoKeyPair, kulcscsere: Object, cserek: Array<Object>, nev: string}>}
+ */
+export async function kulcscsereVegrehajtasa(tarolo, csereLeiras, marado) {
+  console.log('kulcscsereVegrehajtasa - KEZDÉS', { marado: marado.length });
+  const { regi, nev, csereKulcspar, cserek } = await papirAzonossagnak(tarolo, csereLeiras);
   const uj = () => crypto.subtle.generateKey({ name: ALGORITMUS }, true, ['sign', 'verify']);
-  const [kulcspar, ujCsere] = [await uj(), await uj()];
-  const kulcscsere = await kulcscsereKeszitese({ privateKey, publicKey }, nev, cserek.length + 1,
-    await nyilvanosKulcsSzovegesen(kulcspar.publicKey), await csereLenyomata(await nyilvanosKulcsSzovegesen(ujCsere.publicKey)), marado);
+  const [kulcspar, ujCsere, ujFizetes] = [await uj(), await uj(), await uj()];
+  const kulcscsere = await kulcscsereKeszitese(csereKulcspar, nev, cserek.length + 1,
+    await nyilvanosKulcsSzovegesen(kulcspar.publicKey), await csereLenyomata(await nyilvanosKulcsSzovegesen(ujCsere.publicKey)), marado,
+    await nyilvanosKulcsSzovegesen(ujFizetes.publicKey));
   const ujCserek = [...cserek, kulcscsere];
-  await tarolo.ir({ ...(await kulcsparLeirasa(kulcspar)), nev, szuletes: regi.szuletes, cserek: ujCserek,
-    ...(regi.fizetesKulcs ? { fizetesKulcs: regi.fizetesKulcs } : {}) });
-  Object.assign(kulcspar, { szuletes: regi.szuletes, cserek: ujCserek, ...(regi.fizetesKulcs ? { fizetesKulcs: regi.fizetesKulcs } : {}) });
+  const fizetesKulcs = (await kulcsparLeirasa(ujFizetes)).privatKulcs;
+  await tarolo.ir({ ...(await kulcsparLeirasa(kulcspar)), nev, szuletes: regi.szuletes, cserek: ujCserek, fizetesKulcs });
+  Object.assign(kulcspar, { szuletes: regi.szuletes, cserek: ujCserek, fizetesKulcs });
   console.log('kulcscsereVegrehajtasa - VÉGE', { sorszam: kulcscsere.sorszam });
   return { kulcspar, csere: ujCsere, kulcscsere, cserek: ujCserek, nev };
+}
+
+/**
+ * ⭐⭐ D128 (②d — 17. pont, 9.13 5. pont): A PAPÍR VISSZAVONÁSA (a 2. lépcsőn). A papír aláír egy utolsó bejegyzést: a kezelő kulcs
+ * és a fizetési kulcs MARAD (új korszak nem nyílik, senki nem esik ki), a lekötés `null` — ezentúl csere-kulcs nem írhat alá; a
+ * helyreállítás a segítőké. ⚠️ A papír írja alá, nem a kezelő kulcs: különben a laptop tolvaja kapcsolhatná át.
+ * @param {Object} tarolo
+ * @param {Object} csereLeiras - a csere-kulcs (a fájlból vagy a papír kódjából)
+ * @returns {Promise<{kulcspar: CryptoKeyPair, visszavonas: Object, cserek: Array<Object>, nev: string}>}
+ */
+export async function papirVisszavonasa(tarolo, csereLeiras) {
+  console.log('papirVisszavonasa - KEZDÉS');
+  const { regi, nev, csereKulcspar, cserek } = await papirAzonossagnak(tarolo, csereLeiras);
+  const fizetes = cserek.length ? cserek[cserek.length - 1].fizetes : regi.szuletes.fizetes;
+  const visszavonas = await kulcscsereKeszitese(csereKulcspar, nev, cserek.length + 1,
+    await nyilvanosKulcsSzovegesen(regi.publicKey), null, [], fizetes);
+  const ujCserek = [...cserek, visszavonas];
+  await tarolo.ir({ ...(await kulcsparLeirasa(regi)), nev, szuletes: regi.szuletes, cserek: ujCserek,
+    ...(regi.fizetesKulcs ? { fizetesKulcs: regi.fizetesKulcs } : {}) });
+  regi.cserek = ujCserek;
+  console.log('papirVisszavonasa - VÉGE', { sorszam: visszavonas.sorszam });
+  return { kulcspar: regi, visszavonas, cserek: ujCserek, nev };
+}
+
+/** ⭐⭐ D128 (②d): a papír él-e még (a lekötés egy csere-kulcs lenyomata — nem vonták vissza). */
+export function papirEl(kulcspar) {
+  const cserek = kulcspar?.cserek ?? [];
+  return (cserek.length ? cserek[cserek.length - 1].kovetkezo : kulcspar?.szuletes?.csere) != null;
 }
 
 /**

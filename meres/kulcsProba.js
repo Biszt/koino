@@ -22,7 +22,7 @@
 import {
   kulcsparLetrehozasa, kulcsparBetoltese, kulcsparBiztositasa,
   kulcsparLeirasa, kulcsparLeirasbol, kulcsparKimentese, kulcsparVisszatoltese,
-  nyilvanosKulcsSzovegesen, rovidAzonosito, csereKulcsKiadasa, kulcscsereVegrehajtasa
+  nyilvanosKulcsSzovegesen, rovidAzonosito, csereKulcsKiadasa, kulcscsereVegrehajtasa, papirVisszavonasa, papirEl
 } from '../js/kulcs/kulcsTar.js';
 import { azonossagNeve, csereLenyomata } from '../js/kulcs/azonossag.js';
 import { esemenyLetrehozasa, esemenyEllenorzese } from '../js/esemeny/esemeny.js';
@@ -309,6 +309,42 @@ proba('⭐⭐ (②b) a KULCSCSERE a gépen: a csere-kulccsal új kezelő kulcs, 
     && ujra.kulcspar.cserek?.length === 1 && (await azonossagNeve(ujra.kulcspar.szuletes)) === nev
     && vissza.azonosito === nev && vissza.kulcspar.cserek?.length === 1
     && /nem a mostani lekötés/.test(regivel ?? '') && /nem a mostani lekötés/.test(idegennel ?? '');
+});
+
+// ⭐⭐ D128 (②d — 17. pont, 9.13): a PAPÍR VISSZAVONÁSA a gépen (a 2. lépcsőn) — a papír utolsó aláírása: a kezelő kulcs és a
+// fizetési kulcs marad, a lekötés null; utána a papírral se kulcscsere, se újabb visszavonás; a mentés a visszavonást is viszi. És a
+// kulcscsere ÚJ fizetési kulcsot ad (a régi titkos fele a régi kezelő kulcs mellett volt — 9.13 (c)).
+proba('⭐⭐ (②d) a PAPÍR VISSZAVONÁSA a gépen: a kezelő és a fizetési kulcs marad, a lekötés null; utána a papírral semmi; a mentés is viszi — és a kulcscsere új fizetési kulcsot ad', async () => {
+  const tarolo = memoriaTarolo();
+  const elso = await kulcsparBiztositasa(tarolo);
+  const nev = await azonossagNeve(elso.kulcspar.szuletes);
+  const papir = await csereKulcsKiadasa(elso.csere, nev);
+  const regiKulcs = await nyilvanosKulcsSzovegesen(elso.kulcspar.publicKey);
+  const regiFizetes = elso.kulcspar.fizetesKulcs?.x;
+  const elotte = papirEl(elso.kulcspar);
+  const r = await papirVisszavonasa(tarolo, papir);
+  const betoltve = await kulcsparBetoltese(tarolo);
+  let cserevel = null;
+  try { await kulcscsereVegrehajtasa(tarolo, papir, []); } catch (h) { cserevel = h.message; }
+  let ujra = null;
+  try { await papirVisszavonasa(tarolo, papir); } catch (h) { ujra = h.message; }
+  const vissza = await kulcsparVisszatoltese(memoriaTarolo(), await kulcsparKimentese(betoltve));
+  // A kulcscsere (egy másik azonossággal): új fizetési kulcs a láncon és a tárolóban.
+  const t2 = memoriaTarolo();
+  const e2 = await kulcsparBiztositasa(t2);
+  const k = await kulcscsereVegrehajtasa(t2, await csereKulcsKiadasa(e2.csere, await azonossagNeve(e2.kulcspar.szuletes)), []);
+  const k2 = await kulcsparBetoltese(t2);
+  const ok = {
+    visszavonas: elotte && r.visszavonas.kovetkezo === null && r.visszavonas.kulcs === regiKulcs && r.nev === nev,
+    betoltve: (await nyilvanosKulcsSzovegesen(betoltve.publicKey)) === regiKulcs && betoltve.cserek?.length === 1
+      && betoltve.fizetesKulcs?.x === regiFizetes && !papirEl(betoltve),
+    utana: /visszavontad/.test(cserevel ?? '') && /visszavontad/.test(ujra ?? ''),
+    mentes: vissza.azonosito === nev && vissza.kulcspar.cserek?.length === 1 && !papirEl(vissza.kulcspar),
+    fizetes: k.kulcscsere.fizetes !== e2.kulcspar.szuletes.fizetes && k.kulcspar.fizetesKulcs?.x === k.kulcscsere.fizetes
+      && k2.fizetesKulcs?.x === k.kulcscsere.fizetes
+  };
+  if (Object.values(ok).some((x) => !x)) process.stderr.write('    (' + JSON.stringify(ok) + ')\n');
+  return Object.values(ok).every(Boolean);
 });
 
 export default async function (csendes) {

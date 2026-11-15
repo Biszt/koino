@@ -6511,8 +6511,9 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
     mintája). **A várakozás** 7 nap, a bemutatkozók útján 30 nap; **megállítás után** újrakezdhető, de 5 ember kell (egy régi ismerős és
     négy élő tanúsító), kétszeres várakozással, és ezt már nem lehet megállítani (Csaba: *„minden javaslatodat, elfogadom, mehetünk
     tovább.”*). A segítők által jóváhagyott helyreállítás erősebb a papírnál; a 2. lépcsőn a papír egy utolsó aláírással átadja a helyét
-    a segítőknek; a kulcscsere és a helyreállítás a fizetési kulcsot is cseréli. A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md)
-    9.13.
+    a segítőknek; a kulcscsere és a helyreállítás a fizetési kulcsot is cseréli. A segítők EGYSZER cselekszenek (a készülékük a
+    várakozás után magától véglegesít, ha nem jött megállítás), és a bemutatkozós út mindig választható (a 30 napos várakozással —
+    a program nem látja, hogy a meghívó „nincs meg”). A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.13.
 
 *Az építés sorrendje:* ① a mag (a `keszulek` mező és a (szerző, készülék) lánc, a tanúsítvány és a kizárás az örökössel, a keret az
 átadással, a sorrend az azonosság eseményei között) → ② a csere-kulcs és a kulcscsere, a mentés (a lapon is) → ③ a hálózat → ④ a lap
@@ -6545,7 +6546,7 @@ a KÉSZÜLÉK kulcsa írja alá; **②a** a születés és a név (13. pont): `k
 is; **②b** a kulcscsere (14. pont): a csere-kulccsal aláírt, egymásra lekötött cserék lánca, a `Kulcscsere` esemény, a régi
 korszakban tanúsított, fel nem sorolt készülék eseményei kiesnek, `kulcscsere` parancs; **②c** a csere-kulcs papíron (15–16. pont):
 `kulcs/papir.js` (56 jel, 14 csoport × 4, a súlyozott prím-összeg ellenőrzése minden egyes elírást és cserét kimond), `kulcs/qr.js`
-(saját QR-kódoló), `papir` / `papir kesz <kód>` (a leírt kód ellenőrzése után a fájl törlése), `kulcscsere <kód>`. ⭐ A ② a papírral ezzel kész; a 17. pont (a helyreállítás a segítőkkel) ②d–②f-ként folytatja, a ③ előtt. A
+(saját QR-kódoló), `papir` / `papir kesz <kód>` (a leírt kód ellenőrzése után a fájl törlése), `kulcscsere <kód>`. ⭐ A ② a papírral ezzel kész; a 17. pont (a helyreállítás a segítőkkel) ②d–②f-ként folytatja, a ③ előtt: **②d** a papír visszavonása (`papir visszavon` — a 2. lépcsőn az állapot szól), a két ág közül az erősebb (nem a hosszabb) nyer, a vesztes ágon tanúsított készülék kiesik, a kulcscsere a fizetési kulcsot is cseréli. A
 részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.11.
 
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)

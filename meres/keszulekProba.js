@@ -49,7 +49,8 @@ import { TUDATPONT_KERET } from '../js/allapot/szabalyok.js';
 import { tudatpontRendezese, szabadTudatpontjaim, keretAtadasa, keretAtvetele, keretAtfolyasa, atfolyasMerteke,
   javaslatLetrehozasa, szavazas, keszulekKizarasa, kizarasBevitele } from '../js/muveletek.js';
 import { kizarasKeszitese } from '../js/kulcs/keszulek.js';
-import { ujAzonossag, szuletesEllenorzese, szuletesKeszitese, csereLenyomata, azonossagNeve, kulcscsereKeszitese, kezeloKulcsLanc }
+import { ujAzonossag, szuletesEllenorzese, szuletesKeszitese, csereLenyomata, azonossagNeve, kulcscsereKeszitese, kezeloKulcsLanc,
+  lancErosebbE }
   from '../js/kulcs/azonossag.js';
 import { szemelyesKezfogasAlairasa, keszulekKezfogasEllenorzese } from '../js/csere/titkositas.js';
 import { ujSajatHelye } from '../js/tar/esemenyTar.js';
@@ -713,27 +714,28 @@ proba('⭐⭐ A NÉV A SZÜLETÉS LENYOMATA (②a — KC1 (A)) — az első kulc
 proba('⭐⭐ A KULCSCSERE LÁNCA (②b) — a csere-kulcs írja alá, a kezelő kulcs a lánc végén; a tolvaj a régi kulccsal nem cserélhet, a régi kulccsal írt „új” tanúsítvány és a lánc nélküli új tanúsítvány elbukik — a kapu és a kézfogás útján is', async () => {
   const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
   const ujKulcs = () => crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const FZ = await pub(await ujKulcs());   // ⭐ (②d) a fizetési kulcs a csere után
   const a = await ujAzonossag();
   a.kulcspar.szuletes = a.szuletes;
   const laptop = await tesztKeszulek('laptop', a.kulcspar);
   // Az 1. csere: a csere-kulcs (a mentésből) írja alá — új kezelő kulcs, új lekötés, a laptop marad.
   const [K1, C1] = [await ujKulcs(), await ujKulcs()];
-  const c1 = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(K1), await csereLenyomata(await pub(C1)), [laptop.keszulek]);
+  const c1 = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(K1), await csereLenyomata(await pub(C1)), [laptop.keszulek], FZ);
   const lanc1 = await kezeloKulcsLanc(a.szuletes, [c1], a.nev);
   K1.szuletes = a.szuletes;
   K1.cserek = [c1];
   const telefon = await tesztKeszulek('telefon', K1);
   // A 2. csere: a C1 írja alá (az 1. csere lekötése).
   const [K2, C2] = [await ujKulcs(), await ujKulcs()];
-  const c2 = await kulcscsereKeszitese(C1, a.nev, 2, await pub(K2), await csereLenyomata(await pub(C2)), [telefon.keszulek]);
+  const c2 = await kulcscsereKeszitese(C1, a.nev, 2, await pub(K2), await csereLenyomata(await pub(C2)), [telefon.keszulek], FZ);
   const lanc2 = await kezeloKulcsLanc(a.szuletes, [c1, c2], a.nev);
   // ⛔ A tolvaj a RÉGI kezelő kulccsal (csere-kulcs nélkül) „cserél”: egy saját csere-kulccsal — a lekötés nem az övé.
   const X = await ujKulcs();
-  const tolvajCsere = await kulcscsereKeszitese(X, a.nev, 1, await pub(await ujKulcs()), await csereLenyomata(await pub(await ujKulcs())), []);
+  const tolvajCsere = await kulcscsereKeszitese(X, a.nev, 1, await pub(await ujKulcs()), await csereLenyomata(await pub(await ujKulcs())), [], FZ);
   const tolvaj = await kezeloKulcsLanc(a.szuletes, [tolvajCsere], a.nev);
   // ⛔ A régi csere-kulccsal a 2. csere (a lekötés már a C1) · ⛔ az átírt csere (a megmaradók) · ⛔ a hiányzó láncszem (a 2. elsőként).
   const regiCserevel = await kezeloKulcsLanc(a.szuletes, [c1, await kulcscsereKeszitese(a.csere, a.nev, 2, await pub(K2),
-    await csereLenyomata(await pub(C2)), [])], a.nev);
+    await csereLenyomata(await pub(C2)), [], FZ)], a.nev);
   const atirt = await kezeloKulcsLanc(a.szuletes, [{ ...c1, keszulekek: [] }], a.nev);
   const hezag = await kezeloKulcsLanc(a.szuletes, [c2], a.nev);
   // ⛔ A tanúsítványok: a régi kulccsal írt, de a láncot hozó; a lánc nélküli új.
@@ -746,11 +748,11 @@ proba('⭐⭐ A KULCSCSERE LÁNCA (②b) — a csere-kulcs írja alá, a kezelő
   const ki = (t) => ({ sz: a.nev, k: telefon.keszulek, t, a: szemelyesKezfogasAlairasa(jwk, KOINO, atirat) });
   // ⛔ A tolvaj SAJÁT „lánca” (a saját csere-kulcsával) és az azzal kezelt kulcsa írja alá a tanúsítványt — a lekötés nem az övé.
   const tolvajKulcs = await ujKulcs();
-  const tolvajLanc = await kulcscsereKeszitese(X, a.nev, 1, await pub(tolvajKulcs), await csereLenyomata(await pub(await ujKulcs())), []);
+  const tolvajLanc = await kulcscsereKeszitese(X, a.nev, 1, await pub(tolvajKulcs), await csereLenyomata(await pub(await ujKulcs())), [], FZ);
   const tolvajLancos = await alairtTanusitvany(tolvajKulcs, { ...telefon.tanusitvany, cserek: [tolvajLanc] });
   // ⛔ A rossz sorszám (a C1 írja alá — a lekötés jó —, de 1-es sorszámmal a 2. helyen).
   const rosszSorszam = await kezeloKulcsLanc(a.szuletes, [c1, await kulcscsereKeszitese(C1, a.nev, 1, await pub(K2),
-    await csereLenyomata(await pub(C2)), [])], a.nev);
+    await csereLenyomata(await pub(C2)), [], FZ)], a.nev);
   // ⛔ Az átírt csere a tanúsítvány láncában (a megmaradók — az aláírás nem illik rá), a jó kulccsal aláírt tanúsítványban.
   const atirtLancos = await alairtTanusitvany(K1, { ...telefon.tanusitvany, cserek: [{ ...c1, keszulekek: [] }] });
   return !rosszSorszam.rendben && !(await tanusitvanyEllenorzese(tolvajLancos)).rendben
@@ -770,6 +772,7 @@ proba('⭐⭐ A KULCSCSERE LÁNCA (②b) — a csere-kulcs írja alá, a kezelő
 proba('⭐⭐ A KULCSCSERE UTÁN (②b — KC2 (A)) — a nem felsorolt, régi kulccsal felvett készülék eseményei nem számítanak (bárki bevitte a cserét); a felsorolt és az új kulccsal felvett igen; a kapu a kiesett készülék új eseményét nem engedi be, a hamis cserét elveti', async () => {
   const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
   const ujKulcs = () => crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const FZ = await pub(await ujKulcs());   // ⭐ (②d) a fizetési kulcs a csere után
   const a = await ujAzonossag();
   a.kulcspar.szuletes = a.szuletes;
   const laptopK = await tesztKeszulek('laptop', a.kulcspar);
@@ -781,7 +784,7 @@ proba('⭐⭐ A KULCSCSERE UTÁN (②b — KC2 (A)) — a nem felsorolt, régi k
   const tg = await telefon.tesz('GondolatLetrehozas', { cim: 'A telefoné (ellopták)' });
   // A csere: a laptop marad, a telefon (ellopták) nem; utána egy tablet az új kulccsal.
   const [K1, C1] = [await ujKulcs(), await ujKulcs()];
-  const c1 = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(K1), await csereLenyomata(await pub(C1)), [laptopK.keszulek]);
+  const c1 = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(K1), await csereLenyomata(await pub(C1)), [laptopK.keszulek], FZ);
   K1.szuletes = a.szuletes;
   K1.cserek = [c1];
   const tablet = await ujEember(KOINO, await tesztKeszulek('tablet', K1));
@@ -793,7 +796,7 @@ proba('⭐⭐ A KULCSCSERE UTÁN (②b — KC2 (A)) — a nem felsorolt, régi k
   const kiesett = new Set(vele.kizartak.map((k) => k.azonosito));
   // A 2. csere (a C1-gyel): csak a tablet marad — a két csere-esemény közül a LEGUTÓBBI (a hosszabb lánc) számít: a laptop kiesik.
   const [K2, C2] = [await ujKulcs(), await ujKulcs()];
-  const c2 = await kulcscsereKeszitese(C1, a.nev, 2, await pub(K2), await csereLenyomata(await pub(C2)), [tablet.keszulek]);
+  const c2 = await kulcscsereKeszitese(C1, a.nev, 2, await pub(K2), await csereLenyomata(await pub(C2)), [tablet.keszulek], FZ);
   const csere2 = await idegen.tesz('Kulcscsere', { szuletes: a.szuletes, cserek: [c1, c2] });
   const kiesett2 = new Set(allapotSzamitasa([...lista, csere2, csere]).kizartak.map((k) => k.azonosito));
   // A kapu: a csere után a telefon új eseménye nem jön be, a laptopé igen; a hamis csere (a tolvaj saját csere-kulcsával) elbukik.
@@ -803,13 +806,92 @@ proba('⭐⭐ A KULCSCSERE UTÁN (②b — KC2 (A)) — a nem felsorolt, régi k
   const laptopUj = await esemenyMentese(tar, await laptop.tesz('GondolatLetrehozas', { cim: 'A laptop újabb' }));
   const X = await ujKulcs();
   const hamisC = await kulcscsereKeszitese(X, a.nev, 1, await pub(await ujKulcs()), await csereLenyomata(await pub(await ujKulcs())),
-    [telefonK.keszulek]);
+    [telefonK.keszulek], FZ);
   const hamis = await esemenyMentese(tar, await idegen.tesz('Kulcscsere', { szuletes: a.szuletes, cserek: [hamisC] }));
   return nelkule.kizartak.length === 0 && kiesett.has(tg.azonosito) && !kiesett.has(g.azonosito) && !kiesett.has(tt.azonosito)
     && !telefonUj.mentve && /nem sorolta fel/.test(telefonUj.ok ?? '') && laptopUj.mentve
     && !hamis.mentve && /kulcscsere nem hiteles/.test(hamis.ok ?? '')
     && !!alakiHiba({ ...csere, adat: { ...csere.adat, x: 1 } })
     && kiesett2.has(g.azonosito) && kiesett2.has(tg.azonosito) && !kiesett2.has(tt.azonosito);
+});
+
+// ⭐⭐ D128 (②d — 17. pont, 9.13): A PAPÍR VISSZAVONÁSA ÉS AZ ERŐSEBB ÁG. A visszavonás (a papír utolsó aláírása, a lekötés `null`)
+// a kezelő kulcsot nem cseréli — senki nem esik ki; utána papír nem írhat alá (a kapu is elveti). Ha a papírt ellopták, és a tolvaj
+// ugyanarra a helyre kulcscserét írt (és a saját ágát meg is hosszabbította): a visszavonás az ERŐSEBB — nem a hosszabb ág nyer —, és a
+// tolvaj ágán tanúsított készülék kiesik. ⛔ És a ②b rése: két egyforma hosszú papír-ág közül a VESZTESEN tanúsított készülék is
+// kiesik (a ②b-ben a korszak-száma nem volt kisebb, és megmaradt).
+proba('⭐⭐ A PAPÍR VISSZAVONÁSA ÉS AZ ERŐSEBB ÁG (②d — 17. pont) — a visszavonás után papír nem ír alá, és a saját készülékeid közül senki nem esik ki; a tolvaj hosszabb papír-ága a visszavonás ellen veszít, a rajta tanúsított készülék kiesik; két egyforma ágból a vesztesen tanúsított is', async () => {
+  const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
+  const ujKulcs = () => crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const FZ = await pub(await ujKulcs());
+  const a = await ujAzonossag();
+  a.kulcspar.szuletes = a.szuletes;
+  const laptop = await ujEember(KOINO, await tesztKeszulek('laptop', a.kulcspar));
+  const telefon = await ujEember(KOINO, await tesztKeszulek('telefon', a.kulcspar));
+  const idegen = await ujEember(KOINO);
+  const g = await laptop.tesz('GondolatLetrehozas', { cim: 'A laptopé' });
+  const tg = await telefon.tesz('GondolatLetrehozas', { cim: 'A telefoné' });
+  // A VISSZAVONÁS: ugyanaz a kezelő kulcs, a lekötés null.
+  const v = await kulcscsereKeszitese(a.csere, a.nev, 1, a.szuletes.kulcs, null, [], a.szuletes.fizetes);
+  const vLanc = await kezeloKulcsLanc(a.szuletes, [v], a.nev);
+  const utana = await kezeloKulcsLanc(a.szuletes, [v, await kulcscsereKeszitese(a.csere, a.nev, 2, await pub(await ujKulcs()),
+    await csereLenyomata(await pub(await ujKulcs())), [], FZ)], a.nev);
+  // A TOLVAJ a papírral (másolat): ugyanarra a helyre kulcscserét ír, és a saját ágát meghosszabbítja; az új kulcsával felvesz egy
+  // készüléket.
+  const [KT1, CT1, KT2, CT2] = [await ujKulcs(), await ujKulcs(), await ujKulcs(), await ujKulcs()];
+  const t1 = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(KT1), await csereLenyomata(await pub(CT1)), [], FZ);
+  const t2 = await kulcscsereKeszitese(CT1, a.nev, 2, await pub(KT2), await csereLenyomata(await pub(CT2)), [], FZ);
+  KT2.szuletes = a.szuletes;
+  KT2.cserek = [t1, t2];
+  const tolvajK = await ujEember(KOINO, await tesztKeszulek('tolvaj', KT2));
+  const xg = await tolvajK.tesz('GondolatLetrehozas', { cim: 'A tolvajé' });
+  const lista = await tagokkal([g, tg, xg]);
+  const vEsemeny = await idegen.tesz('Kulcscsere', { szuletes: a.szuletes, cserek: [v] });
+  const tEsemeny = await idegen.tesz('Kulcscsere', { szuletes: a.szuletes, cserek: [t1, t2] });
+  const csakVissza = new Set(allapotSzamitasa([...lista, vEsemeny]).kizartak.map((k) => k.azonosito));
+  const mindketto = new Set(allapotSzamitasa([...lista, tEsemeny, vEsemeny]).kizartak.map((k) => k.azonosito));
+  const csakTolvaj = new Set(allapotSzamitasa([...lista, tEsemeny]).kizartak.map((k) => k.azonosito));
+  // KÉT EGYFORMA PAPÍR-ÁG (a ②b rése): mindkettő az 1. helyen cserél, mindkettőn felvesznek egy készüléket.
+  const [P1, Q1, P2, Q2] = [await ujKulcs(), await ujKulcs(), await ujKulcs(), await ujKulcs()];
+  const p1 = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(P1), await csereLenyomata(await pub(Q1)), [laptop.keszulek], FZ);
+  const p2 = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(P2), await csereLenyomata(await pub(Q2)), [laptop.keszulek], FZ);
+  P1.szuletes = a.szuletes;
+  P1.cserek = [p1];
+  P2.szuletes = a.szuletes;
+  P2.cserek = [p2];
+  const egyik = await ujEember(KOINO, await tesztKeszulek('tablet', P1));
+  const masik = await ujEember(KOINO, await tesztKeszulek('tablet2', P2));
+  const eg = await egyik.tesz('GondolatLetrehozas', { cim: 'Az egyik ágon' });
+  const mg = await masik.tesz('GondolatLetrehozas', { cim: 'A másik ágon' });
+  const lista2 = await tagokkal([g, eg, mg]);
+  const ketAg = new Set(allapotSzamitasa([...lista2, await idegen.tesz('Kulcscsere', { szuletes: a.szuletes, cserek: [p1] }),
+    await idegen.tesz('Kulcscsere', { szuletes: a.szuletes, cserek: [p2] })]).kizartak.map((k) => k.azonosito));
+  // A kapu: a visszavonás után a papírral írt csere nem jön be.
+  const tar = await ujTar();
+  for (let i = 0; i < 2; i++) for (const e of [...lista, vEsemeny]) await esemenyMentese(tar, e);
+  const kapun = await esemenyMentese(tar, await idegen.tesz('Kulcscsere', { szuletes: a.szuletes,
+    cserek: [v, await kulcscsereKeszitese(a.csere, a.nev, 2, await pub(await ujKulcs()), await csereLenyomata(await pub(await ujKulcs())),
+      [], FZ)] }));
+  // ⭐ Az erő nem véletlen: 16 különböző tolvaj-kulcscsere ellen a visszavonás MINDIG erősebb (az aláírás szerinti döntés 1/2^16
+  // eséllyel adná ugyanezt).
+  let mindigVisszavonas = true;
+  for (let i = 0; i < 16; i++) {
+    const t = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(await ujKulcs()), await csereLenyomata(await pub(await ujKulcs())), [], FZ);
+    if (!lancErosebbE([v], [t]) || lancErosebbE([t], [v])) mindigVisszavonas = false;
+  }
+  const r = {
+    vLanc: vLanc.rendben && vLanc.lekotes === null && vLanc.kulcsok[1] === a.szuletes.kulcs && vLanc.fizetesek[1] === a.szuletes.fizetes,
+    utana: !utana.rendben && /visszavonták/.test(utana.ok ?? ''),
+    senkiNemEsikKi: !csakVissza.has(g.azonosito) && !csakVissza.has(tg.azonosito) && csakVissza.has(xg.azonosito),
+    visszavonasNyer: mindketto.has(xg.azonosito) && !mindketto.has(g.azonosito) && !mindketto.has(tg.azonosito),
+    tolvajEgyedul: csakTolvaj.has(g.azonosito) && csakTolvaj.has(tg.azonosito) && !csakTolvaj.has(xg.azonosito),
+    ketAg: ketAg.has(eg.azonosito) !== ketAg.has(mg.azonosito) && !ketAg.has(g.azonosito),
+    erosebb: mindigVisszavonas && lancErosebbE([v], [t1, t2]) && !lancErosebbE([t1, t2], [v]) && lancErosebbE([t1, t2], [t1])
+      && lancErosebbE([p1], [p2]) !== lancErosebbE([p2], [p1]),
+    kapu: !kapun.mentve && /visszavonták/.test(kapun.ok ?? '')
+  };
+  if (Object.values(r).some((x) => !x)) process.stderr.write('    (' + JSON.stringify(r) + ')\n');
+  return Object.values(r).every(Boolean);
 });
 
 // ===================================

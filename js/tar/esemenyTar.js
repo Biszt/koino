@@ -30,7 +30,7 @@ import { esemenyEllenorzese, elagazasE, szelet, esemenyKoinoja, azonositoAlaku, 
   KISERO_MEZO, kiseroNelkul, kiseroval } from '../esemeny/esemeny.js';
 // ⭐ D80: az `Ellentmondas` esemény TARTALMA is a kapun megy át (önmagát igazoló bizonyíték).
 import { ellentmondasEllenorzese } from '../allapot/ellentmondas.js';
-import { kizartE, tarKizarasai, tarKulcscserei, cserenKivulE, KIZARAS_ESEMENY, KULCSCSERE_ESEMENY }
+import { kizartE, tarKizarasai, tarKulcscserei, cserenKivulE, tanusitvanyKorszaka, KIZARAS_ESEMENY, KULCSCSERE_ESEMENY }
   from '../allapot/kizaras.js';   // ⭐⭐ D128 (①d, ②b)
 import { kezeloKulcsLanc, azonossagNeve } from '../kulcs/azonossag.js';
 import { kizarasEllenorzese, kizarasKoinoban } from '../kulcs/keszulek.js';
@@ -177,7 +177,7 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
     const cserek = await tarKulcscserei(tar, esemeny.szerzo);
     if (cserek.size) {
       const t = esemeny.tanusitvany ?? await tarTanusitvanya(tar, esemeny.keszulek);
-      if (t && cserenKivulE(esemeny, cserek, new Map([[esemeny.keszulek, t.cserek?.length ?? 0]]))) {
+      if (t && cserenKivulE(esemeny, cserek, new Map([[esemeny.keszulek, tanusitvanyKorszaka(t)]]))) {
         const ok = 'a készüléket a kulcscsere nem sorolta fel a megmaradók között (D128 ②b — KC2 (A))';
         console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok });
         return { mentve: false, ok };
