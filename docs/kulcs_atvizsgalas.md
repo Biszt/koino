@@ -394,6 +394,16 @@ D128 13–15.):
   volna; most a születést és a fizetési kulcsot is viszi (a próba fogta meg). A próba: keszulek („A NÉV A SZÜLETÉS LENYOMATA”, és a
   tolvaj a saját kulcsával szabályosan aláírt tanúsítványa egy idegen névre — csak a név szabálya állítja meg), kulcs (a születés, a
   csere-kulcs, a régi fájl, a mentés), titkositas (ugyanez a kézfogásban) — 8 rontás.
+- ✅ **Az építés — ②b (1) a kulcscsere lánca** (2026-11-15): `azonossag.js` — a kulcscsere `{ tipus, azonossag, sorszam, csere, kulcs,
+  kovetkezo, keszulekek, ido, alairas }` (a CSERE-KULCS írja alá; a lenyomata az előző lekötés — az elsőnél a születésé, utána az előző
+  cseréé; a `kovetkezo` az új lekötés; a `keszulekek` a megmaradók — KC2 (A)), `kezeloKulcsLanc` (korszakonként a kezelő kulcs és a
+  megmaradók). A tanúsítványok (a készüléké, a kizárásé) a cserék láncát is hozzák (`cserek` — csere nélkül nincs, a tanúsítvány a
+  régi), és a lánc VÉGÉN álló kulcs írja alá őket; a kézfogás szinkron ugyanígy. ⛔ **Lelet:** a lánc-ellenőrzés emlékezetének kulcsa
+  csak az aláírásokból állt — egy átírt tartalmú, de a régi aláírást hordozó csere a korábbi „rendben” eredményt kapta volna; most a
+  teljes tartalom a kulcs (a próba fogta meg). A próba: „A KULCSCSERE LÁNCA” — a tolvaj a régi kulccsal nem cserélhet (a lekötés nem az
+  övé), a régi csere-kulcs nem írhatja alá a 2. cserét, az átírt csere, a rossz sorszám, a hiányzó láncszem, a régi kulccsal írt „új”
+  és a lánc nélküli új tanúsítvány elbukik, a kapu és a kézfogás útján is — 8 rontás. ⏭️ ②b (2): a `Kulcscsere` esemény (bárki
+  beviheti), és a régi kulccsal felvett, nem felsorolt készülék eseményei nem számítanak; ②b (3): a művelet és a parancs.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

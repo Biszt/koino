@@ -29,7 +29,8 @@
 
 import { lenyomat, bajtokBase64Url, base64UrlBajtok } from '../esemeny/kanonikusAlak.js';
 import { nyilvanosKulcsSzovegesen, kulcsparLeirasa, kulcsparLeirasbol } from './kulcsTar.js';
-import { szuletesAlakiHibaja, szuletesEllenorzese, azonossagNeve } from './azonossag.js';   // ⭐⭐ D128 (②a — KC1 (A))
+import { szuletesAlakiHibaja, azonossagNeve, kezeloKulcsLanc, kulcscsereAlakiHibaja, KULCSCSERE_KORLAT }
+  from './azonossag.js';   // ⭐⭐ D128 (②a — KC1 (A); ②b — a kulcscserék lánca)
 
 const ALGORITMUS = 'Ed25519';
 
@@ -44,6 +45,21 @@ const AZONOSITO = /^[A-Za-z0-9_-]{43}$/;
 const ALAIRAS = /^[A-Za-z0-9_-]{86}$/;
 // ⭐⭐ D128 (②a — KC1 (A)): a tanúsítvány az azonosság SZÜLETÉSÉT is hozza — a név annak lenyomata, az aláíró kulcs az övé.
 const MEZOK = 'alairas,azonossag,ido,keszulek,nev,szuletes,tipus';
+// ⭐⭐ D128 (②b): egy kulcscsere UTÁN a tanúsítvány a cserék láncát is hozza (`cserek`) — a kezelő kulcs a lánc végén.
+const MEZOK_CSEREKKEL = 'alairas,azonossag,cserek,ido,keszulek,nev,szuletes,tipus';
+
+/** ⭐⭐ D128 (②b): a hozott kulcscserék lánca — alakilag (üres vagy hiányzik: a születés kulcsa kezel). */
+function cserekAlakiHibaja(cserek) {
+  if (cserek === undefined) return null;
+  if (!Array.isArray(cserek) || !cserek.length || cserek.length > KULCSCSERE_KORLAT) {
+    return 'a kulcscserék lánca 1–' + KULCSCSERE_KORLAT + ' csere';
+  }
+  for (const c of cserek) {
+    const h = kulcscsereAlakiHibaja(c);
+    if (h) return 'a kulcscserék lánca: ' + h;
+  }
+  return null;
+}
 
 /**
  * ⭐⭐ D128 (②a): az AZONOSSÁG — a kezelő kulcspár és a születése együtt (`kulcsTar.js` adja: a kulcspárra tett `szuletes` mező).
@@ -52,21 +68,25 @@ const MEZOK = 'alairas,azonossag,ido,keszulek,nev,szuletes,tipus';
 async function azonossagAdatai(azonossagKulcspar) {
   const szuletes = azonossagKulcspar?.szuletes;
   if (szuletesAlakiHibaja(szuletes)) throw new Error('az azonosság születése hiányzik (D128 ②a — kulcs/azonossag.js)');
-  return { szuletes, azonossag: await azonossagNeve(szuletes) };
+  // ⭐⭐ D128 (②b): a kulcscserék lánca (ha volt csere) — a tanúsítvány ezt hozza, a kezelő kulcs a lánc végén.
+  const cserek = Array.isArray(azonossagKulcspar.cserek) && azonossagKulcspar.cserek.length ? azonossagKulcspar.cserek : null;
+  return { szuletes, azonossag: await azonossagNeve(szuletes), cserek };
 }
 
 /**
- * ⭐ Egy ellenőrzött születés emlékezete (aláírás + név → igaz): a kapu sok tanúsítványt néz, a születés ugyanaz — egyszer elég.
- * Korlátos (a legrégebbi esik ki).
+ * ⭐ Egy ellenőrzött kezelő-lánc emlékezete (a születés és a cserék aláírásai + a név → a lánc): a kapu sok tanúsítványt néz, a lánc
+ * ugyanaz — egyszer elég. Korlátos (a legrégebbi esik ki). ⭐⭐ D128 (②b): a lánc végén álló kulcs a kezelő kulcs.
  */
-const SZULETES_EMLEK = new Map();
-const SZULETES_EMLEK_KORLAT = 4096;
-async function szuletesRendben(s, nev) {
-  const kulcs = (s?.alairas ?? '') + '|' + nev;
-  if (SZULETES_EMLEK.has(kulcs)) return SZULETES_EMLEK.get(kulcs);
-  const r = await szuletesEllenorzese(s, nev);
-  SZULETES_EMLEK.set(kulcs, r);
-  while (SZULETES_EMLEK.size > SZULETES_EMLEK_KORLAT) SZULETES_EMLEK.delete(SZULETES_EMLEK.keys().next().value);
+const LANC_EMLEK = new Map();
+const LANC_EMLEK_KORLAT = 4096;
+async function kezeloLancRendben(szuletes, cserek, nev) {
+  // ⛔ A kulcs a TELJES tartalom (nem csak az aláírások): egy átírt, de a régi aláírást hordozó csere különben a korábbi
+  // „rendben” eredményt kapná vissza (a próba mérte).
+  const kulcs = JSON.stringify([szuletes ?? null, cserek ?? [], nev]);
+  if (LANC_EMLEK.has(kulcs)) return LANC_EMLEK.get(kulcs);
+  const r = await kezeloKulcsLanc(szuletes, cserek ?? [], nev);
+  LANC_EMLEK.set(kulcs, r);
+  while (LANC_EMLEK.size > LANC_EMLEK_KORLAT) LANC_EMLEK.delete(LANC_EMLEK.keys().next().value);
   return r;
 }
 
@@ -94,7 +114,12 @@ function tartalma(t) {
  */
 export function tanusitvanyAlakiHibaja(t) {
   if (!t || typeof t !== 'object' || Array.isArray(t)) return 'a tanúsítvány egy objektum';
-  if (Object.keys(t).sort().join(',') !== MEZOK) return 'a tanúsítvány mezői: tipus, azonossag, keszulek, nev, ido, szuletes, alairas';
+  const mezok = Object.keys(t).sort().join(',');
+  if (mezok !== MEZOK && mezok !== MEZOK_CSEREKKEL) {
+    return 'a tanúsítvány mezői: tipus, azonossag, keszulek, nev, ido, szuletes, (cserek,) alairas';
+  }
+  const ch = cserekAlakiHibaja(t.cserek);
+  if (ch) return ch;
   if (t.tipus !== TANUSITVANY_TIPUS) return 'ez nem készülék-tanúsítvány';
   if (typeof t.azonossag !== 'string' || !AZONOSITO.test(t.azonossag)) return 'a tanúsítvány azonossága egy nyilvános kulcs';
   if (typeof t.keszulek !== 'string' || !AZONOSITO.test(t.keszulek)) return 'a tanúsítvány készüléke egy nyilvános kulcs';
@@ -124,11 +149,11 @@ export function tanusitvanyAlakiHibaja(t) {
  */
 export async function tanusitvanyKeszitese(azonossagKulcspar, keszulek, nev, ido = Date.now()) {
   console.log('tanusitvanyKeszitese - KEZDÉS', { nev });
-  const { szuletes, azonossag } = await azonossagAdatai(azonossagKulcspar);
+  const { szuletes, azonossag, cserek } = await azonossagAdatai(azonossagKulcspar);
   const t = { tipus: TANUSITVANY_TIPUS, azonossag, keszulek, nev, ido };
   const alairas = await crypto.subtle.sign({ name: ALGORITMUS }, azonossagKulcspar.privateKey,
     new TextEncoder().encode(await lenyomat(t)));
-  const kesz = { ...t, szuletes, alairas: bajtokBase64Url(new Uint8Array(alairas)) };
+  const kesz = { ...t, szuletes, ...(cserek ? { cserek } : {}), alairas: bajtokBase64Url(new Uint8Array(alairas)) };
   const hiba = tanusitvanyAlakiHibaja(kesz);
   if (hiba) throw new Error('tanusitvanyKeszitese: ' + hiba);
   console.log('tanusitvanyKeszitese - VÉGE');
@@ -143,11 +168,12 @@ export async function tanusitvanyKeszitese(azonossagKulcspar, keszulek, nev, ido
 export async function tanusitvanyEllenorzese(t) {
   const hiba = tanusitvanyAlakiHibaja(t);
   if (hiba) return { rendben: false, ok: hiba };
-  // ⭐⭐ D128 (②a): a név a születés lenyomata, és a születést az első kulcs írta alá — a tanúsítványt ez a kulcs írja alá.
-  const sz = await szuletesRendben(t.szuletes, t.azonossag);
-  if (!sz.rendben) return { rendben: false, ok: 'a tanúsítvány születése: ' + sz.ok };
+  // ⭐⭐ D128 (②a): a név a születés lenyomata, és a születést az első kulcs írta alá; ⭐⭐ (②b) a kulcscserék lánca után a
+  // tanúsítványt a lánc VÉGÉN álló kezelő kulcs írja alá (a korszaka a hozott cserék száma).
+  const lanc = await kezeloLancRendben(t.szuletes, t.cserek, t.azonossag);
+  if (!lanc.rendben) return { rendben: false, ok: 'a tanúsítvány születése: ' + lanc.ok };
   try {
-    const kulcs = await crypto.subtle.importKey('raw', base64UrlBajtok(t.szuletes.kulcs), { name: ALGORITMUS }, false, ['verify']);
+    const kulcs = await crypto.subtle.importKey('raw', base64UrlBajtok(lanc.kulcsok.at(-1)), { name: ALGORITMUS }, false, ['verify']);
     const jo = await crypto.subtle.verify({ name: ALGORITMUS }, kulcs, base64UrlBajtok(t.alairas),
       new TextEncoder().encode(await lenyomat(tartalma(t))));
     return jo ? { rendben: true } : { rendben: false, ok: 'a tanúsítványt nem az azonosság kulcsa írta alá' };
@@ -173,6 +199,7 @@ export const KIZARAS_TIPUS = 'KeszulekKizaras';
 export const KIZARAS_KOINO_KORLAT = 256;
 
 const KIZARAS_MEZOK = 'alairas,azonossag,ido,keszulek,koinok,szuletes,tipus';   // ⭐⭐ (②a): a születéssel
+const KIZARAS_MEZOK_CSEREKKEL = 'alairas,azonossag,cserek,ido,keszulek,koinok,szuletes,tipus';   // ⭐⭐ (②b): és a lánccal
 
 /** A kizárás aláírt része. */
 function kizarasTartalma(k) {
@@ -185,9 +212,12 @@ function kizarasTartalma(k) {
  */
 export function kizarasAlakiHibaja(k) {
   if (!k || typeof k !== 'object' || Array.isArray(k)) return 'a kizárás egy objektum';
-  if (Object.keys(k).sort().join(',') !== KIZARAS_MEZOK) {
-    return 'a kizárás mezői: tipus, azonossag, keszulek, koinok, ido, szuletes, alairas';
+  const mezok = Object.keys(k).sort().join(',');
+  if (mezok !== KIZARAS_MEZOK && mezok !== KIZARAS_MEZOK_CSEREKKEL) {
+    return 'a kizárás mezői: tipus, azonossag, keszulek, koinok, ido, szuletes, (cserek,) alairas';
   }
+  const ch = cserekAlakiHibaja(k.cserek);
+  if (ch) return ch;
   const sh = szuletesAlakiHibaja(k.szuletes);
   if (sh) return 'a kizárás az azonosság születését hozza: ' + sh;
   if (k.tipus !== KIZARAS_TIPUS) return 'ez nem kizárás-tanúsítvány';
@@ -225,13 +255,13 @@ export function kizarasAlakiHibaja(k) {
  */
 export async function kizarasKeszitese(azonossagKulcspar, keszulek, koinok, ido = Date.now()) {
   console.log('kizarasKeszitese - KEZDÉS', { koinok: koinok.length });
-  const { szuletes, azonossag } = await azonossagAdatai(azonossagKulcspar);
+  const { szuletes, azonossag, cserek } = await azonossagAdatai(azonossagKulcspar);
   const rendezett = [...koinok].map((x) => ({ koino: x.koino, vagas: x.vagas, orokos: x.orokos }))
     .sort((a, b) => (a.koino < b.koino ? -1 : a.koino > b.koino ? 1 : 0));
   const k = { tipus: KIZARAS_TIPUS, azonossag, keszulek, koinok: rendezett, ido };
   const alairas = await crypto.subtle.sign({ name: ALGORITMUS }, azonossagKulcspar.privateKey,
     new TextEncoder().encode(await lenyomat(k)));
-  const kesz = { ...k, szuletes, alairas: bajtokBase64Url(new Uint8Array(alairas)) };
+  const kesz = { ...k, szuletes, ...(cserek ? { cserek } : {}), alairas: bajtokBase64Url(new Uint8Array(alairas)) };
   const hiba = kizarasAlakiHibaja(kesz);
   if (hiba) throw new Error('kizarasKeszitese: ' + hiba);
   console.log('kizarasKeszitese - VÉGE');
@@ -245,10 +275,10 @@ export async function kizarasKeszitese(azonossagKulcspar, keszulek, koinok, ido 
 export async function kizarasEllenorzese(k) {
   const hiba = kizarasAlakiHibaja(k);
   if (hiba) return { rendben: false, ok: hiba };
-  const sz = await szuletesRendben(k.szuletes, k.azonossag);
-  if (!sz.rendben) return { rendben: false, ok: 'a kizárás születése: ' + sz.ok };
+  const lanc = await kezeloLancRendben(k.szuletes, k.cserek, k.azonossag);
+  if (!lanc.rendben) return { rendben: false, ok: 'a kizárás születése: ' + lanc.ok };
   try {
-    const kulcs = await crypto.subtle.importKey('raw', base64UrlBajtok(k.szuletes.kulcs), { name: ALGORITMUS }, false, ['verify']);
+    const kulcs = await crypto.subtle.importKey('raw', base64UrlBajtok(lanc.kulcsok.at(-1)), { name: ALGORITMUS }, false, ['verify']);
     const jo = await crypto.subtle.verify({ name: ALGORITMUS }, kulcs, base64UrlBajtok(k.alairas),
       new TextEncoder().encode(await lenyomat(kizarasTartalma(k))));
     return jo ? { rendben: true } : { rendben: false, ok: 'a kizárást nem az azonosság kulcsa írta alá' };

@@ -55,7 +55,7 @@ import {
   createPublicKey, createPrivateKey, createHash, sign, verify
 } from 'node:crypto';
 import { tanusitvanyAlakiHibaja, tanusitvanyTartalma } from '../kulcs/keszulek.js';
-import { azonossagNeveSzinkron, szuletesTartalma } from '../kulcs/azonossag.js';
+import { azonossagNeveSzinkron, szuletesTartalma, kulcscsereTartalma, csereLenyomataSzinkron } from '../kulcs/azonossag.js';
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 
 /** A titkosított csomag első bájtja — se nem `{` (a nyílt JSON), se nem STUN (az első két bit 0), se nem bencode. */
@@ -243,7 +243,17 @@ function tanusitvanySzinkronEllenorzese(t) {
   const nev = azonossagNeveSzinkron(s);
   if (nev !== t.azonossag) return false;
   if (!kezfogasAlairasEllenorzeseNyers(s.kulcs, Buffer.from(lenyomatSzinkron(szuletesTartalma(s)), 'utf8'), s.alairas)) return false;
-  return kezfogasAlairasEllenorzeseNyers(s.kulcs, Buffer.from(lenyomatSzinkron(tanusitvanyTartalma(t)), 'utf8'), t.alairas);
+  // ⭐⭐ D128 (②b): a kulcscserék lánca (ha hozza) — minden csere a lekötött csere-kulccsal, sorban; a kezelő kulcs a lánc végén.
+  let kulcs = s.kulcs;
+  let lekotes = s.csere;
+  for (let i = 0; i < (t.cserek ?? []).length; i++) {
+    const c = t.cserek[i];
+    if (c.azonossag !== nev || c.sorszam !== i + 1 || csereLenyomataSzinkron(c.csere) !== lekotes) return false;
+    if (!kezfogasAlairasEllenorzeseNyers(c.csere, Buffer.from(lenyomatSzinkron(kulcscsereTartalma(c)), 'utf8'), c.alairas)) return false;
+    kulcs = c.kulcs;
+    lekotes = c.kovetkezo;
+  }
+  return kezfogasAlairasEllenorzeseNyers(kulcs, Buffer.from(lenyomatSzinkron(tanusitvanyTartalma(t)), 'utf8'), t.alairas);
 }
 
 function kezfogasAlairasEllenorzeseNyers(nyilvanos, uzenet, alairas) {

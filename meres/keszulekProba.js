@@ -49,7 +49,9 @@ import { TUDATPONT_KERET } from '../js/allapot/szabalyok.js';
 import { tudatpontRendezese, szabadTudatpontjaim, keretAtadasa, keretAtvetele, keretAtfolyasa, atfolyasMerteke,
   javaslatLetrehozasa, szavazas, keszulekKizarasa, kizarasBevitele } from '../js/muveletek.js';
 import { kizarasKeszitese } from '../js/kulcs/keszulek.js';
-import { ujAzonossag, szuletesEllenorzese, szuletesKeszitese, csereLenyomata, azonossagNeve } from '../js/kulcs/azonossag.js';
+import { ujAzonossag, szuletesEllenorzese, szuletesKeszitese, csereLenyomata, azonossagNeve, kulcscsereKeszitese, kezeloKulcsLanc }
+  from '../js/kulcs/azonossag.js';
+import { szemelyesKezfogasAlairasa, keszulekKezfogasEllenorzese } from '../js/csere/titkositas.js';
 import { ujSajatHelye } from '../js/tar/esemenyTar.js';
 import { lancUjEsemenyhez, KAPOTT_FAJTA, KAPOTT_HOSSZ } from '../js/allapot/lancGyoker.js';
 import { ujAllapotFa, allapotBizonyitek, allapotBeallitas, allapotGyokere } from '../js/esemeny/osszegzoFa.js';
@@ -74,7 +76,7 @@ async function ujTar() {
 async function alairtTanusitvany(kulcspar, t) {
   const tartalom = { tipus: t.tipus, azonossag: t.azonossag, keszulek: t.keszulek, nev: t.nev, ido: t.ido };
   const alairas = await crypto.subtle.sign({ name: 'Ed25519' }, kulcspar.privateKey, new TextEncoder().encode(await lenyomat(tartalom)));
-  return { ...tartalom, szuletes: t.szuletes, alairas: bajtokBase64Url(new Uint8Array(alairas)) };
+  return { ...tartalom, szuletes: t.szuletes, ...(t.cserek ? { cserek: t.cserek } : {}), alairas: bajtokBase64Url(new Uint8Array(alairas)) };
 }
 
 /**
@@ -706,6 +708,63 @@ proba('⭐⭐ A NÉV A SZÜLETÉS LENYOMATA (②a — KC1 (A)) — az első kulc
     && !atirt.rendben && /név nem ennek/.test(atirt.ok) && !idegenAlairta.rendben && /első kulcs/.test(idegenAlairta.ok)
     && k.azonossag === a.nev && k.tanusitvany.szuletes.alairas === a.szuletes.alairas
     && (await tanusitvanyEllenorzese(k.tanusitvany)).rendben;
+});
+
+proba('⭐⭐ A KULCSCSERE LÁNCA (②b) — a csere-kulcs írja alá, a kezelő kulcs a lánc végén; a tolvaj a régi kulccsal nem cserélhet, a régi kulccsal írt „új” tanúsítvány és a lánc nélküli új tanúsítvány elbukik — a kapu és a kézfogás útján is', async () => {
+  const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
+  const ujKulcs = () => crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const a = await ujAzonossag();
+  a.kulcspar.szuletes = a.szuletes;
+  const laptop = await tesztKeszulek('laptop', a.kulcspar);
+  // Az 1. csere: a csere-kulcs (a mentésből) írja alá — új kezelő kulcs, új lekötés, a laptop marad.
+  const [K1, C1] = [await ujKulcs(), await ujKulcs()];
+  const c1 = await kulcscsereKeszitese(a.csere, a.nev, 1, await pub(K1), await csereLenyomata(await pub(C1)), [laptop.keszulek]);
+  const lanc1 = await kezeloKulcsLanc(a.szuletes, [c1], a.nev);
+  K1.szuletes = a.szuletes;
+  K1.cserek = [c1];
+  const telefon = await tesztKeszulek('telefon', K1);
+  // A 2. csere: a C1 írja alá (az 1. csere lekötése).
+  const [K2, C2] = [await ujKulcs(), await ujKulcs()];
+  const c2 = await kulcscsereKeszitese(C1, a.nev, 2, await pub(K2), await csereLenyomata(await pub(C2)), [telefon.keszulek]);
+  const lanc2 = await kezeloKulcsLanc(a.szuletes, [c1, c2], a.nev);
+  // ⛔ A tolvaj a RÉGI kezelő kulccsal (csere-kulcs nélkül) „cserél”: egy saját csere-kulccsal — a lekötés nem az övé.
+  const X = await ujKulcs();
+  const tolvajCsere = await kulcscsereKeszitese(X, a.nev, 1, await pub(await ujKulcs()), await csereLenyomata(await pub(await ujKulcs())), []);
+  const tolvaj = await kezeloKulcsLanc(a.szuletes, [tolvajCsere], a.nev);
+  // ⛔ A régi csere-kulccsal a 2. csere (a lekötés már a C1) · ⛔ az átírt csere (a megmaradók) · ⛔ a hiányzó láncszem (a 2. elsőként).
+  const regiCserevel = await kezeloKulcsLanc(a.szuletes, [c1, await kulcscsereKeszitese(a.csere, a.nev, 2, await pub(K2),
+    await csereLenyomata(await pub(C2)), [])], a.nev);
+  const atirt = await kezeloKulcsLanc(a.szuletes, [{ ...c1, keszulekek: [] }], a.nev);
+  const hezag = await kezeloKulcsLanc(a.szuletes, [c2], a.nev);
+  // ⛔ A tanúsítványok: a régi kulccsal írt, de a láncot hozó; a lánc nélküli új.
+  const regiKulccsal = await alairtTanusitvany(a.kulcspar, { ...telefon.tanusitvany });
+  const lancNelkul = await alairtTanusitvany(K1, { ...telefon.tanusitvany, cserek: undefined });
+  delete lancNelkul.cserek;
+  // A kézfogás (szinkron) ugyanígy.
+  const atirat = Buffer.from('egy kézfogás átirata');
+  const jwk = await crypto.subtle.exportKey('jwk', telefon.privateKey);
+  const ki = (t) => ({ sz: a.nev, k: telefon.keszulek, t, a: szemelyesKezfogasAlairasa(jwk, KOINO, atirat) });
+  // ⛔ A tolvaj SAJÁT „lánca” (a saját csere-kulcsával) és az azzal kezelt kulcsa írja alá a tanúsítványt — a lekötés nem az övé.
+  const tolvajKulcs = await ujKulcs();
+  const tolvajLanc = await kulcscsereKeszitese(X, a.nev, 1, await pub(tolvajKulcs), await csereLenyomata(await pub(await ujKulcs())), []);
+  const tolvajLancos = await alairtTanusitvany(tolvajKulcs, { ...telefon.tanusitvany, cserek: [tolvajLanc] });
+  // ⛔ A rossz sorszám (a C1 írja alá — a lekötés jó —, de 1-es sorszámmal a 2. helyen).
+  const rosszSorszam = await kezeloKulcsLanc(a.szuletes, [c1, await kulcscsereKeszitese(C1, a.nev, 1, await pub(K2),
+    await csereLenyomata(await pub(C2)), [])], a.nev);
+  // ⛔ Az átírt csere a tanúsítvány láncában (a megmaradók — az aláírás nem illik rá), a jó kulccsal aláírt tanúsítványban.
+  const atirtLancos = await alairtTanusitvany(K1, { ...telefon.tanusitvany, cserek: [{ ...c1, keszulekek: [] }] });
+  return !rosszSorszam.rendben && !(await tanusitvanyEllenorzese(tolvajLancos)).rendben
+    && !keszulekKezfogasEllenorzese(ki(tolvajLancos), KOINO, atirat)
+    && !(await tanusitvanyEllenorzese(atirtLancos)).rendben && !keszulekKezfogasEllenorzese(ki(atirtLancos), KOINO, atirat)
+    && lanc1.rendben && lanc1.kulcsok.join() === [a.szuletes.kulcs, await pub(K1)].join() && lanc1.marado[1].join() === laptop.keszulek
+    && lanc2.rendben && lanc2.kulcsok.at(-1) === await pub(K2)
+    && telefon.tanusitvany.cserek?.length === 1 && (await tanusitvanyEllenorzese(telefon.tanusitvany)).rendben
+    && (await tanusitvanyEllenorzese(laptop.tanusitvany)).rendben
+    && !tolvaj.rendben && /nem a lekötött/.test(tolvaj.ok) && !regiCserevel.rendben && /nem a lekötött/.test(regiCserevel.ok)
+    && !atirt.rendben && /nem a csere-kulcs írta alá/.test(atirt.ok) && !hezag.rendben
+    && !(await tanusitvanyEllenorzese(regiKulccsal)).rendben && !(await tanusitvanyEllenorzese(lancNelkul)).rendben
+    && keszulekKezfogasEllenorzese(ki(telefon.tanusitvany), KOINO, atirat)
+    && !keszulekKezfogasEllenorzese(ki(regiKulccsal), KOINO, atirat) && !keszulekKezfogasEllenorzese(ki(lancNelkul), KOINO, atirat);
 });
 
 // ===================================
