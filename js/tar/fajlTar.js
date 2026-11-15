@@ -104,7 +104,7 @@ export const KEP_KUSZOB = 1000;
 
 // A pillanatkép alakjának változata. ⚠️ Ha a mutató mezői változnak, ez nő — a régi képet a tár
 // eldobja, és egyszer a fájlból épít újat (a kép tiszta gyorsítótár).
-const KEP_VALTOZAT = 4;
+const KEP_VALTOZAT = 5;   // ⭐⭐ D128 (①d): a bejegyzés a kizárás azonosságát is tartja (`k`)
 
 // ⭐ Ennél több hiányzó testet egyetlen, sorban olvasással hozunk (mint a teljes betöltés);
 // kevesebbet egyenként, a nyitott fájl adott helyéről.
@@ -197,6 +197,8 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
   let szerzoSzerint = new Map();          // lánc (készülék) → bejegyzések
   let azonossagSzerint = new Map();       // ⭐⭐ D128: azonosság (szerző) → bejegyzések (minden készülékéé)
   let tanusitvanySzerint = new Map();     // ⭐⭐ D128: készülék → az első bejegyzés, ami a tanúsítványát hozza
+  // ⭐⭐ D128 (①d): azonosság → a kizárásai (a `Kizaras` események bejegyzései — bárki hozta be; a tanúsítvány azonossága szerint).
+  let kizarasSzerint = new Map();
   let szeletSzerint = new Map();          // szelet-kulcs → bejegyzések
   // ⭐ A C 7. pontja (a gyerek-bejelentés), D85/1, D85/3 óta általánosan: szelet → a hozzá BEJELENTETT
   // események (a gyerekek születése, a javaslatok, a szavazatok — `bejelentesHelyei`). A legfelső szintű
@@ -236,6 +238,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     hozza(szerzoSzerint, b.z, b);
     hozza(azonossagSzerint, b.y, b);
     if (b.t && !tanusitvanySzerint.has(b.z)) tanusitvanySzerint.set(b.z, b);
+    if (b.k) hozza(kizarasSzerint, b.k, b);
     // ⭐ A SZELET-KULCS type-független szabálya (`esemeny.js`): vagy meg van mondva, vagy az
     // esemény a saját szeletét nyitja. A tárolónak ennyit kell tudnia a domainről.
     hozza(szeletSzerint, b.s, b);
@@ -259,7 +262,8 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
 
   const bejegyzesEsemenybol = (e, o, h) =>
     ({ o, h, a: e.azonosito, z: lancKulcsa(e), n: e.sorszam, s: szelet(e), p: bejelentesHelyei(e), y: e.szerzo,
-      t: e.tanusitvany ? 1 : 0 });
+      t: e.tanusitvany ? 1 : 0,
+      k: e.tipus === 'Kizaras' && typeof e.adat?.kizaras?.azonossag === 'string' ? e.adat.kizaras.azonossag : null });
 
   /**
    * A fájl egy darabjának sorai a mutatóba (és a testek a memóriába). ⚠️ A darab egész
@@ -303,6 +307,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     szerzoSzerint = new Map();
     azonossagSzerint = new Map();
     tanusitvanySzerint = new Map();
+    kizarasSzerint = new Map();
     szeletSzerint = new Map();
     bejelentesSzerint = new Map();
     pontSzerint = new Map();
@@ -354,9 +359,11 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     // a bejelentés helyeinek LISTÁJÁT — a régebbit eldobjuk, és a mutató a fájlból épül újra (egyszer).
     if (!kep || kep.v !== KEP_VALTOZAT || !Number.isInteger(kep.fedett) || kep.fedett < 0) return false;
     if (!Array.isArray(kep.szerzok) || !Array.isArray(kep.szeletek) || !Array.isArray(kep.e)) return false;
-    // ⭐⭐ D128 (4. változat): a lánc kulcsa (a készülék), mellette az azonosság (7.) és a tanúsítvány jele (8.).
-    return kep.e.every((x) => Array.isArray(x) && x.length === 9
+    // ⭐⭐ D128 (4. változat): a lánc kulcsa (a készülék), mellette az azonosság (7.) és a tanúsítvány jele (8.); ⭐⭐ (5. változat, ①d):
+    // a kizárás azonossága (9. — a szerzők listájából, vagy −1).
+    return kep.e.every((x) => Array.isArray(x) && x.length === 10
       && Number.isInteger(x[7]) && x[7] >= 0 && x[7] < kep.szerzok.length && (x[8] === 0 || x[8] === 1)
+      && Number.isInteger(x[9]) && x[9] >= -1 && x[9] < kep.szerzok.length
       && Array.isArray(x[6]) && x[6].every((i) => Number.isInteger(i) && i >= 0 && i < kep.szeletek.length)
       && Number.isInteger(x[0]) && x[0] >= 0 && Number.isInteger(x[1]) && x[1] > 0
       && typeof x[2] === 'string'
@@ -404,7 +411,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     mutatoUritese();
     for (const x of kep.e) {
       bejegyez({ o: x[0], h: x[1], a: x[2], z: kep.szerzok[x[3]], n: x[4], s: kep.szeletek[x[5]],
-        p: x[6].map((i) => kep.szeletek[i]), y: kep.szerzok[x[7]], t: x[8] });
+        p: x[6].map((i) => kep.szeletek[i]), y: kep.szerzok[x[7]], t: x[8], k: x[9] >= 0 ? kep.szerzok[x[9]] : null });
     }
     ismertMeret = kep.fedett;
     return true;
@@ -430,7 +437,8 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     };
     const e = bejegyzesek.map((b) =>
       [b.o, b.h, b.a, szama(szerzoSzama, szerzok, b.z), b.n, szama(szeletSzama, szeletek, b.s),
-        b.p.map((k) => szama(szeletSzama, szeletek, k)), szama(szerzoSzama, szerzok, b.y), b.t]);
+        b.p.map((k) => szama(szeletSzama, szeletek, k)), szama(szerzoSzama, szerzok, b.y), b.t,
+        b.k ? szama(szerzoSzama, szerzok, b.k) : -1]);
     const kep = {
       v: KEP_VALTOZAT,
       fedett: ismertMeret,
@@ -606,6 +614,11 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
     /** ⭐⭐ D128: EGY AZONOSSÁG (szerző) eseményei — minden készülékéé (a fájl sorrendjében). */
     async azonossagEsemenyei(szerzo) {
       return testekKellenek(() => azonossagSzerint.get(szerzo) ?? []);
+    },
+
+    /** ⭐⭐ D128 (①d): egy azonosság KIZÁRÁSAI — a `Kizaras` események, akárki hozta be (a tanúsítvány azonossága szerint). */
+    async kizarasEsemenyei(azonossag) {
+      return testekKellenek(() => kizarasSzerint.get(azonossag) ?? []);
     },
 
     /**

@@ -30,6 +30,8 @@ import { esemenyEllenorzese, elagazasE, szelet, esemenyKoinoja, azonositoAlaku, 
   KISERO_MEZO, kiseroNelkul, kiseroval } from '../esemeny/esemeny.js';
 // ⭐ D80: az `Ellentmondas` esemény TARTALMA is a kapun megy át (önmagát igazoló bizonyíték).
 import { ellentmondasEllenorzese } from '../allapot/ellentmondas.js';
+import { kizartE, tarKizarasai, KIZARAS_ESEMENY } from '../allapot/kizaras.js';   // ⭐⭐ D128 (①d)
+import { kizarasEllenorzese, kizarasKoinoban } from '../kulcs/keszulek.js';
 // ⭐ D81: a pont-esemény a saját bizonyítékát hozza — a kapu ellenőrzi, hogy illik a lánc-gyökeréhez.
 import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa, keretAtvetelOnbizonyitasa, lancAlapKerete }
   from '../allapot/lancGyoker.js';
@@ -148,6 +150,27 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
     console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: ellenorzes.ok });
     return { mentve: false, ok: ellenorzes.ok, ...(ellenorzes.hianyzik ? { hianyzik: true } : {}) };
   }
+  // ----- ⭐⭐ D128 (①d, 9.10): A KIZÁRÁS ÉS A FOLYTATOTT LÁNC -----
+  // A kizárás tanúsítványát az azonosság kulcsa írta alá — önmagát igazolja, ezért bárki beviheti (mint az ellentmondás
+  // bizonyítékát, D80). A folytatott láncon (`lanc` mező) csak az ÖRÖKÖS írhat, csak a VÁGÁS UTÁN, és csak ha a koinóban az azonosság
+  // kizárása ezt mondja (a felsorolt koinókba az örökös maga hozza, a folytatás előtt).
+  if (esemeny.tipus === KIZARAS_ESEMENY) {
+    const kv = await kizarasEllenorzese(esemeny.adat.kizaras);
+    if (!kv.rendben) {
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok: kv.ok });
+      return { mentve: false, ok: 'a kizárás nem hiteles: ' + kv.ok };
+    }
+  }
+  if (esemeny.lanc !== undefined) {
+    const k = (await tarKizarasai(tar, esemeny.szerzo)).get(esemeny.lanc);
+    const v = k ? kizarasKoinoban(k, esemenyKoinoja(esemeny)) : null;
+    if (!v || v.orokos !== esemeny.keszulek || !(esemeny.sorszam > v.vagas)) {
+      const ok = 'a folytatott láncot csak a kizárás örököse írhatja, a vágás után (D128 ①d)';
+      console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok });
+      return { mentve: false, ok };
+    }
+  }
+
   // ⛔ D128: egy készüléket csak EGY azonosság tanúsíthat — így egy lánc egy azonosságé (`lancKulcsa`).
   if (esemeny.tanusitvany) {
     const meglevo = await tarTanusitvanya(tar, esemeny.keszulek);
@@ -290,8 +313,10 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
   // Szintén célzott kérdés: elég a szerző láncának EGYETLEN pontját megnézni — oda
   // ütközhet be egy második esemény.
   // ⭐⭐ D128: a lánc a készüléké — két készülék azonos sorszáma nem ütközés.
-  const ottLevok = await tar.sorszamSzerint(lancKulcsa(esemeny), esemeny.sorszam);
-  const utkozo = ottLevok.find((meglevo) => elagazasE(meglevo, esemeny));
+  // ⭐⭐ D128 (①d): a kizárt készülék vágás utáni eseménye nem ütközik az örökös folytatásával (nem a szerző eseménye).
+  const kizarasok = await tarKizarasai(tar, esemeny.szerzo);
+  const ottLevok = (await tar.sorszamSzerint(lancKulcsa(esemeny), esemeny.sorszam)).filter((m) => !kizartE(m, kizarasok));
+  const utkozo = kizartE(esemeny, kizarasok) ? undefined : ottLevok.find((meglevo) => elagazasE(meglevo, esemeny));
 
   // ----- 4. MENTÉS -----
   // Az elágazást is elmentjük! A két esemény EGYÜTT a bizonyíték (D17/D19) — ha az
@@ -398,7 +423,10 @@ export async function sorszamSzerint(tar, lanc, sorszam) {
  * @returns {Promise<Array<Object>>}
  */
 export async function sajatLancEsemenyei(tar, lanc) {
-  return (await tar.lancEsemenyei(lanc)).sort((a, b) => a.sorszam - b.sorszam);
+  const lista = (await tar.lancEsemenyei(lanc)).sort((a, b) => a.sorszam - b.sorszam);
+  // ⭐⭐ D128 (①d, 9.10): a kizárt készülék vágás utáni eseményei nem a lánc részei — a láncot az örökös folytatja.
+  const kizarasok = lista.length ? await tarKizarasai(tar, lista[0].szerzo) : new Map();
+  return kizarasok.size ? lista.filter((e) => !kizartE(e, kizarasok)) : lista;
 }
 
 /**

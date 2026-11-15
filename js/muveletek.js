@@ -27,6 +27,7 @@ import {
 // ⭐ D78 (az A pillér 2. lépése): a lánc-gyökér — a szerző esemény előtti naplója és kiosztása.
 import { lancUjEsemenyhez, lancAlapKerete, lancAlapjai } from './allapot/lancGyoker.js';
 import { alapokAlapja } from './allapot/tagsag.js';
+import { kizarasKeszitese } from './kulcs/keszulek.js';   // ⭐⭐ D128 (①d): a kizárás-tanúsítvány
 // ⭐ D80: az ellentmondás bizonyítéka — a bejelentés előtt magunk is ellenőrizzük.
 import { ellentmondasEllenorzese } from './allapot/ellentmondas.js';
 import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO, lancKulcsa, PONT_TIPUSOK } from './esemeny/esemeny.js';
@@ -321,7 +322,8 @@ async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
   const vegsoAdat = (pontEntitas || szavazatKulcsok) && bizonyitek ? { ...adat, bizonyitek }
     : kapottKulcs && kapottBizonyitek ? { ...adat, bizonyitek: kapottBizonyitek } : adat;
   return esemenyLetrehozasa(
-    { koino: kornyezet.koino, tipus, adat: vegsoAdat, entitas, entitasSorszam, latott, lancGyoker,
+    // ⭐⭐ D128 (①d): a folytatott lánc — ha a környezet egy másik (a kizárt) készülék láncát viszi (az örökös), a `lanc` mező.
+    { koino: kornyezet.koino, tipus, adat: vegsoAdat, entitas, entitasSorszam, latott, lancGyoker, lanc: sajatLanc(kornyezet),
       ...(beallitas.ido !== undefined ? { ido: beallitas.ido } : {}), ...veg },
     kornyezet.kulcspar
   );
@@ -1302,6 +1304,43 @@ export function kezdoPontokElosztasa(osszes, darab) {
  *        vagy a RÉGI alak: { erintett, muvelet, valtozas, indoklas, fajta, pont }
  *        — a `pont` a kezdő tudatpont (alapból töredékenként 1); több érintettnél ennyi oszlik szét
  */
+// ===================================
+// ⭐⭐ D128 (①d — KU7 (A), 9.10): A KÉSZÜLÉK KIZÁRÁSA ÉS AZ ÖRÖKÖS
+// ===================================
+
+/**
+ * A kizárás BEVITELE ebbe a koinóba: a tanúsítványát (az azonosság kulcsa írta alá) egy `Kizaras` esemény hozza, a kizárt
+ * azonosságának szeletébe. ⭐ Bárki beviheti, akihez eljutott (mint az ellentmondás bizonyítékát — D80); a felsorolt koinókba az
+ * örökös hozza, a folytatás előtt.
+ * @param {Object} kornyezet
+ * @param {Object} kizaras - a kizárás-tanúsítvány (`kulcs/keszulek.js` `kizarasKeszitese`)
+ * @returns {Promise<Object>} a `Kizaras` esemény
+ */
+export async function kizarasBevitele(kornyezet, kizaras) {
+  console.log('muveletek.kizarasBevitele - KEZDÉS', { keszulek: kizaras?.keszulek?.slice(0, 8) });
+  const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kizaras?.azonossag);
+  if (!horgony) {
+    throw new Error('A kizárt azonosságnak nincs azonosság-szelete ebben a koinóban — a kizárás nem helyezhető el (D80).');
+  }
+  return esemenytTeszek(kornyezet, 'Kizaras', { kizaras }, { entitas: horgony });
+}
+
+/**
+ * Egy készülékem KIZÁRÁSA (az azonosság kulcsával): a tanúsítvány koinónként a vágással és az örökössel, és a bevitele ebbe a
+ * koinóba (a többi felsorolt koinóba az örökös viszi — ott is `kizarasBevitele`). ⚠️ Az azonosság kulcsa kell hozzá (KU6:
+ * később papírról).
+ * @param {Object} kornyezet
+ * @param {CryptoKeyPair} azonossagKulcspar
+ * @param {string} kizart - a kizárt készülék kulcsa
+ * @param {Array<{koino: string, vagas: number, orokos: string}>} koinok
+ * @returns {Promise<{kizaras: Object, esemeny: Object}>}
+ */
+export async function keszulekKizarasa(kornyezet, azonossagKulcspar, kizart, koinok) {
+  const kizaras = await kizarasKeszitese(azonossagKulcspar, kizart, koinok);
+  if (kizaras.azonossag !== kornyezet.szerzo) throw new Error('Csak a saját azonosságod készülékét zárhatod ki.');
+  return { kizaras, esemeny: await kizarasBevitele(kornyezet, kizaras) };
+}
+
 /**
  * ⭐⭐ D128 (12. pont — Csaba, 2026-11-14: (A)): mennyi pontja van az AZONOSSÁGOMNAK (bármely készülékemnek) az entitáson — a
  * tárban lévő láncaim utolsó pont-eseményeiből (láncónként a legnagyobb sorszámú). A szavazás és a javaslattétel ebből tudja,

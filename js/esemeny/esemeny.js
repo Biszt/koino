@@ -26,7 +26,7 @@ import { osszegzesAlakja } from './osszegzoFa.js';
 // ⭐ D119 (①a): a koinó programja és a koino-verzió kódja egy darab-hivatkozás (a kód-csomag jegyzéke — `tar/kodCsomag.js`).
 import { szovegHivatkozasE } from './szovegDarab.js';
 // ⭐⭐ D128: a készülék-tanúsítvány (az azonosság kulcsa írja alá — koinók fölött).
-import { tanusitvanyAlakiHibaja, tanusitvanyEllenorzese } from '../kulcs/keszulek.js';
+import { tanusitvanyAlakiHibaja, tanusitvanyEllenorzese, kizarasAlakiHibaja } from '../kulcs/keszulek.js';
 
 const ALGORITMUS = 'Ed25519';
 
@@ -100,8 +100,10 @@ const ALGORITMUS = 'Ed25519';
 //   tanusitvany — a készülék-tanúsítvány (`kulcs/keszulek.js`): az azonosság kulcsa aláírja, hogy a készülék az
 //                 övé. ⭐ CSAK a lánc ELSŐ eseményén áll (`tanusitvanyKell`), máshol `null` — a kapu onnan ismeri
 //                 meg, és a többi eseményt a tárban lévőhöz méri (KU2 (A): a tanúsítvány nem utazik minden eseményben).
+//   lanc        — ⭐⭐ D128 (①d, 9.10): CSAK a folytatott láncon — az örökös a kizárt készülék láncát folytatja a vágás után; a
+//                 mező a folytatott lánc kulcsa (`lancKulcsa`), az aláírás az örökösé. Máshol nincs (a lenyomat így a régi).
 const TARTALOM_MEZOK = [
-  'koino', 'tipus', 'szerzo', 'keszulek', 'elozo', 'sorszam', 'ido',
+  'koino', 'tipus', 'szerzo', 'keszulek', 'lanc', 'elozo', 'sorszam', 'ido',
   'entitas', 'entitasSorszam', 'latott', 'lancGyoker', 'tanusitvany',
   'adat'
 ];
@@ -115,7 +117,8 @@ const TARTALOM_MEZOK = [
  * @returns {string}
  */
 export function lancKulcsa(e) {
-  return e?.keszulek;
+  // ⭐⭐ D128 (①d, 9.10): a folytatott láncon (az örökös a kizárt készülék láncát viszi tovább) a `lanc` mező.
+  return e?.lanc ?? e?.keszulek;
 }
 
 /**
@@ -297,6 +300,8 @@ export async function esemenyLetrehozasa(leiras, kulcspar) {
     tipus: leiras.tipus,
     szerzo,
     keszulek,
+    // ⭐⭐ D128 (①d, 9.10): a folytatott lánc (csak ha az örökös a kizárt készülék láncát viszi tovább — és ha más, mint az enyém).
+    ...(typeof leiras.lanc === 'string' && leiras.lanc !== keszulek ? { lanc: leiras.lanc } : {}),
     elozo: leiras.elozo ?? null,
     sorszam: leiras.sorszam,
     // Az idő a SZERZŐ órája — tájékoztató adat, soha nem bizonyíték. A sorrendet a
@@ -611,6 +616,12 @@ export function alakiHiba(esemeny) {
   // (`tanusitvanyKell`), ott a szerzőt és a készüléket nevezi — máshol null (egy alak van, nem kettő).
   if (!azonositoAlaku(esemeny.szerzo) || !azonositoAlaku(esemeny.keszulek)) return 'a szerző és a készülék egy-egy nyilvános kulcs';
   if (esemeny.keszulek === esemeny.szerzo) return 'a készülék kulcsa nem lehet az azonosság kulcsa (D128)';
+  // ⭐⭐ D128 (①d, 9.10): a folytatott lánc egy MÁSIK készülék kulcsa (a kizárté) — hogy a kizárás valóban ide engedi-e (az
+  // örökös, a vágás után), azt a kapu nézi a koinó kizárásával.
+  if (esemeny.lanc !== undefined && (!azonositoAlaku(esemeny.lanc) || esemeny.lanc === esemeny.keszulek
+      || esemeny.lanc === esemeny.szerzo)) {
+    return 'a folytatott lánc egy MÁSIK készülék kulcsa';
+  }
   if (!Number.isSafeInteger(esemeny.sorszam) || esemeny.sorszam < 1) return 'a sorszam csak 1-nél nem kisebb egész lehet';
   if (tanusitvanyKell(esemeny)) {
     const t = esemeny.tanusitvany;
@@ -779,6 +790,13 @@ export function alakiHiba(esemeny) {
       || esemenyKoinoja(at) !== esemenyKoinoja(esemeny) || esemeny.lancGyoker === null) {
       return 'a keret-átvétel az azonosság egy másik készülékének ide szóló átadását hozza, a lánc-gyökerével';
     }
+  }
+  // ⭐⭐ D128 (①d, 9.10): a KIZÁRÁS — az eseménye a kizárás-tanúsítványt hozza (csak azt); az aláírását a kapu nézi.
+  if (esemeny.tipus === 'Kizaras') {
+    const a = esemeny.adat;
+    const h = a && typeof a === 'object' && !Array.isArray(a) && Object.keys(a).length === 1
+      ? kizarasAlakiHibaja(a.kizaras) : 'a kizárás eseménye a kizárás-tanúsítványt hozza ({ kizaras })';
+    if (h) return 'a kizárás eseménye: ' + h;
   }
   // ⭐ D94: a 2. lépcső bemondása — a saját horgonyhoz szól, és a tanúsítások azonosítóit hordozza (1–16, ismétlés nélkül).
   if (esemeny.tipus === 'LepcsoBemondas') {

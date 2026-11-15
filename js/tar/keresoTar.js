@@ -34,7 +34,7 @@
 
 import { mkdir, readFile, appendFile, writeFile, rename, stat } from 'node:fs/promises';
 import { join } from 'node:path';
-import { azonositoAlaku, esemenyKoinoja } from '../esemeny/esemeny.js';
+import { azonositoAlaku, esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 import { rendezettHalmaz } from '../esemeny/halmaz.js';
 import { esemenyMentese } from './esemenyTar.js';
@@ -414,8 +414,8 @@ export async function keresoTarNyitasa(koino, mappa, beallitas = {}) {
     },
     async sorszamSzerint(lanc, sorszam) {   // ⭐⭐ D128: a lánc a készüléké
       const ki = [];
-      for (const { e } of esemenyek.values()) if (e.keszulek === lanc && e.sorszam === sorszam) ki.push(e);
-      for (const e of fuggo.values()) if (e.keszulek === lanc && e.sorszam === sorszam) ki.push(e);
+      for (const { e } of esemenyek.values()) if (lancKulcsa(e) === lanc && e.sorszam === sorszam) ki.push(e);
+      for (const e of fuggo.values()) if (lancKulcsa(e) === lanc && e.sorszam === sorszam) ki.push(e);
       return ki;
     },
     async hozzafuz(e) {

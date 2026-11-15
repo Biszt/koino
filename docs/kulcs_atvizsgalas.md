@@ -316,6 +316,37 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
   pontja, a pont-rendezés kimondja (a keret az átadással jön). A próba: „A SZAVAZÁS ÉS A JAVASLAT JOGA KÉSZÜLÉKENKÉNT” (a javaslat,
   a szavazat, és az idegen gondolat, ahol nem tesz pontot — 5 rontás).
 
+**9.10 A kizárás és az örökös — a pontos alak** (az ①d terve, 2026-11-14 — a 9.4 és a KU7 (A) megvalósítása):
+- **A kizárás-tanúsítvány** (`KeszulekKizaras` — az azonosság kulcsa írja alá, mint a készülék-tanúsítványt; koinók fölött):
+  `{ tipus, azonossag, keszulek, koinok: [{ koino, vagas, orokos }], ido, alairas }`. A `keszulek` a kizárt; koinónként a VÁGÁS (a
+  kizárt lánc utolsó még érvényes sorszáma — 0: egy sem) és az ÖRÖKÖS (az azonosság egy másik, tanúsított készüléke); a koinók
+  rendezve, egyszer. Egy készüléket egyszer lehet kizárni (az első hiteles tanúsítvány számít — a második nem írhatja át a vágást).
+- **Az esemény** (`Kizaras` — a tanúsítványt hozza a koinóba): a felsorolt koinókba az örökös írja (a saját láncán, az azonosság
+  szeletébe); ⭐ és BÁRKI beviheti, akihez eljutott (mint az ellentmondás bizonyítékát — D80): a tartalma önmagát igazolja. Így jut el
+  a fel nem sorolt koinóba is (a terjesztése a ③ hálózaté — 6. szakasz: ahova még nem ért el, ott addig számít).
+- **A számítás:** egy koinóban, ahol a kizárás megvan, a kizárt kulccsal aláírt események a vágás UTÁN nem számítanak (a fel nem
+  sorolt koinóban egyik sem — a vágás 0); nem elágazások, nem vádak — egyszerűen nem a te eseményeid (8.2: nem a szabály szigorítása,
+  hanem annak kimondása, hogy nem tőled jöttek).
+- **A folytatás:** a felsorolt koinóban a kizárt LÁNCÁT az örökös folytatja a vágás utáni sorszámokon — az eseményein egy új, aláírt,
+  nem kötelező mező: `lanc` (a folytatott lánc kulcsa; `lancKulcsa(e) = e.lanc ?? e.keszulek`). A kapu csak akkor engedi be, ha a
+  koinóban megvan a kizárás, az író az örökös, és a sorszám a vágás után van. ⭐ Így a lánc pontjai, a kerete (alap + kapott) és a
+  szabad része az örökösnél vannak, és átrendezheti őket — a D42 gépezete változatlan, a lánc ugyanaz.
+- **A próba:** két készülék, a telefon „ellopva”: a vágás után írt eseményei nem számítanak; a laptop folytatja a láncát (a pontjait
+  átrendezi); egy idegen koinóban a telefon minden eseménye kiesik, amint a kizárás odaér; a hamis kizárás (más kulcs írta, más
+  azonosság, nem tanúsított örökös) a kapun elbukik.
+- **Az építés — ①d** (2026-11-14): `kulcs/keszulek.js` (`kizarasKeszitese`, `kizarasEllenorzese`, `kizarasKoinoban`), `allapot/kizaras.js`
+  (`kizartakSzurese` — a számítás elején, az elágazás előtt; `kizartE`: csak a SAJÁT azonosság zárhat ki; több kizárásból a
+  legkésőbbi; `tarKizarasai` — a saját lánc műveleteihez az azonosság eseményeiből), az esemény `lanc` mezője (`lancKulcsa`), a kapu
+  (a kizárás aláírása; a folytatott láncot csak az örökös, a vágás után; a kizárt esemény nem elágazás), a lánc vége és a saját
+  lánc-gyökér a kizárt események nélkül, `muveletek.js` `keszulekKizarasa` / `kizarasBevitele` (a folytatás: a környezet `keszulek`-je
+  a kizárt lánc). Az állapot kimondja: `kizartak`. ⭐ A tár a `Kizaras` eseményeket a tanúsítvány azonossága szerint indexeli
+  (`fajlTar.js` `kizarasEsemenyei`, a pillanatkép 5. változata): a kapu MINDEN eseménynél kérdezi — index nélkül az azonosság összes
+  eseményének testét betöltené (a mérés: a képből nyitott tárban a kérdés egy testet tölt be). ⛔ Lelet: a pillanatkép alakjának
+  ellenőrzése a mezők számát is nézi — az új mezővel minden kép eldobódott volna (néma lassulás); a próba fogta meg. A próba: „A
+  KIZÁRÁS ÉS AZ ÖRÖKÖS”, „A FEL NEM SOROLT KOINÓBAN” (18 rontás). ⏭️ A
+  kizárás terjesztése (a koinó-listák cseréje a készülékek között, a más által bevitt kizárás) a ③ hálózaté; a kezelése (a parancs, a
+  lap) a ④-é. ⚠️ A folytatott lánc műveleteihez a kizárást az örökös saját `Kizaras` eseménye adja (a felsorolt koinókba ő viszi).
+
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor
   NÉLKÜLE utazik: egy szelet a cserében, egy tagsági kísérő, egy kérelem vagy egy összegző válasza, egy döntési csomag, egy

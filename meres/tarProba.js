@@ -538,8 +538,9 @@ proba('⭐⭐ A SZÜLETÉSEK A SZÜLŐ ALATT (C 7.) — a képből is, és a ré
   await ir(kepFajl, JSON.stringify({ ...kep, v: 1, e: kep.e.map((x) => x.slice(0, 6)) }));
   const regiKeppel = await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 100 });
   // ⛔ D85: a 2. változatú kép (EGY szülő-index, -1 = nincs) sem hihető el — a 3. a bejelentés helyeinek
-  // LISTÁJA; ⭐⭐ D128: a 4. a lánc kulcsát (a készüléket), az azonosságot és a tanúsítvány jelét is. A tár a fájlból épít újat.
-  await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 1 });     // friss 4. változatú kép
+  // LISTÁJA; ⭐⭐ D128: a 4. a lánc kulcsát (a készüléket), az azonosságot és a tanúsítvány jelét is; az 5. (①d) a kizárás
+  // azonosságát. A tár a fájlból épít újat.
+  await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 1 });     // friss 5. változatú kép
   const kep3 = JSON.parse(await readFile(kepFajl, 'utf8'));
   await ir(kepFajl, JSON.stringify({ ...kep3, v: 2, e: kep3.e.map((x) => [...x.slice(0, 6), x[6][0] ?? -1]) }));
   const ketteskeppel = await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 100 });
@@ -548,7 +549,7 @@ proba('⭐⭐ A SZÜLETÉSEK A SZÜLŐ ALATT (C 7.) — a képből is, és a ré
     && kepbol.mutatoAllapota().pillanatkepbol === true
     && regiKeppel.mutatoAllapota().pillanatkepbol === false
     && await valaszok(regiKeppel) === vart
-    && kep3.v === 4
+    && kep3.v === 5
     && ketteskeppel.mutatoAllapota().pillanatkepbol === false
     && await valaszok(ketteskeppel) === vart;
 });

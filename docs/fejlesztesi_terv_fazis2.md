@@ -6508,7 +6508,12 @@ harmadik fája, a `KeretAtadas` (halmozott — saját típus, hogy egy eseményb
 gyökérnek és a műveletnek), `muveletek.js` `keretAtadasa`/`keretAtvetele`; **(2c)** az átfolyás (`atfolyasMerteke`, `keretAtfolyasa` — a különbség fele, a
 fogadó határáig; a határ alapértéke nyitott, a ③-mal); **(3)** az azonosság pontja egy entitáson a készülékei pontjainak összege (az
 állapot, a döntés, az össz-pont levele — a láncok pont-eseményeivel); **(4)** a szavazás és a javaslattétel joga készülékenként (ahol a
-pont a másik készüléken van, ez előbb 1 pontot tesz rá). Hátra az ①-ből: a kizárás és az örökös (①d). A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.8–9.9.
+pont a másik készüléken van, ez előbb 1 pontot tesz rá).
+
+*Az építés — ①d (2026-11-14):* a kizárás és az örökös — a kizárás-tanúsítvány (az azonosság kulcsa írja alá, koinónként a vágással és
+az örökössel), a `Kizaras` esemény (bárki beviheti, mint az ellentmondás bizonyítékát), a vágás utáni (a fel nem sorolt koinóban minden)
+kizárt esemény nem számít, az örökös a `lanc` mezővel folytatja a láncot. ⭐ Az ① (a mag) ezzel kész. A részletek:
+[`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.10. A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.8–9.9.
 
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 

@@ -17,6 +17,8 @@
 //   · ⭐ (①b (3)) az azonosság pontja egy entitáson a készülékei pontjainak összege — az állapotban, az össz-pont fejlécében (a
 //     levél a láncok pont-eseményeinek összege, a tartó mintái mindet hozzák) és a döntésben (a tulajdonos, a küszöb);
 //   · ⭐ (①b (4)) a szavazás és a javaslattétel joga készülékenként: ahol a pont a másik készülékemen van, ez előbb 1 pontot tesz rá;
+//   · ⭐ (①d) a kizárás és az örökös: a vágás utáni (ellopott) események nem számítanak, az örökös folytatja a láncot; a fel nem
+//     sorolt koinóban a kizárt minden eseménye kiesik; a hamis kizárást és az illetéktelen folytatást a kapu elveti;
 //   · a készülék a gépen: létrejön, újranyitáskor ugyanaz, másik azonosságnál új;
 //   · a csomag tanúsítvány-keresője csak a hiteles, a szerzőt és a készüléket nevező tanúsítványt veszi fel.
 //
@@ -45,11 +47,13 @@ import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
 import { lancAlapKerete } from '../js/allapot/lancGyoker.js';
 import { TUDATPONT_KERET } from '../js/allapot/szabalyok.js';
 import { tudatpontRendezese, szabadTudatpontjaim, keretAtadasa, keretAtvetele, keretAtfolyasa, atfolyasMerteke,
-  javaslatLetrehozasa, szavazas } from '../js/muveletek.js';
+  javaslatLetrehozasa, szavazas, keszulekKizarasa, kizarasBevitele } from '../js/muveletek.js';
+import { kizarasKeszitese } from '../js/kulcs/keszulek.js';
 import { ujSajatHelye } from '../js/tar/esemenyTar.js';
 import { lancUjEsemenyhez, KAPOTT_FAJTA, KAPOTT_HOSSZ } from '../js/allapot/lancGyoker.js';
 import { ujAllapotFa, allapotBizonyitek, allapotBeallitas, allapotGyokere } from '../js/esemeny/osszegzoFa.js';
 import { ellentmondasEllenorzese } from '../js/allapot/ellentmondas.js';
+import { tarKizarasai } from '../js/allapot/kizaras.js';
 import { keretAtvetelMerlege, ujLancAllas } from '../js/allapot/szabalyok.js';
 import { sajatSzavazat } from '../js/allapot/javaslatSzamitas.js';
 
@@ -568,6 +572,96 @@ proba('⭐⭐ A SZAVAZÁS ÉS A JAVASLAT JOGA KÉSZÜLÉKENKÉNT (12. pont — (
   return telefonPontja(mindenA, A.telefon, A.g)?.adat?.pont === 1 && !kiesettA.has(ja.azonosito)
     && telefonPontja(mindenB, B.telefon, B.g)?.adat?.pont === 1 && szt.keszulek === B.telefon.keszulek
     && db?.szavazok === 1 && db.ellenzok === 1 && db.tamogatok === 0 && !telefonPontja(mindenB, B.telefon, gc);
+});
+
+// ===================================
+// 4/d. ⭐⭐ A KIZÁRÁS ÉS AZ ÖRÖKÖS (①d — KU7 (A), 9.10)
+// ===================================
+
+proba('⭐⭐ A KIZÁRÁS ÉS AZ ÖRÖKÖS (①d) — az ellopott telefon vágás utáni pontja nem számít; a laptop folytatja a telefon láncát (átrendezi a pontját); a hamis kizárást és az illetéktelen folytatást a kapu elveti', async () => {
+  const { tar, laptop, telefon, g, kL, kT } = await ketKeszulek();
+  await keretAtvetele(kT, await keretAtadasa(kL, telefon.keszulek, 300));       // a telefon lánca: 1.
+  const tp1 = await tudatpontRendezese(kT, g.azonosito, 50);                     // 2. — még a gazdáé
+  // ⛔ A telefont ellopják: a tolvaj 200-at tesz a gondolatra (a lánca 3.).
+  const tolvaj = await tudatpontRendezese(kT, g.azonosito, 200);
+  // A laptop kizárja: a vágás a 2., az örökös a laptop.
+  const { kizaras } = await keszulekKizarasa(kL, laptop.kulcspar.azonossagKulcspar, telefon.keszulek,
+    [{ koino: KOINO, vagas: tp1.sorszam, orokos: laptop.keszulek }]);
+  const kizarasUtan = allapotSzamitasa(await koinoEsemenyei(tar, KOINO));
+  // Az örökös folytatja a telefon láncát (a vágás után — a 3. helyen, a tolvajé helyett): 50 → 20.
+  const kO = { ...kL, keszulek: telefon.keszulek };
+  const folytatas = await tudatpontRendezese(kO, g.azonosito, 20);
+  const folytatas2 = await tudatpontRendezese(kO, g.azonosito, 25);   // a következő (a lánc-gyökér a tolvajé nélkül ép)
+  await tudatpontRendezese(kO, g.azonosito, 20);
+  const vegul = allapotSzamitasa(await koinoEsemenyei(tar, KOINO));
+  // Egy másik gépen a tolvaj eseménye UTOLJÁRA érkezik: nem elágazás (nem a szerző eseménye — a kizárás miatt).
+  const tar2 = await ujTar();
+  const tolvajNelkul = (await koinoEsemenyei(tar, KOINO)).filter((e) => e.azonosito !== tolvaj.azonosito);
+  for (let i = 0; i < 2; i++) for (const e of tolvajNelkul) await esemenyMentese(tar2, e);
+  const mTolvaj = await esemenyMentese(tar2, tolvaj);
+  // …és fordítva: a tolvajé már ott van, az örökös folytatása érkezik utoljára — az sem elágazás.
+  const tar3 = await ujTar();
+  const folytatasNelkul = (await koinoEsemenyei(tar, KOINO)).filter((e) => e.azonosito !== folytatas.azonosito);
+  for (let i = 0; i < 2; i++) for (const e of folytatasNelkul) await esemenyMentese(tar3, e);
+  const mFolytatas = await esemenyMentese(tar3, folytatas);
+  // A tár a kizárást indexeli — a lemezről újranyitva és a pillanatképből is (a kapu így nem tölti be az azonosság minden eseményét).
+  const hely = await mkdtemp(join(tmpdir(), 'koino-kizaras-'));
+  const t1 = await esemenyTarNyitasa(KOINO, hely);
+  for (let i = 0; i < 2; i++) for (const e of await koinoEsemenyei(tar, KOINO)) await esemenyMentese(t1, e);
+  const lemezrol = await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 1 });
+  const kepbol = await esemenyTarNyitasa(KOINO, hely, { kepKuszob: 1 });
+  // ⭐ A kizárások kérdése a képből nyitott tárban csak a kizárás testét tölti be (egyet), nem az azonosság minden eseményét.
+  const kizarasokKepbol = await tarKizarasai(kepbol, laptop.szerzo);
+  const betoltott = kepbol.mutatoAllapota().betoltottTest;
+  const indexben = [(await lemezrol.kizarasEsemenyei(laptop.szerzo)).length, kizarasokKepbol.size,
+    kepbol.mutatoAllapota().pillanatkepbol, betoltott];
+  // ⛔ A kapu: a megváltoztatott kizárás (az aláírás nem illik rá), egy MÁSIK készülékem folytatása (nem az örökös), és a vágás
+  // előtti helyre írt folytatás.
+  let hamis = null;
+  try { await kizarasBevitele(kL, { ...kizaras, koinok: [{ ...kizaras.koinok[0], vagas: 99 }] }); } catch (h) { hamis = h.message; }
+  const tablet = await tesztKeszulek('tablet', laptop.kulcspar.azonossagKulcspar);
+  await tar.tanusitvanyFelvetele(tablet.tanusitvany);
+  let idegenOrokos = null;
+  try {
+    await tudatpontRendezese({ ...kL, kulcspar: tablet, keszulek: telefon.keszulek }, g.azonosito, 10);
+  } catch (h) { idegenOrokos = h.message; }
+  const korai = await esemenyLetrehozasa({ koino: KOINO, tipus: 'GondolatLetrehozas', adat: { cim: 'korai' }, entitas: null,
+    entitasSorszam: 1, latott: [], lancGyoker: null, lanc: telefon.keszulek, sorszam: tp1.sorszam, elozo: tp1.elozo }, laptop.kulcspar);
+  const mKorai = await esemenyMentese(tar, korai);
+  const pont = (a) => a.entitasok.get(g.azonosito)?.hozzajarulok.get(laptop.szerzo)?.pont;
+  return tolvaj.sorszam === 3 && kizarasUtan.kizartak.some((k) => k.azonosito === tolvaj.azonosito) && pont(kizarasUtan) === 60
+    && folytatas.keszulek === laptop.keszulek && folytatas.lanc === telefon.keszulek && folytatas.sorszam === 3
+    && !vegul.kivetelek.some((k) => k.azonosito === folytatas.azonosito) && pont(vegul) === 30
+    && /nem hiteles/.test(hamis ?? '') && /örököse/.test(idegenOrokos ?? '') && !mKorai.mentve && /örököse/.test(mKorai.ok ?? '')
+    && folytatas2.lancGyoker !== null && folytatas2.sorszam === 4 && mTolvaj.mentve && !mTolvaj.elagazas
+    && mFolytatas.mentve && !mFolytatas.elagazas && indexben.join() === '1,1,true,1'
+    // az alak: a folytatott lánc egy MÁSIK készülék kulcsa
+    && !!alakiHiba({ ...folytatas, lanc: folytatas.keszulek });
+});
+
+proba('⛔ A FEL NEM SOROLT KOINÓBAN A KIZÁRT MINDEN ESEMÉNYE KIESIK — amint a kizárás odaér (bárki beviheti); egy MÁSIK azonosság kizárása semmit nem zár ki', async () => {
+  const KOINO2 = 'kizaras-proba-masik';
+  const laptop = await ujEember(KOINO2);
+  const telefon = await ujEember(KOINO2, await tesztKeszulek('telefon', laptop.kulcspar.azonossagKulcspar));
+  const idegen = await ujEember(KOINO2);
+  // A telefon gondolata — a laptop pontjával (a telefoné itt kizárás nélkül számít).
+  const tg = await telefon.tesz('GondolatLetrehozas', { cim: 'A telefon gondolata' });
+  const lp = await laptop.tesz('TudatpontRendezes', { entitas: tg.azonosito, pont: 10 });
+  // A kizárás egy MÁSIK koinót sorol fel — ebben a koinóban a vágás 0: a telefon egyetlen eseménye sem számít.
+  const kizaras = await kizarasKeszitese(laptop.kulcspar.azonossagKulcspar, telefon.keszulek,
+    [{ koino: KOINO, vagas: 5, orokos: laptop.keszulek }]);
+  const bevitel = await idegen.tesz('Kizaras', { kizaras });                    // bárki beviheti (D80 mintája)
+  // Egy idegen azonosság „kizárja” a telefont — nem az övé: semmit nem zár ki.
+  const idegenKizaras = await kizarasKeszitese(idegen.kulcspar.azonossagKulcspar, telefon.keszulek,
+    [{ koino: KOINO2, vagas: 0, orokos: idegen.keszulek }]);
+  const idegenBevitel = await idegen.tesz('Kizaras', { kizaras: idegenKizaras });
+  const nelkule = allapotSzamitasa(await tagokkal([tg, lp]));
+  const idegennel = allapotSzamitasa(await tagokkal([tg, lp, idegenBevitel]));
+  const vele = allapotSzamitasa(await tagokkal([tg, lp, bevitel]));
+  return nelkule.entitasok.has(tg.azonosito) && idegennel.entitasok.has(tg.azonosito) && idegennel.kizartak.length === 0
+    && !vele.entitasok.has(tg.azonosito) && vele.kizartak.some((k) => k.azonosito === tg.azonosito)
+    // az alak: a kizárás eseménye csak a tanúsítványt hozza
+    && !alakiHiba(bevitel) && !!alakiHiba({ ...bevitel, adat: { kizaras, x: 1 } });
 });
 
 // ===================================

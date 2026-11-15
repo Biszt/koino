@@ -33,6 +33,7 @@ import { szabalyokErvenyesitese, erintettek, elsoErintett, javaslatEntitasai } f
 import { csomagokKibontasa } from './dontesiCsomag.js';
 import { koinoSzuleteseListabol, lancKulcsa, kesobbiAllitas } from '../esemeny/esemeny.js';
 import { koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
+import { kizartakSzurese } from './kizaras.js';   // ⭐⭐ D128 (①d): a kizárt készülék eseményei
 
 // ===================================
 // A BEMENET RENDEZÉSE — a determinizmus EGYETLEN forrása
@@ -279,7 +280,10 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
   //    ugyanabból a halmazból ugyanazt a LISTÁT is kapja, nem csak ugyanazokat az értékeket.
   // ⭐ D85 T3: a döntési csomagok belső eseményei is a bemenet részei (azonosító szerint egyszer) — a
   // csak-G1-tartó így a G2-es rész bemenetét is látja, a G2 szeletének tartása nélkül.
-  const rendezettek = rendezettBemenet(csomagokKibontasa(esemenyek));
+  // ⭐⭐ D128 (①d, 9.10): a KIZÁRT készülék vágás utáni eseményei (a fel nem sorolt koinóban mind) kiválnak — nem elágazások, nem
+  // vádak: nem a szerző eseményei. A vágás után a láncot az örökös folytatja (az ő eseményei maradnak). Kimondva (D19): `kizartak`.
+  const { megmaradok: kizarasUtan, kizartak } = kizartakSzurese(rendezettBemenet(csomagokKibontasa(esemenyek)));
+  const rendezettek = kizarasUtan;
 
   // ⭐⭐ D118 (⑤b): a szerzők LÁNC-ÁGA és a láncon ismert, de a jelenből kizárt sorszámok (a koinó képe adja — `ketReteg.js`):
   // a nem bekapcsolódó ős-eseménye külön ág (nem elágazás, nem idő-visszalépés), és a kizárt esemény helye nem hézag.
@@ -576,6 +580,9 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
     pontEsemenyek,
     // Szabályt sértő események (keret, jogosultság) — szintén jelzés, nem büntetés (D19)
     kivetelek,
+    // ⭐⭐ D128 (①d): a kizárt készülék eseményei (a vágás után — a fel nem sorolt koinóban mind) — nem számítanak, kimondva.
+    kizartak: kizartak.map((e) => ({ azonosito: e.azonosito, szerzo: e.szerzo, keszulek: e.keszulek, sorszam: e.sorszam,
+      tipus: e.tipus })),
     // ⚠️ A HARMADIK KATEGÓRIA: az esemény SZÁMÍT, csak valamit nem tudtunk ellenőrizni
     // (hézagos lánc, még meg nem érkezett létrehozó esemény). ⭐ Eddig a szabály-réteg
     // előállította, de az állapot eldobta — pedig épp ez a D19 lényege: *bejelent, nem

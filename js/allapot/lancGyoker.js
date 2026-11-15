@@ -52,7 +52,8 @@ import { lancLepese, ujLancAllas } from './szabalyok.js';
 import { AZONOSITO_MINTA, azonositoAlaku, esemenyKoinoja, koinoSzuleteseE, lancKulcsa, PONT_TIPUSOK } from '../esemeny/esemeny.js';
 import { alapHorgony, alapokAlapja, HORGONY_TIPUSOK } from './tagsag.js';   // ⭐⭐ D128 (9.9): a lánc alapja
 import { koinoSzabalyai, ALAP_SZABALYOK } from '../esemeny/koinoSzabalyok.js';
-import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a bekapcsolódó hozott előtagjával)
+import { lancNezete } from './koinoLanc.js';
+import { kizartE, tarKizarasai } from './kizaras.js';   // ⭐⭐ D128 (①d): a kizárt készülék eseményei nem a lánc részei   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a bekapcsolódó hozott előtagjával)
 
 export const NAPLO_FAJTA = 'naplo';
 export const KIOSZTAS_FAJTA = 'kiosztas';
@@ -378,8 +379,12 @@ async function illikALanchoz(tar, nezet, a) {
  */
 async function allapotIg(tar, koino, lanc, meddig, tarolo) {
   // ⭐⭐ D128 (9.9): a lánc ALAPJA (`keret` — a kerete az alap + a kapott), és az azonosság többi láncáé (az átvételek ítéletéhez).
-  const alapjai = await lancAlapjai(tar, koino, await lancSzerzoje(tar, lanc));
+  const szerzo = await lancSzerzoje(tar, lanc);
+  const alapjai = await lancAlapjai(tar, koino, szerzo);
   const keret = alapokAlapja(alapjai, lanc);
+  // ⭐⭐ D128 (①d, 9.10): a kizárt készülék vágás utáni eseményei nem a lánc részei (az örökös folytatja).
+  const kizarasok = await tarKizarasai(tar, szerzo);
+  const lancon = (e) => nezet.tagja(e) && !kizartE(e, kizarasok);
   // ⭐⭐ D118 (⑤b): a szerző LÁNCA a koinóban — a bekapcsolódóé a hozott előtaggal (a napló a teljes láncot fedi), a kiosztás a
   // jelen réteg szerint (a hozott pontok a számított összeggel, az elhagyottak nélkül). Eddig a koinó nevére szűrt: a
   // bekapcsolódó lánca az 1. sorszámon „nem ép” volt, és a gyermekbeli eseményei lánc-gyökér nélkül születtek.
@@ -412,7 +417,7 @@ async function allapotIg(tar, koino, lanc, meddig, tarolo) {
   let utolso = a.utolso;
   let uj = naplo;
   for (let s = a.sorszam + 1; s <= meddig; s++) {
-    const ott = (await tar.sorszamSzerint(lanc, s)).filter(nezet.tagja);
+    const ott = (await tar.sorszamSzerint(lanc, s)).filter(lancon);
     if (ott.length !== 1 || (ott[0].elozo ?? null) !== utolso) {
       console.warn('lancGyoker - a saját lánc nem ép (hézag, elágazás vagy szakadás) — nem horgonyzunk',
         { sorszam: s, talalat: ott.length });
