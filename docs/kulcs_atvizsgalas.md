@@ -433,8 +433,102 @@ D128 13–15.):
   verzió bitjei, a teljes alfanumerikus kapacitás-tábla 160 pontja — a hibajavító táblák MÁSIK forrása —, az igazító minták helyei) és
   egy a kódolótól FÜGGETLENÜL írt próba-olvasóval (az 1–40. verzió mind a négy szinten, a maszkokkal; a Reed–Solomon szindrómák
   külön táblával); parancssor (a `papir`, a `papir kesz` elírt, idegen és jó kóddal, a kulcscsere a kódból, a koinón kívül) — 20
-  rontás. ⚠️ A QR végső próbája a telefon kamerája (⑤ terep). ⭐ A ② ezzel kész; ⏭️ ③ a hálózat (a kizárás és a kulcscsere
-  terjesztése, a koinó-lista a készülékek között; az átfolyás határának alapértéke — Csaba döntése).
+  rontás. ⚠️ A QR végső próbája a telefon kamerája (⑤ terep). ⭐ A ② a papírral ezzel kész; ⏭️ a D128 17. pontja (a helyreállítás a segítőkkel — 9.13) ②d–②f-ként, utána a
+  ③ a hálózat (a kizárás és a kulcscsere terjesztése, a koinó-lista a készülékek között; az átfolyás határának alapértéke — Csaba döntése).
+
+**9.12 A ③ terve — a hálózat: a saját készülékek találkozása és a kezelés eljuttatása** (2026-11-15; ❓ Csaba döntésére vár:
+KH1, KH2)
+
+*Ami már eldőlt (D128):* a készülékek találkozáskor kicserélik a koinó-listájukat (4. pont); a keret magától átfolyik, amikor
+találkoznak — a fogadó-oldali határig, a határ az adó szabálya (a lapon állítható), fölötte az adó megkérdez (5. pont); a kézfogás és
+a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③-ban épül:
+- **③b A kezelés minden koinómba — helyben.** A kizárás és a kulcscsere egy-egy koinóba bevitt ESEMÉNY: egy másik koinó csak akkor
+  tud róla, ha ott is bekerül. ⛔ Ma egy kulcscsere csak abba a koinóba jut, ahol a parancsot kiadták — a többiben a tolvaj által
+  felvett készülék tovább számít. Ezért minden készülék, amikor fut, a SAJÁT összes koinójába beviszi az azonossága kezelését: a cserék
+  láncát (a `kulcs.json`-ból, vagy amit bármelyik koinójában lát) és a kizárásokat (amit bármelyik koinójában lát; a felsorolt
+  koinókba, és abba, ahol a kizárt készüléknek eseménye van).
+- **③c A saját készülék a cserében.** A kézfogás a társ nevét a készülék tanúsítványával bizonyítja (③a) — ha a név az enyém, a társ
+  a saját készülékem. Ilyenkor (1) a nekem szóló keret-átadást magától átveszem (`keretAtvetele`); (2) ha nálam több a szabad pont,
+  átadok a határig (`keretAtfolyasa`); a határ fölött nem adok magától (a kérdés a ④ lapé).
+- **③d A koinó-lista.** A saját készülékek a titkosított cserében megmondják egymásnak, mely koinókban vannak, és ott hol tart a
+  láncuk (csak a saját készülék kapja; a láncra soha — D6). Ebből készül a kizárás koinónkénti vágása: a felsorolt koinóban a vágásig
+  megmarad, ami jogos volt; a fel nem soroltban minden kiesik.
+- **③e** A csere állásában a lánc mezője `szerzo` → `lanc` (belső átnevezés).
+
+*A kérdések:*
+- **KH1 — az átfolyás határának alapértéke.** A határ: a fogadó készülék része (elhelyezett + szabad pontjai) magától legfeljebb
+  ennyi lehet — vagyis ennyi a legtöbb, amit egy ellopott készülék vihet (93. (g)). A keret ma 10 000. A 93. (g) becsületes
+  használata (a telefon naponta 300-at tesz le, a 3. naptól 150-et levesz, esténként találkozik a laptoppal) 10 nap alatt sem
+  2000-es, sem 3000-es határnál nem akadt el. Ha a telefon a fő eszközöd, és sok pontot tesz le, egy alacsony határ hamarabb
+  megállítja — akkor az adó (a laptop) kérdez, a határ pedig a lapon (④) készülékenként átírható. (A) a keret 20%-a (2000);
+  (B) 30% (3000); (C) a fele (5000); (D) nincs magától átfolyás, minden átadás kérdez.
+- **KH2 — ahová egyik másik készülékem sem jár.** Ha az ellopott telefon egy olyan koinóban is tag, ahol egyik másik készüléked sem
+  (a laptop sem): a kizárást és a kulcscserét oda csak az viheti be, aki ott van. (A) a koinó-lista a koinó nevét hozza, és a
+  kezelő készülék (ahol a kizárást vagy a kulcscserét kiadod) magától csatlakozik oda — csak a bevitelhez (pontja ott nincs, a láncán
+  egy-két esemény); (B) nem: ott a tolvaj készüléke tovább számít, amíg valamelyik másik készüléked be nem lép oda. ⚠️ Amit a
+  telefon az utolsó találkozás UTÁN lépett be, arról a laptop egyik esetben sem tud.
+
+**9.13 A helyreállítás a segítőkkel** (2026-11-15 — D128 17. pont; ✅ eldöntve; a 9.12 (a ③) a ②d–②f után)
+
+*Ami előzte:* a kulcsok és az esetek átbeszélésekor (Csaba: „beszéljük át, még egyszer az összes kúlcs fajtát, és az összes esetet,
+amik miatt kellenek”) három rés jött elő a kódból: (a) a papír egyedül egy üres gépen nem elég — a `kulcscsere` a gépen lévő
+születést kéri (`kulcsTar.js` `kulcscsereVegrehajtasa`), és a papír a nevet sem hozza; (b) ha a papírt ellopják, a tolvaj
+kulcscserét írhat, és két ág közül ma a HOSSZABB nyer (`allapot/kizaras.js` `kulcscserekEsemenyekbol`) — a tolvaj a sajátját
+tetszés szerint hosszabbíthatja; (c) a fizetési kulcs titkos fele a `kulcs.json`-ban, az azonosság kulcsa mellett van, és a kulcscsere
+nem cseréli. Csaba: *„nem tettszik. túl bonyolúlt, és nem is véd rendessen. főleg, ez »Minden elvész (készülékek és papír): új
+regisztráció« nem tettszik, mert mi lessz a koinos megtakarításával? milenne, ha az elvesztés orvoslására, azokat az e-embereket
+vonnánk be, akik ismerik, tehát vagy a meghívója, vagy valakik azok közűl, akik már találkoztak vele?”* — majd a papírról:
+„az első lépcsősőkenek, legyen papirjuk is, mert lehet, hogy nincs elég ember, aki tanusíthatná őket. A 2. lépcsős hitelesítés, viszont már feltételehez köti, a legalább, 3 meghatalmazottal vakó bemutatkozást, ezért ott már ne legyen papír, mert az ott már visszaélésekre is lehet használni, ha a tolvaj kezébe jut.”
+
+*A döntés eddig (D128 17. pont):* az 1. lépcsőn a papír a segítők mellett; a 2. lépcsőn csak a segítők.
+- **A segítők** (Csaba: *„legyen 3 ember, akik közűl 1, vagy a meghívója, vagy a 3 tanusítoja közűl, az egyik, és még két tanusító,
+  akiknek van élő tanusíthatósága. mi a véleményed?”*) — nem előre vezetett lista, hanem a 2. lépcső mércéje: EGY, aki a régi énedet
+  ismeri (a meghívód vagy egy tanúsítód — ő köti az új kulcsot a régi azonossághoz: „ez ugyanaz az ember”), és KÉT tanúsító, akinek
+  most is él a joga (D60 — ők azt erősítik meg, amit a 2. lépcsőnél: létező, külön ember áll előttük).
+- **Ha a régi ismerős már nincs meg** (a meghívó és mindhárom tanúsító kikopott): a bemutatkozók (D62) pótolják — Csaba: *„A
+  bemutatkozók is jók, csak akkor abból, legalább 10 legyen.”*
+- **A várakozás** (Csaba: „rendben”): a folytonosság egyetlen emberen áll — ha ő rosszhiszemű, két tanúsítót talál maga mellé. Ezért a
+  helyreállítás várakozás után lép életbe; közben minden meglévő készülék értesítést kap, és megállíthatja. (Az elrettentés mellette
+  már megvan: a rossz tanúsító elveszíti a szerepét — `identitas.js`, 4.5.)
+- **Minden koinóban érvényes** (Csaba: „rendben”): a lépcső és a tanúsítói jog koinónként van, a kulcs koinók fölött — a helyreállítás
+  a bizonyítékát (ki hagyta jóvá, és hogy ott tanúsító volt) magával viszi (D93: „a bizonyíték a tagnál utazik”); különben a tolvaj a
+  többi koinóban továbbra is te lennél.
+
+- **A várakozás hossza, a bemutatkozók útja, a megállítás után** (Csaba: *„minden javaslatodat, elfogadom, mehetünk tovább.”*): a
+  rendes úton **7 nap**; a bemutatkozók útján (a 10 bemutatkozó a régi ismerőst pótolja, a két élő tanúsító mellett) **30 nap**;
+  **megállítás után** újrakezdhető, de **5 ember** kell (egy régi ismerős és négy élő tanúsító), **kétszeres várakozással** (14, ill. 60
+  nap), és ezt már **nem lehet megállítani** — a jogos tulajdonos két további tanúsítót könnyen talál, a csalónak öt embert kell
+  becsapnia, és közben a valódi tulajdonosnak bőven van ideje szólni nekik.
+
+*A terv — az építő megoldása (a döntések megvalósítása):*
+1. **Két fázis — a várakozást a SEGÍTŐK KÉSZÜLÉKEI őrzik.** A P2P-ben nincs közös óra, és az esemény ideje önbevallás (egy
+   visszadátumozott helyreállítás átugraná a várakozást). Ezért a helyreállítás két aláírás-körből áll: **(a) a kezdés** — a segítők
+   aláírják (az új kezelő kulcs, az új készülék, az új fizetési kulcs, az 1. lépcsőn az új papír lekötése); a koinókba kerül, és az
+   azonosság minden meglévő készüléke értesítést kap; **(b) a véglegesítés** — ugyanazok aláírják újra, de egy segítő készüléke CSAK
+   akkor, ha a SAJÁT órája szerint letelt a várakozás a saját kezdés-aláírása óta, és nem látott megállítást. ⭐ A számítás így időt
+   nem néz (D17 — egy eredmény mindenütt ugyanaz): a helyreállítás érvényes, ha a kezdés és a véglegesítés megvan, a segítők szerepe
+   bizonyított, és (az 1. körben) nincs megállítás. Egy segítő, aki a várakozást átugorja, ugyanúgy hazudik, mint aki csalót igazol — a
+   bizalom ugyanaz, új feltevés nincs.
+2. **A megállítás** — az azonosság egy, a kezdéskor érvényes készülékének aláírt eseménye, a kezdésre hivatkozik. Bármikor jön, az 1.
+   kört érvényteleníti — ha az már véglegesült, visszamenőleg (mint a kizárás, D128 4. pont). Utána a 2. kör (5 segítő, kétszeres
+   várakozás), amit már semmi nem állít meg.
+3. **A szerep bizonyítéka** — a segítő a jóváhagyása mellé hozza, hogy azon a koinón, ahol aláír, a meghívód, a tanúsítód, a
+   bemutatkozód, illetve élő tanúsító (a D93 csomagja: az identitás eseményei a gyökérig — mérve logaritmikus, 12.2). Így bármelyik
+   koinód ellenőrizheti — egy koinóban jóváhagyott helyreállítás mindegyikben érvényes.
+4. **A segítők erősebbek a papírnál** — a kulcscserék láncában ugyanattól a lekötéstől induló két ág közül a segítők által jóváhagyott
+   nyer (a mai „a hosszabb nyer” helyett, ami a papír tolvaját segítette — a (b) rés). Papír a papír ellen (csak lopott vagy másolt
+   papírral lehet) nem dönt: a segítők döntenek.
+5. **A papír visszavonása a 2. lépcsőn** — amikor egy koinóban eléred a 2. lépcsőt, a program egyszer kéri a papír kódját, és a papír
+   aláír egy utolsó cserét: a lekötés ezentúl „a segítők” (nem újabb papír) — utána papír nem írhat alá. ⚠️ Nem az azonosság kulcsa írja
+   alá: különben a laptop tolvaja kapcsolhatná át. Ha a papír már elveszett, a 4. pont véd: aki megtalálja, azt a segítők felülírják.
+6. **A fizetési kulcs** — a kulcscsere és a helyreállítás új fizetési kulcsot is köt (a születésé a lánc elején áll) — a (c) rés.
+7. **Az új készülék** — üres gépen a nevedet (43 jel) sem tudod (az (a) rés): a segítőd készüléke hozza — a koinójában ismer, a
+   horgonyod a születéssel ott van —, a D121 mintájára (két ember, két gomb, egy összevetett kód).
+
+*Az építés sorrendje* (a ② folytatása, a ③ előtt): **②d** a lánc két aláírója és a fizetési kulcs (a kulcscsere-bejegyzés papírral
+vagy a segítőkkel; „a segítők erősebbek”; a papír visszavonása) → **②e** a helyreállítás (a kezdés, a véglegesítés, a megállítás, a két
+kör, a szerepek bizonyítéka) → **②f** a parancsok (a helyreállítás kezdése az új készüléken, a segítés, a megállítás, a papír
+visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a megállítással bővül, és az értesítéssel) → ④ → ⑤.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

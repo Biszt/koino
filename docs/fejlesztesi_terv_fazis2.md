@@ -6498,6 +6498,21 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
     mentsd el, és utána törli magáról — egy ellopott készülék soha nem viheti.
 16. **A csere-kulcs papíron betűcsoportokban** (Csaba, 2026-11-15 — KC4 (A)): 4 jeles csoportokban (kb. 14 csoport), ellenőrző
     jeggyel (elírásnál szól), mellette QR — nyelvfüggetlen, szólista nélkül (a BIP39 angol és egy saját magyar szólista helyett).
+17. **A helyreállítás a segítőkkel — a papír csak az 1. lépcsőn** (Csaba, 2026-11-15, a kulcsok átbeszélése után): a 9. pont „ha
+    minden elveszett: új regisztráció”-ja nem marad — az azonossággal a pontok és a 2. lépcső pénztárcája (D11) is elveszne. Ha minden
+    elveszett, az azonosságot azok állítják helyre, akik ismerik: a meghívója, és akik találkoztak vele. „az első lépcsősőkenek, legyen papirjuk is, mert lehet, hogy nincs elég ember, aki tanusíthatná őket. A 2. lépcsős hitelesítés, viszont már feltételehez köti, a legalább, 3 meghatalmazottal vakó bemutatkozást, ezért ott már ne legyen papír, mert az ott már visszaélésekre is lehet használni, ha a tolvaj kezébe jut.” Vagyis: az 1.
+    lépcsőn a papír (a csere-kulcs) megmarad a segítők mellett; a 2. lépcsőn (három tanúsítás felhatalmazott tanúsítóktól — D56) a
+    papír elveszti az erejét, a helyreállítás csak a segítőké. **A segítők** (Csaba: *„legyen 3 ember, akik közűl 1, vagy a meghívója,
+    vagy a 3 tanusítoja közűl, az egyik, és még két tanusító, akiknek van élő tanusíthatósága.”*): EGY, aki a régi énedet ismeri (a
+    meghívód vagy egy tanúsítód — ő köti az új kulcsot a régi azonossághoz), és KÉT tanúsító, akinek most is él a joga (D60) — a 2.
+    lépcső mércéje. Ha a meghívó és a tanúsítók közül senki nincs meg, a régi ismerőst a bemutatkozók (D62) pótolhatják — *„csak akkor
+    abból, legalább 10 legyen.”* A helyreállítás **várakozás után** lép életbe, amely alatt minden meglévő készülék értesítést kap, és
+    megállíthatja; és **minden koinóban érvényes**, mert a bizonyítékát (ki hagyta jóvá, és hogy ott tanúsító volt) magával viszi (a D93
+    mintája). **A várakozás** 7 nap, a bemutatkozók útján 30 nap; **megállítás után** újrakezdhető, de 5 ember kell (egy régi ismerős és
+    négy élő tanúsító), kétszeres várakozással, és ezt már nem lehet megállítani (Csaba: *„minden javaslatodat, elfogadom, mehetünk
+    tovább.”*). A segítők által jóváhagyott helyreállítás erősebb a papírnál; a 2. lépcsőn a papír egy utolsó aláírással átadja a helyét
+    a segítőknek; a kulcscsere és a helyreállítás a fizetési kulcsot is cseréli. A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md)
+    9.13.
 
 *Az építés sorrendje:* ① a mag (a `keszulek` mező és a (szerző, készülék) lánc, a tanúsítvány és a kizárás az örökössel, a keret az
 átadással, a sorrend az azonosság eseményei között) → ② a csere-kulcs és a kulcscsere, a mentés (a lapon is) → ③ a hálózat → ④ a lap
@@ -6530,7 +6545,7 @@ a KÉSZÜLÉK kulcsa írja alá; **②a** a születés és a név (13. pont): `k
 is; **②b** a kulcscsere (14. pont): a csere-kulccsal aláírt, egymásra lekötött cserék lánca, a `Kulcscsere` esemény, a régi
 korszakban tanúsított, fel nem sorolt készülék eseményei kiesnek, `kulcscsere` parancs; **②c** a csere-kulcs papíron (15–16. pont):
 `kulcs/papir.js` (56 jel, 14 csoport × 4, a súlyozott prím-összeg ellenőrzése minden egyes elírást és cserét kimond), `kulcs/qr.js`
-(saját QR-kódoló), `papir` / `papir kesz <kód>` (a leírt kód ellenőrzése után a fájl törlése), `kulcscsere <kód>`. ⭐ A ② ezzel kész. A
+(saját QR-kódoló), `papir` / `papir kesz <kód>` (a leírt kód ellenőrzése után a fájl törlése), `kulcscsere <kód>`. ⭐ A ② a papírral ezzel kész; a 17. pont (a helyreállítás a segítőkkel) ②d–②f-ként folytatja, a ③ előtt. A
 részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.11.
 
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
