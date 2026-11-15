@@ -89,7 +89,7 @@ export const ONALLO_KUSZOB = 3;
  * Az ember SAJÁT eseményei a SAJÁT azonosság-szeletéből: a hozzá bejelentett állításai és a szeletében álló saját
  * eseményei (pl. a `Lattam`). ⚠️ Ha a tár-illesztő nem ismeri a bejelentést, a saját láncából.
  */
-async function sajatAllitasai(tar, koino, horgony, en) {
+export async function sajatAllitasai(tar, koino, horgony, en) {
   if (typeof tar.bejelentesek !== 'function') {
     return (await azonossagEsemenyei(tar, en)).filter((e) => esemenyKoinoja(e) === koino);   // ⭐⭐ D128: minden készülékemé
   }

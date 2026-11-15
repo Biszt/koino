@@ -30,7 +30,9 @@ import { alapokAlapja } from './allapot/tagsag.js';
 import { kizarasKeszitese } from './kulcs/keszulek.js';   // ⭐⭐ D128 (①d): a kizárás-tanúsítvány
 // ⭐ D80: az ellentmondás bizonyítéka — a bejelentés előtt magunk is ellenőrizzük.
 import { ellentmondasEllenorzese } from './allapot/ellentmondas.js';
-import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO, lancKulcsa, PONT_TIPUSOK } from './esemeny/esemeny.js';
+import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO, lancKulcsa, PONT_TIPUSOK, HELYREALLITAS_FAZISOK }
+  from './esemeny/esemeny.js';
+import { helyreallitasJavaslatAlakiHibaja } from './kulcs/azonossag.js';   // ⭐⭐ D128 (②e)
 import { lancNezete } from './allapot/koinoLanc.js';   // ⭐ D118 (③, ⑤b): a szerző lánca a koinóban, a jelen réteg szerint
 import { koinoSzabalyai, teljesSzabalyok } from './esemeny/koinoSzabalyok.js';
 import { kanonikusBajtok } from './esemeny/kanonikusAlak.js';
@@ -1323,6 +1325,46 @@ export async function kizarasBevitele(kornyezet, kizaras) {
     throw new Error('A kizárt azonosságnak nincs azonosság-szelete ebben a koinóban — a kizárás nem helyezhető el (D80).');
   }
   return esemenytTeszek(kornyezet, 'Kizaras', { kizaras }, { entitas: horgony });
+}
+
+// ===================================
+// ⭐⭐ D128 (②e1 — 17. pont, 9.13): A HELYREÁLLÍTÁS A SEGÍTŐKKEL
+// ===================================
+
+/**
+ * A HELYREÁLLÍTÁS JÓVÁHAGYÁSA (egy segítőé) — állítás a helyreállítandóról: az ő szeletébe kerül (`kit` = ő, `sajatBelepes` = az
+ * én horgonyom — mint a meghívás és a tanúsítás), a javaslattal és a fázissal. A szerepeket és a szabályt a számítás nézi
+ * (`allapot/helyreallitas.js`); itt csak az alak és az, hogy magamat nem hagyhatom jóvá.
+ * @param {Object} kornyezet
+ * @param {{kit: string, horgonya: string, sajatBelepes: string}} adatok - a helyreállítandó (a neve és a horgonya), és az én horgonyom
+ * @param {Object} javaslat - `kulcs/azonossag.js` `helyreallitasJavaslatAlakiHibaja` szerinti alak
+ * @param {'kezdes'|'veglegesites'|'visszavonas'} [fazis]
+ * @returns {Promise<Object>} a `HelyreallitasJovahagyas` esemény
+ */
+export async function helyreallitasJovahagyasa(kornyezet, { kit, horgonya, sajatBelepes }, javaslat, fazis = 'kezdes') {
+  console.log('muveletek.helyreallitasJovahagyasa - KEZDÉS', { fazis });
+  const h = helyreallitasJavaslatAlakiHibaja(javaslat);
+  if (h) throw new Error('A helyreállítás javaslata hibás: ' + h);
+  if (!HELYREALLITAS_FAZISOK.has(fazis)) throw new Error('A fázis: kezdes, veglegesites vagy visszavonas.');
+  if (!azonositoAlaku(kit) || !azonositoAlaku(horgonya)) throw new Error('Kell a helyreállítandó neve és a horgonya.');
+  if (kit === kornyezet.szerzo) throw new Error('A saját helyreállításodat nem hagyhatod jóvá — ehhez segítők kellenek.');
+  if (!azonositoAlaku(sajatBelepes)) throw new Error('Előbb neked is be kell lépned ebbe a koinóba (a horgonyod kell).');
+  return esemenytTeszek(kornyezet, 'HelyreallitasJovahagyas', { kit, sajatBelepes, javaslat, fazis }, { entitas: horgonya });
+}
+
+/**
+ * A HELYREÁLLÍTÁS MEGÁLLÍTÁSA — az azonosság egy meglévő készülékéről, a saját szeletébe: „ezt nem én kértem”. Az 1. kört
+ * érvényteleníti (a 2. kör — 5 segítő, kétszeres várakozás — nem állítható meg).
+ * @param {Object} kornyezet
+ * @param {string} jel - a javaslat jele (`helyreallitasJele`)
+ * @returns {Promise<Object>} a `HelyreallitasMegallitas` esemény
+ */
+export async function helyreallitasMegallitasa(kornyezet, jel) {
+  console.log('muveletek.helyreallitasMegallitasa - KEZDÉS');
+  if (!azonositoAlaku(jel)) throw new Error('Melyik helyreállítást? (a javaslat jele — 43 jel)');
+  const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
+  if (!horgony) throw new Error('Ebben a koinóban nincs azonosság-szeleted — itt nincs mit megállítani.');
+  return esemenytTeszek(kornyezet, 'HelyreallitasMegallitas', { javaslat: jel }, { entitas: horgony });
 }
 
 /**

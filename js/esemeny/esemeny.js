@@ -27,7 +27,7 @@ import { osszegzesAlakja } from './osszegzoFa.js';
 import { szovegHivatkozasE } from './szovegDarab.js';
 // ⭐⭐ D128: a készülék-tanúsítvány (az azonosság kulcsa írja alá — koinók fölött).
 import { tanusitvanyAlakiHibaja, tanusitvanyEllenorzese, kizarasAlakiHibaja } from '../kulcs/keszulek.js';
-import { szuletesAlakiHibaja, kulcscsereAlakiHibaja, KULCSCSERE_KORLAT } from '../kulcs/azonossag.js';
+import { szuletesAlakiHibaja, kulcscsereAlakiHibaja, KULCSCSERE_KORLAT, helyreallitasJavaslatAlakiHibaja } from '../kulcs/azonossag.js';
 
 const ALGORITMUS = 'Ed25519';
 
@@ -210,9 +210,13 @@ export function szuleteseSzuloje(e) {
  * @param {Object} e
  * @returns {Array<string>} tár-kulcsok ('' = a gyökér), ismétlés nélkül, rendezve
  */
-/** ⭐ D93/6: az identitás-állítások — a szerző azonosság-szeletébe is bejelentődnek (`bejelentesHelyei`). */
+/** ⭐ D93/6: az identitás-állítások — a szerző azonosság-szeletébe is bejelentődnek (`bejelentesHelyei`). ⭐⭐ D128 (②e): a
+ * helyreállítás jóváhagyása is (a segítő a saját szeletében is látja, kit hagyott jóvá). */
 export const AZONOSSAG_ALLITASOK = new Set(['Meghivas', 'Felhatalmazas', 'FelhatalmazasVisszavonasa', 'Tanusitas',
-  'Bemutatkozas']);
+  'Bemutatkozas', 'HelyreallitasJovahagyas']);
+
+/** ⭐⭐ D128 (②e — 17. pont): a helyreállítás jóváhagyásának fázisai (a segítő egyszer cselekszik; a készüléke véglegesít). */
+export const HELYREALLITAS_FAZISOK = new Set(['kezdes', 'veglegesites', 'visszavonas']);
 
 export function bejelentesHelyei(e) {
   const helyek = new Set();
@@ -809,6 +813,27 @@ export function alakiHiba(esemeny) {
         ?? (!Array.isArray(cs) || !cs.length || cs.length > KULCSCSERE_KORLAT ? 'a cserék lánca 1–' + KULCSCSERE_KORLAT + ' csere'
           : cs.map(kulcscsereAlakiHibaja).find((x) => x) ?? null);
     if (h) return 'a kulcscsere eseménye: ' + h;
+  }
+  // ⭐⭐ D128 (②e — 17. pont, 9.13): a HELYREÁLLÍTÁS JÓVÁHAGYÁSA — állítás MÁSRÓL (a helyreállítandó szeletébe: `kit` = ő,
+  // `sajatBelepes` = a segítő horgonya), a javaslattal és a fázissal; a szerepeket és a szabályt az `allapot/helyreallitas.js` nézi.
+  if (esemeny.tipus === 'HelyreallitasJovahagyas') {
+    const a = esemeny.adat;
+    if (!a || typeof a !== 'object' || Array.isArray(a) || Object.keys(a).sort().join(',') !== 'fazis,javaslat,kit,sajatBelepes'
+      || !azonositoAlaku(a.kit) || !azonositoAlaku(a.sajatBelepes) || !HELYREALLITAS_FAZISOK.has(a.fazis)
+      || !azonositoAlaku(esemeny.entitas)) {
+      return 'a helyreállítás jóváhagyása a helyreállítandó horgonyához szól: { kit, sajatBelepes, javaslat, fazis }';
+    }
+    const h = helyreallitasJavaslatAlakiHibaja(a.javaslat);
+    if (h) return 'a helyreállítás jóváhagyása: ' + h;
+  }
+  // ⭐⭐ D128 (②e): a helyreállítás MEGÁLLÍTÁSA — a helyreállítandó azonosság egy meglévő készülékéé, a saját horgonyához szól, és
+  // a javaslat jelét nevezi meg (csak azt).
+  if (esemeny.tipus === 'HelyreallitasMegallitas') {
+    const a = esemeny.adat;
+    if (!a || typeof a !== 'object' || Array.isArray(a) || Object.keys(a).join(',') !== 'javaslat' || !azonositoAlaku(a.javaslat)
+      || !azonositoAlaku(esemeny.entitas)) {
+      return 'a helyreállítás megállítása a saját horgonyhoz szól, és a javaslat jelét nevezi meg ({ javaslat })';
+    }
   }
   // ⭐ D94: a 2. lépcső bemondása — a saját horgonyhoz szól, és a tanúsítások azonosítóit hordozza (1–16, ismétlés nélkül).
   if (esemeny.tipus === 'LepcsoBemondas') {

@@ -331,6 +331,69 @@ export function lancElejeE(elotag, alairasok) {
   return true;
 }
 
+// ===================================
+// ⭐⭐ D128 (②e — 17. pont, 9.13): A HELYREÁLLÍTÁS JAVASLATA
+// ===================================
+//
+// Ha minden elveszett (vagy a kezelő kulcs egy tolvajnál van), az azonosságot a SEGÍTŐK állítják helyre: egy régi ismerős és két
+// élő tanúsító (vagy tíz bemutatkozó és két élő tanúsító) jóváhagyja a JAVASLATOT, és a várakozás után a készülékük véglegesíti
+// (`allapot/helyreallitas.js`). A javaslat:
+//   `{ kulcs, keszulekek, fizetes, kovetkezo, kor, elozo, sorszam, utan, ido }`
+//   · `kulcs` — az új kezelő kulcs; `keszulekek` — a megmaradó (az új) készülékek; `fizetes` — az új fizetési kulcs;
+//   · `kovetkezo` — az 1. lépcsőn az új papír lekötése, a 2. lépcsőn `null` (ott nincs papír);
+//   · `kor` — 1, vagy 2 (egy megállított 1. kör után: `elozo` az 1. kör jele);
+//   · `sorszam`, `utan` — a lánc HELYE, amit folytat: a sorszáma, és az előző bejegyzés jele (az 1. helyen `null`);
+//   · `ido` — a javaslat ideje (tájékoztató; a várakozást a segítők készülékei mérik, a saját órájukon).
+// A JELE a tartalom lenyomata — a jóváhagyások és a megállítás erre hivatkoznak.
+
+/** A helyreállítás köre: 1, és egy megállított 1. kör után 2. */
+export const HELYREALLITAS_KOROK = [1, 2];
+
+const JAVASLAT_MEZOK = 'elozo,fizetes,ido,keszulekek,kor,kovetkezo,kulcs,sorszam,utan';
+
+/**
+ * A helyreállítás javaslatának alakja — szinkron. ⚠️ Csak az ALAK (a jóváhagyások szabálya az `allapot/helyreallitas.js`-é).
+ * @returns {string|null}
+ */
+export function helyreallitasJavaslatAlakiHibaja(j) {
+  if (!j || typeof j !== 'object' || Array.isArray(j)) return 'a javaslat egy objektum';
+  if (Object.keys(j).sort().join(',') !== JAVASLAT_MEZOK) {
+    return 'a javaslat mezői: kulcs, keszulekek, fizetes, kovetkezo, kor, elozo, sorszam, utan, ido';
+  }
+  for (const m of ['kulcs', 'fizetes']) if (typeof j[m] !== 'string' || !AZONOSITO.test(j[m])) return 'a javaslat ' + m + ' mezője 43 jel';
+  if (j.kovetkezo !== null && (typeof j.kovetkezo !== 'string' || !AZONOSITO.test(j.kovetkezo))) {
+    return 'a javaslat kovetkezo mezője 43 jel (vagy null: a 2. lépcsőn nincs papír)';
+  }
+  const k = j.keszulekek;
+  if (!Array.isArray(k) || !k.length || k.length > MARADO_KORLAT || !k.every((x) => typeof x === 'string' && AZONOSITO.test(x))) {
+    return 'a javaslat készülékei: 1–' + MARADO_KORLAT + ' kulcs';
+  }
+  for (let i = 1; i < k.length; i++) if (!(k[i] > k[i - 1])) return 'a javaslat készülékei rendezve, egyszer';
+  if (!HELYREALLITAS_KOROK.includes(j.kor)) return 'a javaslat köre 1 vagy 2';
+  if (j.kor === 1 ? j.elozo !== null : (typeof j.elozo !== 'string' || !AZONOSITO.test(j.elozo))) {
+    return 'az 1. kör javaslata előzmény nélküli, a 2. köré a megállított 1. kör jelét nevezi meg';
+  }
+  if (!Number.isSafeInteger(j.sorszam) || j.sorszam < 1 || j.sorszam > KULCSCSERE_KORLAT) {
+    return 'a javaslat sorszáma 1–' + KULCSCSERE_KORLAT;
+  }
+  if (j.sorszam === 1 ? j.utan !== null
+    : (typeof j.utan !== 'string' || !(AZONOSITO.test(j.utan) || ALAIRAS.test(j.utan)))) {
+    return 'a javaslat az előző bejegyzés jele után áll (az 1. helyen null)';
+  }
+  if (!Number.isSafeInteger(j.ido) || j.ido < 0) return 'a javaslat ideje egy nemnegatív egész';
+  return null;
+}
+
+/** A javaslat JELE — a tartalom lenyomata (a jóváhagyások és a megállítás erre hivatkoznak). */
+export async function helyreallitasJele(j) {
+  return lenyomat({ tipus: 'HelyreallitasJavaslat', ...j });
+}
+
+/** A javaslat jele szinkron. */
+export function helyreallitasJeleSzinkron(j) {
+  return lenyomatSzinkron({ tipus: 'HelyreallitasJavaslat', ...j });
+}
+
 /** A csere-kulcs lenyomata szinkron (a kézfogás láncához — `csere/titkositas.js`). */
 export function csereLenyomataSzinkron(csereNyilvanos) {
   return lenyomatSzinkron({ tipus: 'CsereKulcs', kulcs: csereNyilvanos });

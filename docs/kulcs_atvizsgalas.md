@@ -573,6 +573,19 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
     koinóban, a tárból) → **②e2** a lánc bejegyzése és a bizonyíték (a csomag, a kapu, a kezelő kulcs, az erő, a kizárás, a kézfogás)
     → **②e3** a segítők készülékei (a várakozás utáni magától véglegesítés; az értesítés X készülékein) → **②f** a parancsok (az új
     készüléken a kérelem kódja és a befejezés; a segítés, a visszavonás, a megállítás).
+- ✅ **Az építés — ②e1 az események és a szerepek** (2026-11-15): `azonossag.js` — a javaslat alakja
+  (`helyreallitasJavaslatAlakiHibaja`: az új kezelő kulcs, az új készülék(ek), az új fizetési kulcs, a papír lekötése vagy `null`,
+  a kör és az előzmény, a lánc helye — sorszám és az előző bejegyzés jele) és a JELE (`helyreallitasJele` — a tartalom lenyomata).
+  `esemeny.js`: a `HelyreallitasJovahagyas` (állítás másról, a helyreállítandó szeletébe — a segítő a saját szeletében is látja:
+  `AZONOSSAG_ALLITASOK`) és a `HelyreallitasMegallitas` (a saját szeletbe, a javaslat jelével) alakja. `allapot/helyreallitas.js`:
+  `helyreallitasokAllapota` — javaslatonként a kezdők és a véglegesítők (`segitoAllasa`: a visszavonás a kezdést törli, a véglegesítés
+  után semmi nem számít), a megállítás (X érvényes — nem kizárt, a kulcscsere által nem kiejtett — készülékéről), az út
+  (`elegendoUt`: egy ember egy hely; a tanúsítót előbb a nem-bemutatkozók közül), a 2. kör feltétele (a megállított 1. kör), a
+  várakozás napjai. A szerepek: a régi ismerős a meghívás és a tanúsítás érvényes állítójából, a bemutatkozó a KÖLCSÖNÖS
+  bemutatkozásból (D62 — az egyoldalú nem számít; a jelzések `sajatAllitasai`-val), az élő tanúsító a `tanusithatE`-ből
+  (`identitas.js` `allitasHelyben` így exportált). `muveletek.js`: `helyreallitasJovahagyasa`, `helyreallitasMegallitasa`. A próba:
+  `helyreallitasProba.js` (8 — az ismerős út, a különböző emberek, a visszavonás, a megállítás és a 2. kör, a bemutatkozó út, a tiszta
+  szabály, az alak, a műveletek) — 16 rontás. ⏭️ ②e2: a lánc bejegyzése és a bizonyíték.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

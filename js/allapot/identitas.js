@@ -182,7 +182,7 @@ function keretOr(nezet) {
  * önmagáé, és az állító horgonya — amit az esemény hoz — tényleg az övé.
  * @returns {Promise<{ervenyes: boolean, hianyzik?: boolean, allitoHorgony?: string}>}
  */
-async function allitasHelyben(tar, koino, e, horgonyEsemeny, tipus, nezet) {
+export async function allitasHelyben(tar, koino, e, horgonyEsemeny, tipus, nezet) {
   if (!e || e.tipus !== tipus) return { ervenyes: false };
   // ----- 1. RÓLAM SZÓLJON -----
   // A `kit` mező a horgony szerzőjére mutasson. Enélkül egy idegen szeletébe tett
