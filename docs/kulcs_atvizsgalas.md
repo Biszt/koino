@@ -347,7 +347,8 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
   kizárás terjesztése (a koinó-listák cseréje a készülékek között, a más által bevitt kizárás) a ③ hálózaté; a kezelése (a parancs, a
   lap) a ④-é. ⚠️ A folytatott lánc műveleteihez a kizárást az örökös saját `Kizaras` eseménye adja (a felsorolt koinókba ő viszi).
 
-**9.11 A ② terve — a csere-kulcs lekötése, a kulcscsere, a mentés** (2026-11-15; ⏸️ a KC1–KC3 Csabáé):
+**9.11 A ② terve — a csere-kulcs lekötése, a kulcscsere, a mentés** (2026-11-15; ✅ **eldöntve** — Csaba: KC1 (A), KC2 (A), KC3 (A);
+D128 13–15.):
 - **A mai helyzet** (a kódban): az azonosság NEVE a nyilvános kulcsa (`kulcsTar.js`, a `szerzo`), a készülék-tanúsítványt ez a kulcs
   írja alá, és az ellenőrzés a névből veszi a kulcsot. A mentés ma a teljes kulcspár egy fájlban (`mentes` parancs). Csere-kulcs nincs.
 - **A cél** (6. és 7. pont, terv_kulcs 5.1): az azonosság születésekor a KÖVETKEZŐ kulcs (a csere-kulcs) előre le van kötve — a láncon

@@ -6488,6 +6488,14 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
     eseményből); ha a telefon szavazna egy gondolatról, amin csak a laptopnak van pontja, előbb magától 1 pontot tesz rá a saját
     részéből (ahogy ma a javaslatra), és azzal szavaz. *(A (B) — az azonosság bármelyik láncára hivatkozni — elavult bizonyítékot
     adna: a laptop közben levehette a pontot.)*
+13. **A név a születés lenyomata** (Csaba, 2026-11-15 — KC1 (A)): az azonosság születése az első kulcsot, a csere-kulcs lenyomatát és
+    a fizetési kulcsot együtt köti, és a NÉV ebből a lenyomatból jön (a KERI „önmagát címző” azonosítója) — ugyanarra a névre más
+    lekötés nem létezhet, egy tolvaj az azonosság kulcsával sem köthet le mást. A név a kulcscsere után is marad (KU3 (A)); a születés
+    minden koinóban a horgonnyal utazik, a tanúsítványok ellenőrzése belőle (és a kulcscserék láncából) veszi a kezelő kulcsot.
+14. **A kulcscsere felsorolja a megmaradó készülékeket** (KC2 (A)): azok újra-tanúsítás nélkül maradnak; minden más, amit a régi kulcs
+    tanúsított (a tolvaj által felvett készülék is), érvénytelen.
+15. **A csere-kulcs csak a mentésben** (KC3 (A)): a születéskor a készülék megmutatja (papírra: szavak + QR; fájlba), megkéri, hogy
+    mentsd el, és utána törli magáról — egy ellopott készülék soha nem viheti.
 
 *Az építés sorrendje:* ① a mag (a `keszulek` mező és a (szerző, készülék) lánc, a tanúsítvány és a kizárás az örökössel, a keret az
 átadással, a sorrend az azonosság eseményei között) → ② a csere-kulcs és a kulcscsere, a mentés (a lapon is) → ③ a hálózat → ④ a lap
