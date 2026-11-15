@@ -2579,11 +2579,13 @@ proba('⭐⭐ D109 (KK4): az idegennek a csere a keret maradékáig küld — a 
   const esemenyek = await lanc(anna, 6);
   const egyik = await ujTar(); await ment(egyik, esemenyek);
   const masik = await ujTar();
-  // ⭐⭐ D128: a lánc első eseménye a tanúsítványt is hozza (nagyobb) — a mérce egy rendes esemény.
+  // ⭐⭐ D128: a lánc első eseménye a tanúsítványt is hozza (nagyobb — ②a óta a születéssel ~2× egy rendes esemény), és a
+  // későbbi körökben az első küldött esemény a kísérőben viszi ugyanezt — a keret körönként egy ilyet és egy rendeset enged.
   const meret = Buffer.byteLength(JSON.stringify({ uzenet: 'ESEMENY', esemeny: esemenyek[1] })) + 40;
+  const elsoMeret = Buffer.byteLength(JSON.stringify({ uzenet: 'ESEMENY', esemeny: esemenyek[0] })) + 40;
   const konyv = [];
   const keret = {
-    itelet: async () => ({ szabad: true, kesobb: null, maradekBajt: Math.floor(meret * 2.5) }),
+    itelet: async () => ({ szabad: true, kesobb: null, maradekBajt: Math.floor((elsoMeret + meret) * 1.05) }),
     feljegyez: async (x) => { konyv.push(x); }
   };
   const darabok = [];

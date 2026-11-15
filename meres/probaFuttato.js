@@ -126,6 +126,7 @@ export function probaGyujtemeny(cim) {
 import { esemenyLetrehozasa, kiseroval } from '../js/esemeny/esemeny.js';
 import { TUDATPONT_KERET, javaslatEntitasai } from '../js/allapot/szabalyok.js';
 import { ujKeszulek } from '../js/kulcs/keszulek.js';
+import { ujAzonossag } from '../js/kulcs/azonossag.js';   // ⭐⭐ D128 (②a)
 
 /**
  * ⭐⭐ D128: egy próba-KÉSZÜLÉK — egy friss azonosság, és alatta egy tanúsított készülékkulcs (`kulcs/keszulek.js` `eszkoz`).
@@ -136,10 +137,21 @@ import { ujKeszulek } from '../js/kulcs/keszulek.js';
  * @returns {Promise<Object>} eszköz (+ `azonossagKulcspar`)
  */
 export async function tesztKeszulek(nev = 'próba', azonossagKulcspar = null) {
-  const az = azonossagKulcspar ?? await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const az = azonossagKulcspar ?? await tesztAzonossag();
   const k = { ...(await ujKeszulek(az, nev)), azonossagKulcspar: az };
   PROBA_TANUSITVANYOK.set(k.keszulek, k.tanusitvany);
   return k;
+}
+
+/**
+ * ⭐⭐ D128 (②a — KC1 (A)): egy próba-AZONOSSÁG — a kezelő kulcspár a születésével (a név a születés lenyomata). A csere-kulcs a
+ * próbában nem kell (a ②b kulcscsere-próbái maguk készítik).
+ * @returns {Promise<CryptoKeyPair>} a kulcspár, rajta a `szuletes`
+ */
+export async function tesztAzonossag() {
+  const { kulcspar, szuletes } = await ujAzonossag();
+  kulcspar.szuletes = szuletes;
+  return kulcspar;
 }
 
 /** ⭐⭐ D128: a próba-készülékek tanúsítványai (készülék → tanúsítvány). */

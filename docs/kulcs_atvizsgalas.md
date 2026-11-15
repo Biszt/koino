@@ -383,6 +383,17 @@ D128 13–15.):
   szerzőhöz, tanúsítvány nélkül: `tulajdonosKeszulekeE`). A hálózaton az azonosság kulcsa ezzel már semmit nem ír alá. A próba:
   titkositas (a személyes aláírás — az idegen, a hamis tanúsítvány, az azonosság kulcsával írt aláírás nem elég), keresotar (L3) —
   5 rontás.
+- ✅ **Az építés — ②a a születés és a név** (2026-11-15): `kulcs/azonossag.js` — a születés `{ tipus, kulcs, csere, fizetes, ido,
+  alairas }` (az első kulcs írja alá), a NÉV a születés aláírt részének lenyomata (`azonossagNeve`; szinkron is, a kézfogásnak), a
+  csere-kulcs lenyomata (`csereLenyomata`), `ujAzonossag`. A készülék- és a kizárás-tanúsítvány a születést HOZZA (+312 B — a
+  tanúsítvány 605 B, 94. mérés): az ellenőrzés helyben nézi, hogy a név a születés lenyomata, és a születés kulcsa írta alá (a
+  kulcscserék láncát a ②b teszi hozzá). `kulcsTar.js`: az azonosság a születéssel és a fizetési kulccsal a gépen; a régi (születés
+  nélküli) kulcsfájl születést kap — a NÉV megváltozik (új koinó-család); a csere-kulcs kiadásra megy (`csereKulcsKiadasa` —
+  `koino.js` a `csere-kulcs.json`-ba írja, és amíg ott van, minden induláskor szól: vidd el, töröld; a papír a ②c-vel). ⛔ **Lelet:**
+  a mentés (`kulcsparKimentese`) csak a kulcsot vitte — a visszatöltés ÚJ születést (új nevet) adott volna, az azonosság elveszett
+  volna; most a születést és a fizetési kulcsot is viszi (a próba fogta meg). A próba: keszulek („A NÉV A SZÜLETÉS LENYOMATA”, és a
+  tolvaj a saját kulcsával szabályosan aláírt tanúsítványa egy idegen névre — csak a név szabálya állítja meg), kulcs (a születés, a
+  csere-kulcs, a régi fájl, a mentés), titkositas (ugyanez a kézfogásban) — 8 rontás.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

@@ -3335,11 +3335,19 @@ proba('⭐⭐ D92/1 (c): a TOVÁBBADÁS — R → P → H, a válasz lépésenk�
       await fut(R, 'kerelem', 'szelet', gTeljes, helyben);
 
       const naplo = { H: '', P: '', R: '' };
-      for (const [nev, hely, port] of [['H', H, PH], ['P', P, PP], ['R', R, PR]]) {
+      const indit = (nev, hely, port) => {
         const f = orjarat(hely, port);
         f.stdout.on('data', (d) => { naplo[nev] += d; });
         futok.push(f);
-      }
+      };
+      // ⚠️ (2026-11-15) A SORREND: előbb P és R — és H csak akkor, amikor P már ÁTVETTE R kérését továbbadásra. Ha H vele együtt
+      // indul, P a H-val folyó cseréjéből megkaphatja a szeletet, mielőtt R kérése odaér: akkor maga felel (jogosan), és nincs mit
+      // továbbadni — a próba az időzítésen bukna, nem a továbbadáson (a D128 ②a óta ez a sorrend rendszeresen így alakult).
+      indit('P', P, PP);
+      indit('R', R, PR);
+      const atvette = () => /kérelmet vettem át továbbadásra/.test(naplo.P.replace(/\x1b\[[0-9;]*m/g, ''));
+      for (let i = 0; i < 60 && !atvette(); i++) await varj(500);
+      indit('H', H, PH);
       let megjott = false;
       for (let i = 0; i < 90 && !megjott; i++) {
         await varj(500);

@@ -299,10 +299,14 @@ proba('⭐ D118/2 (①b): az új születésbe írt szabályok TELJESEK — a meg
 
 // ===== TÁJÉKOZTATÓ MÉRÉS =====
 
-proba('Egy esemény mérete ésszerű (< 1 KB)', async () => {
-  const meret = new TextEncoder().encode(JSON.stringify(esemeny)).length;
-  console.log('    (egy esemény mérete: ' + meret + ' bájt)');
-  return meret < 1024;
+proba('Egy esemény mérete ésszerű (< 1 KB) — ⭐⭐ D128 (②a): a lánc ELSŐ eseménye a tanúsítvánnyal (benne az azonosság születésével) < 1,5 KB', async () => {
+  // ⚠️ A minta-esemény a lánc első eseménye: a készülék tanúsítványát hozza (a születéssel ~600 B — 94. mérés) — egy lánc minden
+  // további eseménye nélküle utazik.
+  const masodik = await esemenyLetrehozasa({ ...alapLeiras, sorszam: 2, elozo: esemeny.azonosito }, kulcspar);
+  const meret = new TextEncoder().encode(JSON.stringify(masodik)).length;
+  const elsoMeret = new TextEncoder().encode(JSON.stringify(esemeny)).length;
+  console.log('    (egy esemény mérete: ' + meret + ' bájt, a lánc első eseménye: ' + elsoMeret + ' bájt)');
+  return meret < 1024 && elsoMeret < 1536;
 });
 
 export default futtatas;

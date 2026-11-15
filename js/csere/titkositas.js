@@ -55,6 +55,7 @@ import {
   createPublicKey, createPrivateKey, createHash, sign, verify
 } from 'node:crypto';
 import { tanusitvanyAlakiHibaja, tanusitvanyTartalma } from '../kulcs/keszulek.js';
+import { azonossagNeveSzinkron, szuletesTartalma } from '../kulcs/azonossag.js';
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 
 /** A titkosított csomag első bájtja — se nem `{` (a nyílt JSON), se nem STUN (az első két bit 0), se nem bencode. */
@@ -233,9 +234,16 @@ export function keszulekKezfogasEllenorzese(ki, koino, atirat) {
   return kezfogasAlairasEllenorzeseNyers(ki.k, SZEMELYES(koino, atirat), ki.a);
 }
 
-/** A készülék-tanúsítvány aláírása (szinkron — ugyanaz, mint a `keszulek.js` `tanusitvanyEllenorzese`-é). */
+/**
+ * A készülék-tanúsítvány (szinkron — ugyanaz, mint a `keszulek.js` `tanusitvanyEllenorzese`-é): ⭐⭐ D128 (②a) a név a születés
+ * lenyomata, a születést az első kulcs írta alá, és a tanúsítványt ugyanez a kulcs.
+ */
 function tanusitvanySzinkronEllenorzese(t) {
-  return kezfogasAlairasEllenorzeseNyers(t.azonossag, Buffer.from(lenyomatSzinkron(tanusitvanyTartalma(t)), 'utf8'), t.alairas);
+  const s = t.szuletes;
+  const nev = azonossagNeveSzinkron(s);
+  if (nev !== t.azonossag) return false;
+  if (!kezfogasAlairasEllenorzeseNyers(s.kulcs, Buffer.from(lenyomatSzinkron(szuletesTartalma(s)), 'utf8'), s.alairas)) return false;
+  return kezfogasAlairasEllenorzeseNyers(s.kulcs, Buffer.from(lenyomatSzinkron(tanusitvanyTartalma(t)), 'utf8'), t.alairas);
 }
 
 function kezfogasAlairasEllenorzeseNyers(nyilvanos, uzenet, alairas) {

@@ -38,6 +38,8 @@
 // alapot, ami alatta van.
 
 import { bajtokBase64Url } from '../esemeny/kanonikusAlak.js';
+// ⭐⭐ D128 (②a — KC1 (A)): az azonosság születése (a név a lenyomata).
+import { ujAzonossag, szuletesKeszitese, szuletesEllenorzese, csereLenyomata, azonossagNeve } from './azonossag.js';
 
 // ⭐ Változatlanul innen is elérhető marad: aki a kulcs-réteget használja, tipikusan a
 // kulcs olvasható alakja miatt nyúl a bájt-átalakítóhoz is. Egy megvalósítás, két kapu.
@@ -66,17 +68,20 @@ const ALGORITMUS = 'Ed25519';
  */
 export async function kulcsparLetrehozasa(tarolo) {
   console.log('kulcsparLetrehozasa - KEZDÉS');
-
-  const kulcspar = await crypto.subtle.generateKey(
-    { name: ALGORITMUS },
-    true,                 // kimenthető — hogy menteni lehessen (lásd fent)
-    ['sign', 'verify']    // aláírásra és ellenőrzésre használjuk
-  );
-
-  await tarolo.ir(await kulcsparLeirasa(kulcspar));
-
+  // ⭐⭐ D128 (②a — KC1 (A)): az azonosság SZÜLETÉSSEL jön létre — az első kulcs, a csere-kulcs (lenyomata) és a fizetési kulcs;
+  // a név a születés lenyomata. A csere-kulcsot a hívó adja ki (KC3 (A) — a gépen nem marad).
+  const { kulcspar, csere, fizetes, szuletes } = await ujAzonossag();
+  await azonossagMentese(tarolo, kulcspar, szuletes, fizetes);
+  kulcspar.szuletes = szuletes;
   console.log('kulcsparLetrehozasa - VÉGE');
-  return kulcspar;
+  return { kulcspar, csere };
+}
+
+/** ⭐⭐ D128 (②a): az azonosság a tárolóba — a kezelő kulcs, a születése (a név), a fizetési kulcs. */
+async function azonossagMentese(tarolo, kulcspar, szuletes, fizetes) {
+  const fizetesKulcs = (await kulcsparLeirasa(fizetes)).privatKulcs;
+  await tarolo.ir({ ...(await kulcsparLeirasa(kulcspar)), nev: await azonossagNeve(szuletes), szuletes, fizetesKulcs });
+  kulcspar.fizetesKulcs = fizetesKulcs;
 }
 
 // ===================================
@@ -97,8 +102,10 @@ export async function kulcsparBetoltese(tarolo) {
     return null;
   }
 
-  const kulcspar = await kulcsparLeirasbol(leiras);
-  console.log('kulcsparBetoltese - VÉGE (megvan)');
+  // ⭐⭐ D128 (②a): a születés — ha a tárolóban van, és ehhez a kulcshoz tartozik (az első kulcs írta alá). ⚠️ A régi (születés
+  // nélküli) kulcsfájlnak a `kulcsparBiztositasa` ad születést — a név ezzel MEGVÁLTOZIK (új koinó-család).
+  const kulcspar = await azonossagRaTetele(await kulcsparLeirasbol(leiras), leiras);
+  console.log('kulcsparBetoltese - VÉGE (megvan)', { szuletes: !!kulcspar.szuletes });
   return kulcspar;
 }
 
@@ -111,14 +118,38 @@ export async function kulcsparBiztositasa(tarolo) {
   console.log('kulcsparBiztositasa - KEZDÉS');
 
   const meglevo = await kulcsparBetoltese(tarolo);
-  if (meglevo) {
+  if (meglevo?.szuletes) {
     console.log('kulcsparBiztositasa - VÉGE (meglévő kulcs)');
-    return { kulcspar: meglevo, ujE: false };
+    return { kulcspar: meglevo, ujE: false, csere: null };
+  }
+  if (meglevo) {
+    // ⭐⭐ D128 (②a): a régi (születés nélküli) kulcs születést kap — új csere-kulccsal és fizetési kulccsal; a NÉV megváltozik.
+    const ujak = await ujAzonossag();
+    const nyilvanos = async (k) => nyilvanosKulcsSzovegesen(k.publicKey);
+    const szuletes = await szuletesKeszitese(meglevo, await csereLenyomata(await nyilvanos(ujak.csere)), await nyilvanos(ujak.fizetes));
+    await azonossagMentese(tarolo, meglevo, szuletes, ujak.fizetes);
+    meglevo.szuletes = szuletes;
+    console.log('kulcsparBiztositasa - VÉGE (a régi kulcs születést kapott)');
+    return { kulcspar: meglevo, ujE: false, csere: ujak.csere, szuletettE: true };
   }
 
-  const uj = await kulcsparLetrehozasa(tarolo);
+  const { kulcspar, csere } = await kulcsparLetrehozasa(tarolo);
   console.log('kulcsparBiztositasa - VÉGE (ÚJ kulcs készült)');
-  return { kulcspar: uj, ujE: true };
+  return { kulcspar, ujE: true, csere };
+}
+
+/**
+ * ⭐⭐ D128 (②a — KC3 (A)): a CSERE-KULCS kiadásra — a titkos fele, a név és a figyelmeztetés. A gépen nem maradhat: a hívó
+ * kiírja (fájlba), megkéri, hogy vidd el, és töröld (②c: papírra is, szavakkal).
+ * @param {CryptoKeyPair} csere
+ * @param {string} nev - az azonosság neve
+ * @returns {Promise<Object>}
+ */
+export async function csereKulcsKiadasa(csere, nev) {
+  return { mi: 'koino-csere-kulcs', valtozat: 1, nev,
+    figyelmeztetes: 'Ez a CSERE-KULCSOD: ha a kulcsod elveszik vagy ellopják, ezzel szerezheted vissza az azonosságodat. '
+      + 'Vidd el a gépről (papírra vagy pendrive-ra), és utána TÖRÖLD innen — egy ellopott gépen ne legyen.',
+    privatKulcs: await crypto.subtle.exportKey('jwk', csere.privateKey) };
 }
 
 // ===================================
@@ -231,7 +262,22 @@ export async function kulcsparLeirasbol(leiras) {
  * @returns {Promise<string>}
  */
 export async function kulcsparKimentese(kulcspar) {
-  return JSON.stringify(await kulcsparLeirasa(kulcspar), null, 2);
+  // ⭐⭐ D128 (②a): az AZONOSSÁG mentése a születésével és a fizetési kulccsal — e nélkül a visszatöltött kulcs ÚJ születést (új
+  // nevet) kapna, és az azonosság elveszne.
+  const leiras = await kulcsparLeirasa(kulcspar);
+  const szuletes = kulcspar.szuletes;
+  return JSON.stringify(szuletes ? { ...leiras, nev: await azonossagNeve(szuletes), szuletes,
+    ...(kulcspar.fizetesKulcs ? { fizetesKulcs: kulcspar.fizetesKulcs } : {}) } : leiras, null, 2);
+}
+
+/** ⭐⭐ D128 (②a): a leírásból a születés és a fizetési kulcs a kulcspárra — ha a születés ehhez a kulcshoz tartozik. */
+async function azonossagRaTetele(kulcspar, leiras) {
+  const kulcs = await nyilvanosKulcsSzovegesen(kulcspar.publicKey);
+  if (leiras?.szuletes && leiras.szuletes.kulcs === kulcs && (await szuletesEllenorzese(leiras.szuletes)).rendben) {
+    kulcspar.szuletes = leiras.szuletes;
+    if (leiras.fizetesKulcs) kulcspar.fizetesKulcs = leiras.fizetesKulcs;
+  }
+  return kulcspar;
 }
 
 /**
@@ -266,20 +312,21 @@ export async function kulcsparVisszatoltese(tarolo, fajlTartalom, beallitas = {}
     throw new Error('Ez a fájl nem olvasható: nem JSON.');
   }
 
-  const kulcspar = await kulcsparLeirasbol(leiras);
-  const azonosito = await nyilvanosKulcsSzovegesen(kulcspar.publicKey);
+  const kulcspar = await azonossagRaTetele(await kulcsparLeirasbol(leiras), leiras);
+  // ⭐⭐ D128 (②a): a NÉV a születésből (ha a fájl hozza) — különben a kulcs (a régi alak; a betöltés születést ad neki).
+  const azonosito = (typeof leiras.nev === 'string' && leiras.nev) || await nyilvanosKulcsSzovegesen(kulcspar.publicKey);
 
   const meglevo = await tarolo.olvas();
   if (meglevo && beallitas.felulir !== true) {
     // ⚠️ A meglévő fájlban az `azonosito` mező hiányozhat (kézzel szerkesztették) — a
     // hiányt KIMONDJUK, nem írunk a helyére `undefined`-ot (D19).
     throw new Error('Ezen a készüléken MÁR VAN kulcs ('
-      + (rovidAzonosito(meglevo.azonosito) || 'ismeretlen azonosítójú')
+      + (rovidAzonosito(meglevo.nev ?? meglevo.azonosito) || 'ismeretlen azonosítójú')
       + '), a visszatöltés pedig ELDOBNÁ. Ha tényleg ezt akarod, mondd ki: `felulir`.');
   }
 
   await tarolo.ir(leiras);
 
   console.log('kulcsparVisszatoltese - VÉGE', { azonosito });
-  return { kulcspar, azonosito, elhagyott: meglevo?.azonosito ?? null };
+  return { kulcspar, azonosito, elhagyott: meglevo?.nev ?? meglevo?.azonosito ?? null };
 }

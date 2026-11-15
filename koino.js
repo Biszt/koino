@@ -152,7 +152,7 @@ import { rajKorAllapot, valtozottFeljegyzese, rajKorCeljai } from './js/csere/ra
 // ⭐ D70: koinónként és készülékenként EGY folyamat fűz a tárhoz — az író.
 import { iroTarNyitasa } from './js/tar/iro.js';
 import {
-  kulcsparBiztositasa, nyilvanosKulcsSzovegesen, rovidAzonosito, kulcsparKimentese, kulcsparLeirasa,
+  kulcsparBiztositasa, nyilvanosKulcsSzovegesen, rovidAzonosito, kulcsparKimentese, kulcsparLeirasa, csereKulcsKiadasa,
   // ⭐ A KÉZI ÚT MÁSIK FELE (2026-09-15): eddig csak KIMENTENI lehetett a kulcsot.
   kulcsparVisszatoltese
 } from './js/kulcs/kulcsTar.js';
@@ -160,6 +160,8 @@ import { koinoEsemenyei, sajatLancEsemenyei, esemenyLekerese, esemenyMentese, en
   from './js/tar/esemenyTar.js';
 // ⭐⭐ D128: a készülékkulcs és a tanúsítványa.
 import { keszulekBiztositasa } from './js/kulcs/keszulek.js';
+import { azonossagNeve } from './js/kulcs/azonossag.js';   // ⭐⭐ D128 (②a): a név a születés lenyomata
+import { existsSync } from 'node:fs';
 import { kiseroAdo } from './js/tar/esemenyTar.js';
 // ⭐ B/2: a szelet-kulcs (az előléptetéshez).
 import {
@@ -469,8 +471,15 @@ if (parancs === 'visszatolt') {
 // ⭐⭐ D128 (ET-3 — a kulcs: több készülék és a helyreállítás): KÉT KULCS. Az AZONOSSÁG kulcsa (a régi kulcs — a nevem, a
 // `kulcs.json`) csak kezel: tanúsítja a készülékkulcsot; a mindennapi aláírás a KÉSZÜLÉKÉ (`keszulek.json`), a saját láncán.
 // ⚠️ A készülék neve a láncra kerül (a tanúsítványban) — ezért nem a gép neve (D6: személyes adat soha a láncra), csak a fajtája.
-const { kulcspar: azonossagKulcspar, ujE } = await kulcsparBiztositasa(tarolo);
-const szerzo = await nyilvanosKulcsSzovegesen(azonossagKulcspar.publicKey);
+const { kulcspar: azonossagKulcspar, ujE, csere: ujCsereKulcs, szuletettE } = await kulcsparBiztositasa(tarolo);
+// ⭐⭐ D128 (②a — KC1 (A)): a NEVEM a születésem lenyomata (az első kulcs, a csere-kulcs lenyomata, a fizetési kulcs együtt).
+const szerzo = await azonossagNeve(azonossagKulcspar.szuletes);
+// ⭐⭐ D128 (②a — KC3 (A)): a CSERE-KULCS a gépen nem maradhat — kiírjuk egy fájlba, és amíg ott van, minden induláskor szólunk:
+// vidd el (papírra vagy pendrive-ra), és töröld. (A papír — szavak és QR — a ②c-vel és a lappal jön.)
+const CSERE_KULCS_FAJL = join(dirname(tarolo.fajl), 'csere-kulcs.json');
+if (ujCsereKulcs) {
+  await writeFile(CSERE_KULCS_FAJL, JSON.stringify(await csereKulcsKiadasa(ujCsereKulcs, szerzo), null, 2));
+}
 const { eszkoz: kulcspar } = await keszulekBiztositasa(keszulekTarolo(), azonossagKulcspar,
   process.env.KOINO_KESZULEK_NEV || (process.platform === 'android' ? 'telefon' : 'számítógép'));
 /** ⭐⭐ D128: a SAJÁT LÁNCOM kulcsa — a készülékemé (a sorszám, a lánc vége, a lánc-gyökér ezé). */
@@ -7169,12 +7178,20 @@ function csaladMunkaKeszito(allapot) {
   };
 }
 
-if (ujE) {
-  kiir(SZIN.vastag + 'Új kulcs készült — ez mostantól a személyazonosságod.' + SZIN.vege);
+if (ujE || szuletettE) {
+  kiir(SZIN.vastag + (ujE ? 'Új kulcs készült — ez mostantól a személyazonosságod.'
+    : 'A kulcsod születést kapott (D128) — a neved ezzel új.') + SZIN.vege);
   kiir('  ' + rovidAzonosito(szerzo));
   kiir(SZIN.halvany + '  A kulcs helye: ' + tarolo.fajl + SZIN.vege);
   kiir(SZIN.halvany + '  Mentsd el: node koino.js mentes <fájl>' + SZIN.vege);
   kiir();
+}
+// ⭐⭐ D128 (②a — KC3 (A)): amíg a csere-kulcs a gépen van, szólunk.
+// ⚠️ A standard hibakimenetre — a parancsok kimenetét (pl. a JSON-t) nem zavarja.
+if (existsSync(CSERE_KULCS_FAJL)) {
+  process.stderr.write('⚠ A CSERE-KULCSOD még a gépen van: ' + CSERE_KULCS_FAJL + '\n'
+    + '  Ezzel szerezheted vissza az azonosságodat, ha a kulcsod elveszik vagy ellopják. Vidd el a gépről (papírra'
+    + ' vagy pendrive-ra), és utána töröld innen — egy ellopott gépen ne legyen.\n');
 }
 
 try {

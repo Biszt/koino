@@ -49,6 +49,7 @@ import { TUDATPONT_KERET } from '../js/allapot/szabalyok.js';
 import { tudatpontRendezese, szabadTudatpontjaim, keretAtadasa, keretAtvetele, keretAtfolyasa, atfolyasMerteke,
   javaslatLetrehozasa, szavazas, keszulekKizarasa, kizarasBevitele } from '../js/muveletek.js';
 import { kizarasKeszitese } from '../js/kulcs/keszulek.js';
+import { ujAzonossag, szuletesEllenorzese, szuletesKeszitese, csereLenyomata, azonossagNeve } from '../js/kulcs/azonossag.js';
 import { ujSajatHelye } from '../js/tar/esemenyTar.js';
 import { lancUjEsemenyhez, KAPOTT_FAJTA, KAPOTT_HOSSZ } from '../js/allapot/lancGyoker.js';
 import { ujAllapotFa, allapotBizonyitek, allapotBeallitas, allapotGyokere } from '../js/esemeny/osszegzoFa.js';
@@ -64,6 +65,16 @@ const KOINO = 'keszulek-proba';
 /** Egy új, üres tár. */
 async function ujTar() {
   return esemenyTarNyitasa(KOINO, await mkdtemp(join(tmpdir(), 'koino-keszulek-')));
+}
+
+/**
+ * ⭐⭐ D128 (②a): egy tanúsítvány SZABÁLYOSAN aláírva tetszőleges tartalommal (a rontás-próbákhoz: egy tolvaj a saját kulcsával
+ * írhat alá egy idegen nevet — a születése nem az).
+ */
+async function alairtTanusitvany(kulcspar, t) {
+  const tartalom = { tipus: t.tipus, azonossag: t.azonossag, keszulek: t.keszulek, nev: t.nev, ido: t.ido };
+  const alairas = await crypto.subtle.sign({ name: 'Ed25519' }, kulcspar.privateKey, new TextEncoder().encode(await lenyomat(tartalom)));
+  return { ...tartalom, szuletes: t.szuletes, alairas: bajtokBase64Url(new Uint8Array(alairas)) };
 }
 
 /**
@@ -172,16 +183,23 @@ proba('⛔⛔ IDEGEN AZONOSSÁG NEVÉBEN NEM LEHET ÍRNI — se a saját tanús�
   // (5) Egy ÚJ készülék láncának első eseménye Anna nevében, egy HAMISÍTOTT tanúsítvánnyal: Annát és a tolvaj új készülékét
   // nevezi, de a tolvaj azonosság-kulcsa írta alá.
   const uj = await tesztKeszulek('tolvaj 2', tolvaj.azonossagKulcspar);
-  const hamisT = { ...(await tanusitvanyKeszitese(tolvaj.azonossagKulcspar, uj.keszulek, 'laptop')), azonossag: anna.szerzo };
-  const hamisTanusitvannyal = await kezzelAlairt({ koino: KOINO, tipus: 'GondolatLetrehozas', szerzo: anna.szerzo,
-    keszulek: uj.keszulek, sorszam: 1, tanusitvany: hamisT, adat: { cim: 'Hamis 5' } }, uj.privateKey);
-  for (const e of [sajatLancan, masAlairta, hamisTanusitvannyal]) m.push(await esemenyMentese(tar, e));
+  // ⭐⭐ D128 (②a): (5a) csak a nevet írja át — a név nem a hozott születés lenyomata; (5b) Anna SAJÁT születését teszi bele — a
+  // tanúsítványt nem Anna első kulcsa írta alá.
+  const tolvajT = await tanusitvanyKeszitese(tolvaj.azonossagKulcspar, uj.keszulek, 'laptop');
+  // A tolvaj a SAJÁT kulcsával szabályosan aláír egy tanúsítványt Anna nevére, a saját születésével — csak a név szabálya állítja meg.
+  const hamisNev = await alairtTanusitvany(tolvaj.azonossagKulcspar, { ...tolvajT, azonossag: anna.szerzo });
+  const hamisSzuletes = { ...tolvajT, azonossag: anna.szerzo, szuletes: anna.kulcspar.tanusitvany.szuletes };
+  const elsoHamis = async (t, cim) => kezzelAlairt({ koino: KOINO, tipus: 'GondolatLetrehozas', szerzo: anna.szerzo,
+    keszulek: uj.keszulek, sorszam: 1, tanusitvany: t, adat: { cim } }, uj.privateKey);
+  for (const e of [sajatLancan, masAlairta, await elsoHamis(hamisNev, 'Hamis 5a'), await elsoHamis(hamisSzuletes, 'Hamis 5b')]) {
+    m.push(await esemenyMentese(tar, e));
+  }
   const okok = m.map((r) => r.ok ?? '');
   const bejutott = (await koinoEsemenyei(tar, KOINO)).filter((e) => e.szerzo === anna.szerzo).length;
   return m.every((r) => r.mentve === false)
     && /a szerzőt és a készüléket nevezi/.test(okok[0]) && m[1].hianyzik === true
     && /másik azonosság tanúsítványát/.test(okok[2]) && /nem a készüléké/.test(okok[3])
-    && /nem az azonosság kulcsa írta alá/.test(okok[4]) && bejutott === 1;
+    && /a név nem ennek a születésnek a lenyomata/.test(okok[4]) && /nem az azonosság kulcsa írta alá/.test(okok[5]) && bejutott === 1;
 });
 
 proba('⛔ EGY KÉSZÜLÉKET CSAK EGY AZONOSSÁG TANÚSÍTHAT — a második azonosság tanúsítványa ugyanarra a kulcsra a kapun elbukik', async () => {
@@ -662,6 +680,32 @@ proba('⛔ A FEL NEM SOROLT KOINÓBAN A KIZÁRT MINDEN ESEMÉNYE KIESIK — amin
     && !vele.entitasok.has(tg.azonosito) && vele.kizartak.some((k) => k.azonosito === tg.azonosito)
     // az alak: a kizárás eseménye csak a tanúsítványt hozza
     && !alakiHiba(bevitel) && !!alakiHiba({ ...bevitel, adat: { kizaras, x: 1 } });
+});
+
+// ===================================
+// 4/e. ⭐⭐ A NÉV A SZÜLETÉS LENYOMATA (② a — KC1 (A))
+// ===================================
+
+proba('⭐⭐ A NÉV A SZÜLETÉS LENYOMATA (②a — KC1 (A)) — az első kulcs, a csere-kulcs lenyomata és a fizetési kulcs együtt; egy tolvaj a kulccsal sem köthet le mást ugyanarra a névre; az átírt vagy idegen kulccsal aláírt születés elbukik', async () => {
+  const a = await ujAzonossag();
+  const jo = await szuletesEllenorzese(a.szuletes, a.nev);
+  const csereKulcs = bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', a.csere.publicKey)));
+  // ⛔ A tolvaj (az első kulccsal) egy MÁSIK csere-kulcsot köt le: a születése más nevet ad — a régi nevet nem kaphatja meg.
+  const masCsere = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const masCsereNyilvanos = bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', masCsere.publicKey)));
+  const tolvajSzuletes = await szuletesKeszitese(a.kulcspar, await csereLenyomata(masCsereNyilvanos), a.szuletes.fizetes);
+  const tolvajNeve = await azonossagNeve(tolvajSzuletes);
+  // ⛔ Az átírt születés (a csere-kulcs lenyomata) a régi névvel; az idegen kulccsal aláírt (a kulcs mezője a mienk).
+  const atirt = await szuletesEllenorzese({ ...a.szuletes, csere: tolvajSzuletes.csere }, a.nev);
+  const idegen = await ujAzonossag();
+  const idegenAlairta = await szuletesEllenorzese({ ...idegen.szuletes, kulcs: a.szuletes.kulcs });
+  // A készülék tanúsítványa a nevet és a születést hozza; a név a születésből ellenőrizhető.
+  a.kulcspar.szuletes = a.szuletes;
+  const k = await tesztKeszulek('laptop', a.kulcspar);
+  return jo.rendben && a.szuletes.csere === await csereLenyomata(csereKulcs) && tolvajNeve !== a.nev
+    && !atirt.rendben && /név nem ennek/.test(atirt.ok) && !idegenAlairta.rendben && /első kulcs/.test(idegenAlairta.ok)
+    && k.azonossag === a.nev && k.tanusitvany.szuletes.alairas === a.szuletes.alairas
+    && (await tanusitvanyEllenorzese(k.tanusitvany)).rendben;
 });
 
 // ===================================

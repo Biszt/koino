@@ -5391,6 +5391,11 @@ kiosztás 10 000 entitáson (keret)  |    959 B   |   2 016 B      |   806 B / 1
 telefon a saját kulcsával ír, és a keret egy eseményből ellenőrizhető marad (`kiosztva ≤ alap + kapott`). A tanúsítvány (281 B — „telefon” névvel, mérve)
 csak a lánc első eseményén utazik, és a láncán kívül a kísérőben.
 
+⭐⭐ **A ②a után (2026-11-15 — KC1 (A): a név a születés lenyomata):** a tanúsítvány az azonosság SZÜLETÉSÉT is hozza (312 B: az
+első kulcs, a csere-kulcs lenyomata, a fizetési kulcs, az idő, az aláírás) — a tanúsítvány így **605 B**, a lánc első eseménye
+(a tanúsítvánnyal) **1128 B**, a többi esemény változatlanul **568 B**. Az ára egyszeri láncónként: ezért köthető a név úgy a
+csere-kulcshoz, hogy egy tolvaj a kulccsal se köthessen le mást ugyanarra a névre.
+
 ## 93. ⭐ A KULCS: TÖBB KÉSZÜLÉK ÉS A HELYREÁLLÍTÁS — mit kíván a mai kód? (ET-3 átvizsgálása, 2026-11-13, a laptopon)
 
 *`node meres/kulcsMeres.js [a–g]` — a tervező ág ET-3 terve (`docs/terv_kulcs.md`) a kódhoz mérve; az átvizsgálás:

@@ -10,6 +10,8 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createSocket } from 'node:dgram';
+import { sign, createPrivateKey } from 'node:crypto';
+import { lenyomatSzinkron } from '../js/esemeny/kanonikusAlak.js';
 
 import { probaGyujtemeny, tesztKeszulek } from './probaFuttato.js';
 import {
@@ -160,6 +162,16 @@ proba('⛔⛔ A HAMISAN ALÁÍRT TÁBLA-KULCS NEM SZÁMÍT — aki más nevében
 // ⭐⭐ D93/3: A SZEMÉLY A KÉZFOGÁSBAN ÉS A ZÁRT KOINÓ KAPUJA
 // ===================================
 
+/** ⭐⭐ D128 (②a): a `masik` a saját azonosság-kulcsával aláír egy tanúsítványt `r` nevére (a saját születésével), és azzal kezet fog. */
+function hamisNevvel(r, masik, atirat) {
+  const t = masik.tanusitvany;
+  const tartalom = { tipus: t.tipus, azonossag: r.szerzo, keszulek: masik.keszulek, nev: t.nev, ido: t.ido };
+  const alairas = sign(null, Buffer.from(lenyomatSzinkron(tartalom), 'utf8'),
+    createPrivateKey({ key: masik.azonossagJwk, format: 'jwk' })).toString('base64url');
+  return { sz: r.szerzo, k: masik.keszulek, t: { ...tartalom, szuletes: t.szuletes, alairas },
+    a: szemelyesKezfogasAlairasa(masik.jwk, KOINO, atirat) };
+}
+
 /** Egy személyes aláíró (a rés-réteg hívja az átirattal): a szerző, a horgony és az aláírás. */
 const szemelyesAlairo = (r, horgony = null, kulcsJwk = r.jwk) => (atirat) => ({
   sz: r.szerzo, k: r.keszulek, t: r.tanusitvany, ...(horgony ? { h: horgony } : {}),
@@ -186,6 +198,12 @@ proba('⭐ a személyes aláírás csak a SAJÁT átiratára, a SAJÁT koinójá
     && !keszulekKezfogasEllenorzese({ ...ki, t: undefined }, KOINO, atirat)
     // ⛔ az azonosság kulcsával írt aláírás (a régi út) nem elég: a hálózaton a készülék ír
     && !keszulekKezfogasEllenorzese({ ...ki, a: azonossaggal }, KOINO, atirat)
+    // ⛔ ⭐⭐ D128 (②a): a tolvaj a SAJÁT kulcsával szabályosan aláír egy tanúsítványt a mi nevünkre, a saját születésével — csak a
+    // név szabálya (a név a születés lenyomata) állítja meg
+    && !keszulekKezfogasEllenorzese(hamisNevvel(r, masik, atirat), KOINO, atirat)
+    // ⛔ a születés aláírása átírva (a név ettől nem változik — a lenyomat az aláíratlan részé): a születést nem az első kulcs írta alá
+    && !keszulekKezfogasEllenorzese({ ...ki, t: { ...r.tanusitvany, szuletes: { ...r.tanusitvany.szuletes,
+      alairas: masik.tanusitvany.szuletes.alairas } } }, KOINO, atirat)
     // ⛔ a tábla-kulcs aláírása más előtagú: az egyik szerepben adott aláírás a másikban nem használható fel
     && !kezfogasAlairasEllenorzese(r.keszulek, atirat, a);
 });
