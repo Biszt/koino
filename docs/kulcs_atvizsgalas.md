@@ -347,6 +347,34 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
   kizárás terjesztése (a koinó-listák cseréje a készülékek között, a más által bevitt kizárás) a ③ hálózaté; a kezelése (a parancs, a
   lap) a ④-é. ⚠️ A folytatott lánc műveleteihez a kizárást az örökös saját `Kizaras` eseménye adja (a felsorolt koinókba ő viszi).
 
+**9.11 A ② terve — a csere-kulcs lekötése, a kulcscsere, a mentés** (2026-11-15; ⏸️ a KC1–KC3 Csabáé):
+- **A mai helyzet** (a kódban): az azonosság NEVE a nyilvános kulcsa (`kulcsTar.js`, a `szerzo`), a készülék-tanúsítványt ez a kulcs
+  írja alá, és az ellenőrzés a névből veszi a kulcsot. A mentés ma a teljes kulcspár egy fájlban (`mentes` parancs). Csere-kulcs nincs.
+- **A cél** (6. és 7. pont, terv_kulcs 5.1): az azonosság születésekor a KÖVETKEZŐ kulcs (a csere-kulcs) előre le van kötve — a láncon
+  csak a lenyomata áll, maga a kulcs papíron vagy fájlban van, egyik készüléken sem. Ha az azonosság kulcsa elvész vagy ellopják, a
+  csere-kulcs aláír egy kulcscserét (új kezelő kulcs, új lekötés); a tolvaj, akinél csak a régi kulcs van, nem cserélhet kulcsot. A
+  születés a fizetési kulcs nyilvános részét is leköti (KU4 (A)).
+- ⛔ **A gond, amit az építés előtt meg kell oldani:** ha a név maga az első kulcs (KU3 (A) mai olvasata), akkor a lekötés csak egy
+  aláírt születés-tanúsítvány — és aki a kulcsot ellopta, aláírhat egy MÁSIKAT (a saját csere-kulcsával), és egy új koinóban azt
+  mutathatja be. Az idő önbevallás (visszadátumozható); a „melyiket látták előbb” a hálózaté, és egy új koinó tagjai az eredetit nem
+  látták. ⭐ A KERI megoldása: a NÉV A SZÜLETÉS LENYOMATA („önmagát címző azonosító”) — a születés az első kulcsot, a csere-kulcs
+  lenyomatát és a fizetési kulcsot együtt köti, és a név ebből jön: ugyanarra a névre más lekötés nem létezhet.
+- **KC1 — A lekötés köteléke:** (A) ⭐ **a név a születés lenyomata** — a születés (`{ kulcs, csere, fizetes, ido }`) minden koinóban a
+  horgonnyal utazik, a tanúsítványok ellenőrzése belőle (és a kulcscserék láncából) veszi a mostani kezelő kulcsot; a név továbbra is
+  43 jel, és a kulcscsere után is marad (KU3 (A) szelleme: a név nem változik). Ára: a név már nem maga a kulcs — a tanúsítvány
+  ellenőrzéséhez a születés is kell (a horgony hozza). (B) a név marad az első kulcs, a születés egy külön tanúsítvány — egy tolvaj egy
+  új koinóban más lekötést mutathat be; az elsőként látott számít, a terjesztés a ③-é.
+- **KC2 — A kulcscsere után a régi kulccsal aláírtak** (a készülék-tanúsítványok, a kizárások): (A) ⭐ **a kulcscsere felsorolja a
+  megmaradó készülékeket** — a többi (a tolvaj által a régi kulccsal felvett is) érvénytelen, a felsoroltak újra-tanúsítás nélkül
+  maradnak; (B) ami a régi kulccsal a csere IDEJE előtt készült, marad — ⛔ az idő önbevallás, a tolvaj visszadátumozhat; (C) minden
+  készüléket újra kell tanúsítani az új kulccsal (biztos, de minden készüléket elő kell venni).
+- **KC3 — A csere-kulcs helye a születés után:** (A) ⭐ **csak a mentésben** — a születéskor a készülék megmutatja (papírra: szavak +
+  QR; fájlba), megkéri, hogy mentsd el, és utána TÖRLI magáról (a terv: „egyik készüléken sincs”); (B) a készüléken is marad,
+  jelszóval titkosítva — kényelmesebb, de egy lopás (a jelszó kitalálásával) viheti.
+- **A sorrend az építésben** (a döntés után): ②a a születés és a név (KC1), a horgony hozza, a tanúsítványok ellenőrzése belőle →
+  ②b a kulcscsere-tanúsítvány és a kezelő kulcs a láncból (KC2) → ②c a mentés és a visszaállítás (KC3; a mai `mentes` /
+  `visszatolt` helyett: a csere-kulcs papíron vagy fájlban; a lap a ④-ben). ⛔ A mag változik → új koinó-család (mint a D128 eleje).
+
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor
   NÉLKÜLE utazik: egy szelet a cserében, egy tagsági kísérő, egy kérelem vagy egy összegző válasza, egy döntési csomag, egy
