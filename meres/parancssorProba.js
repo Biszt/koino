@@ -3406,6 +3406,50 @@ proba('⭐⭐ D128 (②b): a `kulcscsere` parancs — a csere-kulccsal új kezel
     return ok;
   });
 
+// ⭐⭐ D128 (②c — 16. pont, KC4 (A)): A CSERE-KULCS PAPÍRON a parancssorból. A `papir` kiírja a 14 betűcsoportot és a QR-t; a
+// `papir kesz` egy elírt kódnál a fájlt MEGHAGYJA, a jónál (kisbetűvel, csoportonként) törli; a `kulcscsere` a papír kódjából
+// cserél. ⭐ És a koinón kívül (ahol az azonosságnak nincs szelete) a csere KÉSZ — nem „Nem sikerült” (a ②c előtt az volt, pedig a
+// gépen a kulcs már kicserélődött, és a régi csere-kulcs elhasználódott).
+proba('⭐⭐ D128 (②c): a `papir` — 14 betűcsoport és QR; a `papir kesz` az elírt kódnál meghagyja a fájlt, a jónál törli; a `kulcscsere` a papír kódjából cserél; a koinón kívül is kimondja, hogy kész',
+  async () => {
+    const H = await ujKeszulek();
+    const G = await ujKeszulek();
+    await fut(H, 'koino', 'Papír-próba');
+    const csereFajl = join(H, 'csere-kulcs.json');
+    const ki = await fut(H, 'papir');
+    const sorok = ki.split('\n');
+    const kod = sorok.filter((l) => /^ {4}[0-9A-Z]{4}( {2}[0-9A-Z]{4}){1,3}$/.test(l)).join(' ').trim().split(/\s+/);
+    const qrSorok = sorok.filter((l) => /^ {2}[█▀▄ ]{45}$/.test(l)).length;
+    const elirt = [...kod];
+    elirt[5] = (elirt[5][0] === 'A' ? 'B' : 'A') + elirt[5].slice(1);
+    const elirtKi = await fut(H, 'papir', 'kesz', ...elirt);
+    const elirtUtan = await readFile(csereFajl, 'utf8').then(() => true, () => false);
+    // Egy HIBÁTLAN, de MÁSIK kulcs kódja (G-é — mintha egy régebbi papírt írna be): a fájl marad.
+    await fut(G, 'kulcs');
+    const gKod = (await fut(G, 'papir')).split('\n').filter((l) => /^ {4}[0-9A-Z]{4}( {2}[0-9A-Z]{4}){1,3}$/.test(l))
+      .join(' ').trim().split(/\s+/);
+    const masikKi = await fut(H, 'papir', 'kesz', ...gKod);
+    const masikUtan = await readFile(csereFajl, 'utf8').then(() => true, () => false);
+    const joKi = await fut(H, 'papir', 'kesz', ...kod.map((c) => c.toLowerCase()));
+    const joUtan = await readFile(csereFajl, 'utf8').then(() => true, () => false);
+    const csereKi = await fut(H, 'kulcscsere', ...kod);
+    const ujCsere = JSON.parse(await readFile(csereFajl, 'utf8').catch(() => 'null'));
+    // A koinón kívül: G-nek nincs koinója — a csere a gépen megtörténik, és ezt mondja ki.
+    const kivulKi = await fut(G, 'kulcscsere', join(G, 'csere-kulcs.json'));
+    const ok = kod.length === 14 && kod[0][0] === '1' && qrSorok === 23
+      && /ellenőrzése nem illik/.test(elirtKi) && elirtUtan
+      && gKod.length === 14 && /MÁSIK csere-kulcsé/.test(masikKi) && masikUtan
+      && /A papírod jó/.test(joKi) && !joUtan
+      && /Kulcscsere kész/.test(csereKi) && /A koinóba bekerült/.test(csereKi) && ujCsere?.mi === 'koino-csere-kulcs'
+      && /Kulcscsere kész/.test(kivulKi) && /nincs azonosság-szeleted/.test(kivulKi) && !/Nem sikerült/.test(kivulKi);
+    if (!ok) {
+      process.stderr.write('    (' + JSON.stringify({ kod, qrSorok, elirtKi: elirtKi.slice(-200), masikKi: masikKi.slice(-200),
+        joKi: joKi.slice(-200),
+        csereKi: csereKi.slice(-300), kivulKi: kivulKi.slice(-300) }) + ')\n');
+    }
+    return ok;
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();

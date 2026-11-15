@@ -23,6 +23,7 @@ import { readdirSync } from 'node:fs';
 import kanonikus from './kanonikusProba.js';
 // ⭐ A kulcs-réteg lapja 2026-09-15-ig hiányzott — a személyazonosság volt méretlen.
 import kulcs from './kulcsProba.js';
+import papir from './papirProba.js';   // ⭐⭐ D128 (②c): a csere-kulcs papíron
 import esemeny from './esemenyProba.js';
 import keszulek from './keszulekProba.js';   // ⭐⭐ D128
 import tar from './tarProba.js';
@@ -116,6 +117,7 @@ import lancEllenorzes from './lancEllenorzesProba.js';
 const PROBAK = [
   { nev: 'kanonikus', futtat: kanonikus },
   { nev: 'kulcs', futtat: kulcs },
+  { nev: 'papir', futtat: papir },
   { nev: 'esemeny', futtat: esemeny },
   { nev: 'keszulek', futtat: keszulek },
   { nev: 'tar', futtat: tar },
@@ -202,7 +204,7 @@ const PROBAK = [
 // ⛔ A szűrő PONTOSAN illeszkedik: a régi részszó-szűrő a `tar`-ra a `tarsak`-ot is elindította.
 const CSOPORTOK = {
   // a kanonikus alak, a kulcs, az aláírt esemény és a tár (az íróval)
-  alap: ['kanonikus', 'kulcs', 'esemeny', 'keszulek', 'tar', 'iro', 'atmeneti', 'keresotar', 'keresomegujitas'],
+  alap: ['kanonikus', 'kulcs', 'papir', 'esemeny', 'keszulek', 'tar', 'iro', 'atmeneti', 'keresotar', 'keresomegujitas'],
   // események → állapot: entitások, döntéshozatal, szabályok, egyezmények, tagság
   allapot: ['allapot', 'javaslat', 'szabaly', 'egyezmeny', 'dontesicsomag', 'lezarasiosszegzes', 'osszpont', 'felszabaditas', 'identitas', 'tagsag', 'ertesites', 'felderites', 'koinolanc', 'ketreteg', 'bekapcsolodas', 'koinoverzio'],
   // a felületnek felelő réteg

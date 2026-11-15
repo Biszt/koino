@@ -415,6 +415,26 @@ D128 13–15.):
   (alapból ez a készülék marad; az új csere-kulcs a `csere-kulcs.json`-ba). A próba: „A KULCSCSERE UTÁN” (két cserével is), kulcs („a
   KULCSCSERE a gépen”), parancssor (a parancs) — 11 rontás. ⏭️ ②c: a mentés papíron (szavak + QR); a ③-ban a csere és a kizárás
   terjesztése a készülékek között, a ④ lapon a „📱 Készülékeim”.
+- ✅ **Az építés — ②c a csere-kulcs papíron** (2026-11-15 — KC3 (A), KC4 (A)): `kulcs/papir.js` — a kód 56 jel, 14 csoport × 4: az
+  első a változat, 52 a csere-kulcs 32 bájtos magja (Crockford-féle base32: az I, L, O, U nélkül), 3 az ellenőrzés. A visszaolvasás
+  elnéző a téveszthető jelekkel (kisbetű, O → 0, I és L → 1, a csoportok elválasztása), a kulcspár a magból áll vissza (PKCS#8 — a
+  nyilvános fele vele). ⭐ **Az ellenőrzés a jelek helyükkel súlyozott összege a 32 749 prím szerint** — így BIZTOSAN kimond minden
+  egyetlen elírást és két jel minden felcserélését (az első változat a kulcs SHA-256-jából vett 15 bitet: az ugyanezt csak
+  valószínűséggel tudta); ami mégis átcsúszna, az a kulcscserén a lekötésen akad el. `kulcs/qr.js` — saját QR-kódoló (nulla függőség,
+  az ISO/IEC 18004 szerint): alfanumerikus és bájt mód, 1–40. verzió, L/M/Q/H, Reed–Solomon, a nyolc maszk büntetése; a terminálba a
+  VILÁGOS modulok rajzolódnak (▀ ▄ █ — a terminálon a szín rögzítve, fehér a feketén). A csere-kód QR-je Q szint (a negyede sérülhet):
+  az 5. verzió, 37×37 modul. `koino.js`: `papir` (a 14 csoport és a QR), `papir kesz <a leírt kód>` (a LEÍRT kódot összeveti a gépen
+  lévő fájléval, és ha egyezik, a fájlt törli — a KC3 (A) „megkéri, hogy mentsd el, és utána törli magáról”-ja: a törlés előtt
+  kiderül, ha a leírásba hiba csúszott), `kulcscsere <a kód>` (egyben vagy csoportonként). ⛔ **Lelet (a kézi kipróbálásból):** a
+  `kulcscsere` a koinón kívül (ahol az azonosságnak nincs szelete) „Nem sikerült”-et írt — pedig a gépen a kulcs már kicserélődött, és
+  a régi csere-kulcs elhasználódott; most ELŐBB a csere eredménye és az új csere-kulcs helye íródik ki, és a koinóba vitel `null`, ha
+  ott nincs mit bevinni (a lánc a tanúsítványokkal jár). A próba: `papirProba.js` (15) — a kód oda-vissza, elnézően, kimerítően minden
+  elírás (56 hely × 31 jel) és minden csere; a QR a szabvány ismert értékeivel (a „HELLO WORLD” 1-M kódszavai, a formátum 32 bitsora, a
+  verzió bitjei, a teljes alfanumerikus kapacitás-tábla 160 pontja — a hibajavító táblák MÁSIK forrása —, az igazító minták helyei) és
+  egy a kódolótól FÜGGETLENÜL írt próba-olvasóval (az 1–40. verzió mind a négy szinten, a maszkokkal; a Reed–Solomon szindrómák
+  külön táblával); parancssor (a `papir`, a `papir kesz` elírt, idegen és jó kóddal, a kulcscsere a kódból, a koinón kívül) — 20
+  rontás. ⚠️ A QR végső próbája a telefon kamerája (⑤ terep). ⭐ A ② ezzel kész; ⏭️ ③ a hálózat (a kizárás és a kulcscsere
+  terjesztése, a koinó-lista a készülékek között; az átfolyás határának alapértéke — Csaba döntése).
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

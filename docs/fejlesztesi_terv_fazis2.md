@@ -6525,6 +6525,14 @@ az örökössel), a `Kizaras` esemény (bárki beviheti, mint az ellentmondás b
 kizárt esemény nem számít, az örökös a `lanc` mezővel folytatja a láncot. ⭐ Az ① (a mag) ezzel kész. A részletek:
 [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.10. A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.8–9.9.
 
+*Az építés — ③a és ② (2026-11-15):* **③a** (előre kellett: a kézfogás és a kereső megújítása a NEVET használta kulcsként) — mindkettőt
+a KÉSZÜLÉK kulcsa írja alá; **②a** a születés és a név (13. pont): `kulcs/azonossag.js`, a tanúsítványok a születést hozzák, a mentés
+is; **②b** a kulcscsere (14. pont): a csere-kulccsal aláírt, egymásra lekötött cserék lánca, a `Kulcscsere` esemény, a régi
+korszakban tanúsított, fel nem sorolt készülék eseményei kiesnek, `kulcscsere` parancs; **②c** a csere-kulcs papíron (15–16. pont):
+`kulcs/papir.js` (56 jel, 14 csoport × 4, a súlyozott prím-összeg ellenőrzése minden egyes elírást és cserét kimond), `kulcs/qr.js`
+(saját QR-kódoló), `papir` / `papir kesz <kód>` (a leírt kód ellenőrzése után a fájl törlése), `kulcscsere <kód>`. ⭐ A ② ezzel kész. A
+részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.11.
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem

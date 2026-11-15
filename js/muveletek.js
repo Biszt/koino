@@ -1328,15 +1328,20 @@ export async function kizarasBevitele(kornyezet, kizaras) {
 /**
  * ⭐⭐ D128 (②b): a KULCSCSERE bevitele ebbe a koinóba — a születés és a cserék lánca (önmagát igazolja: bárki beviheti, mint a
  * kizárást), az azonosság szeletébe. A koinó ettől tudja, hogy a régi kulccsal felvett, nem felsorolt készülékek eseményei nem számítanak.
+ * ⭐ (②c) Ha az azonosság ebben a koinóban NEM TAG (nincs azonosság-szelete), itt nincs mit bevinni: `null` — nem hiba (a csere a
+ * gépen már megtörtént, és a lánca a tanúsítványokkal jár, ha később belép).
  * @param {Object} kornyezet
  * @param {Object} szuletes
  * @param {Array<Object>} cserek
- * @returns {Promise<Object>} a `Kulcscsere` esemény
+ * @returns {Promise<Object|null>} a `Kulcscsere` esemény (`null`, ha itt nincs szelete)
  */
 export async function kulcscsereBevitele(kornyezet, szuletes, cserek) {
   console.log('muveletek.kulcscsereBevitele - KEZDÉS', { cserek: cserek?.length });
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, cserek?.[0]?.azonossag);
-  if (!horgony) throw new Error('Az azonosságnak nincs azonosság-szelete ebben a koinóban — a kulcscsere nem helyezhető el.');
+  if (!horgony) {
+    console.log('muveletek.kulcscsereBevitele - VÉGE (ebben a koinóban nincs szelete)');
+    return null;
+  }
   return esemenytTeszek(kornyezet, 'Kulcscsere', { szuletes, cserek }, { entitas: horgony });
 }
 

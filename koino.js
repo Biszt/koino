@@ -162,6 +162,8 @@ import { koinoEsemenyei, sajatLancEsemenyei, esemenyLekerese, esemenyMentese, en
 // ⭐⭐ D128: a készülékkulcs és a tanúsítványa.
 import { keszulekBiztositasa } from './js/kulcs/keszulek.js';
 import { azonossagNeve } from './js/kulcs/azonossag.js';   // ⭐⭐ D128 (②a): a név a születés lenyomata
+import { csereKodja, csereKodbol, csereKodQrja, kodTisztitasa, KOD_HOSSZ } from './js/kulcs/papir.js';   // ⭐⭐ D128 (②c)
+import { qrTerminalra } from './js/kulcs/qr.js';   // ⭐⭐ D128 (②c): a csere-kód QR-je a terminálba
 import { existsSync } from 'node:fs';
 import { kiseroAdo } from './js/tar/esemenyTar.js';
 // ⭐ B/2: a szelet-kulcs (az előléptetéshez).
@@ -477,10 +479,27 @@ const { kulcspar: azonossagKulcspar, ujE, csere: ujCsereKulcs, szuletettE } = aw
 // ⭐⭐ D128 (②a — KC1 (A)): a NEVEM a születésem lenyomata (az első kulcs, a csere-kulcs lenyomata, a fizetési kulcs együtt).
 const szerzo = await azonossagNeve(azonossagKulcspar.szuletes);
 // ⭐⭐ D128 (②a — KC3 (A)): a CSERE-KULCS a gépen nem maradhat — kiírjuk egy fájlba, és amíg ott van, minden induláskor szólunk:
-// vidd el (papírra vagy pendrive-ra), és töröld. (A papír — szavak és QR — a ②c-vel és a lappal jön.)
+// vidd el (papírra vagy pendrive-ra), és töröld. ⭐⭐ (②c) A papír: `papir` — 14 betűcsoport és a QR; a `papir kesz <kód>` a leírt
+// kódot összeveti a fájléval, és ha egyezik, a fájlt törli.
 const CSERE_KULCS_FAJL = join(dirname(tarolo.fajl), 'csere-kulcs.json');
 if (ujCsereKulcs) {
   await writeFile(CSERE_KULCS_FAJL, JSON.stringify(await csereKulcsKiadasa(ujCsereKulcs, szerzo), null, 2));
+}
+
+/**
+ * ⭐⭐ D128 (②c): a csere-kulcs a parancssorból — FÁJL (a `csere-kulcs.json`), vagy a PAPÍR kódja: egyben, vagy a csoportjai külön
+ * szavakként (annyi szó, amennyi az 56 jelhez kell). Ami utána jön, az a többi érv.
+ * @returns {Promise<{leiras: Object, honnan: string, tobbi: string[]}>}
+ */
+async function csereKulcsBeolvasasa(ervek) {
+  if (existsSync(ervek[0])) return { leiras: JSON.parse(await readFile(ervek[0], 'utf8')), honnan: ervek[0], tobbi: ervek.slice(1) };
+  let kod = '';
+  let i = 0;
+  while (i < ervek.length && kodTisztitasa(kod).length < KOD_HOSSZ) kod += ervek[i++];
+  if (kodTisztitasa(kod).length !== KOD_HOSSZ) {
+    throw new Error('Nincs ilyen fájl, és csere-kódnak sem jó (a kód 14 csoport × 4 jel): ' + ervek[0]);
+  }
+  return { leiras: await csereKodbol(kod), honnan: 'a papír', tobbi: ervek.slice(i) };
 }
 const { eszkoz: kulcspar } = await keszulekBiztositasa(keszulekTarolo(), azonossagKulcspar,
   process.env.KOINO_KESZULEK_NEV || (process.platform === 'android' ? 'telefon' : 'számítógép'));
@@ -7193,7 +7212,8 @@ if (ujE || szuletettE) {
 if (existsSync(CSERE_KULCS_FAJL)) {
   process.stderr.write('⚠ A CSERE-KULCSOD még a gépen van: ' + CSERE_KULCS_FAJL + '\n'
     + '  Ezzel szerezheted vissza az azonosságodat, ha a kulcsod elveszik vagy ellopják. Vidd el a gépről (papírra'
-    + ' vagy pendrive-ra), és utána töröld innen — egy ellopott gépen ne legyen.\n');
+    + ' vagy pendrive-ra), és utána töröld innen — egy ellopott gépen ne legyen.\n'
+    + '  Papírra: node koino.js papir — ha leírtad, a `papir kesz <a leírt kód>` ellenőrzi, és törli a fájlt.\n');
 }
 
 try {
@@ -7220,17 +7240,54 @@ try {
     // aláírja az új kezelő kulcsot, az új lekötést és a megmaradó készülékeket (alapból EZ a készülék). A név marad; a koinóba a
     // csere bekerül (a régi kulccsal felvett, nem felsorolt készülékek eseményei nem számítanak); az új csere-kulcs kiadásra megy.
     case 'kulcscsere': {
-      const honnan = ervek[0];
-      if (!honnan) throw new Error('Melyik a csere-kulcsod? node koino.js kulcscsere <csere-kulcs.json> [a megmaradó készülékek kulcsai…]');
-      const marado = ervek.length > 1 ? ervek.slice(1) : [KESZULEK];
-      const r = await kulcscsereVegrehajtasa(tarolo, JSON.parse(await readFile(honnan, 'utf8')), marado);
+      if (!ervek[0]) {
+        throw new Error('Melyik a csere-kulcsod? node koino.js kulcscsere <csere-kulcs.json | a papír kódja> [a megmaradó készülékek kulcsai…]');
+      }
+      // ⭐⭐ (②c) a fájl helyett a PAPÍR kódja is jó (egyben, vagy a csoportjai külön szavakként)
+      const { leiras, honnan, tobbi } = await csereKulcsBeolvasasa(ervek);
+      const marado = tobbi.length ? tobbi : [KESZULEK];
+      const r = await kulcscsereVegrehajtasa(tarolo, leiras, marado);
       await writeFile(CSERE_KULCS_FAJL, JSON.stringify(await csereKulcsKiadasa(r.csere, r.nev), null, 2));
-      const e = await kulcscsereBevitele(kornyezet, r.kulcspar.szuletes, r.cserek);
+      // ⭐ (②c) ELŐBB a gépen történt csere (az már megvan: a régi csere-kulcs elhasználódott), UTÁNA a koinóba vitel — egy ott
+      // felmerülő hiba így nem rejti el, hogy a kulcs kicserélődött, és hol az új csere-kulcs.
       kiir(SZIN.jo + 'Kulcscsere kész (a ' + r.kulcscsere.sorszam + '.) — a neved ugyanaz: ' + rovidAzonosito(r.nev) + SZIN.vege);
       kiir('  Megmaradó készülékek: ' + r.kulcscsere.keszulekek.map((k) => rovidAzonosito(k)).join(', '));
-      kiir('  A koinóba bekerült: ' + rovidAzonosito(e.azonosito));
-      kiir(SZIN.nem + '  Az ÚJ csere-kulcsod: ' + CSERE_KULCS_FAJL + ' — vidd el, és töröld innen. A régi (' + honnan
-        + ') már nem jó semmire.' + SZIN.vege);
+      kiir(SZIN.nem + '  Az ÚJ csere-kulcsod: ' + CSERE_KULCS_FAJL + ' — papírra: node koino.js papir; utána töröld innen. A régi ('
+        + honnan + ') már nem jó semmire.' + SZIN.vege);
+      const e = await kulcscsereBevitele(kornyezet, r.kulcspar.szuletes, r.cserek);
+      kiir(e ? '  A koinóba bekerült: ' + rovidAzonosito(e.azonosito)
+        : SZIN.halvany + '  Ebben a koinóban nincs azonosság-szeleted — ide nincs mit bevinni.' + SZIN.vege);
+      break;
+    }
+
+    // ⭐⭐ D128 (②c — 15–16. pont, KC3 (A), KC4 (A)): A CSERE-KULCS PAPÍRRA — 14 betűcsoport (az utolsó 3 jel az ellenőrzés) és a QR.
+    // A `papir kesz <kód>` a LEÍRT kódot összeveti a gépen lévő fájléval, és ha egyezik, a fájlt törli: a csere-kulcs így csak a
+    // papíron marad (egy ellopott gép nem viheti), és a törlés előtt kiderül, ha a leírásba hiba csúszott.
+    case 'papir': {
+      if (ervek[0] === 'kesz') {
+        if (!existsSync(CSERE_KULCS_FAJL)) throw new Error('A csere-kulcs fájlja már nincs a gépen: ' + CSERE_KULCS_FAJL);
+        const fajlbol = JSON.parse(await readFile(CSERE_KULCS_FAJL, 'utf8'));
+        const leirt = await csereKodbol(ervek.slice(1).join(''));
+        if (leirt.privatKulcs.d !== fajlbol.privatKulcs?.d) {
+          throw new Error('A leírt kód egy MÁSIK csere-kulcsé, nem a gépen lévőé (egy régebbi papír?) — a fájlt nem törlöm.');
+        }
+        await rm(CSERE_KULCS_FAJL);
+        kiir(SZIN.jo + 'A papírod jó — a csere-kulcs fájlját töröltem. Mostantól csak a papíron van: tedd el biztos helyre.' + SZIN.vege);
+        break;
+      }
+      const honnan = ervek[0] ?? CSERE_KULCS_FAJL;
+      if (!existsSync(honnan)) throw new Error('Nincs csere-kulcs fájl: ' + honnan + (ervek[0] ? '' : ' (már elvitted a gépről?)'));
+      const kod = csereKodja(JSON.parse(await readFile(honnan, 'utf8')).privatKulcs);
+      const csoportok = kod.split('-');
+      kiir(SZIN.vastag + 'A CSERE-KULCSOD papírra (D128):' + SZIN.vege);
+      kiir();
+      for (let i = 0; i < csoportok.length; i += 4) kiir('    ' + csoportok.slice(i, i + 4).join('  '));
+      kiir();
+      for (const sor of qrTerminalra(csereKodQrja(kod), { szinesen: Boolean(process.stdout.isTTY) })) kiir('  ' + sor);
+      kiir();
+      kiir('  Írd le a 14 csoportot (a QR ugyanezt hordozza), és tedd el biztos helyre — elírásnál a program szól.');
+      kiir('  Ezzel szerezheted vissza az azonosságodat, ha a kulcsod elveszik vagy ellopják: node koino.js kulcscsere <a kód>');
+      if (!ervek[0]) kiir(SZIN.nem + '  Ha leírtad: node koino.js papir kesz <a leírt kód> — ha egyezik, a fájlt törlöm a gépről.' + SZIN.vege);
       break;
     }
 
