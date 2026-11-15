@@ -586,6 +586,25 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
   (`identitas.js` `allitasHelyben` így exportált). `muveletek.js`: `helyreallitasJovahagyasa`, `helyreallitasMegallitasa`. A próba:
   `helyreallitasProba.js` (8 — az ismerős út, a különböző emberek, a visszavonás, a megállítás és a 2. kör, a bemutatkozó út, a tiszta
   szabály, az alak, a műveletek) — 16 rontás. ⏭️ ②e2: a lánc bejegyzése és a bizonyíték.
+- ✅ **Az építés — ②e2 a lánc bejegyzése és a bizonyíték** (2026-11-15): `tar/memoriaTar.js` — a RÖGZÍTŐ tár (egy valódi tár köré:
+  feljegyzi, mit olvasott ki a szerep-ellenőrzés) és a MEMÓRIABELI tár (egy esemény-listából, ugyanazokkal a műveletekkel).
+  `allapot/helyreallitas.js`: `helyreallitasBizonyiteka` (a teljes helyreállítás olvasásai a rögzítő tárral — TELJES ellenőrzéssel:
+  a keret végtelen, szúrópróba nincs, minden kapu ugyanarra jut) és `helyreallitasBizonyitekEllenorzese` (az alak; minden esemény
+  hiteles és A koinóé; a horgony a helyreállítandóé; a memóriabeli tárban a helyreállítás TELJES, a bejegyzés jelével). Mérve: az
+  alapító körrel 11 esemény, 13 KB. `azonossag.js`: a lánc új bejegyzése, az `AzonossagHelyreallitas` (`{ tipus, azonossag, ...a
+  javaslat, jel }` — nem aláírt; a helye a sorszám és az előző bejegyzés jele; a lekötés nem köti — a visszavonás után is), az ereje
+  (2, a 2. körben 3 — a segítők a papír fölött), a lánc-jel (`bejegyzesJele` — a kulcscseréé az aláírása), és a NYILVÁNTARTÁS (az
+  ellenőrzött helyreállítások jelei, folyamatonként: `helyreallitasFelvetele`, `helyreallitasIsmertE`) — a `kezeloKulcsLanc` innen
+  (vagy a hívó halmazából) tudja, hogy a bejegyzés hiteles; a „még nem ismert” nem végleges ítélet (`keszulek.js`: nem kerül az
+  emlékezetbe). A kapu (`esemenyTar.js`): előbb a szerző tárban lévő helyreállításai a nyilvántartásba, és egy érkező `Kulcscsere`
+  bizonyítékai — ha átmennek, a jelük is (a bizonyíték önmagát igazolja). A `Kulcscsere` esemény (`esemeny.js`) a láncban álló
+  helyreállítások bizonyítékait PONTOSAN hozza (`bizonyitekok`: jel → bizonyíték). A kézfogás (`titkositas.js`, szinkron) a
+  nyilvántartásból; a folyamat induláskor a tár összes helyreállítását felveszi (`fajlTar.js` `kezelesAzonossagai`, `koino.js`). ⭐ A
+  MAG: a kapu így az `identitas.js`-t is importálja — a mag része lett (a helyreállítás elfogadásáról az identitás szabályai döntenek);
+  a belső `feltetel` váza a kimondott listán (D123 PR2). A próba: `helyreallitasProba.js` (+4 — a bizonyíték: csonka, hamisított,
+  más jelű, más azonosságé, idegen koinóé; a lánc; a kapu egy MÁSIK koinóban: bizonyíték nélkül és csonkával nem, utána az új készülék
+  be, a régi ki; a kézfogás) — 14 rontás. ⏭️ ②e3: a segítők készülékei (a várakozás utáni magától véglegesítés és a Kulcscsere
+  bevitele a bizonyítékkal; az értesítés X készülékein).
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

@@ -1377,14 +1377,15 @@ export async function helyreallitasMegallitasa(kornyezet, jel) {
  * @param {Array<Object>} cserek
  * @returns {Promise<Object|null>} a `Kulcscsere` esemény (`null`, ha itt nincs szelete)
  */
-export async function kulcscsereBevitele(kornyezet, szuletes, cserek) {
+export async function kulcscsereBevitele(kornyezet, szuletes, cserek, bizonyitekok = null) {
   console.log('muveletek.kulcscsereBevitele - KEZDÉS', { cserek: cserek?.length });
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, cserek?.[0]?.azonossag);
   if (!horgony) {
     console.log('muveletek.kulcscsereBevitele - VÉGE (ebben a koinóban nincs szelete)');
     return null;
   }
-  return esemenytTeszek(kornyezet, 'Kulcscsere', { szuletes, cserek }, { entitas: horgony });
+  // ⭐⭐ (②e2) a láncban álló helyreállítások bizonyítékai (jel → bizonyíték) — ha vannak
+  return esemenytTeszek(kornyezet, 'Kulcscsere', { szuletes, cserek, ...(bizonyitekok ? { bizonyitekok } : {}) }, { entitas: horgony });
 }
 
 /**

@@ -29,7 +29,7 @@
 
 import { lenyomat, bajtokBase64Url, base64UrlBajtok } from '../esemeny/kanonikusAlak.js';
 import { nyilvanosKulcsSzovegesen, kulcsparLeirasa, kulcsparLeirasbol } from './kulcsTar.js';
-import { szuletesAlakiHibaja, azonossagNeve, kezeloKulcsLanc, kulcscsereAlakiHibaja, KULCSCSERE_KORLAT }
+import { szuletesAlakiHibaja, azonossagNeve, kezeloKulcsLanc, lancBejegyzesAlakiHibaja, KULCSCSERE_KORLAT }
   from './azonossag.js';   // ⭐⭐ D128 (②a — KC1 (A); ②b — a kulcscserék lánca)
 
 const ALGORITMUS = 'Ed25519';
@@ -55,7 +55,7 @@ function cserekAlakiHibaja(cserek) {
     return 'a kulcscserék lánca 1–' + KULCSCSERE_KORLAT + ' csere';
   }
   for (const c of cserek) {
-    const h = kulcscsereAlakiHibaja(c);
+    const h = lancBejegyzesAlakiHibaja(c);   // ⭐⭐ (②e2): a kulcscsere vagy a segítők helyreállítása
     if (h) return 'a kulcscserék lánca: ' + h;
   }
   return null;
@@ -85,6 +85,8 @@ async function kezeloLancRendben(szuletes, cserek, nev) {
   const kulcs = JSON.stringify([szuletes ?? null, cserek ?? [], nev]);
   if (LANC_EMLEK.has(kulcs)) return LANC_EMLEK.get(kulcs);
   const r = await kezeloKulcsLanc(szuletes, cserek ?? [], nev);
+  // ⭐⭐ (②e2) a „még nem ismert” helyreállítás nem végleges ítélet: amint a bizonyítéka a kapun átmegy, újra kell nézni.
+  if (r.hianyzik) return r;
   LANC_EMLEK.set(kulcs, r);
   while (LANC_EMLEK.size > LANC_EMLEK_KORLAT) LANC_EMLEK.delete(LANC_EMLEK.keys().next().value);
   return r;

@@ -16,11 +16,17 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { probaGyujtemeny, ujEember } from './probaFuttato.js';
+import { probaGyujtemeny, ujEember, tesztKeszulek } from './probaFuttato.js';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { esemenyMentese } from '../js/tar/esemenyTar.js';
-import { helyreallitasokAllapota, elegendoUt, segitoAllasa, JOVAHAGYAS, MEGALLITAS } from '../js/allapot/helyreallitas.js';
-import { helyreallitasJele, helyreallitasJavaslatAlakiHibaja } from '../js/kulcs/azonossag.js';
+import { helyreallitasokAllapota, elegendoUt, segitoAllasa, JOVAHAGYAS, MEGALLITAS, helyreallitasBizonyiteka,
+  helyreallitasBizonyitekEllenorzese } from '../js/allapot/helyreallitas.js';
+import { helyreallitasJele, helyreallitasJavaslatAlakiHibaja, helyreallitasBejegyzese, kezeloKulcsLanc, kulcscsereKeszitese,
+  csereLenyomata, ujAzonossag, lancErosebbE, bejegyzesJele, helyreallitasFelvetele } from '../js/kulcs/azonossag.js';
+import { tanusitvanyEllenorzese } from '../js/kulcs/keszulek.js';
+import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
+import { koinoEsemenyei } from '../js/tar/esemenyTar.js';
+import { keszulekKezfogasEllenorzese, szemelyesKezfogasAlairasa } from '../js/csere/titkositas.js';
 import { bajtokBase64Url } from '../js/esemeny/kanonikusAlak.js';
 import { alakiHiba } from '../js/esemeny/esemeny.js';
 import { helyreallitasJovahagyasa, helyreallitasMegallitasa } from '../js/muveletek.js';
@@ -263,6 +269,157 @@ proba('⭐ A MŰVELETEK — a jóváhagyás a helyreállítandó szeletébe ker�
   }
   return elindult.elindult && m.entitas === x.horgony && megallitva.megallitva && /saját helyreállításodat/.test(hibak[0] ?? '')
     && /javaslata hibás/.test(hibak[1] ?? '');
+});
+
+// ===== ⭐⭐ ②e2: A BIZONYÍTÉK ÉS A LÁNC =====
+
+/** Egy teljes helyreállítás (a meghívó + két élő tanúsító, mindkét fázis) — a tár, X, a javaslat és a jele. */
+async function teljesHelyreallitas(beallitas = {}) {
+  const { tar, kor, x } = await alap();
+  const j = await javaslat(beallitas);
+  for (const k of kor.slice(0, 3)) await ment(tar, await jovahagy(k, x, j));
+  const reszleges = await helyreallitasBizonyiteka(tar, KOINO, x.horgony, await helyreallitasJele(j)).then(() => 'kész', (h) => h.message);
+  for (const k of kor.slice(0, 3)) await ment(tar, await jovahagy(k, x, j, 'veglegesites'));
+  return { tar, kor, x, j, jel: await helyreallitasJele(j), reszleges };
+}
+
+proba('⭐⭐ A BIZONYÍTÉK (②e2) — a teljes helyreállításból összeáll, és egy MEMÓRIABELI tárban ugyanarra jut; a megcsonkított, a hamisított és a más jelű bejegyzéshez adott nem megy át; a félkész nem áll össze', async () => {
+  const { x, j, jel, tar, reszleges } = await teljesHelyreallitas();
+  const bejegyzes = await helyreallitasBejegyzese(x.eember.szerzo, j);
+  const b = await helyreallitasBizonyiteka(tar, KOINO, x.horgony, jel);
+  const jo = await helyreallitasBizonyitekEllenorzese(b, bejegyzes);
+  // Megcsonkítva: egy véglegesítés hiányzik.
+  const egyVeglegesites = b.esemenyek.findIndex((e) => e.tipus === JOVAHAGYAS && e.adat.fazis === 'veglegesites');
+  const csonka = await helyreallitasBizonyitekEllenorzese({ ...b, esemenyek: b.esemenyek.filter((_, i) => i !== egyVeglegesites) }, bejegyzes);
+  // Hamisítva: a kihagyott véglegesítés HELYÉN egy hamis — a segítő kezdését átírva véglegesítésre (az aláírás nem illik; aláírás-
+  // ellenőrzés nélkül a helyreállítás teljesnek látszana).
+  const kihagyott = b.esemenyek[egyVeglegesites];
+  const kezdese = b.esemenyek.find((e) => e.tipus === JOVAHAGYAS && e.adat.fazis === 'kezdes' && e.szerzo === kihagyott.szerzo);
+  const hamisEsemenyek = [...b.esemenyek.filter((_, i) => i !== egyVeglegesites),
+    { ...kezdese, azonosito: 'H'.repeat(43), adat: { ...kezdese.adat, fazis: 'veglegesites' }, entitasSorszam: kezdese.entitasSorszam + 100 }];
+  const hamis = await helyreallitasBizonyitekEllenorzese({ ...b, esemenyek: hamisEsemenyek }, bejegyzes);
+  // Egy MÁSIK koinó eseménye a bizonyítékban — kimondottan elutasítva.
+  const idegenKoinobol = await (await ujEember('masik')).tesz('Belepes', {});
+  const idegenKoino = await helyreallitasBizonyitekEllenorzese({ ...b, esemenyek: [...b.esemenyek, idegenKoinobol] }, bejegyzes);
+  // Más bejegyzés (más kulccsal) — a jel nem illik.
+  const masik = await helyreallitasBizonyitekEllenorzese(b, await helyreallitasBejegyzese(x.eember.szerzo, { ...j, kulcs: j.fizetes }));
+  // Egy másik azonosság nevében.
+  const idegen = await helyreallitasBizonyitekEllenorzese(b, { ...bejegyzes, azonossag: j.kulcs });
+  const r = { jo: jo.rendben, csonka: !csonka.rendben, hamis: !hamis.rendben, masik: !masik.rendben, idegen: !idegen.rendben,
+    idegenKoino: !idegenKoino.rendben && /másik koinóé/.test(idegenKoino.ok ?? ''),
+    reszleges: /még nem teljes/.test(reszleges) };
+  if (Object.values(r).some((v) => !v)) process.stderr.write('    (' + JSON.stringify({ r, jo, csonka, hamis }) + ')\n');
+  return Object.values(r).every(Boolean);
+});
+
+proba('⭐⭐ A HELYREÁLLÍTÁS A LÁNCBAN (②e2) — csak ismert bizonyítékkal érvényes; a helye és a jele kötött; a papír visszavonása után is; a kezelő kulcs, a fizetési kulcs és a lekötés az övé; a segítők erősebbek a papírnál; a vele felvett készülék tanúsítványa érvényes', async () => {
+  const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
+  const ujKulcs = () => crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const a = await ujAzonossag();
+  const nev = a.nev;
+  // Az 1. helyen.
+  const UJ = await ujKulcs();
+  const j1 = { ...(await javaslat()), kulcs: await pub(UJ), kovetkezo: await csereLenyomata(await pub(await ujKulcs())) };
+  const h1 = await helyreallitasBejegyzese(nev, j1);
+  const ismeretlen = await kezeloKulcsLanc(a.szuletes, [h1], nev);
+  const ismert = await kezeloKulcsLanc(a.szuletes, [h1], nev, { helyreallitasok: new Set([h1.jel]) });
+  const atirt = await kezeloKulcsLanc(a.szuletes, [{ ...h1, kulcs: j1.fizetes }], nev, { helyreallitasok: new Set([h1.jel]) });
+  // A papír visszavonása UTÁN (a 2. helyen): a helye az előző bejegyzés jele után.
+  const v = await kulcscsereKeszitese(a.csere, nev, 1, a.szuletes.kulcs, null, [], a.szuletes.fizetes);
+  const j2 = await javaslat({ sorszam: 2, utan: bejegyzesJele(v) });
+  const h2 = await helyreallitasBejegyzese(nev, j2);
+  const visszavonasUtan = await kezeloKulcsLanc(a.szuletes, [v, h2], nev, { helyreallitasok: new Set([h2.jel]) });
+  const rosszHely = await helyreallitasBejegyzese(nev, await javaslat({ sorszam: 2, utan: 'A'.repeat(43) }));
+  const rosszHelyen = await kezeloKulcsLanc(a.szuletes, [v, rosszHely], nev, { helyreallitasok: new Set([rosszHely.jel]) });
+  // Az erő: a helyreállítás erősebb a papír cseréjénél és a visszavonásnál; a 2. kör az 1.-nél.
+  const papir = await kulcscsereKeszitese(a.csere, nev, 1, await pub(await ujKulcs()), await csereLenyomata(await pub(await ujKulcs())), [],
+    a.szuletes.fizetes);
+  const h1b = await helyreallitasBejegyzese(nev, await javaslat({ kor: 2, elozo: h1.jel }));
+  // ⭐ Az erő nem véletlen: 8 friss párnál MINDIG a helyreállítás nyer a visszavonás ellen, és a 2. kör az 1. ellen (az aláírás vagy a jel
+  // szerinti döntés 1/2^8 eséllyel adná ugyanezt).
+  let mindigEros = true;
+  for (let i = 0; i < 8; i++) {
+    const hx = await helyreallitasBejegyzese(nev, await javaslat());
+    const hy = await helyreallitasBejegyzese(nev, await javaslat({ kor: 2, elozo: hx.jel }));
+    if (!lancErosebbE([hx], [v]) || lancErosebbE([v], [hx]) || !lancErosebbE([hy], [hx]) || lancErosebbE([hx], [hy])) mindigEros = false;
+  }
+  // A nyilvántartásba vett helyreállítás után a vele felvett készülék tanúsítványa érvényes.
+  UJ.szuletes = a.szuletes;
+  UJ.cserek = [h1];
+  const tablet = await tesztKeszulek('tablet', UJ);
+  const elotte = await tanusitvanyEllenorzese(tablet.tanusitvany);
+  helyreallitasFelvetele(h1.jel);
+  const utana = await tanusitvanyEllenorzese(tablet.tanusitvany);
+  const r = {
+    ismeretlen: !ismeretlen.rendben && ismeretlen.hianyzik === true,
+    ismert: ismert.rendben && ismert.kulcsok[1] === j1.kulcs && ismert.fizetesek[1] === j1.fizetes && ismert.lekotes === j1.kovetkezo,
+    atirt: !atirt.rendben && /jele nem a tartalmáé/.test(atirt.ok ?? ''),
+    visszavonasUtan: visszavonasUtan.rendben && visszavonasUtan.kulcsok[2] === j2.kulcs,
+    rosszHelyen: !rosszHelyen.rendben && /nem az előző bejegyzés után/.test(rosszHelyen.ok ?? ''),
+    ero: mindigEros && lancErosebbE([h1], [papir]) && !lancErosebbE([papir], [h1]) && lancErosebbE([v, h2], [v]) && lancErosebbE([h1], [v])
+      && lancErosebbE([h1b], [h1]) && !lancErosebbE([h1], [h1b]),
+    tanusitvany: !elotte.rendben && utana.rendben
+  };
+  if (Object.values(r).some((x) => !x)) process.stderr.write('    (' + JSON.stringify({ r, elotte, utana, ismeretlen }) + ')\n');
+  return Object.values(r).every(Boolean);
+});
+
+proba('⭐⭐ A KAPU ÉS A MÁSIK KOINÓ (②e2) — a helyreállítás Kulcscsere eseménye a bizonyítékával egy MÁSIK koinóba is bejut; bizonyíték nélkül és csonka bizonyítékkal nem; utána az új kulccsal felvett készülék eseménye bejut, a régi (nem felsorolt) készüléké kiesik', async () => {
+  const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
+  const UJ = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const { tar, x, j, jel } = await teljesHelyreallitas({ kulcs: await pub(UJ) });
+  const nev = x.eember.szerzo;
+  const szuletes = x.eember.kulcspar.azonossagKulcspar.szuletes;
+  const h = await helyreallitasBejegyzese(nev, j);
+  const b = await helyreallitasBizonyiteka(tar, KOINO, x.horgony, jel);
+  // A MÁSIK koinó (B): X ott is tag (egy másik, régi készülékével), és van ott egy gondolata.
+  const B = 'masik';
+  const tarB = await esemenyTarNyitasa(B, await mkdtemp(join(tmpdir(), 'koino-helyreallitas-b-')));
+  const xB = await ujEember(B, await tesztKeszulek('regi', x.eember.kulcspar.azonossagKulcspar));
+  const xBbe = await xB.tesz('Belepes', {});
+  const regiGondolat = await xB.tesz('GondolatLetrehozas', { cim: 'A régi készülékről', meret: 1, szulo: null });
+  const idegenB = await ujEember(B);
+  await ment(tarB, xBbe, regiGondolat, await idegenB.tesz('Belepes', {}));   // a bevivő tanúsítványa a tárban
+  const bevisz = (adat) => idegenB.tesz('Kulcscsere', adat, undefined, { entitas: xBbe.azonosito });
+  // Bizonyíték nélkül: az alak nem engedi.
+  const nelkule = await esemenyMentese(tarB, await bevisz({ szuletes, cserek: [h] }));
+  // Csonka bizonyítékkal: a lánc bejegyzése nem ismert.
+  const csonkaB = { ...b, esemenyek: b.esemenyek.filter((e) => !(e.tipus === JOVAHAGYAS && e.adat.fazis === 'veglegesites')) };
+  const csonkaval = await esemenyMentese(tarB, await bevisz({ szuletes, cserek: [h], bizonyitekok: { [jel]: csonkaB } }));
+  // A teljes bizonyítékkal: bejut.
+  const jo = await esemenyMentese(tarB, await bevisz({ szuletes, cserek: [h], bizonyitekok: { [jel]: b } }));
+  // Az új kulccsal felvett készülék.
+  UJ.szuletes = szuletes;
+  UJ.cserek = [h];
+  const ujB = await ujEember(B, await tesztKeszulek('uj', UJ));
+  const ujGondolat = await ujB.tesz('GondolatLetrehozas', { cim: 'Az új készülékről', meret: 1, szulo: null });
+  const ujBe = await esemenyMentese(tarB, ujGondolat);
+  const kizartak = new Set(allapotSzamitasa(await koinoEsemenyei(tarB, B)).kizartak.map((e) => e.azonosito));
+  const r = {
+    nelkule: !nelkule.mentve && /bizonyítékai/.test(nelkule.ok ?? ''),
+    csonkaval: !csonkaval.mentve && /bizonyítéka még nem ismert/.test(csonkaval.ok ?? ''),
+    jo: jo.mentve, ujBe: ujBe.mentve, regiKiesik: kizartak.has(regiGondolat.azonosito), ujMarad: !kizartak.has(ujGondolat.azonosito)
+  };
+  if (Object.values(r).some((v) => !v)) process.stderr.write('    (' + JSON.stringify({ r, nelkule: nelkule.ok, csonkaval: csonkaval.ok, jo: jo.ok, ujBe: ujBe.ok }) + ')\n');
+  return Object.values(r).every(Boolean);
+});
+
+proba('⭐ A KÉZFOGÁS (②e2) — a helyreállított azonosság új készüléke csak akkor bizonyít, ha a helyreállítás bizonyítékát a folyamat már látta (a nyilvántartás)', async () => {
+  const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
+  const a = await ujAzonossag();
+  const UJ = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const h = await helyreallitasBejegyzese(a.nev, { ...(await javaslat()), kulcs: await pub(UJ) });
+  UJ.szuletes = a.szuletes;
+  UJ.cserek = [h];
+  const uj = await tesztKeszulek('uj', UJ);
+  const atirat = Buffer.from('a kézfogás átirata');
+  const ki = { sz: a.nev, k: uj.keszulek, t: uj.tanusitvany,
+    a: szemelyesKezfogasAlairasa(await crypto.subtle.exportKey('jwk', uj.privateKey), KOINO, atirat) };
+  const elotte = keszulekKezfogasEllenorzese(ki, KOINO, atirat);
+  helyreallitasFelvetele(h.jel);
+  const utana = keszulekKezfogasEllenorzese(ki, KOINO, atirat);
+  const atirtJellel = keszulekKezfogasEllenorzese({ ...ki, t: { ...ki.t, cserek: [{ ...h, kulcs: h.fizetes }] } }, KOINO, atirat);
+  return !elotte && utana && !atirtJellel;
 });
 
 export default async function (csendes) {

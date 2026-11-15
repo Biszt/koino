@@ -232,13 +232,18 @@ export async function kulcscsereKeszitese(csereKulcspar, azonossag, sorszam, kul
  * készülékek (a 0.-ban nincs ilyen lista) és a fizetési kulcs. Minden csere: az alakja jó, a név ugyanaz, a sorszáma a következő, a
  * csere-kulcsa az előző lekötésnek felel meg (a lenyomata), és a csere-kulcs írta alá. ⭐ (②d) A papír visszavonása után (a lekötés
  * `null`) csere-kulcs nem írhat alá.
+ * ⭐⭐ (②e2) A HELYREÁLLÍTÁS bejegyzése (`AzonossagHelyreallitas`) nem aláírt: a segítők jóváhagyták — a bizonyítékát a kapu
+ * ellenőrizte (`allapot/helyreallitas.js`), és a jelét felvette (`helyreallitasFelvetele`), vagy a hívó adja
+ * (`beallitas.helyreallitasok`). A helye a láncban: a sorszáma, és az előző bejegyzés jele (`utan`); a lekötés nem köti (a segítők a
+ * papír fölött állnak — a visszavonás után is).
  * @param {Object} szuletes
- * @param {Array<Object>} cserek - a kulcscserék, sorrendben (lehet üres)
+ * @param {Array<Object>} cserek - a kulcscserék (és helyreállítások), sorrendben (lehet üres)
  * @param {string} nev - a név (a születés lenyomata)
+ * @param {{helyreallitasok?: Set<string>}} [beallitas] - az ismert (ellenőrzött) helyreállítások jelei
  * @returns {Promise<{rendben: boolean, ok?: string, kulcsok?: Array<string>, marado?: Array<Array<string>|null>,
  *   fizetesek?: Array<string>, lekotes?: string|null}>}
  */
-export async function kezeloKulcsLanc(szuletes, cserek, nev) {
+export async function kezeloKulcsLanc(szuletes, cserek, nev, beallitas = {}) {
   const sz = await szuletesEllenorzese(szuletes, nev);
   if (!sz.rendben) return { rendben: false, ok: sz.ok };
   const lista = cserek ?? [];
@@ -249,9 +254,26 @@ export async function kezeloKulcsLanc(szuletes, cserek, nev) {
   let lekotes = szuletes.csere;
   for (let i = 0; i < lista.length; i++) {
     const c = lista[i];
-    const h = kulcscsereAlakiHibaja(c);
+    const h = lancBejegyzesAlakiHibaja(c);
     if (h) return { rendben: false, ok: 'a ' + (i + 1) + '. kulcscsere: ' + h };
     if (c.azonossag !== nev || c.sorszam !== i + 1) return { rendben: false, ok: 'a ' + (i + 1) + '. kulcscsere nem ennek a láncnak a része' };
+    // ⭐⭐ (②e2) A HELYREÁLLÍTÁS: a helye (az előző bejegyzés jele), a jele (a tartalomé), és hogy a bizonyítéka ismert.
+    if (c.tipus === HELYREALLITAS_BEJEGYZES) {
+      if (c.utan !== (i ? bejegyzesJele(lista[i - 1]) : null)) {
+        return { rendben: false, ok: 'a ' + (i + 1) + '. bejegyzés (helyreállítás) nem az előző bejegyzés után áll' };
+      }
+      if (c.jel !== await helyreallitasJele(javaslatResze(c))) {
+        return { rendben: false, ok: 'a ' + (i + 1) + '. bejegyzés (helyreállítás) jele nem a tartalmáé' };
+      }
+      if (!(beallitas.helyreallitasok?.has(c.jel) || ISMERT_HELYREALLITASOK.has(c.jel))) {
+        return { rendben: false, ok: 'a ' + (i + 1) + '. bejegyzés (helyreállítás) bizonyítéka még nem ismert (D128 17. pont)', hianyzik: true };
+      }
+      kulcsok.push(c.kulcs);
+      marado.push(c.keszulekek);
+      fizetesek.push(c.fizetes);
+      lekotes = c.kovetkezo;
+      continue;
+    }
     if (lekotes === null) {
       return { rendben: false, ok: 'a ' + (i + 1) + '. kulcscsere: a papírt visszavonták — csere-kulcs már nem írhat alá (D128 17. pont)' };
     }
@@ -294,9 +316,18 @@ export function kulcsKorszak(szuletesKulcs, cserek) {
   return { korszak, marado };
 }
 
-/** Egy bejegyzés EREJE két ág eltérésénél: a papír visszavonása (1) erősebb a papír kulcscseréjénél (0). */
+/**
+ * Egy bejegyzés EREJE két ág eltérésénél: a papír kulcscseréje 0, a papír visszavonása 1, a segítők helyreállítása 2 (az 1. kör), ill.
+ * 3 (a megállítás utáni 2. kör) — a segítők a papír fölött állnak (9.13 4. pont).
+ */
 function bejegyzesEreje(c) {
+  if (c?.tipus === HELYREALLITAS_BEJEGYZES) return 1 + (c.kor === 2 ? 2 : 1);
   return c?.kovetkezo === null ? 1 : 0;
+}
+
+/** ⭐⭐ (②e2) Egy lánc-bejegyzés JELE: a kulcscseréé az aláírása, a helyreállításé a javaslat jele. */
+export function bejegyzesJele(c) {
+  return c?.tipus === HELYREALLITAS_BEJEGYZES ? c?.jel : c?.alairas;
 }
 
 /**
@@ -310,12 +341,12 @@ function bejegyzesEreje(c) {
 export function lancErosebbE(a, b) {
   const n = Math.min(a.length, b.length);
   let i = 0;
-  while (i < n && a[i]?.alairas === b[i]?.alairas) i++;
+  while (i < n && bejegyzesJele(a[i]) === bejegyzesJele(b[i])) i++;
   if (i === n) return a.length > b.length;
   const ea = bejegyzesEreje(a[i]);
   const eb = bejegyzesEreje(b[i]);
   if (ea !== eb) return ea > eb;
-  return a[i].alairas < b[i].alairas;
+  return bejegyzesJele(a[i]) < bejegyzesJele(b[i]);
 }
 
 /**
@@ -327,7 +358,7 @@ export function lancErosebbE(a, b) {
 export function lancElejeE(elotag, alairasok) {
   const e = elotag ?? [];
   if (e.length > alairasok.length) return false;
-  for (let i = 0; i < e.length; i++) if (e[i]?.alairas !== alairasok[i]) return false;
+  for (let i = 0; i < e.length; i++) if (bejegyzesJele(e[i]) !== alairasok[i]) return false;
   return true;
 }
 
@@ -392,6 +423,60 @@ export async function helyreallitasJele(j) {
 /** A javaslat jele szinkron. */
 export function helyreallitasJeleSzinkron(j) {
   return lenyomatSzinkron({ tipus: 'HelyreallitasJavaslat', ...j });
+}
+
+// ===== ⭐⭐ D128 (②e2): A HELYREÁLLÍTÁS A LÁNCBAN =====
+//
+// A teljes helyreállítás (a segítők mindkét fázisa megvan — `allapot/helyreallitas.js`) a kulcscserék láncába egy
+// `AzonossagHelyreallitas` bejegyzéssel kerül: `{ tipus, azonossag, ...a javaslat, jel }`. Nem aláírt — a bizonyítéka (a
+// `Kulcscsere` esemény hozza) a segítők eseményei; a kapu ellenőrzi, és a jelét a NYILVÁNTARTÁSBA veszi: a tanúsítványok és a
+// kézfogás (tár nélkül, szinkron is) innen tudják, hogy a bejegyzés hiteles. ⚠️ A nyilvántartás folyamatonként él (a kapu tölti — a
+// tárban lévő `Kulcscsere` eseményekből is); amit nem ismer, az „még nem ismert” (D19 — nem vád).
+
+/** A helyreállítás bejegyzésének fajtája (a kulcscserék láncában). */
+export const HELYREALLITAS_BEJEGYZES = 'AzonossagHelyreallitas';
+
+const HELYREALLITAS_BEJEGYZES_MEZOK = 'azonossag,elozo,fizetes,ido,jel,keszulekek,kor,kovetkezo,kulcs,sorszam,tipus,utan';
+
+/** A bejegyzés javaslat-része (ennek a lenyomata a jel). */
+export function javaslatResze(c) {
+  return { kulcs: c.kulcs, keszulekek: c.keszulekek, fizetes: c.fizetes, kovetkezo: c.kovetkezo, kor: c.kor, elozo: c.elozo,
+    sorszam: c.sorszam, utan: c.utan, ido: c.ido };
+}
+
+/** A helyreállítás bejegyzésének alakja — szinkron. */
+export function helyreallitasBejegyzesAlakiHibaja(c) {
+  if (!c || typeof c !== 'object' || Array.isArray(c)) return 'a helyreállítás bejegyzése egy objektum';
+  if (Object.keys(c).sort().join(',') !== HELYREALLITAS_BEJEGYZES_MEZOK) {
+    return 'a helyreállítás bejegyzése: tipus, azonossag, jel és a javaslat mezői';
+  }
+  if (c.tipus !== HELYREALLITAS_BEJEGYZES) return 'ez nem a helyreállítás bejegyzése';
+  if (typeof c.azonossag !== 'string' || !AZONOSITO.test(c.azonossag)) return 'a helyreállítás azonossága 43 jel';
+  if (typeof c.jel !== 'string' || !AZONOSITO.test(c.jel)) return 'a helyreállítás jele 43 jel';
+  return helyreallitasJavaslatAlakiHibaja(javaslatResze(c));
+}
+
+/** Egy lánc-bejegyzés alakja — a kulcscseréé vagy a helyreállításé. */
+export function lancBejegyzesAlakiHibaja(c) {
+  return c?.tipus === HELYREALLITAS_BEJEGYZES ? helyreallitasBejegyzesAlakiHibaja(c) : kulcscsereAlakiHibaja(c);
+}
+
+/** A helyreállítás bejegyzése egy (teljes) javaslatból. */
+export async function helyreallitasBejegyzese(azonossag, javaslat) {
+  return { tipus: HELYREALLITAS_BEJEGYZES, azonossag, ...javaslat, jel: await helyreallitasJele(javaslat) };
+}
+
+/** Az ellenőrzött (a bizonyítékát a kapu látta) helyreállítások jelei — folyamatonként. */
+const ISMERT_HELYREALLITASOK = new Set();
+
+/** Egy helyreállítás jele ismert-e (a bizonyítékát ellenőrizték). */
+export function helyreallitasIsmertE(jel) {
+  return ISMERT_HELYREALLITASOK.has(jel);
+}
+
+/** Egy ellenőrzött helyreállítás felvétele (a kapu — a bizonyíték után, vagy a tárban lévő eseményekből). */
+export function helyreallitasFelvetele(jel) {
+  if (typeof jel === 'string' && AZONOSITO.test(jel)) ISMERT_HELYREALLITASOK.add(jel);
 }
 
 /** A csere-kulcs lenyomata szinkron (a kézfogás láncához — `csere/titkositas.js`). */

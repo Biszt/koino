@@ -34,7 +34,10 @@
 
 import { allitasHelyben, tanusithatE, ujIdentitasNezet } from './identitas.js';
 import { esemenyLekerese, entitasEsemenyei, tarTanusitvanya } from '../tar/esemenyTar.js';
-import { helyreallitasJele, helyreallitasJavaslatAlakiHibaja } from '../kulcs/azonossag.js';
+import { helyreallitasJele, helyreallitasJavaslatAlakiHibaja, javaslatResze, helyreallitasBejegyzesAlakiHibaja }
+  from '../kulcs/azonossag.js';
+import { memoriaTar, rogzitoTar } from '../tar/memoriaTar.js';
+import { alakiHiba, esemenyEllenorzese, esemenyKoinoja, tanusitvanyKereso, azonositoAlaku } from '../esemeny/esemeny.js';
 import { tarKizarasai, tarKulcscserei, kizartE, cserenKivulE, tanusitvanyKorszaka } from './kizaras.js';
 import { sajatAllitasai } from './jelzesek.js';
 
@@ -198,4 +201,91 @@ export async function helyreallitasokAllapota(tar, koino, horgony, nezet = ujIde
   ki.sort((a, b) => (a.jel < b.jel ? -1 : a.jel > b.jel ? 1 : 0));
   console.log('helyreallitasokAllapota - VÉGE', { javaslatok: ki.length, teljes: ki.filter((x) => x.teljes).length });
   return ki;
+}
+
+// ===================================
+// ⭐⭐ D128 (②e2 — 9.13 3. pont): A BIZONYÍTÉK — a helyreállítás minden koinóban érvényes
+// ===================================
+//
+// A helyreállítás A koinóban teljes (a segítők mindkét fázisa megvan); B koinó ezt A eseményei nélkül nem látná. Ezért a lánc
+// bejegyzése mellé (a `Kulcscsere` esemény hozza) a BIZONYÍTÉK kerül: azok az A-beli események (és a tanúsítványaik), amiket a
+// szerep-ellenőrzés kiolvasott — a RÖGZÍTŐ TÁR jegyezte fel (`tar/memoriaTar.js`). Bármelyik kapu ezekből egy MEMÓRIABELI tárat
+// épít, és ugyanazzal a függvénnyel (`helyreallitasokAllapota`) számolja újra — egy szabály, egy forrás (a D93/2 mintája).
+// ⭐ TELJES ellenőrzéssel (a keret végtelen, szúrópróba nincs): minden kapu ugyanarra jut. ⚠️ A maradék kockázat (9.13): az
+// összeállító egy felhatalmazás VISSZAVONÁSÁT kihagyhatja — A koinó készülékei látják, a várakozás és a megállítás ez ellen is véd.
+
+/** A bizonyíték legfeljebb ennyi eseményt hoz (a tagsági csomag korlátja nagyságrendjében). */
+export const BIZONYITEK_KORLAT = 4096;
+
+const BIZONYITEK_MEZOK = 'esemenyek,horgony,jel,koino,tanusitvanyok';
+
+/** A teljes ellenőrzés nézete: a keret végtelen — szúrópróba nincs, minden kapu ugyanarra jut. */
+function teljesNezet() {
+  return ujIdentitasNezet({ keret: Infinity });
+}
+
+/**
+ * A BIZONYÍTÉK ÖSSZEÁLLÍTÁSA — a helyreállítás teljes ebben a koinóban: amit a szerep-ellenőrzés kiolvasott (a rögzítő tárral), az
+ * a bizonyíték (és a koinó születése, a szabályaihoz).
+ * @param {Object} tar
+ * @param {string} koino
+ * @param {string} horgony - a helyreállítandó horgonya ebben a koinóban
+ * @param {string} jel - a javaslat jele
+ * @returns {Promise<{koino: string, horgony: string, jel: string, esemenyek: Array<Object>, tanusitvanyok: Array<Object>}>}
+ */
+export async function helyreallitasBizonyiteka(tar, koino, horgony, jel) {
+  console.log('helyreallitasBizonyiteka - KEZDÉS', { horgony });
+  const r = rogzitoTar(tar);
+  const a = (await helyreallitasokAllapota(r.tar, koino, horgony, teljesNezet())).find((x) => x.jel === jel);
+  if (!a?.teljes) throw new Error('A helyreállítás ebben a koinóban még nem teljes — nincs mit bizonyítani.');
+  if (azonositoAlaku(koino)) await r.tar.esemeny(koino);   // a koinó születése (a szabályai — D118/2)
+  const b = { koino, horgony, jel, esemenyek: r.esemenyek(), tanusitvanyok: r.tanusitvanyok() };
+  if (b.esemenyek.length > BIZONYITEK_KORLAT) throw new Error('A bizonyíték túl nagy (' + b.esemenyek.length + ' esemény).');
+  console.log('helyreallitasBizonyiteka - VÉGE', { esemenyek: b.esemenyek.length, tanusitvanyok: b.tanusitvanyok.length });
+  return b;
+}
+
+/**
+ * A BIZONYÍTÉK ELLENŐRZÉSE — bármelyik kapu: az alak, minden esemény hiteles (aláírás, tanúsítvány) és A koinóé, a horgony a
+ * helyreállítandóé, és a memóriabeli tárban a helyreállítás TELJES, ugyanazzal a jellel, mint a bejegyzés.
+ * @param {Object} b - a bizonyíték
+ * @param {Object} bejegyzes - a lánc `AzonossagHelyreallitas` bejegyzése
+ * @returns {Promise<{rendben: boolean, ok?: string}>}
+ */
+export async function helyreallitasBizonyitekEllenorzese(b, bejegyzes) {
+  console.log('helyreallitasBizonyitekEllenorzese - KEZDÉS');
+  const nem = (ok) => {
+    console.log('helyreallitasBizonyitekEllenorzese - VÉGE (nem)', { ok });
+    return { rendben: false, ok };
+  };
+  const bh = helyreallitasBejegyzesAlakiHibaja(bejegyzes);
+  if (bh) return nem('a bejegyzés: ' + bh);
+  if (!b || typeof b !== 'object' || Array.isArray(b) || Object.keys(b).sort().join(',') !== BIZONYITEK_MEZOK) {
+    return nem('a bizonyíték alakja: { koino, horgony, jel, esemenyek, tanusitvanyok }');
+  }
+  if (typeof b.koino !== 'string' || !b.koino || !azonositoAlaku(b.horgony) || b.jel !== bejegyzes.jel) {
+    return nem('a bizonyíték koinója, horgonya és jele (a bejegyzésé)');
+  }
+  if (!Array.isArray(b.esemenyek) || !b.esemenyek.length || b.esemenyek.length > BIZONYITEK_KORLAT
+    || !Array.isArray(b.tanusitvanyok) || b.tanusitvanyok.length > BIZONYITEK_KORLAT) {
+    return nem('a bizonyíték eseményei (1–' + BIZONYITEK_KORLAT + ') és tanúsítványai');
+  }
+  if (await helyreallitasJele(javaslatResze(bejegyzes)) !== bejegyzes.jel) return nem('a bejegyzés jele nem a tartalmáé');
+  // Minden esemény hiteles és A koinóé.
+  const kereso = await tanusitvanyKereso(b.esemenyek, null, b.tanusitvanyok);
+  for (const e of b.esemenyek) {
+    if (alakiHiba(e)) return nem('egy esemény alakja hibás');
+    if (esemenyKoinoja(e) !== b.koino) return nem('egy esemény másik koinóé');
+    if (!(await esemenyEllenorzese(e, { tanusitvany: kereso })).rendben) return nem('egy esemény nem hiteles');
+  }
+  const horgonyEsemeny = b.esemenyek.find((e) => e.azonosito === b.horgony);
+  if (!horgonyEsemeny || horgonyEsemeny.szerzo !== bejegyzes.azonossag) return nem('a horgony nem a helyreállítandóé');
+  if (azonositoAlaku(b.koino) && !b.esemenyek.some((e) => e.azonosito === b.koino && e.tipus === 'KoinoLetrehozas')) {
+    return nem('a koinó születése hiányzik');
+  }
+  const mem = memoriaTar(b.esemenyek, b.tanusitvanyok);
+  const a = (await helyreallitasokAllapota(mem, b.koino, b.horgony, teljesNezet())).find((x) => x.jel === b.jel);
+  if (!a?.teljes) return nem('a bizonyítékból a helyreállítás nem teljes');
+  console.log('helyreallitasBizonyitekEllenorzese - VÉGE (rendben)');
+  return { rendben: true };
 }

@@ -55,7 +55,8 @@ import {
   createPublicKey, createPrivateKey, createHash, sign, verify
 } from 'node:crypto';
 import { tanusitvanyAlakiHibaja, tanusitvanyTartalma } from '../kulcs/keszulek.js';
-import { azonossagNeveSzinkron, szuletesTartalma, kulcscsereTartalma, csereLenyomataSzinkron } from '../kulcs/azonossag.js';
+import { azonossagNeveSzinkron, szuletesTartalma, kulcscsereTartalma, csereLenyomataSzinkron, HELYREALLITAS_BEJEGYZES,
+  helyreallitasBejegyzesAlakiHibaja, helyreallitasJeleSzinkron, javaslatResze, bejegyzesJele, helyreallitasIsmertE } from '../kulcs/azonossag.js';
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 
 /** A titkosított csomag első bájtja — se nem `{` (a nyílt JSON), se nem STUN (az első két bit 0), se nem bencode. */
@@ -248,6 +249,15 @@ function tanusitvanySzinkronEllenorzese(t) {
   let lekotes = s.csere;
   for (let i = 0; i < (t.cserek ?? []).length; i++) {
     const c = t.cserek[i];
+    // ⭐⭐ D128 (②e2): a segítők helyreállítása — a helye, a jele, és hogy a bizonyítékát a kapu már látta (a nyilvántartás).
+    if (c?.tipus === HELYREALLITAS_BEJEGYZES) {
+      if (helyreallitasBejegyzesAlakiHibaja(c) || c.azonossag !== nev || c.sorszam !== i + 1) return false;
+      if (c.utan !== (i ? bejegyzesJele(t.cserek[i - 1]) : null)) return false;
+      if (helyreallitasJeleSzinkron(javaslatResze(c)) !== c.jel || !helyreallitasIsmertE(c.jel)) return false;
+      kulcs = c.kulcs;
+      lekotes = c.kovetkezo;
+      continue;
+    }
     if (c.azonossag !== nev || c.sorszam !== i + 1 || csereLenyomataSzinkron(c.csere) !== lekotes) return false;
     if (!kezfogasAlairasEllenorzeseNyers(c.csere, Buffer.from(lenyomatSzinkron(kulcscsereTartalma(c)), 'utf8'), c.alairas)) return false;
     kulcs = c.kulcs;

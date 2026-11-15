@@ -624,6 +624,11 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
       return testekKellenek(() => kizarasSzerint.get(azonossag) ?? []);
     },
 
+    /** ⭐⭐ D128 (②e2): azok az azonosságok, akiknek kezelés-eseménye van (a helyreállítások nyilvántartásához, induláskor). */
+    async kezelesAzonossagai() {
+      return [...kizarasSzerint.keys()];
+    },
+
     /**
      * ⭐⭐ D128: egy készülék tanúsítványa — abból az eseményből, ami a tárban elsőként hozta (a kapu ellenőrizte).
      * @param {string} keszulek

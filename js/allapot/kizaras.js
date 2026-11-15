@@ -20,7 +20,7 @@
 // (a saját lánc-gyökér), muveletek.js (a saját lánc), a próbák.
 
 import { kizarasAlakiHibaja, kizarasKoinoban } from '../kulcs/keszulek.js';
-import { kulcscsereAlakiHibaja, kulcsKorszak, lancErosebbE, lancElejeE } from '../kulcs/azonossag.js';
+import { lancBejegyzesAlakiHibaja, kulcsKorszak, lancErosebbE, lancElejeE, bejegyzesJele } from '../kulcs/azonossag.js';
 import { esemenyKoinoja } from '../esemeny/esemeny.js';
 
 /** A kizárás eseménytípusa. */
@@ -93,7 +93,7 @@ export function kulcscserekEsemenyekbol(esemenyek) {
   for (const e of esemenyek ?? []) {
     if (e?.tipus !== KULCSCSERE_ESEMENY) continue;
     const cs = e.adat?.cserek;
-    if (!Array.isArray(cs) || !cs.length || cs.some((c) => kulcscsereAlakiHibaja(c))) continue;
+    if (!Array.isArray(cs) || !cs.length || cs.some((c) => lancBejegyzesAlakiHibaja(c))) continue;
     const nev = cs[0].azonossag;
     const eddigi = lancok.get(nev);
     if (!eddigi || lancErosebbE(cs, eddigi.cs)) lancok.set(nev, { cs, szuletesKulcs: e.adat?.szuletes?.kulcs });
@@ -101,7 +101,7 @@ export function kulcscserekEsemenyekbol(esemenyek) {
   const ki = new Map();
   for (const [nev, { cs, szuletesKulcs }] of lancok) {
     const k = kulcsKorszak(szuletesKulcs, cs);
-    ki.set(nev, { korszak: k.korszak, marado: k.marado ? new Set(k.marado) : null, alairasok: cs.map((c) => c.alairas) });
+    ki.set(nev, { korszak: k.korszak, marado: k.marado ? new Set(k.marado) : null, alairasok: cs.map(bejegyzesJele) });
   }
   return ki;
 }

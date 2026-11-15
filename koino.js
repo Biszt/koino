@@ -166,7 +166,7 @@ import { azonossagNeve } from './js/kulcs/azonossag.js';   // ⭐⭐ D128 (②a)
 import { csereKodja, csereKodbol, csereKodQrja, kodTisztitasa, KOD_HOSSZ } from './js/kulcs/papir.js';   // ⭐⭐ D128 (②c)
 import { qrTerminalra } from './js/kulcs/qr.js';   // ⭐⭐ D128 (②c): a csere-kód QR-je a terminálba
 import { existsSync } from 'node:fs';
-import { kiseroAdo } from './js/tar/esemenyTar.js';
+import { kiseroAdo, osszesHelyreallitasFelvetele } from './js/tar/esemenyTar.js';   // ⭐⭐ D128 (②e2): a helyreállítások
 // ⭐ B/2: a szelet-kulcs (az előléptetéshez).
 import {
   szelet, esemenyEllenorzese, tanusitvanyKereso, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, koinoSzuleteseE, koinoSzuleteseListabol,
@@ -771,6 +771,8 @@ function telepitesElonezetKiirasa(el) {
 // fölé csúszna). A törzs a `koinoPeldany` és a `return { … }` között tart.
 async function koinoPeldany(KOINO) {
 const tar = await koinoTaraEgyszer(KOINO);
+// ⭐⭐ D128 (②e2): a tárban lévő helyreállítások a nyilvántartásba — a kézfogás szinkron, tár nélkül kérdez (`titkositas.js`).
+await osszesHelyreallitasFelvetele(tar);
 
 // ⭐⭐ D119 (①a): A PROGRAM MAPPÁJA — a kód-csomag gyökere (a koino-verzió kártya „Kód” fülének forrása, és a futó program
 // kódja, amit a koinó születésének programjával vetünk össze).

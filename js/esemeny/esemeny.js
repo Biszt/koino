@@ -27,7 +27,8 @@ import { osszegzesAlakja } from './osszegzoFa.js';
 import { szovegHivatkozasE } from './szovegDarab.js';
 // ⭐⭐ D128: a készülék-tanúsítvány (az azonosság kulcsa írja alá — koinók fölött).
 import { tanusitvanyAlakiHibaja, tanusitvanyEllenorzese, kizarasAlakiHibaja } from '../kulcs/keszulek.js';
-import { szuletesAlakiHibaja, kulcscsereAlakiHibaja, KULCSCSERE_KORLAT, helyreallitasJavaslatAlakiHibaja } from '../kulcs/azonossag.js';
+import { szuletesAlakiHibaja, lancBejegyzesAlakiHibaja, KULCSCSERE_KORLAT, helyreallitasJavaslatAlakiHibaja, HELYREALLITAS_BEJEGYZES }
+  from '../kulcs/azonossag.js';
 
 const ALGORITMUS = 'Ed25519';
 
@@ -803,15 +804,26 @@ export function alakiHiba(esemeny) {
       ? kizarasAlakiHibaja(a.kizaras) : 'a kizárás eseménye a kizárás-tanúsítványt hozza ({ kizaras })';
     if (h) return 'a kizárás eseménye: ' + h;
   }
-  // ⭐⭐ D128 (②b): a KULCSCSERE — az eseménye a születést és a cserék láncát hozza (csak azt); a láncot a kapu ellenőrzi.
+  // ⭐⭐ D128 (②b): a KULCSCSERE — az eseménye a születést és a cserék láncát hozza; a láncot a kapu ellenőrzi. ⭐⭐ (②e2) Ha a
+  // láncban a segítők HELYREÁLLÍTÁSA áll, mindegyikének a BIZONYÍTÉKA is (`bizonyitekok`: jel → bizonyíték — pontosan ezek); a
+  // bizonyítékot a kapu ellenőrzi (`allapot/helyreallitas.js`).
   if (esemeny.tipus === 'Kulcscsere') {
     const a = esemeny.adat;
     const cs = a?.cserek;
-    const h = !a || typeof a !== 'object' || Array.isArray(a) || Object.keys(a).sort().join(',') !== 'cserek,szuletes'
-      ? 'a kulcscsere eseménye a születést és a cserék láncát hozza ({ szuletes, cserek })'
+    const kulcsok = a && typeof a === 'object' && !Array.isArray(a) ? Object.keys(a).sort().join(',') : '';
+    let h = kulcsok !== 'cserek,szuletes' && kulcsok !== 'bizonyitekok,cserek,szuletes'
+      ? 'a kulcscsere eseménye a születést és a cserék láncát hozza ({ szuletes, cserek[, bizonyitekok] })'
       : szuletesAlakiHibaja(a.szuletes)
         ?? (!Array.isArray(cs) || !cs.length || cs.length > KULCSCSERE_KORLAT ? 'a cserék lánca 1–' + KULCSCSERE_KORLAT + ' csere'
-          : cs.map(kulcscsereAlakiHibaja).find((x) => x) ?? null);
+          : cs.map(lancBejegyzesAlakiHibaja).find((x) => x) ?? null);
+    if (!h) {
+      const jelek = cs.filter((c) => c.tipus === HELYREALLITAS_BEJEGYZES).map((c) => c.jel).sort().join(',');
+      const b = a.bizonyitekok;
+      const hozott = b === undefined ? '' : b && typeof b === 'object' && !Array.isArray(b) ? Object.keys(b).sort().join(',') : null;
+      if (hozott !== jelek || (b !== undefined && !jelek)) {
+        h = 'a láncban álló helyreállítások bizonyítékai (pontosan ezek): bizonyitekok';
+      }
+    }
     if (h) return 'a kulcscsere eseménye: ' + h;
   }
   // ⭐⭐ D128 (②e — 17. pont, 9.13): a HELYREÁLLÍTÁS JÓVÁHAGYÁSA — állítás MÁSRÓL (a helyreállítandó szeletébe: `kit` = ő,

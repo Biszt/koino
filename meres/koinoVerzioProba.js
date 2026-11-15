@@ -468,6 +468,9 @@ const KIMONDOTT_BEADOTT = new Map([
   ['js/allapot/lezarasiOsszegzes.js:esemenyOlvas', 'a lezárási összegzés mintáinak kiszolgálása (D95/1) — a teljes tartó olvassa a saját tárából'],
   ['js/allapot/lezarasiOsszegzes.js:tagE', 'a lezárási összegzés ellenőrzése (D95/1) — a nem ellenőrizhető tagság nem hiba, csak nem igazol'],
   ['js/esemeny/szovegDarab.js:olvas', 'a szöveg feloldása a megjelenítéshez — a számítás a hivatkozást viszi (D72)'],
+  // ⭐⭐ D128 (②e2): a kapu a helyreállítás bizonyítékát az identitás szabályaival ítéli meg (`allapot/helyreallitas.js`) — az
+  // `identitas.js` így a mag része; a `feltetel` a modul BELSŐ váza (a három kérdés egy vázban), a hívó nem adhatja be.
+  ['js/allapot/identitas.js:feltetel', 'az identitás három kérdésének közös váza (ervenyesAllitok) — a feltételt a modul saját függvényei adják, nem a hívó'],
   ['js/esemeny/esemeny.js:tanusitvany', '⭐⭐ D128: a készülék-tanúsítvány keresője (a tár, a csomag) — nem döntés: a tanúsítvány önmagát igazolja (az azonosság kulcsa írta alá), a kereső csak megtalálja']
 ]);
 function beadottFuggvenyek(ut, forras) {

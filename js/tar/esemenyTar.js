@@ -32,7 +32,8 @@ import { esemenyEllenorzese, elagazasE, szelet, esemenyKoinoja, azonositoAlaku, 
 import { ellentmondasEllenorzese } from '../allapot/ellentmondas.js';
 import { kizartE, tarKizarasai, tarKulcscserei, cserenKivulE, tanusitvanyKorszaka, KIZARAS_ESEMENY, KULCSCSERE_ESEMENY }
   from '../allapot/kizaras.js';   // ⭐⭐ D128 (①d, ②b)
-import { kezeloKulcsLanc, azonossagNeve } from '../kulcs/azonossag.js';
+import { kezeloKulcsLanc, azonossagNeve, HELYREALLITAS_BEJEGYZES, helyreallitasFelvetele } from '../kulcs/azonossag.js';
+import { helyreallitasBizonyitekEllenorzese } from '../allapot/helyreallitas.js';   // ⭐⭐ D128 (②e2)
 import { kizarasEllenorzese, kizarasKoinoban } from '../kulcs/keszulek.js';
 // ⭐ D81: a pont-esemény a saját bizonyítékát hozza — a kapu ellenőrzi, hogy illik a lánc-gyökeréhez.
 import { pontEsemenyOnbizonyitasa, hozottBizonyitekokOnbizonyitasa, keretAtvetelOnbizonyitasa, lancAlapKerete }
@@ -135,7 +136,40 @@ function beagyazottak(e) {
   return lista;
 }
 
+/**
+ * ⭐⭐ D128 (②e2 — 17. pont): A HELYREÁLLÍTÁSOK NYILVÁNTARTÁSA a kapun — (1) a szerző tárban lévő `Kulcscsere` eseményeinek
+ * helyreállításai (a kapu már ellenőrizte őket); (2) egy érkező `Kulcscsere` bizonyítékai — ha átmennek, a jelük is. ⭐ A bizonyíték
+ * önmagát igazolja (a segítők eseményei), ezért a jele akkor is felvehető, ha maga az esemény később más okból elbukik. Így a tanúsítvány
+ * (és a kézfogás) tár nélkül is tudja, hogy a helyreállítás hiteles (`azonossag.js` `helyreallitasFelvetele`).
+ */
+async function helyreallitasokFelvetele(tar, esemeny) {
+  if (typeof esemeny?.szerzo === 'string') await tarHelyreallitasainakFelvetele(tar, esemeny.szerzo);
+  if (esemeny?.tipus !== KULCSCSERE_ESEMENY || !esemeny.adat?.bizonyitekok || !Array.isArray(esemeny.adat.cserek)) return;
+  for (const c of esemeny.adat.cserek) {
+    if (c?.tipus !== HELYREALLITAS_BEJEGYZES) continue;
+    const b = esemeny.adat.bizonyitekok[c.jel];
+    if (b && (await helyreallitasBizonyitekEllenorzese(b, c)).rendben) helyreallitasFelvetele(c.jel);
+  }
+}
+
+/** ⭐⭐ D128 (②e2): egy azonosság tárban lévő helyreállításai a nyilvántartásba (a tárba csak a kapun át jutott be). */
+export async function tarHelyreallitasainakFelvetele(tar, azonossag) {
+  const lista = typeof tar?.kezelesEsemenyei === 'function' ? await tar.kezelesEsemenyei(azonossag) : [];
+  for (const e of lista) {
+    if (e?.tipus !== KULCSCSERE_ESEMENY || !Array.isArray(e.adat?.cserek)) continue;
+    for (const c of e.adat.cserek) if (c?.tipus === HELYREALLITAS_BEJEGYZES) helyreallitasFelvetele(c.jel);
+  }
+}
+
+/** ⭐⭐ D128 (②e2): a tár ÖSSZES helyreállítása a nyilvántartásba — a folyamat indulásakor (a kézfogás szinkron, tár nélkül kérdez). */
+export async function osszesHelyreallitasFelvetele(tar) {
+  if (typeof tar?.kezelesAzonossagai !== 'function') return;
+  for (const az of await tar.kezelesAzonossagai()) await tarHelyreallitasainakFelvetele(tar, az);
+}
+
 async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
+  // ⭐⭐ D128 (②e2): előbb a helyreállítások nyilvántartása (a szerző tanúsítványa egy helyreállítás után az új kulccsal szól).
+  await helyreallitasokFelvetele(tar, esemeny);
   // ----- 1. ELLENŐRZÉS -----
   // ⭐⭐ D128: az aláírás a készüléké, és a készülék tanúsítványa vagy az eseményben van (a lánc első eseménye), vagy a
   // tárban (a kapu korábban beengedte). Ha egyik sincs: „hiányzik” — nem mentjük, a csere elkérheti. ⭐ Így a tárba
