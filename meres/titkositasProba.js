@@ -15,7 +15,7 @@ import { probaGyujtemeny, tesztKeszulek } from './probaFuttato.js';
 import {
   ujEgyszeriKulcs, kezfogasCsomag, kezfogasCsomagbol, munkamenetKulcsai, csomagTitkositasa,
   csomagKititkositasa, kezfogasAlairasa, kezfogasAlairasEllenorzese, TITKOS_JEL, KF_JEL,
-  szemelyesKezfogasAlairasa, szemelyesKezfogasEllenorzese
+  szemelyesKezfogasAlairasa, keszulekKezfogasEllenorzese
 } from '../js/csere/titkositas.js';
 import { ujTablaKulcs, nyilvanosResz } from '../js/csere/tablaKulcs.js';
 import { csereUdpResen, udpKapcsolat, szeletUdpResen } from '../js/csere/udpVonal.js';
@@ -107,7 +107,12 @@ async function tarGondolattal(cim, reszlet = null) {
     // ⭐ D93/3: a kapu-próbáknak a szeletek neve is kell (a születés és a gondolat).
     if (reszlet) Object.assign(reszlet, { szuletes: szul.azonosito, gondolat: g.azonosito });
   }
-  if (reszlet) Object.assign(reszlet, { szerzo, jwk: await crypto.subtle.exportKey('jwk', kulcspar.azonossagKulcspar.privateKey) });   // ⭐⭐ D128: a kézfogás (még) az azonosság kulcsával
+  // ⭐⭐ D128 (③): a kézfogás a KÉSZÜLÉK kulcsával, a tanúsítványa köti az azonossághoz.
+  if (reszlet) {
+    Object.assign(reszlet, { szerzo, keszulek: kulcspar.keszulek, tanusitvany: kulcspar.tanusitvany,
+      jwk: await crypto.subtle.exportKey('jwk', kulcspar.privateKey),
+      azonossagJwk: await crypto.subtle.exportKey('jwk', kulcspar.azonossagKulcspar.privateKey) });
+  }
   return tar;
 }
 
@@ -157,22 +162,32 @@ proba('⛔⛔ A HAMISAN ALÁÍRT TÁBLA-KULCS NEM SZÁMÍT — aki más nevében
 
 /** Egy személyes aláíró (a rés-réteg hívja az átirattal): a szerző, a horgony és az aláírás. */
 const szemelyesAlairo = (r, horgony = null, kulcsJwk = r.jwk) => (atirat) => ({
-  sz: r.szerzo, ...(horgony ? { h: horgony } : {}), a: szemelyesKezfogasAlairasa(kulcsJwk, KOINO, atirat)
+  sz: r.szerzo, k: r.keszulek, t: r.tanusitvany, ...(horgony ? { h: horgony } : {}),
+  a: szemelyesKezfogasAlairasa(kulcsJwk, KOINO, atirat)
 });
 
-proba('⭐ a személyes aláírás csak a SAJÁT átiratára, a SAJÁT koinójára és a SAJÁT kulcsával igaz', async () => {
+proba('⭐ a személyes aláírás csak a SAJÁT átiratára, a SAJÁT koinójára és a SAJÁT kulcsával igaz — ⭐⭐ D128 (③): a KÉSZÜLÉK írja alá, a tanúsítványa köti (egy idegen vagy hamis tanúsítvány, az azonosság kulcsával írt aláírás nem elég)', async () => {
   const r = {};
   await tarGondolattal(null, r);
   const masik = {};
   await tarGondolattal(null, masik);
   const atirat = Buffer.from('egy kézfogás átirata');
   const a = szemelyesKezfogasAlairasa(r.jwk, KOINO, atirat);
-  return szemelyesKezfogasEllenorzese(r.szerzo, KOINO, atirat, a)
-    && !szemelyesKezfogasEllenorzese(r.szerzo, KOINO, Buffer.from('másik átirat'), a)
-    && !szemelyesKezfogasEllenorzese(r.szerzo, 'masik-koino', atirat, a)
-    && !szemelyesKezfogasEllenorzese(masik.szerzo, KOINO, atirat, a)
+  const ki = { sz: r.szerzo, k: r.keszulek, t: r.tanusitvany, a };
+  const azonossaggal = szemelyesKezfogasAlairasa(r.azonossagJwk, KOINO, atirat);
+  return keszulekKezfogasEllenorzese(ki, KOINO, atirat)
+    && !keszulekKezfogasEllenorzese(ki, KOINO, Buffer.from('másik átirat'))
+    && !keszulekKezfogasEllenorzese(ki, 'masik-koino', atirat)
+    // ⛔ egy másik azonosság (a saját tanúsítványával is, a mienkkel is)
+    && !keszulekKezfogasEllenorzese({ ...ki, sz: masik.szerzo }, KOINO, atirat)
+    && !keszulekKezfogasEllenorzese({ ...ki, sz: masik.szerzo, t: masik.tanusitvany }, KOINO, atirat)
+    // ⛔ a tanúsítvány átírva (a név), vagy hiányzik
+    && !keszulekKezfogasEllenorzese({ ...ki, t: { ...r.tanusitvany, nev: 'hamis' } }, KOINO, atirat)
+    && !keszulekKezfogasEllenorzese({ ...ki, t: undefined }, KOINO, atirat)
+    // ⛔ az azonosság kulcsával írt aláírás (a régi út) nem elég: a hálózaton a készülék ír
+    && !keszulekKezfogasEllenorzese({ ...ki, a: azonossaggal }, KOINO, atirat)
     // ⛔ a tábla-kulcs aláírása más előtagú: az egyik szerepben adott aláírás a másikban nem használható fel
-    && !kezfogasAlairasEllenorzese(r.szerzo, atirat, a);
+    && !kezfogasAlairasEllenorzese(r.keszulek, atirat, a);
 });
 
 proba('⭐⭐ D93/3: A NEM SZABAD TÁRS CSAK A MEGENGEDETT SZELETET KAPJA — a kapu a bizonyítási körben a hitelesített személyt látja', async () => {

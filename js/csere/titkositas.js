@@ -54,6 +54,8 @@ import {
   generateKeyPairSync, diffieHellman, hkdfSync, createCipheriv, createDecipheriv,
   createPublicKey, createPrivateKey, createHash, sign, verify
 } from 'node:crypto';
+import { tanusitvanyAlakiHibaja, tanusitvanyTartalma } from '../kulcs/keszulek.js';
+import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 
 /** A titkosított csomag első bájtja — se nem `{` (a nyílt JSON), se nem STUN (az első két bit 0), se nem bencode. */
 export const TITKOS_JEL = 0xa5;
@@ -202,8 +204,9 @@ export function kezfogasAlairasa(tablaLeiras, atirat) {
 const SZEMELYES = (koino, atirat) => Buffer.concat([Buffer.from('koino-kezfogas-szemely-1|' + koino + '|'), atirat]);
 
 /**
- * A saját személyes aláírásunk a kézfogás átiratára.
- * @param {Object} privatJwk - a személyes kulcs titkos fele JWK-ban (`kulcsTar.js`: `kulcsparLeirasa().privatKulcs`)
+ * A saját személyes aláírásunk a kézfogás átiratára. ⭐⭐ D128 (③, 10. pont): a KÉSZÜLÉK kulcsával (a mindennapi kulcs) — a
+ * személyt a mellé tett tanúsítvány köti az azonossághoz (`keszulekKezfogasEllenorzese`); az azonosság kulcsa nem ír a hálózaton.
+ * @param {Object} privatJwk - a KÉSZÜLÉK kulcsának titkos fele JWK-ban (`kulcsTar.js`: `kulcsparLeirasa().privatKulcs`)
  * @param {string} koino
  * @param {Buffer} atirat
  * @returns {string} base64url
@@ -214,12 +217,25 @@ export function szemelyesKezfogasAlairasa(privatJwk, koino, atirat) {
 }
 
 /**
- * A társ személyes aláírása a kézfogás átiratára — a szerző (a nyilvános kulcsa, 43 jel) a bemondás, az aláírás a
- * bizonyíték.
+ * ⭐⭐ D128 (③, 10. pont): A TÁRS SZEMÉLYE A KÉZFOGÁSBAN — a készüléke írta alá az átiratot (`k`, a készülék kulcsa), és a
+ * készülék tanúsítványa (`t` — az azonosság kulcsa írta alá) azt mondja, hogy a készülék a bemondott azonosságé (`sz`). Szinkron
+ * (a kézfogás így ellenőriz). ⛔ Egy idegen tanúsítvány (más azonosságé, más készüléké, hamis aláírású) nem fogadható el.
+ * @param {{sz: string, k: string, t: Object, a: string}} ki
+ * @param {string} koino
+ * @param {Buffer} atirat
  * @returns {boolean}
  */
-export function szemelyesKezfogasEllenorzese(szerzo, koino, atirat, alairas) {
-  return kezfogasAlairasEllenorzeseNyers(szerzo, SZEMELYES(koino, atirat), alairas);
+export function keszulekKezfogasEllenorzese(ki, koino, atirat) {
+  const t = ki?.t;
+  if (typeof ki?.sz !== 'string' || typeof ki.k !== 'string' || tanusitvanyAlakiHibaja(t)
+      || t.azonossag !== ki.sz || t.keszulek !== ki.k) return false;
+  if (!tanusitvanySzinkronEllenorzese(t)) return false;
+  return kezfogasAlairasEllenorzeseNyers(ki.k, SZEMELYES(koino, atirat), ki.a);
+}
+
+/** A készülék-tanúsítvány aláírása (szinkron — ugyanaz, mint a `keszulek.js` `tanusitvanyEllenorzese`-é). */
+function tanusitvanySzinkronEllenorzese(t) {
+  return kezfogasAlairasEllenorzeseNyers(t.azonossag, Buffer.from(lenyomatSzinkron(tanusitvanyTartalma(t)), 'utf8'), t.alairas);
 }
 
 function kezfogasAlairasEllenorzeseNyers(nyilvanos, uzenet, alairas) {

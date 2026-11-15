@@ -201,7 +201,7 @@ import {
   keresoTarNyitasa, bejegyzesBefogadasa, bejegyzesekEpitese, bejegyzesSzerzoi, bejegyzesAlakja, KERESO_KORLAT, TIPP_VALASZ
 } from './js/tar/keresoTar.js';
 import { tarsMelysegeFeljegyzese, tanultMelyseg, ervenyesMelyseg, melysegJegyzekAlakja } from './js/csere/melysegTanulas.js';
-import { megujitasKeszitese, csomagTulajdonosai } from './js/tar/keresoMegujitas.js';
+import { megujitasKeszitese, csomagTulajdonosai, tulajdonosKeszulekeE } from './js/tar/keresoMegujitas.js';
 // ⭐⭐ A kereső-réteg ⑤: a kérdés tiszta számításai.
 import {
   kerdesTerve, kerdesHelye, helyTalalatai, talalatokEllenorzese, osztottMinta, KERESES_TALALAT_KORLAT
@@ -1562,10 +1562,11 @@ async function sajatBejegyzesek(allapot) {
     }
     // ⭐ D107 L3 (④a): a megújításom — ha a csomag tulajdonosai közt vagyok (különben a tartó elvetné).
     const megujitas = (esemenyek) => {
-      if (!csomagTulajdonosai(esemenyek, g).includes(szerzo)) return null;
+      // ⭐⭐ D128 (③): a KÉSZÜLÉKEM újít — ha az én pont-eseményem van a csomagban (a kulcsomat az köti az azonosságomhoz).
+      if (!tulajdonosKeszulekeE(esemenyek, g, szerzo, KESZULEK)) return null;
       const regi = megujitasUjrahasznalhato({ koino: KOINO, g, esemenyek, szerzo, regi: jegyzek.megujitasok[g] ?? null });
       if (regi) return regi;
-      const m = megujitasKeszitese(szemelyesJwk, szerzo, { koino: KOINO, g, esemenyek });
+      const m = megujitasKeszitese(keszulekJwk, szerzo, KESZULEK, { koino: KOINO, g, esemenyek });
       jegyzek = megujitasFeljegyzese(jegyzek, g, m);
       jegyzekValtozott = true;
       return m;
@@ -5445,7 +5446,8 @@ async function lezarasiOsszegzesekKiadasa() {
 
 /** A személyes kulcs titkos fele (JWK) — a kézfogás aláírásához, szinkron (`node:crypto`). */
 // ⚠️ D128: a kézfogás ma még az AZONOSSÁG kulcsával bizonyít (a ③ teszi át a készülékkulcsra, a tanúsítvánnyal).
-const szemelyesJwk = (await kulcsparLeirasa(azonossagKulcspar)).privatKulcs;
+// ⭐⭐ D128 (③, 10. pont): a hálózaton a KÉSZÜLÉK kulcsa ír alá (a kézfogás, a kereső megújítása) — a tanúsítványa köti az azonossághoz.
+const keszulekJwk = (await kulcsparLeirasa(kulcspar)).privatKulcs;
 const AZONOSSAG_KORLAT = 256;
 const azonossagFajl = () => join(alapHely(), KOINO, 'azonossagok.json');
 /** Akit a folyamat életében tagnak láttunk (szerző → igaz) — a tagság nem vész el. */
@@ -5627,8 +5629,9 @@ async function azonossagBeallitasa() {
   return {
     tablaKulcs: nyilvanosResz(tabla),
     tablaAlairo: (atirat) => kezfogasAlairasa(tabla, atirat),
-    szemelyesAlairo: (atirat) => ({ sz: szerzo, ...(h ? { h } : {}),
-      a: szemelyesKezfogasAlairasa(szemelyesJwk, KOINO, atirat) }),
+    // ⭐⭐ D128 (③): a készülékem írja alá, a tanúsítványa (az azonosság kulcsától) köti a személyemhez.
+    szemelyesAlairo: (atirat) => ({ sz: szerzo, k: KESZULEK, t: kulcspar.tanusitvany, ...(h ? { h } : {}),
+      a: szemelyesKezfogasAlairasa(keszulekJwk, KOINO, atirat) }),
     tagsagiCsomag: sajatTagsagiCsomagja,
     // ⭐⭐ D122: a meghívóm bizonyítéka a kapu személy-körébe (ha egy meghívóval léptem be, és még nem vagyok tag)
     meghivoBizonyitek: meghivoBizonyitekom,

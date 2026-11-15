@@ -85,9 +85,9 @@ proba('⭐⭐ a megújítás újrahasznosul, amíg érvényes a mai csomagra és
   const t = csomagTulajdonosai(esemenyek, g.szuletes.azonosito);
   const elso = sorosRend(g.szuletes.azonosito, t)[0];
   const ember = elso === g.a.szerzo ? g.a : g.b;
-  const jwk = await crypto.subtle.exportKey('jwk', ember.kulcspar.azonossagKulcspar.privateKey);
+  const jwk = await crypto.subtle.exportKey('jwk', ember.kulcspar.privateKey)   /* ⭐⭐ D128 (③): a készülék kulcsa */;
   const T0 = Date.now();
-  const regi = megujitasKeszitese(jwk, ember.szerzo, { koino: KOINO, g: g.szuletes.azonosito, esemenyek, ido: T0 });
+  const regi = megujitasKeszitese(jwk, ember.szerzo, ember.keszulek, { koino: KOINO, g: g.szuletes.azonosito, esemenyek, ido: T0 });
   const alap = { koino: KOINO, g: g.szuletes.azonosito, esemenyek, szerzo: ember.szerzo, regi };
   const most = megujitasUjrahasznalhato({ ...alap, most: T0 + NAP }) === regi;
   const esedekes = megujitasUjrahasznalhato({ ...alap, most: T0 + 21 * NAP }) === null;
@@ -111,7 +111,8 @@ proba('A kiszolgáló szűrője: a bejegyzés helye a tartó régióinak valamel
 // Rontás: a jegyzék alakja nem szűr → a hibás tétel bent marad → bukik.
 proba('A jegyzék a hibás tételt eldobja (azonosító, mélység, megújítás alak)', () => {
   const j = felajanlasJegyzekAlakja({ ajanlott: { rossz: 1, ['A'.repeat(43)]: 5 }, osztodasok: { 'p:park#0:0': 3, x: -1, y: 999 },
-    megujitasok: { ['B'.repeat(43)]: { szerzo: 's', ido: 1, alairas: 'a' }, rossz: {} } });
+    megujitasok: { ['B'.repeat(43)]: { szerzo: 's', k: 'k', ido: 1, alairas: 'a' }, rossz: {},
+      ['C'.repeat(43)]: { szerzo: 's', ido: 1, alairas: 'a' } } });   // ⭐⭐ D128 (③): a készülék nélküli (régi) megújítás kiesik
   return Object.keys(j.ajanlott).join() === 'A'.repeat(43) && Object.keys(j.osztodasok).join() === 'p:park#0:0'
     && Object.keys(j.megujitasok).join() === 'B'.repeat(43);
 });

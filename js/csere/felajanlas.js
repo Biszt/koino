@@ -45,7 +45,9 @@ export function felajanlasJegyzekAlakja(j) {
   }
   for (const [g, m] of Object.entries(j.megujitasok ?? {})) {
     if (/^[A-Za-z0-9_-]{43}$/.test(g) && m && typeof m === 'object' && Number.isInteger(m.ido) && typeof m.szerzo === 'string'
-      && typeof m.alairas === 'string') ki.megujitasok[g] = { szerzo: m.szerzo, ido: m.ido, alairas: m.alairas };
+      && typeof m.k === 'string' && typeof m.alairas === 'string') {
+      ki.megujitasok[g] = { szerzo: m.szerzo, k: m.k, ido: m.ido, alairas: m.alairas };   // ⭐⭐ D128 (③): a készülék is
+    }
   }
   return ki;
 }
@@ -166,7 +168,7 @@ export function megujitasUjrahasznalhato({ koino, g, esemenyek, szerzo, regi, mo
 /** A gondolat megújításának feljegyzése a jegyzékben. */
 export function megujitasFeljegyzese(jegyzek, g, m) {
   const ki = felajanlasJegyzekAlakja(jegyzek);
-  if (m) ki.megujitasok[g] = { szerzo: m.szerzo, ido: m.ido, alairas: m.alairas };
+  if (m) ki.megujitasok[g] = { szerzo: m.szerzo, k: m.k, ido: m.ido, alairas: m.alairas };
   ki.megujitasok = vagas(ki.megujitasok, MEGUJITAS_JEGYZEK_KORLAT, (x) => x.ido);
   return ki;
 }

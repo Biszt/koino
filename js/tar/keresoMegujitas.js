@@ -44,6 +44,15 @@ function megujitasUzenete({ koino, g, esemenyek, ido }) {
   return Buffer.from('koino-kereso-megujitas-1|' + kanonikusSzoveg({ koino, g, e, ido }), 'utf8');
 }
 
+/**
+ * ⭐⭐ D128 (③): a tulajdonos KÉSZÜLÉKE a csomagban — megújítani az a készülék tud, amelyiknek pozitív pont-eseménye a csomagban
+ * van: a kulcsát az az esemény (a kapu ellenőrizte) köti a szerzőhöz, külön tanúsítvány nélkül.
+ */
+export function tulajdonosKeszulekeE(esemenyek, g, szerzo, keszulek) {
+  return (esemenyek ?? []).some((e) => e?.tipus === 'TudatpontRendezes' && e.adat?.entitas === g && Number.isInteger(e.adat?.pont)
+    && e.adat.pont > 0 && e.szerzo === szerzo && e.keszulek === keszulek);
+}
+
 /** A csomag tulajdonosai: a pozitív pont-események szerzői (rendezve). */
 export function csomagTulajdonosai(esemenyek, g) {
   return [...new Set((esemenyek ?? []).filter((e) => e?.tipus === 'TudatpontRendezes' && e.adat?.entitas === g
@@ -51,16 +60,18 @@ export function csomagTulajdonosai(esemenyek, g) {
 }
 
 /**
- * ⭐ A megújítás elkészítése (a tulajdonos készülékén).
- * @param {Object} privatJwk - a személyes kulcs titkos fele (`kulcsparLeirasa().privatKulcs`)
- * @param {string} szerzo - a személyes kulcs nyilvános fele (43 jel)
+ * ⭐ A megújítás elkészítése (a tulajdonos készülékén). ⭐⭐ D128 (③): a KÉSZÜLÉK kulcsával — az a készülék, amelyiknek a
+ * pont-eseménye a csomagban van (`tulajdonosKeszulekeE`).
+ * @param {Object} privatJwk - a készülék kulcsának titkos fele (`kulcsparLeirasa().privatKulcs`)
+ * @param {string} szerzo - az azonosság
+ * @param {string} keszulek - a készülék kulcsa (43 jel)
  * @param {{koino: string, g: string, esemenyek: Array<Object|string>, ido?: number}} b
- * @returns {{szerzo: string, ido: number, alairas: string}}
+ * @returns {{szerzo: string, k: string, ido: number, alairas: string}}
  */
-export function megujitasKeszitese(privatJwk, szerzo, { koino, g, esemenyek, ido = Date.now() }) {
+export function megujitasKeszitese(privatJwk, szerzo, keszulek, { koino, g, esemenyek, ido = Date.now() }) {
   const kulcs = createPrivateKey({ key: privatJwk, format: 'jwk' });
   const alairas = sign(null, megujitasUzenete({ koino, g, esemenyek, ido }), kulcs).toString('base64url');
-  return { szerzo, ido, alairas };
+  return { szerzo, k: keszulek, ido, alairas };
 }
 
 /**
@@ -72,14 +83,15 @@ export function megujitasKeszitese(privatJwk, szerzo, { koino, g, esemenyek, ido
  */
 export function megujitasEllenorzese(m, { koino, g, esemenyek, most = Date.now() }) {
   if (!m || typeof m !== 'object' || Array.isArray(m)) return { rendben: false, ok: 'nem megújítás alakú' };
-  if (!azonositoAlaku(m.szerzo) || !Number.isInteger(m.ido) || m.ido <= 0 || typeof m.alairas !== 'string'
-    || m.alairas.length > 200 || Object.keys(m).length !== 3) {
+  if (!azonositoAlaku(m.szerzo) || !azonositoAlaku(m.k) || !Number.isInteger(m.ido) || m.ido <= 0 || typeof m.alairas !== 'string'
+    || m.alairas.length > 200 || Object.keys(m).length !== 4) {
     return { rendben: false, ok: 'nem megújítás alakú' };
   }
-  if (!csomagTulajdonosai(esemenyek, g).includes(m.szerzo)) return { rendben: false, ok: 'a megújító nem a csomag tulajdonosa' };
+  // ⭐⭐ D128 (③): a megújító a csomag egy tulajdonosának KÉSZÜLÉKE (a pont-eseménye a csomagban köti a kulcsát a szerzőhöz).
+  if (!tulajdonosKeszulekeE(esemenyek, g, m.szerzo, m.k)) return { rendben: false, ok: 'a megújító nem a csomag tulajdonosa' };
   if (m.ido > most + JOVO_TURES) return { rendben: false, ok: 'a megújítás a jövőbe dátumozott' };
   try {
-    const kulcs = createPublicKey({ key: { kty: 'OKP', crv: 'Ed25519', x: m.szerzo }, format: 'jwk' });
+    const kulcs = createPublicKey({ key: { kty: 'OKP', crv: 'Ed25519', x: m.k }, format: 'jwk' });
     if (!verify(null, megujitasUzenete({ koino, g, esemenyek, ido: m.ido }), kulcs, Buffer.from(m.alairas, 'base64url'))) {
       return { rendben: false, ok: 'a megújítás aláírása nem az övé (vagy más csomagra szól)' };
     }

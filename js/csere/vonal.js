@@ -477,7 +477,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   };
   /** A társ bemondott személye — csak ha a személyes aláírása EBBEN a kézfogásban érvényes. */
   const bizonyitottSzemely = (ki) => (ki && typeof ki === 'object' && typeof kezfogas?.kiEllenoriz === 'function'
-    && kezfogas.kiEllenoriz(ki) ? { sz: ki.sz, h: typeof ki.h === 'string' ? ki.h : null } : null);
+    && kezfogas.kiEllenoriz(ki) ? { sz: ki.sz, h: typeof ki.h === 'string' ? ki.h : null, k: ki.k } : null);
   /** Amit a bizonyításunkhoz küldünk: a személyes aláírás és a tagsági csomag (ha van) — ⭐ D122: és a meghívóm bizonyítéka. */
   const sajatBizonyitek = async () => {
     let csomag = null;

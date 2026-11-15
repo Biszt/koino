@@ -120,8 +120,9 @@ export function bejegyzesAlakja(b) {
   if (new Set(b.esemenyek.map((e) => e.azonosito)).size !== b.esemenyek.length) return null;
   let m = null;
   if (b.m !== undefined && b.m !== null) {
-    if (typeof b.m !== 'object' || Array.isArray(b.m) || Object.keys(b.m).length !== 3) return null;
-    m = { szerzo: b.m.szerzo, ido: b.m.ido, alairas: b.m.alairas };
+    // ⭐⭐ D128 (③): a megújítás a készüléket is megnevezi (`k` — az írta alá).
+    if (typeof b.m !== 'object' || Array.isArray(b.m) || Object.keys(b.m).length !== 4) return null;
+    m = { szerzo: b.m.szerzo, k: b.m.k, ido: b.m.ido, alairas: b.m.alairas };
   }
   return { k: b.k, s: b.s, g: b.g, esemenyek: b.esemenyek, m };
 }

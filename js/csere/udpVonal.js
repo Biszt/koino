@@ -60,7 +60,7 @@ import {
 } from './vonal.js';
 import { KERELEM_KORLAT } from './fajlKerelem.js';
 // ⭐ D89/1: a csere titkosítása — a kézfogás és a csomagok kriptográfiája (hálózat nélkül).
-import { kezfogasAlairasEllenorzese, szemelyesKezfogasEllenorzese } from './titkositas.js';
+import { kezfogasAlairasEllenorzese, keszulekKezfogasEllenorzese } from './titkositas.js';
 // ⭐⭐ D124 ④: A KÉZFOGÁS-VÁLASZTÓ — a kézfogás és a védett rés a KÖZÖS szállítás-nemzedék részeivel dolgozik (a kapu a kopogásból
 // feljegyzi, `nyelvValtozat.js`); a részek a szállítás jegyzékéből (`forditoSzel.js`).
 import { sajatSzallitas, szallitasKeszlet, feljegyzettSzallitas } from './nyelvValtozat.js';
@@ -455,7 +455,7 @@ function kezfogasHitelesitese(res, beallitas, koino = null) {
       ? beallitas.szemelyesAlairo(res.atirat) : null,
     kiEllenoriz: (ki) => typeof koino === 'string' && !!ki && typeof ki === 'object'
       && typeof ki.sz === 'string' && AZONOSITO.test(ki.sz) && (ki.h == null || (typeof ki.h === 'string' && AZONOSITO.test(ki.h)))
-      && szemelyesKezfogasEllenorzese(ki.sz, koino, res.atirat, ki.a)
+      && keszulekKezfogasEllenorzese(ki, koino, res.atirat)   // ⭐⭐ D128 (③): a készülék írja alá, a tanúsítványa köti
   };
 }
 

@@ -122,16 +122,16 @@ proba('⭐⛔ A megújítás (L3): a tulajdonosé érvényes és ÚJ elem (a ré
   const { szerzok, szuletes, pontEsemenyek } = await gondolatTulajdonosokkal('Közös park');
   const [regi] = bejegyzesekEpitese({ szuletes, pontEsemenyek });
   await bejegyzesBefogadasa(tar, regi);
-  const jwk = async (e) => crypto.subtle.exportKey('jwk', e.kulcspar.azonossagKulcspar.privateKey);
+  const jwk = async (e) => crypto.subtle.exportKey('jwk', e.kulcspar.privateKey)   /* ⭐⭐ D128 (③): a készülék kulcsa */;
   const kulcs = await jwk(szerzok[1]);
   const [uj] = bejegyzesekEpitese({ szuletes, pontEsemenyek,
-    megujitas: (esemenyek) => megujitasKeszitese(kulcs, szerzok[1].szerzo, { koino: KOINO, g: szuletes.azonosito, esemenyek,
+    megujitas: (esemenyek) => megujitasKeszitese(kulcs, szerzok[1].szerzo, szerzok[1].keszulek, { koino: KOINO, g: szuletes.azonosito, esemenyek,
       ido: Date.now() + 5000 }) });
   const r = await bejegyzesBefogadasa(tar, uj);
   const idegen = await ujEember(KOINO);
   const ik = await jwk(idegen);
   const [hamis] = bejegyzesekEpitese({ szuletes, pontEsemenyek,
-    megujitas: (esemenyek) => megujitasKeszitese(ik, idegen.szerzo, { koino: KOINO, g: szuletes.azonosito, esemenyek,
+    megujitas: (esemenyek) => megujitasKeszitese(ik, idegen.szerzo, idegen.keszulek, { koino: KOINO, g: szuletes.azonosito, esemenyek,
       ido: Date.now() + 9000 }) });
   const h = await bejegyzesBefogadasa(tar, hamis);
   const halmaz = tar.regioHalmaza(0, 0n);
@@ -142,7 +142,7 @@ proba('⭐⛔ A megújítás (L3): a tulajdonosé érvényes és ÚJ elem (a ré
   let uj2 = null;
   for (let d = 9000; d < 2000000 && !uj2; d += 1000) {
     const [x] = bejegyzesekEpitese({ szuletes, pontEsemenyek,
-      megujitas: (esemenyek) => megujitasKeszitese(kulcs, szerzok[1].szerzo, { koino: KOINO, g: szuletes.azonosito, esemenyek,
+      megujitas: (esemenyek) => megujitasKeszitese(kulcs, szerzok[1].szerzo, szerzok[1].keszulek, { koino: KOINO, g: szuletes.azonosito, esemenyek,
         ido: Date.now() + d }) });
     if (bejegyzesAzonositoja(x) > bejegyzesAzonositoja(uj)) uj2 = x;
   }

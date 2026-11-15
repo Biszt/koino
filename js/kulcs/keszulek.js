@@ -43,7 +43,14 @@ const AZONOSITO = /^[A-Za-z0-9_-]{43}$/;
 const ALAIRAS = /^[A-Za-z0-9_-]{86}$/;
 const MEZOK = 'alairas,azonossag,ido,keszulek,nev,tipus';
 
-/** Az aláírt rész — ennek a lenyomatát írja alá az azonosság kulcsa. */
+/**
+ * Az aláírt rész — ennek a lenyomatát írja alá az azonosság kulcsa. ⭐ Kiadva: a hálózat (`csere/titkositas.js`) a kézfogásban
+ * szinkron ellenőrzi ugyanezt (EGY forrás a tartalomnak).
+ */
+export function tanusitvanyTartalma(t) {
+  return tartalma(t);
+}
+
 function tartalma(t) {
   return { tipus: t.tipus, azonossag: t.azonossag, keszulek: t.keszulek, nev: t.nev, ido: t.ido };
 }

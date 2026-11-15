@@ -375,6 +375,14 @@ D128 13–15.):
 - **A sorrend az építésben** (a döntés után): ②a a születés és a név (KC1), a horgony hozza, a tanúsítványok ellenőrzése belőle →
   ②b a kulcscsere-tanúsítvány és a kezelő kulcs a láncból (KC2) → ②c a mentés és a visszaállítás (KC3; a mai `mentes` /
   `visszatolt` helyett: a csere-kulcs papíron vagy fájlban; a lap a ④-ben). ⛔ A mag változik → új koinó-család (mint a D128 eleje).
+- ⭐ **Az építés közben kiderült — a ③ két pontja ELŐRE kell** (2026-11-15): a csere kézfogása (`titkositas.js`
+  `szemelyesKezfogasEllenorzese`) és a kereső megújítása (`keresoMegujitas.js`) a NEVET használta ellenőrző kulcsként — a KC1 (A) után
+  (a név a születés lenyomata) eltörnének. ✅ **③a:** mindkettőt a KÉSZÜLÉK kulcsa írja alá (D128 10. pont): a kézfogásban a személy
+  `{ sz, k, t, h, a }` — a készülék kulcsa (`k`) és a tanúsítványa (`t`, szinkron ellenőrizve: `keszulekKezfogasEllenorzese`); a
+  megújítás `{ szerzo, k, ido, alairas }` — az a készülék újít, amelyiknek a pozitív pont-eseménye a csomagban van (az köti a kulcsát a
+  szerzőhöz, tanúsítvány nélkül: `tulajdonosKeszulekeE`). A hálózaton az azonosság kulcsa ezzel már semmit nem ír alá. A próba:
+  titkositas (a személyes aláírás — az idegen, a hamis tanúsítvány, az azonosság kulcsával írt aláírás nem elég), keresotar (L3) —
+  5 rontás.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

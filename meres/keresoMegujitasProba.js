@@ -20,7 +20,7 @@ const { proba, futtatas } = probaGyujtemeny('A KERESŐ-BEJEGYZÉS MEGÚJÍTÁSA 
 const KOINO = 'kereso-megujitas-proba';
 const NAP = 24 * 3600 * 1000;
 
-const jwk = async (ember) => crypto.subtle.exportKey('jwk', ember.kulcspar.azonossagKulcspar.privateKey);
+const jwk = async (ember) => crypto.subtle.exportKey('jwk', ember.kulcspar.privateKey)   /* ⭐⭐ D128 (③): a készülék kulcsa */;
 
 async function csomag(pontok = [30, 20]) {
   const emberek = [];
@@ -35,7 +35,7 @@ async function csomag(pontok = [30, 20]) {
 // Rontás: az aláírás ellenőrzése kihagyva → a hamis is átmegy (lent) → bukik; itt: a jó bukik, ha az üzenet nem stabil.
 proba('⭐ a tulajdonos megújítása érvényes — és a gondolat MINDEN fiók-bejegyzésére szól (egy aláírás)', async () => {
   const c = await csomag();
-  const m = megujitasKeszitese(await jwk(c.emberek[1]), c.emberek[1].szerzo, { koino: KOINO, g: c.g, esemenyek: c.esemenyek });
+  const m = megujitasKeszitese(await jwk(c.emberek[1]), c.emberek[1].szerzo, c.emberek[1].keszulek, { koino: KOINO, g: c.g, esemenyek: c.esemenyek });
   return c.bejegyzesek.length > 1
     && c.bejegyzesek.every((b) => megujitasEllenorzese(m, { koino: KOINO, g: b.g, esemenyek: b.esemenyek }).rendben);
 });
@@ -44,7 +44,7 @@ proba('⭐ a tulajdonos megújítása érvényes — és a gondolat MINDEN fiók
 proba('⛔ a NEM tulajdonos megújítása nem érvényes (az idegen nem tarthatja életben)', async () => {
   const c = await csomag();
   const idegen = await ujEember(KOINO);
-  const m = megujitasKeszitese(await jwk(idegen), idegen.szerzo, { koino: KOINO, g: c.g, esemenyek: c.esemenyek });
+  const m = megujitasKeszitese(await jwk(idegen), idegen.szerzo, idegen.keszulek, { koino: KOINO, g: c.g, esemenyek: c.esemenyek });
   const r = megujitasEllenorzese(m, { koino: KOINO, g: c.g, esemenyek: c.esemenyek });
   return !r.rendben && /nem a csomag tulajdonosa/.test(r.ok);
 });
@@ -54,8 +54,8 @@ proba('⛔ a jövőbe dátumozott (egy napnál több) nem érvényes — a fél 
   const c = await csomag();
   const k = await jwk(c.emberek[0]);
   const most = Date.now();
-  const jovo = megujitasKeszitese(k, c.emberek[0].szerzo, { koino: KOINO, g: c.g, esemenyek: c.esemenyek, ido: most + 2 * NAP });
-  const kicsit = megujitasKeszitese(k, c.emberek[0].szerzo, { koino: KOINO, g: c.g, esemenyek: c.esemenyek, ido: most + NAP / 2 });
+  const jovo = megujitasKeszitese(k, c.emberek[0].szerzo, c.emberek[0].keszulek, { koino: KOINO, g: c.g, esemenyek: c.esemenyek, ido: most + 2 * NAP });
+  const kicsit = megujitasKeszitese(k, c.emberek[0].szerzo, c.emberek[0].keszulek, { koino: KOINO, g: c.g, esemenyek: c.esemenyek, ido: most + NAP / 2 });
   return JOVO_TURES === NAP && !megujitasEllenorzese(jovo, { koino: KOINO, g: c.g, esemenyek: c.esemenyek, most }).rendben
     && megujitasEllenorzese(kicsit, { koino: KOINO, g: c.g, esemenyek: c.esemenyek, most }).rendben;
 });
@@ -64,7 +64,7 @@ proba('⛔ a jövőbe dátumozott (egy napnál több) nem érvényes — a fél 
 proba('⛔ a megújítás nem vihető át: más csomagra, más gondolatra, más koinóra vagy más időre nem érvényes', async () => {
   const c = await csomag();
   const masik = await csomag();
-  const m = megujitasKeszitese(await jwk(c.emberek[0]), c.emberek[0].szerzo, { koino: KOINO, g: c.g, esemenyek: c.esemenyek });
+  const m = megujitasKeszitese(await jwk(c.emberek[0]), c.emberek[0].szerzo, c.emberek[0].keszulek, { koino: KOINO, g: c.g, esemenyek: c.esemenyek });
   const harmadik = await ujEember(KOINO);
   const bovebb = [...c.esemenyek, await harmadik.tesz('TudatpontRendezes', { entitas: c.g, pont: 5 })];
   return !megujitasEllenorzese(m, { koino: KOINO, g: c.g, esemenyek: bovebb }).rendben
