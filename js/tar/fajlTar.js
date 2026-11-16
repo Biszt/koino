@@ -907,6 +907,42 @@ export function keszulekTarolo(hely = alapHely()) {
   };
 }
 
+/**
+ * ⭐⭐ D128 (③b): A KEZELÉS-JEGYZÉK tárolója (`kezeles.json`) — amit a készülék az azonossága kezeléséről (a kulcscserék lánca, a
+ * kizárások) bármelyik koinójában látott (`allapot/kezelesTerjesztes.js`). Helyi feljegyzés, nem esemény: a kapu minden bevitelt
+ * újra ellenőriz, ezért egy átírt fájl hamisat nem visz be. Készülék-szintű, mint a kulcs.
+ * ⚠️ A `modosit` a folyamaton belül sorba rendez; két folyamat egymás írását felülírhatja — a jegyzék a tárakból újra összegyűlik.
+ * @param {string} [hely]
+ * @returns {{olvas: Function, ir: Function, modosit: Function, fajl: string}}
+ */
+export function kezelesTarolo(hely = alapHely()) {
+  const fajl = join(hely, 'kezeles.json');
+  return {
+    fajl,
+    async olvas() {
+      try {
+        return JSON.parse(await readFile(fajl, 'utf8'));
+      } catch (hiba) {
+        if (hiba.code === 'ENOENT' || hiba instanceof SyntaxError) return null;   // nincs, vagy olvashatatlan: üres jegyzék
+        throw hiba;
+      }
+    },
+    async ir(leiras) {
+      await mkdir(hely, { recursive: true });
+      const ideiglenes = fajl + '.' + process.pid + '.uj';
+      await writeFile(ideiglenes, JSON.stringify(leiras), 'utf8');
+      await rename(ideiglenes, fajl);   // egy félbeszakadt írás ne hagyjon csonka fájlt
+    },
+    async modosit(atalakit) {
+      return sorban(fajl, async () => {
+        const uj = await atalakit(await this.olvas());
+        if (uj !== undefined) await this.ir(uj);
+        return uj;
+      });
+    }
+  };
+}
+
 // ===================================
 // A TÁRS-LISTA TÁROLÁSA
 // ===================================

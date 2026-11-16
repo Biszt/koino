@@ -35,6 +35,7 @@ import fajlCsere from './fajlCsereProba.js';
 import tarsak from './tarsakProba.js';
 import identitas from './identitasProba.js';
 import helyreallitas from './helyreallitasProba.js';   // ⭐⭐ D128 (②e): a helyreállítás a segítőkkel
+import kezeles from './kezelesProba.js';   // ⭐⭐ D128 (③b): a kezelés minden koinómba
 import kapu from './kapuProba.js';
 import pakli from './pakliProba.js';
 import ter from './terProba.js';
@@ -130,6 +131,7 @@ const PROBAK = [
   { nev: 'tarsak', futtat: tarsak },
   { nev: 'identitas', futtat: identitas },
   { nev: 'helyreallitas', futtat: helyreallitas },
+  { nev: 'kezeles', futtat: kezeles },
   { nev: 'kapu', futtat: kapu },
   { nev: 'pakli', futtat: pakli },
   { nev: 'ter', futtat: ter },
@@ -208,7 +210,7 @@ const CSOPORTOK = {
   // a kanonikus alak, a kulcs, az aláírt esemény és a tár (az íróval)
   alap: ['kanonikus', 'kulcs', 'papir', 'esemeny', 'keszulek', 'tar', 'iro', 'atmeneti', 'keresotar', 'keresomegujitas'],
   // események → állapot: entitások, döntéshozatal, szabályok, egyezmények, tagság
-  allapot: ['allapot', 'javaslat', 'szabaly', 'egyezmeny', 'dontesicsomag', 'lezarasiosszegzes', 'osszpont', 'felszabaditas', 'identitas', 'helyreallitas', 'tagsag', 'ertesites', 'felderites', 'koinolanc', 'ketreteg', 'bekapcsolodas', 'koinoverzio'],
+  allapot: ['allapot', 'javaslat', 'szabaly', 'egyezmeny', 'dontesicsomag', 'lezarasiosszegzes', 'osszpont', 'felszabaditas', 'identitas', 'helyreallitas', 'kezeles', 'tagsag', 'ertesites', 'felderites', 'koinolanc', 'ketreteg', 'bekapcsolodas', 'koinoverzio'],
   // a felületnek felelő réteg
   felulet: ['kapu', 'pakli', 'ter', 'csereallapot'],
   // két készülék között: a párbeszéd, a kézi út, a társak, a kapu, a kötések, a tábla, a DHT

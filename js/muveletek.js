@@ -35,6 +35,8 @@ import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO, lancK
 import { helyreallitasJavaslatAlakiHibaja, helyreallitasJele, helyreallitasBejegyzese } from './kulcs/azonossag.js';
 import { helyreallitasokAllapota, helyreallitasBizonyiteka, azonossagLancaTarbol, javaslatElotagja, lancHelyreallitasai, segitoAllasa,
   JOVAHAGYAS } from './allapot/helyreallitas.js';   // ⭐⭐ D128 (②e)
+import { tarKezelese, jegyzekbe, kezelesHianyai, elvetesFeljegyzese, lancBizonyitekai, lancJele, ujKezelesJegyzek }
+  from './allapot/kezelesTerjesztes.js';   // ⭐⭐ D128 (③b): a kezelés minden koinómba
 import { lancNezete } from './allapot/koinoLanc.js';   // ⭐ D118 (③, ⑤b): a szerző lánca a koinóban, a jelen réteg szerint
 import { koinoSzabalyai, teljesSzabalyok } from './esemeny/koinoSzabalyok.js';
 import { kanonikusBajtok } from './esemeny/kanonikusAlak.js';
@@ -1476,6 +1478,56 @@ export async function keszulekKizarasa(kornyezet, azonossagKulcspar, kizart, koi
   const kizaras = await kizarasKeszitese(azonossagKulcspar, kizart, koinok);
   if (kizaras.azonossag !== kornyezet.szerzo) throw new Error('Csak a saját azonosságod készülékét zárhatod ki.');
   return { kizaras, esemeny: await kizarasBevitele(kornyezet, kizaras) };
+}
+
+// ===================================
+// ⭐⭐ D128 (③b — 9.12): AZ AZONOSSÁGOM KEZELÉSE MINDEN KOINÓMBA — HELYBEN
+// ===================================
+
+/**
+ * Az azonosságom kezelése EBBE A KOINÓBA: a jegyzékbe veszi, amit itt lát (a legerősebb kulcscsere-láncot a bizonyítékaival, a
+ * kizárásokat), és ha az azonosságomnak itt szelete van, beviszi, ami innen hiányzik — előbb a láncot (a kapu így a benne álló
+ * helyreállításokat is felveszi), utána a kizárásokat. Amit a kapu elvet, azt feljegyzi (`elvetve` — egy napig nem próbálja újra).
+ * ⚠️ A jegyzék tárolása a hívóé (`koino.js` — `kezeles.json`): ez a függvény a régit kapja, az újat adja vissza.
+ * @param {Object} kornyezet
+ * @param {Object|null} jegyzek - `allapot/kezelesTerjesztes.js` (null: üres)
+ * @param {{most?: number}} [beallitas]
+ * @returns {Promise<{jegyzek: Object, valtozott: boolean, lanc: Object|null, kizarasok: Array<Object>, hibak: Array<string>,
+ *   bizonyitekNelkul: boolean}>} a bevitt események és a kapu elvetéseinek okai
+ */
+export async function kezelesGondozasa(kornyezet, jegyzek, { most = Date.now() } = {}) {
+  const { tar, koino, szerzo } = kornyezet;
+  const itt = await tarKezelese(tar, szerzo);
+  let { jegyzek: j, valtozott } = jegyzekbe(jegyzek ?? ujKezelesJegyzek(szerzo), itt);
+  const ki = { jegyzek: j, valtozott, lanc: null, kizarasok: [], hibak: [], bizonyitekNelkul: false };
+  const h = kezelesHianyai(itt, j, koino, most);
+  ki.bizonyitekNelkul = h.bizonyitekNelkul;
+  if (!h.lanc && !h.kizarasok.length) return ki;
+  if (!(await azonossagHorgonya(tar, koino, szerzo))) return ki;   // itt nincs szeletem — nincs hová bevinni
+  console.log('muveletek.kezelesGondozasa - KEZDÉS', { koino, lanc: !!h.lanc, kizarasok: h.kizarasok.length });
+  const elvetettek = [];
+  if (h.lanc) {
+    try {
+      ki.lanc = await kulcscsereBevitele(kornyezet, h.lanc.szuletes, h.lanc.cserek, lancBizonyitekai(h.lanc));
+    } catch (hiba) {
+      ki.hibak.push('a kulcscsere: ' + hiba.message);
+      elvetettek.push(lancJele(h.lanc));
+    }
+  }
+  for (const k of h.kizarasok) {
+    try {
+      ki.kizarasok.push(await kizarasBevitele(kornyezet, k));
+    } catch (hiba) {
+      ki.hibak.push('a kizárás: ' + hiba.message);
+      elvetettek.push(k.alairas);
+    }
+  }
+  if (elvetettek.length) {
+    ki.jegyzek = elvetesFeljegyzese(ki.jegyzek, koino, elvetettek, most);
+    ki.valtozott = true;
+  }
+  console.log('muveletek.kezelesGondozasa - VÉGE', { lanc: !!ki.lanc, kizarasok: ki.kizarasok.length, hibak: ki.hibak.length });
+  return ki;
 }
 
 /**

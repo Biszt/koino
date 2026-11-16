@@ -475,6 +475,40 @@ a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③
   laptop csak a Kertvárosban; az Olvasókörben a telefon tartja a koinó TELJES keretét (az írta a horgonyt — `tagsag.js`
   `alapHorgony`), és a KH1 határa sem fékezi (az csak két saját készülék között számít). Csaba: *„IGEN MEHETÜNK TOVÁBB”*.
 
+*Az építés:*
+- ✅ **③b — a kezelés minden koinómba, helyben** (2026-11-16): `allapot/kezelesTerjesztes.js` — a KEZELÉS-JEGYZÉK (`kezeles.json`,
+  készülék-szintű helyi feljegyzés, mint a társ-lista): a legerősebb kulcscsere-lánc (a születésével és a benne álló helyreállítások
+  bizonyítékaival) és a kizárások, amit a készülék BÁRMELYIK koinójában látott, és a saját kulcsfájljának lánca. `muveletek.js`
+  `kezelesGondozasa`: egy koinóban a jegyzékbe veszi, amit ott lát, és ha az azonosságnak ott szelete van, beviszi, ami onnan hiányzik
+  (előbb a láncot — a kapu így a helyreállításait is felveszi —, utána a kizárásokat). ⭐ A jegyzék csak gyorsítótár: a kapu mindent
+  újra ellenőriz. Amit a kapu elvetett (pl. ezt a készüléket a kulcscsere nem sorolta fel), azt egy napig nem próbálja újra abban a
+  koinóban. Bizonyíték nélkül egy helyreállítást tartalmazó láncot nem visz be (kimondja). `koino.js`: a gondozás minden parancs
+  elején és az őrjárat minden körében (az éppen futó koinóba — a családi őrjárat a család minden koinójába); a `kulcscsere` és a
+  `papir visszavon` MINDEN koinóba beviszi (`kezelesMindenKoinomba` — a tér koinói); a `helyreallitas befejez` a láncot a
+  bizonyítékokkal a jegyzékbe írja (a kulcsfájl a bizonyítékot nem őrzi). ⭐ **Új parancs: `kizar`** — a készülékeim listája (a
+  tanúsítványuk neve, koinónként a láncuk vége, a kizártak); `kizar <készülék — a neve vagy a kulcsa eleje> [orokos <készülék>]` a
+  kizárás: koinónként a VÁGÁS a kizárt lánc vége, ameddig ez a készülék ismeri (a koinó-lista — ③d — nélkül is: ahol a kezelő is
+  tag, a saját tárából tudja), az örökös ez a készülék; a kizárás minden koinómba bekerül. ⚠️ A kizárás a terv „a felsorolt koinókba,
+  és ahol a kizárt készüléknek eseménye van” helyett MINDEN koinómba megy, ahol az azonosságomnak szelete van: egy tolvaj a telefonnal
+  később is írhat egy olyan koinóban, ahol tag vagyok — ott a kizárás már várja. A próba: `kezelesProba.js` (a jegyzék; a terjesztés
+  az A koinóból a B-be — ott a telefon eseménye kiesik —, másodszor semmi, ahol nincs szeletem, oda semmi; az elvetés egy napig), a
+  helyreállítás a bizonyítékkal a másik koinóba (`helyreallitasProba.js`), a parancssor (a `kizar` listája és a kizárás két koinóba;
+  egy másik készülékem kizárása az A-ból egy B-beli parancs elején a B-be; a kulcscsere két koinóba; a ②f befejezése a jegyzékbe)
+  — 15 rontás. ⚠️ Az őrjárat körének hívását csak a parancsok elejéé méri (ugyanaz a függvény).
+- ❓ **KH3 — a régi készülék MÚLTJA a kulcscsere és a helyreállítás után** (a ③b próbájának felállításakor derült ki, egy
+  mérő-szkripttel ellenőrizve; Csaba döntésére vár): a kulcscsere (és a helyreállítás) után minden FEL NEM SOROLT régi készülék
+  MINDEN eseménye kiesik a számításból — a lopás vagy az elvesztés előttiek is: a belépése (a tagság), a pontjai, a szavazatai
+  (`allapot/kizaras.js` `cserenKivulE` — a KC2 (A) szó szerint). Ha minden készülék elveszett, és a segítők visszaadják az
+  azonosságot, a NÉV és a pénztárca megmarad, de a koinókban olyan, mintha sosem lett volna ott — épp az, ami ellen a 17. pont
+  született („mi lessz a koinos megtakarításával?”). És fordítva: egy RÉGI kulccsal aláírt kizárás (a tolvajé, akinél az azonosság
+  kulcsa volt) ma a megmaradónak felsorolt laptopot is kizárja — a KC2 (A) „a felsoroltak … maradnak”-ja ellenére.
+  (A) ⭐ a kizárás vágása itt is érvényes: a kulcscsere (vagy a helyreállítás) UTÁN az új kezelő kulccsal aláírt kizárás a régi
+  készülék vágásig tartó múltját megtartja (a tagságát, a pontjait — az örökös folytatja a láncát); kizárás nélkül a régi készülék
+  minden eseménye kiesik, mint ma (a tolvaj ismeretlen készülékei); egy régi kulccsal aláírt kizárás a megmaradót nem zárhatja ki, és
+  a kulcscsere után a jegyzék kizárásait a készülék az új kulccsal újra aláírja. A helyreállítás után az új készülék, amint egy
+  koinóban látja a régi készülékeit, felajánlja a kizárásukat (a `kizar` listája). (B) marad, ahogy van (a múlt elvész). (C) a
+  kulcscsere előtti események mind maradnak — ⛔ a tolvaj régi kulccsal felvett készülékeié is.
+
 **9.13 A helyreállítás a segítőkkel** (2026-11-15 — D128 17. pont; ✅ eldöntve; a 9.12 (a ③) a ②d–②f után)
 
 *Ami előzte:* a kulcsok és az esetek átbeszélésekor (Csaba: „beszéljük át, még egyszer az összes kúlcs fajtát, és az összes esetet,

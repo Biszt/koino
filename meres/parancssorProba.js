@@ -3536,6 +3536,10 @@ proba('⭐⭐ D128 (②f): a HELYREÁLLÍTÁS a parancssorból — kérelem az �
       const befejezKi = tiszta(await fut(N, 'helyreallitas', 'befejez', kiadas));
       const nKulcs = tiszta(await fut(N, 'kulcs'));
       const xKulcs = tiszta(await fut(X, 'kulcs'));
+      // ⭐⭐ (③b) a lánc a BIZONYÍTÉKKAL a kezelés-jegyzékbe került (a kulcsfájl nem őrzi — innen viszi be a koinóiba)
+      const nJegyzek = JSON.parse(await readFile(join(N, 'kezeles.json'), 'utf8').catch(() => 'null'));
+      const jegyzekben = !!nJegyzek?.lanc?.cserek?.length
+        && nJegyzek.lanc.cserek.every((c) => c.tipus !== 'AzonossagHelyreallitas' || !!nJegyzek.lanc.bizonyitekok?.[c.jel]);
       const nev = (ki) => ki.split('\n').map((l) => l.trim()).find((l) => /^[A-Za-z0-9_-]{43}$/.test(l));
       const r = {
         kerelem: !!kerelem && !!kod, blokkolt: /helyreállításod folyamatban/.test(blokkolt),
@@ -3544,7 +3548,7 @@ proba('⭐⭐ D128 (②f): a HELYREÁLLÍTÁS a parancssorból — kérelem az �
         ertesites: /Valaki az azonosságod HELYREÁLLÍTÁSÁT kezdte/.test(xAllapot),
         fV: /1 véglegesítve, 0 bevíve/.test(fV), h2V: /1 véglegesítve, 0 bevíve/.test(h2V), h3V: /1 véglegesítve, 1 bevíve/.test(h3V),
         kiad: /Kiadva/.test(kiadKi), befejez: /Visszakaptad az azonosságodat/.test(befejezKi),
-        ugyanazANev: !!nev(xKulcs) && nev(nKulcs) === nev(xKulcs)
+        ugyanazANev: !!nev(xKulcs) && nev(nKulcs) === nev(xKulcs), jegyzekben
       };
       if (!Object.values(r).every(Boolean)) {
         process.stderr.write('    (②f-próba: ' + JSON.stringify({ r, nKulcs, xKulcs, fKi: fKi.slice(-300), h3Ki: h3Ki.slice(-300), fV: fV.slice(0, 300),
@@ -3554,6 +3558,61 @@ proba('⭐⭐ D128 (②f): a HELYREÁLLÍTÁS a parancssorból — kérelem az �
       return true;
     } finally {
       for (const h of [F, X, H2, H3, N]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
+// ⭐⭐ D128 (③b — 9.12): A KEZELÉS MINDEN KOINÓMBA a parancssorból. A laptop két koinót hoz létre, a telefon (ugyanaz az azonosság) az
+// egyikbe csatlakozik. A telefon egy képzelt készüléket zár ki — ez az A-ban van, a laptop onnan kapja meg, és egy B-beli parancs elején
+// a B-be is beviszi (a kezelés-jegyzéken át). A `kizar` a készülékeket koinónként listázza; a telefon kizárása és a kulcscsere MINDEN
+// koinóba bekerül; egy készüléket kétszer nem lehet kizárni.
+proba('⭐⭐ D128 (③b): a `kizar` — a készülékeim koinónként; a telefon kizárása és a kulcscsere MINDEN koinómba bekerül; amit az egyik koinóban lát (egy kizárást), azt egy parancs elején a másikba is beviszi',
+  async () => {
+    const L = await ujKeszulek();
+    const T = await ujKeszulek();
+    const TEL = { KOINO_KESZULEK_NEV: 'telefon' };
+    try {
+      await fut(L, 'koino', 'Kertváros');
+      await fut(L, 'koino', 'Olvasókör', { KOINO_AZONOSITO: 'b' });
+      const A = await koinoNeve(L);
+      const B = await koinoNeve(L, 'b');
+      await copyFile(join(L, 'kulcs.json'), join(T, 'kulcs.json'));
+      await fut(T, 'csatlakoz', A, TEL);
+      await fut(L, 'kivisz', join(L, 'a.jsonl'));
+      await fut(T, 'behoz', join(L, 'a.jsonl'), TEL);
+      // A telefon egy képzelt készüléket zár ki (csak az A-t ismeri) — a laptop az A-n át kapja meg.
+      const tKi = await fut(T, 'kizar', 'K'.repeat(43), TEL);
+      await fut(T, 'kivisz', join(T, 't.jsonl'), TEL);
+      await fut(L, 'behoz', join(T, 't.jsonl'));
+      const lista = await fut(L, 'kizar');
+      const bElotte = await readFile(join(L, B, 'esemenyek.jsonl'), 'utf8');
+      const bParancs = await fut(L, 'allapot', { KOINO_AZONOSITO: 'b' });
+      const bUtana = await readFile(join(L, B, 'esemenyek.jsonl'), 'utf8');
+      // A laptop kizárja a telefont; másodszor nem megy.
+      const kz = await fut(L, 'kizar', 'telefon');
+      const kz2 = await fut(L, 'kizar', 'telefon');
+      // A kulcscsere — mindkét koinóba.
+      const kc = await fut(L, 'kulcscsere', join(L, 'csere-kulcs.json'));
+      const bVegul = await readFile(join(L, B, 'esemenyek.jsonl'), 'utf8');
+      const db = (szoveg, tipus) => (szoveg.match(new RegExp('"tipus":"' + tipus + '"', 'g')) ?? []).length;
+      const r = {
+        tKi: /A készüléket kizártad/.test(tKi) && /A koinóba bekerült/.test(tKi),
+        lista: /telefon/.test(lista) && /\(ez a készülék\)/.test(lista) && /„Kertváros”: a láncán 1 esemény/.test(lista)
+          && /„Olvasókör”: a láncán 1 esemény/.test(lista),
+        bParancs: db(bElotte, 'Kizaras') === 0 && /kezelés: 1 kizárás bekerült ebbe a koinóba/.test(bParancs) && db(bUtana, 'Kizaras') === 1,
+        kz: /A készüléket kizártad/.test(kz) && /„Kertváros”: a láncából 1 esemény marad/.test(kz) && /A koinóba bekerült/.test(kz)
+          && /„Olvasókör” koinódba is bekerült/.test(kz),
+        kz2: /már kizártad/.test(kz2),
+        kc: /Kulcscsere kész/.test(kc) && /A koinóba bekerült/.test(kc) && /„Olvasókör” koinódba is bekerült/.test(kc),
+        bVegul: db(bVegul, 'Kizaras') === 2 && db(bVegul, 'Kulcscsere') === 1
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (③b-próba: ' + JSON.stringify({ r, tKi: tKi.slice(-300), lista: lista.slice(-500), bParancs: bParancs.slice(0, 300),
+          kz: kz.slice(-400), kc: kc.slice(-400) }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      for (const h of [L, T]) await rm(h, { recursive: true, force: true });
     }
   });
 
