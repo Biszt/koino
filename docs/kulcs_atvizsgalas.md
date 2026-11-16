@@ -725,6 +725,32 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
   ellenőrző kóddal — a rossz kód nem megy —, az értesítés a régi készüléken, a várakozás után a véglegesítés és a bevitel, a kiadás, a
   befejezés UGYANAZZAL a névvel) — 10 rontás. ⭐ A D128 17. pontja ezzel megépült; ⏭️ ③ a hálózat (9.12 — KH1, KH2 még nyitott).
 
+**9.14 A ④ terve — a lap: „📱 Készülékeim” és a második készülék felvétele** (2026-11-16; ❓ Csaba döntésére vár: KF1)
+
+*Ami már eldőlt:* új készüléket csak az azonosság kulcsa vesz fel, ami a kezelő készüléken és a mentésben él (ET-3/4 (A)); a
+tanúsítvány koinók fölött érvényes (KU2 (A)); az azonosság kulcsa csak kezel (KU6 (A)). ⚠️ **Ami ma van:** második készülék csak a
+`kulcs.json` átmásolásával jön létre — így az azonosság kulcsa (a kezelés: a kizárás, a kulcscsere, a felvétel) MINDEN készüléken
+ott van, és egy ellopott telefonnal a tolvaj a laptopot is kizárhatja (a ③f után a papíros kulcscsere ezt rendbe teszi — de ehhez a
+papír kell). A ③ próbái is így állították fel a két készüléket. A ④-ben a második készülék CSAK a tanúsítványát kapja meg.
+
+*Ami a ④-ben épül:*
+- **④a A felvétel.** Az új készülék „kezelő nélküli”: a kulcsfájlja a nevet, a születést és a láncot hordozza, titkos kulcs nélkül;
+  a kezelést kívánó parancsok (`kizar`, a felvétel, a `papir`) kimondják, hogy ez a kezelő készüléken megy. A papíros kulcscsere
+  innen is megy — utána ez a készülék a kezelő.
+- **④b A lap: „📱 Készülékeim”** — a készülékek (a nevük, koinónként a láncuk vége, a kizártak, a régebbi kulccsal tanúsítottak), a
+  felvétel, a kizárás (a vágás állítható), a keret részei és a személyes határ (készülékenként — KH1: csak az alapérték a 20%), a
+  mentés (a papír) állása.
+- **④c A személyes határ** — a fogadó készülékenként, a lapon; a `sajatKeszulekTalalkozasa` ezt kapja az alapérték helyett.
+
+*A kérdés:*
+- **KF1 — hogyan kerül a tanúsítvány az új készülékre?** (A) ⭐ **párosító kóddal, a hálózaton:** a laptop (a kezelő) kiír egy
+  párosító kódot és QR-t (benne a címei és egy egyszeri titok — a D121 meghívójának mintája); a telefon kamerája beolvassa, a
+  telefon ezzel kapcsolódik a laptophoz, elküldi a készülékkulcsát, a laptop aláírja és visszaküldi a tanúsítványt — közben mindkét
+  gép kiír egy 6 jeles ellenőrző kódot (mint a helyreállításnál), amit összevetsz; egy beolvasás, és kész (ahogy a Signal, a
+  WhatsApp Web párosít). (B) **két kóddal, hálózat nélkül:** a telefon kiír egy kérelem-kódot (14 négyjeles csoport, mint a papír),
+  amit a laptopba begépelsz; a laptop QR-t mutat a tanúsítvánnyal, amit a telefon kamerája beolvas. (C) **fájllal** (mint a mai
+  mentés — a fájlt át kell vinni).
+
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor
   NÉLKÜLE utazik: egy szelet a cserében, egy tagsági kísérő, egy kérelem vagy egy összegző válasza, egy döntési csomag, egy
