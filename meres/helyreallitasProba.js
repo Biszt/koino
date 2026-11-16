@@ -29,7 +29,8 @@ import { koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { keszulekKezfogasEllenorzese, szemelyesKezfogasAlairasa } from '../js/csere/titkositas.js';
 import { bajtokBase64Url } from '../js/esemeny/kanonikusAlak.js';
 import { alakiHiba } from '../js/esemeny/esemeny.js';
-import { helyreallitasJovahagyasa, helyreallitasMegallitasa } from '../js/muveletek.js';
+import { helyreallitasJovahagyasa, helyreallitasMegallitasa, helyreallitasokGondozasa } from '../js/muveletek.js';
+import { tarKulcscserei } from '../js/allapot/kizaras.js';
 
 const { proba, futtatas } = probaGyujtemeny('A helyreállítás a segítőkkel — a szerepek és a szabály (D128 ②e1)');
 
@@ -420,6 +421,50 @@ proba('⭐ A KÉZFOGÁS (②e2) — a helyreállított azonosság új készülé
   const utana = keszulekKezfogasEllenorzese(ki, KOINO, atirat);
   const atirtJellel = keszulekKezfogasEllenorzese({ ...ki, t: { ...ki.t, cserek: [{ ...h, kulcs: h.fizetes }] } }, KOINO, atirat);
   return !elotte && utana && !atirtJellel;
+});
+
+// ===== ⭐⭐ ②e3: A SEGÍTŐ KÉSZÜLÉKE =====
+
+proba('⭐⭐ A SEGÍTŐ KÉSZÜLÉKE (②e3) — a várakozás előtt nem véglegesít, utána igen (a saját órája szerint); ha teljes, beviszi a Kulcscserét a bizonyítékkal — egyszer; megállítás után nem véglegesít', async () => {
+  const NAP = 86400 * 1000;
+  const kornyezete = (tar, ki) => ({ koino: KOINO, kulcspar: ki.eember.kulcspar, szerzo: ki.eember.szerzo, tar });
+  // 1. A rendes út.
+  const { tar, kor, x } = await alap();
+  const X = x.eember.szerzo;
+  const j = await javaslat();
+  const jel = await helyreallitasJele(j);
+  for (const k of kor.slice(0, 3)) {
+    await helyreallitasJovahagyasa(kornyezete(tar, k), { kit: X, horgonya: x.horgony, sajatBelepes: k.horgony }, j);
+  }
+  const most = Date.now();
+  const gond = (k, nap) => helyreallitasokGondozasa(kornyezete(tar, k), { most: most + nap * NAP });
+  const korai = await gond(kor[0], 6);
+  const g0 = await gond(kor[0], 8);
+  const kozben = await allapota(tar, x, j);
+  const g1 = await gond(kor[1], 8);
+  const g2 = await gond(kor[2], 8);
+  const ujra = await gond(kor[0], 9);
+  const masikUjra = await gond(kor[1], 9);
+  const cserek = await tarKulcscserei(tar, X);
+  // 2. Megállítva: X egy készüléke megállítja — a 7. nap után sem véglegesít senki.
+  const m = await alap();
+  const jm = await javaslat();
+  for (const k of m.kor.slice(0, 3)) {
+    await helyreallitasJovahagyasa(kornyezete(m.tar, k), { kit: m.x.eember.szerzo, horgonya: m.x.horgony, sajatBelepes: k.horgony }, jm);
+  }
+  await helyreallitasMegallitasa(kornyezete(m.tar, m.x), await helyreallitasJele(jm));
+  const megallitva = await helyreallitasokGondozasa(kornyezete(m.tar, m.kor[0]), { most: most + 8 * NAP });
+  const r = {
+    korai: !korai.veglegesitettek.length && !korai.bevittek.length,
+    g0: g0.veglegesitettek[0] === jel && !g0.bevittek.length && !kozben.teljes,
+    g1: g1.veglegesitettek[0] === jel && !g1.bevittek.length,
+    g2: g2.veglegesitettek[0] === jel && g2.bevittek[0] === jel,
+    egyszer: !ujra.veglegesitettek.length && !ujra.bevittek.length && !masikUjra.bevittek.length,
+    lancban: cserek.get(X)?.korszak === 1 && cserek.get(X)?.alairasok[0] === jel,
+    megallitva: !megallitva.veglegesitettek.length
+  };
+  if (Object.values(r).some((v) => !v)) process.stderr.write('    (' + JSON.stringify({ r, g0, g2 }) + ')\n');
+  return Object.values(r).every(Boolean);
 });
 
 export default async function (csendes) {

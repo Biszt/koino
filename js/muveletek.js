@@ -32,7 +32,9 @@ import { kizarasKeszitese } from './kulcs/keszulek.js';   // ⭐⭐ D128 (①d):
 import { ellentmondasEllenorzese } from './allapot/ellentmondas.js';
 import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO, lancKulcsa, PONT_TIPUSOK, HELYREALLITAS_FAZISOK }
   from './esemeny/esemeny.js';
-import { helyreallitasJavaslatAlakiHibaja } from './kulcs/azonossag.js';   // ⭐⭐ D128 (②e)
+import { helyreallitasJavaslatAlakiHibaja, helyreallitasJele, helyreallitasBejegyzese } from './kulcs/azonossag.js';
+import { helyreallitasokAllapota, helyreallitasBizonyiteka, azonossagLancaTarbol, javaslatElotagja, lancHelyreallitasai, segitoAllasa,
+  JOVAHAGYAS } from './allapot/helyreallitas.js';   // ⭐⭐ D128 (②e)
 import { lancNezete } from './allapot/koinoLanc.js';   // ⭐ D118 (③, ⑤b): a szerző lánca a koinóban, a jelen réteg szerint
 import { koinoSzabalyai, teljesSzabalyok } from './esemeny/koinoSzabalyok.js';
 import { kanonikusBajtok } from './esemeny/kanonikusAlak.js';
@@ -1365,6 +1367,78 @@ export async function helyreallitasMegallitasa(kornyezet, jel) {
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
   if (!horgony) throw new Error('Ebben a koinóban nincs azonosság-szeleted — itt nincs mit megállítani.');
   return esemenytTeszek(kornyezet, 'HelyreallitasMegallitas', { javaslat: jel }, { entitas: horgony });
+}
+
+/** Egy nap ezredmásodpercben (a helyreállítás várakozása napokban áll). */
+const NAP_MS = 86400 * 1000;
+
+/**
+ * ⭐⭐ D128 (②e3 — 17. pont, Csaba: „a segítők EGYSZER cselekszenek”): A SEGÍTŐ KÉSZÜLÉKÉNEK GONDOZÁSA ebben a koinóban — minden
+ * helyreállításnál, amit az azonosságom jóváhagyott (és nem vont vissza, nem véglegesített):
+ *   · ha a SAJÁT ÓRÁM szerint letelt a várakozás (a kezdésemtől — az út és a kör szerinti napok), és nem jött megállítás (és a 2.
+ *     körnél az 1. meg van állítva), VÉGLEGESÍT;
+ *   · ha a helyreállítás így (vagy már korábban) TELJES, és a koinóban még nincs bent: a láncot (a tárból — a javaslat helyéig) a
+ *     helyreállítás bejegyzésével és a BIZONYÍTÉKOKKAL egy `Kulcscsere` eseményben beviszi (bárki beviheti — önmagát igazolja).
+ * ⭐ Idő nélkül dönt a koinó (D17) — a várakozást itt, a segítő készülékén mérjük.
+ * @param {Object} kornyezet
+ * @param {{most?: number}} [beallitas] - a „most” (a próbáknak)
+ * @returns {Promise<{veglegesitettek: Array<string>, bevittek: Array<string>}>} a javaslatok jelei
+ */
+export async function helyreallitasokGondozasa(kornyezet, { most = Date.now() } = {}) {
+  const { tar, koino, szerzo } = kornyezet;
+  const sajatok = (await azonossagEsemenyei(tar, szerzo))
+    .filter((e) => e.tipus === JOVAHAGYAS && esemenyKoinoja(e) === koino && typeof e.entitas === 'string');
+  const ki = { veglegesitettek: [], bevittek: [] };
+  if (!sajatok.length) return ki;
+  console.log('muveletek.helyreallitasokGondozasa - KEZDÉS', { jovahagyasaim: sajatok.length });
+  // Horgonyonként, javaslatonként a fázisaim.
+  const csoportok = new Map();
+  for (const e of sajatok) {
+    const jel = await helyreallitasJele(e.adat.javaslat);
+    const kulcs = e.entitas + '|' + jel;
+    if (!csoportok.has(kulcs)) csoportok.set(kulcs, { horgony: e.entitas, jel, javaslat: e.adat.javaslat, kit: e.adat.kit, fazisok: [] });
+    csoportok.get(kulcs).fazisok.push({ fazis: e.adat.fazis, sorszam: e.entitasSorszam ?? 0, ido: e.ido });
+  }
+  for (const c of csoportok.values()) {
+    const allas = segitoAllasa(c.fazisok);
+    let a = (await helyreallitasokAllapota(tar, koino, c.horgony)).find((x) => x.jel === c.jel);
+    if (!a) continue;
+    if (allas.kezdett && !allas.veglegesitett && a.ut && !a.megallitva && a.elozoMegallitva) {
+      // A kezdésem ideje: az utolsó visszavonásom utáni első kezdés.
+      const rendezett = [...c.fazisok].sort((x, y) => x.sorszam - y.sorszam);
+      let kezdesIdo = null;
+      for (const f of rendezett) {
+        if (f.fazis === 'visszavonas') kezdesIdo = null;
+        else if (f.fazis === 'kezdes' && kezdesIdo === null) kezdesIdo = f.ido;
+      }
+      if (kezdesIdo !== null && most - kezdesIdo >= a.varakozasNap * NAP_MS) {
+        const sajatBelepes = await azonossagHorgonya(tar, koino, szerzo);
+        await helyreallitasJovahagyasa(kornyezet, { kit: c.kit, horgonya: c.horgony, sajatBelepes }, c.javaslat, 'veglegesites');
+        ki.veglegesitettek.push(c.jel);
+        a = (await helyreallitasokAllapota(tar, koino, c.horgony)).find((x) => x.jel === c.jel);
+      }
+    }
+    if (!a?.teljes) continue;
+    // TELJES — bent van-e már (egy Kulcscsere, aminek a láncában ez a jel áll)?
+    const lanc = await azonossagLancaTarbol(tar, c.kit);
+    if (lanc.lancok.some((cs) => cs.some((x) => x.jel === c.jel))) continue;
+    const elotag = javaslatElotagja(lanc, c.javaslat);
+    if (!lanc.szuletes || !elotag) continue;   // a tár nem ismeri a láncot a javaslat helyéig (D19 — később)
+    const bejegyzes = await helyreallitasBejegyzese(c.kit, c.javaslat);
+    const cserek = [...elotag, bejegyzes];
+    const bizonyitekok = { [c.jel]: await helyreallitasBizonyiteka(tar, koino, c.horgony, c.jel) };
+    // A lánc-elejében álló korábbi helyreállítások bizonyítékai is kellenek (a Kulcscsere pontosan hozza őket).
+    let hianyos = false;
+    for (const jel of lancHelyreallitasai(elotag)) {
+      if (!lanc.bizonyitekok[jel]) { hianyos = true; break; }
+      bizonyitekok[jel] = lanc.bizonyitekok[jel];
+    }
+    if (hianyos) continue;
+    await kulcscsereBevitele(kornyezet, lanc.szuletes, cserek, bizonyitekok);
+    ki.bevittek.push(c.jel);
+  }
+  console.log('muveletek.helyreallitasokGondozasa - VÉGE', ki);
+  return ki;
 }
 
 /**

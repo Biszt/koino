@@ -33,9 +33,9 @@
 // Használják: a lánc bejegyzése és a bizonyíték (②e2), a segítők készülékei (②e3), a parancsok (②f), a próbák.
 
 import { allitasHelyben, tanusithatE, ujIdentitasNezet } from './identitas.js';
-import { esemenyLekerese, entitasEsemenyei, tarTanusitvanya } from '../tar/esemenyTar.js';
-import { helyreallitasJele, helyreallitasJavaslatAlakiHibaja, javaslatResze, helyreallitasBejegyzesAlakiHibaja }
-  from '../kulcs/azonossag.js';
+import { esemenyLekerese, entitasEsemenyei, tarTanusitvanya, azonossagEsemenyei } from '../tar/esemenyTar.js';
+import { helyreallitasJele, helyreallitasJavaslatAlakiHibaja, javaslatResze, helyreallitasBejegyzesAlakiHibaja, lancErosebbE,
+  bejegyzesJele, HELYREALLITAS_BEJEGYZES, lancBejegyzesAlakiHibaja } from '../kulcs/azonossag.js';
 import { memoriaTar, rogzitoTar } from '../tar/memoriaTar.js';
 import { alakiHiba, esemenyEllenorzese, esemenyKoinoja, tanusitvanyKereso, azonositoAlaku } from '../esemeny/esemeny.js';
 import { tarKizarasai, tarKulcscserei, kizartE, cserenKivulE, tanusitvanyKorszaka } from './kizaras.js';
@@ -288,4 +288,58 @@ export async function helyreallitasBizonyitekEllenorzese(b, bejegyzes) {
   if (!a?.teljes) return nem('a bizonyítékból a helyreállítás nem teljes');
   console.log('helyreallitasBizonyitekEllenorzese - VÉGE (rendben)');
   return { rendben: true };
+}
+
+// ===================================
+// ⭐⭐ D128 (②e3): AZ AZONOSSÁG LÁNCA A TÁRBÓL — a segítő készüléke ebből építi a helyreállítás `Kulcscsere` eseményét
+// ===================================
+
+/**
+ * Egy azonosság LÁNCA a tárból: a születése, a láncok (a `Kulcscsere` eseményekből és a készülékei tanúsítványaiból) közül az
+ * erősebb, és a benne álló helyreállítások bizonyítékai (a `Kulcscsere` eseményekből). ⚠️ Amit a tár ismer — nem több.
+ * @param {Object} tar
+ * @param {string} nev - az azonosság neve
+ * @returns {Promise<{szuletes: Object|null, cserek: Array<Object>, lancok: Array<Array<Object>>, bizonyitekok: Object}>}
+ */
+export async function azonossagLancaTarbol(tar, nev) {
+  let szuletes = null;
+  const lancok = [];
+  const bizonyitekok = {};
+  const jelolt = (cs) => {
+    if (Array.isArray(cs) && cs.length && !cs.some((c) => lancBejegyzesAlakiHibaja(c)) && cs[0].azonossag === nev) lancok.push(cs);
+  };
+  const kezeles = typeof tar?.kezelesEsemenyei === 'function' ? await tar.kezelesEsemenyei(nev) : [];
+  for (const e of kezeles) {
+    if (e?.tipus !== 'Kulcscsere') continue;
+    szuletes ??= e.adat?.szuletes ?? null;
+    jelolt(e.adat?.cserek);
+    for (const [jel, b] of Object.entries(e.adat?.bizonyitekok ?? {})) bizonyitekok[jel] ??= b;
+  }
+  for (const e of await azonossagEsemenyei(tar, nev)) {
+    if (!e?.tanusitvany) continue;
+    szuletes ??= e.tanusitvany.szuletes ?? null;
+    jelolt(e.tanusitvany.cserek);
+  }
+  let cserek = [];
+  for (const cs of lancok) if (lancErosebbE(cs, cserek)) cserek = cs;
+  return { szuletes, cserek, lancok, bizonyitekok };
+}
+
+/**
+ * A helyreállítás bejegyzésének HELYE a lánc(ok)ban: az a lánc-eleje, amit a javaslat folytat (`sorszam - 1` hosszú, az utolsó jele
+ * az `utan`) — vagy null, ha a tár nem ismeri.
+ * @returns {Array<Object>|null}
+ */
+export function javaslatElotagja(lanc, javaslat) {
+  const n = javaslat.sorszam - 1;
+  if (n === 0) return [];
+  for (const cs of [lanc.cserek, ...lanc.lancok]) {
+    if (cs.length >= n && bejegyzesJele(cs[n - 1]) === javaslat.utan) return cs.slice(0, n);
+  }
+  return null;
+}
+
+/** A láncban álló helyreállítások jelei. */
+export function lancHelyreallitasai(cserek) {
+  return cserek.filter((c) => c?.tipus === HELYREALLITAS_BEJEGYZES).map((c) => c.jel);
 }

@@ -605,6 +605,17 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
   más jelű, más azonosságé, idegen koinóé; a lánc; a kapu egy MÁSIK koinóban: bizonyíték nélkül és csonkával nem, utána az új készülék
   be, a régi ki; a kézfogás) — 14 rontás. ⏭️ ②e3: a segítők készülékei (a várakozás utáni magától véglegesítés és a Kulcscsere
   bevitele a bizonyítékkal; az értesítés X készülékein).
+- ✅ **Az építés — ②e3 a segítők készülékei** (2026-11-16 — Csaba: „a segítők EGYSZER cselekszenek”): `muveletek.js`
+  `helyreallitasokGondozasa` — minden helyreállításnál, amit az azonosságom jóváhagyott (és nem vont vissza, nem véglegesített): ha a
+  SAJÁT ÓRÁM szerint letelt a várakozás a kezdésemtől (az út és a kör napjai), és nem jött megállítás, VÉGLEGESÍT; ha a helyreállítás
+  így (vagy már korábban) TELJES, és a koinóban még nincs bent, a láncot (a tárból, a javaslat helyéig — `allapot/helyreallitas.js`
+  `azonossagLancaTarbol`, `javaslatElotagja`) a bejegyzéssel és a bizonyítékokkal (a lánc-elejében álló korábbi helyreállításokéval is)
+  egy `Kulcscsere` eseményben BEVISZI — egyszer. A koinó idő nélkül dönt (D17); a várakozást a segítő készüléke méri. `koino.js`:
+  minden parancs elején és az őrjárat minden körében (a hibája nem akaszt meg semmit); az állapot SZÓL, ha valaki az én
+  helyreállításomat kezdte (a segítők száma, az út, a várakozás, és a `megallit <jel>` parancs); a `megallit` csak az én
+  azonosságomról szóló javaslatot fogadja el. A próba: „A SEGÍTŐ KÉSZÜLÉKE” (a várakozás előtt nem, utána igen; a harmadik véglegesítő
+  beviszi — egyszer; megállítás után senki) — 5 rontás. ⏭️ ②f: a parancsok (az új készüléken a kérelem és a befejezés; a segítés, a
+  visszavonás), a parancssor-próba a megállítással és az értesítéssel.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

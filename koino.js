@@ -166,7 +166,8 @@ import { azonossagNeve } from './js/kulcs/azonossag.js';   // ⭐⭐ D128 (②a)
 import { csereKodja, csereKodbol, csereKodQrja, kodTisztitasa, KOD_HOSSZ } from './js/kulcs/papir.js';   // ⭐⭐ D128 (②c)
 import { qrTerminalra } from './js/kulcs/qr.js';   // ⭐⭐ D128 (②c): a csere-kód QR-je a terminálba
 import { existsSync } from 'node:fs';
-import { kiseroAdo, osszesHelyreallitasFelvetele } from './js/tar/esemenyTar.js';   // ⭐⭐ D128 (②e2): a helyreállítások
+import { kiseroAdo, osszesHelyreallitasFelvetele } from './js/tar/esemenyTar.js';
+import { helyreallitasokAllapota } from './js/allapot/helyreallitas.js';   // ⭐⭐ D128 (②e3): az értesítés   // ⭐⭐ D128 (②e2): a helyreállítások
 // ⭐ B/2: a szelet-kulcs (az előléptetéshez).
 import {
   szelet, esemenyEllenorzese, tanusitvanyKereso, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, koinoSzuleteseE, koinoSzuleteseListabol,
@@ -232,6 +233,7 @@ import {
   // ⭐ A SZAKASZ 4 HÉT MŰVELETE (2026-09-12) — eddig egyik sem volt elérhető kézzel.
   belepes, meghivas, felhatalmazas, tanusitas, bemutatkozas, lattam, felhatalmazasVisszavonasa,
   kulcscsereBevitele,   // ⭐⭐ D128 (②b)
+  helyreallitasokGondozasa, helyreallitasMegallitasa,   // ⭐⭐ D128 (②e3): a segítő készüléke; a megállítás
   // ⭐ D82: az észlelt ellentmondások bejelentése (ismétlés nélkül).
   ellentmondasokBejelentese,
   // ⭐ D85 T3: a lezárt, több érintettes döntések csomagja (a (B): a töredék szeletébe).
@@ -5926,6 +5928,15 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
   try { await atmenetiElolepetese(); } catch (hiba) {
     kiir(SZIN.halvany + '  ⚠ az előléptetés most nem sikerült: ' + hiba.message + SZIN.vege);
   }
+  // ⭐⭐ D128 (②e3): a segítő készüléke — a várakozás utáni véglegesítés és a teljes helyreállítás bevitele — körönként.
+  try {
+    const g = await helyreallitasokGondozasa(kornyezet);
+    if (g.veglegesitettek.length || g.bevittek.length) {
+      kiir('  helyreállítás: ' + g.veglegesitettek.length + ' véglegesítve, ' + g.bevittek.length + ' bevíve a koinóba');
+    }
+  } catch (hiba) {
+    kiir(SZIN.halvany + '  ⚠ a helyreállítások gondozása most nem sikerült: ' + hiba.message + SZIN.vege);
+  }
 
   // ⭐⭐ D85 T3: A SAJÁT LEZÁRT, TÖBB ÉRINTETTES JAVASLATAIM DÖNTÉSI CSOMAGJA (a (B): a töredékekbe).
   // ⚠️ A csere UTÁN, mint a felszabadítás: a friss események már beleszámítanak. Ismételhető — ha
@@ -6555,6 +6566,13 @@ async function allapotKiirasa(napokMulva) {
     }
     // ⭐⭐ D128 (②d — 17. pont): a 2. lépcsőn a papír visszavonása — amíg meg nem történik, itt szólunk.
     if (kerdesek[2][1].igen && papirEl(azonossagKulcspar)) kiir('  ' + SZIN.nem + PAPIR_INTELEM + SZIN.vege);
+    // ⭐⭐ D128 (②e3): ha valaki az ÉN helyreállításomat kezdte (és még megállítható), szólunk — a megállítás parancsával.
+    for (const a of await helyreallitasokAllapota(tar, KOINO, sajatBelepes)) {
+      if (!a.elindult || a.teljes || a.javaslat.kor !== 1) continue;
+      kiir('  ' + SZIN.nem + '⚠ Valaki az azonosságod HELYREÁLLÍTÁSÁT kezdte: ' + a.kezdok.size + ' segítő ('
+        + (a.ut === 'ismeros' ? 'a régi ismerős útján' : 'a bemutatkozók útján') + ', ' + a.varakozasNap + ' nap várakozás). Ha nem te'
+        + ' kérted: node koino.js megallit ' + a.jel + SZIN.vege);
+    }
 
     // ⭐ MEGBÍZÁS, NEM PONTSZÁM (D60): „hányan bízták rá a tanúsítást" — soha nem
     // „becsületesség: N". A különbség nem szépészeti: egy jellem-szám hírnév-rendszerré
@@ -7236,6 +7254,16 @@ if (existsSync(CSERE_KULCS_FAJL)) {
 try {
   // ⭐ B/2: a vállalttá vált átmeneti szeletek a tartós tárba (pl. ha az előző parancs pontot tett rájuk).
   await atmenetiElolepetese();
+  // ⭐⭐ D128 (②e3 — Csaba: „a segítők EGYSZER cselekszenek”): a segítő készüléke magától véglegesít a várakozás után, és a teljes
+  // helyreállítást a bizonyítékkal beviszi — minden parancs elején is (nem csak az őrjáratban). ⚠️ A hibája nem akasztja meg a parancsot.
+  try {
+    const g = await helyreallitasokGondozasa(kornyezet);
+    if (g.veglegesitettek.length || g.bevittek.length) {
+      process.stderr.write('helyreállítás: ' + g.veglegesitettek.length + ' véglegesítve, ' + g.bevittek.length + ' bevíve a koinóba\n');
+    }
+  } catch (hiba) {
+    process.stderr.write('⚠ a helyreállítások gondozása most nem sikerült: ' + hiba.message + '\n');
+  }
   switch (parancs) {
 
     case undefined:
@@ -7274,6 +7302,21 @@ try {
       const e = await kulcscsereBevitele(kornyezet, r.kulcspar.szuletes, r.cserek);
       kiir(e ? '  A koinóba bekerült: ' + rovidAzonosito(e.azonosito)
         : SZIN.halvany + '  Ebben a koinóban nincs azonosság-szeleted — ide nincs mit bevinni.' + SZIN.vege);
+      break;
+    }
+
+    // ⭐⭐ D128 (②e3 — 17. pont): A HELYREÁLLÍTÁS MEGÁLLÍTÁSA — „ezt nem én kértem”. Az 1. kört érvényteleníti (a 2. kör — 5 segítő,
+    // kétszeres várakozás — nem állítható meg). A jelét az állapot írja ki.
+    case 'megallit': {
+      if (!ervek[0]) throw new Error('Melyik helyreállítást? node koino.js megallit <a javaslat jele> (az állapot kiírja)');
+      // ⛔ Csak egy, az ÉN azonosságomról szóló javaslatot (egy elírt jelre ne írjunk alá semmit).
+      const horgonyom = await sajatHorgonyom();
+      const ismert = horgonyom ? (await helyreallitasokAllapota(tar, KOINO, horgonyom)).some((a) => a.jel === ervek[0]) : false;
+      if (!ismert) throw new Error('Nincs ilyen helyreállítás az azonosságodról ebben a koinóban: ' + ervek[0] + ' (az állapot kiírja a jelét)');
+      const e = await helyreallitasMegallitasa(kornyezet, ervek[0]);
+      kiir(SZIN.jo + 'Megállítottad a helyreállítást — ha valóban te kérted, a segítőid újrakezdhetik (5 segítővel, kétszeres várakozással).'
+        + SZIN.vege);
+      kiir('  ' + rovidAzonosito(e.azonosito));
       break;
     }
 
