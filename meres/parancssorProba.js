@@ -3657,6 +3657,99 @@ proba('⭐⭐ D128 (③c): a laptop és a telefon cseréje — a kapu a társ k�
     }
   });
 
+// ⭐⭐ D128 (③d — 9.12, KH2 (A)): A KOINÓ-LISTA ÉS A CSATLAKOZÁS a parancssorból. A telefon a Kertvárosban (a laptoppal közös) és az
+// Olvasókörben (csak ő) tag. A cserében a két saját készülék megmondja egymásnak a koinóit (egy idegennek nem); a laptop a telefon
+// kizárásakor az Olvasókört is felsorolja (a vágás a telefon listájáé), csatlakozik hozzá, és amint az eseményei megjönnek, egy ottani
+// parancs elején a kizárást beviszi.
+proba('⭐⭐ D128 (③d): a koinó-lista a saját készülékek között (az idegennek nem); a kizárás az Olvasókört is felsorolja — a laptop csatlakozik, és amint az eseményei megjönnek, beviszi',
+  async () => {
+    const L = await ujKeszulek();
+    const T = await ujKeszulek();
+    const S = await ujKeszulek();
+    const TEL = { KOINO_KESZULEK_NEV: 'telefon' };
+    try {
+      await fut(L, 'koino', 'Kertváros');
+      const A = await koinoNeve(L);
+      await copyFile(join(L, 'kulcs.json'), join(T, 'kulcs.json'));
+      await fut(T, 'csatlakoz', A, TEL);
+      await fut(L, 'kivisz', join(L, 'a.jsonl'));
+      await fut(T, 'behoz', join(L, 'a.jsonl'), TEL);   // a telefonnál is megvan a Kertváros születése (a kapuja így kérdez)
+      await fut(T, 'koino', 'Olvasókör', { ...TEL, KOINO_AZONOSITO: 'c' });
+      const C = await koinoNeve(T, 'c');
+      await csereKor(L, T, 8021, TEL);
+      const lListak = JSON.parse(await readFile(join(L, 'sajatkeszulekek.json'), 'utf8').catch(() => '{}'));
+      const tListak = JSON.parse(await readFile(join(T, 'sajatkeszulekek.json'), 'utf8').catch(() => '{}'));
+      // Egy idegen (más azonosság) a Kertvárosban: a cseréből nem tud meg semmit a koinóimról.
+      await fut(S, 'csatlakoz', A);
+      await csereKor(L, S, 8023);
+      const sListak = JSON.parse(await readFile(join(S, 'sajatkeszulekek.json'), 'utf8').catch(() => '{}'));
+      const tKesz = JSON.parse(await readFile(join(T, 'keszulek.json'), 'utf8')).tanusitvany.keszulek;
+      const lista = await fut(L, 'kizar');
+      const kz = await fut(L, 'kizar', 'telefon');
+      const cMappa = await readdir(join(L, C)).then(() => true, () => false);
+      // Az Olvasókör eseményei a laptopra (a kézi úton), és egy ottani parancs elején a kizárás bekerül.
+      await fut(T, 'kivisz', join(T, 'c.jsonl'), { ...TEL, KOINO_AZONOSITO: 'c' });
+      await fut(L, 'behoz', join(T, 'c.jsonl'), { KOINO_AZONOSITO: C });
+      const cParancs = await fut(L, 'allapot', { KOINO_AZONOSITO: C });
+      const cFajl = await readFile(join(L, C, 'esemenyek.jsonl'), 'utf8').catch(() => '');
+      const r = {
+        lLista: (lListak[tKesz]?.koinok ?? []).some((x) => x.k === C && x.n === 1) && (lListak[tKesz]?.koinok ?? []).some((x) => x.k === A),
+        tLista: Object.values(tListak).some((x) => (x.koinok ?? []).some((y) => y.k === A)),
+        idegen: Object.keys(sListak).length === 0 && !Object.values(lListak).some((x) => x === undefined) && Object.keys(lListak).length === 1,
+        lista: new RegExp(C.slice(0, 8)).test(lista) && /a listája szerint 1 esemény \(ezen a készüléken nem ismert koinó\)/.test(lista),
+        kz: /A készüléket kizártad/.test(kz) && /csatlakoztam/.test(kz) && /a láncából 1 esemény marad/.test(kz)
+          && !kz.split(/\r?\n/).some((l) => l.includes(A.slice(0, 8)) && l.includes('csatlakoztam')),   // a már ismert koinóhoz nem
+        cMappa,
+        cBevitel: /kezelés: 1 kizárás bekerült ebbe a koinóba/.test(cParancs) && /"tipus":"Kizaras"/.test(cFajl)
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (③d-próba: ' + JSON.stringify({ r, lListak, tListak, sListak, lista: lista.slice(-600), kz: kz.slice(-600),
+          cParancs: cParancs.slice(0, 400) }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      for (const h of [L, T, S]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
+// ⭐⭐ D128 (③d — KH2 (A)): A KULCSCSERE IS CSATLAKOZIK — a telefon (a kulcscsere nem sorolja fel) koinó-listájának az a koinója,
+// amelyik a laptopon nincs (az Olvasókör), a kulcscsere után ismert lesz, és amint az eseményei megjönnek, a kulcscsere oda is bekerül.
+proba('⭐⭐ D128 (③d): a kulcscsere is csatlakozik — a fel nem sorolt telefon listájának koinójához; amint az eseményei megjönnek, a kulcscsere oda is bekerül',
+  async () => {
+    const L = await ujKeszulek();
+    const T = await ujKeszulek();
+    const TEL = { KOINO_KESZULEK_NEV: 'telefon' };
+    try {
+      await fut(L, 'koino', 'Kertváros');
+      const A = await koinoNeve(L);
+      await copyFile(join(L, 'kulcs.json'), join(T, 'kulcs.json'));
+      await fut(T, 'csatlakoz', A, TEL);
+      await fut(L, 'kivisz', join(L, 'a.jsonl'));
+      await fut(T, 'behoz', join(L, 'a.jsonl'), TEL);
+      await fut(T, 'koino', 'Olvasókör', { ...TEL, KOINO_AZONOSITO: 'c' });
+      const C = await koinoNeve(T, 'c');
+      await csereKor(L, T, 8025, TEL);
+      const kc = await fut(L, 'kulcscsere', join(L, 'csere-kulcs.json'));
+      const cMappa = await readdir(join(L, C)).then(() => true, () => false);
+      await fut(T, 'kivisz', join(T, 'c.jsonl'), { ...TEL, KOINO_AZONOSITO: 'c' });
+      await fut(L, 'behoz', join(T, 'c.jsonl'), { KOINO_AZONOSITO: C });
+      const cParancs = await fut(L, 'allapot', { KOINO_AZONOSITO: C });
+      const cFajl = await readFile(join(L, C, 'esemenyek.jsonl'), 'utf8').catch(() => '');
+      const r = {
+        kc: /Kulcscsere kész/.test(kc) && new RegExp(C.slice(0, 8)).test(kc) && /csatlakoztam/.test(kc), cMappa,
+        cBevitel: /kezelés: a kulcscsere bekerült ebbe a koinóba/.test(cParancs) && /"tipus":"Kulcscsere"/.test(cFajl)
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (③d-kulcscsere: ' + JSON.stringify({ r, kc: kc.slice(-600), cParancs: cParancs.slice(0, 300) }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      for (const h of [L, T]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();

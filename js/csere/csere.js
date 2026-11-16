@@ -95,7 +95,7 @@ async function csereLatoEsemenyek(tar, koino) {
  *
  * @param {Object} tar - a tároló (betolt/hozzafuz)
  * @param {string} koino
- * @returns {Promise<{koino: string, szerzok: Array<{szerzo: string, legnagyobb: number, hezagok: Array<number>, elagazasok: Array<number>, ujjlenyomat: string}>}>}
+ * @returns {Promise<{koino: string, lancok: Array<{lanc: string, legnagyobb: number, hezagok: Array<number>, elagazasok: Array<number>, ujjlenyomat: string}>}>}
  */
 export async function allasOsszeallitasa(tar, koino) {
   console.log('allasOsszeallitasa - KEZDÉS', { koino });
@@ -105,24 +105,24 @@ export async function allasOsszeallitasa(tar, koino) {
   // ⛔ Csak az alakilag érvényeset (lásd fent, 40. mérés).
   const esemenyek = await csereLatoEsemenyek(tar, koino);
 
-  // ⭐⭐ D128: LÁNCONKÉNT (a készülék kulcsa — `lancKulcsa`): a sorszám egy láncon belül sorrend. ⚠️ Az állás mezőjének neve
-  // `szerzo` maradt (a vonal alakja — a ③ hálózati lépés nevezi át), az értéke a lánc kulcsa.
-  const szerzonkent = new Map();
+  // ⭐⭐ D128: LÁNCONKÉNT (a készülék kulcsa — `lancKulcsa`): a sorszám egy láncon belül sorrend. ⭐ (③e) Az állás mezője `lanc`
+  // (a D128 előtt `szerzo` — a lánc egy szerzőé volt; az átnevezést a ③ hozta: belső, a dróton nem utazik).
+  const lanconkent = new Map();
   for (const e of esemenyek) {
-    if (!szerzonkent.has(lancKulcsa(e))) szerzonkent.set(lancKulcsa(e), []);
-    szerzonkent.get(lancKulcsa(e)).push(e);
+    if (!lanconkent.has(lancKulcsa(e))) lanconkent.set(lancKulcsa(e), []);
+    lanconkent.get(lancKulcsa(e)).push(e);
   }
 
-  const szerzok = [];
-  for (const [szerzo, sajatjai] of szerzonkent) {
-    szerzok.push(await lancAllasa(szerzo, sajatjai));
+  const lancok = [];
+  for (const [lanc, sajatjai] of lanconkent) {
+    lancok.push(await lancAllasa(lanc, sajatjai));
   }
 
   // A sorrend legyen kiszámítható: két gép ugyanarra a tudásra ugyanazt az állást adja.
-  szerzok.sort((a, b) => (a.szerzo < b.szerzo ? -1 : a.szerzo > b.szerzo ? 1 : 0));
+  lancok.sort((a, b) => (a.lanc < b.lanc ? -1 : a.lanc > b.lanc ? 1 : 0));
 
-  console.log('allasOsszeallitasa - VÉGE', { szerzok: szerzok.length });
-  return { koino, szerzok };
+  console.log('allasOsszeallitasa - VÉGE', { lancok: lancok.length });
+  return { koino, lancok };
 }
 
 /**
@@ -148,7 +148,7 @@ export async function allasOsszeallitasa(tar, koino) {
  * @returns {Promise<string>} 43 karakteres lenyomat
  */
 export async function allasLenyomata(allas) {
-  return lenyomat(allas.szerzok);
+  return lenyomat(allas.lancok);
 }
 
 /**
@@ -157,11 +157,11 @@ export async function allasLenyomata(allas) {
  * ⚠️ A hézag és az elágazás fogalma UGYANAZ, mint a tár-réteg `lancEllenorzese`-ében —
  * csak itt egy már betöltött eseménylistán számoljuk, és a koinóra szűkítve.
  *
- * @param {string} szerzo
+ * @param {string} lanc - a lánc kulcsa (a készüléké)
  * @param {Array<Object>} esemenyek - ennek a szerzőnek az eseményei (rendezetlenül is jó)
  * @returns {Promise<Object>}
  */
-async function lancAllasa(szerzo, esemenyek) {
+async function lancAllasa(lanc, esemenyek) {
   const sorszamonkent = new Map();
   for (const e of esemenyek) {
     if (!sorszamonkent.has(e.sorszam)) sorszamonkent.set(e.sorszam, []);
@@ -183,7 +183,7 @@ async function lancAllasa(szerzo, esemenyek) {
   const azonositok = esemenyek.map((e) => e.azonosito).sort();
   const ujjlenyomat = await lenyomat(azonositok);
 
-  return { szerzo, legnagyobb, hezagok, elagazasok, ujjlenyomat };
+  return { lanc, legnagyobb, hezagok, elagazasok, ujjlenyomat };
 }
 
 // ===================================
@@ -222,17 +222,17 @@ async function lancAllasa(szerzo, esemenyek) {
  *
  * @param {Object} sajatAllas - a saját állásunk (allasOsszeallitasa)
  * @param {Object} idegenAllas - amit a másik küldött
- * @returns {{koino: string, szerzok: Array<{szerzo: string, sorszamok: Array<number>}>}}
+ * @returns {{koino: string, lancok: Array<{lanc: string, sorszamok: Array<number>}>}}
  */
 export function hianyokSzamitasa(sajatAllas, idegenAllas) {
-  console.log('hianyokSzamitasa - KEZDÉS', { idegenSzerzok: idegenAllas.szerzok.length });
+  console.log('hianyokSzamitasa - KEZDÉS', { idegenLancok: idegenAllas.lancok.length });
 
-  const sajatjaim = new Map(sajatAllas.szerzok.map((sz) => [sz.szerzo, sz]));
-  const szerzok = [];
+  const sajatjaim = new Map(sajatAllas.lancok.map((sz) => [sz.lanc, sz]));
+  const lancok = [];
 
-  for (const ove of idegenAllas.szerzok) {
+  for (const ove of idegenAllas.lancok) {
     // Akiről semmit nem tudok: üres lánc — ilyenkor az egészet elkérem.
-    const enyem = sajatjaim.get(ove.szerzo)
+    const enyem = sajatjaim.get(ove.lanc)
       ?? { legnagyobb: 0, hezagok: [], elagazasok: [], ujjlenyomat: null };
 
     // ----- 1. EGYEZŐ LÁNC: nincs dolgunk -----
@@ -258,18 +258,18 @@ export function hianyokSzamitasa(sajatAllas, idegenAllas) {
         if (!oveHezagja.has(sorszam)) sorszamok.push(sorszam);
       }
       console.warn('hianyokSzamitasa - eltérő lánc, de nem behatárolható → TELJES tartomány', {
-        szerzo: ove.szerzo.slice(0, 8) + '…', legnagyobb: ove.legnagyobb
+        lanc: ove.lanc.slice(0, 8) + '…', legnagyobb: ove.legnagyobb
       });
     }
 
-    if (sorszamok.length) szerzok.push({ szerzo: ove.szerzo, sorszamok });
+    if (sorszamok.length) lancok.push({ lanc: ove.lanc, sorszamok });
   }
 
   console.log('hianyokSzamitasa - VÉGE', {
-    szerzok: szerzok.length,
-    esemenyek: szerzok.reduce((osszeg, sz) => osszeg + sz.sorszamok.length, 0)
+    lancok: lancok.length,
+    esemenyek: lancok.reduce((osszeg, sz) => osszeg + sz.sorszamok.length, 0)
   });
-  return { koino: idegenAllas.koino, szerzok };
+  return { koino: idegenAllas.koino, lancok };
 }
 
 // ===================================
@@ -290,12 +290,12 @@ export function hianyokSzamitasa(sajatAllas, idegenAllas) {
  * @returns {Promise<Array<Object>>} az elküldendő események
  */
 export async function valaszOsszeallitasa(tar, kerelem) {
-  console.log('valaszOsszeallitasa - KEZDÉS', { szerzok: kerelem.szerzok.length });
+  console.log('valaszOsszeallitasa - KEZDÉS', { lancok: kerelem.lancok.length });
 
   // ⛔ Amit egy mai kapu úgysem enged be, azt el sem küldjük (40. mérés — egy RÉGEBBI
   // változatú társ még kérheti: az ő állás-számítása nem ismeri ezt a szabályt).
   const esemenyek = await csereLatoEsemenyek(tar, kerelem.koino);
-  const kertek = new Map(kerelem.szerzok.map((sz) => [sz.szerzo, new Set(sz.sorszamok)]));
+  const kertek = new Map(kerelem.lancok.map((sz) => [sz.lanc, new Set(sz.sorszamok)]));
 
   const valasz = esemenyek.filter((e) => kertek.get(lancKulcsa(e))?.has(e.sorszam));   // ⭐⭐ D128: láncónként
 
@@ -453,9 +453,9 @@ export async function allasokEgyeznek(egyikTar, masikTar, koino) {
   const egyik = await allasOsszeallitasa(egyikTar, koino);
   const masik = await allasOsszeallitasa(masikTar, koino);
 
-  if (egyik.szerzok.length !== masik.szerzok.length) return false;
-  return egyik.szerzok.every((sz, i) =>
-    sz.szerzo === masik.szerzok[i].szerzo && sz.ujjlenyomat === masik.szerzok[i].ujjlenyomat);
+  if (egyik.lancok.length !== masik.lancok.length) return false;
+  return egyik.lancok.every((sz, i) =>
+    sz.lanc === masik.lancok[i].lanc && sz.ujjlenyomat === masik.lancok[i].ujjlenyomat);
 }
 
 /**

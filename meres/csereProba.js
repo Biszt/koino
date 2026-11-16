@@ -65,19 +65,19 @@ async function lanc(eember, hossz) {
 }
 
 /** Egy szerző sora az állásban. */
-// ⭐⭐ D128: az állás láncónként (a `szerzo` mező a lánc kulcsa — a készüléké).
-const sora = (allas, szerzo) => allas.szerzok.find((sz) => sz.szerzo === szerzo);
+// ⭐⭐ D128: az állás láncónként (⭐ ③e: a `lanc` mező — a készülék kulcsa).
+const sora = (allas, lanc) => allas.lancok.find((sz) => sz.lanc === lanc);
 
 /** Egy szerzőtől kért sorszámok. */
-const kertek = (kerelem, szerzo) =>
-  kerelem.szerzok.find((sz) => sz.szerzo === szerzo)?.sorszamok ?? [];
+const kertek = (kerelem, lanc) =>
+  kerelem.lancok.find((sz) => sz.lanc === lanc)?.sorszamok ?? [];
 
 // ===== AZ ÁLLÁS: „ezt tudom" =====
 
 proba('Az ÜRES tár állása üres (nincs kit felsorolni)', async () => {
   const tar = await ujTar();
   const allas = await allasOsszeallitasa(tar, KOINO);
-  return allas.koino === KOINO && allas.szerzok.length === 0;
+  return allas.koino === KOINO && allas.lancok.length === 0;
 });
 
 proba('Az állás szerzőnként EGY sor, a legnagyobb sorszámmal', async () => {
@@ -88,7 +88,7 @@ proba('Az állás szerzőnként EGY sor, a legnagyobb sorszámmal', async () => 
   await ment(tar, await lanc(bela, 1));
 
   const allas = await allasOsszeallitasa(tar, KOINO);
-  return allas.szerzok.length === 2
+  return allas.lancok.length === 2
       && sora(allas, anna.keszulek).legnagyobb === 3
       && sora(allas, bela.keszulek).legnagyobb === 1;
 });
@@ -121,7 +121,7 @@ proba('Aki UGYANAZT tudja, SEMMIT nem kér', async () => {
 
   const a = await allasOsszeallitasa(egyik, KOINO);
   const b = await allasOsszeallitasa(masik, KOINO);
-  return hianyokSzamitasa(a, b).szerzok.length === 0;
+  return hianyokSzamitasa(a, b).lancok.length === 0;
 });
 
 proba('⭐ Aki LE VAN MARADVA, csak a hiányzó tartományt kéri', async () => {
@@ -277,7 +277,7 @@ proba('⛔⛔ A RÉGI ALAKÚ eseményt a csere NEM hirdeti — a társ nem kéri
 
   // ⭐ A DÖNTŐ ÁLLÍTÁS: az új tár SEMMIT nem kér (terepen: 9 eseményt kért körönként).
   const ujKeri = hianyokSzamitasa(await allasOsszeallitasa(uj, KOINO), regiAllas);
-  return allasTiszta && ujKeri.szerzok.length === 0;
+  return allasTiszta && ujKeri.lancok.length === 0;
 });
 
 proba('⛔⛔ …ÉS A TÜKÖRKÉPE: a „régi" tár sem kéri újra, ami már megvan nála', async () => {
@@ -289,7 +289,7 @@ proba('⛔⛔ …ÉS A TÜKÖRKÉPE: a „régi" tár sem kéri újra, ami már 
 
   // …és egy teljes kör sem mozgat semmit: se elutasítás, se „már megvolt", és egyeznek.
   const kor = await csereKor(regi, uj, KOINO);
-  return regiKeri.szerzok.length === 0 && kor.egyezik
+  return regiKeri.lancok.length === 0 && kor.egyezik
     && kor.egyikKapott.marMegvolt === 0 && kor.masikKapott.elutasitva.length === 0
     && kor.egyikKapott.elutasitva.length === 0;
 });
@@ -312,7 +312,7 @@ proba('⛔ A régi alakú eseményt a válasz SEM küldi el — egy régebbi tá
   const { anna, bela, regi } = await regiAlakosPar();
   const valasz = await valaszOsszeallitasa(regi, {
     koino: KOINO,
-    szerzok: [{ szerzo: anna.keszulek, sorszamok: [1, 2, 3] }, { szerzo: bela.keszulek, sorszamok: [1, 2, 3] }]
+    lancok: [{ lanc: anna.keszulek, sorszamok: [1, 2, 3] }, { lanc: bela.keszulek, sorszamok: [1, 2, 3] }]
   });
   // ⭐⭐ D128: Anna 1. eseménye érvényes (a lánc eleje), a 2. régi alakú — a válasz az 1-et és a 3-at adja.
   return valasz.length === 2 && valasz.every((e) => e.szerzo === anna.szerzo)
@@ -329,7 +329,7 @@ proba('A válasz CSAK a kért eseményeket adja', async () => {
   await ment(tar, await lanc(bela, 2));
 
   const valasz = await valaszOsszeallitasa(tar, {
-    koino: KOINO, szerzok: [{ szerzo: anna.keszulek, sorszamok: [2] }]
+    koino: KOINO, lancok: [{ lanc: anna.keszulek, sorszamok: [2] }]
   });
   return valasz.length === 1 && valasz[0].szerzo === anna.szerzo && valasz[0].sorszam === 2;
 });
@@ -424,7 +424,7 @@ proba('⭐ Az ELŐRÉBB TARTÓ fél nem kér vissza fölöslegesen', async () =>
     await allasOsszeallitasa(teljes, KOINO),
     await allasOsszeallitasa(lemaradt, KOINO)
   );
-  return kerelem.szerzok.length === 0;
+  return kerelem.lancok.length === 0;
 });
 
 // ===== A VONAL: ugyanez valódi foglalaton — 2026-09-26 óta a UDP-résen (D69/2) =====
@@ -548,7 +548,7 @@ proba('MÉRÉS: az ÁLLÁS 50 e-embernél is 200 bájt/fő alatt marad', async (
   process.stdout.write('           ↳ mérve: ' + bajt + ' bájt / ' + LETSZAM
     + ' e-ember = ' + fejenkent + ' bájt/fő\n');
 
-  return allas.szerzok.length === LETSZAM && fejenkent < 200;
+  return allas.lancok.length === LETSZAM && fejenkent < 200;
 });
 
 // ===== AZ OLCSÓ CSERE (D35, B. lépés) =====

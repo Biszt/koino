@@ -511,8 +511,26 @@ a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③
   az egyszeri átvétel, egy magasabb határ, az idegen, a más koinóbeli és a kizárt készülék), parancssor (a laptop és a friss telefon
   cseréje: a kötés a készülékkel, a 2000-es átadás, a telefon egy parancs elején átveszi) — 9 rontás. ⚠️ Az őrjárat körének átvételét
   csak a parancsok elejéé méri (ugyanaz a függvény).
-- ❓ **KH3 — a régi készülék MÚLTJA a kulcscsere és a helyreállítás után** (a ③b próbájának felállításakor derült ki, egy
-  mérő-szkripttel ellenőrizve; Csaba döntésére vár): a kulcscsere (és a helyreállítás) után minden FEL NEM SOROLT régi készülék
+- ✅ **③d — a koinó-lista és a csatlakozás (KH2 (A))** (2026-11-16): a saját készülékek a cserében megmondják egymásnak, mely
+  koinókban vannak, és ott hol tart a láncuk — a `CIMEK` üzenet elhagyható `kl` mezője (`csere/vonal.js`), CSAK a saját
+  készülékemnek (a kapu kötése szerint: az én nevem és egy másik készülékem), és a fogadó is csak tőle fogadja el; a kapott listát a
+  bizonyítási kör UTÁN dolgozza fel (első találkozáskor épp az köti meg, hogy a társ a saját készülékem). A készülék megjegyzi
+  (`sajatkeszulekek.json` — helyi feljegyzés, nem esemény; D6: a láncra soha). A `kizar` ebből a kizárt készülék listájának koinóit is
+  felsorolja (a vágás a nagyobbik: amit a készülék a legutóbbi találkozáskor mondott, és amit én láttam), és ahová a listából tudok,
+  de ezen a készüléken nincs, oda CSATLAKOZIK (KH2 (A) — csak a bevitelhez: kiírja a koinó őrjáratának indító parancsát, ha nem fut);
+  amint a koinó eseményei megjönnek, egy ottani parancs elején (vagy az őrjáratában) a kezelés-jegyzékből a kizárás bekerül. A
+  `kulcscsere` ugyanígy csatlakozik a fel nem sorolt készülékeim listáinak koinóihoz. A `kizar` listája a koinó-listából ismert
+  készülékeket is mutatja (egy új telefon még semmit nem írt — a nevét a kapu által a tárba vett tanúsítványa adja). ⛔ **Lelet (a
+  parancssor-próba fogta meg):** ha a telefonnál a koinó születése még nem volt meg, a kapuja nem kérte a laptop személyét — a
+  telefon nem tudta, hogy a társ a saját laptopja, és a laptop a telefon listáját sem kapta meg; a valóságban a következő csere pótolja
+  (addigra a születés megjön), a próba ezért a születéssel indul. ⚠️ **A vágás korlátja:** a lista is, a saját tár is azt mondja,
+  ameddig a készülék a lánca végén tartott — ha a tolvaj a lopás után még találkozott a laptoppal, az ő eseményei is a vágásig
+  számítanak (a lap — ④ — mutatja a lánc végét, és ott a vágás állítható). **③e:** a csere ÁLLÁSÁBAN a lánc mezője `szerzo` →
+  `lanc` (a lista `szerzok` → `lancok`; belső — a dróton nem utazik, a próbák mércéje). A próba: parancssor (a lista a saját
+  készülékek között, az idegennek nem; a kizárás az Olvasókört is felsorolja, a laptop csatlakozik, és az események után beviszi; a
+  kulcscsere is csatlakozik), a csere-próba (az átnevezés) — 10 rontás.
+- ✅ **KH3 — a régi készülék MÚLTJA a kulcscsere és a helyreállítás után** (a ③b próbájának felállításakor derült ki, egy
+  mérő-szkripttel ellenőrizve; eldöntve 2026-11-16 — (A)): a kulcscsere (és a helyreállítás) után minden FEL NEM SOROLT régi készülék
   MINDEN eseménye kiesik a számításból — a lopás vagy az elvesztés előttiek is: a belépése (a tagság), a pontjai, a szavazatai
   (`allapot/kizaras.js` `cserenKivulE` — a KC2 (A) szó szerint). Ha minden készülék elveszett, és a segítők visszaadják az
   azonosságot, a NÉV és a pénztárca megmarad, de a koinókban olyan, mintha sosem lett volna ott — épp az, ami ellen a 17. pont
@@ -524,6 +542,7 @@ a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③
   a kulcscsere után a jegyzék kizárásait a készülék az új kulccsal újra aláírja. A helyreállítás után az új készülék, amint egy
   koinóban látja a régi készülékeit, felajánlja a kizárásukat (a `kizar` listája). (B) marad, ahogy van (a múlt elvész). (C) a
   kulcscsere előtti események mind maradnak — ⛔ a tolvaj régi kulccsal felvett készülékeié is.
+  ✅ **Eldöntve (2026-11-16) — (A).** Csaba: *„rendben. mehetünk, tovább, ha kész a próbasór.”* — a ③f építi (a ③d–③e után).
 
 **9.13 A helyreállítás a segítőkkel** (2026-11-15 — D128 17. pont; ✅ eldöntve; a 9.12 (a ③) a ②d–②f után)
 

@@ -427,6 +427,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   let uj = 0, kuldott = 0, masKoino = null;
   let kivulrolIgyLatszom = null, kapottUdpCimek = [];
   let kapottTablaKulcs = null;      // a társ tábla-kulcsa — a KÖTÉS azonosítója
+  let oveKoinoLista = null;         // ⭐⭐ D128 (③d): a társ CIMEK-je a koinó-listával (a bizonyítás után dolgozzuk fel)
   let kapottDhtGepek = [];          // néhány DHT-gép, amit ő ismer (nem bizalom, csak cím)
   let elteroSzeletek = 0, egyeztetoUzenetek = 0;
   let ujAzonositok = [];            // ⭐ D82: a most beérkezett események (az észlelőnek)
@@ -481,6 +482,27 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
    */
   const bizonyitottSzemely = (ki) => (ki && typeof ki === 'object' && typeof kezfogas?.kiEllenoriz === 'function'
     && kezfogas.kiEllenoriz(ki) ? { sz: ki.sz, h: typeof ki.h === 'string' ? ki.h : null, k: ki.k, t: ki.t } : null);
+  /**
+   * ⭐⭐ D128 (③d — 9.12): A KOINÓ-LISTÁM — csak a SAJÁT készülékemnek: a hívó dönti el a társ tábla-aláírójából (a kapu kötése szerint
+   * az én nevem és egy másik készülékem), és ha igen, a lista (mely koinókban vagyok, és ott hol tart a láncom). Másnak soha (D6: a
+   * láncra sem). Elhagyható mező: a régi program nem küldi, és nem is olvassa.
+   */
+  const koinoListaMezo = async () => {
+    if (typeof beallitas.koinoLista !== 'function' || typeof beallitas.sajatKeszulekE !== 'function') return {};
+    const alairo = kapottTablaKulcs?.alairo;
+    try {
+      return alairo && (await beallitas.sajatKeszulekE(alairo)) ? { kl: await beallitas.koinoLista() } : {};
+    } catch (hiba) {
+      console.warn('parbeszed - a koinó-lista nem küldhető', { ok: hiba.message });
+      return {};
+    }
+  };
+  /** ⭐⭐ D128 (③d): a társ koinó-listája a hívóhoz — az is csak a saját készülékemtől fogadja el (ugyanaz a kötés). */
+  const koinoListaFogadasa = async (ove) => {
+    if (!Array.isArray(ove?.kl) || typeof beallitas.koinoListaFogadasa !== 'function' || !kapottTablaKulcs?.alairo) return;
+    try { await beallitas.koinoListaFogadasa(kapottTablaKulcs.alairo, ove.kl); }
+    catch (hiba) { console.warn('parbeszed - a koinó-lista nem fogadható', { ok: hiba.message }); }
+  };
   /** Amit a bizonyításunkhoz küldünk: a személyes aláírás és a tagsági csomag (ha van) — ⭐ D122: és a meghívóm bizonyítéka. */
   const sajatBizonyitek = async () => {
     let csomag = null;
@@ -1020,6 +1042,8 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
       ...(sajatKul.length ? { kul: sajatKul } : {}),
       // ⭐ D93/3: kérjük a társ bizonyítását (a személyes aláírás és a tagsági csomag a következő körben jön).
       ...(kapu.kell ? { kell: 1 } : {}),
+      // ⭐⭐ D128 (③d): a koinó-listám — ha a társ már ismert saját készülékem
+      ...(await koinoListaMezo()),
       udp: [
         ...(sajatUdp ? [{ hoszt: sajatUdp.hoszt, port: sajatUdp.port, kor: 0 }] : []),
         ...(kapu.szabad ? idegenUdp.slice(0, IDEGEN_CIM_KORLAT) : [])
@@ -1029,6 +1053,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     oKerte = ove.kell === 1;
     // ⚠️ Az alakját itt nem ellenőrizzük, csak továbbadjuk (1. szabály); a hívó ellenőriz.
     cimekBeolvasasa(ove);
+    oveKoinoLista = ove;   // ⭐⭐ D128 (③d): a bizonyítás UTÁN dolgozzuk fel (lent)
     oveOsz = lista(ove.osz, OSZ_KORLAT);
     oveKul = lista(ove.kul, KUL_KORLAT);
     oveKz = kzAlakja(ove.kz);
@@ -1058,16 +1083,23 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
         ...(sajatKz ? { kz: sajatKz } : {}),
         ...(kapu.szabad && dhtKuldheto.length ? { dht: dhtKuldheto } : {}),
         ...(sajatOsz.length ? { osz: sajatOsz } : {}),
-        ...(sajatKul.length ? { kul: sajatKul } : {}) });
+        ...(sajatKul.length ? { kul: sajatKul } : {}),
+        // ⭐⭐ D128 (③d): első találkozáskor a bizonyítás UTÁN derül ki, hogy a társ a saját készülékem — a lista a pótlásban megy
+        ...(await koinoListaMezo()) });
     }
     if (oKerte) {
       const potlas = await varj('CIMEK');
       cimekBeolvasasa(potlas);
+      if (Array.isArray(potlas.kl)) oveKoinoLista = potlas;   // ⭐⭐ D128 (③d)
       if (Array.isArray(potlas.osz)) oveOsz = lista(potlas.osz, OSZ_KORLAT);
       if (Array.isArray(potlas.kul)) oveKul = lista(potlas.kul, KUL_KORLAT);
       if (potlas.kz !== undefined) oveKz = kzAlakja(potlas.kz);
     }
   }
+
+  // ⭐⭐ D128 (③d): a társ koinó-listája — a bizonyítás UTÁN: első találkozáskor épp a bizonyítás köti meg, hogy a társ a saját
+  // készülékem (az első CIMEK-ben jött listája így is elfogadható). A hívó csak a saját készülékemtől fogadja el.
+  await koinoListaFogadasa(oveKoinoLista);
 
   // ----- ⛔⛔ D93/3: A KORLÁTOZÁS — a nem szabad társsal csak a megengedett szeleteket egyeztetjük -----
   //

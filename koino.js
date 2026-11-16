@@ -693,6 +693,109 @@ function kezelesEredmenyKiirasa(eredmenyek, bekerultE) {
   }
 }
 
+// ===================================
+// ⭐⭐ D128 (③d — 9.12): A SAJÁT KÉSZÜLÉKEIM KOINÓ-LISTÁJA
+// ===================================
+//
+// A saját készülékek a cserében megmondják egymásnak, mely koinókban vannak, és ott hol tart a láncuk (a CIMEK `kl` mezője — csak a
+// saját készülékemnek, és csak tőle: a kapu kötése szerint; `csere/vonal.js`). A készülék megjegyzi (`sajatkeszulekek.json` — helyi
+// feljegyzés, nem esemény, D6), és a kezelés ebből tudja: a kizárás koinónkénti vágását ott is, ahol ő maga nem tag, és hogy hová
+// kell csatlakoznia, hogy a kizárást (a kulcscserét) bevigye (KH2 (A)).
+const SAJAT_KESZULEKEK_FAJL = join(dirname(tarolo.fajl), 'sajatkeszulekek.json');
+/** Egy koinó-lista legfeljebb ennyi koinó (mint a kizárás koinói). */
+const KOINO_LISTA_KORLAT = 256;
+/** Legfeljebb ennyi saját készülék listáját őrizzük (a legrégebben látott esik ki). */
+const SAJAT_KESZULEK_KORLAT = 16;
+/** A saját koinó-listám ennyi ideig érvényes (a láncok vége nem kell percre pontosan). */
+const KOINO_LISTA_EMLEK = 10 * 60 * 1000;
+let sajatKeszulekekSora = Promise.resolve();
+let koinoListaEmlek = null;
+
+/** A saját készülékeim koinó-listái (készülék → { koinok: [{ k, n }], ido }). */
+async function sajatKeszulekekOlvasasa() {
+  try {
+    const j = JSON.parse(await readFile(SAJAT_KESZULEKEK_FAJL, 'utf8'));
+    return j && typeof j === 'object' && !Array.isArray(j) ? j : {};
+  } catch { return {}; }
+}
+
+/** A listák módosítása sorban (a folyamaton belül) — a legutóbb látott `SAJAT_KESZULEK_KORLAT` készülék marad. */
+function sajatKeszulekekModositasa(fn) {
+  const lepes = sajatKeszulekekSora.then(async () => {
+    const uj = await fn(await sajatKeszulekekOlvasasa());
+    const lista = Object.entries(uj).sort((a, b) => (b[1]?.ido ?? 0) - (a[1]?.ido ?? 0)).slice(0, SAJAT_KESZULEK_KORLAT);
+    await writeFile(SAJAT_KESZULEKEK_FAJL, JSON.stringify(Object.fromEntries(lista)), 'utf8');
+  });
+  sajatKeszulekekSora = lepes.catch(() => {});
+  return lepes;
+}
+
+/** Egy kapott koinó-lista alakja: legfeljebb 256 különböző koinó (név), mindegyiknél a lánc vége (nemnegatív egész) — vagy null. */
+function koinoListaAlakja(kl) {
+  if (!Array.isArray(kl) || kl.length > KOINO_LISTA_KORLAT) return null;
+  const latott = new Set();
+  for (const x of kl) {
+    if (!x || typeof x !== 'object' || !azonositoAlaku(x.k) || !Number.isSafeInteger(x.n) || x.n < 0 || latott.has(x.k)) return null;
+    latott.add(x.k);
+  }
+  return kl.map((x) => ({ k: x.k, n: x.n }));
+}
+
+/**
+ * A SAJÁT koinó-listám (a saját készülékemnek): a készülékem ismert koinói (amelyeknek a születése megvan), és ott a láncom vége.
+ * Tíz percig emlékszik rá (a cserék gyakoriak, a láncok vége nem kell percre pontosan).
+ */
+async function sajatKoinoListam() {
+  if (koinoListaEmlek && Date.now() - koinoListaEmlek.ido < KOINO_LISTA_EMLEK) return koinoListaEmlek.lista;
+  const lista = [];
+  for (const k of await ismertKoinok(alapHely())) {
+    if (!azonositoAlaku(k) || lista.length >= KOINO_LISTA_KORLAT) continue;
+    try {
+      const ktar = await koinoTaraEgyszer(k);
+      if (!(await ktar.esemeny(k))) continue;   // a születése még nincs meg
+      lista.push({ k, n: (await lancVege(ktar, KESZULEK)).sorszam - 1 });
+    } catch { /* egy koinó hibája nem akasztja meg a listát */ }
+  }
+  koinoListaEmlek = { ido: Date.now(), lista };
+  return lista;
+}
+
+/**
+ * ⭐⭐ D128 (③d — KH2 (A)): CSATLAKOZÁS azokhoz a koinókhoz, amelyekről a készülékek listájából tudok, de ezen a készüléken nincsenek —
+ * csak a kezelés beviteléhez (ott a kizárt készülék tartaná a koinó teljes keretét). A bevitel akkor történik, amikor a koinó cseréje
+ * ezen a készüléken lemegy (a parancsok eleje, az őrjárat — a kezelés-jegyzékből).
+ * @param {Iterable<string>} keszulekek - akiknek a listáját nézzük
+ * @returns {Promise<Array<{koino: string, parancs: string|null}>>} az új koinók (és az őrjáratuk indító parancsa, ha nem fut)
+ */
+async function listakKoinoiCsatlakozasa(keszulekek) {
+  const listak = await sajatKeszulekekOlvasasa();
+  const ismertek = new Set(await ismertKoinok(alapHely()));
+  const ujak = [];
+  for (const k of keszulekek) {
+    for (const x of koinoListaAlakja(listak[k]?.koinok) ?? []) {
+      if (ismertek.has(x.k)) continue;
+      ismertek.add(x.k);
+      try {
+        await koinoCsatlakozas(x.k);
+        ujak.push(x.k);
+      } catch (hiba) {
+        kiir(SZIN.nem + '  ⚠ ' + rovidAzonosito(x.k) + ': nem sikerült csatlakozni — ' + hiba.message + SZIN.vege);
+      }
+    }
+  }
+  const orjaratok = ujak.length ? await koinokOrjaratai(ujak).catch(() => new Map()) : new Map();
+  return ujak.map((k) => ({ koino: k, parancs: orjaratok.get(k)?.parancs ?? null }));
+}
+
+/** A csatlakozások kiírása (KH2). */
+function listakCsatlakozasaKiirasa(csatlakozasok) {
+  for (const c of csatlakozasok) {
+    kiir('  ' + rovidAzonosito(c.koino) + ': csatlakoztam (ezen a készüléken eddig nem volt — ott csak a kizárt készüléked tag); amint a'
+      + ' cseréje lemegy, ide is bekerül.');
+    if (c.parancs) kiir(SZIN.halvany + '      az őrjárata: ' + c.parancs + SZIN.vege);
+  }
+}
+
 /**
  * ⭐⭐ D128 (③b): AZ AZONOSSÁGOM KÉSZÜLÉKEI, ahogy a koinóimban látszanak — a tanúsítványuk neve, koinónként a láncuk vége (a
  * legnagyobb sorszám a saját aláírásukkal, amit ez a készülék ismer), és hogy ki vannak-e már zárva.
@@ -708,6 +811,9 @@ async function keszulekeim() {
     return keszulekek.get(k);
   };
   d(KESZULEK).nev = kulcspar.tanusitvany?.nev ?? null;
+  // ⭐⭐ D128 (③d): a koinó-listájukból ismert saját készülékeim is (egy új telefon még semmit nem írt — de a cserében megmondta)
+  const listazottak = Object.keys(await sajatKeszulekekOlvasasa()).filter((k) => azonositoAlaku(k));
+  for (const k of listazottak) d(k);
   for (const k of await ismertKoinok(alapHely())) {
     try {
       const ktar = k === KOINO ? tar : await koinoTaraEgyszer(k);
@@ -719,6 +825,13 @@ async function keszulekeim() {
         if (e.tanusitvany) x.nev ??= e.tanusitvany.nev;
       }
       for (const kz of (await tarKezelese(ktar, szerzo)).kizarasok) kizartak.add(kz.keszulek);
+      // a név a tanúsítványból (a saját készülékem tanúsítványát a kapu a tárba vette — ③c)
+      for (const [k, x] of keszulekek) {
+        if (x.nev == null) {
+          const t = await tarTanusitvanya(ktar, k);
+          if (t?.azonossag === szerzo) x.nev = t.nev ?? null;
+        }
+      }
     } catch { /* egy koinó hibája nem akasztja meg a többit */ }
   }
   for (const k of kizartak) d(k).kizarva = true;
@@ -5726,6 +5839,20 @@ async function sajatKeszulekTanusitvanya(ki) {
   try { await tar.tanusitvanyFelvetele?.(ki.t); } catch (hiba) { console.warn('a saját készülék tanúsítványa nem vehető fel', hiba.message); }
 }
 
+/** ⭐⭐ D128 (③d): a társ (a tábla-aláírója szerint) a SAJÁT készülékem-e — a kapu kötése: az én nevem és egy másik készülékem (a kulcsa). */
+async function sajatKeszulekKotese(alairo) {
+  const k = typeof alairo === 'string' ? (await azonossagokOlvasasa())[alairo] : null;
+  return k?.sz === szerzo && typeof k.k === 'string' && k.k !== KESZULEK ? k.k : null;
+}
+
+/** ⭐⭐ D128 (③d): a saját készülékem koinó-listája a cserében — csak tőle fogadom el (a kötés szerint), és megjegyzem. */
+async function tarsKoinoListaja(alairo, kl) {
+  const k = await sajatKeszulekKotese(alairo);
+  const lista = k ? koinoListaAlakja(kl) : null;
+  if (!lista) return;
+  await sajatKeszulekekModositasa((j) => ({ ...j, [k]: { koinok: lista, ido: Date.now() } }));
+}
+
 async function azonossagKotese(alairo, sz, h, k = null) {
   const j = await azonossagokOlvasasa();
   if (j[alairo]?.sz === sz && j[alairo]?.h === h && (j[alairo]?.k ?? null) === k) return;
@@ -5904,7 +6031,9 @@ async function azonossagBeallitasa() {
     tagsagiCsomag: sajatTagsagiCsomagja,
     // ⭐⭐ D122: a meghívóm bizonyítéka a kapu személy-körébe (ha egy meghívóval léptem be, és még nem vagyok tag)
     meghivoBizonyitek: meghivoBizonyitekom,
-    zartKapu: tarsKapuja
+    zartKapu: tarsKapuja,
+    // ⭐⭐ D128 (③d): a koinó-lista — csak a saját készülékemnek, és csak tőle
+    sajatKeszulekE: sajatKeszulekKotese, koinoLista: sajatKoinoListam, koinoListaFogadasa: tarsKoinoListaja
   };
 }
 
@@ -7579,8 +7708,12 @@ try {
         + honnan + ') már nem jó semmire.' + SZIN.vege);
       // ⭐⭐ D128 (③b): MINDEN koinómba, ahol az azonosságomnak szelete van (a kezelés-jegyzéken át — a többi készülékem is innen viszi tovább).
       azonossagKulcspar.cserek = r.cserek;
+      // ⭐⭐ D128 (③d — KH2 (A)): a fel nem sorolt készülékeim listáinak koinói, amelyek itt nincsenek — csatlakozom (a bevitelhez)
+      const kcsCsatlakozasok = await listakKoinoiCsatlakozasa(Object.keys(await sajatKeszulekekOlvasasa())
+        .filter((k) => !r.kulcscsere.keszulekek.includes(k)));
       kezelesEredmenyKiirasa(await kezelesMindenKoinomba({ tudas: { lanc: { szuletes: r.kulcspar.szuletes, cserek: r.cserek, bizonyitekok: {} } } }),
         (x) => x.lanc);
+      listakCsatlakozasaKiirasa(kcsCsatlakozasok);
       break;
     }
 
@@ -7591,11 +7724,17 @@ try {
     case 'kizar': {
       const { keszulekek, koinoNevek } = await keszulekeim();
       if (!ervek[0]) {
+        const listak = await sajatKeszulekekOlvasasa();
         kiir(SZIN.vastag + 'A KÉSZÜLÉKEID' + SZIN.vege + ' (ahogy a koinóidban látszanak):');
         for (const [k, d] of keszulekek) {
           kiir('  ' + rovidAzonosito(k) + '  ' + (d.nev ?? '?') + (k === KESZULEK ? '  (ez a készülék)' : '')
             + (d.kizarva ? SZIN.nem + '  — kizárva' + SZIN.vege : ''));
           for (const [koino, n] of d.koinok) kiir(SZIN.halvany + '      ' + koinoFelirata(koino, koinoNevek.get(koino)) + ': a láncán ' + n + ' esemény' + SZIN.vege);
+          // ⭐⭐ D128 (③d): amit a készülék a legutóbbi találkozáskor mondott, de itt nem látszik
+          for (const x of koinoListaAlakja(listak[k]?.koinok) ?? []) {
+            if (!d.koinok.has(x.k)) kiir(SZIN.halvany + '      ' + koinoFelirata(x.k, koinoNevek.get(x.k)) + ': a listája szerint ' + x.n
+              + ' esemény (ezen a készüléken ' + (koinoNevek.has(x.k) ? 'nincs láncrésze' : 'nem ismert koinó') + ')' + SZIN.vege);
+          }
         }
         kiir(SZIN.halvany + '  Kizárni: node koino.js kizar <készülék — a neve vagy a kulcsa eleje> [orokos <készülék>]' + SZIN.vege);
         break;
@@ -7616,7 +7755,12 @@ try {
       if (orokos === kizart) throw new Error('Az örökös egy MÁSIK készüléked.');
       if (!keszulekek.has(orokos) || keszulekek.get(orokos).kizarva) throw new Error('Az örökös a te (ki nem zárt) készüléked legyen.');
       if (keszulekek.get(kizart)?.kizarva) throw new Error('Ezt a készüléket már kizártad.');
-      const koinok = [...(keszulekek.get(kizart)?.koinok ?? new Map())].map(([koino, vagas]) => ({ koino, vagas, orokos }));
+      // ⭐⭐ D128 (③d): a kizárt készülék koinó-listájából (amit a legutóbbi találkozáskor mondott) azok a koinók is, ahol én nem vagyok
+      // tag — a vágás ott a listáé; ahol mindkettő ismert, a nagyobbik (a listán lehet olyan esemény, ami még nem jutott el hozzám).
+      const latott = keszulekek.get(kizart)?.koinok ?? new Map();
+      const listaja = new Map((koinoListaAlakja((await sajatKeszulekekOlvasasa())[kizart]?.koinok) ?? []).map((x) => [x.k, x.n]));
+      const koinok = [...new Set([...latott.keys(), ...listaja.keys()])].slice(0, KOINO_LISTA_KORLAT)
+        .map((koino) => ({ koino, vagas: Math.max(latott.get(koino) ?? 0, listaja.get(koino) ?? 0), orokos }));
       const kizaras = await kizarasKeszitese(azonossagKulcspar, kizart, koinok);
       kiir(SZIN.jo + 'A készüléket kizártad: ' + rovidAzonosito(kizart) + (keszulekek.get(kizart)?.nev ? ' (' + keszulekek.get(kizart).nev + ')' : '')
         + SZIN.vege);
@@ -7625,8 +7769,11 @@ try {
           + rovidAzonosito(x.orokos) + (x.orokos === KESZULEK ? ' (ez a készülék)' : ''));
       }
       kiir(SZIN.halvany + '  A többi koinóban a kizárt készülék egyetlen eseménye sem számít.' + SZIN.vege);
+      // ⭐⭐ D128 (③d — KH2 (A)): ahová a kizárt készülék listájából tudok, de itt nincs — csatlakozom (csak a bevitelhez)
+      const csatlakozasok = await listakKoinoiCsatlakozasa([kizart]);
       kezelesEredmenyKiirasa(await kezelesMindenKoinomba({ tudas: { kizarasok: [kizaras] } }),
         (x) => x.kizarasok.some((e) => e.adat?.kizaras?.alairas === kizaras.alairas));
+      listakCsatlakozasaKiirasa(csatlakozasok);
       break;
     }
 
