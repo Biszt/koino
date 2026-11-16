@@ -616,6 +616,25 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
   azonosságomról szóló javaslatot fogadja el. A próba: „A SEGÍTŐ KÉSZÜLÉKE” (a várakozás előtt nem, utána igen; a harmadik véglegesítő
   beviszi — egyszer; megállítás után senki) — 5 rontás. ⏭️ ②f: a parancsok (az új készüléken a kérelem és a befejezés; a segítés, a
   visszavonás), a parancssor-próba a megállítással és az értesítéssel.
+- ✅ **Az építés — ②f a parancsok** (2026-11-16): `kulcs/helyreallitasKerelem.js` — a KÉRELEM (az új kezelő, fizetési és papír-kulcs —
+  a titkok az új készüléken maradnak —, és a megtartandó régi készülékek): egy sor szöveg (`koino-helyreallitas.1.…`) és QR, mellette
+  az ELLENŐRZŐ KÓD (6 jel, a kérelem lenyomatából — a két ember szóban összeveti, a D121 mintája; a segítő be is írja, és a gépe csak
+  egyezőnél hagy jóvá: egy kicserélt kérelem nem csúszik át). `allapot/helyreallitas.js` `javaslatKerelembol` — ha egy másik segítő
+  már kezdte, a MEGLÉVŐ javaslatot adja (mindenki ugyanazt hagyja jóvá), különben újat (a lánc helye a tárból; a 2. lépcsőn papír
+  nélkül). `kulcsTar.js` `helyreallitasBefejezese` — a lánc végén az én kulcsom és fizetési kulcsom áll → ez a gép az azonosság
+  kezelője (meglévő azonosságot csak `felulir`-ral; az 1. lépcsőn az új papír a `csere-kulcs.json`-ba). A javaslat készülék-listája
+  üres is lehet (ha minden elveszett). `koino.js`: `helyreallitas kerelem` és `helyreallitas befejez <fájl>` (a kulcs-biztosítás
+  ELŐTT — mint a visszatöltés; folyamatban lévő kérelem mellett, azonosság nélkül más parancs nem fut), `segit <horgony> <kérelem>
+  <ellenőrző kód> [masodik <jel>]`, `segit visszavon <horgony> <jel>`, `segit kiad <horgony> <fájl>`; a gondozás órája a
+  `KOINO_ORAELTOLAS` (egy elcsúszott óra — a próba ezzel ugorja át a 7 napot). ⛔ **Lelet (a parancssor-próba fogta meg):** a
+  befejezés után a következő indulás ÚJ SZÜLETÉST adott — új nevet, a visszakapott azonosság elveszett volna. Két ok: (1) a
+  nyilvántartás folyamatonként él, az új folyamat nem tudta, hogy a saját `kulcs.json`-jában álló helyreállítás hiteles — most a
+  betöltés a SAJÁT tárolóban álló helyreállítást felveszi (oda csak a bizonyíték ellenőrzése után került; aki ezt a fájlt átírhatja, a
+  titkos kulcsot is kicserélhetné); (2) a biztosítás a születéssel bíró, de be nem tölthető azonosságot „régi alaknak” vette, és
+  újraszülte — most megáll („új születést NEM adunk”), és a fájlhoz nem nyúl (egy sérült lánc sem vihetné el így a nevet). A próba:
+  helyreallitas („A KÉRELEM ÉS A BEFEJEZÉS”), kulcs (a be nem tölthető azonosság), parancssor (a teljes út: kérelem, három segítő az
+  ellenőrző kóddal — a rossz kód nem megy —, az értesítés a régi készüléken, a várakozás után a véglegesítés és a bevitel, a kiadás, a
+  befejezés UGYANAZZAL a névvel) — 10 rontás. ⭐ A D128 17. pontja ezzel megépült; ⏭️ ③ a hálózat (9.12 — KH1, KH2 még nyitott).
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

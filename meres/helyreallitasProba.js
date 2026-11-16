@@ -31,6 +31,10 @@ import { bajtokBase64Url } from '../js/esemeny/kanonikusAlak.js';
 import { alakiHiba } from '../js/esemeny/esemeny.js';
 import { helyreallitasJovahagyasa, helyreallitasMegallitasa, helyreallitasokGondozasa } from '../js/muveletek.js';
 import { tarKulcscserei } from '../js/allapot/kizaras.js';
+import { ujKerelem, kerelemSzovege, kerelemSzovegbol, kerelemEllenorzoKodja } from '../js/kulcs/helyreallitasKerelem.js';
+import { javaslatKerelembol } from '../js/allapot/helyreallitas.js';
+import { helyreallitasBefejezese, kulcsparBetoltese, kulcsparBiztositasa } from '../js/kulcs/kulcsTar.js';
+import { azonossagNeve } from '../js/kulcs/azonossag.js';
 
 const { proba, futtatas } = probaGyujtemeny('A helyreállítás a segítőkkel — a szerepek és a szabály (D128 ②e1)');
 
@@ -236,7 +240,7 @@ proba('⭐ A SZABÁLY TISZTA FÜGGVÉNYE — a helyek kiosztása: egy ember egy 
 proba('⛔ AZ ALAK — a hibás javaslatú jóváhagyás és a hibás megállítás a kapun elbukik; a javaslat jele a tartalomé', async () => {
   const { tar, kor, x } = await alap(3);
   const j = await javaslat();
-  const rosszak = [{ ...j, kor: 3 }, { ...j, elozo: 'A'.repeat(43) }, { ...j, sorszam: 2 }, { ...j, keszulekek: [] },
+  const rosszak = [{ ...j, kor: 3 }, { ...j, elozo: 'A'.repeat(43) }, { ...j, sorszam: 2 }, { ...j, keszulekek: [j.kulcs, j.kulcs] },
     { ...j, x: 1 }, { ...j, kovetkezo: 'rövid' }];
   const elbuknak = [];
   for (const r of rosszak) elbuknak.push(!(await esemenyMentese(tar, await jovahagy(kor[0], x, r))).mentve);
@@ -465,6 +469,60 @@ proba('⭐⭐ A SEGÍTŐ KÉSZÜLÉKE (②e3) — a várakozás előtt nem végl
   };
   if (Object.values(r).some((v) => !v)) process.stderr.write('    (' + JSON.stringify({ r, g0, g2 }) + ')\n');
   return Object.values(r).every(Boolean);
+});
+
+// ===== ⭐⭐ ②f: A KÉRELEM ÉS A BEFEJEZÉS =====
+
+/** Eldobható tároló a memóriában. */
+function memoriaTarolo() {
+  let mentett = null;
+  return { fajl: '(memória)', irasokSzama: 0, async olvas() { return mentett; }, async ir(l) { mentett = l; this.irasokSzama++; } };
+}
+
+proba('⭐⭐ A KÉRELEM ÉS A BEFEJEZÉS (②f) — a kérelem szövege oda-vissza, az ellenőrző kódja a tartalmáé; a javaslat a kérelemből (a második segítő a meglévőt kapja); az új készüléken a befejezés UGYANAZT a nevet adja (és az 1. lépcsőn a papírt); idegen kérelemmel nem; meglévő azonosságot csak felulir-ral', async () => {
+  const { tar, kor, x } = await alap();
+  const X = x.eember.szerzo;
+  const { kerelem, titkok } = await ujKerelem();
+  const szoveg = kerelemSzovege(kerelem);
+  const oda = JSON.stringify(kerelemSzovegbol(szoveg)) === JSON.stringify(kerelem);
+  const kod = await kerelemEllenorzoKodja(kerelem);
+  const masikKod = await kerelemEllenorzoKodja({ ...kerelem, fizetes: kerelem.kulcs.slice(0, 42) + 'A' });
+  let rosszSzoveg = null;
+  try { kerelemSzovegbol(szoveg.replace('koino-helyreallitas.1.', 'koino-helyreallitas.1.x')); } catch (h) { rosszSzoveg = h.message; }
+  const elso = await javaslatKerelembol(tar, KOINO, x.horgony, kerelem);
+  for (const k of kor.slice(0, 3)) await ment(tar, await jovahagy(k, x, elso.javaslat));
+  const masodik = await javaslatKerelembol(tar, KOINO, x.horgony, kerelem);
+  // A 2. lépcsőn (egy alapító — az alapító kör) a javaslat papírt NEM köt le (Csaba: „ott már ne legyen papír”).
+  const alapitoJavaslat = (await javaslatKerelembol(tar, KOINO, kor[4].horgony, kerelem)).javaslat;
+  for (const k of kor.slice(0, 3)) await ment(tar, await jovahagy(k, x, elso.javaslat, 'veglegesites'));
+  const jel = await helyreallitasJele(elso.javaslat);
+  const h = await helyreallitasBejegyzese(X, elso.javaslat);
+  const b = await helyreallitasBizonyiteka(tar, KOINO, x.horgony, jel);
+  const esemeny = await kor[3].eember.tesz('Kulcscsere', { szuletes: x.eember.kulcspar.azonossagKulcspar.szuletes, cserek: [h],
+    bizonyitekok: { [jel]: b } }, undefined, { entitas: x.horgony });
+  helyreallitasFelvetele(jel);
+  // Az új készülék.
+  const t = memoriaTarolo();
+  const r = await helyreallitasBefejezese(t, titkok, esemeny);
+  const betoltve = await kulcsparBetoltese(t);
+  // Idegen kérelem titkaival nem; meglévő azonosságot csak felulir-ral.
+  let idegen = null;
+  try { await helyreallitasBefejezese(memoriaTarolo(), (await ujKerelem()).titkok, esemeny); } catch (hiba) { idegen = hiba.message; }
+  const t2 = memoriaTarolo();
+  await kulcsparBiztositasa(t2);
+  let felulirNelkul = null;
+  try { await helyreallitasBefejezese(t2, titkok, esemeny); } catch (hiba) { felulirNelkul = hiba.message; }
+  const felulirral = await helyreallitasBefejezese(t2, titkok, esemeny, { felulir: true });
+  const ok = {
+    oda, kod: /^[0-9A-Z]{3}-[0-9A-Z]{3}$/.test(kod) && kod !== masikKod, rosszSzoveg: /hibás/.test(rosszSzoveg ?? ''),
+    javaslat: elso.uj && !masodik.uj && (await helyreallitasJele(masodik.javaslat)) === jel && elso.javaslat.kovetkezo === kerelem.csere
+      && elso.javaslat.sorszam === 1 && elso.javaslat.utan === null && alapitoJavaslat.kovetkezo === null,
+    befejez: r.nev === X && !!r.papir && betoltve?.szuletes && (await azonossagNeve(betoltve.szuletes)) === X,
+    idegen: /nem a te kérelmedé/.test(idegen ?? ''), felulirNelkul: /már van azonosság/.test(felulirNelkul ?? ''),
+    felulirral: felulirral.nev === X && !!felulirral.elhagyott
+  };
+  if (Object.values(ok).some((v) => !v)) process.stderr.write('    (' + JSON.stringify(ok) + ')\n');
+  return Object.values(ok).every(Boolean);
 });
 
 export default async function (csendes) {

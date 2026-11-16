@@ -3475,6 +3475,88 @@ proba('⭐⭐ D128 (②d): a 2. lépcsőn az állapot szól a papírért; a `pap
     return ok;
   });
 
+// ⭐⭐ D128 (②f — 17. pont, 9.13): A HELYREÁLLÍTÁS A SEGÍTŐKKEL — végig a parancssorból. Az alapító (F) a koinót úgy hozza létre, hogy
+// egy tanúsítás és egy felhatalmazás elég (`tanusitasKell=1 felhatalmazasKell=1`): így két társát (H2, H3) élő tanúsítóvá teheti.
+// X-et F hívta meg (ő a régi ismerős). X mindent elveszt: az ÚJ készülék (N) kérelmet állít ki; F, H2, H3 jóváhagyja (az ellenőrző
+// kóddal — egy rossz kódnál a gép nem hagy jóvá); X régi készülékén az állapot szól; a várakozás (KOINO_ORAELTOLAS: 8 nap) után a
+// segítők készüléke véglegesít, a harmadik beviszi; egy segítő kiadja, és N a befejezéssel UGYANAZT a nevet kapja vissza. N a befejezés
+// előtt más parancsot nem futtat (különben új azonosságot kapna).
+proba('⭐⭐ D128 (②f): a HELYREÁLLÍTÁS a parancssorból — kérelem az új készüléken, három segítő az ellenőrző kóddal (a rossz kód nem megy), az értesítés a régi készüléken, a várakozás után a véglegesítés és a bevitel, a kiadás, és a befejezés ugyanazzal a névvel',
+  async () => {
+    const [F, X, H2, H3, N] = [await ujKeszulek(), await ujKeszulek(), await ujKeszulek(), await ujKeszulek(), await ujKeszulek()];
+    const fajl = (hely, nev) => join(hely, nev);
+    const atad = async (honnan, hova) => {
+      const ut = fajl(honnan, 'mind-' + Math.random().toString(36).slice(2) + '.jsonl');
+      await fut(honnan, 'kivisz', ut);
+      for (const h of hova) await fut(h, 'behoz', ut);
+    };
+    const sajatAtad = async (honnan, hova) => {
+      const ut = fajl(honnan, 'sajat-' + Math.random().toString(36).slice(2) + '.jsonl');
+      await fut(honnan, 'kivisz', ut, 'sajat');
+      await fut(hova, 'behoz', ut);
+    };
+    const NAP8 = { KOINO_ORAELTOLAS: String(8 * 86400 * 1000) };
+    const tiszta = (x) => x.replace(/\x1b\[[0-9;]*m/g, '');
+    try {
+      await fut(F, 'koino', 'Helyreállítás-próba', 'tanusitasKell=1', 'felhatalmazasKell=1');
+      await atad(F, [X, H2, H3]);
+      const hX = teljesAzonosito(await fut(X, 'belep'));
+      const hH2 = teljesAzonosito(await fut(H2, 'belep'));
+      const hH3 = teljesAzonosito(await fut(H3, 'belep'));
+      for (const h of [X, H2, H3]) await sajatAtad(h, F);
+      await fut(F, 'meghiv', hX);
+      for (const h of [hH2, hH3]) {
+        await fut(F, 'meghiv', h);
+        await fut(F, 'tanusit', h);
+        await fut(F, 'felhatalmaz', h);
+      }
+      await atad(F, [X, H2, H3]);
+      // Az új készülék kérelme.
+      const kerelemKi = tiszta(await fut(N, 'helyreallitas', 'kerelem'));
+      const kerelem = kerelemKi.split('\n').map((l) => l.trim()).find((l) => l.startsWith('koino-helyreallitas.1.'));
+      const kod = (/Az ellenőrző kód: ([0-9A-Z]{3}-[0-9A-Z]{3})/.exec(kerelemKi) ?? [])[1];
+      const blokkolt = tiszta(await fut(N, 'allapot'));
+      // A három segítő (F a régi ismerős).
+      const fKi = tiszta(await fut(F, 'segit', hX, kerelem, kod));
+      await atad(F, [H2]);
+      const rosszKod = tiszta(await fut(H2, 'segit', hX, kerelem, 'AAA-AAA'));
+      const h2Ki = tiszta(await fut(H2, 'segit', hX, kerelem, kod));
+      await atad(H2, [H3]);
+      const h3Ki = tiszta(await fut(H3, 'segit', hX, kerelem, kod));
+      await atad(H3, [F, H2, X]);
+      const xAllapot = tiszta(await fut(X, 'allapot'));
+      // A várakozás után: a segítők készüléke véglegesít; a harmadik beviszi.
+      const fV = tiszta(await fut(F, 'allapot', NAP8));
+      await atad(F, [H2]);
+      const h2V = tiszta(await fut(H2, 'allapot', NAP8));
+      await atad(H2, [H3]);
+      const h3V = tiszta(await fut(H3, 'allapot', NAP8));
+      const kiadas = fajl(H3, 'helyreallitas.json');
+      const kiadKi = tiszta(await fut(H3, 'segit', 'kiad', hX, kiadas));
+      const befejezKi = tiszta(await fut(N, 'helyreallitas', 'befejez', kiadas));
+      const nKulcs = tiszta(await fut(N, 'kulcs'));
+      const xKulcs = tiszta(await fut(X, 'kulcs'));
+      const nev = (ki) => ki.split('\n').map((l) => l.trim()).find((l) => /^[A-Za-z0-9_-]{43}$/.test(l));
+      const r = {
+        kerelem: !!kerelem && !!kod, blokkolt: /helyreállításod folyamatban/.test(blokkolt),
+        f: /Jóváhagytad/.test(fKi) && /új javaslat/.test(fKi), rosszKod: /NEM egyezik/.test(rosszKod),
+        h2: /meglévő javaslathoz/.test(h2Ki), h3: /Elindult: 3 segítő; a várakozás 7 nap/.test(h3Ki),
+        ertesites: /Valaki az azonosságod HELYREÁLLÍTÁSÁT kezdte/.test(xAllapot),
+        fV: /1 véglegesítve, 0 bevíve/.test(fV), h2V: /1 véglegesítve, 0 bevíve/.test(h2V), h3V: /1 véglegesítve, 1 bevíve/.test(h3V),
+        kiad: /Kiadva/.test(kiadKi), befejez: /Visszakaptad az azonosságodat/.test(befejezKi),
+        ugyanazANev: !!nev(xKulcs) && nev(nKulcs) === nev(xKulcs)
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (②f-próba: ' + JSON.stringify({ r, nKulcs, xKulcs, fKi: fKi.slice(-300), h3Ki: h3Ki.slice(-300), fV: fV.slice(0, 300),
+          h3V: h3V.slice(0, 300), kiadKi: kiadKi.slice(-300), befejezKi: befejezKi.slice(-300) }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      for (const h of [F, X, H2, H3, N]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();

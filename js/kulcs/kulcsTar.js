@@ -39,7 +39,8 @@
 
 import { bajtokBase64Url } from '../esemeny/kanonikusAlak.js';
 // ⭐⭐ D128 (②a — KC1 (A)): az azonosság születése (a név a lenyomata).
-import { ujAzonossag, szuletesKeszitese, szuletesEllenorzese, csereLenyomata, azonossagNeve, kezeloKulcsLanc, kulcscsereKeszitese }
+import { ujAzonossag, szuletesKeszitese, szuletesEllenorzese, csereLenyomata, azonossagNeve, kezeloKulcsLanc, kulcscsereKeszitese,
+  HELYREALLITAS_BEJEGYZES, helyreallitasFelvetele }
   from './azonossag.js';
 
 // ⭐ Változatlanul innen is elérhető marad: aki a kulcs-réteget használja, tipikusan a
@@ -119,6 +120,13 @@ export async function kulcsparBiztositasa(tarolo) {
   console.log('kulcsparBiztositasa - KEZDÉS');
 
   const meglevo = await kulcsparBetoltese(tarolo);
+  // ⛔⛔ D128 (②f — a próba fogta meg): ha a tárolt azonosságnak VAN születése, de nem tölthető be (a lánca nem ellenőrizhető, vagy a
+  // kulcs nem a lánc végéé), az NEM a régi alak — új születés helyett megállunk: egy újraszületés némán új nevet adna, és az azonosság
+  // (a pontok, a pénztárca) elveszne.
+  if (meglevo && !meglevo.szuletes && (await tarolo.olvas())?.szuletes) {
+    throw new Error('A gépen lévő azonosság nem tölthető be (a lánca nem ellenőrizhető, vagy a kulcs nem a lánc végéé) — '
+      + 'új születést NEM adunk (a neved megváltozna). A fájl: ' + tarolo.fajl);
+  }
   if (meglevo?.szuletes) {
     console.log('kulcsparBiztositasa - VÉGE (meglévő kulcs)');
     return { kulcspar: meglevo, ujE: false, csere: null };
@@ -278,6 +286,9 @@ async function azonossagRaTetele(kulcspar, leiras) {
   if (!leiras?.szuletes || !(await szuletesEllenorzese(leiras.szuletes)).rendben) return kulcspar;
   // ⭐⭐ D128 (②b): egy kulcscsere UTÁN a tárolt kulcs a lánc VÉGÉN álló kezelő kulcs (nem a születésé) — a lánc a fájlban van.
   const cserek = Array.isArray(leiras.cserek) ? leiras.cserek : [];
+  // ⭐⭐ D128 (②f): a SAJÁT tárolónkban álló helyreállítás hiteles — ide csak a bizonyíték ellenőrzése után került (a befejezés), és
+  // aki ezt a fájlt átírhatja, a titkos kulcsot is kicserélhetné. A nyilvántartás folyamatonként él: az új folyamat innen tudja.
+  for (const c of cserek) if (c?.tipus === HELYREALLITAS_BEJEGYZES) helyreallitasFelvetele(c.jel);
   const lanc = await kezeloKulcsLanc(leiras.szuletes, cserek, await azonossagNeve(leiras.szuletes));
   if (lanc.rendben && lanc.kulcsok.at(-1) === kulcs) {
     kulcspar.szuletes = leiras.szuletes;
@@ -357,6 +368,45 @@ export async function papirVisszavonasa(tarolo, csereLeiras) {
   regi.cserek = ujCserek;
   console.log('papirVisszavonasa - VÉGE', { sorszam: visszavonas.sorszam });
   return { kulcspar: regi, visszavonas, cserek: ujCserek, nev };
+}
+
+/**
+ * ⭐⭐ D128 (②f — 17. pont): A HELYREÁLLÍTÁS BEFEJEZÉSE az új készüléken — a kérelem titkaival (a kezelő és a fizetési kulcs) és a
+ * helyreállítás `Kulcscsere` eseményével (a segítő adta ki): a lánc hiteles, és a VÉGÉN az én kezelő kulcsom és fizetési kulcsom
+ * áll — akkor ez a gép ennek az azonosságnak a kezelője. ⚠️ A helyreállítás bizonyítékát a hívó előbb ellenőrzi (a nyilvántartásba
+ * veszi — `allapot/helyreallitas.js`); itt a lánc. ⛔ Meglévő azonosságot csak kimondott `felulir`-ral ír felül (D15).
+ * @param {Object} tarolo
+ * @param {{kulcs: Object, fizetes: Object, csere: Object}} titkok - a kérelem titkos kulcsai (JWK)
+ * @param {Object} esemeny - a helyreállítás `Kulcscsere` eseménye
+ * @param {{felulir?: boolean}} [beallitas]
+ * @returns {Promise<{kulcspar: CryptoKeyPair, nev: string, papir: Object|null, elhagyott: string|null}>}
+ */
+export async function helyreallitasBefejezese(tarolo, titkok, esemeny, { felulir = false } = {}) {
+  console.log('helyreallitasBefejezese - KEZDÉS');
+  if (esemeny?.tipus !== 'Kulcscsere' || !esemeny.adat?.szuletes || !Array.isArray(esemeny.adat.cserek)) {
+    throw new Error('Ez nem a helyreállítás eseménye (Kulcscsere).');
+  }
+  const { szuletes, cserek } = esemeny.adat;
+  const nev = await azonossagNeve(szuletes);
+  const lanc = await kezeloKulcsLanc(szuletes, cserek, nev);
+  if (!lanc.rendben) throw new Error('A helyreállítás lánca nem hiteles: ' + lanc.ok);
+  if (lanc.kulcsok[lanc.kulcsok.length - 1] !== titkok.kulcs?.x || lanc.fizetesek[lanc.fizetesek.length - 1] !== titkok.fizetes?.x) {
+    throw new Error('Ez a helyreállítás nem a te kérelmedé (a lánc végén más kulcs áll).');
+  }
+  const meglevo = await kulcsparBetoltese(tarolo);
+  if (meglevo && !felulir) {
+    throw new Error('Ezen a készüléken már van azonosság — ha mégis ezt akarod: … felulir');
+  }
+  const privateKey = await crypto.subtle.importKey('jwk', titkok.kulcs, { name: ALGORITMUS }, true, ['sign']);
+  const { kty, crv, x } = titkok.kulcs;
+  const publicKey = await crypto.subtle.importKey('jwk', { kty, crv, x }, { name: ALGORITMUS }, true, ['verify']);
+  const kulcspar = { privateKey, publicKey };
+  await tarolo.ir({ ...(await kulcsparLeirasa(kulcspar)), nev, szuletes, cserek, fizetesKulcs: titkok.fizetes });
+  Object.assign(kulcspar, { szuletes, cserek, fizetesKulcs: titkok.fizetes });
+  const papir = lanc.lekotes !== null && lanc.lekotes === await csereLenyomata(titkok.csere?.x) ? titkok.csere : null;
+  const elhagyott = meglevo ? await nyilvanosKulcsSzovegesen(meglevo.publicKey) : null;
+  console.log('helyreallitasBefejezese - VÉGE', { papir: !!papir });
+  return { kulcspar, nev, papir, elhagyott };
 }
 
 /** ⭐⭐ D128 (②d): a papír él-e még (a lekötés egy csere-kulcs lenyomata — nem vonták vissza). */

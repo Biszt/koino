@@ -155,6 +155,7 @@ import {
   kulcsparBiztositasa, nyilvanosKulcsSzovegesen, rovidAzonosito, kulcsparKimentese, kulcsparLeirasa, csereKulcsKiadasa,
   kulcscsereVegrehajtasa,   // ⭐⭐ D128 (②b)
   papirVisszavonasa, papirEl,   // ⭐⭐ D128 (②d — 17. pont): a papír visszavonása a 2. lépcsőn
+  helyreallitasBefejezese,   // ⭐⭐ D128 (②f): a helyreállítás befejezése az új készüléken
   // ⭐ A KÉZI ÚT MÁSIK FELE (2026-09-15): eddig csak KIMENTENI lehetett a kulcsot.
   kulcsparVisszatoltese
 } from './js/kulcs/kulcsTar.js';
@@ -162,12 +163,14 @@ import { koinoEsemenyei, sajatLancEsemenyei, esemenyLekerese, esemenyMentese, en
   from './js/tar/esemenyTar.js';
 // ⭐⭐ D128: a készülékkulcs és a tanúsítványa.
 import { keszulekBiztositasa } from './js/kulcs/keszulek.js';
-import { azonossagNeve } from './js/kulcs/azonossag.js';   // ⭐⭐ D128 (②a): a név a születés lenyomata
+import { azonossagNeve, HELYREALLITAS_BEJEGYZES, helyreallitasFelvetele, helyreallitasJele } from './js/kulcs/azonossag.js';   // ⭐⭐ D128
+// ⭐⭐ D128 (②f): a helyreállítás kérelme (az új készüléken) és a segítő oldala
+import { ujKerelem, kerelemSzovege, kerelemSzovegbol, kerelemEllenorzoKodja, ellenorzoKodTisztitasa } from './js/kulcs/helyreallitasKerelem.js';
 import { csereKodja, csereKodbol, csereKodQrja, kodTisztitasa, KOD_HOSSZ } from './js/kulcs/papir.js';   // ⭐⭐ D128 (②c)
-import { qrTerminalra } from './js/kulcs/qr.js';   // ⭐⭐ D128 (②c): a csere-kód QR-je a terminálba
+import { qrTerminalra, qrKeszitese } from './js/kulcs/qr.js';   // ⭐⭐ D128 (②c): a csere-kód QR-je a terminálba
 import { existsSync } from 'node:fs';
 import { kiseroAdo, osszesHelyreallitasFelvetele } from './js/tar/esemenyTar.js';
-import { helyreallitasokAllapota } from './js/allapot/helyreallitas.js';   // ⭐⭐ D128 (②e3): az értesítés   // ⭐⭐ D128 (②e2): a helyreállítások
+import { helyreallitasokAllapota, helyreallitasBizonyitekEllenorzese, javaslatKerelembol } from './js/allapot/helyreallitas.js';   // ⭐⭐ D128   // ⭐⭐ D128 (②e2): a helyreállítások
 // ⭐ B/2: a szelet-kulcs (az előléptetéshez).
 import {
   szelet, esemenyEllenorzese, tanusitvanyKereso, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, koinoSzuleteseE, koinoSzuleteseListabol,
@@ -233,7 +236,7 @@ import {
   // ⭐ A SZAKASZ 4 HÉT MŰVELETE (2026-09-12) — eddig egyik sem volt elérhető kézzel.
   belepes, meghivas, felhatalmazas, tanusitas, bemutatkozas, lattam, felhatalmazasVisszavonasa,
   kulcscsereBevitele,   // ⭐⭐ D128 (②b)
-  helyreallitasokGondozasa, helyreallitasMegallitasa,   // ⭐⭐ D128 (②e3): a segítő készüléke; a megállítás
+  helyreallitasokGondozasa, helyreallitasMegallitasa, helyreallitasJovahagyasa,   // ⭐⭐ D128 (②e3, ②f): a segítő; a megállítás
   // ⭐ D82: az észlelt ellentmondások bejelentése (ismétlés nélkül).
   ellentmondasokBejelentese,
   // ⭐ D85 T3: a lezárt, több érintettes döntések csomagja (a (B): a töredék szeletébe).
@@ -473,6 +476,80 @@ if (parancs === 'visszatolt') {
     if (process.env.KOINO_NAPLO) naplo(hiba);
     process.exit(1);
   }
+}
+
+// ===================================
+// ⭐⭐ D128 (②f — 17. pont, 9.13): A HELYREÁLLÍTÁS AZ ÚJ KÉSZÜLÉKEN — a kulcs-biztosítás ELŐTT (mint a visszatöltés)
+// ===================================
+//
+// Ha minden elveszett, az új készülék KÉRELMET állít ki (az új kezelő, fizetési és papír-kulcs — a titkok itt maradnak), a segítők
+// ezt hagyják jóvá (`segit`), a várakozás után a készülékük véglegesít és beviszi; egy segítő kiadja (`segit kiad`), és itt a
+// BEFEJEZÉS teszi ezt a gépet az azonosság kezelőjévé — a név, a pontok, a pénztárca megmarad.
+const HELYREALLITAS_KERELEM_FAJL = join(dirname(tarolo.fajl), 'helyreallitas-kerelem.json');
+if (parancs === 'helyreallitas') {
+  try {
+    if (ervek[0] === 'kerelem') {
+      const felulir = ervek.includes('felulir');
+      if (existsSync(HELYREALLITAS_KERELEM_FAJL) && !felulir) {
+        throw new Error('Már van egy folyamatban lévő kérelmed (' + HELYREALLITAS_KERELEM_FAJL + ') — újat: helyreallitas kerelem … felulir');
+      }
+      const { kerelem, titkok } = await ujKerelem(ervek.slice(1).filter((x) => x !== 'felulir'));
+      await writeFile(HELYREALLITAS_KERELEM_FAJL, JSON.stringify({ mi: 'koino-helyreallitas-kerelem', valtozat: 1, kerelem, titkok }, null, 2));
+      const szoveg = kerelemSzovege(kerelem);
+      kiir(SZIN.vastag + 'A HELYREÁLLÍTÁSI KÉRELMED (D128):' + SZIN.vege);
+      kiir();
+      kiir('  ' + szoveg);
+      kiir();
+      kiir('  Az ellenőrző kód: ' + SZIN.vastag + await kerelemEllenorzoKodja(kerelem) + SZIN.vege + '  (szóban mondd be a segítőidnek)');
+      kiir();
+      for (const sor of qrTerminalra(qrKeszitese(szoveg), { szinesen: Boolean(process.stdout.isTTY) })) kiir('  ' + sor);
+      kiir();
+      kiir('  Add át a kérelmet a segítőidnek: egy régi ismerősödnek (a meghívódnak vagy egy tanúsítódnak) és két élő tanúsítónak —');
+      kiir('  vagy tíz bemutatkozódnak és két élő tanúsítónak. Mindegyik: node koino.js segit <a horgonyod> <a kérelem> <az ellenőrző kód>');
+      kiir('  A várakozás (7 nap — a bemutatkozók útján 30) után a készülékük magától véglegesít. Utána egyikük kiadja:');
+      kiir('  node koino.js segit kiad <a horgonyod> <fájl>  — és itt: node koino.js helyreallitas befejez <fájl>');
+      process.exit(0);
+    }
+    if (ervek[0] === 'befejez') {
+      const fajl = ervek[1];
+      if (!fajl) throw new Error('Melyik fájlból? node koino.js helyreallitas befejez <fájl> [felulir]');
+      const fuggo = JSON.parse(await readFile(HELYREALLITAS_KERELEM_FAJL, 'utf8').catch(() => 'null'));
+      if (fuggo?.mi !== 'koino-helyreallitas-kerelem') throw new Error('Ezen a készüléken nincs folyamatban lévő helyreállítási kérelem.');
+      const esemeny = JSON.parse(await readFile(fajl, 'utf8'));
+      // A bizonyítékok — a nyilvántartásba (a lánc ellenőrzése ebből tudja, hogy a helyreállítás hiteles).
+      for (const c of Array.isArray(esemeny?.adat?.cserek) ? esemeny.adat.cserek : []) {
+        if (c?.tipus !== HELYREALLITAS_BEJEGYZES) continue;
+        const b = esemeny.adat.bizonyitekok?.[c.jel];
+        if (!b || !(await helyreallitasBizonyitekEllenorzese(b, c)).rendben) throw new Error('A helyreállítás bizonyítéka nem hiteles.');
+        helyreallitasFelvetele(c.jel);
+      }
+      const r = await helyreallitasBefejezese(tarolo, fuggo.titkok, esemeny, { felulir: ervek.includes('felulir') });
+      if (r.papir) {
+        const csere = { privateKey: await crypto.subtle.importKey('jwk', r.papir, { name: 'Ed25519' }, true, ['sign']) };
+        await writeFile(join(dirname(tarolo.fajl), 'csere-kulcs.json'), JSON.stringify(await csereKulcsKiadasa(csere, r.nev), null, 2));
+      }
+      await rm(HELYREALLITAS_KERELEM_FAJL);
+      kiir(SZIN.jo + 'Visszakaptad az azonosságodat — a neved ugyanaz: ' + rovidAzonosito(r.nev) + SZIN.vege);
+      if (r.elhagyott) kiir(SZIN.nem + '  ⚠ A korábbi azonosság ezen a készüléken ELVESZETT: ' + rovidAzonosito(r.elhagyott) + SZIN.vege);
+      kiir(r.papir ? '  Az új papírod a csere-kulcs.json-ban — papírra: node koino.js papir'
+        : '  A 2. lépcsőn papír nincs — a helyreállítás a segítőidé (D128 17. pont).');
+      kiir(SZIN.halvany + '  A készüléked a következő indulásnál az új kulccsal kap tanúsítványt; a koinóidba: csatlakoz <a koinó neve>.' + SZIN.vege);
+      process.exit(0);
+    }
+    throw new Error('node koino.js helyreallitas kerelem [a megtartandó régi készülékek…] [felulir]  |  helyreallitas befejez <fájl> [felulir]');
+  } catch (hiba) {
+    kiir(SZIN.nem + 'Nem sikerült: ' + hiba.message + SZIN.vege);
+    if (process.env.KOINO_NAPLO) naplo(hiba);
+    process.exit(1);
+  }
+}
+// ⛔ Folyamatban lévő kérelem mellett, azonosság nélkül más parancs NEM fut — különben a kulcs-biztosítás új azonosságot adna (és a
+// befejezés felülírást kérne).
+if (existsSync(HELYREALLITAS_KERELEM_FAJL) && !(await tarolo.olvas())) {
+  kiir(SZIN.nem + 'A helyreállításod folyamatban — amíg be nem fejezed, ezen a készüléken más parancs nem fut:' + SZIN.vege);
+  kiir('  node koino.js helyreallitas befejez <fájl>   (a fájlt egy segítőd adja: segit kiad <a horgonyod> <fájl>)');
+  kiir(SZIN.halvany + '  Vagy töröld a kérelmet: ' + HELYREALLITAS_KERELEM_FAJL + SZIN.vege);
+  process.exit(1);
 }
 
 // ⭐⭐ D128 (ET-3 — a kulcs: több készülék és a helyreállítás): KÉT KULCS. Az AZONOSSÁG kulcsa (a régi kulcs — a nevem, a
@@ -5930,7 +6007,7 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
   }
   // ⭐⭐ D128 (②e3): a segítő készüléke — a várakozás utáni véglegesítés és a teljes helyreállítás bevitele — körönként.
   try {
-    const g = await helyreallitasokGondozasa(kornyezet);
+    const g = await helyreallitasokGondozasa(kornyezet, { most: Date.now() + (Number.parseInt(process.env.KOINO_ORAELTOLAS ?? '0', 10) || 0) });
     if (g.veglegesitettek.length || g.bevittek.length) {
       kiir('  helyreállítás: ' + g.veglegesitettek.length + ' véglegesítve, ' + g.bevittek.length + ' bevíve a koinóba');
     }
@@ -7257,7 +7334,7 @@ try {
   // ⭐⭐ D128 (②e3 — Csaba: „a segítők EGYSZER cselekszenek”): a segítő készüléke magától véglegesít a várakozás után, és a teljes
   // helyreállítást a bizonyítékkal beviszi — minden parancs elején is (nem csak az őrjáratban). ⚠️ A hibája nem akasztja meg a parancsot.
   try {
-    const g = await helyreallitasokGondozasa(kornyezet);
+    const g = await helyreallitasokGondozasa(kornyezet, { most: Date.now() + (Number.parseInt(process.env.KOINO_ORAELTOLAS ?? '0', 10) || 0) });
     if (g.veglegesitettek.length || g.bevittek.length) {
       process.stderr.write('helyreállítás: ' + g.veglegesitettek.length + ' véglegesítve, ' + g.bevittek.length + ' bevíve a koinóba\n');
     }
@@ -7302,6 +7379,61 @@ try {
       const e = await kulcscsereBevitele(kornyezet, r.kulcspar.szuletes, r.cserek);
       kiir(e ? '  A koinóba bekerült: ' + rovidAzonosito(e.azonosito)
         : SZIN.halvany + '  Ebben a koinóban nincs azonosság-szeleted — ide nincs mit bevinni.' + SZIN.vege);
+      break;
+    }
+
+    // ⭐⭐ D128 (②f — 17. pont): A SEGÍTŐ — `segit <horgony> <kérelem> <ellenőrző kód> [masodik <a megállított javaslat jele>]`: a
+    // kérelem ellenőrző kódját a két ember szóban összeveti (a gép csak egyezőnél hagy jóvá); a javaslat a meglévő (ha más segítő már
+    // kezdte), vagy új (a lánc helye a tárból; a 2. lépcsőn papír nélkül). `segit visszavon <horgony> <jel>` — a jóváhagyás
+    // visszavonása (a véglegesítés előtt); `segit kiad <horgony> <fájl>` — a TELJES helyreállítás eseménye az új készüléknek.
+    case 'segit': {
+      if (ervek[0] === 'visszavon' || ervek[0] === 'kiad') {
+        if (!ervek[1] || !ervek[2]) {
+          throw new Error(ervek[0] === 'kiad' ? 'node koino.js segit kiad <a helyreállított horgonya> <fájl>'
+            : 'node koino.js segit visszavon <a helyreállítandó horgonya> <a javaslat jele>');
+        }
+        const adatok = await allitasAdatai(ervek[1]);
+        const allasok = await helyreallitasokAllapota(tar, KOINO, adatok.horgonya);
+        if (ervek[0] === 'visszavon') {
+          const a = allasok.find((x) => x.jel === ervek[2]);
+          if (!a) throw new Error('Nincs ilyen helyreállítás erről a horgonyról: ' + ervek[2]);
+          await helyreallitasJovahagyasa(kornyezet, adatok, a.javaslat, 'visszavonas');
+          kiir(SZIN.jo + 'Visszavontad a jóváhagyásodat (a véglegesítés előtt ez számít; utána már nem).' + SZIN.vege);
+          break;
+        }
+        const keszJelek = new Set(allasok.filter((a) => a.teljes).map((a) => a.jel));
+        const kiadhato = (await tar.kezelesEsemenyei(adatok.kit)).filter((e) => e.tipus === 'Kulcscsere'
+          && e.adat.cserek.some((c) => keszJelek.has(c.jel)));
+        if (!kiadhato.length) {
+          throw new Error('A helyreállítás még nincs bent a koinóban (a várakozás után a segítők készüléke viszi be) — később.');
+        }
+        await writeFile(ervek[2], JSON.stringify(kiadhato[kiadhato.length - 1]), 'utf8');
+        kiir(SZIN.jo + 'Kiadva: ' + ervek[2] + SZIN.vege + ' — az új készüléken: node koino.js helyreallitas befejez ' + ervek[2]);
+        break;
+      }
+      const [horgonyErv, kerelemErv, kodErv] = ervek;
+      if (!horgonyErv || !kerelemErv || !kodErv) {
+        throw new Error('node koino.js segit <a helyreállítandó horgonya> <a kérelme> <az ellenőrző kód, amit szóban mond>'
+          + ' [masodik <a megállított javaslat jele>]');
+      }
+      const kerelem = kerelemSzovegbol(kerelemErv);
+      const kod = await kerelemEllenorzoKodja(kerelem);
+      if (ellenorzoKodTisztitasa(kodErv) !== ellenorzoKodTisztitasa(kod)) {
+        throw new Error('Az ellenőrző kód NEM egyezik — ne hagyd jóvá (a kérelmet útközben kicserélhették). A te gépeden: ' + kod);
+      }
+      const adatok = await allitasAdatai(horgonyErv);
+      const mi = ervek.indexOf('masodik');
+      const { javaslat, uj } = await javaslatKerelembol(tar, KOINO, adatok.horgonya, kerelem,
+        mi >= 0 ? { kor: 2, elozo: ervek[mi + 1] ?? null } : {});
+      await helyreallitasJovahagyasa(kornyezet, adatok, javaslat, 'kezdes');
+      const jel = await helyreallitasJele(javaslat);
+      const a = (await helyreallitasokAllapota(tar, KOINO, adatok.horgonya)).find((x) => x.jel === jel);
+      kiir(SZIN.jo + 'Jóváhagytad a helyreállítást' + (uj ? ' (új javaslat).' : ' (a meglévő javaslathoz csatlakoztál).') + SZIN.vege);
+      kiir('  a javaslat jele: ' + jel);
+      kiir(a?.elindult
+        ? '  Elindult: ' + a.kezdok.size + ' segítő; a várakozás ' + a.varakozasNap + ' nap — utána a készüléked magától véglegesít.'
+        : '  Még nem indult el: ' + (a?.kezdok.size ?? 1) + ' segítő hagyta jóvá (egy régi ismerős és két élő tanúsító kell — vagy tíz'
+          + ' bemutatkozó és két élő tanúsító).');
       break;
     }
 

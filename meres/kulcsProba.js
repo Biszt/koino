@@ -347,6 +347,24 @@ proba('⭐⭐ (②d) a PAPÍR VISSZAVONÁSA a gépen: a kezelő és a fizetési 
   return Object.values(ok).every(Boolean);
 });
 
+// ⛔⛔ D128 (②f — a parancssor-próba fogta meg): egy SZÜLETÉSSEL bíró, de be nem tölthető azonosság (a lánca nem ellenőrizhető) NEM
+// a régi alak — a biztosítás megáll, és nem ad új születést (az új nevet adna: a pontok, a pénztárca elvesznének).
+proba('⛔⛔ (②f) a be nem tölthető, születéssel bíró azonosságot a biztosítás NEM szüli újra — megáll, és a fájlhoz nem nyúl', async () => {
+  const tarolo = memoriaTarolo();
+  const elso = await kulcsparBiztositasa(tarolo);
+  const nev = await azonossagNeve(elso.kulcspar.szuletes);
+  await kulcscsereVegrehajtasa(tarolo, await csereKulcsKiadasa(elso.csere, nev), []);
+  const leiras = await tarolo.olvas();
+  // A lánc egy bejegyzése megsérül (az aláírása) — a kulcs a lánc végéé, de a lánc nem ellenőrizhető.
+  const serult = { ...leiras, cserek: leiras.cserek.map((c) => ({ ...c, alairas: 'A'.repeat(86) })) };
+  await tarolo.ir(serult);
+  const irasok = tarolo.irasokSzama;
+  let hiba = null;
+  try { await kulcsparBiztositasa(tarolo); } catch (h) { hiba = h.message; }
+  return /új születést NEM adunk/.test(hiba ?? '') && tarolo.irasokSzama === irasok
+    && JSON.stringify(await tarolo.olvas()) === JSON.stringify(serult);
+});
+
 export default async function (csendes) {
   return futtatas(csendes);
 }

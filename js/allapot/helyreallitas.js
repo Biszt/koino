@@ -32,7 +32,7 @@
 //
 // Használják: a lánc bejegyzése és a bizonyíték (②e2), a segítők készülékei (②e3), a parancsok (②f), a próbák.
 
-import { allitasHelyben, tanusithatE, ujIdentitasNezet } from './identitas.js';
+import { allitasHelyben, tanusithatE, lepcso2E, ujIdentitasNezet } from './identitas.js';
 import { esemenyLekerese, entitasEsemenyei, tarTanusitvanya, azonossagEsemenyei } from '../tar/esemenyTar.js';
 import { helyreallitasJele, helyreallitasJavaslatAlakiHibaja, javaslatResze, helyreallitasBejegyzesAlakiHibaja, lancErosebbE,
   bejegyzesJele, HELYREALLITAS_BEJEGYZES, lancBejegyzesAlakiHibaja } from '../kulcs/azonossag.js';
@@ -342,4 +342,34 @@ export function javaslatElotagja(lanc, javaslat) {
 /** A láncban álló helyreállítások jelei. */
 export function lancHelyreallitasai(cserek) {
   return cserek.filter((c) => c?.tipus === HELYREALLITAS_BEJEGYZES).map((c) => c.jel);
+}
+
+/**
+ * ⭐⭐ D128 (②f): A JAVASLAT A KÉRELEMBŐL — a segítő gépe ebből hagy jóvá. Ha a kérelemre már van javaslat (egy másik segítő
+ * kezdte — ugyanaz a kulcs, a fizetési kulcs, a készülékek, a kör és az előzmény), AZT adja (mindenki ugyanazt hagyja jóvá); különben
+ * újat: a lánc HELYE a tárból (`azonossagLancaTarbol` — a következő sorszám, az utolsó bejegyzés jele), és a papír lekötése a 2.
+ * lépcsőn NINCS (Csaba: „ott már ne legyen papír”), az 1. lépcsőn a kérelem papírja.
+ * @param {Object} tar
+ * @param {string} koino
+ * @param {string} horgony - a helyreállítandó horgonya
+ * @param {{kulcs: string, fizetes: string, csere: string|null, keszulekek: Array<string>}} kerelem
+ * @param {{kor?: number, elozo?: string|null, ido?: number}} [beallitas]
+ * @returns {Promise<{javaslat: Object, uj: boolean}>}
+ */
+export async function javaslatKerelembol(tar, koino, horgony, kerelem, { kor = 1, elozo = null, ido = Date.now() } = {}) {
+  const ugyanaz = (j) => j.kulcs === kerelem.kulcs && j.fizetes === kerelem.fizetes && j.kor === kor && j.elozo === elozo
+    && JSON.stringify(j.keszulekek) === JSON.stringify(kerelem.keszulekek);
+  const meglevo = (await helyreallitasokAllapota(tar, koino, horgony)).find((a) => ugyanaz(a.javaslat));
+  if (meglevo) return { javaslat: meglevo.javaslat, uj: false };
+  const horgonyEsemeny = await esemenyLekerese(tar, horgony);
+  if (!horgonyEsemeny) throw new Error('Nem ismerem ezt a horgonyt — előbb a koinó cseréje (vagy behoz).');
+  const lanc = await azonossagLancaTarbol(tar, horgonyEsemeny.szerzo);
+  const utolso = lanc.cserek[lanc.cserek.length - 1];
+  const masodik = (await lepcso2E(tar, koino, horgony, ujIdentitasNezet({ keret: Infinity }))).igen;
+  const javaslat = { kulcs: kerelem.kulcs, keszulekek: [...kerelem.keszulekek], fizetes: kerelem.fizetes,
+    kovetkezo: masodik ? null : kerelem.csere, kor, elozo, sorszam: lanc.cserek.length + 1,
+    utan: utolso ? bejegyzesJele(utolso) : null, ido };
+  const h = helyreallitasJavaslatAlakiHibaja(javaslat);
+  if (h) throw new Error('A javaslat nem állítható össze: ' + h);
+  return { javaslat, uj: true };
 }

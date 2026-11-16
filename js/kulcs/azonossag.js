@@ -370,7 +370,7 @@ export function lancElejeE(elotag, alairasok) {
 // élő tanúsító (vagy tíz bemutatkozó és két élő tanúsító) jóváhagyja a JAVASLATOT, és a várakozás után a készülékük véglegesíti
 // (`allapot/helyreallitas.js`). A javaslat:
 //   `{ kulcs, keszulekek, fizetes, kovetkezo, kor, elozo, sorszam, utan, ido }`
-//   · `kulcs` — az új kezelő kulcs; `keszulekek` — a megmaradó (az új) készülékek; `fizetes` — az új fizetési kulcs;
+//   · `kulcs` — az új kezelő kulcs; `keszulekek` — a megmaradó régi készülékek (üres is lehet); `fizetes` — az új fizetési kulcs;
 //   · `kovetkezo` — az 1. lépcsőn az új papír lekötése, a 2. lépcsőn `null` (ott nincs papír);
 //   · `kor` — 1, vagy 2 (egy megállított 1. kör után: `elozo` az 1. kör jele);
 //   · `sorszam`, `utan` — a lánc HELYE, amit folytat: a sorszáma, és az előző bejegyzés jele (az 1. helyen `null`);
@@ -396,8 +396,9 @@ export function helyreallitasJavaslatAlakiHibaja(j) {
     return 'a javaslat kovetkezo mezője 43 jel (vagy null: a 2. lépcsőn nincs papír)';
   }
   const k = j.keszulekek;
-  if (!Array.isArray(k) || !k.length || k.length > MARADO_KORLAT || !k.every((x) => typeof x === 'string' && AZONOSITO.test(x))) {
-    return 'a javaslat készülékei: 1–' + MARADO_KORLAT + ' kulcs';
+  // ⭐ (②f) üres is lehet: ha minden elveszett, egyetlen régi készülék sem marad (az új a helyreállítás UTÁN, az új kulccsal kerül fel)
+  if (!Array.isArray(k) || k.length > MARADO_KORLAT || !k.every((x) => typeof x === 'string' && AZONOSITO.test(x))) {
+    return 'a javaslat készülékei: 0–' + MARADO_KORLAT + ' kulcs';
   }
   for (let i = 1; i < k.length; i++) if (!(k[i] > k[i - 1])) return 'a javaslat készülékei rendezve, egyszer';
   if (!HELYREALLITAS_KOROK.includes(j.kor)) return 'a javaslat köre 1 vagy 2';
