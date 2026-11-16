@@ -436,8 +436,8 @@ D128 13–15.):
   rontás. ⚠️ A QR végső próbája a telefon kamerája (⑤ terep). ⭐ A ② a papírral ezzel kész; ⏭️ a D128 17. pontja (a helyreállítás a segítőkkel — 9.13) ②d–②f-ként, utána a
   ③ a hálózat (a kizárás és a kulcscsere terjesztése, a koinó-lista a készülékek között; az átfolyás határának alapértéke — Csaba döntése).
 
-**9.12 A ③ terve — a hálózat: a saját készülékek találkozása és a kezelés eljuttatása** (2026-11-15; ✅ KH1 eldöntve
-2026-11-16; ❓ Csaba döntésére vár: KH2)
+**9.12 A ③ terve — a hálózat: a saját készülékek találkozása és a kezelés eljuttatása** (2026-11-15; ✅ KH1 és KH2 eldöntve
+2026-11-16)
 
 *Ami már eldőlt (D128):* a készülékek találkozáskor kicserélik a koinó-listájukat (4. pont); a keret magától átfolyik, amikor
 találkoznak — a fogadó-oldali határig, a határ az adó szabálya (a lapon állítható), fölötte az adó megkérdez (5. pont); a kézfogás és
@@ -471,6 +471,9 @@ a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③
   kezelő készülék (ahol a kizárást vagy a kulcscserét kiadod) magától csatlakozik oda — csak a bevitelhez (pontja ott nincs, a láncán
   egy-két esemény); (B) nem: ott a tolvaj készüléke tovább számít, amíg valamelyik másik készüléked be nem lép oda. ⚠️ Amit a
   telefon az utolsó találkozás UTÁN lépett be, arról a laptop egyik esetben sem tud.
+  ✅ **Eldöntve (2026-11-16) — (A).** A példa, amin Csaba eldöntötte: a telefon a „Kertváros”-ban és az „Olvasókör”-ben tag, a
+  laptop csak a Kertvárosban; az Olvasókörben a telefon tartja a koinó TELJES keretét (az írta a horgonyt — `tagsag.js`
+  `alapHorgony`), és a KH1 határa sem fékezi (az csak két saját készülék között számít). Csaba: *„IGEN MEHETÜNK TOVÁBB”*.
 
 **9.13 A helyreállítás a segítőkkel** (2026-11-15 — D128 17. pont; ✅ eldöntve; a 9.12 (a ③) a ②d–②f után)
 

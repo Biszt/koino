@@ -6462,7 +6462,10 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
 4. **A kizárás** is koinók fölötti tanúsítvány: koinónként kimondja, a készülék láncából meddig érvényes; **ahol egy koinó nincs
    felsorolva, ott a kizárt készülék egyetlen eseménye sem számít** (a tervező kiegészítése) — visszamenőleges, kimondva: nem a szabály
    szigorítása (D47), hanem annak kimondása, hogy azok az események nem tőled jöttek. A készülékek találkozáskor a koinó-listájukat is
-   kicserélik.
+   kicserélik. **Ahová egyik másik készüléked sem jár** (KH2 (A), Csaba, 2026-11-16: *„IGEN MEHETÜNK TOVÁBB”*): ha a kizárt (vagy a
+   kulcscsere előtti) készülék egy olyan koinóban is tag, ahol egyik másik készüléked sincs, a kezelő készülék — ahol a kizárást vagy a
+   kulcscserét kiadod — a koinó-listából ismeri, és magától csatlakozik oda, csak a bevitelhez (pontja ott nincs; ott a kizárt
+   készülék tartaná a koinó teljes keretét, amit a határ sem fékez).
 5. **A tudatpont-keret készülékenként osztott** (KU1 (B) — az ET-3/3 (A) „közös keret” helyett, mert a D42 (a bemondott összeg) „egyetlen
    eseményből eldől”-jét a közös keret elvenné — 93. (b)): az első készüléké alapból az egész. **A keret magától átfolyik** a
    készülékek között, amikor találkoznak: az átadást a több szabad ponttal rendelkező készülék írja alá, a fogadó a saját láncában
