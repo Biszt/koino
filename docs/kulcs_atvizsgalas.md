@@ -773,6 +773,13 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
   oda-vissza, a hibás alakok, a bizonyítás kötése, az ellenőrző kód), `kulcsProba.js` (a kezelő nélküli azonosság), parancssor (a
   rossz titok és az idegen kezelő nem megy; a valódival a két ellenőrző kód egyezik; a telefonon nincs titkos kulcs, a kizárás és a
   felvétel a kezelőé; a csere után a telefon keretet kap) — 10 rontás. ⏭️ ④b a lap („📱 Készülékeim”), ④c a személyes határ.
+- ✅ **④c — a személyes határ** (2026-11-16; KH1 — Csaba: *„ezek az értékek, személyre szabhatók lesznek majd”*): `keszulek hatar
+  <készülék> <pont | alap>` — a saját készülékemnek magától legfeljebb ennyit adok (a határ az ADÓ szabálya — KU1 (a): ezen a
+  készüléken él, a `sajatkeszulekek.json`-ban, a fogadó készülékenként); az `alap` a koinó keretének 20%-a; a koinó keretén túl a
+  határ sem ér (`sajatKeszulekTalalkozasa` — `Math.min`). A koinó-lista fogadása és a felvétel feljegyzése a határt megtartja. A
+  `kizar` listája kimondja (a sor végén — ⛔ az első változat a név után írta, és ez a ③d-próba „régebbi kulcs” sorát szétvágta).
+  A próba: parancssor (az 1000-es határral a csere után 1000 megy — közben a koinó-lista is megjön, és a határ megmarad; a lista; az
+  `alap`; a rossz érték) — 4 rontás. A lapon (④b) ugyanez állítható.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

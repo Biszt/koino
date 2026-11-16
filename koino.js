@@ -5950,7 +5950,7 @@ async function tarsKoinoListaja(alairo, kl) {
   const k = await sajatKeszulekKotese(alairo);
   const lista = k ? koinoListaAlakja(kl) : null;
   if (!lista) return;
-  await sajatKeszulekekModositasa((j) => ({ ...j, [k]: { ...(j[k]?.nev ? { nev: j[k].nev } : {}), koinok: lista, ido: Date.now() } }));
+  await sajatKeszulekekModositasa((j) => ({ ...j, [k]: { ...(j[k] ?? {}), koinok: lista, ido: Date.now() } }));
 }
 
 async function azonossagKotese(alairo, sz, h, k = null) {
@@ -6725,7 +6725,9 @@ function resMunka(allapot, halo, tars) {
       try {
         const kot = (await azonossagokOlvasasa())[alairo];
         if (kot?.sz === szerzo && typeof kot.k === 'string' && kot.k !== KESZULEK) {
-          const s = await sajatKeszulekTalalkozasa(kornyezet, kot.k);
+          // ⭐⭐ (④c) a személyes határ, ha beállítottam (a fogadó készülékre); különben az alapérték (a keret 20%-a)
+          const szemelyes = (await sajatKeszulekekOlvasasa())[kot.k]?.hatar;
+          const s = await sajatKeszulekTalalkozasa(kornyezet, kot.k, Number.isSafeInteger(szemelyes) ? { hatar: szemelyes } : {});
           if (s.atvetelek.length || s.merteke) {
             kiir('  ' + (allapot.koinoJel ?? '') + 'a saját készülékem (' + rovidAzonosito(kot.k) + '): '
               + (s.atvetelek.length ? s.atvetelek.length + ' átvétel' : '') + (s.atvetelek.length && s.merteke ? ', ' : '')
@@ -7841,10 +7843,15 @@ try {
         const listak = await sajatKeszulekekOlvasasa();
         kiir(SZIN.vastag + 'A KÉSZÜLÉKEID' + SZIN.vege + ' (ahogy a koinóidban látszanak):');
         for (const [k, d] of keszulekek) {
+          const sh = listak[k]?.hatar;
+          if (k !== KESZULEK && !d.kizarva) {
+            d.hatarSzoveg = Number.isSafeInteger(sh) ? 'határ: ' + sh + ' (a te beállításod)' : 'határ: a keret 20%-a (alap)';
+          }
           kiir('  ' + rovidAzonosito(k) + '  ' + (d.nev ?? '?') + (k === KESZULEK ? '  (ez a készülék)' : '')
             + (d.kizarva ? SZIN.nem + '  — kizárva' + SZIN.vege : '')
             + (!d.kizarva && d.regi && k !== KESZULEK ? SZIN.halvany + '  — egy régebbi kulcs tanúsította: kizárás nélkül a múltja nem'
-              + ' számít; a kizárása a vágásig megtartja' + SZIN.vege : ''));
+              + ' számít; a kizárása a vágásig megtartja' + SZIN.vege : '')
+            + (d.hatarSzoveg ? SZIN.halvany + '  · ' + d.hatarSzoveg + SZIN.vege : ''));
           for (const [koino, n] of d.koinok) kiir(SZIN.halvany + '      ' + koinoFelirata(koino, koinoNevek.get(koino)) + ': a láncán ' + n + ' esemény' + SZIN.vege);
           // ⭐⭐ D128 (③d): amit a készülék a legutóbbi találkozáskor mondott, de itt nem látszik
           for (const x of koinoListaAlakja(listak[k]?.koinok) ?? []) {
@@ -7900,8 +7907,33 @@ try {
     // aláíróm, egy egyszeri titok); a kapu nyitva vár (legfeljebb 10 percig), amíg az új készülék (`keszulek csatlakoz <kód>`) a titok
     // bizonyításával kopog — akkor az azonosság kulcsával aláírom a tanúsítványát, és mindketten kiírjuk az ellenőrző kódot.
     case 'keszulek': {
+      // ⭐⭐ D128 (④c — KH1: „ezek az értékek, személyre szabhatók lesznek majd”): `keszulek hatar <készülék> <pont | alap>` — a
+      // saját készülékemnek magától legfeljebb ennyi pontot adok (a része legfeljebb eddig nőhet); az `alap` a keret 20%-a. ⭐ A határ az
+      // ADÓ szabálya (KU1 (a)): itt állítom, ezen a készüléken él.
+      if (ervek[0] === 'hatar') {
+        const { keszulekek } = await keszulekeim();
+        const t = ervek[1];
+        if (!t || ervek[2] === undefined) throw new Error('node koino.js keszulek hatar <készülék — a neve vagy a kulcsa eleje> <pont | alap>');
+        const nevvel = [...keszulekek].filter(([, d]) => d.nev === t).map(([k]) => k);
+        if (nevvel.length > 1) throw new Error('Több „' + t + '” nevű készüléked van — a kulcsa elejével add meg.');
+        const k = azonositoAlaku(t) ? t : nevvel[0] ?? feloldas(t, keszulekek.keys());
+        if (k === KESZULEK) throw new Error('A határ egy MÁSIK készülékedre szól (amelyiknek ez a készülék ad).');
+        const alap = ervek[2] === 'alap';
+        const pont = alap ? null : Number(ervek[2]);
+        if (!alap && (!Number.isSafeInteger(pont) || pont < 0)) throw new Error('A határ egy nemnegatív egész (pont), vagy: alap');
+        await sajatKeszulekekModositasa((j) => {
+          const e = { ...(j[k] ?? { koinok: [], ido: Date.now() }) };
+          if (alap) delete e.hatar; else e.hatar = pont;
+          return { ...j, [k]: e };
+        });
+        kiir(SZIN.jo + (alap ? 'A határ az alapérték (a keret 20%-a)' : 'A határ: ' + pont + ' pont') + SZIN.vege + ' — ennyit adok magától a '
+          + rovidAzonosito(k) + (keszulekek.get(k)?.nev ? ' („' + keszulekek.get(k).nev + '”)' : '') + ' készülékednek (fölötte nem; a koinó'
+          + ' keretén túl sem).');
+        break;
+      }
       if (ervek[0] !== 'felvesz') {
-        throw new Error('node koino.js keszulek felvesz   (az új készüléken utána: node koino.js keszulek csatlakoz <a párosító kód>)');
+        throw new Error('node koino.js keszulek felvesz   (az új készüléken utána: node koino.js keszulek csatlakoz <a párosító kód>)'
+          + '   ·   node koino.js keszulek hatar <készülék> <pont | alap>');
       }
       if (azonossagKulcspar.kezeloNelkul || !azonossagKulcspar.privateKey) {
         throw new Error('Új készüléket csak a kezelő készüléked vehet fel — ahol az azonosságod kulcsa van (ET-3/4 (A)).');
@@ -7964,8 +7996,8 @@ try {
         break;
       }
       // ⭐ a saját készülékeim közé (a nevével) — a `kizar` listája így rögtön mutatja, a koinó-listája a cserével jön (③d)
-      await sajatKeszulekekModositasa((j) => ({ ...j, [felvett.keszulek]: { koinok: j[felvett.keszulek]?.koinok ?? [], ido: Date.now(),
-        nev: felvett.nev } }));
+      await sajatKeszulekekModositasa((j) => ({ ...j, [felvett.keszulek]: { ...(j[felvett.keszulek] ?? {}),
+        koinok: j[felvett.keszulek]?.koinok ?? [], ido: Date.now(), nev: felvett.nev } }));
       kiir(SZIN.jo + 'Felvettem: „' + felvett.nev + '” (' + rovidAzonosito(felvett.keszulek) + ')' + SZIN.vege);
       kiir('  Az ellenőrző kód: ' + SZIN.vastag + felvett.ellenorzo + SZIN.vege + '  — az új készüléken ugyanezt kell látnod.'
         + ' Ha nem egyezik: node koino.js kizar ' + felvett.keszulek.slice(0, 8));

@@ -3817,6 +3817,47 @@ proba('⭐⭐ D128 (④a): a második készülék felvétele — párosító kó
     }
   });
 
+// ⭐⭐ D128 (④c — KH1: „ezek az értékek, személyre szabhatók lesznek majd”): A SZEMÉLYES HATÁR. A laptop a telefonnak 1000-es határt
+// állít (az alap 2000 helyett): a csere után 1000-et ad; a lista kimondja a beállítást; az `alap` visszaállítja; rossz értéket nem fogad.
+proba('⭐⭐ D128 (④c): a személyes határ — a laptop a telefonnak 1000-et állít, és a csere után annyit ad; a lista kimondja; az alap visszaállítja; a rossz értéket nem fogadja',
+  async () => {
+    const L = await ujKeszulek();
+    const T = await ujKeszulek();
+    const TEL = { KOINO_KESZULEK_NEV: 'telefon' };
+    try {
+      await fut(L, 'koino', 'Határ-próba');
+      const A = await koinoNeve(L);
+      await copyFile(join(L, 'kulcs.json'), join(T, 'kulcs.json'));
+      await fut(T, 'csatlakoz', A, TEL);
+      const tKesz = JSON.parse(await readFile(join(T, 'keszulek.json'), 'utf8')).tanusitvany.keszulek;
+      const rossz = await fut(L, 'keszulek', 'hatar', tKesz, '-5');
+      const beallit = await fut(L, 'keszulek', 'hatar', tKesz, '1000');
+      // a telefonnál a születés megvan: a cserében a koinó-lista is megjön — a fogadása nem írhatja felül a határt
+      await fut(L, 'kivisz', join(L, 'a.jsonl'));
+      await fut(T, 'behoz', join(L, 'a.jsonl'), TEL);
+      await csereKor(L, T, 8029, TEL);
+      const listaMegjott = Object.keys(JSON.parse(await readFile(join(L, 'sajatkeszulekek.json'), 'utf8').catch(() => '{}'))[tKesz]?.koinok ?? {}).length > 0;
+      const sorok = (s) => s.split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+      const atadasok = sorok(await readFile(join(L, A, 'esemenyek.jsonl'), 'utf8')).filter((e) => e.tipus === 'KeretAtadas');
+      const lista = await fut(L, 'kizar');
+      const vissza = await fut(L, 'keszulek', 'hatar', tKesz, 'alap');
+      const lista2 = await fut(L, 'kizar');
+      const r = {
+        rossz: /nemnegatív egész/.test(rossz), beallit: /A határ: 1000 pont/.test(beallit), listaMegjott,
+        atadas: atadasok.length === 1 && atadasok[0].adat.pont === 1000,
+        lista: /határ: 1000 \(a te beállításod\)/.test(lista),
+        vissza: /alapérték/.test(vissza) && /határ: a keret 20%-a \(alap\)/.test(lista2)
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (④c-próba: ' + JSON.stringify({ r, atadasok: atadasok.map((e) => e.adat.pont), lista: lista.slice(-400) }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      for (const h of [L, T]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();

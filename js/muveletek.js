@@ -583,7 +583,9 @@ export async function sajatKeszulekTalalkozasa(kornyezet, tarsKeszulek, { hatar 
   console.log('muveletek.sajatKeszulekTalalkozasa - KEZDÉS', { tars: tarsKeszulek.slice(0, 8) });
   ki.ervenyes = true;
   ki.atvetelek = (await keretAtvetelekGondozasa(kornyezet)).atvetelek;
-  const h = hatar ?? atfolyasHatarAlap((await koinomSzabalyai(kornyezet)).tudatpontKeret);
+  // ⭐⭐ (④c) a személyes határ (a fogadó készülékre — a lapon vagy a `keszulek hatar`-ral), de a koinó keretén túl nem
+  const keret = (await koinomSzabalyai(kornyezet)).tudatpontKeret;
+  const h = Number.isSafeInteger(hatar) && hatar >= 0 ? Math.min(hatar, keret) : atfolyasHatarAlap(keret);
   const r = await keretAtfolyasa(kornyezet, tarsKeszulek, { hatar: h });
   ki.merteke = r.merteke;
   ki.atadas = r.atadas;
