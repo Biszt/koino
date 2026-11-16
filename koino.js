@@ -240,6 +240,7 @@ import {
   belepes, meghivas, felhatalmazas, tanusitas, bemutatkozas, lattam, felhatalmazasVisszavonasa,
   helyreallitasokGondozasa, helyreallitasMegallitasa, helyreallitasJovahagyasa,   // ⭐⭐ D128 (②e3, ②f): a segítő; a megállítás
   kezelesGondozasa,   // ⭐⭐ D128 (③b): a kezelés minden koinómba
+  keretAtvetelekGondozasa, sajatKeszulekTalalkozasa,   // ⭐⭐ D128 (③c): a saját készülék a cserében
   // ⭐ D82: az észlelt ellentmondások bejelentése (ismétlés nélkül).
   ellentmondasokBejelentese,
   // ⭐ D85 T3: a lezárt, több érintettes döntések csomagja (a (B): a töredék szeletébe).
@@ -5713,11 +5714,22 @@ async function azonossagokOlvasasa() {
   }
 }
 
-/** A tábla-kulcs (aláírója) ↔ személy kötés megjegyzése — a legutóbb látott `AZONOSSAG_KORLAT` darab marad. */
-async function azonossagKotese(alairo, sz, h) {
+/**
+ * A tábla-kulcs (aláírója) ↔ személy kötés megjegyzése — a legutóbb látott `AZONOSSAG_KORLAT` darab marad. ⭐⭐ D128 (③c): a
+ * társ KÉSZÜLÉKÉNEK kulcsa is (a bizonyításban benne van) — ebből tudja a csere, hogy a társ a saját készülékem, és melyik.
+ * ⭐ És ha a társ a SAJÁT készülékem, a tanúsítványát (a kézfogás ellenőrizte) a tárba veszem: egy új telefon még semmit nem írt
+ * (kerete sincs) — a tanúsítványa nélkül nem ismerném el, és nem adhatnék neki keretet.
+ */
+async function sajatKeszulekTanusitvanya(ki) {
+  if (ki?.sz !== szerzo || typeof ki.k !== 'string' || ki.k === KESZULEK || !ki.t || ki.t.keszulek !== ki.k) return;
+  if (await tarTanusitvanya(tar, ki.k)) return;
+  try { await tar.tanusitvanyFelvetele?.(ki.t); } catch (hiba) { console.warn('a saját készülék tanúsítványa nem vehető fel', hiba.message); }
+}
+
+async function azonossagKotese(alairo, sz, h, k = null) {
   const j = await azonossagokOlvasasa();
-  if (j[alairo]?.sz === sz && j[alairo]?.h === h) return;
-  j[alairo] = { sz, h, ido: Date.now() };
+  if (j[alairo]?.sz === sz && j[alairo]?.h === h && (j[alairo]?.k ?? null) === k) return;
+  j[alairo] = { sz, h, ...(typeof k === 'string' ? { k } : {}), ido: Date.now() };
   const lista = Object.entries(j).sort((a, b) => (b[1]?.ido ?? 0) - (a[1]?.ido ?? 0)).slice(0, AZONOSSAG_KORLAT);
   try { await writeFile(azonossagFajl(), JSON.stringify(Object.fromEntries(lista)), 'utf8'); } catch { /* nem végzetes */ }
 }
@@ -5794,8 +5806,11 @@ async function tarsKapuja({ tabla = null, ki = null, csomag = null, meghivo = nu
     // +0,5 KB, utána semmi: 64. mérés), és megjegyzi — a belépők jegyzéke ebből telik (a meghívó ebből tudja, ki jelentkezett).
     // ⛔ Nem zár: a csere a személy nélkül is megy (`szabad`). ⛔ Mérve (2026-11-01): enélkül nyílt koinóban az „alap” meghívó
     // a belépőről semmit nem tudott meg.
-    if (ki && typeof tabla?.alairo === 'string') await azonossagKotese(tabla.alairo, ki.sz, ki.h ?? null);
-    const ismert = ki || (typeof tabla?.alairo === 'string' && (await azonossagokOlvasasa())[tabla.alairo]);
+    if (ki && typeof tabla?.alairo === 'string') await azonossagKotese(tabla.alairo, ki.sz, ki.h ?? null, ki.k ?? null);
+    await sajatKeszulekTanusitvanya(ki);
+    // ⭐⭐ D128 (③c): a saját nevemhez kötött, de készülék nélküli (a ③c előtti) kötés nem ismert — egyszer újra kérjük.
+    const kotes = typeof tabla?.alairo === 'string' ? (await azonossagokOlvasasa())[tabla.alairo] : null;
+    const ismert = ki || (kotes && (kotes.sz !== szerzo || typeof kotes.k === 'string'));
     if (!ismert && typeof tabla?.alairo === 'string') return { szabad: true, kell: true, ok: 'nyílt koinó — ismeretlen társ', tag };
     return { szabad: true, ok: 'nyílt koinó', tag };
   }
@@ -5803,12 +5818,16 @@ async function tarsKapuja({ tabla = null, ki = null, csomag = null, meghivo = nu
   let szemely = ki;
   if (!szemely && typeof tabla?.alairo === 'string') {
     const k = (await azonossagokOlvasasa())[tabla.alairo];
-    if (k && typeof k.sz === 'string') szemely = { sz: k.sz, h: typeof k.h === 'string' ? k.h : null };
+    // ⭐⭐ D128 (③c): a saját nevemhez kötött, de készülék nélküli (a ③c előtti) kötés nem ismert — egyszer újra kérjük.
+    if (k && typeof k.sz === 'string' && (k.sz !== szerzo || typeof k.k === 'string')) {
+      szemely = { sz: k.sz, h: typeof k.h === 'string' ? k.h : null };
+    }
   }
   const sajatH = await sajatHorgonyom();
   const szeletek = [...new Set([szuletes?.azonosito, szemely?.h, sajatH].filter((x) => typeof x === 'string'))];
   if (!szemely) return { szabad: false, kell: true, szeletek, ok: 'ismeretlen társ' };
-  if (ki && typeof tabla?.alairo === 'string') await azonossagKotese(tabla.alairo, ki.sz, ki.h ?? null);
+  if (ki && typeof tabla?.alairo === 'string') await azonossagKotese(tabla.alairo, ki.sz, ki.h ?? null, ki.k ?? null);
+  await sajatKeszulekTanusitvanya(ki);
   const r = await tagsagItelete(szemely, csomag);
   if (r.igen) return { szabad: true, tag: true, ok: r.ok };
   // ⭐ Ha csomagot még nem láttunk tőle, kérjük (a következő kör, vagy a kérelemben a `KELL`).
@@ -6140,6 +6159,13 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
   } catch (hiba) {
     kiir(SZIN.halvany + '  ⚠ a helyreállítások gondozása most nem sikerült: ' + hiba.message + SZIN.vege);
   }
+  // ⭐⭐ D128 (③c): a nekem szóló keret-átadások átvétele — körönként.
+  try {
+    const a = await keretAtvetelekGondozasa(kornyezet);
+    if (a.atvetelek.length) kiir('  ' + kk + 'keret: ' + a.atvetelek.length + ' átadást átvettem egy másik készülékemtől');
+  } catch (hiba) {
+    kiir(SZIN.halvany + '  ⚠ a keret átvétele most nem sikerült: ' + hiba.message + SZIN.vege);
+  }
   // ⭐⭐ D128 (③b — 9.12): az azonosságom kezelése (a kulcscsere, a kizárások) ebbe a koinóba — körönként (a családi őrjárat a család
   // minden koinójába; amit egy másik koinóban látott, azt a kezelés-jegyzékből hozza).
   try {
@@ -6463,6 +6489,24 @@ function resMunka(allapot, halo, tars) {
     if (alairo) utolsoCsereTarssal.set(alairo, Date.now());
     // ⭐⭐ D121 MH7 (A), D122: a belépő útja (fent) — a csere épp hozhatta a belépését
     await belepoUtja();
+    // ⭐⭐ D128 (③c — 9.12, KH1 (A)): A SAJÁT KÉSZÜLÉKEM A CSERÉBEN — ha a társ tábla-aláírója az én nevemhez és egy készülékemhez
+    // kötött (a kapu kötése), a nekem szóló átadásait átveszem, és ha nálam több a szabad pont, a határig átadok (a következő csere
+    // viszi át). ⚠️ A hibája nem dönti el a munkát.
+    if (alairo) {
+      try {
+        const kot = (await azonossagokOlvasasa())[alairo];
+        if (kot?.sz === szerzo && typeof kot.k === 'string' && kot.k !== KESZULEK) {
+          const s = await sajatKeszulekTalalkozasa(kornyezet, kot.k);
+          if (s.atvetelek.length || s.merteke) {
+            kiir('  ' + (allapot.koinoJel ?? '') + 'a saját készülékem (' + rovidAzonosito(kot.k) + '): '
+              + (s.atvetelek.length ? s.atvetelek.length + ' átvétel' : '') + (s.atvetelek.length && s.merteke ? ', ' : '')
+              + (s.merteke ? s.merteke + ' pontot adtam át (a határig)' : ''));
+          }
+        }
+      } catch (hiba) {
+        kiir(SZIN.halvany + '  ⚠ a saját készülékkel a keret most nem rendeződött: ' + hiba.message + SZIN.vege);
+      }
+    }
     // ⭐ Az alsó sáv (2026-10-15): a lap ebből mondja ki a csere idejét, és ha újat hozott, frissül (a bekopogó cseréje is).
     await csereAllapota().modosit((a) => csereFeljegyzese(a, { uj: alap.uj, kuldott: alap.kuldott, most: Date.now() }));
     // ⭐ D109 (KK4): a csere is kiszolgálás — a kiküldött bájtok a társ osztálya szerint könyvelődnek (a kötés csak könyvelődik).
@@ -7478,6 +7522,13 @@ try {
     }
   } catch (hiba) {
     process.stderr.write('⚠ a helyreállítások gondozása most nem sikerült: ' + hiba.message + '\n');
+  }
+  // ⭐⭐ D128 (③c — 9.12): a nekem szóló keret-átadások átvétele (egy másik készülékemtől — a cserével jött). ⚠️ A hibája nem akaszt.
+  try {
+    const a = await keretAtvetelekGondozasa(kornyezet);
+    if (a.atvetelek.length) process.stderr.write('keret: ' + a.atvetelek.length + ' átadást átvettem egy másik készülékemtől\n');
+  } catch (hiba) {
+    process.stderr.write('⚠ a keret átvétele most nem sikerült: ' + hiba.message + '\n');
   }
   // ⭐⭐ D128 (③b — 9.12): az azonosságom kezelése (a kulcscsere, a kizárások) ebbe a koinóba, ha valamelyik koinómban már láttam,
   // itt még nincs — minden parancs elején is. ⚠️ A hibája nem akasztja meg a parancsot.

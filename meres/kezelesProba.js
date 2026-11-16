@@ -6,7 +6,9 @@
 //      MÁSIK azonosságé nem; a sérült, idegen vagy régi fájlból üres jegyzék lesz;
 //   2. a TERJESZTÉS: amit az A koinóban lát (a kizárást, a kulcscserét), azt a B koinóba is beviszi — ott a telefon eseménye kiesik;
 //      másodszor semmit; ahol az azonosságomnak nincs szelete, oda semmit;
-//   3. az ELVETÉS: amit a kapu nem fogadott, azt feljegyzi, és egy napig nem próbálja újra (utána igen).
+//   3. az ELVETÉS: amit a kapu nem fogadott, azt feljegyzi, és egy napig nem próbálja újra (utána igen);
+//   4. ⭐ (③c) a SAJÁT KÉSZÜLÉK A CSERÉBEN: a laptop a határig ad (a koinó keretének 20%-a — KH1), a függő átadás a telefon részéhez
+//      számít; a telefon a nekem szóló átadást egyszer veszi át; egy idegen, egy kizárt és egy másik koinóbeli készüléknek semmi.
 //
 // Futtatás: node meres/mind.js csak kezelesProba
 
@@ -20,7 +22,8 @@ import { esemenyMentese, koinoEsemenyei } from '../js/tar/esemenyTar.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
 import { ujAzonossag, kulcscsereKeszitese, csereLenyomata } from '../js/kulcs/azonossag.js';
 import { kizarasKeszitese } from '../js/kulcs/keszulek.js';
-import { kezelesGondozasa, kulcscsereBevitele, keszulekKizarasa } from '../js/muveletek.js';
+import { kezelesGondozasa, kulcscsereBevitele, keszulekKizarasa, sajatKeszulekTalalkozasa, keretAtvetelekGondozasa, sajatKeretem,
+  atfolyasHatarAlap } from '../js/muveletek.js';
 import { ujKezelesJegyzek, kezelesJegyzekBetoltese, jegyzekbe, tarKezelese, KEZELES_JEGYZEK, ELVETVE_SZUNET }
   from '../js/allapot/kezelesTerjesztes.js';
 import { bajtokBase64Url } from '../js/esemeny/kanonikusAlak.js';
@@ -190,6 +193,45 @@ proba('⛔ AMIT A KAPU ELVETETT, EGY NAPIG NEM PRÓBÁLJA ÚJRA (③b) — a jeg
     g3: g3.hibak.length === 1, gA: gA.hibak.length === 1, bent: bent === 0
   };
   if (Object.values(ok).some((v) => !v)) process.stderr.write('    (' + JSON.stringify(ok) + ')\n');
+  return Object.values(ok).every(Boolean);
+});
+
+// ===================================
+// 4. ⭐ (③c) A SAJÁT KÉSZÜLÉK A CSERÉBEN
+// ===================================
+
+proba('⭐⭐ A SAJÁT KÉSZÜLÉK A CSERÉBEN (③c — KH1) — a laptop a határig ad (10 000-ből 2000, nem a különbség felét); másodszor semmit (a függő átadás számít); a telefon egyszer veszi át; egy magasabb határnál a különbség fele a határig; idegennek, kizártnak, másik koinóban semmi', async () => {
+  const { a, laptopK, telefonK, tarak, kornyezete } = await alap();
+  const kL = kornyezete(KA);
+  const kT = { koino: KA, kulcspar: telefonK, szerzo: a.nev, tar: tarak[KA] };
+  const s1 = await sajatKeszulekTalalkozasa(kL, telefonK.keszulek);
+  const s2 = await sajatKeszulekTalalkozasa(kL, telefonK.keszulek);
+  const g1 = await keretAtvetelekGondozasa(kT);
+  const g2 = await keretAtvetelekGondozasa(kT);
+  const telefonKerete = await sajatKeretem(kT);
+  const s3 = await sajatKeszulekTalalkozasa(kL, telefonK.keszulek);
+  // Egy magasabb (személyes) határ: a laptop szabadja 8000, a telefoné 2000 → a fele 3000, de a telefon része 3000-ig nőhet → 1000.
+  const s4 = await sajatKeszulekTalalkozasa(kL, telefonK.keszulek, { hatar: 3000 });
+  // Egy idegen készülék (más azonosság); a másik koinóban (B — a telefon ott is tag, de itt nem vagyok adó: a horgonyt én írtam, ott
+  // is a teljes keret az enyém — a próba: a C, ahol nincs szeletem).
+  const idegen = await tesztKeszulek('idegen');
+  await tarak[KA].tanusitvanyFelvetele(idegen.tanusitvany);   // a tanúsítványa nálam van — de egy MÁSIK azonosságé
+  const s5 = await sajatKeszulekTalalkozasa(kL, idegen.keszulek);
+  const s6 = await sajatKeszulekTalalkozasa(kornyezete(KC), telefonK.keszulek);
+  // A kizárt telefonnak semmit (és tőle semmit nem veszünk át).
+  await keszulekKizarasa(kL, a.kulcspar, telefonK.keszulek, [{ koino: KA, vagas: 1, orokos: laptopK.keszulek }]);
+  const s7 = await sajatKeszulekTalalkozasa(kL, telefonK.keszulek, { hatar: 9000 });
+  const ok = {
+    alap: atfolyasHatarAlap(10000) === 2000,
+    s1: s1.ervenyes && s1.merteke === 2000 && s1.atadas?.adat?.pont === 2000,
+    s2: s2.ervenyes && s2.merteke === 0 && !s2.atadas,
+    g1: g1.atvetelek.length === 1 && !g1.kihagyva.length, g2: !g2.atvetelek.length && !g2.kihagyva.length,
+    telefonKerete: telefonKerete === 2000,
+    s3: s3.merteke === 0, s4: s4.merteke === 1000,
+    s5: !s5.ervenyes && s5.merteke === 0, s6: !s6.ervenyes && s6.merteke === 0,
+    s7: !s7.ervenyes && s7.merteke === 0
+  };
+  if (Object.values(ok).some((v) => !v)) process.stderr.write('    (' + JSON.stringify({ ok, s1: s1.merteke, s4: s4.merteke }) + ')\n');
   return Object.values(ok).every(Boolean);
 });
 

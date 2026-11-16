@@ -3616,6 +3616,47 @@ proba('⭐⭐ D128 (③b): a `kizar` — a készülékeim koinónként; a telefo
     }
   });
 
+// ⭐⭐ D128 (③c — 9.12, KH1 (A)): A SAJÁT KÉSZÜLÉK A CSERÉBEN a parancssorból. A laptop és a telefon (ugyanaz az azonosság) cserél: a
+// kapu a társ személyét a KÉSZÜLÉKÉVEL köti meg (és a még semmit nem írt telefon tanúsítványát a tárba veszi), így a laptop tudja,
+// hogy a társ a saját telefonja — a határig (10 000-ből 2000) átad; ha az átadás a telefonra ér (itt a kézi úton), a telefon egy
+// parancs elején átveszi.
+proba('⭐⭐ D128 (③c): a laptop és a telefon cseréje — a kapu a társ készülékét is megjegyzi; a laptop a határig (2000) átad; a telefon egy parancs elején átveszi',
+  async () => {
+    const L = await ujKeszulek();
+    const T = await ujKeszulek();
+    const TEL = { KOINO_KESZULEK_NEV: 'telefon' };
+    try {
+      await fut(L, 'koino', 'Átfolyás-próba');
+      const A = await koinoNeve(L);
+      await copyFile(join(L, 'kulcs.json'), join(T, 'kulcs.json'));
+      await fut(T, 'csatlakoz', A, TEL);
+      await csereKor(L, T, 8017, TEL);
+      const kotes = JSON.parse(await readFile(join(L, A, 'azonossagok.json'), 'utf8').catch(() => '{}'));
+      const lElso = await readFile(join(L, A, 'esemenyek.jsonl'), 'utf8');
+      await fut(L, 'kivisz', join(L, 'l.jsonl'));
+      await fut(T, 'behoz', join(L, 'l.jsonl'), TEL);
+      const tParancs = await fut(T, 'allapot', TEL);
+      const tFajl = await readFile(join(T, A, 'esemenyek.jsonl'), 'utf8');
+      const tKesz = JSON.parse(await readFile(join(T, 'keszulek.json'), 'utf8'));
+      const sorok = (s) => s.split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+      const atadasok = sorok(lElso).filter((e) => e.tipus === 'KeretAtadas');
+      const atvetelek = sorok(tFajl).filter((e) => e.tipus === 'KeretAtvetel');
+      const r = {
+        kotes: Object.values(kotes).some((k) => k.k === tKesz.tanusitvany.keszulek),
+        atadas: atadasok.length === 1 && atadasok[0].adat.pont === 2000 && atadasok[0].adat.entitas === tKesz.tanusitvany.keszulek,
+        atvetel: atvetelek.length === 1 && atvetelek[0].keszulek === tKesz.tanusitvany.keszulek
+          && /keret: 1 átadást átvettem egy másik készülékemtől/.test(tParancs)
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (③c-próba: ' + JSON.stringify({ r, kotes, atadasok: atadasok.length, atvetelek: atvetelek.length }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      for (const h of [L, T]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();

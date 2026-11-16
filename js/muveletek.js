@@ -35,6 +35,7 @@ import { esemenyLetrehozasa, esemenyKoinoja, azonositoAlaku, KOINO_VERZIO, lancK
 import { helyreallitasJavaslatAlakiHibaja, helyreallitasJele, helyreallitasBejegyzese } from './kulcs/azonossag.js';
 import { helyreallitasokAllapota, helyreallitasBizonyiteka, azonossagLancaTarbol, javaslatElotagja, lancHelyreallitasai, segitoAllasa,
   JOVAHAGYAS } from './allapot/helyreallitas.js';   // ⭐⭐ D128 (②e)
+import { tarKizarasai, tarKulcscserei, cserenKivulE, tanusitvanyKorszaka } from './allapot/kizaras.js';   // ⭐⭐ D128 (③c)
 import { tarKezelese, jegyzekbe, kezelesHianyai, elvetesFeljegyzese, lancBizonyitekai, lancJele, ujKezelesJegyzek }
   from './allapot/kezelesTerjesztes.js';   // ⭐⭐ D128 (③b): a kezelés minden koinómba
 import { lancNezete } from './allapot/koinoLanc.js';   // ⭐ D118 (③, ⑤b): a szerző lánca a koinóban, a jelen réteg szerint
@@ -501,6 +502,92 @@ export async function keretAtfolyasa(kornyezet, kinek, { hatar }) {
   const atadas = merteke > 0 ? await keretAtadasa(kornyezet, kinek, merteke) : null;
   console.log('muveletek.keretAtfolyasa - VÉGE', { merteke, fuggo });
   return { merteke, atadas };
+}
+
+/**
+ * ⭐⭐ D128 (③c — 9.12, KH1 (A)): AZ ÁTFOLYÁS HATÁRÁNAK ALAPÉRTÉKE — a koinó keretének 20%-a (10 000-nél 2000). Csaba (2026-11-16):
+ * „jó a 2000, de írdfel, hogy ezek az értékek, személyre szabhatók lesznek majd.” — ez csak az alapérték: a határt mindenki maga
+ * szabja meg, készülékenként (a lapon — ④); addig ez érvényes.
+ */
+export const ATFOLYAS_HATAR_ARANY = 0.2;
+
+/** Az átfolyás határának alapértéke egy kerethez (lefelé kerekítve). */
+export function atfolyasHatarAlap(keret) {
+  return Math.floor(keret * ATFOLYAS_HATAR_ARANY);
+}
+
+/**
+ * ⭐⭐ D128 (③c): ÉRVÉNYES-E a készülékem ebben a koinóban — a tanúsítványa az azonosságomé, nincs kizárva, és a kulcscsere sem ejtette
+ * ki (a tár szerint). Egy kizárt (ellopott) készüléknek semmit nem adunk, és tőle semmit nem veszünk át.
+ * @param {Object} kornyezet
+ * @param {string} keszulek
+ * @returns {Promise<boolean>}
+ */
+export async function sajatKeszulekErvenyesE(kornyezet, keszulek) {
+  const t = await tarTanusitvanya(kornyezet.tar, keszulek);
+  if (!t || t.azonossag !== kornyezet.szerzo) return false;
+  if ((await tarKizarasai(kornyezet.tar, kornyezet.szerzo)).has(keszulek)) return false;
+  const cserek = await tarKulcscserei(kornyezet.tar, kornyezet.szerzo);
+  return !cserenKivulE({ szerzo: kornyezet.szerzo, keszulek }, cserek, new Map([[keszulek, tanusitvanyKorszaka(t)]]));
+}
+
+/**
+ * ⭐⭐ D128 (③c — 9.12): A NEKEM SZÓLÓ ÁTADÁSOK ÁTVÉTELE — ha egy másik (érvényes) készülékem átadást írt nekem ebben a koinóban, és
+ * még nem vettem át mindet (a halmozott összeg több, mint amit tőle kaptam), átveszem a legutolsót (az a halmozott — `keretAtvetele`).
+ * ⭐ Találkozás nem kell: az átadás a cserével (vagy egy harmadik készülékkel) jön, és a parancsok elején, az őrjárat körében és a
+ * saját készülékkel való csere után is lefut. ⚠️ Amit a számítás nem fogadna el (pl. az adó közben kiesett), azt kihagyja.
+ * @param {Object} kornyezet
+ * @returns {Promise<{atvetelek: Array<Object>, kihagyva: Array<string>}>}
+ */
+export async function keretAtvetelekGondozasa(kornyezet) {
+  const en = sajatLanc(kornyezet);
+  const utolsok = new Map();   // adó lánca → a legutolsó nekem szóló átadása
+  for (const e of await azonossagEsemenyei(kornyezet.tar, kornyezet.szerzo)) {
+    if (e.tipus !== 'KeretAtadas' || e.adat?.entitas !== en || esemenyKoinoja(e) !== kornyezet.koino) continue;
+    const ado = lancKulcsa(e);
+    if (ado === en) continue;
+    const eddigi = utolsok.get(ado);
+    if (!eddigi || e.sorszam > eddigi.sorszam) utolsok.set(ado, e);
+  }
+  const ki = { atvetelek: [], kihagyva: [] };
+  if (!utolsok.size) return ki;
+  const { allas } = await sajatKiosztott(kornyezet, null);
+  for (const [ado, atadas] of utolsok) {
+    if ((atadas.adat.pont ?? 0) <= (allas.kapott.get(ado) ?? 0)) continue;   // már átvettem
+    try {
+      ki.atvetelek.push(await keretAtvetele(kornyezet, atadas));
+    } catch (hiba) {
+      ki.kihagyva.push(ado);
+      console.log('muveletek.keretAtvetelekGondozasa - kihagyva', { ado: ado.slice(0, 8), ok: hiba.message });
+    }
+  }
+  if (ki.atvetelek.length) console.log('muveletek.keretAtvetelekGondozasa - VÉGE', { atvetelek: ki.atvetelek.length });
+  return ki;
+}
+
+/**
+ * ⭐⭐ D128 (③c — 9.12, KH1 (A)): A SAJÁT KÉSZÜLÉKEM A CSERÉBEN — ha a társ az én (érvényes) készülékem: a nekem szóló átadásait
+ * átveszem, és ha nálam több a szabad pont, a különbség felét átadom neki, de a része legfeljebb a határig nő (`keretAtfolyasa` —
+ * a határ az ADÓ szabálya; alapból a koinó keretének 20%-a). A határ fölött nem adok magától (a kérdés a lapé — ④). Egy kizárt vagy a
+ * kulcscsere által kiejtett készüléknek semmit.
+ * @param {Object} kornyezet
+ * @param {string} tarsKeszulek - a társ készülékének kulcsa (a kapu kötéséből)
+ * @param {{hatar?: number|null}} [beallitas]
+ * @returns {Promise<{ervenyes: boolean, atvetelek: Array<Object>, merteke: number, atadas: Object|null}>}
+ */
+export async function sajatKeszulekTalalkozasa(kornyezet, tarsKeszulek, { hatar = null } = {}) {
+  const ki = { ervenyes: false, atvetelek: [], merteke: 0, atadas: null };
+  if (tarsKeszulek === sajatLanc(kornyezet) || !(await sajatKeszulekErvenyesE(kornyezet, tarsKeszulek))) return ki;
+  if (!(await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kornyezet.szerzo))) return ki;   // itt nem vagyok tag
+  console.log('muveletek.sajatKeszulekTalalkozasa - KEZDÉS', { tars: tarsKeszulek.slice(0, 8) });
+  ki.ervenyes = true;
+  ki.atvetelek = (await keretAtvetelekGondozasa(kornyezet)).atvetelek;
+  const h = hatar ?? atfolyasHatarAlap((await koinomSzabalyai(kornyezet)).tudatpontKeret);
+  const r = await keretAtfolyasa(kornyezet, tarsKeszulek, { hatar: h });
+  ki.merteke = r.merteke;
+  ki.atadas = r.atadas;
+  console.log('muveletek.sajatKeszulekTalalkozasa - VÉGE', { atvetelek: ki.atvetelek.length, merteke: ki.merteke, hatar: h });
+  return ki;
 }
 
 /**

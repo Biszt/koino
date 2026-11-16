@@ -495,6 +495,22 @@ a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③
   helyreállítás a bizonyítékkal a másik koinóba (`helyreallitasProba.js`), a parancssor (a `kizar` listája és a kizárás két koinóba;
   egy másik készülékem kizárása az A-ból egy B-beli parancs elején a B-be; a kulcscsere két koinóba; a ②f befejezése a jegyzékbe)
   — 15 rontás. ⚠️ Az őrjárat körének hívását csak a parancsok elejéé méri (ugyanaz a függvény).
+- ✅ **③c — a saját készülék a cserében** (2026-11-16): a kapu kötése (a társ tábla-aláírója → a személye) mostantól a társ
+  KÉSZÜLÉKÉT is megjegyzi (a bizonyításban benne van) — ebből tudja a csere, hogy a társ a saját készülékem, és melyik. ⛔ **Lelet (a
+  terv helyesbítése):** a 9.12 fent azt feltételezte, hogy a kézfogás MINDIG megmondja a társ nevét — valójában a személyét a kapu
+  bizonyítási köre (`TAGSAG`) hozza, első találkozáskor (nyílt és zárt koinóban is — D121 MH7 (A)), utána a kötés emlékszik; egy ③c
+  előtti, a saját nevemhez kötött, de készülék nélküli kötést a kapu egyszer újra kér. ⛔ **Lelet (a parancssor-próba fogta meg):** egy
+  új telefon még semmit nem írt (kerete sincs, hát nem is írhat) — a tanúsítványa nem volt a laptop tárában, és a laptop nem ismerte el
+  a saját készülékének; most a saját készülékem tanúsítványát (a kézfogás ellenőrizte) a kötéskor a tárba veszem. `muveletek.js`:
+  `atfolyasHatarAlap` (a koinó keretének 20%-a, 10 000-nél 2000 — KH1: csak az alapérték, a személyes határ a lappal jön — ④),
+  `sajatKeszulekErvenyesE` (a tanúsítványa az azonosságomé, nincs kizárva, a kulcscsere nem ejtette ki — egy kizárt telefonnak
+  semmit), `keretAtvetelekGondozasa` (a nekem szóló, még át nem vett átadás átvétele — a parancsok elején és az őrjárat körében is:
+  ehhez találkozás nem kell, az átadás a cserével jön), `sajatKeszulekTalalkozasa` (a csere után: az átvételek, és ha nálam több a
+  szabad pont, az átfolyás a határig — `keretAtfolyasa`; a határ fölött nem ad magától). `koino.js`: a horog a csere végén
+  (`resMunka` — a hívó és a figyelő oldalon is). A próba: `kezelesProba.js` („A SAJÁT KÉSZÜLÉK A CSERÉBEN” — a határ, a függő átadás,
+  az egyszeri átvétel, egy magasabb határ, az idegen, a más koinóbeli és a kizárt készülék), parancssor (a laptop és a friss telefon
+  cseréje: a kötés a készülékkel, a 2000-es átadás, a telefon egy parancs elején átveszi) — 9 rontás. ⚠️ Az őrjárat körének átvételét
+  csak a parancsok elejéé méri (ugyanaz a függvény).
 - ❓ **KH3 — a régi készülék MÚLTJA a kulcscsere és a helyreállítás után** (a ③b próbájának felállításakor derült ki, egy
   mérő-szkripttel ellenőrizve; Csaba döntésére vár): a kulcscsere (és a helyreállítás) után minden FEL NEM SOROLT régi készülék
   MINDEN eseménye kiesik a számításból — a lopás vagy az elvesztés előttiek is: a belépése (a tagság), a pontjai, a szavazatai
