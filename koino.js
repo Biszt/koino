@@ -165,8 +165,10 @@ import { koinoEsemenyei, sajatLancEsemenyei, esemenyLekerese, esemenyMentese, en
 // ⭐⭐ D128: a készülékkulcs és a tanúsítványa.
 import { keszulekBiztositasa, kizarasKeszitese } from './js/kulcs/keszulek.js';
 // ⭐⭐ D128 (③b): a kezelés-jegyzék — az azonosságom kezelése minden koinómba, helyben
-import { jegyzekbe, kezelesJegyzekBetoltese, tarKezelese } from './js/allapot/kezelesTerjesztes.js';
-import { azonossagNeve, HELYREALLITAS_BEJEGYZES, helyreallitasFelvetele, helyreallitasJele } from './js/kulcs/azonossag.js';   // ⭐⭐ D128
+import { jegyzekbe, kezelesJegyzekBetoltese } from './js/allapot/kezelesTerjesztes.js';
+import { azonossagNeve, HELYREALLITAS_BEJEGYZES, helyreallitasFelvetele, helyreallitasJele, kulcsKorszak, bejegyzesJele }
+  from './js/kulcs/azonossag.js';   // ⭐⭐ D128
+import { kizarasMostaniE, tarKizarasai, tanusitvanyKorszaka } from './js/allapot/kizaras.js';   // ⭐⭐ D128 (③f — KH3 (A))
 // ⭐⭐ D128 (②f): a helyreállítás kérelme (az új készüléken) és a segítő oldala
 import { ujKerelem, kerelemSzovege, kerelemSzovegbol, kerelemEllenorzoKodja, ellenorzoKodTisztitasa } from './js/kulcs/helyreallitasKerelem.js';
 import { csereKodja, csereKodbol, csereKodQrja, kodTisztitasa, KOD_HOSSZ } from './js/kulcs/papir.js';   // ⭐⭐ D128 (②c)
@@ -542,6 +544,9 @@ if (parancs === 'helyreallitas') {
       kiir(r.papir ? '  Az új papírod a csere-kulcs.json-ban — papírra: node koino.js papir'
         : '  A 2. lépcsőn papír nincs — a helyreállítás a segítőidé (D128 17. pont).');
       kiir(SZIN.halvany + '  A készüléked a következő indulásnál az új kulccsal kap tanúsítványt; a koinóidba: csatlakoz <a koinó neve>.' + SZIN.vege);
+      // ⭐⭐ D128 (③f — KH3 (A)): a régi készülékek múltja a kizárásukkal marad meg
+      kiir(SZIN.halvany + '  A régi készülékeid múltját (a tagságodat, a pontjaidat) a kizárásuk tartja meg: amint a koinóid eseményei'
+        + ' megjöttek, node koino.js kizar — és mindegyiket zárd ki.' + SZIN.vege);
       process.exit(0);
     }
     throw new Error('node koino.js helyreallitas kerelem [a megtartandó régi készülékek…] [felulir]  |  helyreallitas befejez <fájl> [felulir]');
@@ -805,7 +810,13 @@ function listakCsatlakozasaKiirasa(csatlakozasok) {
 async function keszulekeim() {
   const keszulekek = new Map();
   const koinoNevek = new Map();
-  const kizartak = new Set(kezelesJegyzekBetoltese(await kezelesJegyzekTar.olvas(), szerzo).kizarasok.map((k) => k.keszulek));
+  // ⭐⭐ (③f) csak a mostani kulccsal aláírt kizárás számít (a saját láncom szerint)
+  const sajatCserek = Array.isArray(azonossagKulcspar.cserek) ? azonossagKulcspar.cserek : [];
+  const sajatKorszak = kulcsKorszak(azonossagKulcspar.szuletes?.kulcs, sajatCserek).korszak;
+  const sajatLancom = sajatCserek.length
+    ? new Map([[szerzo, { korszak: sajatKorszak, alairasok: sajatCserek.map(bejegyzesJele) }]]) : null;
+  const kizartak = new Set(kezelesJegyzekBetoltese(await kezelesJegyzekTar.olvas(), szerzo).kizarasok
+    .filter((k) => kizarasMostaniE(k, sajatLancom)).map((k) => k.keszulek));
   const d = (k) => {
     if (!keszulekek.has(k)) keszulekek.set(k, { nev: null, koinok: new Map(), kizarva: false });
     return keszulekek.get(k);
@@ -824,12 +835,14 @@ async function keszulekeim() {
         x.koinok.set(k, Math.max(x.koinok.get(k) ?? 0, e.sorszam));
         if (e.tanusitvany) x.nev ??= e.tanusitvany.nev;
       }
-      for (const kz of (await tarKezelese(ktar, szerzo)).kizarasok) kizartak.add(kz.keszulek);
+      for (const kz of (await tarKizarasai(ktar, szerzo)).keys()) kizartak.add(kz);
       // a név a tanúsítványból (a saját készülékem tanúsítványát a kapu a tárba vette — ③c)
       for (const [k, x] of keszulekek) {
-        if (x.nev == null) {
-          const t = await tarTanusitvanya(ktar, k);
-          if (t?.azonossag === szerzo) x.nev = t.nev ?? null;
+        const t = (x.nev == null || x.regi === undefined) ? await tarTanusitvanya(ktar, k) : null;
+        if (t?.azonossag === szerzo) {
+          x.nev ??= t.nev ?? null;
+          // ⭐⭐ (③f) egy régebbi kulcs tanúsította — a kulcscsere után kizárás nélkül a múltja nem számít
+          x.regi ??= tanusitvanyKorszaka(t).korszak < sajatKorszak;
         }
       }
     } catch { /* egy koinó hibája nem akasztja meg a többit */ }
@@ -7708,11 +7721,25 @@ try {
         + honnan + ') már nem jó semmire.' + SZIN.vege);
       // ⭐⭐ D128 (③b): MINDEN koinómba, ahol az azonosságomnak szelete van (a kezelés-jegyzéken át — a többi készülékem is innen viszi tovább).
       azonossagKulcspar.cserek = r.cserek;
+      // ⭐⭐ D128 (③f — KH3 (A)): az EZEN a készüléken kiadott kizárásaimat az új kulccsal újra aláírom — a kulcscsere után csak a mostani
+      // kulccsal aláírt kizárás számít, és a vágása megtartja a kizárt készülék múltját. ⛔ A más készülékről gyűjtött kizárásokat NEM
+      // (egy tolvaj régi kulccsal aláírt kizárása így nem lesz érvényes); és a megmaradónak felsoroltakét sem.
+      const jegyzekMost = kezelesJegyzekBetoltese(await kezelesJegyzekTar.olvas(), szerzo);
+      const legutobbi = new Map();
+      for (const k of jegyzekMost.kizarasok) {
+        if (!jegyzekMost.sajat.includes(k.alairas) || r.kulcscsere.keszulekek.includes(k.keszulek) || k.keszulek === KESZULEK) continue;
+        if (!legutobbi.has(k.keszulek) || k.ido > legutobbi.get(k.keszulek).ido) legutobbi.set(k.keszulek, k);
+      }
+      const ujraAlairt = [];
+      for (const k of legutobbi.values()) ujraAlairt.push(await kizarasKeszitese(r.kulcspar, k.keszulek, k.koinok));
+      if (ujraAlairt.length) {
+        kiir('  A kizárásaidat (' + ujraAlairt.length + ') az új kulccsal újra aláírtam — a kizárt készülékek múltja a vágásig megmarad.');
+      }
       // ⭐⭐ D128 (③d — KH2 (A)): a fel nem sorolt készülékeim listáinak koinói, amelyek itt nincsenek — csatlakozom (a bevitelhez)
       const kcsCsatlakozasok = await listakKoinoiCsatlakozasa(Object.keys(await sajatKeszulekekOlvasasa())
         .filter((k) => !r.kulcscsere.keszulekek.includes(k)));
-      kezelesEredmenyKiirasa(await kezelesMindenKoinomba({ tudas: { lanc: { szuletes: r.kulcspar.szuletes, cserek: r.cserek, bizonyitekok: {} } } }),
-        (x) => x.lanc);
+      kezelesEredmenyKiirasa(await kezelesMindenKoinomba({ tudas: { lanc: { szuletes: r.kulcspar.szuletes, cserek: r.cserek, bizonyitekok: {} },
+        kizarasok: ujraAlairt, sajatKizarasok: ujraAlairt.map((k) => k.alairas) } }), (x) => x.lanc);
       listakCsatlakozasaKiirasa(kcsCsatlakozasok);
       break;
     }
@@ -7728,7 +7755,9 @@ try {
         kiir(SZIN.vastag + 'A KÉSZÜLÉKEID' + SZIN.vege + ' (ahogy a koinóidban látszanak):');
         for (const [k, d] of keszulekek) {
           kiir('  ' + rovidAzonosito(k) + '  ' + (d.nev ?? '?') + (k === KESZULEK ? '  (ez a készülék)' : '')
-            + (d.kizarva ? SZIN.nem + '  — kizárva' + SZIN.vege : ''));
+            + (d.kizarva ? SZIN.nem + '  — kizárva' + SZIN.vege : '')
+            + (!d.kizarva && d.regi && k !== KESZULEK ? SZIN.halvany + '  — egy régebbi kulcs tanúsította: kizárás nélkül a múltja nem'
+              + ' számít; a kizárása a vágásig megtartja' + SZIN.vege : ''));
           for (const [koino, n] of d.koinok) kiir(SZIN.halvany + '      ' + koinoFelirata(koino, koinoNevek.get(koino)) + ': a láncán ' + n + ' esemény' + SZIN.vege);
           // ⭐⭐ D128 (③d): amit a készülék a legutóbbi találkozáskor mondott, de itt nem látszik
           for (const x of koinoListaAlakja(listak[k]?.koinok) ?? []) {
@@ -7771,7 +7800,7 @@ try {
       kiir(SZIN.halvany + '  A többi koinóban a kizárt készülék egyetlen eseménye sem számít.' + SZIN.vege);
       // ⭐⭐ D128 (③d — KH2 (A)): ahová a kizárt készülék listájából tudok, de itt nincs — csatlakozom (csak a bevitelhez)
       const csatlakozasok = await listakKoinoiCsatlakozasa([kizart]);
-      kezelesEredmenyKiirasa(await kezelesMindenKoinomba({ tudas: { kizarasok: [kizaras] } }),
+      kezelesEredmenyKiirasa(await kezelesMindenKoinomba({ tudas: { kizarasok: [kizaras], sajatKizarasok: [kizaras.alairas] } }),
         (x) => x.kizarasok.some((e) => e.adat?.kizaras?.alairas === kizaras.alairas));
       listakCsatlakozasaKiirasa(csatlakozasok);
       break;

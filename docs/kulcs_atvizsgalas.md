@@ -543,6 +543,19 @@ a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③
   koinóban látja a régi készülékeit, felajánlja a kizárásukat (a `kizar` listája). (B) marad, ahogy van (a múlt elvész). (C) a
   kulcscsere előtti események mind maradnak — ⛔ a tolvaj régi kulccsal felvett készülékeié is.
   ✅ **Eldöntve (2026-11-16) — (A).** Csaba: *„rendben. mehetünk, tovább, ha kész a próbasór.”* — a ③f építi (a ③d–③e után).
+- ✅ **③f — KH3 (A): a régi készülék múltja** (2026-11-16): `allapot/kizaras.js` (a mag) — `kizarasMostaniE`: ha az azonosságnak van
+  nyertes kulcscsere-lánca, csak az a kizárás számít, amelynek a lánca annak az eleje, és ugyanannyi kulcsváltással (a MOSTANI kezelő
+  kulcs írta alá); `kizarasokEsemenyekbol` és `tarKizarasai` (a kapu, a lánc-gyökér, a műveletek ebből dolgoznak) csak ezeket adja;
+  `cserenKivulE`: a mostani kulccsal kizárt régi készülék NEM esik ki a kulcscsere miatt — a kizárás vágása dönt (`kizartE`), a
+  múltja a vágásig megmarad, és a kapu a vágás utáni eseményét beengedi, de az nem számít (mint a kizárt készüléké eddig is). A
+  kezelés-jegyzék megjegyzi, mely kizárásokat adta ki EZ a készülék (`sajat`); a `kulcscsere` ezeket (készülékenként a
+  legutolsót, a megmaradók és önmaga nélkül) az új kulccsal újra aláírja — ⛔ a más készülékről gyűjtötteket NEM: egy tolvaj régi
+  kulccsal aláírt kizárása így nem válhat érvényessé. A `kizar` listája jelzi a régebbi kulccsal tanúsított, még ki nem zárt
+  készüléket („kizárás nélkül a múltja nem számít; a kizárása a vágásig megtartja”); a `helyreallitas befejez` kimondja, hogy a régi
+  készülékek múltját a kizárásuk tartja meg. A próba: `keszulekProba.js` („A RÉGI KÉSZÜLÉK MÚLTJA A KULCSCSERE UTÁN” — kizárás
+  nélkül minden kiesik; az új kulccsal kizárva a vágásig megmarad; a régi kulcsú kizárás a felsorolt laptopot nem zárja ki, és a
+  telefon múltját sem tartja meg; a tárból olvasott kizárások; a kapu), parancssor (a kulcscsere a SAJÁT kizárást újra aláírja, a
+  gyűjtöttet nem; a lista jelzése) — 8 rontás.
 
 **9.13 A helyreállítás a segítőkkel** (2026-11-15 — D128 17. pont; ✅ eldöntve; a 9.12 (a ③) a ②d–②f után)
 

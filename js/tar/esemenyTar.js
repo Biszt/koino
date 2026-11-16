@@ -211,7 +211,8 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
     const cserek = await tarKulcscserei(tar, esemeny.szerzo);
     if (cserek.size) {
       const t = esemeny.tanusitvany ?? await tarTanusitvanya(tar, esemeny.keszulek);
-      if (t && cserenKivulE(esemeny, cserek, new Map([[esemeny.keszulek, tanusitvanyKorszaka(t)]]))) {
+      if (t && cserenKivulE(esemeny, cserek, new Map([[esemeny.keszulek, tanusitvanyKorszaka(t)]]),
+        await tarKizarasai(tar, esemeny.szerzo))) {   // ⭐⭐ (③f) a mostani kulccsal kizárt régi készülék a vágásig írhat
         const ok = 'a készüléket a kulcscsere nem sorolta fel a megmaradók között (D128 ②b — KC2 (A))';
         console.log('esemenyMentese - VÉGE (ELUTASÍTVA)', { ok });
         return { mentve: false, ok };

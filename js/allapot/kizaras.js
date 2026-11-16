@@ -12,6 +12,12 @@
 // szigorítása, D47, hanem annak kimondása, hogy nem tőled jöttek). A vágás után a láncot az örökös folytatja (`lanc` mező —
 // `esemeny.js`): az ő eseményeit az ő kulcsa írja alá, ezek számítanak.
 //
+// ⭐⭐ D128 (③f — KH3 (A), Csaba, 2026-11-16): A KULCSCSERE UTÁN csak a MOSTANI kezelő kulccsal aláírt kizárás számít (a nyertes ágon,
+// ugyanannyi kulcsváltással — `kizarasMostaniE`): egy RÉGI kulccsal aláírt (a tolvajé is, akinél a régi kulcs volt) a megmaradónak
+// felsorolt készüléket nem zárhatja ki. És a mostani kulccsal kizárt RÉGI készülék múltja a vágásig megmarad — a kulcscsere nem ejti
+// ki (`cserenKivulE`): a kizárás vágása itt is érvényes, az örökös folytatja a láncát. Kizárás nélkül a fel nem sorolt régi
+// készülék minden eseménye kiesik, mint eddig (a tolvaj ismeretlen készülékei).
+//
 // ⭐ Ha egy készülékről több kizárás is van, a LEGKÉSŐBBI számít (az idő, holtversenyben a nagyobb aláírás) — az azonosság
 // utolsó állítása, mint máshol (9.5). ⛔ Egy kizárás csak a SAJÁT azonossága készülékét zárhatja ki: a tanúsítvány azonossága
 // az esemény szerzője kell legyen.
@@ -36,17 +42,33 @@ function kesobbiKizaras(a, b) {
 }
 
 /**
+ * ⭐⭐ D128 (③f — KH3 (A)): MOSTANI-e a kizárás — ha az azonosságnak van nyertes kulcscsere-lánca, a kizárás láncának annak az elejének
+ * kell lennie, és ugyanannyi kulcsváltással (a mostani kezelő kulcs írta alá). Kulcscsere nélkül minden kizárás az.
+ * @param {Object} k - a kizárás-tanúsítvány
+ * @param {Map<string, {korszak: number, alairasok: Array<string>}>|null} kulcscserek - `kulcscserekEsemenyekbol`
+ * @returns {boolean}
+ */
+export function kizarasMostaniE(k, kulcscserek) {
+  const c = kulcscserek?.get(k?.azonossag);
+  if (!c) return true;
+  return lancElejeE(k.cserek ?? [], c.alairasok) && kulcsKorszak(k.szuletes?.kulcs, k.cserek).korszak === c.korszak;
+}
+
+/**
  * A kizárások az eseményekből: kizárt készülék → a (legkésőbbi) kizárás-tanúsítvány. ⚠️ Az aláírást a kapu ellenőrizte (a
- * számítás a tárban lévőt hiszi el, mint az esemény aláírását); itt csak az alak.
+ * számítás a tárban lévőt hiszi el, mint az esemény aláírását); itt csak az alak. ⭐⭐ (③f) Ha a hívó a kulcscseréket is adja, csak
+ * a mostani kulccsal aláírt kizárás számít (`kizarasMostaniE`).
  * @param {Iterable<Object>} esemenyek
+ * @param {Map<string, Object>|null} [kulcscserek] - `kulcscserekEsemenyekbol`
  * @returns {Map<string, Object>}
  */
-export function kizarasokEsemenyekbol(esemenyek) {
+export function kizarasokEsemenyekbol(esemenyek, kulcscserek = null) {
   const ki = new Map();
   for (const e of esemenyek ?? []) {
     if (e?.tipus !== KIZARAS_ESEMENY) continue;
     const k = e.adat?.kizaras;
     if (kizarasAlakiHibaja(k)) continue;
+    if (kulcscserek && !kizarasMostaniE(k, kulcscserek)) continue;
     const eddigi = ki.get(k.keszulek);
     if (!eddigi || kesobbiKizaras(k, eddigi)) ki.set(k.keszulek, k);
   }
@@ -130,10 +152,15 @@ export function keszulekKorszakai(esemenyek, tanusitvanyok = null) {
 /**
  * Kiesik-e az esemény a kulcscsere miatt: az azonosságának van kulcscseréje, a készüléke nincs a nyertes utolsó kulcsváltásának
  * megmaradói között, és vagy egy RÉGEBBI korszakban, vagy a VESZTES ágon tanúsították. Ismeretlen korszak: nem esik ki (D19).
+ * ⭐⭐ (③f — KH3 (A)) Ha a készüléket a MOSTANI kulccsal kizárták (a hívó a mostani kizárásokat adja — `kizarasokEsemenyekbol` a
+ * kulcscserékkel), nem esik ki: a kizárás vágása dönt (`kizartE`) — a múltja a vágásig megmarad.
+ * @param {Map<string, Object>|null} [kizarasok]
  */
-export function cserenKivulE(e, kulcscserek, korszakok) {
+export function cserenKivulE(e, kulcscserek, korszakok, kizarasok = null) {
   const c = kulcscserek?.get(e?.szerzo);
   if (!c || typeof e.keszulek !== 'string' || c.marado?.has(e.keszulek)) return false;
+  const kz = kizarasok?.get(e.keszulek);
+  if (kz && kz.azonossag === e.szerzo && kizarasMostaniE(kz, kulcscserek)) return false;
   const k = korszakok?.get(e.keszulek);
   if (k === undefined) return false;
   if (!lancElejeE(k.cserek, c.alairasok)) return true;
@@ -148,13 +175,15 @@ export function cserenKivulE(e, kulcscserek, korszakok) {
  * @returns {{megmaradok: Array<Object>, kizartak: Array<Object>, kizarasok: Map<string, Object>}}
  */
 export function kizartakSzurese(esemenyek, beallitas = {}) {
-  const kizarasok = kizarasokEsemenyekbol(esemenyek);
   const kulcscserek = kulcscserekEsemenyekbol(esemenyek);
+  const kizarasok = kizarasokEsemenyekbol(esemenyek, kulcscserek);   // ⭐⭐ (③f) csak a mostani kulccsal aláírt
   if (!kizarasok.size && !kulcscserek.size) return { megmaradok: esemenyek, kizartak: [], kizarasok };
   const korszakok = kulcscserek.size ? keszulekKorszakai(esemenyek, beallitas.tanusitvanyok ?? null) : null;
   const megmaradok = [];
   const kizartak = [];
-  for (const e of esemenyek) (kizartE(e, kizarasok) || cserenKivulE(e, kulcscserek, korszakok) ? kizartak : megmaradok).push(e);
+  for (const e of esemenyek) {
+    (kizartE(e, kizarasok) || cserenKivulE(e, kulcscserek, korszakok, kizarasok) ? kizartak : megmaradok).push(e);
+  }
   return { megmaradok, kizartak, kizarasok };
 }
 
@@ -167,7 +196,8 @@ export function kizartakSzurese(esemenyek, beallitas = {}) {
  * @returns {Promise<Map<string, Object>>}
  */
 export async function tarKizarasai(tar, szerzo) {
-  return kizarasokEsemenyekbol(await tarKezelesEsemenyei(tar, szerzo));
+  const esemenyek = await tarKezelesEsemenyei(tar, szerzo);
+  return kizarasokEsemenyekbol(esemenyek, kulcscserekEsemenyekbol(esemenyek));   // ⭐⭐ (③f) csak a mostani kulccsal aláírt
 }
 
 /** ⭐⭐ D128 (②b): egy azonosság kulcscseréi a tárból (ugyanabból az indexből, mint a kizárások). */

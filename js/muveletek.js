@@ -526,9 +526,10 @@ export function atfolyasHatarAlap(keret) {
 export async function sajatKeszulekErvenyesE(kornyezet, keszulek) {
   const t = await tarTanusitvanya(kornyezet.tar, keszulek);
   if (!t || t.azonossag !== kornyezet.szerzo) return false;
-  if ((await tarKizarasai(kornyezet.tar, kornyezet.szerzo)).has(keszulek)) return false;
+  const kizarasok = await tarKizarasai(kornyezet.tar, kornyezet.szerzo);
+  if (kizarasok.has(keszulek)) return false;
   const cserek = await tarKulcscserei(kornyezet.tar, kornyezet.szerzo);
-  return !cserenKivulE({ szerzo: kornyezet.szerzo, keszulek }, cserek, new Map([[keszulek, tanusitvanyKorszaka(t)]]));
+  return !cserenKivulE({ szerzo: kornyezet.szerzo, keszulek }, cserek, new Map([[keszulek, tanusitvanyKorszaka(t)]]), kizarasok);
 }
 
 /**

@@ -3602,8 +3602,10 @@ proba('⭐⭐ D128 (③b): a `kizar` — a készülékeim koinónként; a telefo
         kz: /A készüléket kizártad/.test(kz) && /„Kertváros”: a láncából 1 esemény marad/.test(kz) && /A koinóba bekerült/.test(kz)
           && /„Olvasókör” koinódba is bekerült/.test(kz),
         kz2: /már kizártad/.test(kz2),
-        kc: /Kulcscsere kész/.test(kc) && /A koinóba bekerült/.test(kc) && /„Olvasókör” koinódba is bekerült/.test(kc),
-        bVegul: db(bVegul, 'Kizaras') === 2 && db(bVegul, 'Kulcscsere') === 1
+        kc: /Kulcscsere kész/.test(kc) && /A koinóba bekerült/.test(kc) && /„Olvasókör” koinódba is bekerült/.test(kc)
+          && /A kizárásaidat \(1\) az új kulccsal újra aláírtam/.test(kc),
+        // ⭐⭐ (③f) a telefoné az új kulccsal is (a saját kizárás); a telefon képzelt kizárása nem (a gyűjtött — azt a telefon adta ki)
+        bVegul: db(bVegul, 'Kizaras') === 3 && db(bVegul, 'Kulcscsere') === 1
       };
       if (!Object.values(r).every(Boolean)) {
         process.stderr.write('    (③b-próba: ' + JSON.stringify({ r, tKi: tKi.slice(-300), lista: lista.slice(-500), bParancs: bParancs.slice(0, 300),
@@ -3732,12 +3734,15 @@ proba('⭐⭐ D128 (③d): a kulcscsere is csatlakozik — a fel nem sorolt tele
       await csereKor(L, T, 8025, TEL);
       const kc = await fut(L, 'kulcscsere', join(L, 'csere-kulcs.json'));
       const cMappa = await readdir(join(L, C)).then(() => true, () => false);
+      // ⭐⭐ (③f — KH3 (A)) a lista jelzi: a telefont egy régebbi kulcs tanúsította — kizárás nélkül a múltja nem számít
+      const lista = await fut(L, 'kizar');
       await fut(T, 'kivisz', join(T, 'c.jsonl'), { ...TEL, KOINO_AZONOSITO: 'c' });
       await fut(L, 'behoz', join(T, 'c.jsonl'), { KOINO_AZONOSITO: C });
       const cParancs = await fut(L, 'allapot', { KOINO_AZONOSITO: C });
       const cFajl = await readFile(join(L, C, 'esemenyek.jsonl'), 'utf8').catch(() => '');
       const r = {
         kc: /Kulcscsere kész/.test(kc) && new RegExp(C.slice(0, 8)).test(kc) && /csatlakoztam/.test(kc), cMappa,
+        regi: /telefon {2}— egy régebbi kulcs tanúsította/.test(lista),
         cBevitel: /kezelés: a kulcscsere bekerült ebbe a koinóba/.test(cParancs) && /"tipus":"Kulcscsere"/.test(cFajl)
       };
       if (!Object.values(r).every(Boolean)) {

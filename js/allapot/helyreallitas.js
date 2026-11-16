@@ -163,7 +163,7 @@ export async function helyreallitasokAllapota(tar, koino, horgony, nezet = ujIde
     if (kizartE(e, kizarasok)) continue;
     if (kulcscserek.size) {
       const t = e.tanusitvany ?? await tarTanusitvanya(tar, e.keszulek);
-      if (t && cserenKivulE(e, kulcscserek, new Map([[e.keszulek, tanusitvanyKorszaka(t)]]))) continue;
+      if (t && cserenKivulE(e, kulcscserek, new Map([[e.keszulek, tanusitvanyKorszaka(t)]]), kizarasok)) continue;
     }
     megallitott.add(e.adat.javaslat);
   }

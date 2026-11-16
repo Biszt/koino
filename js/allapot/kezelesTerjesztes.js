@@ -20,6 +20,10 @@
 // aláírását) — egy átírt jegyzék nem visz be hamisat, legfeljebb a kapu elveti. Egy sérült vagy idegen fájlból üres jegyzék lesz
 // (D19 — a hiány nem hiba): a tárakból újra összegyűlik.
 //
+// ⭐⭐ D128 (③f — KH3 (A)): a jegyzék megjegyzi, mely kizárásokat adta ki EZ a készülék (`sajat` — az aláírásuk): a kulcscsere után csak
+// ezeket írja alá újra az új kulccsal. ⛔ A más készülékről gyűjtötteket nem — egy tolvaj régi kulccsal aláírt kizárása így nem lesz
+// érvényes.
+//
 // ⭐ Amit a kapu elvetett (pl. ezt a készüléket a kulcscsere nem sorolta fel — az eseményét a koinó már nem fogadja), azt egy napig
 // nem próbáljuk újra abban a koinóban (`elvetve`): különben minden parancs elején ugyanaz a hiba szólna.
 //
@@ -43,7 +47,7 @@ const ELVETVE_ELEVULES = 7 * 24 * 3600 * 1000;
 
 /** Egy üres jegyzék az azonosságnak. */
 export function ujKezelesJegyzek(azonossag) {
-  return { mi: KEZELES_JEGYZEK, valtozat: 1, azonossag, lanc: null, kizarasok: [], elvetve: {} };
+  return { mi: KEZELES_JEGYZEK, valtozat: 1, azonossag, lanc: null, kizarasok: [], sajat: [], elvetve: {} };
 }
 
 /** A lánc helyreállításainak jelei (azokhoz kell bizonyíték). */
@@ -86,7 +90,9 @@ export function kezelesJegyzekBetoltese(leiras, azonossag) {
       if (Object.keys(tiszta).length) elvetve[koino] = tiszta;
     }
   }
-  return { ...ujKezelesJegyzek(azonossag), lanc, kizarasok, elvetve };
+  const bent = new Set(kizarasok.map((k) => k.alairas));
+  const sajat = (Array.isArray(leiras.sajat) ? leiras.sajat : []).filter((a) => typeof a === 'string' && bent.has(a));
+  return { ...ujKezelesJegyzek(azonossag), lanc, kizarasok, sajat, elvetve };
 }
 
 /**
@@ -128,7 +134,7 @@ export async function tarKezelese(tar, azonossag) {
  * @param {{lanc?: Object|null, kizarasok?: Array<Object>}} tudas
  * @returns {{jegyzek: Object, valtozott: boolean}}
  */
-export function jegyzekbe(jegyzek, { lanc = null, kizarasok = [] } = {}) {
+export function jegyzekbe(jegyzek, { lanc = null, kizarasok = [], sajatKizarasok = [] } = {}) {
   const az = jegyzek.azonossag;
   let ujLanc = jegyzek.lanc;
   let valtozott = false;
@@ -155,7 +161,12 @@ export function jegyzekbe(jegyzek, { lanc = null, kizarasok = [] } = {}) {
     ujKizarasok.push(k);
     valtozott = true;
   }
-  return { jegyzek: { ...jegyzek, lanc: ujLanc, kizarasok: ujKizarasok.slice(-JEGYZEK_KIZARAS_KORLAT) }, valtozott };
+  // ⭐⭐ (③f) az itt kiadott kizárások aláírásai (csak ami a jegyzékben van)
+  const vegso = ujKizarasok.slice(-JEGYZEK_KIZARAS_KORLAT);
+  const bent = new Set(vegso.map((k) => k.alairas));
+  const sajat = [...new Set([...(jegyzek.sajat ?? []), ...(sajatKizarasok ?? [])])].filter((a) => bent.has(a));
+  if (sajat.length !== (jegyzek.sajat ?? []).length) valtozott = true;
+  return { jegyzek: { ...jegyzek, lanc: ujLanc, kizarasok: vegso, sajat }, valtozott };
 }
 
 /** Egy jegyzékbeli tétel jele (az elvetés feljegyzéséhez): a láncé az utolsó bejegyzés jele, a kizárásé az aláírása. */
