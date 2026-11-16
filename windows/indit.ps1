@@ -50,6 +50,12 @@ if ($ervek.Count -gt 0 -and ([string]$ervek[0]) -like '*koino-meghivo:*') {
   $meghivo = [string]$ervek[0]
   $ervek = @($ervek | Select-Object -Skip 1)
 }
+# ⭐⭐ D128 (④b — KF1 (A)): a PÁROSÍTÓ KÓD (koino-parosit.1.… — a kezelő készülék adja): ez a készülék a kezelőtől kapja a tanúsítványát.
+$parosito = $null
+if ($ervek.Count -gt 0 -and ([string]$ervek[0]) -like 'koino-parosit.1.*') {
+  $parosito = [string]$ervek[0]
+  $ervek = @($ervek | Select-Object -Skip 1)
+}
 
 # ===== ARGUMENTUMMAL: a program parancsa =====
 if ($ervek.Count -gt 0) {
@@ -58,6 +64,15 @@ if ($ervek.Count -gt 0) {
 }
 
 New-Item -ItemType Directory -Force -Path $env:KOINO_ADAT | Out-Null
+if ($parosito) {
+  Write-Host '· A párosítás: ez a készülék a kezelő készülékedtől kapja a tanúsítványát…'
+  & $NODE $PROGRAM keszulek csatlakoz $parosito
+  # ⛔ Ha nem sikerül, NEM indulunk tovább: az indulás egy új azonosságot szülne.
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host '⚠ A párosítás most nem sikerült — a kezelő készülékeden kérj új kódot (📱 Készülékeim → Új készülék), és futtasd újra a sort.'
+    exit 1
+  }
+}
 if ($meghivo) {
   Write-Host '· A meghívó: csatlakozás és belépés…'
   & $NODE $PROGRAM csatlakoz $meghivo

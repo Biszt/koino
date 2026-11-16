@@ -35,8 +35,12 @@ KOR="${KOINO_KOR:-1}"
 
 # ===== ⭐ D122: A MEGHÍVÓ (az első argumentum) =====
 MEGHIVO=""
+# ⭐⭐ D128 (④b — KF1 (A)): a PÁROSÍTÓ KÓD (`koino-parosit.1.…` — a kezelő készülék „📱 Készülékeim” ablaka vagy a `keszulek felvesz`
+# adja a telepítő sor végén): ez a készülék a kezelőtől kapja a tanúsítványát — az azonosság kulcsa nélkül.
+PAROSITO=""
 case "$1" in
   *koino-meghivo:*) MEGHIVO="$1"; shift ;;
+  koino-parosit.1.*) PAROSITO="$1"; shift ;;
 esac
 
 # ===== ⭐ `koino lap` — a FUTÓ program lapja (Csaba, 2026-11-09 — a PR5 terepi próbájának lelete) =====
@@ -62,6 +66,14 @@ if [ $# -gt 0 ]; then
 fi
 
 mkdir -p "$KOINO_ADAT"
+if [ -n "$PAROSITO" ]; then
+  echo "· A párosítás: ez a készülék a kezelő készülékedtől kapja a tanúsítványát…"
+  # ⛔ Ha nem sikerül, NEM indulunk tovább: az indulás egy új azonosságot szülne (és a párosításhoz utána a felülírás kellene).
+  if ! node "$PROGRAM" keszulek csatlakoz "$PAROSITO"; then
+    echo "⚠ A párosítás most nem sikerült — a kezelő készülékeden kérj új kódot (📱 Készülékeim → Új készülék), és futtasd újra a sort."
+    exit 1
+  fi
+fi
 if [ -n "$MEGHIVO" ]; then
   echo "· A meghívó: csatlakozás és belépés…"
   node "$PROGRAM" csatlakoz "$MEGHIVO"     || echo "⚠ A meghívót most nem sikerült elfogadni — a lapon is beillesztheted („🔗 Csatlakozás egy koinóhoz…”)."

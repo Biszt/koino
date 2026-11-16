@@ -3858,6 +3858,64 @@ proba('⭐⭐ D128 (④c): a személyes határ — a laptop a telefonnak 1000-et
     }
   });
 
+// ⭐⭐ D128 (④b): A „📱 KÉSZÜLÉKEIM” A LAPON. A laptop lapja: a lista (a kezelő); az „Új készülék felvétele” párosítást indít (a lap a
+// telepítő sort és a QR-t kapja — benne a párosító kód); a telefon a kóddal felkerül, és a lap a felvett készüléket és az ellenőrző kódot
+// mondja (ugyanaz, mint a telefoné); a határ a lapról állítható; a kizárás a lapról megy. A menüpont és az ablak a lapon van.
+proba('⭐⭐ D128 (④b): a „📱 Készülékeim” a lapon — a lista, a felvétel (telepítő sor + QR, az ellenőrző kód egyezik), a határ, a kizárás; a menüpont és az ablak kiszolgálva',
+  async () => {
+    const L = await ujKeszulek();
+    const T = await ujKeszulek();
+    let fl = null;
+    try {
+      await fut(L, 'koino', 'Lap-próba');
+      fl = await feluletet(L, 7869);
+      const elso = await fl.hiv('/api/keszulekek');
+      const indit = await fl.hiv('/api/keszulek/felvetel', { method: 'POST', body: '{}' });
+      const ujra = await fl.hiv('/api/keszulek/felvetel', { method: 'POST', body: '{}' });   // ugyanaz a párosítás
+      const megse = await fl.hiv('/api/keszulek/felvetel/megse', { method: 'POST', body: '{}' });
+      const indit2 = await fl.hiv('/api/keszulek/felvetel', { method: 'POST', body: '{}' });   // a Mégse után új
+      const kod = (indit2.adat.telepitoSor ?? '').match(/(koino-parosit\.1\.[A-Za-z0-9_-]+)/)?.[1] ?? '';
+      const tKi = await fut(T, 'keszulek', 'csatlakoz', kod, 'nev=telefon');
+      let allas = null;
+      for (let i = 0; i < 40; i++) {
+        allas = (await fl.hiv('/api/keszulek/felvetel')).adat;
+        if (allas.allapot !== 'var') break;
+        await varj(250);
+      }
+      const tKesz = JSON.parse(await readFile(join(T, 'keszulek.json'), 'utf8')).tanusitvany.keszulek;
+      const hatar = await fl.hiv('/api/keszulek/hatar', { method: 'POST', body: JSON.stringify({ keszulek: tKesz, hatar: 1500 }) });
+      const rosszHatar = await fl.hiv('/api/keszulek/hatar', { method: 'POST', body: JSON.stringify({ keszulek: tKesz, hatar: -1 }) });
+      const lista = (await fl.hiv('/api/keszulekek')).adat;
+      const telefon = lista.keszulekek.find((d) => d.k === tKesz);
+      const kizar = await fl.hiv('/api/keszulek/kizar', { method: 'POST', body: JSON.stringify({ keszulek: tKesz }) });
+      const utana = (await fl.hiv('/api/keszulekek')).adat.keszulekek.find((d) => d.k === tKesz);
+      const sajatKizar = await fl.hiv('/api/keszulek/kizar', { method: 'POST', body: JSON.stringify({ keszulek: lista.sajat }) });
+      // a lap fájljai: a menüpont és az ablak
+      const menu = await fetch('http://127.0.0.1:7869/js/foMenu.js').then((v) => v.text());
+      const ablak = await fetch('http://127.0.0.1:7869/js/koinoKeszulekek.js').then((v) => v.status);
+      const css = await fetch('http://127.0.0.1:7869/css/components/koinoKeszulekek.css').then((v) => v.status);
+      const tKod = tKi.match(/ellenőrző kód: (?:\x1b\[[0-9;]*m)?([0-9A-Z]{3}-[0-9A-Z]{3})/)?.[1];
+      const r = {
+        elso: elso.allapot === 200 && elso.adat.kezelo === true && elso.adat.keszulekek.some((d) => d.sajat) && elso.adat.felvetel.allapot === 'nincs',
+        indit: indit.allapot === 200 && indit.adat.allapot === 'var' && /^<svg/.test(indit.adat.qr ?? '') && !!kod
+          && ujra.adat.telepitoSor === indit.adat.telepitoSor && /powershell/.test(indit.adat.windowsSor ?? ''),
+        megse: megse.adat.allapot === 'megszakitva' && indit2.adat.allapot === 'var' && indit2.adat.telepitoSor !== indit.adat.telepitoSor,
+        felvett: allas?.allapot === 'kesz' && allas.felvett?.nev === 'telefon' && !!tKod && allas.felvett.ellenorzo === tKod,
+        hatar: hatar.allapot === 200 && rosszHatar.allapot === 400 && telefon?.hatar === 1500 && telefon?.nev === 'telefon',
+        kizar: kizar.allapot === 200 && utana?.kizarva === true && sajatKizar.allapot === 400,
+        lap: menu.includes("felirat: 'Készülékeim'") && ablak === 200 && css === 200
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (④b-próba: ' + JSON.stringify({ r, allas, hatar: hatar.adat, kizar: kizar.adat, tKi: tKi.slice(-300) }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      fl?.folyamat.kill();
+      for (const h of [L, T]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();

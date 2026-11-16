@@ -49,6 +49,8 @@ import { telepitesMegnyitasa } from './koinoTelepites.js';
 import { nezetekMegnyitasa, ujNezetMegnyitasa } from './koinoNezet.js';
 // ⭐⭐ D121, D122: a meghívás a lapon — a „Meghívóim” (a prototípus ablaka) és a profil-űrlap („eember beállítások”)
 import { meghivoimMegnyitasa, profilUrlapMegnyitasa } from './koinoMeghivas.js';
+// ⭐⭐ D128 (④b): a „📱 Készülékeim” — a készülékek, az új készülék felvétele, a kizárás, a határ, a papír
+import { keszulekeimMegnyitasa } from './koinoKeszulekek.js';
 
 const MODAL_KONTENER = 'modal-kontener';
 
@@ -141,6 +143,8 @@ export class FoMenu {
       // — 4) Fiók — ⭐⭐ D122: a „Meghívóim” a prototípus ablaka (a meghívott neve + a nyilatkozat; a 📋 egy sort másol: a telepítő
       // sort a meghívóval — a meghívott gépe a következő cserénél magától tag lesz), az „eember beállítások” a profil-űrlap.
       { ikon: '✉️', felirat: 'Meghívóim', elvalaszto: true, akcio: () => meghivoimMegnyitasa() },
+      // ⭐⭐ D128 (④b): a saját készülékeim (a felvétel párosító kóddal, a kizárás, a határ, a papír)
+      { ikon: '📱', felirat: 'Készülékeim', akcio: () => keszulekeimMegnyitasa() },
       { ikon: '🌟', felirat: 'Tudatpontok', akcio: () => this._tudatpontokMegnyitasa() },
       { ikon: '⚙️', felirat: 'eember beállítások', akcio: () => profilUrlapMegnyitasa() }
     ];

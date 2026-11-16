@@ -780,6 +780,22 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
   `kizar` listája kimondja (a sor végén — ⛔ az első változat a név után írta, és ez a ③d-próba „régebbi kulcs” sorát szétvágta).
   A próba: parancssor (az 1000-es határral a csere után 1000 megy — közben a koinó-lista is megjön, és a határ megmarad; a lista; az
   `alap`; a rossz érték) — 4 rontás. A lapon (④b) ugyanez állítható.
+- ✅ **④b — a lap: „📱 Készülékeim”** (2026-11-16): a fő menü „Fiók” csoportjában. A készülékek (a nevük, a rövid kulcsuk, koinónként a
+  láncuk vége és amit a koinó-listájukban mondtak, a jelek: „ez a készülék”, „kizárva”, „régebbi kulcs”), a HATÁR készülékenként
+  (üresen az alap), a KIZÁRÁS (a második kattintás erősít meg), az ÚJ KÉSZÜLÉK FELVÉTELE (a program a lap folyamatában párosít — a lap
+  a TELEPÍTŐ SORT kapja a párosító kóddal és a QR-ét: a telefonon EGY bemásolt sor a Termuxba telepít/frissít és párosít; 📋 a Termuxba,
+  💻 Windowsra, Mégse; a lap kérdezi az állását, és ha a telefon felkerült, kimondja az ellenőrző kódot), és a PAPÍR állása (él-e, a
+  gépen van-e még a fájlja, a 2. lépcső figyelmeztetése). Egy felvett készüléken a felvétel és a kizárás nem látszik — a lap kimondja,
+  hogy az a kezelőn megy. ⭐ A lap csak rajzol: a parancs és a lap ugyanazt hívja (`koino.js` `keszulekKizarasaItt`,
+  `parositasInditasa`, `szemelyesHatarBeallitasa`, `keszulekekLapja`, `qrSvg` — a `kizar` és a `keszulek` parancs is ezekre épül át).
+  Az API: `GET /api/keszulekek`, `GET|POST /api/keszulek/felvetel`, `POST /api/keszulek/felvetel/megse`, `POST /api/keszulek/hatar`,
+  `POST /api/keszulek/kizar`. Az indítók (`termux/indit.sh`, `windows/indit.ps1`) a párosító kódot (`koino-parosit.1.…` — a telepítő
+  sor végén) felismerik, és előbb `keszulek csatlakoz`-t futtatnak; ⛔ ha nem sikerül, NEM indulnak tovább (az indulás új azonosságot
+  szülne). ⛔ **Lelet (a böngészős kipróbálás fogta meg):** a Mégse után a lap még a „vár” állást kapta (a párosítás lezárása a válasz
+  után futott le), és a felvétel gombja nem jött vissza — most a Mégse megvárja a lezárást. A próba: parancssor (a lap API-ja: a lista, a
+  felvétel — ugyanaz a párosítás másodszorra, a Mégse után új; a telefon a lap kódjával felkerül, az ellenőrző kód egyezik; a határ — a
+  rossz nem megy; a kizárás — a saját nem megy; a menüpont, az ablak és a stílusa kiszolgálva) — 7 rontás; böngészőben ránézve (a lista,
+  a QR, a gombok, a papír). ⚠️ Az indítók párosító ága próba nélkül (a terepen — ⑤).
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

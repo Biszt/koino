@@ -55,6 +55,14 @@ yes | pkg upgrade && pkg install -y nodejs git procps && { if [ -d ~/koino ]; th
    kéri (nem kötelező).
    Meghívó nélkül a lap a „Meghívtak? illeszd be” ablakkal nyílik: ide később is beillesztheted. Az őrjárat (ami a cserét végzi)
    a csatlakozás után **magától elindul**.
+4. ⭐⭐ **Ha a telefon a SAJÁT második készüléked (D128 ④, 2026-11-16):** a laptopod lapján (a fő menüben „📱 Készülékeim” →
+   „➕ Új készülék felvétele”) egy sort kapsz és egy QR-t — ugyanez a telepítő sor, a végén egy **párosító kóddal**
+   (`… telepit.sh koino-parosit.1.…`). A telefon kamerájával olvasd be a QR-t (szöveggé alakítja), másold, és EZT illeszd be a
+   2. pont helyett: telepít, és a laptopodtól megkapja a tanúsítványát — a telefon ugyanaz az e-ember lesz, mint a laptopod, de az
+   azonosságod kulcsa NEM kerül rá (egy ellopott telefonnal így nem lehet a laptopodat kizárni). A két gép **ugyanazon a wifin**
+   legyen; a kód 10 percig érvényes. A végén mindkét gép kiír egy 6 jeles **ellenőrző kódot** — nézd meg, hogy egyezik-e.
+   ⚠️ Ha a telefonon már van egy MÁSIK koino-azonosság, a párosítás nem írja felül (azt külön kell kérni: `koino keszulek csatlakoz
+   <kód> felulir` — a régi azonosság ezen a telefonon elveszik).
 
 **Ezután minden indításhoz elég ennyi a Termuxban:** `koino` — leállítás: **Ctrl+C**. A program parancsai ugyanazzal az
 adattal: `koino belep`, `koino meghiv <horgony>`, `koino ter` …
