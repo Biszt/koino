@@ -22,6 +22,9 @@ import {
 import { kulcsparBiztositasa, csereKulcsKiadasa, kulcscsereVegrehajtasa } from '../js/kulcs/kulcsTar.js';
 import { azonossagNeve } from '../js/kulcs/azonossag.js';
 import { probaGyujtemeny } from './probaFuttato.js';
+// ⭐⭐ D128 (④a — KF1 (A)): a párosító kód
+import { ujParositas, parositoSzovege, parositoSzovegbol, parositasBizonyitasa, parositasEllenorzoKodja, PAROSITO_ELOTAG }
+  from '../js/csere/parositas.js';
 
 const { proba, futtatas } = probaGyujtemeny('A csere-kulcs papíron — a betűcsoportok és a QR (D128 ②c)');
 
@@ -433,6 +436,42 @@ proba('A terminál-rajz: a VILÁGOS modulok rajzolódnak (a csend-zónával), k�
   }
   const szines = qrTerminalra(qr, { szinesen: true });
   return szines.every((s, i) => s === '\x1b[97;40m' + sorok[i] + '\x1b[0m');
+});
+
+// ===================================
+// ⭐⭐ D128 (④a — KF1 (A)): A PÁROSÍTÓ KÓD
+// ===================================
+
+proba('⭐⭐ A PÁROSÍTÓ KÓD (④a — KF1 (A)) — oda-vissza (szóközökkel is); a hibás alakot, az idegen előtagot és a sérültet kimondja; a titok bizonyítása a kézfogás átiratához ÉS a készülékhez kötött; az ellenőrző kód a titoké és a készüléké', async () => {
+  const A = 'A'.repeat(43);
+  const N = 'N'.repeat(43);
+  const { kod, titok } = ujParositas({ cimek: [{ hoszt: '192.168.1.5', port: 7374 }, { hoszt: '127.0.0.1', port: 7374 }],
+    tablaAlairo: A, nev: N, most: 1000 });
+  const szoveg = parositoSzovege(kod);
+  const vissza = parositoSzovegbol('  ' + szoveg.slice(0, 40) + '\n ' + szoveg.slice(40) + ' ');
+  const hiba = (fn) => { try { fn(); return null; } catch (h) { return h.message; } };
+  const idegen = hiba(() => parositoSzovegbol('koino-meghivo.1.' + szoveg.slice(PAROSITO_ELOTAG.length)));
+  const serult = hiba(() => parositoSzovegbol(PAROSITO_ELOTAG + '%%%'));
+  const rosszAlak = hiba(() => parositoSzovegbol(parositoSzovege({ ...kod, a: 'rövid' })));
+  const folos = hiba(() => parositoSzovegbol(parositoSzovege({ ...kod, x: 1 })));
+  const atirat1 = Buffer.from('atirat-1');
+  const atirat2 = Buffer.from('atirat-2');
+  const K1 = 'K'.repeat(43);
+  const K2 = 'L'.repeat(43);
+  const b = parositasBizonyitasa(titok, atirat1, K1);
+  const ok = {
+    oda: JSON.stringify(vissza) === JSON.stringify(kod) && kod.l === 1000 + 10 * 60 * 1000 && /^[A-Za-z0-9_-]{22}$/.test(titok),
+    idegen: /nem párosító kód/.test(idegen ?? ''), serult: /sérült|hibás/.test(serult ?? ''),
+    rosszAlak: /hibás/.test(rosszAlak ?? ''), folos: /hibás/.test(folos ?? ''),
+    bizonyitas: b === parositasBizonyitasa(titok, atirat1, K1) && b !== parositasBizonyitasa(titok, atirat2, K1)
+      && b !== parositasBizonyitasa(titok, atirat1, K2) && b !== parositasBizonyitasa(ujParositas({ cimek: kod.c.map(([hoszt, port]) =>
+        ({ hoszt, port })), tablaAlairo: A, nev: N }).titok, atirat1, K1),
+    kod: /^[0-9A-Z]{3}-[0-9A-Z]{3}$/.test(parositasEllenorzoKodja(titok, K1))
+      && parositasEllenorzoKodja(titok, K1) === parositasEllenorzoKodja(titok, K1)
+      && parositasEllenorzoKodja(titok, K1) !== parositasEllenorzoKodja(titok, K2)
+  };
+  if (Object.values(ok).some((v) => !v)) process.stderr.write('    (' + JSON.stringify(ok) + ')\n');
+  return Object.values(ok).every(Boolean);
 });
 
 export default async function (csendes) {

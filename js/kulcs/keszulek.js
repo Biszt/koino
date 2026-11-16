@@ -352,6 +352,12 @@ export async function keszulekBiztositasa(tarolo, azonossagKulcspar, nev = 'kés
       return { eszkoz: eszkoz(kulcspar, leiras.tanusitvany), ujE: false };
     }
   }
+  // ⭐⭐ D128 (④a — ET-3/4 (A)): egy FELVETT készülék (az azonosság kulcsa nincs rajta) magát nem tanúsíthatja — a tanúsítványát a
+  // kezelő adja (a párosításban).
+  if (azonossagKulcspar?.kezeloNelkul) {
+    throw new Error('Ezen a készüléken nincs érvényes tanúsítvány, és az azonosság kulcsa sincs itt — a kezelő készülékeden vedd fel'
+      + ' újra: node koino.js keszulek felvesz (és itt: keszulek csatlakoz <a párosító kód> felulir)');
+  }
   const kulcspar = await crypto.subtle.generateKey({ name: ALGORITMUS }, true, ['sign', 'verify']);
   const keszulek = await nyilvanosKulcsSzovegesen(kulcspar.publicKey);
   const tanusitvany = await tanusitvanyKeszitese(azonossagKulcspar, keszulek, nev);

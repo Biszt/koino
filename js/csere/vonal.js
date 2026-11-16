@@ -190,7 +190,7 @@ const IDEGEN_CIM_KORLAT = 3;
  * @param {Object} kapcsolat - foglalat-szerű kapcsolat (`on('data')`, `setEncoding`…)
  * @returns {{kovetkezo: () => Promise<Object>}}
  */
-function uzenetSor(kapcsolat) {
+export function uzenetSor(kapcsolat) {
   const beerkezett = [];
   const varakozok = [];
   let puffer = '';

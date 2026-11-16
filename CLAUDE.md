@@ -123,7 +123,7 @@ tanúsítottat enged be; a láncán kívül utazó esemény a **kísérő burokk
 `tanusitvanyok` mezőjével, a készülék **tanúsítvány-jegyzékével** (`<adat>/tanusitvanyok.jsonl`) és a **várakozó sorral**; ⏭️ ①b a második
 készülék, ①c a keret, ①d a kizárás) → ② a csere-kulcs → ③ a hálózat → ④ a lap → ⑤ a terep. Részletek: `kulcs_atvizsgalas.md` 9.7.
 
-**Az állapot:** **1513 önpróba** (71 próba-fájl; a legutóbbi teljes soron 1511/1511 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-16, a D128 ③f után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba és a csere „CSOMAGVESZTÉS (30%)” próbája, magukban zöldek) · 396 fájl / 8054,7 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1516 önpróba** (71 próba-fájl; a legutóbbi teljes soron 1514/1514 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-16, a D128 ④a után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba és a csere „CSOMAGVESZTÉS (30%)” próbája, magukban zöldek) · 397 fájl / 8087,7 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

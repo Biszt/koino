@@ -157,13 +157,17 @@ import {
   kulcscsereVegrehajtasa,   // ⭐⭐ D128 (②b)
   papirVisszavonasa, papirEl,   // ⭐⭐ D128 (②d — 17. pont): a papír visszavonása a 2. lépcsőn
   helyreallitasBefejezese,   // ⭐⭐ D128 (②f): a helyreállítás befejezése az új készüléken
+  kezeloNelkuliAzonossagMentese,   // ⭐⭐ D128 (④a): a felvett készülék azonossága (titkos kulcs nélkül)
   // ⭐ A KÉZI ÚT MÁSIK FELE (2026-09-15): eddig csak KIMENTENI lehetett a kulcsot.
   kulcsparVisszatoltese
 } from './js/kulcs/kulcsTar.js';
 import { koinoEsemenyei, sajatLancEsemenyei, esemenyLekerese, esemenyMentese, entitasEsemenyei, lancVege, azonossagEsemenyei,
   tarTanusitvanya } from './js/tar/esemenyTar.js';
 // ⭐⭐ D128: a készülékkulcs és a tanúsítványa.
-import { keszulekBiztositasa, kizarasKeszitese } from './js/kulcs/keszulek.js';
+import { keszulekBiztositasa, kizarasKeszitese, tanusitvanyKeszitese, tanusitvanyEllenorzese } from './js/kulcs/keszulek.js';
+// ⭐⭐ D128 (④a — KF1 (A)): a második készülék felvétele — párosítás a hálózaton
+import { ujParositas, parositoSzovege, parositoSzovegbol, parositasKiszolgalasa, parositasKerese, PAROSITAS_ELETTARTAM }
+  from './js/csere/parositas.js';
 // ⭐⭐ D128 (③b): a kezelés-jegyzék — az azonosságom kezelése minden koinómba, helyben
 import { jegyzekbe, kezelesJegyzekBetoltese } from './js/allapot/kezelesTerjesztes.js';
 import { azonossagNeve, HELYREALLITAS_BEJEGYZES, helyreallitasFelvetele, helyreallitasJele, kulcsKorszak, bejegyzesJele }
@@ -556,6 +560,85 @@ if (parancs === 'helyreallitas') {
     process.exit(1);
   }
 }
+// ===================================
+// ⭐⭐ D128 (④a — KF1 (A)): AZ ÚJ KÉSZÜLÉK PÁROSÍTÁSA — a kulcs-biztosítás ELŐTT (különben új azonosság születne)
+// ===================================
+//
+// `keszulek csatlakoz <a párosító kód> [nev=<a készülék neve>] [felulir]` — a kezelő (a laptop: `keszulek felvesz`) kiírta a kódot és
+// a QR-t; ez a készülék kopog rá, és a titok bizonyításával kéri a tanúsítványát. Utána ez a gép az azonosság egy FELVETT
+// készüléke: az azonosság kulcsa nincs rajta (ET-3/4 (A)), csak a saját készülékkulcsa és a tanúsítványa.
+if (parancs === 'keszulek' && ervek[0] === 'csatlakoz') {
+  try {
+    if (!ervek[1]) throw new Error('A párosító kóddal: node koino.js keszulek csatlakoz <a kód> (a kezelőn: keszulek felvesz)');
+    const kod = parositoSzovegbol(ervek[1]);
+    if (Date.now() > kod.l) throw new Error('A párosító kód lejárt — kérj újat a kezelő készülékeden: node koino.js keszulek felvesz');
+    const felulir = ervek.includes('felulir');
+    if ((await tarolo.olvas()) && !felulir) {
+      throw new Error('Ezen a készüléken már van azonosság — ha mégis ezt akarod: … felulir (a mostani elveszik ezen a gépen)');
+    }
+    const nevE = ervek.find((x) => typeof x === 'string' && x.startsWith('nev='))?.slice(4);
+    const nev = (nevE || process.env.KOINO_KESZULEK_NEV || (process.platform === 'android' ? 'telefon' : 'számítógép')).slice(0, 64);
+    const ujKulcspar = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+    const keszulek = await nyilvanosKulcsSzovegesen(ujKulcspar.publicKey);
+    let eredmeny = null;
+    let hiba = null;
+    const kapu = await udpKapuNyitasa({ port: 0, bekopogoKorlat: 0, jelez: () => {},
+      munka: async (halo, tars) => {
+        if (eredmeny) return { alairo: kod.a };
+        try { eredmeny = await parositasKerese(halo, tars, { kod, keszulek, nev }); }
+        catch (h) { hiba = h; throw h; }
+        return { alairo: kod.a };
+      } });
+    try {
+      await kapu.kopog(kod.c.map(([cim, port]) => ({ cim, port, alairo: kod.a })), { idokorlat: 15000 });
+    } finally {
+      kapu.zar();
+    }
+    if (!eredmeny) {
+      throw hiba ?? new Error('A kezelő készülékedet nem értem el (' + kod.c.map((c) => c[0] + ':' + c[1]).join(', ') + ') — fut rajta'
+        + ' a párosítás (keszulek felvesz), és ugyanazon a hálózaton vagytok?');
+    }
+    // A kapott tanúsítvány: hiteles, az ÉN készülékemé, és a kódban lévő azonosságé.
+    const t = eredmeny.tanusitvany;
+    if (!(await tanusitvanyEllenorzese(t)).rendben || t.keszulek !== keszulek || t.azonossag !== kod.n) {
+      throw new Error('A kapott tanúsítvány nem hiteles (vagy nem ennek a készüléknek, ennek az azonosságnak szól).');
+    }
+    const nevem = await kezeloNelkuliAzonossagMentese(tarolo, { szuletes: eredmeny.azonossag.szuletes,
+      cserek: Array.isArray(eredmeny.azonossag.cserek) ? eredmeny.azonossag.cserek : [] });
+    if (nevem !== kod.n) throw new Error('A kapott azonosság nem a kódban lévő.');
+    await keszulekTarolo().ir({ mi: 'koino-keszulek', valtozat: 1, kulcs: await kulcsparLeirasa(ujKulcspar), tanusitvany: t });
+    // A koinók: a tér ismeri őket (a kezelő beceneveivel), és a kezelő a társ (a cserék innen indulnak).
+    const ismertek = [];
+    for (const x of eredmeny.koinok.slice(0, 256)) {
+      if (!x || !azonositoAlaku(x.k)) continue;
+      await mkdir(join(alapHely(), x.k), { recursive: true });
+      await writeFile(join(alapHely(), x.k, 'esemenyek.jsonl'), '', { flag: 'a' });
+      for (const b of (Array.isArray(x.b) ? x.b : []).slice(0, 8)) {
+        if (typeof b === 'string' && b && !azonositoAlaku(b) && b.length <= 64) await koinoBecenevKijelolese(b, x.k);
+      }
+      ismertek.push(x);
+    }
+    await tarsakTarolo().modosit((lista) => {
+      const uj = [...lista];
+      for (const [hoszt, port] of kod.c) {
+        if (!uj.some((c) => c.hoszt === hoszt && Number(c.port) === port)) uj.push({ hoszt, port });
+      }
+      return uj;
+    });
+    kiir(SZIN.jo + 'Felvett: ez a készülék mostantól az azonosságod („' + nev + '”) — a neved: ' + rovidAzonosito(nevem) + SZIN.vege);
+    kiir('  Az ellenőrző kód: ' + SZIN.vastag + eredmeny.ellenorzo + SZIN.vege
+      + '  — a kezelő készülékeden ugyanezt kell látnod. Ha nem egyezik, ne használd ezt a párosítást.');
+    kiir(SZIN.halvany + '  Az azonosságod kulcsa NINCS ezen a gépen (csak a kezelőn): innen nem zárhatsz ki készüléket, és nem vehetsz'
+      + ' fel újat; a papírral (kulcscsere) innen is kicserélheted a kulcsot.' + SZIN.vege);
+    if (ismertek.length) kiir('  A koinóid (' + ismertek.length + ') ismertek ezen a gépen; a következő cserével megjönnek az eseményeik.');
+    process.exit(0);
+  } catch (hiba) {
+    kiir(SZIN.nem + 'Nem sikerült: ' + hiba.message + SZIN.vege);
+    if (process.env.KOINO_NAPLO) naplo(hiba);
+    process.exit(1);
+  }
+}
+
 // ⛔ Folyamatban lévő kérelem mellett, azonosság nélkül más parancs NEM fut — különben a kulcs-biztosítás új azonosságot adna (és a
 // befejezés felülírást kérne).
 if (existsSync(HELYREALLITAS_KERELEM_FAJL) && !(await tarolo.olvas())) {
@@ -823,8 +906,12 @@ async function keszulekeim() {
   };
   d(KESZULEK).nev = kulcspar.tanusitvany?.nev ?? null;
   // ⭐⭐ D128 (③d): a koinó-listájukból ismert saját készülékeim is (egy új telefon még semmit nem írt — de a cserében megmondta)
-  const listazottak = Object.keys(await sajatKeszulekekOlvasasa()).filter((k) => azonositoAlaku(k));
-  for (const k of listazottak) d(k);
+  const listak = await sajatKeszulekekOlvasasa();
+  const listazottak = Object.keys(listak).filter((k) => azonositoAlaku(k));
+  for (const k of listazottak) {
+    const x = d(k);
+    if (typeof listak[k]?.nev === 'string') x.nev ??= listak[k].nev.slice(0, 64);   // ⭐ (④a) a felvételkor feljegyzett név
+  }
   for (const k of await ismertKoinok(alapHely())) {
     try {
       const ktar = k === KOINO ? tar : await koinoTaraEgyszer(k);
@@ -5863,7 +5950,7 @@ async function tarsKoinoListaja(alairo, kl) {
   const k = await sajatKeszulekKotese(alairo);
   const lista = k ? koinoListaAlakja(kl) : null;
   if (!lista) return;
-  await sajatKeszulekekModositasa((j) => ({ ...j, [k]: { koinok: lista, ido: Date.now() } }));
+  await sajatKeszulekekModositasa((j) => ({ ...j, [k]: { ...(j[k]?.nev ? { nev: j[k].nev } : {}), koinok: lista, ido: Date.now() } }));
 }
 
 async function azonossagKotese(alairo, sz, h, k = null) {
@@ -7259,7 +7346,7 @@ return {
   tar, tartottSzeleteim, terKartyaGyermekei, tomoritesEsedekesE, tomoritesFuttatasa, torzsElvartja, torzsElemKerese, torzsKerhetoi, torzsHatarBeallitasa,
   korCeljaim, orjaratHazimunkaja, kotesTaram, koinoCsatlakozas,
   // ⭐⭐ D121: a meghívás a lapon
-  belepesHaNincs, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, meghivasVegrehajtasa, tagsagAllapotom,
+  belepesHaNincs, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, meghivasVegrehajtasa, tagsagAllapotom, helyiCimeim,
   profilomAllapota, igazoltMeghivasokAlairasa,
   // ⭐⭐ D125: a telepítés a kártyáról
   telepitesElonezete,
@@ -7300,7 +7387,7 @@ const {
   tar, tartottSzeleteim, terKartyaGyermekei, tomoritesEsedekesE, tomoritesFuttatasa, torzsElvartja, torzsElemKerese, torzsKerhetoi, torzsHatarBeallitasa,
   korCeljaim, orjaratHazimunkaja, kotesTaram, koinoCsatlakozas,
   // ⭐⭐ D121: a meghívás a lapon
-  belepesHaNincs, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, meghivasVegrehajtasa, tagsagAllapotom,
+  belepesHaNincs, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, meghivasVegrehajtasa, tagsagAllapotom, helyiCimeim,
   profilomAllapota, igazoltMeghivasokAlairasa,
   // ⭐⭐ D125: a telepítés a kártyáról
   telepitesElonezete,
@@ -7790,6 +7877,9 @@ try {
       const listaja = new Map((koinoListaAlakja((await sajatKeszulekekOlvasasa())[kizart]?.koinok) ?? []).map((x) => [x.k, x.n]));
       const koinok = [...new Set([...latott.keys(), ...listaja.keys()])].slice(0, KOINO_LISTA_KORLAT)
         .map((koino) => ({ koino, vagas: Math.max(latott.get(koino) ?? 0, listaja.get(koino) ?? 0), orokos }));
+      if (azonossagKulcspar.kezeloNelkul) {
+        throw new Error('A kizárás az azonosság kulcsával megy — a kezelő készülékeden (ez a készülék csak a tanúsítványát kapta).');
+      }
       const kizaras = await kizarasKeszitese(azonossagKulcspar, kizart, koinok);
       kiir(SZIN.jo + 'A készüléket kizártad: ' + rovidAzonosito(kizart) + (keszulekek.get(kizart)?.nev ? ' (' + keszulekek.get(kizart).nev + ')' : '')
         + SZIN.vege);
@@ -7803,6 +7893,82 @@ try {
       kezelesEredmenyKiirasa(await kezelesMindenKoinomba({ tudas: { kizarasok: [kizaras], sajatKizarasok: [kizaras.alairas] } }),
         (x) => x.kizarasok.some((e) => e.adat?.kizaras?.alairas === kizaras.alairas));
       listakCsatlakozasaKiirasa(csatlakozasok);
+      break;
+    }
+
+    // ⭐⭐ D128 (④a — KF1 (A), ET-3/4 (A)): ÚJ KÉSZÜLÉK FELVÉTELE — `keszulek felvesz`: a párosító kód és a QR (a címeim, a tábla-
+    // aláíróm, egy egyszeri titok); a kapu nyitva vár (legfeljebb 10 percig), amíg az új készülék (`keszulek csatlakoz <kód>`) a titok
+    // bizonyításával kopog — akkor az azonosság kulcsával aláírom a tanúsítványát, és mindketten kiírjuk az ellenőrző kódot.
+    case 'keszulek': {
+      if (ervek[0] !== 'felvesz') {
+        throw new Error('node koino.js keszulek felvesz   (az új készüléken utána: node koino.js keszulek csatlakoz <a párosító kód>)');
+      }
+      if (azonossagKulcspar.kezeloNelkul || !azonossagKulcspar.privateKey) {
+        throw new Error('Új készüléket csak a kezelő készüléked vehet fel — ahol az azonosságod kulcsa van (ET-3/4 (A)).');
+      }
+      const tabla = await tablaKulcsBiztositasa();
+      let felvett = null;
+      let titokMost = null;
+      let vege = () => {};
+      const kesz = new Promise((t) => { vege = t; });
+      const tanusito = async ({ keszulek: uj, nev }) => {
+        const koinok = [];
+        for (const k of await ismertKoinok(alapHely())) {
+          if (!azonositoAlaku(k) || koinok.length >= 256) continue;
+          if (!(await (await koinoTaraEgyszer(k)).esemeny(k).catch(() => null))) continue;
+          koinok.push({ k, b: (await koinoBecenevei(k)).slice(0, 8) });
+        }
+        return { tanusitvany: await tanusitvanyKeszitese(azonossagKulcspar, uj, nev),
+          azonossag: { szuletes: azonossagKulcspar.szuletes, ...(azonossagKulcspar.cserek?.length ? { cserek: azonossagKulcspar.cserek } : {}) },
+          koinok };
+      };
+      const munka = async (halo, tars) => {
+        if (felvett || !titokMost) return { alairo: null };
+        try {
+          const r = await parositasKiszolgalasa(halo, tars, { tablaKulcs: nyilvanosResz(tabla), tablaLeiras: tabla, titok: titokMost, tanusito });
+          if (r) { felvett = r; titokMost = null; vege(); }
+        } catch (hiba) {
+          kiir(SZIN.halvany + '  · egy párosítási kísérlet nem sikerült (' + tars.cim + ':' + tars.port + '): ' + hiba.message + SZIN.vege);
+        }
+        return { alairo: null };
+      };
+      const beallitas = { munka, bekopogoKorlat: 2, jelez: () => {} };
+      let kapu;
+      try { kapu = await udpKapuNyitasa({ ...beallitas, port: ALAP_PORT + 1 }); }
+      catch (hiba) {
+        if (hiba.code !== 'EADDRINUSE') throw hiba;
+        kapu = await udpKapuNyitasa({ ...beallitas, port: 0 });
+      }
+      try {
+        const cimek = [...(await helyiCimeim()).map((hoszt) => ({ hoszt, port: kapu.port })), { hoszt: '127.0.0.1', port: kapu.port }];
+        const { kod, titok } = ujParositas({ cimek, tablaAlairo: nyilvanosResz(tabla).alairo, nev: szerzo });
+        titokMost = titok;
+        const szoveg = parositoSzovege(kod);
+        kiir(SZIN.vastag + 'ÚJ KÉSZÜLÉK FELVÉTELE (D128)' + SZIN.vege + ' — az új készüléken (a telefon kamerájával a QR-ből):');
+        kiir();
+        kiir('  node koino.js keszulek csatlakoz ' + szoveg);
+        kiir();
+        for (const sor of qrTerminalra(qrKeszitese(szoveg), { szinesen: Boolean(process.stdout.isTTY) })) kiir('  ' + sor);
+        kiir();
+        kiir(SZIN.halvany + '  Várok (legfeljebb ' + Math.round(PAROSITAS_ELETTARTAM / 60000) + ' percig) — a két gép ugyanazon a hálózaton legyen.'
+          + SZIN.vege);
+        const ido = Number(process.env.KOINO_PAROSITAS_VARAKOZAS) > 0 ? Number(process.env.KOINO_PAROSITAS_VARAKOZAS) : PAROSITAS_ELETTARTAM;
+        let ora = null;
+        await Promise.race([kesz, new Promise((t) => { ora = setTimeout(t, ido); })]);
+        clearTimeout(ora);
+      } finally {
+        kapu.zar();
+      }
+      if (!felvett) {
+        kiir(SZIN.nem + 'A párosítás lejárt — új készülék nem jelentkezett. Újra: node koino.js keszulek felvesz' + SZIN.vege);
+        break;
+      }
+      // ⭐ a saját készülékeim közé (a nevével) — a `kizar` listája így rögtön mutatja, a koinó-listája a cserével jön (③d)
+      await sajatKeszulekekModositasa((j) => ({ ...j, [felvett.keszulek]: { koinok: j[felvett.keszulek]?.koinok ?? [], ido: Date.now(),
+        nev: felvett.nev } }));
+      kiir(SZIN.jo + 'Felvettem: „' + felvett.nev + '” (' + rovidAzonosito(felvett.keszulek) + ')' + SZIN.vege);
+      kiir('  Az ellenőrző kód: ' + SZIN.vastag + felvett.ellenorzo + SZIN.vege + '  — az új készüléken ugyanezt kell látnod.'
+        + ' Ha nem egyezik: node koino.js kizar ' + felvett.keszulek.slice(0, 8));
       break;
     }
 
@@ -7886,6 +8052,9 @@ try {
       if (ervek[0] === 'visszavon') {
         if (!ervek[1]) {
           throw new Error('A papír kódjával (vagy a fájllal): node koino.js papir visszavon <a papír kódja | csere-kulcs.json>');
+        }
+        if (azonossagKulcspar.kezeloNelkul) {
+          throw new Error('A papír visszavonása a kezelő készülékeden megy (ahol az azonosságod kulcsa van).');
         }
         const { leiras } = await csereKulcsBeolvasasa(ervek.slice(1));
         const r = await papirVisszavonasa(tarolo, leiras);

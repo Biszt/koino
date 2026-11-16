@@ -725,7 +725,7 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
   ellenőrző kóddal — a rossz kód nem megy —, az értesítés a régi készüléken, a várakozás után a véglegesítés és a bevitel, a kiadás, a
   befejezés UGYANAZZAL a névvel) — 10 rontás. ⭐ A D128 17. pontja ezzel megépült; ⏭️ ③ a hálózat (9.12 — KH1, KH2 még nyitott).
 
-**9.14 A ④ terve — a lap: „📱 Készülékeim” és a második készülék felvétele** (2026-11-16; ❓ Csaba döntésére vár: KF1)
+**9.14 A ④ terve — a lap: „📱 Készülékeim” és a második készülék felvétele** (2026-11-16; ✅ KF1 eldöntve: (A))
 
 *Ami már eldőlt:* új készüléket csak az azonosság kulcsa vesz fel, ami a kezelő készüléken és a mentésben él (ET-3/4 (A)); a
 tanúsítvány koinók fölött érvényes (KU2 (A)); az azonosság kulcsa csak kezel (KU6 (A)). ⚠️ **Ami ma van:** második készülék csak a
@@ -750,6 +750,29 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
   WhatsApp Web párosít). (B) **két kóddal, hálózat nélkül:** a telefon kiír egy kérelem-kódot (14 négyjeles csoport, mint a papír),
   amit a laptopba begépelsz; a laptop QR-t mutat a tanúsítvánnyal, amit a telefon kamerája beolvas. (C) **fájllal** (mint a mai
   mentés — a fájlt át kell vinni).
+  ✅ **Eldöntve (2026-11-16) — (A).** Csaba: *„rendben, legyen az (A). mehetünk tovább”*.
+
+*Az építés:*
+- ✅ **④a — a felvétel (a parancsok)** (2026-11-16): `csere/parositas.js` — a PÁROSÍTÓ KÓD (`koino-parosit.1.…`: a kezelő címei és a
+  kapuja portja, a tábla-aláírója, egy 16 bájtos egyszeri titok, az azonosság neve, a lejárat — 10 perc), a titok BIZONYÍTÁSA (HMAC a
+  titokkal, a kézfogás átiratához és a készülékkulcshoz kötve — a titok maga nem utazik, és egy lehallgatott bizonyítás másik
+  beszélgetésben nem ér semmit), az ELLENŐRZŐ KÓD (6 jel, a titokból és a készülékkulcsból), és a két oldal a védett résen, saját
+  üzenetekkel (`PAROSITAS_NYIT` — a kezelő a tábla-kulcsával aláírja az átiratot, ebből tudja az új készülék, hogy a kódot kiíró géppel
+  beszél; `PAROSITAS`; `PAROSITAS_KESZ` — a tanúsítvány, az azonosság nyilvános részei, a koinók a beceneveikkel); a csere
+  párbeszédéhez nem nyúl. `kulcsTar.js`: a KEZELŐ NÉLKÜLI azonosság (`koino-azonossag-keszulek` — a név, a születés, a lánc, titkos
+  kulcs nélkül): betölthető, a biztosítás nem szül újat, a mentés kimondja, hogy ez a kezelőn megy; `keszulek.js`: egy felvett készülék
+  magát nem tanúsíthatja. `koino.js`: `keszulek felvesz` (a kezelőn — a kód és a QR, a kapu a párosítás idejére nyitva, legfeljebb 10
+  percig; a felvett készüléket a saját készülékei közé jegyzi a nevével) és `keszulek csatlakoz <kód> [nev=…] [felulir]` (az új
+  készüléken, a kulcs-biztosítás ELŐTT — mint a helyreállítás: a tanúsítványt ellenőrzi, a kezelő nélküli azonosságot és a
+  készülékkulcsot menti, a koinókat a kezelő beceneveivel ismertté teszi, a kezelőt társnak veszi); a kezelést kívánó parancsok (a
+  `kizar`, a felvétel, a papír visszavonása, a mentés) a felvett készüléken kimondják, hogy a kezelőn mennek; a papíros kulcscsere
+  innen is megy. ⛔ **Lelet (a parancssor-próba fogta meg):** a frissen felvett telefonnál a koinó születése még nincs meg, ezért az
+  első cserében a kapuja nem kéri a laptop személyét, és a koinó-listák nem cserélődnek (a ③d korlátja — itt a szokásos eset) — a
+  laptop listáján a telefon nem látszott; most a felvételkor a kezelő rögtön feljegyzi (a nevével). ⚠️ A két gépnek el kell érnie
+  egymást (ugyanaz a hálózat, vagy egy továbbított port — a kód a kezelő helyi címeit hordozza). A próba: `papirProba.js` (a kód
+  oda-vissza, a hibás alakok, a bizonyítás kötése, az ellenőrző kód), `kulcsProba.js` (a kezelő nélküli azonosság), parancssor (a
+  rossz titok és az idegen kezelő nem megy; a valódival a két ellenőrző kód egyezik; a telefonon nincs titkos kulcs, a kizárás és a
+  felvétel a kezelőé; a csere után a telefon keretet kap) — 10 rontás. ⏭️ ④b a lap („📱 Készülékeim”), ④c a személyes határ.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

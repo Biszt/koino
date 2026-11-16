@@ -103,12 +103,41 @@ export async function kulcsparBetoltese(tarolo) {
     console.log('kulcsparBetoltese - VÉGE (még nincs kulcs)');
     return null;
   }
+  // ⭐⭐ D128 (④a — KF1 (A), ET-3/4 (A)): a KEZELŐ NÉLKÜLI azonosság (egy felvett készülék — a telefon): a név, a születés és a lánc,
+  // titkos kulcs nélkül. A kezelést kívánó parancsok kimondják, hogy ez a kezelő készüléken megy.
+  if (leiras.mi === KEZELO_NELKULI) {
+    if (!leiras.szuletes || !(await szuletesEllenorzese(leiras.szuletes)).rendben
+        || (await azonossagNeve(leiras.szuletes)) !== leiras.nev) {
+      throw new Error('A gépen lévő (kezelő nélküli) azonosság sérült — a fájl: ' + tarolo.fajl);
+    }
+    const cserek = Array.isArray(leiras.cserek) ? leiras.cserek : [];
+    for (const c of cserek) if (c?.tipus === HELYREALLITAS_BEJEGYZES) helyreallitasFelvetele(c.jel);
+    console.log('kulcsparBetoltese - VÉGE (kezelő nélküli)');
+    return { privateKey: null, publicKey: null, szuletes: leiras.szuletes, ...(cserek.length ? { cserek } : {}), kezeloNelkul: true };
+  }
 
   // ⭐⭐ D128 (②a): a születés — ha a tárolóban van, és ehhez a kulcshoz tartozik (az első kulcs írta alá). ⚠️ A régi (születés
   // nélküli) kulcsfájlnak a `kulcsparBiztositasa` ad születést — a név ezzel MEGVÁLTOZIK (új koinó-család).
   const kulcspar = await azonossagRaTetele(await kulcsparLeirasbol(leiras), leiras);
   console.log('kulcsparBetoltese - VÉGE (megvan)', { szuletes: !!kulcspar.szuletes });
   return kulcspar;
+}
+
+/** ⭐⭐ D128 (④a): a kezelő nélküli azonosság leírásának fajtája. */
+export const KEZELO_NELKULI = 'koino-azonossag-keszulek';
+
+/**
+ * ⭐⭐ D128 (④a — KF1 (A)): egy FELVETT készülék azonossága a tárolóba — a név, a születés és a lánc (a kezelő küldte a párosításban),
+ * titkos kulcs NÉLKÜL: ez a készülék csak a saját készülékkulcsával ír (a tanúsítványa a `keszulek.json`-ban).
+ * @param {Object} tarolo
+ * @param {{szuletes: Object, cserek?: Array<Object>}} azonossag
+ * @returns {Promise<string>} a név
+ */
+export async function kezeloNelkuliAzonossagMentese(tarolo, { szuletes, cserek = [] }) {
+  if (!szuletes || !(await szuletesEllenorzese(szuletes)).rendben) throw new Error('A kapott azonosság születése nem hiteles.');
+  const nev = await azonossagNeve(szuletes);
+  await tarolo.ir({ mi: KEZELO_NELKULI, valtozat: 1, nev, szuletes, ...(cserek.length ? { cserek } : {}) });
+  return nev;
 }
 
 /**
@@ -271,6 +300,9 @@ export async function kulcsparLeirasbol(leiras) {
  * @returns {Promise<string>}
  */
 export async function kulcsparKimentese(kulcspar) {
+  if (kulcspar?.kezeloNelkul) {
+    throw new Error('Ezen a készüléken nincs az azonosság kulcsa (felvett készülék) — a mentés a kezelő készülékeden megy.');
+  }
   // ⭐⭐ D128 (②a): az AZONOSSÁG mentése a születésével és a fizetési kulccsal — e nélkül a visszatöltött kulcs ÚJ születést (új
   // nevet) kapna, és az azonosság elveszne.
   const leiras = await kulcsparLeirasa(kulcspar);

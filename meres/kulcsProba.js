@@ -22,12 +22,13 @@
 import {
   kulcsparLetrehozasa, kulcsparBetoltese, kulcsparBiztositasa,
   kulcsparLeirasa, kulcsparLeirasbol, kulcsparKimentese, kulcsparVisszatoltese,
-  nyilvanosKulcsSzovegesen, rovidAzonosito, csereKulcsKiadasa, kulcscsereVegrehajtasa, papirVisszavonasa, papirEl
+  nyilvanosKulcsSzovegesen, rovidAzonosito, csereKulcsKiadasa, kulcscsereVegrehajtasa, papirVisszavonasa, papirEl,
+  kezeloNelkuliAzonossagMentese   // ⭐⭐ D128 (④a)
 } from '../js/kulcs/kulcsTar.js';
 import { azonossagNeve, csereLenyomata } from '../js/kulcs/azonossag.js';
 import { esemenyLetrehozasa, esemenyEllenorzese } from '../js/esemeny/esemeny.js';
 import { probaGyujtemeny } from './probaFuttato.js';
-import { ujKeszulek } from '../js/kulcs/keszulek.js';   // ⭐⭐ D128
+import { ujKeszulek, keszulekBiztositasa } from '../js/kulcs/keszulek.js';   // ⭐⭐ D128
 
 const { proba, futtatas } = probaGyujtemeny('A kulcs-réteg próbája — a személyazonosság');
 
@@ -363,6 +364,27 @@ proba('⛔⛔ (②f) a be nem tölthető, születéssel bíró azonosságot a bi
   try { await kulcsparBiztositasa(tarolo); } catch (h) { hiba = h.message; }
   return /új születést NEM adunk/.test(hiba ?? '') && tarolo.irasokSzama === irasok
     && JSON.stringify(await tarolo.olvas()) === JSON.stringify(serult);
+});
+
+// ⭐⭐ D128 (④a — ET-3/4 (A)): a FELVETT készülék azonossága — titkos kulcs nélkül: betölthető (a név a születésé), a biztosítás nem szül
+// újat, a mentés kimondja, hogy itt nincs mit menteni; és a készülék-biztosítás nem tanúsíthatja magát (a tanúsítványt a kezelő adja).
+proba('⭐⭐ (④a) a kezelő nélküli azonosság — betölthető, a név a születésé; a biztosítás nem szül újat; a mentés és az önmaga-tanúsítás kimondja, hogy ez a kezelőn megy', async () => {
+  const kezelo = memoriaTarolo();
+  const { kulcspar: kk } = await kulcsparBiztositasa(kezelo);
+  const nev = await azonossagNeve(kk.szuletes);
+  const t = memoriaTarolo();
+  const mentett = await kezeloNelkuliAzonossagMentese(t, { szuletes: kk.szuletes });
+  const betoltve = await kulcsparBetoltese(t);
+  const biztositva = await kulcsparBiztositasa(t);
+  let mentes = null;
+  try { await kulcsparKimentese(betoltve); } catch (h) { mentes = h.message; }
+  let onTanusit = null;
+  try { await keszulekBiztositasa(memoriaTarolo(), betoltve, 'telefon'); } catch (h) { onTanusit = h.message; }
+  let hamis = null;
+  try { await kezeloNelkuliAzonossagMentese(memoriaTarolo(), { szuletes: { ...kk.szuletes, alairas: 'A'.repeat(86) } }); } catch (h) { hamis = h.message; }
+  return mentett === nev && betoltve?.kezeloNelkul && !betoltve.privateKey && (await azonossagNeve(betoltve.szuletes)) === nev
+    && biztositva.kulcspar.kezeloNelkul && !biztositva.ujE && /kezelő készülékeden/.test(mentes ?? '')
+    && /kezelő készülékeden vedd fel/.test(onTanusit ?? '') && /nem hiteles/.test(hamis ?? '');
 });
 
 export default async function (csendes) {

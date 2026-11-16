@@ -3755,6 +3755,68 @@ proba('⭐⭐ D128 (③d): a kulcscsere is csatlakozik — a fel nem sorolt tele
     }
   });
 
+// ⭐⭐ D128 (④a — KF1 (A), ET-3/4 (A)): AZ ÚJ KÉSZÜLÉK FELVÉTELE a parancssorból. A laptop (a kezelő) kiírja a párosító kódot és vár; a
+// telefon egy átírt titkú kóddal nem kerül fel, egy idegen tábla-aláírójú kóddal (egy álkezelő) sem — a valódival igen, és a két gép
+// ugyanazt az ellenőrző kódot írja ki. A telefonon az azonosság kulcsa NINCS (a kizárás kimondja, hogy a kezelőn megy); egy csere után
+// a laptop a határig keretet ad, és a telefon átveszi.
+proba('⭐⭐ D128 (④a): a második készülék felvétele — párosító kód a hálózaton; a rossz titok és az idegen kezelő nem megy; az ellenőrző kód egyezik; a telefonon nincs az azonosság kulcsa; a csere után a telefon keretet kap',
+  async () => {
+    const L = await ujKeszulek();
+    const T = await ujKeszulek();
+    const TEL = { KOINO_KESZULEK_NEV: 'telefon' };
+    let felvesz = null;
+    try {
+      await fut(L, 'koino', 'Párosítás-próba');
+      const A = await koinoNeve(L);
+      felvesz = spawn(process.execPath, [KOINO_JS, 'keszulek', 'felvesz'],
+        { env: { ...process.env, KOINO_ADAT: L, KOINO_NAPLO: '', KOINO_PAROSITAS_VARAKOZAS: '60000' }, stdio: ['ignore', 'pipe', 'pipe'] });
+      let lKi = '';
+      felvesz.stdout.on('data', (d) => { lKi += d; });
+      felvesz.stderr.on('data', (d) => { lKi += d; });
+      const vege = new Promise((t) => felvesz.on('exit', t));
+      for (let i = 0; i < 80 && !/keszulek csatlakoz koino-parosit/.test(lKi); i++) await varj(250);
+      const kod = lKi.match(/keszulek csatlakoz (koino-parosit\.1\.[A-Za-z0-9_-]+)/)?.[1] ?? '';
+      const kodJson = JSON.parse(Buffer.from(kod.slice('koino-parosit.1.'.length), 'base64url').toString('utf8'));
+      const atirt = (m) => 'koino-parosit.1.' + Buffer.from(JSON.stringify({ ...kodJson, ...m }), 'utf8').toString('base64url');
+      const rosszTitok = await fut(T, 'keszulek', 'csatlakoz', atirt({ t: 'X'.repeat(22) }), 'nev=telefon');
+      const idegenKezelo = await fut(T, 'keszulek', 'csatlakoz', atirt({ a: 'Q'.repeat(43) }), 'nev=telefon');
+      const rosszUtan = await readFile(join(T, 'kulcs.json'), 'utf8').then(() => true, () => false);
+      const tKi = await fut(T, 'keszulek', 'csatlakoz', kod, 'nev=telefon');
+      await vege;
+      const tKulcs = JSON.parse(await readFile(join(T, 'kulcs.json'), 'utf8'));
+      const kodja = (s) => s.match(/ellenőrző kód: (?:\x1b\[[0-9;]*m)?([0-9A-Z]{3}-[0-9A-Z]{3})/)?.[1] ?? null;
+      const tKizar = await fut(T, 'kizar', 'K'.repeat(43), TEL);
+      const tFelvesz = await fut(T, 'keszulek', 'felvesz', TEL);
+      const masodszor = await fut(T, 'keszulek', 'csatlakoz', kod, 'nev=telefon');
+      // A csere: a laptop felismeri a telefonját, és a határig ad; a telefon (a kézi úton megkapva) egy parancs elején átveszi.
+      await csereKor(L, T, 8027, TEL);
+      await fut(L, 'kivisz', join(L, 'l.jsonl'));
+      await fut(T, 'behoz', join(L, 'l.jsonl'), TEL);
+      const tAllapot = await fut(T, 'allapot', TEL);
+      const lLista = await fut(L, 'kizar');
+      const r = {
+        rosszTitok: /titka nem stimmel/.test(rosszTitok) && !rosszUtan,
+        idegenKezelo: /nem az a készülék/.test(idegenKezelo),
+        felvett: /Felvettem: „telefon”/.test(lKi) && /Felvett: ez a készülék/.test(tKi),
+        kod: !!kodja(lKi) && kodja(lKi) === kodja(tKi),
+        kulcs: tKulcs.mi === 'koino-azonossag-keszulek' && !tKulcs.privatKulcs && tKulcs.nev === kodJson.n,
+        becenev: (await koinoNeve(T)) === A,
+        tKizar: /a kezelő készülékeden/.test(tKizar), tFelvesz: /csak a kezelő készüléked/.test(tFelvesz),
+        masodszor: /már van azonosság/.test(masodszor),
+        keret: /keret: 1 átadást átvettem/.test(tAllapot), lista: /telefon/.test(lLista)
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (④a-próba: ' + JSON.stringify({ r, lKi: lKi.slice(-500), tKi: tKi.slice(-400), rosszTitok: rosszTitok.slice(-200),
+          idegenKezelo: idegenKezelo.slice(-200), tAllapot: tAllapot.slice(0, 300) }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      felvesz?.kill();
+      for (const h of [L, T]) await rm(h, { recursive: true, force: true });
+    }
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();
