@@ -6467,7 +6467,9 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
    eseményből eldől”-jét a közös keret elvenné — 93. (b)): az első készüléké alapból az egész. **A keret magától átfolyik** a
    készülékek között, amikor találkoznak: az átadást a több szabad ponttal rendelkező készülék írja alá, a fogadó a saját láncában
    veszi át. **Egy fogadó-oldali határig** (KU1 (a)): a határ az ADÓ készülék szabálya (a lapon állítható), fölötte az adó megkérdez —
-   93. (g): határ nélkül egy ellopott készülék a többi összes szabad pontját magához húzná. Egy készülék csak a maga tett pontjait
+   93. (g): határ nélkül egy ellopott készülék a többi összes szabad pontját magához húzná. **A határ alapértéke 2000** (a keret 20%-a —
+   KH1 (A), Csaba, 2026-11-16: *„jó a 2000, de írdfel, hogy ezek az értékek, személyre szabhatók lesznek majd.”*): ez csak az
+   alapérték, a határt mindenki maga szabja meg, készülékenként. Egy készülék csak a maga tett pontjait
    rendezi át; a másikét az hajtja végre, amikor legközelebb fut, és a lap kimondja.
 6. **Egy kizárt készülék pontjai** (KU7 (A)): a kizárás megnevez egy **örököst** (a másik készülékedet), az koinónként átveszi a kizárt
    készülék vágásig érvényes elhelyezéseit és a szabad részét — a pontok a gondolatokon maradnak.
@@ -6532,7 +6534,7 @@ készülék között az idő — 9.5); **(2a)** a keret alapja láncónként: a 
 harmadik fája, a `KeretAtadas` (halmozott — saját típus, hogy egy eseményből eldőljön, hogy nem csökkenhet) és a `KeretAtvetel`
 (az adó aláírt átadását hozza, egy eseményből ellenőrizhető), `szabalyok.js` `lancLepese` (egy forrás a szabálynak, a saját
 gyökérnek és a műveletnek), `muveletek.js` `keretAtadasa`/`keretAtvetele`; **(2c)** az átfolyás (`atfolyasMerteke`, `keretAtfolyasa` — a különbség fele, a
-fogadó határáig; a határ alapértéke nyitott, a ③-mal); **(3)** az azonosság pontja egy entitáson a készülékei pontjainak összege (az
+fogadó határáig; a határ alapértéke akkor még nyitott volt — 2000, KH1, a ③-mal épül be); **(3)** az azonosság pontja egy entitáson a készülékei pontjainak összege (az
 állapot, a döntés, az össz-pont levele — a láncok pont-eseményeivel); **(4)** a szavazás és a javaslattétel joga készülékenként (ahol a
 pont a másik készüléken van, ez előbb 1 pontot tesz rá).
 

@@ -436,8 +436,8 @@ D128 13–15.):
   rontás. ⚠️ A QR végső próbája a telefon kamerája (⑤ terep). ⭐ A ② a papírral ezzel kész; ⏭️ a D128 17. pontja (a helyreállítás a segítőkkel — 9.13) ②d–②f-ként, utána a
   ③ a hálózat (a kizárás és a kulcscsere terjesztése, a koinó-lista a készülékek között; az átfolyás határának alapértéke — Csaba döntése).
 
-**9.12 A ③ terve — a hálózat: a saját készülékek találkozása és a kezelés eljuttatása** (2026-11-15; ❓ Csaba döntésére vár:
-KH1, KH2)
+**9.12 A ③ terve — a hálózat: a saját készülékek találkozása és a kezelés eljuttatása** (2026-11-15; ✅ KH1 eldöntve
+2026-11-16; ❓ Csaba döntésére vár: KH2)
 
 *Ami már eldőlt (D128):* a készülékek találkozáskor kicserélik a koinó-listájukat (4. pont); a keret magától átfolyik, amikor
 találkoznak — a fogadó-oldali határig, a határ az adó szabálya (a lapon állítható), fölötte az adó megkérdez (5. pont); a kézfogás és
@@ -462,6 +462,10 @@ a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③
   2000-es, sem 3000-es határnál nem akadt el. Ha a telefon a fő eszközöd, és sok pontot tesz le, egy alacsony határ hamarabb
   megállítja — akkor az adó (a laptop) kérdez, a határ pedig a lapon (④) készülékenként átírható. (A) a keret 20%-a (2000);
   (B) 30% (3000); (C) a fele (5000); (D) nincs magától átfolyás, minden átadás kérdez.
+  ✅ **Eldöntve (2026-11-16) — (A), személyre szabható alapértékként.** Csaba: *„jó a 2000, de írdfel, hogy ezek az értékek,
+  személyre szabhatók lesznek majd.”* Vagyis a 2000 csak az ALAPÉRTÉK — az, ami addig érvényes, amíg az e-ember át nem írja; a
+  határt mindenki maga szabja meg, készülékenként (a lapon — ④). A keret (10 000) nem ilyen: az mindenkinek ugyanannyi (a tudatpont
+  alapelve).
 - **KH2 — ahová egyik másik készülékem sem jár.** Ha az ellopott telefon egy olyan koinóban is tag, ahol egyik másik készüléked sem
   (a laptop sem): a kizárást és a kulcscserét oda csak az viheti be, aki ott van. (A) a koinó-lista a koinó nevét hozza, és a
   kezelő készülék (ahol a kizárást vagy a kulcscserét kiadod) magától csatlakozik oda — csak a bevitelhez (pontja ott nincs, a láncán
