@@ -3801,6 +3801,9 @@ proba('⭐⭐ D128 (④a): a második készülék felvétele — párosító kó
         kod: !!kodja(lKi) && kodja(lKi) === kodja(tKi),
         kulcs: tKulcs.mi === 'koino-azonossag-keszulek' && !tKulcs.privatKulcs && tKulcs.nev === kodJson.n,
         becenev: (await koinoNeve(T)) === A,
+        // a laptop a társ — az őrjárata portjával (itt nem fut őrjárat: az alap 7373), nem a bezárult párosító kapuéval
+        tars: JSON.parse(await readFile(join(T, 'indulocimek.json'), 'utf8')).tarsak.some((c) => Number(c.port) === 7373)
+          && !JSON.parse(await readFile(join(T, 'indulocimek.json'), 'utf8')).tarsak.some((c) => Number(c.port) === kodJson.c[0][1]),
         tKizar: /a kezelő készülékeden/.test(tKizar), tFelvesz: /csak a kezelő készüléked/.test(tFelvesz),
         masodszor: /már van azonosság/.test(masodszor),
         keret: /keret: 1 átadást átvettem/.test(tAllapot), lista: /telefon/.test(lLista)

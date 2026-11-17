@@ -161,7 +161,8 @@ export async function parositasKiszolgalasa(halo, tars, { tablaKulcs, tablaLeira
       return null;
     }
     const v = await tanusito({ keszulek: k.keszulek, nev: k.nev });
-    kuldes(kapcsolat, { uzenet: 'PAROSITAS_KESZ', tanusitvany: v.tanusitvany, azonossag: v.azonossag, koinok: v.koinok ?? [] });
+    kuldes(kapcsolat, { uzenet: 'PAROSITAS_KESZ', tanusitvany: v.tanusitvany, azonossag: v.azonossag, koinok: v.koinok ?? [],
+      ...(Number.isInteger(v.kapuPort) ? { kapuPort: v.kapuPort } : {}) });
     await kapcsolat.kiurites?.();
     console.log('parositasKiszolgalasa - VÉGE', { keszulek: k.keszulek.slice(0, 8) });
     return { keszulek: k.keszulek, nev: k.nev, ellenorzo: parositasEllenorzoKodja(titok, k.keszulek) };
@@ -194,8 +195,10 @@ export async function parositasKerese(halo, tars, { kod, keszulek, nev }) {
     if (v.tiltva) throw new Error('A laptop nem vett fel: ' + v.tiltva);
     if (!v.tanusitvany || !v.azonossag) throw new Error('A laptop válasza hiányos (nincs tanúsítvány).');
     console.log('parositasKerese - VÉGE');
+    // ⭐ a kezelő ŐRJÁRATÁNAK portja (a párosító kapu a párosítás után bezárul — a cserék oda mennek), és a cím, amin elértük
+    const kapuPort = Number.isInteger(v.kapuPort) && v.kapuPort > 0 && v.kapuPort < 65536 ? v.kapuPort : null;
     return { tanusitvany: v.tanusitvany, azonossag: v.azonossag, koinok: Array.isArray(v.koinok) ? v.koinok : [],
-      ellenorzo: parositasEllenorzoKodja(kod.t, keszulek) };
+      ellenorzo: parositasEllenorzoKodja(kod.t, keszulek), tarsCim: tars.cim, kapuPort };
   } finally {
     kapcsolat.end();
     res.zar();

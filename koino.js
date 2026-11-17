@@ -618,13 +618,10 @@ if (parancs === 'keszulek' && ervek[0] === 'csatlakoz') {
       }
       ismertek.push(x);
     }
-    await tarsakTarolo().modosit((lista) => {
-      const uj = [...lista];
-      for (const [hoszt, port] of kod.c) {
-        if (!uj.some((c) => c.hoszt === hoszt && Number(c.port) === port)) uj.push({ hoszt, port });
-      }
-      return uj;
-    });
+    // A kezelő a társ — azon a címen, amin elértük, az ŐRJÁRATA portjával (a párosító kapu a párosítás után bezárul).
+    const tarsPort = eredmeny.kapuPort ?? ALAP_PORT;
+    await tarsakTarolo().modosit((lista) => (lista.some((c) => c.hoszt === eredmeny.tarsCim && Number(c.port) === tarsPort)
+      ? lista : [...lista, { hoszt: eredmeny.tarsCim, port: tarsPort }]));
     kiir(SZIN.jo + 'Felvett: ez a készülék mostantól az azonosságod („' + nev + '”) — a neved: ' + rovidAzonosito(nevem) + SZIN.vege);
     kiir('  Az ellenőrző kód: ' + SZIN.vastag + eredmeny.ellenorzo + SZIN.vege
       + '  — a kezelő készülékeden ugyanezt kell látnod. Ha nem egyezik, ne használd ezt a párosítást.');
@@ -1058,9 +1055,11 @@ async function parositasInditasa({ varakozas = PAROSITAS_ELETTARTAM } = {}) {
       if (!(await (await koinoTaraEgyszer(k)).esemeny(k).catch(() => null))) continue;
       koinok.push({ k, b: (await koinoBecenevei(k)).slice(0, 8) });
     }
+    // ⭐ az őrjáratom portja (ha feljegyeztem — különben az alap): a telefon ide kopog a párosítás után
+    const kapuPort = Number(await kapuPortja().catch(() => null)) || ALAP_PORT;
     return { tanusitvany: await tanusitvanyKeszitese(azonossagKulcspar, uj, nev),
       azonossag: { szuletes: azonossagKulcspar.szuletes, ...(azonossagKulcspar.cserek?.length ? { cserek: azonossagKulcspar.cserek } : {}) },
-      koinok };
+      koinok, kapuPort };
   };
   const munka = async (halo, tars) => {
     if (felvett || !titokMost) return { alairo: null };
