@@ -3788,11 +3788,12 @@ proba('⭐⭐ D128 (④a): a második készülék felvétele — párosító kó
       const tKizar = await fut(T, 'kizar', 'K'.repeat(43), TEL);
       const tFelvesz = await fut(T, 'keszulek', 'felvesz', TEL);
       const masodszor = await fut(T, 'keszulek', 'csatlakoz', kod, 'nev=telefon');
-      // A csere: a laptop felismeri a telefonját, és a határig ad; a telefon (a kézi úton megkapva) egy parancs elején átveszi.
+      // A csere: a laptop felismeri a telefonját, és a határig ad; a KÖVETKEZŐ csere elviszi, és a telefon átveszi. ⛔ (⑤ — a terep
+      // lelete) kézi út nélkül: a felvett telefon az azonossága horgonyának szeletét is vállalja (a horgonyt a laptop írta) — a
+      // próba eddig kivisz/behoz-zal vitte át, és ezért nem vette észre, hogy a csere el sem küldte.
       await csereKor(L, T, 8027, TEL);
-      await fut(L, 'kivisz', join(L, 'l.jsonl'));
-      await fut(T, 'behoz', join(L, 'l.jsonl'), TEL);
-      const tAllapot = await fut(T, 'allapot', TEL);
+      await csereKor(L, T, 8031, TEL);
+      const tAtvetelek = (await readFile(join(T, A, 'esemenyek.jsonl'), 'utf8')).split('\n').filter((l) => l.includes('"tipus":"KeretAtvetel"'));
       const lLista = await fut(L, 'kizar');
       const r = {
         rosszTitok: /titka nem stimmel/.test(rosszTitok) && !rosszUtan,
@@ -3806,11 +3807,11 @@ proba('⭐⭐ D128 (④a): a második készülék felvétele — párosító kó
           && !JSON.parse(await readFile(join(T, 'indulocimek.json'), 'utf8')).tarsak.some((c) => Number(c.port) === kodJson.c[0][1]),
         tKizar: /a kezelő készülékeden/.test(tKizar), tFelvesz: /csak a kezelő készüléked/.test(tFelvesz),
         masodszor: /már van azonosság/.test(masodszor),
-        keret: /keret: 1 átadást átvettem/.test(tAllapot), lista: /telefon/.test(lLista)
+        keret: tAtvetelek.length === 1, lista: /telefon/.test(lLista)
       };
       if (!Object.values(r).every(Boolean)) {
         process.stderr.write('    (④a-próba: ' + JSON.stringify({ r, lKi: lKi.slice(-500), tKi: tKi.slice(-400), rosszTitok: rosszTitok.slice(-200),
-          idegenKezelo: idegenKezelo.slice(-200), tAllapot: tAllapot.slice(0, 300) }) + ')\n');
+          idegenKezelo: idegenKezelo.slice(-200) }) + ')\n');
         return false;
       }
       return true;

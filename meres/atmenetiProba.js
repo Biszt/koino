@@ -218,4 +218,15 @@ proba('⭐⭐ D104: a KIFUTÁS — a visszavett pontú szeletet még 24 óráig 
   return Object.values(ki).every(Boolean);
 });
 
+// ⭐⭐ D128 (⑤ — a terep lelete, 2026-11-17): a felvett telefonnak még nincs eseménye, az azonosság horgonyát a laptop írta — a
+// vállalása mégis tartalmazza a horgony szeletét (`azonossagHorgonyai`), különben a csere a keret átadását nem hozná el neki.
+proba('⭐⭐ (⑤) a vállalás az azonosságom horgonyát akkor is tartalmazza, ha egy MÁSIK készülékem írta (a lánc üres) — és csak egyszer', async () => {
+  const H = 'H'.repeat(43);
+  const ures = vallalasSzamitasa([], { azonossagHorgonyai: [H] });
+  const nelkule = vallalasSzamitasa([]);
+  const ketszer = vallalasSzamitasa([], { azonossagHorgonyai: [H, H, 5] });
+  return ures.szeletek.has(H) && ures.azonossag.includes(H) && !nelkule.szeletek.has(H)
+    && ketszer.azonossag.filter((x) => x === H).length === 1 && ketszer.azonossag.length === 1;
+});
+
 export default futtatas;

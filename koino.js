@@ -2574,7 +2574,10 @@ async function keresoTarTomoritese() {
  */
 async function sajatVallalasa(allapot) {
   const { lanc, szamit } = await sajatLancomNezete();
+  // ⭐⭐ D128 (⑤ — a terep lelete): az azonosságom horgonya (bármelyik készülékem írta) a vállalásom része
+  const horgony = await sajatHorgonyom();
   return vallalasSzamitasa(lanc, { koinoSzuletes: allapot?.koino?.azonosito ?? null, ...kifutasBeallitas(),
+    azonossagHorgonyai: horgony ? [horgony] : [],
     tudatpontKeret: (await koinomSzabalyai(kornyezet)).tudatpontKeret, koino: KOINO, szamit });   // ⭐ D118/2: a koinó kerete
 }
 
@@ -5880,8 +5883,10 @@ async function ketFokAllapota(allapot = null) {
   // ⚠️ A teljes állapot nélkül (a csere minden munkájában fut): a koinó születését a tagsági láncom adja.
   const szuletes = allapot?.koino?.azonosito ?? (await koinoSzuletese())?.azonosito ?? null;
   const sajatLancom = await sajatLancomNezete();
+  const horgony = await sajatHorgonyom();   // ⭐⭐ D128 (⑤): az azonosságom horgonya (bármelyik készülékem írta)
   const vallalas = vallalasSzamitasa(sajatLancom.lanc,
     { koinoSzuletes: szuletes, ...kifutasBeallitas(), tudatpontKeret: (await koinomSzabalyai(kornyezet)).tudatpontKeret,
+      azonossagHorgonyai: horgony ? [horgony] : [],
       koino: KOINO, szamit: sajatLancom.szamit });   // ⭐ D118 (⑤a): a hozott pontjaimmal
   const tarolo = osszegzesTarolo(KOINO);
   const t = await tarolo.olvas();

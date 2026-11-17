@@ -45,6 +45,9 @@ export const KIFUTAS = 24 * 3600 * 1000;
  *        számított összeggel számít (`pontEsemenyMerlege` `hozott` — mint a szabály-rétegben)
  * @param {Function} [beallitas.szamit] - ⭐ D118 (⑤b): mely eseményeim számítanak (a jelen réteg — `lancNezete`); a többi a
  *        láncom része (a folytonossághoz), de nem vállalás
+ * @param {Array<string>} [beallitas.azonossagHorgonyai] - ⭐⭐ D128 (⑤ — a terep lelete): az AZONOSSÁGOM horgonya(i), akkor is, ha egy
+ *        MÁSIK készülékem írta (a laptop lépett be, a telefon felvett készülék): az azonosság szelete a telefoné is — különben a
+ *        csere a szeletbe írt eseményeket (a keret átadását) nem hozza el neki
  * @returns {{szeletek: Set<string>, pontok: Map<string, number>, azonossag: Array<string>,
  *            koinoSzuletes: string|null, kifuto: Map<string, number>}} a `kifuto`: a pont nélkül, de még kifutásban
  *            tartott szeletek → mikor jár le a kifutásuk
@@ -77,6 +80,10 @@ export function vallalasSzamitasa(sajatEsemenyek, beallitas = {}) {
 
   const szeletek = new Set();
   for (const [kulcs, pont] of allas.pontok) if (pont > 0) szeletek.add(kulcs);
+  // ⭐⭐ D128 (⑤): az azonosságom horgonya akkor is az enyém, ha egy másik készülékem írta
+  for (const h of Array.isArray(beallitas.azonossagHorgonyai) ? beallitas.azonossagHorgonyai : []) {
+    if (typeof h === 'string' && !azonossag.includes(h)) azonossag.push(h);
+  }
   for (const a of azonossag) szeletek.add(a);
   const koinoSzuletes = typeof beallitas.koinoSzuletes === 'string' ? beallitas.koinoSzuletes : null;
   if (koinoSzuletes) szeletek.add(koinoSzuletes);
