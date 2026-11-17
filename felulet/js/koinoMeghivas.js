@@ -201,7 +201,9 @@ export function varakozasHtml(t) {
 
 /**
  * ⭐⭐ D122: AZ ELSŐ MEGNYITÁS — ha a készülék még egy koinót sem ismer: a csatlakozás ablaka („Meghívtak? illeszd be”); ha a
- * mostani koinóba beléptem, de még nincs profilom, és nem hagytam ki: a profil-űrlap.
+ * mostani koinóba beléptem, de még nincs profilom, és nem hagytam ki: a profil-űrlap. ⭐⭐ D128 (⑤ — a terep lelete): csak a kezelő
+ * készülékemen (`kezelo`) — egy felvett készülék nem tudhatja biztosan, hogy a kezelőn van-e már profilom (a csere később hozza);
+ * ott a menüből adható meg.
  * @param {{csatlakozas: Function}} b - a csatlakozás ablakának megnyitója (a `koinoCsatlakozas.js`-ből — körkörös import nélkül)
  */
 export async function elsoMegnyitas({ csatlakozas }) {
@@ -212,7 +214,7 @@ export async function elsoMegnyitas({ csatlakozas }) {
     const allapot = await apiGet('profil');
     let kihagyva = false;
     try { kihagyva = localStorage.getItem(KIHAGYVA + en?.koino) === '1'; } catch { /* a tároló nem elérhető */ }
-    if (allapot?.belepve && allapot.mezok === null && !kihagyva) await profilUrlapMegnyitasa({ elso: true, koino: en?.koino });
+    if (allapot?.belepve && allapot.kezelo && allapot.mezok === null && !kihagyva) await profilUrlapMegnyitasa({ elso: true, koino: en?.koino });
   } catch (hiba) {
     console.warn('elsoMegnyitas - nem sikerült', { ok: hiba.message });
   }

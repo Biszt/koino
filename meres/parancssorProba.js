@@ -1583,7 +1583,9 @@ proba('⭐⭐ D122: a meghívás a lapon — A kiállítja a meghívót, B a lap
         felhasznalt: utana[0]?.statusz === 'Felhasznalt' && !!utana[0]?.felhasznaloEemberId,
         egyMeghivas: meghivasok.length === 1 && meghivasok[0].adat?.nyilatkozat === true && meghivasok[0].entitas === csat.adat?.horgony,
         ertesites: /belépett a meghívóddal/.test(ertesites) && ertesites.includes('Kovács Anna'),
-        profil: profilElotte?.elotoltes?.nev === 'Kovács Anna' && profilElotte.mezok === null && mentes.allapot === 200
+        // ⭐⭐ D128 (⑤): a belépett készülék a kezelője az azonosságának — a lap felkínálja az űrlapot (`kezelo`)
+        profil: profilElotte?.elotoltes?.nev === 'Kovács Anna' && profilElotte.mezok === null && profilElotte.kezelo === true
+          && mentes.allapot === 200
           && profilUtana?.mezok?.nev === 'Kovács Anna' && profilUtana.mezok.telepules === 'Pécs',
         alsoSavNev: /…/.test(nevElotte) && nevUtana === 'Panni'
       };
@@ -3790,10 +3792,15 @@ proba('⭐⭐ D128 (④a): a második készülék felvétele — párosító kó
       const masodszor = await fut(T, 'keszulek', 'csatlakoz', kod, 'nev=telefon');
       // A csere: a laptop felismeri a telefonját, és a határig ad; a KÖVETKEZŐ csere elviszi, és a telefon átveszi. ⛔ (⑤ — a terep
       // lelete) kézi út nélkül: a felvett telefon az azonossága horgonyának szeletét is vállalja (a horgonyt a laptop írta) — a
-      // próba eddig kivisz/behoz-zal vitte át, és ezért nem vette észre, hogy a csere el sem küldte.
-      await csereKor(L, T, 8027, TEL);
-      await csereKor(L, T, 8031, TEL);
+      // próba eddig kivisz/behoz-zal vitte át, és ezért nem vette észre, hogy a csere el sem küldte. ⚠️ A csere „alap” kiszolgálással
+      // (mint a terepen és minden valódi készüléken): a próbák „mindent”-je kérés nélkül is odaadja a szeletet, és elfedi a hibát.
+      const TEL_ALAP = { ...TEL, KOINO_KISZOLGALAS: 'alap' };
+      await csereKor(L, T, 8027, TEL_ALAP);
+      await csereKor(L, T, 8031, TEL_ALAP);
       const tAtvetelek = (await readFile(join(T, A, 'esemenyek.jsonl'), 'utf8')).split('\n').filter((l) => l.includes('"tipus":"KeretAtvetel"'));
+      // ⭐⭐ (⑤) a vállalásom MINDEN útja ismeri a horgonyt (nem csak a cseréé — a raj, az előléptetés, a hirdetés is): a telefon
+      // láncán nincs belépés, mégis 1 azonosság-szeletet tart
+      const tVallalas = await fut(T, 'vallalas', TEL_ALAP);
       const lLista = await fut(L, 'kizar');
       const r = {
         rosszTitok: /titka nem stimmel/.test(rosszTitok) && !rosszUtan,
@@ -3807,11 +3814,12 @@ proba('⭐⭐ D128 (④a): a második készülék felvétele — párosító kó
           && !JSON.parse(await readFile(join(T, 'indulocimek.json'), 'utf8')).tarsak.some((c) => Number(c.port) === kodJson.c[0][1]),
         tKizar: /a kezelő készülékeden/.test(tKizar), tFelvesz: /csak a kezelő készüléked/.test(tFelvesz),
         masodszor: /már van azonosság/.test(masodszor),
-        keret: tAtvetelek.length === 1, lista: /telefon/.test(lLista)
+        keret: tAtvetelek.length === 1, lista: /telefon/.test(lLista),
+        vallalas: /\b1 azonosság-szelet/.test(tVallalas)
       };
       if (!Object.values(r).every(Boolean)) {
         process.stderr.write('    (④a-próba: ' + JSON.stringify({ r, lKi: lKi.slice(-500), tKi: tKi.slice(-400), rosszTitok: rosszTitok.slice(-200),
-          idegenKezelo: idegenKezelo.slice(-200) }) + ')\n');
+          idegenKezelo: idegenKezelo.slice(-200), tVallalas: tVallalas.slice(0, 300) }) + ')\n');
         return false;
       }
       return true;
@@ -3870,6 +3878,7 @@ proba('⭐⭐ D128 (④b): a „📱 Készülékeim” a lapon — a lista, a fe
     const L = await ujKeszulek();
     const T = await ujKeszulek();
     let fl = null;
+    let ft = null;
     try {
       await fut(L, 'koino', 'Lap-próba');
       fl = await feluletet(L, 7869);
@@ -3894,6 +3903,12 @@ proba('⭐⭐ D128 (④b): a „📱 Készülékeim” a lapon — a lista, a fe
       const kizar = await fl.hiv('/api/keszulek/kizar', { method: 'POST', body: JSON.stringify({ keszulek: tKesz }) });
       const utana = (await fl.hiv('/api/keszulekek')).adat.keszulekek.find((d) => d.k === tKesz);
       const sajatKizar = await fl.hiv('/api/keszulek/kizar', { method: 'POST', body: JSON.stringify({ keszulek: lista.sajat }) });
+      // ⭐⭐ (⑤ — a terep lelete) „Az adataid” űrlapot a lap magától csak a kezelőn kínálja fel: a felvett telefon nem tudhatja
+      // biztosan, van-e már profilom (a laptop írta, a csere később hozza) — `kezelo: false`; a laptopé `kezelo: true`
+      ft = await feluletet(T, 7871);
+      const tProfil = (await ft.hiv('/api/profil')).adat;
+      const lProfil = (await fl.hiv('/api/profil')).adat;
+      const meghivasJs = await fetch('http://127.0.0.1:7869/js/koinoMeghivas.js').then((v) => v.text());
       // a lap fájljai: a menüpont és az ablak
       const menu = await fetch('http://127.0.0.1:7869/js/foMenu.js').then((v) => v.text());
       const ablak = await fetch('http://127.0.0.1:7869/js/koinoKeszulekek.js').then((v) => v.status);
@@ -3907,15 +3922,19 @@ proba('⭐⭐ D128 (④b): a „📱 Készülékeim” a lapon — a lista, a fe
         felvett: allas?.allapot === 'kesz' && allas.felvett?.nev === 'telefon' && !!tKod && allas.felvett.ellenorzo === tKod,
         hatar: hatar.allapot === 200 && rosszHatar.allapot === 400 && telefon?.hatar === 1500 && telefon?.nev === 'telefon',
         kizar: kizar.allapot === 200 && utana?.kizarva === true && sajatKizar.allapot === 400,
-        lap: menu.includes("felirat: 'Készülékeim'") && ablak === 200 && css === 200
+        lap: menu.includes("felirat: 'Készülékeim'") && ablak === 200 && css === 200,
+        profil: tProfil?.kezelo === false && tProfil.mezok === null && lProfil?.belepve === true && lProfil.kezelo === true
+          && lProfil.mezok === null && /allapot\?\.belepve && allapot\.kezelo && allapot\.mezok === null/.test(meghivasJs)
       };
       if (!Object.values(r).every(Boolean)) {
-        process.stderr.write('    (④b-próba: ' + JSON.stringify({ r, allas, hatar: hatar.adat, kizar: kizar.adat, tKi: tKi.slice(-300) }) + ')\n');
+        process.stderr.write('    (④b-próba: ' + JSON.stringify({ r, allas, hatar: hatar.adat, kizar: kizar.adat, tKi: tKi.slice(-300), tProfil, lProfil })
+          + ')\n');
         return false;
       }
       return true;
     } finally {
       fl?.folyamat.kill();
+      ft?.folyamat.kill();
       for (const h of [L, T]) await rm(h, { recursive: true, force: true });
     }
   });

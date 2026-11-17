@@ -3232,6 +3232,9 @@ async function tagsagAllapotom() {
 /**
  * ⭐⭐ D122: A PROFILOM a lapnak — a legutóbbi profilom mezői (a darabjából), az előtöltés (a meghívóból: a meghívó által beírt
  * név), a koinó kötelező mezői, és hogy be vagyok-e lépve / tag vagyok-e (a lap ebből dönti el, felkínálja-e az űrlapot).
+ * ⭐⭐ D128 (⑤ — a terep lelete): `kezelo` — ez-e a kezelő készülékem. Az „Az adataid” űrlapot a lap MAGÁTÓL csak a kezelőn kínálja
+ * fel: egy felvett készülék nem tudhatja biztosan, van-e már profilom (a kezelő írta, és a csere csak később hozza el) — a
+ * terepen a telefon épp ebben a résben kérte. A felvett készüléken a menüből („eember beállítások”) ugyanúgy megadható.
  */
 async function profilomAllapota() {
   await tar.frissit?.();
@@ -3249,7 +3252,8 @@ async function profilomAllapota() {
     }
   }
   const tag = h ? (await tagE(tar, KOINO, h).catch(() => ({ igen: false }))).igen : false;
-  return { belepve: !!h, tag, mezok, elotoltes: { nev: m?.nev ?? null }, kotelezo, meghivoval: !!m };
+  return { belepve: !!h, kezelo: !azonossagKulcspar.kezeloNelkul, tag, mezok, elotoltes: { nev: m?.nev ?? null }, kotelezo,
+    meghivoval: !!m };
 }
 
 /** ⭐ D93/1: figyelmeztetés, ha a saját eseményem a tagságom miatt nem számít (D19: nem vád, hiány). */

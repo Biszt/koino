@@ -797,6 +797,33 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
   rossz nem megy; a kizárás — a saját nem megy; a menüpont, az ablak és a stílusa kiszolgálva) — 7 rontás; böngészőben ránézve (a lista,
   a QR, a gombok, a papír). ⚠️ Az indítók párosító ága próba nélkül (a terepen — ⑤).
 
+**9.15 A ⑤ terep — a laptop és Csaba telefonja, egy e-ember két készüléke** (2026-11-17):
+- **A menet.** A laptop (a kezelő) új koinót hozott létre („Terep — két készülék”), a telefon (Termux) a telepítő sor végére
+  tett párosító kóddal a hálózaton felkerült — az ellenőrző kód (VF4-KB9) a két gépen egyezett. A laptop a csere után a határig
+  (2000 — a keret 20%-a, KH1) átadta a keretet; a telefon a javított programmal **átvette** (a `KeretAtvetel` 19:02:00-kor, a laptop
+  19:03-kor megkapta), és a laptop listája kimondja: „telefon · határ: a keret 20%-a (alap) — a láncán 1 esemény”.
+- ⛔ **1. lelet — a társ portja** (2742884): a felvétel után a telefon a laptopot a párosító kapu (bezárult, véletlen) portjával
+  jegyezte fel, nem az őrjáratéval. Most a `PAROSITAS_KESZ` a kezelő őrjáratának portját is hozza (`kapuPort`).
+- ⛔ **2. lelet — a keret nem jutott át** (8766d3d). A laptop 18:27-kor aláírta az átadást, a telefon mégsem kapta meg. Az átadás az
+  e-ember AZONOSSÁG-szeletébe kerül (a horgonya szelete — itt a laptop írta koinó-születés), és a telefon ezt a szeletet nem vállalta: a
+  vállalás az azonosság-szeletet a SAJÁT láncom belépéséből ismeri, a felvett telefon láncában viszont nincs belépés (a horgonyt a
+  laptop írta); a koinó születését pedig a csere vállalása nem kapja meg (a raj `sajatVallalasa(null)`, a szeletek foka a tár
+  születéséből — a telefonon az első cserékig nincs). ⭐ A javítás: a vállalás az azonosságom horgonyát (`sajatHorgonyom` — bármelyik
+  készülékem írta) is az enyémnek veszi (`vallalas.js` `azonossagHorgonyai`; a `koino.js` mindkét hívása átadja).
+- ⛔ **3. lelet — a próba vakfoltja.** A ④a próba eleinte kivisz/behoz-zal vitte át az átadást, és a javítás után is zöld maradt a
+  javítás NÉLKÜL: a parancssor-próbák `KOINO_KISZOLGALAS=mindent` beállítással futnak, és a „mindent” kérés nélkül is odaadja a
+  szeletet — épp azt az utat kerüli el, amelyiken a terep elakadt. Most a ④a cseréi „alap” kiszolgálással mennek (mint minden valódi
+  készüléken), és a telefon `vallalas` parancsa kimondja: 1 azonosság-szelet. Három rontás: a `vallalas.js` és a `koino.js` két
+  hívása (a raj/előléptetés és a szeletek foka) — mindhárom bukik.
+- ⛔ **4. lelet — „Az adataid” a telefonon.** A telefon lapja (a frissítés után) felkínálta az első profil-űrlapot, pedig a laptopon
+  már volt profil: a `Profil` ugyanabban az azonosság-szeletben él, és a 2. lelet miatt nem jött át. A javítás után is marad egy rés
+  (az első csere hozza a horgonyt, a profilt csak a következő) — ⭐ ezért az űrlapot a lap MAGÁTÓL csak a kezelő készüléken kínálja
+  fel (`/api/profil` `kezelo`); a felvett készüléken a menüből („eember beállítások”) ugyanúgy megadható. Próba: ④b (a telefoné
+  `kezelo: false`, a laptopé `true`) és a D122 lap-próbája (a belépett készülék kezelő) — 1 rontás.
+- ⏸️ **Nyitott — a legutóbbi profil két készüléknél.** A program a „legutóbbi” profilt a lánc SORSZÁMA szerint választja
+  (`profilomAllapota`, `meghivottProfilja`) — egy készüléken ez jó, de a két készülék két külön lánc: ha a telefon (rövidebb lánc)
+  később ad meg profilt, a laptop régebbije maradhat érvényben. Javaslat: az aláírt idő szerint (`ido`), egyezésnél a sorszám.
+
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor
   NÉLKÜLE utazik: egy szelet a cserében, egy tagsági kísérő, egy kérelem vagy egy összegző válasza, egy döntési csomag, egy
