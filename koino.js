@@ -189,7 +189,7 @@ import {
 import { sajatKodCsomag, kodCsomagTarolasa, kodJegyzekOlvasasa, sajatMag, magJegyzeke } from './js/tar/kodCsomag.js';
 // ⭐⭐ D125: a telepítés a kártyáról — a kiírás, a csere helye, az előnézet rétegei
 import { kodKiirasa, telepitesHelye, valtozasRetegei } from './js/tar/programTelepites.js';
-import { szabalyokAlakiHibaja, ALAP_SZABALYOK, koinoSzabalyai, teljesSzabalyok } from './js/esemeny/koinoSzabalyok.js';
+import { szabalyokAlakiHibaja, ALAP_SZABALYOK, koinoSzabalyai, teljesSzabalyok, kezikonyvesE } from './js/esemeny/koinoSzabalyok.js';
 import { szuletesLanc, szuloTagsagaEpitese, bekapcsolodasokEllenorzese, koinoNezete, lancNezete } from './js/allapot/koinoLanc.js';
 import { koinoKepe } from './js/allapot/ketReteg.js';
 import { szetosztottPontok, elakadtPontok } from './js/allapot/allapotSzamitas.js';
@@ -2576,9 +2576,11 @@ async function sajatVallalasa(allapot) {
   const { lanc, szamit } = await sajatLancomNezete();
   // ⭐⭐ D128 (⑤ — a terep lelete): az azonosságom horgonya (bármelyik készülékem írta) a vállalásom része
   const horgony = await sajatHorgonyom();
+  const szabalyok = await koinomSzabalyai(kornyezet);
   return vallalasSzamitasa(lanc, { koinoSzuletes: allapot?.koino?.azonosito ?? null, ...kifutasBeallitas(),
     azonossagHorgonyai: horgony ? [horgony] : [],
-    tudatpontKeret: (await koinomSzabalyai(kornyezet)).tudatpontKeret, koino: KOINO, szamit });   // ⭐ D118/2: a koinó kerete
+    kezikonyv: kezikonyvesE(szabalyok),   // ⭐⭐ D129 (MA4 (B)): a kézikönyv szelete mindenkié
+    tudatpontKeret: szabalyok.tudatpontKeret, koino: KOINO, szamit });   // ⭐ D118/2: a koinó kerete
 }
 
 /**
@@ -5888,9 +5890,11 @@ async function ketFokAllapota(allapot = null) {
   const szuletes = allapot?.koino?.azonosito ?? (await koinoSzuletese())?.azonosito ?? null;
   const sajatLancom = await sajatLancomNezete();
   const horgony = await sajatHorgonyom();   // ⭐⭐ D128 (⑤): az azonosságom horgonya (bármelyik készülékem írta)
+  const szabalyok = await koinomSzabalyai(kornyezet);
   const vallalas = vallalasSzamitasa(sajatLancom.lanc,
-    { koinoSzuletes: szuletes, ...kifutasBeallitas(), tudatpontKeret: (await koinomSzabalyai(kornyezet)).tudatpontKeret,
+    { koinoSzuletes: szuletes, ...kifutasBeallitas(), tudatpontKeret: szabalyok.tudatpontKeret,
       azonossagHorgonyai: horgony ? [horgony] : [],
+      kezikonyv: kezikonyvesE(szabalyok),   // ⭐⭐ D129 (MA4 (B)): a kézikönyv szelete mindenkié
       koino: KOINO, szamit: sajatLancom.szamit });   // ⭐ D118 (⑤a): a hozott pontjaimmal
   const tarolo = osszegzesTarolo(KOINO);
   const t = await tarolo.olvas();
@@ -5900,7 +5904,8 @@ async function ketFokAllapota(allapot = null) {
     meretek.set(k, Math.max(jegyzek.get(k) ?? 0, t.szeletek[k]?.fok === 'osszegzo' ? (t.szeletek[k].darab ?? 0) : 0));
   }
   const fokok = szeletFokai({ szeletek: vallalas.szeletek, meretek,
-    mindigTeljes: [...vallalas.azonossag, vallalas.koinoSzuletes].filter(Boolean),
+    // ⭐⭐ D129: a kézikönyv szelete is mindig egészében (a pont nélkül megmaradó módosítás eseményei nem összegezhetők el)
+    mindigTeljes: [...vallalas.azonossag, vallalas.koinoSzuletes, vallalas.kezikonyv].filter(Boolean),
     elozo: new Map(Object.entries(t.szeletek).map(([k, x]) => [k, x?.fok])),
     mindent: (await kiszolgalasBeallitas()).mindent, kuszob: KETFOK.kuszob, vissza: KETFOK.vissza });
   let valtozott = false;

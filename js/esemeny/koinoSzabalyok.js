@@ -52,6 +52,27 @@ export const ALAP_SZABALYOK = Object.freeze({
 });
 
 // ===================================
+// ⭐⭐ D129: A KÉZIKÖNYV SZABÁLYA — CSAK AZ ÚJ SZÜLETÉSBEN
+// ===================================
+//
+// A kézikönyv (a rendszer-entitások: az ⓘ jelek magyarázatai — `rendszerEntitas.js`) a koinó szabálya: ha a születés `kezikonyv`
+// mezőt visz, a koinóban a kézikönyv-entitások léteznek (a D14 alól kivételek), és a saját alap-küszöbükkel döntenek. ⛔ Az
+// `ALAP_SZABALYOK` NEM kapja meg — a mező nélküli (régi) születés így kézikönyv NÉLKÜLI marad (a „mai értékek soha nem
+// változnak”): ez az ELSŐ szabály, aminek a HIÁNYA is jelent valamit. Az új születésbe a `teljesSzabalyok` írja.
+//
+// ⭐ MA8 (B) (Csaba, 2026-11-19: „rendben”): ugyanaz a szabály (a pont-tartók döntenek), de óvatosabb alap-küszöbbel — legalább
+// 3 nap döntési idő, hogy mások észrevehessék és csatlakozhassanak (a mai alap-küszöbbel egy ember 1 ponttal, egyedül, 1 mp alatt
+// átírhatná). A küszöböt a tulajdonosok érték javaslattal ugyanúgy megváltoztathatják, mint bármely gondolatét.
+//
+// ⛔ EZEK A SZÁMOK SEM VÁLTOZNAK: egy részleges (kézzel írt) `kezikonyv` mező a hiányzókat innen veszi.
+export const KEZIKONYV_ALAP_KUSZOBOK = Object.freeze({
+  elfogadasiKuszob: 51,
+  reszveteliKuszob: 0,
+  minimumDontesiIdo: 259200,   // másodperc: 3 nap
+  maximumDontesiIdo: 604800    // másodperc: 7 nap
+});
+
+// ===================================
 // A HATÁROK — amit a kapu enged
 // ===================================
 //
@@ -74,6 +95,25 @@ const KUSZOB_HATAROK = {
 const egeszKozte = (x, [also, felso]) => Number.isSafeInteger(x) && x >= also && x <= felso;
 
 /**
+ * Egy küszöb-objektum alaki hibája (a koinó alap-küszöbei és a kézikönyvé ugyanígy): csak ismert küszöbök, a határokon belül, és
+ * a kiegészített alakban a legkisebb döntési idő nem nagyobb a legnagyobbnál.
+ * @param {*} v
+ * @param {Object} alap - amivel a hiányzókat kiegészítjük
+ * @param {string} mi - a hibaüzenet alanya
+ * @returns {string|null}
+ */
+function kuszobokAlakiHibaja(v, alap, mi) {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return mi + ' egy objektum';
+  for (const [kk, vv] of Object.entries(v)) {
+    if (!KUSZOB_HATAROK[kk]) return 'ismeretlen küszöb a koinó szabályaiban: ' + kk;
+    if (!egeszKozte(vv, KUSZOB_HATAROK[kk])) return 'a(z) ' + kk + ' küszöb a határon kívül';
+  }
+  const k2 = { ...alap, ...v };
+  if (k2.minimumDontesiIdo > k2.maximumDontesiIdo) return 'a legkisebb döntési idő nagyobb a legnagyobbnál';
+  return null;
+}
+
+/**
  * A születés `szabalyok` mezőjének alakja — a kapu kérdezi. Csak ismert kulcsok, egész számok a határokon belül; a
  * küszöböknél a legkisebb döntési idő nem nagyobb a legnagyobbnál.
  * @returns {string|null} a hiba szövege, vagy null
@@ -83,13 +123,18 @@ export function szabalyokAlakiHibaja(sz) {
   if (!sz || typeof sz !== 'object' || Array.isArray(sz)) return 'a koinó szabályai egy objektum';
   for (const [k, v] of Object.entries(sz)) {
     if (k === 'alapKuszobok') {
-      if (!v || typeof v !== 'object' || Array.isArray(v)) return 'a küszöbök alapértékei egy objektum';
-      for (const [kk, vv] of Object.entries(v)) {
-        if (!KUSZOB_HATAROK[kk]) return 'ismeretlen küszöb a koinó szabályaiban: ' + kk;
-        if (!egeszKozte(vv, KUSZOB_HATAROK[kk])) return 'a(z) ' + kk + ' küszöb a határon kívül';
+      const h = kuszobokAlakiHibaja(v, ALAP_SZABALYOK.alapKuszobok, 'a küszöbök alapértékei');
+      if (h) return h;
+      continue;
+    }
+    // ⭐⭐ D129: a kézikönyv szabálya — egy objektum, egyetlen ismert mezővel (a kézikönyv alap-küszöbe; hiányozhat).
+    if (k === 'kezikonyv') {
+      if (!v || typeof v !== 'object' || Array.isArray(v)) return 'a kézikönyv szabálya egy objektum';
+      for (const kk of Object.keys(v)) if (kk !== 'alapKuszobok') return 'ismeretlen mező a kézikönyv szabályában: ' + kk;
+      if (v.alapKuszobok !== undefined) {
+        const h = kuszobokAlakiHibaja(v.alapKuszobok, KEZIKONYV_ALAP_KUSZOBOK, 'a kézikönyv alap-küszöbei');
+        if (h) return h;
       }
-      const k2 = { ...ALAP_SZABALYOK.alapKuszobok, ...v };
-      if (k2.minimumDontesiIdo > k2.maximumDontesiIdo) return 'a legkisebb döntési idő nagyobb a legnagyobbnál';
       continue;
     }
     if (!HATAROK[k]) return 'ismeretlen szabály a koinó születésében: ' + k;
@@ -105,24 +150,39 @@ export function szabalyokAlakiHibaja(sz) {
  * @returns {Object} sima (nem fagyasztott) objektum — az esemény adata
  */
 export function teljesSzabalyok(megadott = {}) {
-  const { alapKuszobok, ...tobbi } = megadott ?? {};
+  const { alapKuszobok, kezikonyv, ...tobbi } = megadott ?? {};
   const { alapKuszobok: alapK, ...alap } = ALAP_SZABALYOK;
-  return { ...alap, ...tobbi, alapKuszobok: { ...alapK, ...(alapKuszobok ?? {}) } };
+  // ⭐⭐ D129: az új születés a kézikönyv szabályát is viszi (az `ALAP_SZABALYOK`-ban nincs — a régi születés kézikönyv nélküli)
+  return { ...alap, ...tobbi, alapKuszobok: { ...alapK, ...(alapKuszobok ?? {}) },
+    kezikonyv: { alapKuszobok: { ...KEZIKONYV_ALAP_KUSZOBOK, ...(kezikonyv?.alapKuszobok ?? {}) } } };
 }
 
 /**
  * A koinó szabályai a születéséből — a mai értékekkel kiegészítve (ami nincs megadva, az a mai). A hiányzó vagy régi
  * születés: a mai értékek.
  * @param {Object|null} szuletes - a koinó `KoinoLetrehozas` eseménye
+ * ⭐⭐ D129: ha a születés a kézikönyv szabályát viszi, a `kezikonyv` mező (`{ alapKuszobok }`, a hiányzók a
+ * `KEZIKONYV_ALAP_KUSZOBOK`-ból); ha nem, a mező NINCS — a koinóban nincs kézikönyv.
  * @returns {{tudatpontKeret: number, kategoriaKorlat: number, tanusitasKell: number, felhatalmazasKell: number,
- *   alapKuszobok: Object}}
+ *   alapKuszobok: Object, kezikonyv?: {alapKuszobok: Object}}}
  */
 export function koinoSzabalyai(szuletes) {
   const sz = szuletes?.tipus === 'KoinoLetrehozas' ? szuletes.adat?.szabalyok : undefined;
   if (!sz || szabalyokAlakiHibaja(sz)) return ALAP_SZABALYOK;
   return Object.freeze({
     ...ALAP_SZABALYOK,
-    ...Object.fromEntries(Object.entries(sz).filter(([k]) => k !== 'alapKuszobok')),
-    alapKuszobok: Object.freeze({ ...ALAP_SZABALYOK.alapKuszobok, ...(sz.alapKuszobok ?? {}) })
+    ...Object.fromEntries(Object.entries(sz).filter(([k]) => k !== 'alapKuszobok' && k !== 'kezikonyv')),
+    alapKuszobok: Object.freeze({ ...ALAP_SZABALYOK.alapKuszobok, ...(sz.alapKuszobok ?? {}) }),
+    ...(sz.kezikonyv ? { kezikonyv: Object.freeze({
+      alapKuszobok: Object.freeze({ ...KEZIKONYV_ALAP_KUSZOBOK, ...(sz.kezikonyv.alapKuszobok ?? {}) }) }) } : {})
   });
+}
+
+/**
+ * ⭐⭐ D129: van-e a koinóban kézikönyv (a születése viszi-e a szabályát).
+ * @param {Object} szabalyok - a `koinoSzabalyai` eredménye
+ * @returns {boolean}
+ */
+export function kezikonyvesE(szabalyok) {
+  return !!szabalyok?.kezikonyv;
 }

@@ -29,6 +29,8 @@ import { szovegHivatkozasE } from './szovegDarab.js';
 import { tanusitvanyAlakiHibaja, tanusitvanyEllenorzese, kizarasAlakiHibaja } from '../kulcs/keszulek.js';
 import { szuletesAlakiHibaja, lancBejegyzesAlakiHibaja, KULCSCSERE_KORLAT, helyreallitasJavaslatAlakiHibaja, HELYREALLITAS_BEJEGYZES }
   from '../kulcs/azonossag.js';
+// ⭐⭐ D129: a rendszer-entitások (a kézikönyv) nevei — a kapu az alakjukat nézi, a bejelentés a kézikönyv gyökeréhez is viszi.
+import { rendszerNevekAlakiHibaja, esemenyRendszerNevei, KEZIKONYV_GYOKER_AZONOSITO } from './rendszerEntitas.js';
 
 const ALGORITMUS = 'Ed25519';
 
@@ -247,6 +249,9 @@ export function bejelentesHelyei(e) {
     // a nagy szeletű rész döntését).
     hozza(e.adat?.entitas);
   }
+  // ⭐⭐ D129: ami kézikönyv-entitásra mutat (a nevét hozza), az a kézikönyv GYÖKERÉNEK szeletébe is bejelentődik — EGY szelet
+  // hordja az egész kézikönyvet, és azt mindenki tartja (MA4 (B): a pont nélkül megmaradó módosítást is őrizni kell).
+  if (esemenyRendszerNevei(e).length) hozza(KEZIKONYV_GYOKER_AZONOSITO);
   return [...helyek].sort();
 }
 
@@ -740,6 +745,12 @@ export function alakiHiba(esemeny) {
     if (szulo !== undefined && szulo !== null && !azonositoAlaku(szulo)) {
       return 'a gondolat szulo-ja csak azonosító vagy null lehet';
     }
+  }
+  // ----- ⭐⭐ D129: A RENDSZER-ENTITÁSOK NEVEI — bármely esemény hozhatja (ami kézikönyv-entitásra mutat) -----
+  // A mag a névből ellenőrzi az azonosítót és ebből hozza létre az entitást (`rendszerEntitas.js`); itt az alak.
+  {
+    const hiba = rendszerNevekAlakiHibaja(esemeny.adat?.rendszer);
+    if (hiba) return hiba;
   }
   // ----- ⭐⭐ D119 (①a): A KOINO-VERZIÓ — legfelső szintű, a gyermek születését és a kódját hozza -----
   // Itt az alak (a beágyazott születésé is); az aláírást és a tagsági bizonyítékot a kapu nézi, a szülő születésével

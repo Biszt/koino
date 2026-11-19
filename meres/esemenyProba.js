@@ -289,9 +289,12 @@ proba('⭐ D118/2 (①b): az új születésbe írt szabályok TELJESEK — a meg
     const ures = teljesSzabalyok();
     const kulcsok = (o) => Object.keys(o).sort().join(',');
     t.alapKuszobok.reszveteliKuszob = 7;   // sima objektum (az esemény adata) — a mai értékeket nem érinti
+    // ⭐⭐ D129: az új születés a mai értékek MELLETT a kézikönyv szabályát is viszi — az az első szabály, ami az `ALAP_SZABALYOK`-ban
+    // nincs (a régi, mező nélküli születés kézikönyv nélküli marad; `kezikonyvProba.js`).
+    const { kezikonyv: _k, ...uresAlap } = ures;
     return t.tudatpontKeret === 500 && t.alapKuszobok.elfogadasiKuszob === 66 && t.kategoriaKorlat === ALAP_SZABALYOK.kategoriaKorlat
-      && kulcsok(t) === kulcsok(ALAP_SZABALYOK) && kulcsok(t.alapKuszobok) === kulcsok(ALAP_SZABALYOK.alapKuszobok)
-      && JSON.stringify(ures) === JSON.stringify(ALAP_SZABALYOK) && szabalyokAlakiHibaja(ures) === null
+      && kulcsok(t) === kulcsok({ ...ALAP_SZABALYOK, kezikonyv: null }) && kulcsok(t.alapKuszobok) === kulcsok(ALAP_SZABALYOK.alapKuszobok)
+      && JSON.stringify(uresAlap) === JSON.stringify(ALAP_SZABALYOK) && !!ures.kezikonyv && szabalyokAlakiHibaja(ures) === null
       && ALAP_SZABALYOK.alapKuszobok.reszveteliKuszob === 0
       && (await esemenyEllenorzese(await esemenyLetrehozasa({ ...szuletesLeiras, adat: { ...szuletesLeiras.adat, szabalyok: t } },
         kulcspar))).rendben === true;

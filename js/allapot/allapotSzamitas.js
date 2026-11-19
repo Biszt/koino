@@ -32,8 +32,10 @@
 import { szabalyokErvenyesitese, erintettek, elsoErintett, javaslatEntitasai } from './szabalyok.js';
 import { csomagokKibontasa } from './dontesiCsomag.js';
 import { koinoSzuleteseListabol, lancKulcsa, kesobbiAllitas } from '../esemeny/esemeny.js';
-import { koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
+import { koinoSzabalyai, kezikonyvesE } from '../esemeny/koinoSzabalyok.js';
 import { kizartakSzurese } from './kizaras.js';   // ⭐⭐ D128 (①d): a kizárt készülék eseményei
+// ⭐⭐ D129: a rendszer-entitások (a kézikönyv) — a nevükből az azonosító és a hely a fában
+import { esemenyRendszerNevei, nevEsFelmenoi, rendszerAzonosito, szuloNeve } from '../esemeny/rendszerEntitas.js';
 
 // ===================================
 // A BEMENET RENDEZÉSE — a determinizmus EGYETLEN forrása
@@ -440,6 +442,30 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
     });
   }
 
+  // ----- ⭐⭐ D129: A KÉZIKÖNYV — A RENDSZER-ENTITÁSOK, SZÜLETÉSI ESEMÉNY NÉLKÜL -----
+  // Csaba: „ha létrehozzuk azt, hogy az összes i betü tartalmát, a rendszer létrehozza, strukturában, és az e-emberek
+  // javaslatokkal tudják módosítani.” A kézikönyv-entitásnak nincs születése: LÉTEZIK, ha egy (számító) esemény rá mutat — a
+  // nevét az esemény hozza (`adat.rendszer`), az azonosítót és a szülőt a névből számoljuk (`rendszerEntitas.js`), és a
+  // felmenői is létrejönnek (a fa összefüggő, az ágazati pont a kézikönyv gyökeréig folyik). ⛔ A szövege itt NINCS (null): az
+  // alap-tartalmat a mag nem kapja meg (különben minden új ⓘ „más számítás” lenne — D123); a lap rajzolja, amíg a közösség
+  // módosítással meg nem adja. Csak a kézikönyves koinóban (a születése viszi a szabályát — `koinoSzabalyok.js`).
+  // A sorrend a nevek szerinti (determinisztikus), a születéssel bírók után.
+  if (kezikonyvesE(koinoAdatok.szabalyok)) {
+    const nevek = new Set();
+    for (const e of szamitok) for (const n of esemenyRendszerNevei(e)) for (const f of nevEsFelmenoi(n)) nevek.add(f);
+    for (const nev of [...nevek].sort()) {
+      const az = rendszerAzonosito(nev);
+      if (entitasok.has(az)) continue;
+      const sz = szuloNeve(nev);
+      entitasok.set(az, {
+        azonosito: az, tipus: 'Gondolat', cim: null, szoveg: null, ikon: null, gondolatTipus: null, kategoriak: [],
+        szulo: sz === null ? null : rendszerAzonosito(sz), meret: 0,
+        rendszer: nev,                                  // a kézikönyv-név (a lap ebből tudja, melyik ⓘ)
+        szerzo: null, letrehozva: null, osszesPont: 0, hozzajarulok: new Map(), kuszobok: null
+      });
+    }
+  }
+
   // ----- TUDATPONTOK BEÍRÁSA -----
   // ⭐ MENET KÖZBEN A KIOSZTÁSI FŐKÖNYVET IS VEZETJÜK — az entitás létezésétől
   // függetlenül. Ez a D42 bemondott összegének forrása (lásd `szetosztottPontok`).
@@ -520,6 +546,9 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
 
   const elfelejtettek = [];
   for (const [azonosito, entitas] of entitasok) {
+    // ⭐⭐ D129 (MA4 (B) — Csaba, 2026-11-19): a kézikönyv-entitást a koinó NEM felejti el — a közösség módosítása pont nélkül
+    // is megmarad (a kézikönyv szeletét ezért mindenki tartja — `vallalas.js`).
+    if (entitas.rendszer !== undefined) continue;
     if (entitas.osszesPont <= 0) {
       // ⭐⭐ B/2 (D75/4): A D14 CSAK A TARTÓS TÁRRA VONATKOZIK. Ha az entitást csak az átmeneti tárból
       // ismerjük (pl. a szülője köréből jött a születése), és egyetlen pont-eseményét sem láttuk, akkor a

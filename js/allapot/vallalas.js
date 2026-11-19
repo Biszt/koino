@@ -28,6 +28,8 @@
 
 import { pontEsemenyMerlege } from './szabalyok.js';
 import { esemenyKoinoja } from '../esemeny/esemeny.js';   // ⭐ D118 (⑤a)
+// ⭐⭐ D129: a kézikönyv gyökerének szelete (az egész kézikönyv ebbe jelentődik be)
+import { KEZIKONYV_GYOKER_AZONOSITO } from '../esemeny/rendszerEntitas.js';
 
 /** ⭐ D104: a pont levétele után ennyi ideig tartom még a szeletet (a többiek későbbi változásaiért). */
 export const KIFUTAS = 24 * 3600 * 1000;
@@ -48,8 +50,10 @@ export const KIFUTAS = 24 * 3600 * 1000;
  * @param {Array<string>} [beallitas.azonossagHorgonyai] - ⭐⭐ D128 (⑤ — a terep lelete): az AZONOSSÁGOM horgonya(i), akkor is, ha egy
  *        MÁSIK készülékem írta (a laptop lépett be, a telefon felvett készülék): az azonosság szelete a telefoné is — különben a
  *        csere a szeletbe írt eseményeket (a keret átadását) nem hozza el neki
+ * @param {boolean} [beallitas.kezikonyv] - ⭐⭐ D129 (MA4 (B)): a koinóban van-e kézikönyv (a születése viszi a szabályát) — ha
+ *        igen, a kézikönyv gyökerének szeletét MINDENKI tartja: a pont nélkül megmaradó módosítást is valakinek őriznie kell
  * @returns {{szeletek: Set<string>, pontok: Map<string, number>, azonossag: Array<string>,
- *            koinoSzuletes: string|null, kifuto: Map<string, number>}} a `kifuto`: a pont nélkül, de még kifutásban
+ *            koinoSzuletes: string|null, kezikonyv: string|null, kifuto: Map<string, number>}} a `kifuto`: a pont nélkül, de még kifutásban
  *            tartott szeletek → mikor jár le a kifutásuk
  */
 export function vallalasSzamitasa(sajatEsemenyek, beallitas = {}) {
@@ -87,6 +91,9 @@ export function vallalasSzamitasa(sajatEsemenyek, beallitas = {}) {
   for (const a of azonossag) szeletek.add(a);
   const koinoSzuletes = typeof beallitas.koinoSzuletes === 'string' ? beallitas.koinoSzuletes : null;
   if (koinoSzuletes) szeletek.add(koinoSzuletes);
+  // ⭐⭐ D129 (MA4 (B)): a kézikönyv szelete mindenkié (mint a koinó születése)
+  const kezikonyv = beallitas.kezikonyv === true ? KEZIKONYV_GYOKER_AZONOSITO : null;
+  if (kezikonyv) szeletek.add(kezikonyv);
   // ⭐ D104: a kifutó szeletek — a pont levétele után még `kifutas` ideig.
   const most = Number.isFinite(beallitas.most) ? beallitas.most : Date.now();
   const kifutas = Number.isFinite(beallitas.kifutas) && beallitas.kifutas >= 0 ? beallitas.kifutas : KIFUTAS;
@@ -96,5 +103,5 @@ export function vallalasSzamitasa(sajatEsemenyek, beallitas = {}) {
     szeletek.add(kulcs);
     kifuto.set(kulcs, ido + kifutas);
   }
-  return { szeletek, pontok: allas.pontok, azonossag, koinoSzuletes, kifuto };
+  return { szeletek, pontok: allas.pontok, azonossag, koinoSzuletes, kezikonyv, kifuto };
 }

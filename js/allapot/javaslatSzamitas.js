@@ -35,6 +35,8 @@ import { median } from './allapotSzamitas.js';
 import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
 import { koinoSzuleteseListabol, kesobbiAllitas, lancKulcsa } from '../esemeny/esemeny.js';
 import { erintettek, javaslatEntitasai, szavazatSajatPontjai } from './szabalyok.js';
+// ⭐⭐ D129: a kézikönyv-entitások (a nevükből az azonosító) — a saját, óvatosabb alap-küszöbükhöz
+import { esemenyRendszerNevei, nevEsFelmenoi, rendszerAzonosito } from '../esemeny/rendszerEntitas.js';
 
 // ===================================
 // ALAPÉRTELMEZETT KÜSZÖBÖK
@@ -381,7 +383,7 @@ function kulonvaloOldal(szavazatok, igenyek, fajta) {
 }
 
 function reszekSzamitasa(javaslatEsemeny, kik, szavazatok, tudatpontok, ertekJavaslatEsemenyek,
-                         javaslatPontok = [], lezarasRogzitve = null, alapKuszobok = ALAP_KUSZOBOK) {
+                         javaslatPontok = [], lezarasRogzitve = null, alapKuszobok = ALAP_KUSZOBOK, kezikonyv = null) {
   const entitasok = kik.map((r) => r.entitas);
   const sor = idorendbe([...szavazatok, ...tudatpontok, ...ertekJavaslatEsemenyek, ...javaslatPontok]);
 
@@ -459,7 +461,8 @@ function reszekSzamitasa(javaslatEsemeny, kik, szavazatok, tudatpontok, ertekJav
       if ((tulajdonosok.get(entitas).get(szerzo)?.pont ?? 0) > 0) ervenyesek.push(bejegyzes.ertekek);
     }
 
-    const eredmeny = { ...alapKuszobok };   // ⭐ D118/2: a koinó alapértékei (a születéséből)
+    // ⭐ D118/2: a koinó alapértékei (a születéséből); ⭐⭐ D129 (MA8 (B)): a kézikönyv-entitásé a kézikönyv óvatosabb alap-küszöbe
+    const eredmeny = { ...(kezikonyv?.azonositok.has(entitas) ? kezikonyv.kuszobok : alapKuszobok) };
     for (const nev of KUSZOB_NEVEK) {
       const szamok = ervenyesek
         .map((ertekek) => ertekek?.[nev])
@@ -721,7 +724,7 @@ function hatalyokSzamitasa(esemenyek) {
  */
 /** Egy javaslat csoport-számítása a begyűjtött bemenetből (a `javaslatokSzamitasa` és a lezárási pillanatkép közös útja). */
 function csoportSzamitasa(e, kik, { szavazatok, tudatpontok, ertekJavaslatok }, lezarasRogzitve = null,
-                          alapKuszobok = ALAP_KUSZOBOK) {
+                          alapKuszobok = ALAP_KUSZOBOK, kezikonyv = null) {
   const erintettAzonositok = kik.map((r) => r.entitas);
   return reszekSzamitasa(
     e,
@@ -732,8 +735,24 @@ function csoportSzamitasa(e, kik, { szavazatok, tudatpontok, ertekJavaslatok }, 
     // ⭐ D85/2: a javaslat-entitás(ok) pontjai — a szavazati jog második feltétele.
     javaslatEntitasai(e).flatMap((je) => tudatpontok.get(je.azonosito) ?? []),
     lezarasRogzitve,
-    alapKuszobok
+    alapKuszobok,
+    kezikonyv
   );
+}
+
+/**
+ * ⭐⭐ D129 (MA8 (B)): A KÉZIKÖNYV a döntéshez — a kézikönyv-entitások azonosítói (minden esemény neveiből és a felmenőikből,
+ * ugyanúgy, mint az állapot — `allapotSzamitas.js`) és az óvatosabb alap-küszöbük. ⛔ NEM a javaslat saját állításából: egy
+ * javaslattevő a név elhagyásával különben megkerülhetné a küszöböt. A kézikönyv nélküli koinóban null.
+ * @param {Array<Object>} esemenyek
+ * @param {Object|null|undefined} kuszobok - a koinó kézikönyv-szabályának alap-küszöbei
+ * @returns {{azonositok: Set<string>, kuszobok: Object}|null}
+ */
+function kezikonyvDonteshez(esemenyek, kuszobok) {
+  if (!kuszobok) return null;
+  const nevek = new Set();
+  for (const e of esemenyek) for (const n of esemenyRendszerNevei(e)) for (const f of nevEsFelmenoi(n)) nevek.add(f);
+  return { azonositok: new Set([...nevek].map(rendszerAzonosito)), kuszobok };
 }
 
 /**
@@ -742,14 +761,16 @@ function csoportSzamitasa(e, kik, { szavazatok, tudatpontok, ertekJavaslatok }, 
  * @returns {{lezarasIdeje: number, reszek: Array<Object>, pillanatkepek: Map<string, Object>}}
  */
 export function lezarasiPillanatkep(esemenyek, javaslatEsemeny,
-  alapKuszobok = koinoSzabalyai(koinoSzuleteseListabol(esemenyek)).alapKuszobok) {
+  alapKuszobok = koinoSzabalyai(koinoSzuleteseListabol(esemenyek)).alapKuszobok,
+  kezikonyvKuszobok = koinoSzabalyai(koinoSzuleteseListabol(esemenyek)).kezikonyv?.alapKuszobok) {
   const gyujtott = {
     szavazatok: szavazatokGyujtese(esemenyek),
     tudatpontok: tudatpontokGyujtese(esemenyek),
     ertekJavaslatok: ertekJavaslatokGyujtese(esemenyek)
   };
   const { reszek, lezarasIdeje, pillanatkepek, dontesiIdo, kuszobTeljesul } =
-    csoportSzamitasa(javaslatEsemeny, erintettek(javaslatEsemeny.adat), gyujtott, null, alapKuszobok);
+    csoportSzamitasa(javaslatEsemeny, erintettek(javaslatEsemeny.adat), gyujtott, null, alapKuszobok,
+      kezikonyvDonteshez(esemenyek, kezikonyvKuszobok));
   return { reszek, lezarasIdeje, pillanatkepek, dontesiIdo, kuszobTeljesul };
 }
 
@@ -771,6 +792,9 @@ export function javaslatokSzamitasa(esemenyek, allapot, most = Date.now(), beall
   // ⭐⭐ D118/2 (①b): a küszöbök alapértékei a koinó születéséből (az állapotban, vagy a bemenetben).
   const alapKuszobok = beallitas.alapKuszobok ?? allapot?.koino?.szabalyok?.alapKuszobok
     ?? koinoSzabalyai(koinoSzuleteseListabol(esemenyek)).alapKuszobok;
+  // ⭐⭐ D129 (MA8 (B)): a kézikönyv-entitások azonosítói és az óvatosabb alap-küszöbük (a kézikönyv nélküli koinóban null)
+  const kezikonyv = kezikonyvDonteshez(esemenyek, (allapot?.koino?.szabalyok
+    ?? koinoSzabalyai(koinoSzuleteseListabol(esemenyek))).kezikonyv?.alapKuszobok);
   console.log('javaslatokSzamitasa - KEZDÉS', { esemenyDarab: esemenyek.length });
 
   const szavazatok = szavazatokGyujtese(esemenyek);
@@ -807,7 +831,8 @@ export function javaslatokSzamitasa(esemenyek, allapot, most = Date.now(), beall
     const reszOsszegzese = (az) => osszegzesek.get(e.azonosito + '|' + az) ?? null;
     const osszegzettek = erintettAzonositok.map(reszOsszegzese);
     const rogzitett = osszegzettek.find(Boolean)?.osszegzes.lezaras ?? null;
-    const csoport0 = csoportSzamitasa(e, kik, { szavazatok, tudatpontok, ertekJavaslatok }, rogzitett, alapKuszobok);
+    const csoport0 = csoportSzamitasa(e, kik, { szavazatok, tudatpontok, ertekJavaslatok }, rogzitett, alapKuszobok,
+      kezikonyv);
     if (rogzitett !== null) {
       csoport0.reszek = csoport0.reszek.map((r, i) => {
         const o = osszegzettek[i];
