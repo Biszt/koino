@@ -1,0 +1,40 @@
+{
+  "fajta": "koino-kezikonyv-1",
+  "bejegyzesek": [
+    {
+      "nev": "kezikonyv",
+      "cim": "A koinó kézikönyve",
+      "szoveg": "Ez a kézikönyv a koinó minden részét elmagyarázza: a menüt, az ablakokat, az alsó sávot, a fejlécet, a kártyákat, és a koinó fogalmait. Minden ⓘ jel mögött egy itteni magyarázat áll.\n\nA kézikönyvet a program hozza, de a koinó közössége alakítja: ha egy magyarázat nem érthető, tegyél rá tudatpontot, és javasolj jobbat. A javaslatról a magyarázaton tudatpontot tartók döntenek, legalább 3 nap alatt, hogy mások is észrevehessék és csatlakozhassanak.\n\nA kézikönyv nem tűnik el akkor sem, ha senki nem tart rajta tudatpontot: a közösség módosításai megmaradnak, és minden tag készüléke őrzi őket."
+    },
+    {
+      "nev": "kezikonyv/menu",
+      "cim": "A menü",
+      "szoveg": "A menü a lap bal alsó sarkában nyílik (☰). Innen éred el a nézeteket, a koinóidat, a felderítést, az értesítéseket, az új gondolat, kategória és gondolattípus létrehozását, és a fiókod dolgait (a meghívóidat, a készülékeidet, a tudatpontjaidat, az adataidat). Minden pontja mellett egy ⓘ jel magyarázza, mire jó."
+    },
+    {
+      "nev": "kezikonyv/ablak",
+      "cim": "Az ablakok",
+      "szoveg": "Az ablakok (más néven modálok) a lap fölött nyílnak meg, amikor egy dolgot részletesen megnézel vagy szerkesztesz: egy gondolatot, egy javaslatot, a tudatpontjaidat, a keresést, a készülékeidet. Minden ablak minden része mellett egy ⓘ jel magyarázza, mit látsz és mit tehetsz ott."
+    },
+    {
+      "nev": "kezikonyv/also-sav",
+      "cim": "Az alsó sáv",
+      "szoveg": "Az alsó sáv a lap alján mindig látszik: a neved, a szabad tudatpontjaid, a koinó számai (hány e-ember, gondolat, kategória, gondolattípus, javaslat, egyezmény van), és hogy mikor cserélt utoljára a készüléked a társaival. Minden része mellett egy ⓘ jel magyarázza, mit jelent."
+    },
+    {
+      "nev": "kezikonyv/fejlec",
+      "cim": "A fejléc",
+      "szoveg": "A fejléc a lap tetején áll: a koinóid terén itt váltasz a pakli és a tér között, itt rendezed a koinóidat, és itt csatlakozol egy új koinóhoz vagy veszel fel társat. Belépéskor itt látod, hol tart a belépésed."
+    },
+    {
+      "nev": "kezikonyv/kartya",
+      "cim": "A kártyák",
+      "szoveg": "A kártya a koinó egy entitása a pakliban: egy gondolat, egy javaslat, egy egyezmény, egy kategória vagy egy gondolattípus. A kártyán látod a címét, a rá tett tudatpontokat, és a füleit (részletek, javaslatok, szavazás). A kártya keretének és jeleinek is jelentése van — mindegyik mellett egy ⓘ jel magyarázza."
+    },
+    {
+      "nev": "kezikonyv/fogalom",
+      "cim": "A fogalomtár",
+      "szoveg": "A fogalomtár a koinó szavait magyarázza egy helyen: mi az e-ember, a tudatpont, a gondolat, a javaslat, az egyezmény, a küszöb, a bizonyossági mutató, a társ, a csere, az őrjárat, a készülék, a kezelő és a papír. A magyarázatok alján a bennük szereplő fogalmakhoz is eljutsz innen."
+    }
+  ]
+}

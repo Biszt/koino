@@ -90,3 +90,11 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
 - **2026-11-19** — ✅ **az ① kész** (`a309655`): 6 próba (`meres/kezikonyvProba.js`), 12 rontás mind bukik (⛔ az első változat a
   megkerülést — a név elhagyását — nem fogta meg: a nevesített javaslat neve „kisegítette” a név nélkülit; most egy másik
   entitásra mutat); az `esemenyProba` „a teljes = a mai értékek” próbája a kézikönyvvel kiegészítve. Teljes sor 1523/1523 + 2 ismert.
+- **2026-11-19** — ✅ **a ② kész**: a szabályok (`szabalyok.js` — a `Kezikonyv` típus a nevekből; törlés, egyesítés tilos;
+  áthelyezés csak kézikönyv alá), a különvált ág `rendszerbol`-ja, a nevek minden döntés-eseményen (`muveletek.js` — a
+  `kornyezet.rendszerNevei`), az alap-tartalom (`js/kezikonyv/` — 7 bejegyzés: a gyökér és a hat fejezet), a `kezikonyv` parancs és
+  a „program által megírt javaslat” (`kezikonyv javasol`; a próbák egy „újabb program” alap-tartalmát a `KOINO_KEZIKONYV_ALAP`-pal
+  adják). Próba: +4 egység (`kezikonyvProba.js`, most 10) és +1 parancssor (a teljes út). ⛔ **Lelet (a parancssor-próba fogta
+  meg):** a javaslattevő automatikus támogató szavazata (a `javaslatLetrehozasa` maga írja, nem a `szavazas`) nem vitte a nevet —
+  pont nélkül ez a szavazat elveszett volna a kézikönyv szeletéből. 16 rontás mind bukik. ⚠️ Próba nélkül: a lezárási összegzés
+  kihagyása a kézikönyv-entitásnál (`koino.js` — csak 1000 eseménynél nagyobb szeletre fut; védekező lépés).

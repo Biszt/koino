@@ -131,9 +131,11 @@ az azonosító a koinóból és a névből), a pakliban struktúrában, **egy ú
 módosítás és áthelyezés a kézikönyvön belül, óvatosabb alap-küszöbbel — legalább 3 nap); a D14 alól kivétel, mindenki tartja.
 ✅ **① a mag** (a rendszer-entitás: `js/esemeny/rendszerEntitas.js`; a születés `kezikonyv` szabálya, a kapu `adat.rendszer`, a
 bejelentés a kézikönyv gyökeréhez, a D14 kivétele, a ≥ 3 napos küszöb, a vállalás — [`magyarazat_reteg.md`](docs/magyarazat_reteg.md)) →
-⏭️ ② a javaslatok → ③ a felület (az ⓘ réteg — az örökölt fájlok érintetlenül) → ④ a szövegek → ⑤ a próba.
+✅ **② a javaslatok** (törlés, egyesítés tilos, áthelyezés csak a kézikönyvön belül; a nevek minden döntés-eseményen; az alap-tartalom
+`js/kezikonyv/`; a `kezikonyv` parancs és a program által megírt javaslat — MA5 (A)) →
+⏭️ ③ a felület (az ⓘ réteg — az örökölt fájlok érintetlenül) → ④ a szövegek → ⑤ a próba.
 
-**Az állapot:** **1525 önpróba** (72 próba-fájl; a legutóbbi teljes soron 1523/1523 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-19, a D129 ① (a kézikönyv magja) után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba és a csere „CSOMAGVESZTÉS (30%)” próbája, magukban zöldek) · 401 fájl / 8153,0 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1530 önpróba** (72 próba-fájl; a legutóbbi teljes soron 1528/1528 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-19, a D129 ② (a kézikönyv javaslatai) után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba és a csere „CSOMAGVESZTÉS (30%)” próbája, magukban zöldek) · 403 fájl / 8190,4 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

@@ -40,6 +40,8 @@ import { tarKezelese, jegyzekbe, kezelesHianyai, elvetesFeljegyzese, lancBizonyi
   from './allapot/kezelesTerjesztes.js';   // ⭐⭐ D128 (③b): a kezelés minden koinómba
 import { lancNezete } from './allapot/koinoLanc.js';   // ⭐ D118 (③, ⑤b): a szerző lánca a koinóban, a jelen réteg szerint
 import { koinoSzabalyai, teljesSzabalyok } from './esemeny/koinoSzabalyok.js';
+// ⭐⭐ D129 (②b): a kézikönyv-nevek az eseményeken (a döntés minden eseménye a kézikönyv szeletébe kerül — MA4 (B))
+import { esemenyRendszerNevei, ESEMENY_NEV_KORLAT } from './esemeny/rendszerEntitas.js';
 import { kanonikusBajtok } from './esemeny/kanonikusAlak.js';
 import { szovegDarabra } from './esemeny/szovegDarab.js';
 // ⭐ D120: a szöveg blokkjaiban hivatkozott fájlok (a törzs méretéhez).
@@ -1232,6 +1234,8 @@ export async function tudatpontRendezese(kornyezet, entitas, pont, szerep = 'akt
   if (!Number.isInteger(pont) || pont < 0) {
     throw new Error('A tudatpont csak egész szám lehet, és nem lehet negatív.');
   }
+  // ⭐⭐ D129 (②b): a kézikönyv-entitásra (vagy egy kézikönyv-javaslatra — a hívó adja) tett pont a nevét is viszi
+  const nevek = Array.isArray(beallitas.rendszer) ? beallitas.rendszer : rendszerNevekKornyezetbol(kornyezet, [entitas]);
 
   // ⭐ D70: az adat FÜGGVÉNY — ha közben más folyamat írt a láncunkba, az `esemenytTeszek` a
   // friss láncból újraszámolja a bemondott összeget, mielőtt újra aláírna.
@@ -1247,7 +1251,7 @@ export async function tudatpontRendezese(kornyezet, entitas, pont, szerep = 'akt
         ', ebből máshol ' + (osszeg - regi) + ' van kiosztva.'
       );
     }
-    return { entitas, pont, szerep, kiosztva };
+    return { entitas, pont, szerep, kiosztva, ...nevMezo(nevek) };
   };
 
   return esemenytTeszek(
@@ -1340,9 +1344,36 @@ export async function allasfoglalas(kornyezet, egyezmeny, allas, beallitas = {})
  */
 export function ertekJavaslat(kornyezet, entitas, ertekek) {
   return esemenytTeszek(
-    kornyezet, 'ErtekJavaslat', { entitas, ertekek },
+    kornyezet, 'ErtekJavaslat', { entitas, ertekek, ...nevMezo(rendszerNevekKornyezetbol(kornyezet, [entitas])) },
     { entitas, horgonyozzunk: true }
   );
+}
+
+// ===================================
+// ⭐⭐ D129 (②b): A KÉZIKÖNYV-NEVEK AZ ESEMÉNYEKEN
+// ===================================
+//
+// A pont nélkül megmaradó közösségi módosítás (MA4 (B)) csak akkor számolható újra, ha a DÖNTÉS minden eseménye megmarad — ezért
+// mind a kézikönyv szeletébe kerül (`esemeny.js` `bejelentesHelyei`): ehhez a kézikönyv-entitásra mutató esemény a nevét viszi
+// (`adat.rendszer`). A neveket a környezet adja (`kornyezet.rendszerNevei` — a `koino.js` az alap-tartalomból és a parancssorban
+// megnevezettekből); a javaslatból eredőket (a szavazat, a javaslatra tett pont) a javaslat eseménye.
+
+/**
+ * Az entitások kézikönyv-nevei a környezettől (ha nincs ilyen szolgáltatás — a próbák egy része —, üres).
+ * @param {Object} kornyezet
+ * @param {Array<string|null|undefined>} azonositok
+ * @returns {Array<string>} rendezve, ismétlés nélkül, legfeljebb `ESEMENY_NEV_KORLAT`
+ */
+function rendszerNevekKornyezetbol(kornyezet, azonositok) {
+  const f = kornyezet?.rendszerNevei;
+  if (typeof f !== 'function') return [];
+  const nevek = f(azonositok.filter((x) => typeof x === 'string'));
+  return [...new Set(Array.isArray(nevek) ? nevek : [])].sort().slice(0, ESEMENY_NEV_KORLAT);
+}
+
+/** Az adat `rendszer` mezője (csak ha van név). */
+function nevMezo(nevek) {
+  return nevek.length ? { rendszer: nevek } : {};
 }
 
 // ===================================
@@ -1687,13 +1718,32 @@ export async function javaslatLetrehozasa(kornyezet, adatok) {
   // ⭐⭐ D128 (12. pont): a javaslattétel joga is a KÉSZÜLÉKÉ — ahol a pont egy másik készülékemen van, ez előbb 1 pontot tesz rá.
   for (const r of erintettek) await keszulekPontjaHaAzonossagome(kornyezet, r.entitas);
 
+  // ⭐⭐ D129 (②b, ②c): a kézikönyv-érintettek (és az áthelyezés céljának) nevei; a kézikönyv-módosítás azt is megjegyzi, a program
+  // melyik szövegét váltja (`alapLenyomatok` — MA5 (A): ebből tudja a program később, hogy azóta mást mond-e); és ha a program
+  // által megírt javaslat, azt is (a lap kimondja).
+  const nevek = rendszerNevekKornyezetbol(kornyezet, [...erintettek.map((r) => r.entitas),
+    ...erintettek.filter((r) => r.muvelet === 'Athelyezes').map((r) => r.valtozas?.szulo)]);
+  const alapLenyomatok = {};
+  if (typeof kornyezet.alapLenyomata === 'function') {
+    for (const r of erintettek) {
+      if (r.muvelet !== 'Modositas') continue;
+      for (const n of rendszerNevekKornyezetbol(kornyezet, [r.entitas])) {
+        const l = kornyezet.alapLenyomata(n);
+        if (typeof l === 'string') alapLenyomatok[n] = l;
+      }
+    }
+  }
+
   const javaslat = await esemenytTeszek(
     kornyezet,
     'Javaslat',
     {
       fajta: fajta === 'altalanos' ? 'altalanos' : 'szerkesztesi',
       erintettek,
-      indoklas: indoklas || null
+      indoklas: indoklas || null,
+      ...nevMezo(nevek),
+      ...(Object.keys(alapLenyomatok).length ? { alapLenyomatok } : {}),
+      ...(adatok.programJavaslata === true ? { programJavaslata: true } : {})
     },
     // ⭐⭐ D85/1 (Csaba, 2026-10-02): A JAVASLAT A SAJÁT SZELETÉBEN ÉL, mint egy gondolat (az `entitas`
     // üres → a saját azonosítója a szelet). Minden érintettjénél BEJELENTÉSKÉNT jelenik meg
@@ -1714,7 +1764,7 @@ export async function javaslatLetrehozasa(kornyezet, adatok) {
   const elosztas = kezdoPontokElosztasa(kezdoPont ?? entitasai.length, entitasai.length);
   for (let i = 0; i < entitasai.length; i++) {
     await tudatpontRendezese(kornyezet, entitasai[i].azonosito, elosztas[i], 'aktiv', undefined,
-      { ido: javaslat.ido });
+      { ido: javaslat.ido, rendszer: esemenyRendszerNevei(javaslat) });   // ⭐⭐ D129: a javaslat nevei
   }
 
   // ===================================
@@ -1741,7 +1791,8 @@ export async function javaslatLetrehozasa(kornyezet, adatok) {
   // `javaslat` parancs a tudatpontot is külön eseményként rendeli hozzá.
   await esemenytTeszek(
     kornyezet, 'Szavazat',
-    { javaslat: javaslat.azonosito, szavazat: 'Tamogat', kulonvalasIgeny: false },
+    // ⭐⭐ D129 (②b): a kézikönyv-javaslat támogató szavazata is a javaslat neveit viszi (a kézikönyv szeletébe)
+    { javaslat: javaslat.azonosito, szavazat: 'Tamogat', kulonvalasIgeny: false, ...nevMezo(esemenyRendszerNevei(javaslat)) },
     // ⛔⛔ UGYANAZ AZ IDŐBÉLYEG, mint a javaslaté — lásd az `esemenytTeszek` `ido` ágát.
     // Nélküle nulla döntési időnél a saját szavazatom **késői** lenne, és a javaslat
     // 0%-kal, ELVETVE zárna — mérve, 2026-09-12.
@@ -1805,6 +1856,8 @@ export async function szavazas(kornyezet, javaslat, szavazat, kulonvalasIgeny = 
   // némán hatástalan.
   const ido = Date.now();
   const bizonyitekKulcsok = [];
+  // ⭐⭐ D129 (②b): a kézikönyv-javaslat szavazata (és a javaslatra tett pont) a javaslat neveit viszi — a kézikönyv szeletébe
+  const nevek = esemenyRendszerNevei(javaslatEsemeny);
   for (const je of javaslatEntitasai(javaslatEsemeny)) {
     if (!je.resz) continue;
     // ⭐⭐ D128 (12. pont, Csaba: (A)): a jog KÉSZÜLÉKENKÉNT — ha a pont egy másik készülékemen van, ez előbb 1 pontot tesz rá.
@@ -1812,11 +1865,11 @@ export async function szavazas(kornyezet, javaslat, szavazat, kulonvalasIgeny = 
     // ⭐ T2: a jogosult részek mindkét kulcsára bizonyíték megy a szavazattal.
     bizonyitekKulcsok.push(je.resz.entitas, je.azonosito);
     if ((await sajatKiosztott(kornyezet, je.azonosito)).regi > 0) continue;      // már van pontja rajta
-    await tudatpontRendezese(kornyezet, je.azonosito, 1, 'aktiv', undefined, { ido });
+    await tudatpontRendezese(kornyezet, je.azonosito, 1, 'aktiv', undefined, { ido, rendszer: nevek });
   }
 
   return esemenytTeszek(
-    kornyezet, 'Szavazat', { javaslat, szavazat, kulonvalasIgeny: igeny },
+    kornyezet, 'Szavazat', { javaslat, szavazat, kulonvalasIgeny: igeny, ...nevMezo(nevek) },
     { entitas, horgonyozzunk: true, ido, bizonyitekKulcsok }
   );
 }

@@ -3939,6 +3939,67 @@ proba('⭐⭐ D128 (④b): a „📱 Készülékeim” a lapon — a lista, a fe
     }
   });
 
+// ⭐⭐ D129 (②): A KÉZIKÖNYV A PARANCSSORBÓL. Egy új koinó kézikönyves (a program szövegeivel); a pont, az érték javaslat és a
+// javaslat a NEVET is elfogadja, és a döntés minden eseménye viszi (a kézikönyv szeletébe — MA4 (B)); a módosítás után a lista
+// „a közösség módosította”-t mond; a törlés tilos (MA7 (A)). Az MA5 (A) útja egy „újabb program” alap-tartalmával
+// (`KOINO_KEZIKONYV_ALAP`): a program felkínálja az új szövegét, egy e-ember elindítja, és utána már nem kínálja.
+proba('⭐⭐ D129 (②): a kézikönyv a parancssorból — a nevek az eseményeken, a módosítás, a törlés tilalma; egy újabb program új szövegét a program javasolja, és elindítható',
+  async () => {
+    const L = await ujKeszulek();
+    try {
+      await fut(L, 'koino', 'Kézikönyv-próba');
+      const A = await koinoNeve(L);
+      const MENU = 'kezikonyv/menu';
+      const elso = await fut(L, 'kezikonyv');
+      await fut(L, 'pont', MENU, '10');
+      await fut(L, 'ertek', MENU, '51', '0', '1', '604800');
+      const javaslatKi = await fut(L, 'javaslat', MENU, 'A menü (a ☰ gomb)', 'érthetőbb');
+      // a kézi szavazat is (a `szavazas` művelet útja — a javaslattevő automatikus szavazata egy másik út)
+      await fut(L, 'szavaz', javaslatKi.match(/\(Modositas\): ([A-Za-z0-9_-]{8})/)?.[1] ?? 'x', 'tamogat');
+      await varj(1500);
+      const modositva = await fut(L, 'kezikonyv');
+      await fut(L, 'torol', MENU, 'próba');
+      const torolve = await fut(L, 'allapot');
+      // ⭐ MA5 (A): egy „újabb program” — ugyanaz az alap-tartalom, de a menü magyarázata más
+      const alap = JSON.parse(await readFile(join(dirname(KOINO_JS), 'js', 'kezikonyv', 'alapTartalom.json'), 'utf8'));
+      alap.bejegyzesek = alap.bejegyzesek.map((b) => (b.nev === MENU ? { ...b, cim: 'A menü — az új program szövege' } : b));
+      await writeFile(join(L, 'uj-alap.json'), JSON.stringify(alap), 'utf8');
+      const UJ = { KOINO_KEZIKONYV_ALAP: join(L, 'uj-alap.json') };
+      const ujProgram = await fut(L, 'kezikonyv', UJ);
+      const javasol = await fut(L, 'kezikonyv', 'javasol', MENU, UJ);
+      await varj(1500);
+      const utana = await fut(L, 'kezikonyv', UJ);
+      const sorok = (await readFile(join(L, A, 'esemenyek.jsonl'), 'utf8')).split('\n').filter(Boolean).map((l) => JSON.parse(l));
+      const nevvel = (tipus) => sorok.some((e) => e.tipus === tipus && (e.adat?.rendszer ?? []).includes(MENU));
+      const menuSor = (s) => s.split(/\r?\n/).find((l) => l.includes(MENU + ' ')) ?? '';
+      const r = {
+        elso: /A KÉZIKÖNYV \(\d+ bejegyzés\)/.test(elso) && /„A menü” · a program szövege/.test(menuSor(elso)),
+        modositva: /„A menü \(a ☰ gomb\)” · a közösség módosította/.test(menuSor(modositva)),
+        nevek: ['TudatpontRendezes', 'ErtekJavaslat', 'Javaslat', 'Szavazat'].every(nevvel)
+          // MINDEN szavazat (az automatikus és a kézi is) a nevet viszi
+          && sorok.filter((e) => e.tipus === 'Szavazat').length >= 2
+          && sorok.filter((e) => e.tipus === 'Szavazat').every((e) => (e.adat?.rendszer ?? []).includes(MENU))
+          // a javaslatra tett pont (D85/2) is a nevet viszi
+          && sorok.some((e) => e.tipus === 'TudatpontRendezes' && e.adat?.entitas !== undefined
+            && sorok.some((j) => j.tipus === 'Javaslat' && j.azonosito === e.adat.entitas) && (e.adat.rendszer ?? []).includes(MENU))
+          && sorok.some((e) => e.tipus === 'Javaslat' && typeof e.adat?.alapLenyomatok?.[MENU] === 'string'),
+        torles: /kézikönyv-entitáson nem indítható Torles/.test(torolve),
+        ujProgram: /⭐ a program új szöveget javasol: node koino.js kezikonyv javasol kezikonyv\/menu/.test(menuSor(ujProgram)),
+        javasol: /A program által megírt javaslat elindítva/.test(javasol)
+          && sorok.some((e) => e.tipus === 'Javaslat' && e.adat?.programJavaslata === true),
+        utana: /„A menü — az új program szövege” · a közösség módosította/.test(menuSor(utana)) && !/⭐/.test(menuSor(utana))
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (D129 ②: ' + JSON.stringify({ r, elso: menuSor(elso), modositva: menuSor(modositva),
+          ujProgram: menuSor(ujProgram), javasol: javasol.slice(-300), utana: menuSor(utana), torolve: torolve.slice(0, 400) }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      await rm(L, { recursive: true, force: true });
+    }
+  });
+
 proba('⭐⭐ D93: a NEM TAG szavazata nem számít (és ezt kimondja) — a profilos meghívás után ugyanaz a szavazat számít',
   async () => {
     const gazda = await ujKeszulek();

@@ -31,7 +31,9 @@
 // Használják: allapotSzamitas.js (és rajta keresztül minden számítás).
 
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
-import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
+import { ALAP_SZABALYOK, koinoSzabalyai, kezikonyvesE } from '../esemeny/koinoSzabalyok.js';
+// ⭐⭐ D129: a kézikönyv-entitások (nincs létrehozó eseményük — a nevükből a típus és a szülő)
+import { esemenyRendszerNevei, nevEsFelmenoi, rendszerAzonosito, szuloNeve } from '../esemeny/rendszerEntitas.js';
 import { koinoSzuleteseListabol, esemenyKoinoja, lancKulcsa, PONT_TIPUSOK } from '../esemeny/esemeny.js';
 // ⭐ D93/1: a tagság (egy forrás — `tagsag.js`).
 import { tagsagiIndex, szerzoTagsaga, azonossagAlapjai, alapokAlapja } from './tagsag.js';
@@ -144,8 +146,14 @@ const TILTOTT_MUVELETEK = {
   // A kategória és a gondolattípus BESOROLÁS, nem a fában lógó gondolat — nincs értelmes
   // „új szülője".
   Kategoria: ['Athelyezes'],
-  GondolatTipus: ['Athelyezes', 'Egyesites']
+  GondolatTipus: ['Athelyezes', 'Egyesites'],
+  // ⭐⭐ D129 (MA7 (A) — Csaba, 2026-11-19): a KÉZIKÖNYV-entitás (egy ⓘ jel magyarázata) csak módosítható és a kézikönyvön belül
+  // áthelyezhető — amíg a gomb a felületen van, az ⓘ-jének tartalma legyen. (Az áthelyezés célját lent nézzük.)
+  Kezikonyv: ['Torles', 'Egyesites']
 };
+
+/** ⭐⭐ D129: a kézikönyv-entitás típusa a szabály-rétegben (az állapotban `Gondolat` + `rendszer` mező). */
+const KEZIKONYV_TIPUS = 'Kezikonyv';
 
 /** Egyesíteni CSAK ezeket lehet (a prototípus: „Gondolatot Gondolattal, Kategóriát Kategóriával"). */
 const EGYESITHETO_TIPUSOK = ['Gondolat', 'Kategoria'];
@@ -617,6 +625,24 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
       }
     }
   }
+  // ⭐⭐ D129: a KÉZIKÖNYV-entitásoknak nincs létrehozó eseményük — a típusuk és a szülőjük a NEVÜKBŐL (minden esemény
+  // `adat.rendszer`-éből és a felmenőikből — ugyanúgy, mint az állapotban), csak a kézikönyves koinóban.
+  if (kezikonyvesE(koinoSzabalyok)) {
+    const latott = new Set();
+    for (const e of esemenyek) {
+      for (const n of esemenyRendszerNevei(e)) {
+        for (const f of nevEsFelmenoi(n)) {
+          if (latott.has(f)) continue;
+          latott.add(f);
+          const az = rendszerAzonosito(f);
+          if (entitasTipusok.has(az)) continue;
+          entitasTipusok.set(az, KEZIKONYV_TIPUS);
+          const sz = szuloNeve(f);
+          szulok.set(az, sz === null ? null : rendszerAzonosito(sz));
+        }
+      }
+    }
+  }
 
   /** Egy eseményt kivételnek jelöl — de nem dob el semmit (D19). */
   const kivetel = (esemeny, ok) => {
@@ -880,8 +906,10 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
           if ((TILTOTT_MUVELETEK[tipus] ?? []).includes(r.muvelet)) { tiltott = { r, tipus }; break; }
         }
         if (tiltott) {
-          kivetel(e, tiltott.tipus + ' entitáson nem indítható ' + tiltott.r.muvelet
-            + ' javaslat (a prototípus tiltása)');
+          kivetel(e, tiltott.tipus === KEZIKONYV_TIPUS
+            ? 'kézikönyv-entitáson nem indítható ' + tiltott.r.muvelet + ' javaslat (D129: csak módosítható, és a kézikönyvön'
+              + ' belül helyezhető át)'
+            : tiltott.tipus + ' entitáson nem indítható ' + tiltott.r.muvelet + ' javaslat (a prototípus tiltása)');
           continue;
         }
 
@@ -899,6 +927,24 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
             kivetel(e, kozos + ' entitást nem lehet egyesíteni');
             continue;
           }
+        }
+
+        // ----- ⭐⭐ D129 (MA7 (A)): A KÉZIKÖNYV-ENTITÁS CSAK A KÉZIKÖNYVÖN BELÜL HELYEZHETŐ ÁT -----
+        // Az új szülő is kézikönyv-entitás kell legyen (a gyökérre helyezés — `null` — is kívül van). Ha a cél típusa még
+        // ismeretlen, az hiány, nem vád (D19).
+        let kezikonyvbolKi = false;
+        for (const r of kik) {
+          if (r.muvelet !== 'Athelyezes' || entitasTipusok.get(r.entitas) !== KEZIKONYV_TIPUS) continue;
+          const cel = r.valtozas?.szulo ?? null;
+          const celTipus = cel === null ? null : entitasTipusok.get(cel);
+          if (celTipus === KEZIKONYV_TIPUS) continue;
+          if (celTipus === undefined) { ismeretlenTipus = ismeretlenTipus ?? r; continue; }
+          kezikonyvbolKi = true;
+          break;
+        }
+        if (kezikonyvbolKi) {
+          kivetel(e, 'kézikönyv-entitás csak a kézikönyvön belül helyezhető át (D129)');
+          continue;
         }
 
         if (ismeretlenTipus) {

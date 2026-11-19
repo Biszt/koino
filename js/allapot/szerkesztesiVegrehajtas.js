@@ -392,6 +392,9 @@ async function kulonvalas(entitas, regi, kulonvalok, egyezmeny, allapot) {
     gondolatTipus: entitas.gondolatTipus ?? null,
     kategoriak: [...(entitas.kategoriak ?? [])],
     ...(entitas.koinoVerzio ? { koinoVerzio: entitas.koinoVerzio } : {}),   // ⭐ D119: a koino-verzió gyermeke és kódja
+    // ⭐⭐ D129: a kézikönyv-entitásból különvált ág HÉTKÖZNAPI gondolat (nem kézikönyv — a D14 alá esik), de megjegyzi, melyik
+    // kézikönyv-névből vált ki: ha a közösség még nem módosította (a cím és a szöveg üres), a lap az eredeti szöveget rajzolja.
+    ...(entitas.rendszer !== undefined ? { rendszerbol: entitas.rendszer } : {}),
     meret: entitas.meret,
     agMeret: entitas.meret,
     szerzo: entitas.szerzo,

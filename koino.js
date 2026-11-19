@@ -190,6 +190,9 @@ import { sajatKodCsomag, kodCsomagTarolasa, kodJegyzekOlvasasa, sajatMag, magJeg
 // ⭐⭐ D125: a telepítés a kártyáról — a kiírás, a csere helye, az előnézet rétegei
 import { kodKiirasa, telepitesHelye, valtozasRetegei } from './js/tar/programTelepites.js';
 import { szabalyokAlakiHibaja, ALAP_SZABALYOK, koinoSzabalyai, teljesSzabalyok, kezikonyvesE } from './js/esemeny/koinoSzabalyok.js';
+// ⭐⭐ D129: a kézikönyv — a nevek (a mag része) és az alap-tartalom (NEM a mag része: a szövegek a programé)
+import { rendszerNevE, rendszerAzonosito } from './js/esemeny/rendszerEntitas.js';
+import { programAlapTartalma, kezikonyvSzovege, programJavaslatai } from './js/kezikonyv/kezikonyv.js';
 import { szuletesLanc, szuloTagsagaEpitese, bekapcsolodasokEllenorzese, koinoNezete, lancNezete } from './js/allapot/koinoLanc.js';
 import { koinoKepe } from './js/allapot/ketReteg.js';
 import { szetosztottPontok, elakadtPontok } from './js/allapot/allapotSzamitas.js';
@@ -2628,7 +2631,9 @@ async function atmenetiElolepetese() {
 const felszabaditasJegyzet = felszabaditasTarolo();
 
 // ⭐ D72: a műveletek a szöveget KÜLÖN DARABKÉNT a fájl-tárba írják (ahol a képek is) — innen kapják.
-const kornyezet = { koino: KOINO, kulcspar, szerzo, tar, darabTar: fajlBlobTarolo(KOINO), lancTarolo: lancTarolo(KOINO) };
+const kornyezet = { koino: KOINO, kulcspar, szerzo, tar, darabTar: fajlBlobTarolo(KOINO), lancTarolo: lancTarolo(KOINO),
+  // ⭐⭐ D129 (②b, ②c): a kézikönyv-nevek és a program szövegének lenyomata — a műveletek az eseményre írják
+  rendszerNevei: kezikonyvNevei, alapLenyomata: kezikonyvAlapLenyomata };
 
 // ===================================
 // SEGÉD: AZONOSÍTÓ-RÖVIDÍTÉS FELOLDÁSA
@@ -2665,7 +2670,43 @@ function szovegKifele(szoveg) {
   }).filter((s) => s !== '').join(' ');
 }
 
+// ===================================
+// ⭐⭐ D129 (②b): A KÉZIKÖNYV-NEVEK — a műveletek ezekből írják az eseményre (`adat.rendszer`)
+// ===================================
+//
+// Az alap-tartalom nevei (a programé), és amit a parancssorban megneveztek (`pont kezikonyv/menu/kereses 10`). A műveletek
+// (`muveletek.js`) a környezettől kérdezik (`kornyezet.rendszerNevei`), hogy a kézikönyv-entitásra mutató esemény a nevét is vigye.
+
+/** A parancssorban megnevezett kézikönyv-nevek (azonosító → név) — ami nincs az alap-tartalomban, az is. */
+const MEGNEVEZETT_RENDSZER_NEVEK = new Map();
+
+/**
+ * Az azonosítók kézikönyv-nevei (az ismeretleneket kihagyja).
+ * @param {Array<string>} azonositok
+ * @returns {Array<string>}
+ */
+function kezikonyvNevei(azonositok) {
+  const alap = programAlapTartalma().azonositoSzerint;
+  const ki = [];
+  for (const az of azonositok) {
+    const n = MEGNEVEZETT_RENDSZER_NEVEK.get(az) ?? alap.get(az)?.nev;
+    if (n) ki.push(n);
+  }
+  return ki;
+}
+
+/** A program szövegének lenyomata egy kézikönyv-névhez (MA5 (A) — a módosító javaslat ezt jegyzi meg), vagy null. */
+function kezikonyvAlapLenyomata(nev) {
+  return programAlapTartalma().nevSzerint.get(nev)?.lenyomat ?? null;
+}
+
 function feloldas(toredek, lehetosegek) {
+  // ⭐⭐ D129: a kézikönyv-név (kezikonyv/…) — az azonosító a névből; a név megjegyezve (a műveletek az eseményre írják)
+  if (rendszerNevE(toredek)) {
+    const az = rendszerAzonosito(toredek);
+    MEGNEVEZETT_RENDSZER_NEVEK.set(az, toredek);
+    return az;
+  }
   const talalatok = [...lehetosegek].filter((a) => a.startsWith(toredek));
   if (talalatok.length === 1) return talalatok[0];
   if (talalatok.length === 0) throw new Error('Nincs ilyen azonosító: ' + toredek);
@@ -6105,6 +6146,8 @@ async function lezarasiOsszegzesekKiadasa() {
     if (j.statusz !== 'elfogadva' && j.statusz !== 'elvetve') continue;
     for (const k of new Set((j.reszek ?? []).map((r) => r.entitas))) {
       if (kf.fokok.get(k) === 'osszegzo' || (kf.jegyzek.get(k) ?? 0) <= KETFOK.kuszob || kiadott.has(az + '|' + k)) continue;
+      // ⭐⭐ D129: a kézikönyv-entitás döntését nem összegezzük — a kézikönyv szeletét mindenki egészében tartja (és a küszöbe is más)
+      if (allapot.entitasok.get(k)?.rendszer !== undefined) continue;
       const je = await esemenyLekerese(tar, az);
       const ep = je ? await lezarasiOsszegzesEpitese(allapot.szamitok, je, k) : null;
       if (!ep) continue;
@@ -8050,6 +8093,62 @@ try {
       kezelesEredmenyKiirasa(await kezelesMindenKoinomba({ tudas: { lanc: { szuletes: r.kulcspar.szuletes, cserek: r.cserek, bizonyitekok: {} },
         kizarasok: ujraAlairt, sajatKizarasok: ujraAlairt.map((k) => k.alairas) } }), (x) => x.lanc);
       listakCsatlakozasaKiirasa(kcsCsatlakozasok);
+      break;
+    }
+
+    // ⭐⭐ D129 (②c): A KÉZIKÖNYV. `kezikonyv` — a kézikönyv bejegyzései (az alap-tartalom és a közösség módosításai): honnan jön a
+    // szöveg (a programé, vagy a közösség módosította), a rajta lévő pontok, és ha a program azóta új szöveget mond (MA5 (A)).
+    // `kezikonyv javasol <név>` — a program által megírt javaslat elindítása (a program mai szövege, módosító javaslatként).
+    case 'kezikonyv': {
+      const { allapot, javaslatok, esemenyek } = await kepetKeszit();
+      if (!kezikonyvesE(allapot.koino.szabalyok)) {
+        kiir('Ennek a koinónak nincs kézikönyve (a születése előtti programmal jött létre — D129).');
+        break;
+      }
+      const index = programAlapTartalma();
+      const esemenyTerkep = new Map((esemenyek ?? allapot.szamitok).map((e) => [e.azonosito, e]));
+      const ajanlatok = programJavaslatai({ allapot, javaslatok, esemenyek: esemenyTerkep, index });
+      if (ervek[0] === 'javasol') {
+        const nev = ervek[1];
+        const a = ajanlatok.find((x) => x.nev === nev);
+        if (!a) {
+          throw new Error(index.nevSzerint.has(nev)
+            ? 'Ehhez a programnak nincs új szövege (a közösség nem módosította, vagy a program azóta sem mondott mást).'
+            : 'Nincs ilyen kézikönyv-név: ' + nev);
+        }
+        const az = feloldas(nev, []);
+        if (!((allapot.entitasok.get(az)?.hozzajarulok.get(szerzo)?.pont ?? 0) > 0)) {
+          throw new Error('Javaslatot csak az tehet, aki tudatpontot tett rá — előbb: node koino.js pont ' + nev + ' 1');
+        }
+        const e = await javaslatLetrehozasa(kornyezet, {
+          fajta: 'szerkesztesi',
+          erintettek: [{ entitas: az, muvelet: 'Modositas', valtozas: { cim: a.cim, szoveg: a.szoveg } }],
+          indoklas: 'A program új szövege ehhez a magyarázathoz (D129, MA5).',
+          pont: KEZDO_PONT,
+          programJavaslata: true
+        });
+        kiir('A program által megírt javaslat elindítva: ' + e.azonosito.slice(0, 8) + ' (' + nev + ')');
+        break;
+      }
+      const ajanlatNevek = new Set(ajanlatok.map((a) => a.nev));
+      const sorok = [];
+      const latott = new Set();
+      for (const b of index.bejegyzesek) {
+        latott.add(b.nev);
+        const e = allapot.entitasok.get(b.azonosito);
+        sorok.push({ nev: b.nev, sz: kezikonyvSzovege(e ?? { rendszer: b.nev, cim: null, szoveg: null }, index), pont: e?.osszesPont ?? 0 });
+      }
+      // a közösség által megérintett, de a programban (már vagy még) nem szereplő nevek
+      for (const e of allapot.entitasok.values()) {
+        if (e.rendszer === undefined || latott.has(e.rendszer)) continue;
+        sorok.push({ nev: e.rendszer, sz: kezikonyvSzovege(e, index), pont: e.osszesPont });
+      }
+      kiir(SZIN.vastag + 'A KÉZIKÖNYV (' + sorok.length + ' bejegyzés)' + SZIN.vege);
+      for (const s of sorok) {
+        const forras = !s.sz.ismert ? 'a programod nem ismeri' : s.sz.modositott ? 'a közösség módosította' : 'a program szövege';
+        kiir('  ' + s.nev + SZIN.halvany + '  „' + (s.sz.cim ?? '—') + '” · ' + forras + (s.pont ? ' · ' + s.pont + ' pont' : '')
+          + (ajanlatNevek.has(s.nev) ? ' · ⭐ a program új szöveget javasol: node koino.js kezikonyv javasol ' + s.nev : '') + SZIN.vege);
+      }
       break;
     }
 
@@ -13242,6 +13341,7 @@ try {
       kiir('           koinoverzio <név> [leírás] [pont=N] [becenev=…] · bekapcsolodas <gyermek> [elhagy=…] [fájl]   (D119, D118)');
       kiir('           nezet [uj <fájl> "<cím>" [pont=N] | kod|be|ki <kártya>]   (D126: a közösség feltöltött nézetei)');
       kiir('           pont <azonosító> <pont> [passziv] · javaslat <azonosító> <új cím> [indoklás]');
+      kiir('           kezikonyv [javasol <név>]   (D129: a kézikönyv — az ⓘ jelek; a pont, a javaslat, az athelyez a nevet is: kezikonyv/menu/…)');
       kiir('           torol <azonosító> [indoklás] · athelyez <mit> <hova|gyoker> [indoklás]');
       kiir('           egyesit <az1>,<az2>[,...] <egyesített cím> [indoklás]');
       kiir('           ertek <azonosító> <elfogadási%> <részvételi%> <min mp> <max mp>');

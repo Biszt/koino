@@ -18,8 +18,12 @@ import { koinoSzabalyai, teljesSzabalyok, szabalyokAlakiHibaja, kezikonyvesE, KE
   from '../js/esemeny/koinoSzabalyok.js';
 import { rendszerNevE, rendszerAzonosito, szuloNeve, nevEsFelmenoi, rendszerNevekAlakiHibaja, KEZIKONYV_GYOKER,
   KEZIKONYV_GYOKER_AZONOSITO } from '../js/esemeny/rendszerEntitas.js';
+// ⭐⭐ D129 (②): a javaslatok szabályai, a végrehajtás, az alap-tartalom és az új programverzió
+import { szerkesztesiEgyezmenyekAlkalmazasa } from '../js/allapot/szerkesztesiVegrehajtas.js';
+import { alapTartalomAlakiHibaja, alapTartalomIndexe, programAlapTartalma, kezikonyvSzovege, programJavaslatai, bejegyzesLenyomata,
+  ALAP_TARTALOM_FAJTA } from '../js/kezikonyv/kezikonyv.js';
 
-const { proba, futtatas } = probaGyujtemeny('A kézikönyv magja (D129 ①)');
+const { proba, futtatas } = probaGyujtemeny('A kézikönyv (D129 ①–②)');
 
 const NAP = 86400 * 1000;
 const KEZDET = Date.UTC(2026, 10, 19);
@@ -199,6 +203,147 @@ proba('⭐⭐ D129 (①, MA4 (B)): a kézikönyves koinóban mindenki tartja a k
       nem: !nem.szeletek.has(KEZIKONYV_GYOKER_AZONOSITO) && nem.kezikonyv === null
     };
     if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify(r) + ')\n'); return false; }
+    return true;
+  });
+
+// ===================================
+// 7. ②a — A JAVASLATOK SZABÁLYAI (MA7 (A))
+// ===================================
+
+proba('⭐⭐ D129 (②a, MA7 (A)): kézikönyv-entitáson a törlés és az egyesítés nem indítható; áthelyezni csak kézikönyv-entitás alá lehet (a gyökérre és hétköznapi gondolat alá nem); a módosítás és a kézikönyvön belüli áthelyezés mehet',
+  async () => {
+    const { a, K, g, esemenyek } = await eset();
+    const ABLAK = 'kezikonyv/ablak';
+    const K2 = rendszerAzonosito(ABLAK);
+    const pontK2 = await a.tesz('TudatpontRendezes', { entitas: K2, pont: 20, szerep: 'aktiv', rendszer: [ABLAK] }, KEZDET + 4000);
+    const javasol = (erintettek, rendszer, ido) => a.tesz('Javaslat', { fajta: 'szerkesztesi', erintettek, indoklas: 'próba',
+      ...(rendszer ? { rendszer } : {}) }, ido);
+    const torol = await javasol([{ entitas: K, muvelet: 'Torles', valtozas: null }], [KERESES], KEZDET + 20000);
+    const egyesit = await javasol([{ entitas: K, muvelet: 'Egyesites', valtozas: { cim: 'X' } },
+      { entitas: g.azonosito, muvelet: 'Egyesites', valtozas: null }], [KERESES], KEZDET + 20001);
+    const kiG = await javasol([{ entitas: K, muvelet: 'Athelyezes', valtozas: { szulo: g.azonosito } }], [KERESES], KEZDET + 20002);
+    const kiGyoker = await javasol([{ entitas: K, muvelet: 'Athelyezes', valtozas: { szulo: null } }], [KERESES], KEZDET + 20003);
+    const belul = await javasol([{ entitas: K, muvelet: 'Athelyezes', valtozas: { szulo: K2 } }], [KERESES, ABLAK], KEZDET + 20004);
+    const modosit = await javasol([{ entitas: K, muvelet: 'Modositas', valtozas: { cim: 'Érthetőbb' } }], [KERESES], KEZDET + 20005);
+    const allapot = await allapotbol([...esemenyek, pontK2, torol, egyesit, kiG, kiGyoker, belul, modosit]);
+    const kiesett = new Map(allapot.kivetelek.map((k) => [k.azonosito, k.ok ?? k.indok ?? '']));
+    const r = {
+      torol: kiesett.has(torol.azonosito), egyesit: kiesett.has(egyesit.azonosito),
+      kiG: kiesett.has(kiG.azonosito), kiGyoker: kiesett.has(kiGyoker.azonosito),
+      belul: !kiesett.has(belul.azonosito), modosit: !kiesett.has(modosit.azonosito),
+      uzenet: /kézikönyv/.test(JSON.stringify(allapot.kivetelek.find((k) => k.azonosito === torol.azonosito) ?? ''))
+    };
+    if (!Object.values(r).every(Boolean)) {
+      process.stderr.write('    (' + JSON.stringify({ r, kivetelek: allapot.kivetelek.map((k) => JSON.stringify(k).slice(0, 160)) }) + ')\n');
+      return false;
+    }
+    return true;
+  });
+
+proba('⭐⭐ D129 (②a): a kézikönyv-módosításnál a különváló kisebbség ága HÉTKÖZNAPI gondolat (nem kézikönyv), de megjegyzi, honnan vált ki — a lap az eredeti szöveget rajzolja',
+  async () => {
+    const { a, K, esemenyek } = await eset();
+    const b = await ujEember();
+    const c = await ujEember();
+    const ertek = await a.tesz('ErtekJavaslat', { entitas: K, rendszer: [KERESES],
+      ertekek: { elfogadasiKuszob: 51, reszveteliKuszob: 0, minimumDontesiIdo: 1, maximumDontesiIdo: 604800 } }, KEZDET + 4000);
+    const pontB = await b.tesz('TudatpontRendezes', { entitas: K, pont: 40, szerep: 'aktiv', rendszer: [KERESES] }, KEZDET + 4000);
+    const pontC = await c.tesz('TudatpontRendezes', { entitas: K, pont: 10, szerep: 'aktiv', rendszer: [KERESES] }, KEZDET + 4000);
+    const j = await a.tesz('Javaslat', { fajta: 'szerkesztesi', rendszer: [KERESES],
+      erintettek: [{ entitas: K, muvelet: 'Modositas', valtozas: { cim: 'ÚJ CÍM' } }] }, KEZDET + 5000);
+    const sz = [...await a.szavaz(j, { szavazat: 'Tamogat', kulonvalasIgeny: false }, KEZDET + 6000),
+      ...await b.szavaz(j, { szavazat: 'Tamogat', kulonvalasIgeny: false }, KEZDET + 6000),
+      ...await c.szavaz(j, { szavazat: 'Ellenez', kulonvalasIgeny: true }, KEZDET + 6000)];
+    const allapot = await allapotbol([...esemenyek, ertek, pontB, pontC, j, ...sz]);
+    const javaslatok = javaslatokSzamitasa(allapot.szamitok, allapot, KEZDET + 8 * NAP);
+    const v = await szerkesztesiEgyezmenyekAlkalmazasa(allapot, javaslatok);
+    const fo = allapot.entitasok.get(K);
+    const ag = [...allapot.entitasok.values()].find((e) => e.rendszerbol === KERESES);
+    const r = {
+      elfogadva: javaslatok.get(j.azonosito)?.statusz === 'elfogadva' && (v?.kulonvalasok?.length ?? 0) === 1,
+      fo: fo?.rendszer === KERESES && fo.cim === 'ÚJ CÍM',
+      ag: !!ag && ag.rendszer === undefined && ag.cim === null && ag.hozzajarulok.has(c.szerzo),
+      // a lap az ágnak az eredeti (program) szövegét rajzolja, a főágnak a közösségét
+      szoveg: kezikonyvSzovege(ag ?? {}, alapTartalomIndexe(probaTartalom('A keresés'))).cim === 'A keresés'
+        && kezikonyvSzovege(fo ?? {}, alapTartalomIndexe(probaTartalom('A keresés'))).cim === 'ÚJ CÍM'
+    };
+    if (!Object.values(r).every(Boolean)) {
+      process.stderr.write('    (' + JSON.stringify({ r, statusz: javaslatok.get(j.azonosito)?.statusz, kv: v?.kulonvalasok,
+        ag: ag && { cim: ag.cim, rendszer: ag.rendszer, rendszerbol: ag.rendszerbol } }) + ')\n');
+      return false;
+    }
+    return true;
+  });
+
+// ===================================
+// 8. AZ ALAP-TARTALOM ÉS A MEGJELENÍTETT SZÖVEG
+// ===================================
+
+/** Egy próba-alap-tartalom: a gyökér, a menü és a keresés (a keresés címe megadható — „egy újabb program”). */
+function probaTartalom(keresesCime, keresesSzovege = 'Így keresel.') {
+  return { fajta: ALAP_TARTALOM_FAJTA, bejegyzesek: [
+    { nev: 'kezikonyv', cim: 'Kézikönyv', szoveg: 'A gyökér.' },
+    { nev: 'kezikonyv/menu', cim: 'Menü', szoveg: 'A menü.' },
+    { nev: KERESES, cim: keresesCime, szoveg: keresesSzovege }
+  ] };
+}
+
+proba('⭐⭐ D129 (②): az alap-tartalom alakja (a program fájlja érvényes; a hibásat a betöltő nem fogadja); a megjelenített szöveg mezőnként a közösségé, ha módosította, különben a programé',
+  async () => {
+    const jo = probaTartalom('A keresés');
+    const hibak = [
+      { ...jo, fajta: 'mas' },
+      { ...jo, bejegyzesek: jo.bejegyzesek.slice(1) },                               // a gyökér nélkül
+      { ...jo, bejegyzesek: [jo.bejegyzesek[0], jo.bejegyzesek[2], jo.bejegyzesek[1]] },   // a szülő később
+      { ...jo, bejegyzesek: [...jo.bejegyzesek, jo.bejegyzesek[2]] },                // kétszer
+      { ...jo, bejegyzesek: [...jo.bejegyzesek, { nev: 'kezikonyv/menu/x', cim: '', szoveg: '' }] },
+      { ...jo, bejegyzesek: [...jo.bejegyzesek, { nev: 'menu/x', cim: 'x', szoveg: '' }] }
+    ];
+    const index = alapTartalomIndexe(jo);
+    const program = programAlapTartalma();
+    const sz1 = kezikonyvSzovege({ rendszer: KERESES, cim: null, szoveg: null }, index);
+    const sz2 = kezikonyvSzovege({ rendszer: KERESES, cim: 'Saját', szoveg: null }, index);
+    const sz3 = kezikonyvSzovege({ rendszer: 'kezikonyv/nincs', cim: null, szoveg: null }, index);
+    const r = {
+      jo: alapTartalomAlakiHibaja(jo) === null, hibak: hibak.every((t) => !!alapTartalomAlakiHibaja(t)),
+      program: program.bejegyzesek[0].nev === KEZIKONYV_GYOKER && program.bejegyzesek.length >= 7
+        && program.nevSzerint.get(KEZIKONYV_GYOKER).azonosito === KEZIKONYV_GYOKER_AZONOSITO,
+      index: index.azonositoSzerint.get(rendszerAzonosito(KERESES))?.nev === KERESES
+        && index.nevSzerint.get(KERESES).lenyomat === bejegyzesLenyomata({ cim: 'A keresés', szoveg: 'Így keresel.' }),
+      programe: sz1.cim === 'A keresés' && sz1.szoveg === 'Így keresel.' && !sz1.modositott && sz1.ismert,
+      kozossege: sz2.cim === 'Saját' && sz2.szoveg === 'Így keresel.' && sz2.modositott,
+      ismeretlen: sz3.cim === null && !sz3.ismert
+    };
+    if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify(r) + ')\n'); return false; }
+    return true;
+  });
+
+// ===================================
+// 9. ②c — AZ ÚJ PROGRAMVERZIÓ (MA5 (A))
+// ===================================
+
+proba('⭐⭐ D129 (②c, MA5 (A)): a program által megírt javaslat — ahol a közösség módosított, és a program azóta mást mond, a program felkínálja a mai szövegét; ahol nem változott, vagy ahol a közösség nem módosított, nem',
+  async () => {
+    const regi = alapTartalomIndexe(probaTartalom('A keresés'));
+    const uj = alapTartalomIndexe(probaTartalom('A keresés (a 🔍 gomb)'));
+    const K = rendszerAzonosito(KERESES);
+    const M = rendszerAzonosito('kezikonyv/menu');
+    const j = { azonosito: 'J', tipus: 'Javaslat', adat: { alapLenyomatok: { [KERESES]: regi.nevSzerint.get(KERESES).lenyomat } } };
+    const javaslatok = new Map([['J', { statusz: 'elfogadva', lezarasIdeje: 5, reszek: [{ entitas: K, muvelet: 'Modositas' }] }]]);
+    const allapot = { entitasok: new Map([
+      [K, { azonosito: K, rendszer: KERESES, cim: 'Közösségi', szoveg: null }],
+      [M, { azonosito: M, rendszer: 'kezikonyv/menu', cim: null, szoveg: null }]
+    ]) };
+    const esemenyek = new Map([['J', j]]);
+    const ujban = programJavaslatai({ allapot, javaslatok, esemenyek, index: uj });
+    const regiben = programJavaslatai({ allapot, javaslatok, esemenyek, index: regi });
+    const megjegyzesNelkul = programJavaslatai({ allapot, javaslatok,
+      esemenyek: new Map([['J', { ...j, adat: {} }]]), index: uj });
+    const r = {
+      ujban: ujban.length === 1 && ujban[0].nev === KERESES && ujban[0].cim === 'A keresés (a 🔍 gomb)',
+      regiben: regiben.length === 0, megjegyzesNelkul: megjegyzesNelkul.length === 0
+    };
+    if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify({ r, ujban }) + ')\n'); return false; }
     return true;
   });
 
