@@ -4032,7 +4032,9 @@ proba('⭐⭐ D129 (③): a kézikönyv a lapon — a pakliban a gyökere, az �
         sav: sav.allapot === 200 && sav.adat.cim === 'Az alsó sáv' && sav.adat.forras === 'program'
           && (sav.adat.gyerekek ?? []).some((g) => g.nev === 'kezikonyv/also-sav/tudatpont') && /^[A-Za-z0-9_-]{43}$/.test(sav.adat.azonosito)
           // ⭐⭐ a koinon pontja külön: a buborék a közösség pontjait mondja (itt 0)
-          && sav.adat.koinonPont === 1 && sav.adat.osszesPont === 1,
+          && sav.adat.koinonPont === 1 && sav.adat.osszesPont === 1
+          // ⭐ D129 (④b): a szöveg a kártya alakjában — bekezdésenként egy szöveg-blokk (az alsó sávé több bekezdés)
+          && Array.isArray(sav.adat.szoveg) && sav.adat.szoveg.length >= 2 && sav.adat.szoveg.every((b) => b.tipus === 'szoveg'),
         nincs: nincs.allapot === 404,
         szamok: (stat?.data?.gondolatokSzama ?? stat?.gondolatokSzama) === 0,
         lap: /magyarazatInditasa\(\)/.test(index) && modul === 200 && css === 200 && /koinoMagyarazat\.css/.test(mainCss)
@@ -5489,8 +5491,11 @@ proba('⭐⭐ D101 ④: a Síkidom a lapon — a nem tartott síkidom gyerekei �
       lancKert: (lancElotte.adat?.oslanc ?? []).length === 0
         && (kerelmek.fuggo ?? []).some((x) => x.fajta === 'szelet' && x.kulcs === C1),
       megjott: azok(r1Utana).includes(P1) && p1Sor?.vanGyereke === true && p1Sor?.hierarchikusOsszesPont === 30,
+      // ⭐⭐ D129 (a koinon): a legerősebb gyökér R1 (60) — vagy a kézikönyv gyökere, ha az erősebb (bejegyzésenként a koinon 1
+      // pontja: a kézikönyv növekedtével elhagyja a 60-at — ⛔ a 79 bejegyzésnél a rögzített 60 bukott). Ugyanaz a szabály.
       lanc: (lancUtana.adat?.oslanc ?? []).map((x) => x.entitasId).join() === [C1, P1, R1].join()
-        && lancUtana.adat?.teljesLanc === true && lancUtana.adat?.legerosebbGyokerPont === 60
+        && lancUtana.adat?.teljesLanc === true && lancUtana.adat?.legerosebbGyokerPont === Math.max(60,
+          (gyokerElotte.adat?.gyerekek ?? []).find((g) => KEZIKONYV_AZONOSITOK.has(g.entitasId))?.hierarchikusOsszesPont ?? 0)
     };
     if (!Object.values(ki).every(Boolean)) {
       process.stdout.write('  síkidom — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ')

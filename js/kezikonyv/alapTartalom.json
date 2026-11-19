@@ -274,7 +274,122 @@
     {
       "nev": "kezikonyv/kartya",
       "cim": "A kártyák",
-      "szoveg": "A kártya a koinó egy entitása a pakliban: egy gondolat, egy javaslat, egy egyezmény, egy kategória vagy egy gondolattípus. A kártyán látod a címét, a rá tett tudatpontokat, és a füleit (részletek, javaslatok, szavazás). A kártya keretének és jeleinek is jelentése van."
+      "szoveg": "A kártya a koinó egy dolgát mutatja a pakliban: egy gondolatot, egy javaslatot, egy egyezményt, egy kategóriát vagy egy gondolattípust. Felül a címe áll, alatta balra a kártya saját menüje (☰), jobbra a számai — a rá tett tudatpontok, és hogy hány része van alatta és mellette.\n\nEgy kártyára koppintva kiválasztod: a kiválasztott kártya kinyílik, és a szövegét is mutatja; ha több része van (egy javaslat indoklása és a szavazás), azok füleken. Ha a szöveg nem fér el, a „...” gomb — vagy a szövegre dupla koppintás — kinyitja az egészet.\n\nA kártya ⓘ jele a számok elején áll; a részeit innen is eléred."
+    },
+    {
+      "nev": "kezikonyv/kartya/szamok",
+      "cim": "A kártya számai",
+      "szoveg": "A cím alatt jobbra álló számok, balról jobbra:\n\n👥 — hányan tettek tudatpontot erre a kártyára (a hozzájárulók száma).\n👤🌟 — a te tudatpontod rajta (csak ha tettél rá).\n(egy levél a száron) 🌟 — a kártya saját tudatpontja: amennyit közvetlenül erre tettek.\n🌿🌟 — az ágazati tudatpont: a kártya és minden alatta lévő együtt. A testvérek sorrendje ezt követi (az erősebb ág előrébb).\n▾ — hány leszármazottja van (az ága alatt), amennyit ez a készülék ismer.\n↔ — hány testvére van, amennyit ez a készülék ismer.\n\nHa egy szám mellett halványan „+…” áll, a koinóban ennél több van, mint amennyit ez a készülék eddig megismert — a tartója szerint. A „+?” azt jelenti: nem tudni, mert a tartója még nem mondta meg. Ez nem hiba: a koinót a készülékek darabokban tartják, és a hiányzó részt a program elkéri.\n\nEgy szám fölé állva a rövid magyarázata is megjelenik."
+    },
+    {
+      "nev": "kezikonyv/kartya/tipus-sor",
+      "cim": "A második sor: a típus és a mutatók",
+      "szoveg": "A számok alatti második sor a kártya fajtájától függ.\n\nGondolatnál: 🧩 után a gondolat típusa, 🏷️ után a kategóriái (ha vannak).\nKategóriánál és gondolattípusnál: 📄 — hány gondolat használja, mellette egy dátum (a részleteit a „Részletes adatok” mondja meg).\nJavaslatnál és egyezménynél a döntés mutatói, százalékban: 👥 a részvétel, ✔️ a támogatók, ❌ az ellenzők, ➖ a tartózkodók aránya.\n\nA javaslatnál ⏱ a döntési idő: minél egyértelműbb az eredmény és minél többen vesznek részt, annál rövidebb — a küszöbökben megadott legrövidebb és leghosszabb idő között. A javaslat a születése után ennyi idővel zárul. Az egyezménynél a döntés dátuma áll."
+    },
+    {
+      "nev": "kezikonyv/kartya/fulek",
+      "cim": "A kártya fülei",
+      "szoveg": "Ha egy kártyának több része van, a szövege fölött fülek állnak; egy fülre koppintva az a rész látszik. Ha csak egy része van, nincs fülsáv.\n\nGondolatnál: „Gondolat” — maga a szöveg; „Másik ág” — ha a gondolat egy döntésnél kettévált, itt látod, mikor és hogyan, és a másik ágra koppintva a pakli oda ugrik (több különválásnál a fülek számozottak).\nJavaslatnál: „Indoklás” — miért javasolja a szerzője; „Módosított gondolat” — módosításnál az új változat; „Szavazás” — itt szavazol.\nEgyezménynél: „Lecserélt gondolat” — a módosítás előtti változat; „Indoklás”."
+    },
+    {
+      "nev": "kezikonyv/kartya/szavazas",
+      "cim": "A szavazás",
+      "szoveg": "A javaslat kártyáján, a „Szavazás” fülön szavazol: Támogatom, Ellenzem vagy Tartózkodom. A gomb azonnal hat; a szavazatodat megváltoztathatod, vagy visszavonhatod („Szavazat visszavonása”).\n\nAz szavazhat, akinek tudatpontja van az érintett gondolaton (a javaslaton magán nem kell). A szavazásnál mindenki egyenlő: a tudatpont a jogot adja, nem a szavazat súlyát. Aki szavaz, ezen a gondolaton aktív résztvevő lesz (lásd a kártya menüjében a „Részvételi beállítások”-at).\n\nA javaslat a döntési idő végén zárul (⏱ a kártyán): ha a támogatottság és a részvétel eléri a gondolat küszöbét, elfogadják, különben elvetik."
+    },
+    {
+      "nev": "kezikonyv/kartya/szavazas/kulonvalas",
+      "cim": "A különválás",
+      "szoveg": "Ha támogatod vagy ellenzed a javaslatot, megjelölheted: „Ha a döntés nem a te álláspontodat követi, szeretnél külön ágat?” — tartózkodásnál ez nem választható.\n\nEgy módosításnál: ha a javaslatot elfogadják, és te külön ággal ellenezted, a gondolat RÉGI változata új ágként megmarad, a te tudatpontjaiddal. Ha elvetik, és te külön ággal támogattad, a MÓDOSÍTOTT változat lesz új ág, a pontjaiddal. A két ágat a kártya „Másik ág” füle köti össze.\n\nHa mindenki külön válna, nincs kettéválás — a főág nem maradhat gazdátlanul."
+    },
+    {
+      "nev": "kezikonyv/kartya/pakli",
+      "cim": "A pakli: a lánc és a testvérek",
+      "szoveg": "A pakli egymásra tett kártyákból áll. A kiválasztott kártya alatt a felmenői állnak — a szülője, annak a szülője, egészen a gyökérig —, fölötte a gyerekeinek lánca: mindig a legerősebb gyerek (a legtöbb ágazati tudatponttal), annak a legerősebb gyereke, és így tovább.\n\nA kiválasztott kártya két szélén a testvér-jelzők: „‹ N” — N testvére van balra, „N ›” — jobbra; az erősebb ág áll balra. Egy koppintás egy testvért lép, a „|‹” és a „›|” a sor elejére és végére ugrik; a kártyát oldalra húzva is lépkedhetsz. A „+N testvér” vagy „+? testvér” felirat azt jelzi, hogy a koinóban több testvér lehet, mint amennyit ez a készülék ismer."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu",
+      "cim": "A kártya menüje",
+      "szoveg": "A kártya bal oldali ☰ gombja a kártya saját menüjét nyitja. Ezek a pontok EZT a kártyát érintik — és az ágát, mindent, ami alatta van —, nem az egész koinót, mint a lap bal alsó menüje.\n\nMinden kártyán: értesítések, tudatpontok, részvételi beállítások, keresés, struktúra, síkidom, világtérkép és rendezés — ennek a kártyának az ágára szűkítve —, és a felderítés innen. A kártya fajtája szerint: új gondolat ebből, javaslat, tudatpont módosítás, részletes adatok, küszöb érték javaslat és értesítési beállítások (kategóriánál új alkategória is).\n\nNéhány ponthoz tudatpont kell ezen a kártyán — amíg nincs, az a pont nem választható."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/ertesitesek",
+      "cim": "🔔 Értesítések (az ágon)",
+      "szoveg": "Az értesítéseid közül azok, amelyek ezen a kártyán vagy bármely alatta lévőn történtek. Egy értesítésre koppintva a pakli oda ugrik."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/tudatpontok",
+      "cim": "🌟 Tudatpontok (az ágon)",
+      "szoveg": "A tudatpontjaid közül azok, amelyek ezen a kártyán vagy az ága alatt vannak. Egy sorra koppintva a pakli oda ugrik; a pontjaidat itt is módosíthatod."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/reszveteli-beallitasok",
+      "cim": "🙋 Részvételi beállítások",
+      "szoveg": "Itt döntöd el, hogyan veszel részt ennek a kártyának a döntéseiben.\n\nPasszív (figyelő): a tudatpontoddal azt jelzed, hogy fontos neked, de nem számítasz bele a szavazások részvételi arányába — így nem lassítod és nem akadályozod a döntéseket.\nAktív (résztvevő): beleszámítasz a részvételi arányba. Ha szavazol, magától aktív leszel.\n\nA pontjaidhoz nem nyúl. Csak akkor választható, ha van tudatpontod a kártyán."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/kereses",
+      "cim": "🔍 Keresés (az ágon)",
+      "szoveg": "Keresés cím szerint, csak ennek a kártyának az ágán belül. Egy találatra koppintva a pakli oda ugrik."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/struktura",
+      "cim": "🗺️ Struktúra nézet (az ágon)",
+      "szoveg": "Ennek a kártyának az ága fa-szerkezetben, teljes képernyőn — a kártya az ág gyökere, kiemelve. Egy csomópontra koppintva a pakli oda ugrik."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/sikidom",
+      "cim": "🔵 Síkidom nézet (innen)",
+      "szoveg": "A síkidom nézet ebből a kártyából indítva: a kártya gyerekei a területén belül, és a felmenői is látszanak — így a környezete is."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/vilagterkep",
+      "cim": "🚧 Világtérkép",
+      "szoveg": "Ez a nézet még fejlesztésre vár (a lap bal alsó menüjében is): a koinó gondolatait egy világtérképen mutatná meg."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/rendezes",
+      "cim": "↕️ Rendezés (az ágon)",
+      "szoveg": "A lapos listák sorrendje, ennek a kártyának az ágára szűkítve. A hierarchikus (kapcsolatok szerinti) nézetben nincs külön ág-rendezés — ott a választás az egész pakli rendezése."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/uj-gondolat",
+      "cim": "✏️ Új gondolat létrehozása ebből",
+      "szoveg": "Új gondolatot írsz, ami ennek a kártyának a gyereke lesz — alá kerül, az ágába. Ehhez tudatpont kell ezen a kártyán."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/uj-alkategoria",
+      "cim": "Új alkategória létrehozása",
+      "szoveg": "A kategória kártyáján: új kategóriát hozol létre, ennek a kategóriának az alkategóriájaként. Ehhez tudatpont kell ezen a kártyán."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/javaslat",
+      "cim": "🌿 Javaslat létrehozása",
+      "szoveg": "Javaslatot teszel erre a kártyára: módosítás (a cím vagy a szöveg), áthelyezés (más szülő alá), törlés, vagy egyesítés egy másikkal — több ilyen egy csomagban is mehet. Ehhez tudatpont kell ezen a kártyán.\n\nA javaslatról azok döntenek szavazással, akiknek tudatpontjuk van a kártyán. A kézikönyv bejegyzéseinél csak módosítás és áthelyezés lehet."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/tudatpont-modositas",
+      "cim": "🌟 Tudatpont módosítás",
+      "szoveg": "Itt teszel tudatpontot erre a kártyára, vagy veszel le róla. A tudatpont nem fogy el: mindenkinek ugyanannyi van, és bármikor átrendezheted. Azt fejezi ki, mennyire fontos neked ez a dolog — nem a szavazatod súlyát."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/reszletes-adatok",
+      "cim": "ℹ️ Részletes adatok",
+      "szoveg": "A kártya adatai egy ablakban. Gondolatnál: a címe, a típusa, a kategóriái, mikor jött létre és mikor módosult, a tudatpontjai (a tiéd, az összes rajta, a hozzájárulók, az ágazati), a küszöbértékei és az azonosítója. Javaslatnál a szavazás állása és a saját részvételed, egyezménynél a szavazás a végrehajtáskor és az érintett entitások is."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/kuszob-ertek-javaslat",
+      "cim": "⚖️ Küszöb érték javaslat",
+      "szoveg": "Itt mondod meg, szerinted mekkora támogatottság és részvétel kelljen ezen a gondolaton egy javaslat elfogadásához, és mennyi legyen a legrövidebb és a leghosszabb döntési idő.\n\nEz érték javaslat — nem javaslat: nincs róla szavazás. A gondolat küszöbei a rajta tudatpontot tartók érték javaslatainak középértékéből (mediánjából) számolódnak; ha senki nem adott meg semmit, az alapértékekből. Ehhez tudatpont kell ezen a kártyán."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/ertesitesi-beallitasok",
+      "cim": "🔔 Értesítési beállítások",
+      "szoveg": "Itt állítod be, kérsz-e értesítést arról, ami ezen a kártyán és az ága alatt történik. Ha nem állítasz semmit, a fölötte lévő ág beállítását örökli. Ehhez tudatpont kell ezen a kártyán."
+    },
+    {
+      "nev": "kezikonyv/kartya/menu/felderites",
+      "cim": "📷 Felderítés (ebből az ágból)",
+      "szoveg": "Egy felderítést indít ebből a kártyából, az ágára: a program az ágat a megadott mélységig bejárja, és elhozza a társaidtól, amit a készüléked még nem ismer — hogy ott is lásd, ahol nem tartasz tudatpontot.\n\nBeállíthatod, hány csomópontot hozzon el, milyen mélyen, a szövegekkel (a törzzsel) együtt-e, és legfeljebb hány MB-ot. Az őrjárat végzi a háttérben; az állását a fő menü „Felderítések” ablakában látod. ⚠️ A pillanatkép nem frissül magától, és nem értesít: ha egy ágat követni akarsz, tegyél rá tudatpontot."
     },
     {
       "nev": "kezikonyv/fogalom",

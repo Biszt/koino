@@ -20,6 +20,7 @@
 // Használja: `index.html` (betöltéskor indul).
 
 import Modal from './components/modals/Modal.js';
+import SzovegMezoMegjelenito from './components/szoveg/SzovegMezoMegjelenito.js';
 import { apiGet } from './utils/apiHelper.js';
 import { aktivEntitasMentese } from './utils/authHelper.js';
 
@@ -37,6 +38,9 @@ import { aktivEntitasMentese } from './utils/authHelper.js';
 // hangzik (pl. „Értesítési beállítások” — ott a kártyáé); azok a kártyák magyarázatai közé tartoznak.
 const menuPont = (felirat, nev) => ({ hely: '#hamburger-menu-kontener .hamburger-menu-pont', cimke: '.hamburger-menu-pont__felirat',
   felirat, nev: 'kezikonyv/menu/' + nev, mod: 'vegere' });
+// ⭐ D129 (④b): a KÁRTYA menüje — ugyanaz az elem, a kártya saját tartójában (a pontjai a kártyát és az ágát érintik)
+const kartyaMenuPont = (felirat, nev) => ({ hely: '.pakli-kartya__hamburger-kontener .hamburger-menu-pont',
+  cimke: '.hamburger-menu-pont__felirat', felirat, nev: 'kezikonyv/kartya/menu/' + nev, mod: 'vegere' });
 
 export const MAGYARAZAT_HELYEK = Object.freeze([
   // ----- a menü: a panel tetején a menü egésze, és minden pontja (a gomb végén — a kattintása a menüpontot nem indítja) -----
@@ -57,6 +61,21 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   { hely: '#allapot', nev: 'kezikonyv/fejlec/allapot', mod: 'elejere' },
   // ----- az alsó sáv: egyetlen ⓘ a sáv elején (telefonon egy sor — a részei a buborékból nyílnak) -----
   { hely: '.also-sav__infok', nev: 'kezikonyv/also-sav', mod: 'elejere' },
+  // ----- ⭐ D129 (④b) a kártyák: EGY ⓘ a számsor elején (a kártya egésze — a részei, a pakli is, a buborékból), a fülsáv, a
+  // szavazás és a különválás, a kártya menüje (a panel tetején és minden pontján) -----
+  { hely: '.pakli-kartya__ikon-sor--tudatpont', nev: 'kezikonyv/kartya', mod: 'elejere' },
+  { hely: '.kartya-fulsav__sav', nev: 'kezikonyv/kartya/fulek', mod: 'vegere' },
+  { hely: '.szavazas-ful__bevezeto', nev: 'kezikonyv/kartya/szavazas', mod: 'vegere' },
+  { hely: '.szavazas-ful__kulonvalas-kerdes', nev: 'kezikonyv/kartya/szavazas/kulonvalas', mod: 'vegere' },
+  { hely: '.pakli-kartya__hamburger-kontener .hamburger-menu-panel', nev: 'kezikonyv/kartya/menu', mod: 'elejere' },
+  kartyaMenuPont('Értesítések', 'ertesitesek'), kartyaMenuPont('Tudatpontok', 'tudatpontok'),
+  kartyaMenuPont('Részvételi beállítások', 'reszveteli-beallitasok'), kartyaMenuPont('Keresés', 'kereses'),
+  kartyaMenuPont('Struktúra nézet', 'struktura'), kartyaMenuPont('Síkidom nézet', 'sikidom'),
+  kartyaMenuPont('Világtérkép', 'vilagterkep'), kartyaMenuPont('Rendezés', 'rendezes'),
+  kartyaMenuPont('Új gondolat létrehozása ebből', 'uj-gondolat'), kartyaMenuPont('Új alkategória létrehozása', 'uj-alkategoria'),
+  kartyaMenuPont('Javaslat létrehozása', 'javaslat'), kartyaMenuPont('Tudatpont módosítás', 'tudatpont-modositas'),
+  kartyaMenuPont('Részletes adatok', 'reszletes-adatok'), kartyaMenuPont('Küszöb érték javaslat', 'kuszob-ertek-javaslat'),
+  kartyaMenuPont('Értesítési beállítások', 'ertesitesi-beallitasok'), kartyaMenuPont('Felderítés…', 'felderites'),
   // ----- a „📱 Készülékeim” ablak -----
   { hely: '.koino-keszulekek__leiras', nev: 'kezikonyv/ablak/keszulekeim', mod: 'vegere' },
   { hely: '.koino-keszulekek__keszulek .koino-keszulekek__fej', nev: 'kezikonyv/ablak/keszulekeim/keszulek', mod: 'vegere' },
@@ -148,6 +167,32 @@ function bekezdesek(szoveg) {
 }
 
 /**
+ * ⭐ D129 (④b): a bejegyzés szövege a buborékba. A program a kártya alakjában adja: a szerkesztő blokkjait (a sima szöveg is
+ * bekezdésenként — `kezikonyv.js` `bekezdesBlokkok`; a közösség módosítása a szerkesztőből jön, HTML-tartalmú blokkokkal) — ezt
+ * UGYANAZ a megjelenítő rajzolja, mint a kártyát (a formázás, a link, a hivatkozás ugyanúgy; a tartalmat ő tisztítja). ⛔ Enélkül
+ * a lapról módosított bejegyzés buborékja „[object Object]”-et írt volna.
+ * @param {HTMLElement} kontener
+ * @param {Object} b - a program válasza
+ */
+function szovegRajzolasa(kontener, b) {
+  if (b.szovegHianyzik) {
+    kontener.innerHTML = '<p>A szövege még nem érkezett meg erre a készülékre — a tartójától kéri a program.</p>';
+    return;
+  }
+  if (b.szoveg === null || b.szoveg === undefined || typeof b.szoveg === 'string') {
+    kontener.innerHTML = bekezdesek(b.szoveg);
+    return;
+  }
+  new SzovegMezoMegjelenito(kontener, {
+    blokkok: b.szoveg,
+    onEntitasKivalasztas: (entitasId, entitasTipus) => {
+      buborekBezarasa();
+      window.aktivPakli?.entitasKivalasztasa?.(entitasId, entitasTipus);
+    }
+  });
+}
+
+/**
  * Egy bejegyzés a buborékban (a részei közt lépkedve ugyanabban a buborékban, „‹ vissza”-val).
  * @param {HTMLElement} jel - amelyik ⓘ nyitotta
  * @param {string} nev - a kézikönyv-név
@@ -193,12 +238,13 @@ async function buborekNyitasa(jel, nev, elozok = []) {
     + (elozok.length ? '<button type="button" class="koino-magyarazat__vissza" aria-label="Vissza">‹</button>' : '')
     + '<h4 class="koino-magyarazat__cim">' + html(b.cim ?? nev) + '</h4>'
     + '<button type="button" class="koino-magyarazat__bezar" aria-label="Bezárás">✕</button></div>'
-    + '<div class="koino-magyarazat__szoveg">' + bekezdesek(b.szoveg) + '</div>'
+    + '<div class="koino-magyarazat__szoveg"></div>'
     + reszek
     + (b.programJavaslat ? '<p class="koino-magyarazat__ajanlat">⭐ A program új szöveget javasol ehhez — a kézikönyvben elindíthatod.</p>' : '')
     + '<div class="koino-magyarazat__lab"><span>' + html(forras + pont) + '</span>'
     + '<button type="button" class="koino-magyarazat__gomb" title="A pakliban: tudatpontot tehetsz rá, és jobbat javasolhatsz">'
     + '📖 A kézikönyvben</button></div>';
+  szovegRajzolasa(buborek.querySelector('.koino-magyarazat__szoveg'), b);
   buborek.querySelector('.koino-magyarazat__bezar').onclick = buborekBezarasa;
   buborek.querySelector('.koino-magyarazat__vissza')?.addEventListener('click', () => buborekNyitasa(jel, elozok.at(-1), elozok.slice(0, -1)));
   for (const r of buborek.querySelectorAll('.koino-magyarazat__resz')) {

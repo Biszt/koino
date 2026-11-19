@@ -930,7 +930,7 @@ export async function entitasSzovege(tar, koino, azonosito, beallitas = {}) {
  * azóta új szöveget mond (MA5 (A)).
  * @param {Object} tar
  * @param {string} koino
- * @param {Object} beallitas - `{ nev, nezet, szerzo, horgony?, most? }`
+ * @param {Object} beallitas - `{ nev, nezet, szerzo, darabOlvas?, horgony?, most? }`
  * @returns {Promise<Object|null>} null, ha a koinóban nincs kézikönyv, vagy a név ismeretlen
  */
 export async function kezikonyvBejegyzese(tar, koino, beallitas = {}) {
@@ -947,9 +947,12 @@ export async function kezikonyvBejegyzese(tar, koino, beallitas = {}) {
     .find((x) => x.nev === beallitas.nev) ?? null;
   const gyerekek = [...kep.entitasok.values()].filter((x) => x.szulo === e.azonosito && x.rendszer !== undefined)
     .map((x) => ({ nev: x.rendszer, cim: x.cim }));
+  // ⭐ D129 (④b): a szöveg a kártyáé — a szerkesztő blokkjai (a sima szöveg is bekezdésenként, `kezikonyvKepbe`); ha a közösség
+  // hosszú szövege külön darab, a darab-tárból oldjuk fel (mint a kártya — `entitasSzovege`), és ha még nincs meg, kimondjuk.
+  const f = await szovegFeloldasa(e.szoveg ?? null, beallitas.darabOlvas);
   console.log('pakli.kezikonyvBejegyzese - VÉGE', { azonosito: e.azonosito.slice(0, 8), forras: e.kezikonyv?.forras });
   return {
-    nev: beallitas.nev, azonosito: e.azonosito, cim: e.cim, szoveg: e.szoveg,
+    nev: beallitas.nev, azonosito: e.azonosito, cim: e.cim, szoveg: f.szoveg, ...(f.hianyzik ? { szovegHianyzik: true } : {}),
     forras: e.kezikonyv?.forras ?? 'program', ismert: e.kezikonyv?.ismert ?? true,
     osszesPont: e.osszesPont ?? 0, sajatPont: beallitas.szerzo ? (e.hozzajarulok?.get(beallitas.szerzo)?.pont ?? 0) : 0,
     // ⭐⭐ a koinon pontja külön (a buborék a közösség pontjait mondja — a koinoné mindig 1)

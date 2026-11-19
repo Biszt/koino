@@ -12793,7 +12793,8 @@ try {
         // ⭐⭐ D129 (③): EGY KÉZIKÖNYV-BEJEGYZÉS — az ⓘ buborékja kéri (a név szerint): a megjelenítendő szöveg, honnan jön, az
         // entitás (a „📖 A kézikönyvben” gombhoz), a pontok, és ha a program azóta új szöveget mond (MA5 (A)).
         if (utvonal === '/api/kezikonyv/bejegyzes') {
-          const b = await kezikonyvBejegyzese(olvasoTar, KOINO, { nev: kereses.get('nev') ?? '', szerzo, nezet: pakliNezet });
+          const b = await kezikonyvBejegyzese(olvasoTar, KOINO, { nev: kereses.get('nev') ?? '', szerzo, nezet: pakliNezet,
+            darabOlvas: (lenyomat) => fajlBlobTarolo(KOINO).olvas(lenyomat) });
           if (!b) return { allapot: 404, adat: { hiba: 'nincs ilyen kézikönyv-bejegyzés (vagy ennek a koinónak nincs kézikönyve)' } };
           return { adat: b };
         }

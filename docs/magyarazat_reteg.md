@@ -153,3 +153,26 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   állapot-sor és a tér sávja a lap zöld hátterén ül — a zöld jel elveszett rajta; ott is világos jel. A buborék a menüpont ⓘ-jére
   kattintva nyílik, és a menüpontot magát nem indítja el (a „Keresés” ablaka zárva marad). Próba: a névellenőrzés (minden ⓘ-hely
   neve szerepel az alap-tartalomban) a `menuPont(…)` alakot is olvassa.
+- **2026-11-19** — ✅ **a ④b kész: a kártyák és a pakli.** Minden kártyán EGY ⓘ a számsor elején („A kártyák” — a részei a
+  buborékból: a számok, a második sor (típus, kategóriák, a javaslat és az egyezmény mutatói, a döntési idő), a fülek, a szavazás és a
+  különválás, a pakli (a lánc és a testvér-jelzők), a kártya menüje); külön ⓘ a fülsávon, a „Szavazás” fülön és a különválás
+  kérdésénél; a kártya menüjének tetején és minden pontján (15 — a koinó saját „📷 Felderítés…” pontja is). Az alap-tartalom +23
+  bejegyzés (most 79); minden állítás a kódból (a kártya-osztályok, a modálok, a `pakli.js`, a `javaslatSzamitas.js`, a
+  `szerkesztesiVegrehajtas.js`) — pl. a döntési idő a minimum és a maximum között a bizonyossági mutatóval rövidül; a küszöb a
+  tulajdonosok érték javaslatainak mediánja; a kártya menüjének mely pontjaihoz kell saját tudatpont. ⭐ **A szöveg a kártya
+  alakjában** (`kezikonyv.js` `bekezdesBlokkok`): a pakli képében a sima szöveg bekezdésenként egy szerkesztő-blokk (a jelei kódolva,
+  a sortörés `<br>`) — a kártya eddig egy blokkba folyatta a bekezdéseket (a ③-ban feljegyzett hiba). ⛔ **Lelet (kódolvasás
+  közben):** a felület szerkesztője HTML-tartalmú blokkokat ment — egy lapról módosított kézikönyv-bejegyzés buborékja
+  „[object Object]”-et írt volna, és a hosszú közösségi szöveg (külön darab) fel sem oldódott volna. Most a buborék a blokkokat
+  UGYANAZZAL a megjelenítővel rajzolja, mint a kártya (`SzovegMezoMegjelenito` — a tisztítás is az övé), a program
+  (`kezikonyvBejegyzese`) a darabot feloldja, és ha még nincs meg, kimondja. Böngészőben: a kártya ⓘ-je és a részei, a kártya-menü
+  ⓘ-je (a buborék nyílik, a menüpont nem indul), a szavazás és a fülsáv ⓘ-je a valódi komponenseken (a különválás ⓘ-je nem jelöli be
+  a jelölőt, a fül nem vált), telefonos szélességben is. Próba: +1 egység (most 14 — a bekezdések, a darab feloldása és a hiánya), a
+  ③ képpróbája a blokk-alakkal, a parancssor ③ próbája a buborék szövegének alakjával; a névellenőrzés a kártya-menü alakját is
+  olvassa, és az előtagot a segédfüggvény saját sorából veszi (⛔ a 9. rontás — az elírt előtag — elsőre átcsúszott: a próba maga
+  tette hozzá az előtagot). 9 rontás mind bukik. ⚠️ Próba nélkül: a kapu útvonala a darab-olvasót adja a buboréknak (`koino.js`).
+  ⛔ **Lelet (a teljes sor — a parancssor D101 ④ síkidom-próbája):** a kézikönyv gyökere bejegyzésenként a koinon 1 pontját
+  hordozza (az ágában), és a 79 bejegyzéssel (79 pont) erősebb lett a próba legerősebb gyökerénél (60) — a próba rögzített 60-at
+  várt a „legerősebb gyökér pontjának”. A program helyes (Csaba: a kézikönyvre ugyanaz a sorrend); a próba most a kettő közül az
+  erősebbet várja. ⚠️ A kézikönyv növekedtével egy friss koinóban a kézikönyv a legerősebb gyökér — a pakli azzal nyílik, a síkidom
+  hozzá méretez, amíg a közösség gondolatai el nem hagyják.

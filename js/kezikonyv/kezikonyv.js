@@ -127,6 +127,30 @@ export function kezikonyvSzovege(entitas, index = programAlapTartalma()) {
 }
 
 // ===================================
+// ⭐⭐ D129 (④b): A SZÖVEG BEKEZDÉSEI — a szerkesztő blokkjaiként
+// ===================================
+
+const HTML_JEL = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+/**
+ * Egy egyszerű szöveg (a program alap-tartalma, vagy a parancssorból javasolt) a szerkesztő blokkjaiként: bekezdésenként (üres sor
+ * választ el) egy szöveg-blokk, a bekezdésen belüli sortörés `<br>`. ⛔ Enélkül a kártya az egész szöveget EGY blokkba tette (a régi,
+ * sima szöveges alak útja), és a bekezdések egybefolytak. A blokk tartalma HTML — a szöveg jeleit kódoljuk (a sima szöveg nem
+ * HTML). A szerkesztő is ezt az alakot kapja, ha valaki a bejegyzés módosítását javasolja.
+ * @param {*} szoveg
+ * @returns {*} a blokkok tömbje; ami nem szöveg (már blokkok, darab-hivatkozás, null), változatlanul
+ */
+export function bekezdesBlokkok(szoveg) {
+  if (typeof szoveg !== 'string') return szoveg;
+  return szoveg.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean).map((p, i) => ({
+    id: 'kezikonyv-' + (i + 1),
+    tipus: 'szoveg',
+    tartalom: p.replace(/[&<>"']/g, (c) => HTML_JEL[c]).replace(/\n/g, '<br>'),
+    formatas: { felkover: false, dolt: false, meret: 'kozepes' }
+  }));
+}
+
+// ===================================
 // ⭐⭐ D129 (③, MA6 (A)): A KÉZIKÖNYV A PAKLI KÉPÉBEN
 // ===================================
 
@@ -137,7 +161,8 @@ export function kezikonyvSzovege(entitas, index = programAlapTartalma()) {
  * kód nélkül mutatja — „A koinó kézikönyve” egy új koinó első témája.
  *
  * Minden kézikönyv-entitás megkapja a `kezikonyv` jelet: `{ nev, forras: 'program'|'kozosseg', ismert }` (a lap kimondja, honnan
- * jön a szöveg). ⚠️ A bemenet entitásait HELYBEN írja (a kép a pakli saját, kiszámolt példánya).
+ * jön a szöveg). A sima szöveg a képben bekezdésenkénti blokkokként áll (`bekezdesBlokkok` — a kártya így tagolja); a közösség
+ * blokkjai és a darab-hivatkozás változatlanul. ⚠️ A bemenet entitásait HELYBEN írja (a kép a pakli saját, kiszámolt példánya).
  * @param {Map<string, Object>} entitasok - a pakli képének entitásai
  * @param {ReturnType<typeof alapTartalomIndexe>} [index]
  * @returns {number} hány virtuális entitás került a képbe
@@ -149,12 +174,12 @@ export function kezikonyvKepbe(entitasok, index = programAlapTartalma()) {
     const sz = kezikonyvSzovege(e, index);
     e.kezikonyv = { nev: sz.nev, forras: sz.modositott ? 'kozosseg' : 'program', ismert: sz.ismert };
     e.cim = sz.cim;
-    e.szoveg = sz.szoveg;
+    e.szoveg = bekezdesBlokkok(sz.szoveg);
   }
   for (const b of index.bejegyzesek) {
     if (entitasok.has(b.azonosito)) continue;
     entitasok.set(b.azonosito, {
-      azonosito: b.azonosito, tipus: 'Gondolat', cim: b.cim, szoveg: b.szoveg, ikon: null, gondolatTipus: null, kategoriak: [],
+      azonosito: b.azonosito, tipus: 'Gondolat', cim: b.cim, szoveg: bekezdesBlokkok(b.szoveg), ikon: null, gondolatTipus: null, kategoriak: [],
       szulo: b.szulo === null ? null : rendszerAzonosito(b.szulo), meret: 0, rendszer: b.nev, szerzo: null, letrehozva: null,
       // ⭐⭐ a koinon 1 pontja (mint a mag kézikönyv-entitásain — `allapotSzamitas.js`)
       osszesPont: KOINON_PONT, hozzajarulok: new Map([[KOINON, koinonHozzajarulasa()]]), kuszobok: null,

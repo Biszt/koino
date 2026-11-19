@@ -21,17 +21,18 @@ import { rendszerNevE, rendszerAzonosito, szuloNeve, nevEsFelmenoi, rendszerNeve
 // ⭐⭐ D129 (②): a javaslatok szabályai, a végrehajtás, az alap-tartalom és az új programverzió
 import { szerkesztesiEgyezmenyekAlkalmazasa } from '../js/allapot/szerkesztesiVegrehajtas.js';
 import { alapTartalomAlakiHibaja, alapTartalomIndexe, programAlapTartalma, kezikonyvSzovege, programJavaslatai, bejegyzesLenyomata,
-  ALAP_TARTALOM_FAJTA, kezikonyvKepbe } from '../js/kezikonyv/kezikonyv.js';
+  ALAP_TARTALOM_FAJTA, kezikonyvKepbe, bekezdesBlokkok } from '../js/kezikonyv/kezikonyv.js';
 // ⭐⭐ D129 (③): a felület ⓘ helyei (a forrásból olvasva — a modul böngészős, Node-ban nem tölthető be); a pakli számai
 import { readFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
 import { esemenyMentese } from '../js/tar/esemenyTar.js';
-import { helyiStatisztika, ujPakliNezet } from '../js/allapot/pakli.js';
+import { helyiStatisztika, ujPakliNezet, kezikonyvBejegyzese } from '../js/allapot/pakli.js';
+import { szovegDarabra } from '../js/esemeny/szovegDarab.js';
 import { GYOKER_KULCS } from '../js/csere/szeletEgyeztetes.js';
 
-const { proba, futtatas } = probaGyujtemeny('A kézikönyv (D129 ①–③)');
+const { proba, futtatas } = probaGyujtemeny('A kézikönyv (D129 ①–④)');
 
 const NAP = 86400 * 1000;
 const KEZDET = Date.UTC(2026, 10, 19);
@@ -379,17 +380,72 @@ proba('⭐⭐ D129 (③, MA6 (A)): a kézikönyv a pakli képében — a meg nem
     const k = entitasok.get(K);
     const m = entitasok.get(M);
     const g = entitasok.get(G);
+    // ⭐ D129 (④b): a képben a sima szöveg bekezdésenkénti blokk (`bekezdesBlokkok`) — itt a blokkok tartalmát olvassuk vissza
+    const blokkSzovege = (sz) => (Array.isArray(sz) && sz.every((b) => b.tipus === 'szoveg') ? sz.map((b) => b.tartalom).join('\n\n') : null);
     const r = {
       uj: uj === 2 && entitasok.has(KEZIKONYV_GYOKER_AZONOSITO) && entitasok.get(KEZIKONYV_GYOKER_AZONOSITO).szulo === null,
       virtualis: k?.virtualis === true && k.cim === 'A keresés' && k.szulo === M && k.osszesPont === KOINON_PONT
         && k.hozzajarulok.get(KOINON)?.szerep === 'passziv' && k.kezikonyv?.forras === 'program'
-        && k.hozzajarulok instanceof Map,
-      modositott: m.cim === 'Közösségi menü' && m.szoveg === 'A menü.' && m.kezikonyv?.forras === 'kozosseg',
-      ag: g.cim === 'A keresés' && g.szoveg === 'Így keresel.',
+        && k.hozzajarulok instanceof Map && blokkSzovege(k.szoveg) === 'Így keresel.',
+      modositott: m.cim === 'Közösségi menü' && blokkSzovege(m.szoveg) === 'A menü.' && m.kezikonyv?.forras === 'kozosseg',
+      ag: g.cim === 'A keresés' && blokkSzovege(g.szoveg) === 'Így keresel.',
       hetkoznapi: entitasok.get('h'.repeat(43)).kezikonyv === undefined
     };
     if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify({ r, uj }) + ')\n'); return false; }
     return true;
+  });
+
+proba('⭐⭐ D129 (④b): a szöveg a kártya alakjában — a sima szöveg bekezdésenként egy blokk (a jelei kódolva, a sortörés <br>), a blokk és a hivatkozás változatlan; a buborék a közösség darabban tartott szövegét feloldja, és ha nincs meg, kimondja',
+  async () => {
+    // ----- a bekezdések -----
+    const bl = bekezdesBlokkok('Első & <b>"\'.\nmég\n\n  Második  \n \n');
+    const tomb = [{ id: 'b1', tipus: 'szoveg', tartalom: 'x' }];
+    const hiv = { lenyomat: 'l'.repeat(43), bajt: 10 };
+    const bekezdes = bl.length === 2 && bl.every((b) => b.tipus === 'szoveg') && bl[0].id !== bl[1].id
+      && bl[0].tartalom === 'Első &amp; &lt;b&gt;&quot;&#39;.<br>még' && bl[1].tartalom === 'Második'
+      && bekezdesBlokkok(tomb) === tomb && bekezdesBlokkok(hiv) === hiv && bekezdesBlokkok(null) === null;
+    // ----- a buborék: a program szövege blokkokban; a közösség darabban tartott szövege feloldva -----
+    const mappa = await mkdtemp(join(tmpdir(), 'koino-kezikonyv-'));
+    try {
+      const tar = await esemenyTarNyitasa('kb', mappa);
+      const a = await ujEember('kb');
+      const K = rendszerAzonosito(KERESES);
+      const szuletes = await a.tesz('KoinoLetrehozas', { nev: 'Buborék', leiras: null, alapitok: [], zart: true,
+        szabalyok: teljesSzabalyok() }, KEZDET);
+      const ertek = await a.tesz('ErtekJavaslat', { entitas: K, rendszer: [KERESES],
+        ertekek: { elfogadasiKuszob: 51, reszveteliKuszob: 0, minimumDontesiIdo: 1, maximumDontesiIdo: 604800 } }, KEZDET + 1000);
+      const pont = await a.tesz('TudatpontRendezes', { entitas: K, pont: 50, szerep: 'aktiv', rendszer: [KERESES] }, KEZDET + 1000);
+      const kozossegi = [{ id: 'k1', tipus: 'szoveg', tartalom: '<b>Közösségi</b> szöveg', formatas: { felkover: false, dolt: false, meret: 'kozepes' } }];
+      const { hivatkozas, bajtok } = await szovegDarabra(kozossegi);
+      const j = await a.tesz('Javaslat', { fajta: 'szerkesztesi', rendszer: [KERESES],
+        erintettek: [{ entitas: K, muvelet: 'Modositas', valtozas: { szoveg: hivatkozas } }] }, KEZDET + 2000);
+      const sz = await a.szavaz(j, { szavazat: 'Tamogat', kulonvalasIgeny: false }, KEZDET + 3000);
+      for (const e of [szuletes, ertek, pont, j, ...sz]) await esemenyMentese(tar, e);
+      const kerdes = (nev, darabOlvas) => kezikonyvBejegyzese(tar, 'kb', { nev, most: KEZDET + 8 * NAP, darabOlvas,
+        nezet: ujPakliNezet({ tartott: async () => new Set([K]) }) });
+      const megvan = await kerdes(KERESES, async (l) => (l === hivatkozas.lenyomat ? bajtok : null));
+      const nincsMeg = await kerdes(KERESES, async () => null);
+      const program = await kerdes('kezikonyv/also-sav', undefined);
+      const programSzovege = programAlapTartalma().nevSzerint.get('kezikonyv/also-sav').szoveg;
+      // a darab kanonikus alakban áll (a kulcsok rendezve) — a tartalmat vetjük össze, nem a kulcsok sorrendjét
+      const rendezve = (x) => JSON.stringify(x, (k, v) => (v && typeof v === 'object' && !Array.isArray(v)
+        ? Object.fromEntries(Object.entries(v).sort(([p], [q]) => (p < q ? -1 : 1))) : v));
+      const r = {
+        bekezdes,
+        megvan: megvan?.forras === 'kozosseg' && rendezve(megvan.szoveg) === rendezve(kozossegi) && !megvan.szovegHianyzik,
+        nincsMeg: nincsMeg?.szoveg === null && nincsMeg.szovegHianyzik === true,
+        program: program?.forras === 'program' && Array.isArray(program.szoveg)
+          && program.szoveg.length === programSzovege.split(/\n\s*\n/).filter((p) => p.trim()).length && program.szovegHianyzik === undefined
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (' + JSON.stringify({ r, bl, megvan: megvan && { forras: megvan.forras, szoveg: megvan.szoveg },
+          nincsMeg: nincsMeg && { szoveg: nincsMeg.szoveg, h: nincsMeg.szovegHianyzik } }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      await rm(mappa, { recursive: true, force: true });
+    }
   });
 
 proba('⭐⭐ D129 (③): az alsó sáv számai — a kézikönyv nem gondolat (a „📄” nem számolja), és nem ismert rész a gyökérnél (a „🔭 még nem ismert” a tartó bemondásából a kézikönyv nélkül számol)',
@@ -419,9 +475,17 @@ proba('⭐⭐ D129 (③): a felület minden ⓘ-helyének neve szerepel a progra
     const forras = await readFile(new URL('../felulet/js/koinoMagyarazat.js', import.meta.url), 'utf8');
     const kezdet = forras.indexOf('export const MAGYARAZAT_HELYEK');
     const helyek = forras.slice(kezdet, forras.indexOf(']);', kezdet));
-    // a `nev: '…'` alakú bejegyzések, és a menüpontok (`menuPont('<felirat>', '<név vége>')` → `kezikonyv/menu/<név vége>`)
+    // a `nev: '…'` alakú bejegyzések, és a menüpontok (`menuPont('<felirat>', '<név vége>')` → `kezikonyv/menu/<név vége>`; a
+    // kártya menüjéé — ⭐ D129 (④b) — `kartyaMenuPont(…)` → `kezikonyv/kartya/menu/<név vége>`; a kettő nem keveredhet)
+    // ⛔ az előtagot a segédfüggvény SAJÁT soráról olvassuk (nem a próba mondja meg) — különben egy elírt előtag átcsúszna
+    const elotag = (fv) => forras.match(new RegExp('const ' + fv + ' = [^;]*?nev: \'([^\']+)\' \\+ nev'))?.[1] ?? '(nincs)';
     const nevek = [...[...helyek.matchAll(/nev: '([^']+)'/g)].map((m) => m[1]),
-      ...[...helyek.matchAll(/menuPont\('[^']*', '([^']+)'\)/g)].map((m) => 'kezikonyv/menu/' + m[1])];
+      ...[...helyek.matchAll(/(?<![A-Za-z])menuPont\('[^']*', '([^']+)'\)/g)].map((m) => elotag('menuPont') + m[1]),
+      ...[...helyek.matchAll(/kartyaMenuPont\('[^']*', '([^']+)'\)/g)].map((m) => elotag('kartyaMenuPont') + m[1])];
+    if (!nevek.includes('kezikonyv/kartya/menu/javaslat') || !nevek.includes('kezikonyv/menu/kereses')) {
+      process.stderr.write('    (a két menü-alak közül valamelyiket nem olvasta a próba)\n');
+      return false;
+    }
     const alap = programAlapTartalma();
     const hianyzik = nevek.filter((n) => !alap.nevSzerint.has(n));
     if (nevek.length < 5 || hianyzik.length) { process.stderr.write('    (' + JSON.stringify({ nevek, hianyzik }) + ')\n'); return false; }
