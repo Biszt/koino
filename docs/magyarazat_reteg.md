@@ -176,3 +176,16 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   várt a „legerősebb gyökér pontjának”. A program helyes (Csaba: a kézikönyvre ugyanaz a sorrend); a próba most a kettő közül az
   erősebbet várja. ⚠️ A kézikönyv növekedtével egy friss koinóban a kézikönyv a legerősebb gyökér — a pakli azzal nyílik, a síkidom
   hozzá méretez, amíg a közösség gondolatai el nem hagyják.
+- **2026-11-20** — ⭐ **A próbák rendje a ④ további részeinél** (Csaba: „minden rész után lefuttatod a teljes próbasórt, ami
+  kb.1 óra?” — a javaslatra „rendben”): a szöveget és felületi helyet hozó al-részek után a kézikönyv próbái és a parancssor D129
+  próbái futnak, és commit; a teljes sor egyszer, a ④ végén (ez fogja meg, ha a kézikönyv növekedése más próbák sorrendjét mozdítja).
+- **2026-11-20** — ✅ **a ④c első csoportja: a nézetek ablakai.** Az ablak CÍME mellett ⓘ (Keresés, Struktúra, Rendezés, a három
+  nézet-ablak; a Síkidom a címét elrejti — ott a súgó-sor elején). Ahol a menüpont ⓘ-je már elmondja az ablakot, az ablaké ugyanarra a
+  bejegyzésre mutat (egy magyarázat egy dologról — a közösség egy helyen javítja); az örökölt ablakot a tartalma jelöli
+  (`.modal-panel:has(.kereses-modal) .modal-cim` — a kártyáról nyitott, ágra szűkített változat is), a koinósat a címe. ⛔
+  **Leletek (a kód újraolvasása — a ④a három szövege nem stimmelt):** ① a Keresés javaslatot és egyezményt NEM talál (a kereső
+  típusai: gondolat, kategória, gondolattípus — `pakli.js` `KERESES_TIPUSOK`), és nem „a szavak elejére” keres, hanem a beírt
+  szöveget egészében (a címben benne van-e); a hálózati kérdés minden kérdésnél fut, nem csak „ha a koinó nagyobb”. ② A Síkidomban
+  egy koppintás az alakzatra FÓKUSZÁL, a dupla koppintás a paklit oda viszi (a ④a ezt tévesen kivette; az örökölt súgó-sor
+  „koppintás: adatlap”-ja elavult — a fájl bájtra azonos, nem írjuk át). ③ A Struktúra nem behúzásos lista, hanem rajzolt fa
+  (csomópontok, élek; a nagyítással egyre több részlet), és a kerete 5000 csomópont. Mindhárom szöveg kijavítva.

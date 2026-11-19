@@ -76,6 +76,17 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   kartyaMenuPont('Javaslat létrehozása', 'javaslat'), kartyaMenuPont('Tudatpont módosítás', 'tudatpont-modositas'),
   kartyaMenuPont('Részletes adatok', 'reszletes-adatok'), kartyaMenuPont('Küszöb érték javaslat', 'kuszob-ertek-javaslat'),
   kartyaMenuPont('Értesítési beállítások', 'ertesitesi-beallitasok'), kartyaMenuPont('Felderítés…', 'felderites'),
+  // ----- ⭐ D129 (④c) az ablakok: az ablak CÍME mellett egy ⓘ. Ahol a menüpont ⓘ-je már elmondja az ablakot, az ablaké UGYANARRA a
+  // bejegyzésre mutat (egy magyarázat egy dologról — a közösség egy helyen javítja). Az örökölt ablakot a tartalma jelöli
+  // (`:has(...)` — a kártyáról nyitott, ágra szűkített változat is), a koinósat a címe. -----
+  { hely: '.modal-panel:has(.kereses-modal) .modal-cim', nev: 'kezikonyv/menu/kereses', mod: 'vegere' },
+  { hely: '.modal-panel:has(.struktura-modal) .modal-cim', nev: 'kezikonyv/menu/struktura', mod: 'vegere' },
+  // ⚠️ a Síkidom ablaka a címét elrejti (teljes képernyő) — az ⓘ a súgó-sor elején áll (a böngészős kipróbálás lelete)
+  { hely: '.sikidom-modal__sugo', nev: 'kezikonyv/menu/sikidom', mod: 'elejere' },
+  { hely: '.modal-panel:has(.rendezes-modal) .modal-cim', nev: 'kezikonyv/menu/rendezes', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🧩 A koinó nézetei', nev: 'kezikonyv/menu/nezetek', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🧩 Nézet bekapcsolása', nev: 'kezikonyv/menu/nezetek', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🧩 Új nézet', nev: 'kezikonyv/menu/uj-nezet', mod: 'vegere' },
   // ----- a „📱 Készülékeim” ablak -----
   { hely: '.koino-keszulekek__leiras', nev: 'kezikonyv/ablak/keszulekeim', mod: 'vegere' },
   { hely: '.koino-keszulekek__keszulek .koino-keszulekek__fej', nev: 'kezikonyv/ablak/keszulekeim/keszulek', mod: 'vegere' },
