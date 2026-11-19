@@ -139,3 +139,17 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   Következmény: egy friss koinóban a kézikönyv gyökere (a bejegyzései koinon-pontjaival) a legerősebb gyökér lehet — a pakli azzal
   nyílik, amíg a közösség gondolatai nem erősebbek. ⏭️ D130: a koinon az általános egyezményekhez, a darabokra osztott, replikált
   őrzéssel.
+- **2026-11-19** — ✅ **a ④a kész: a menü és a fejléc.** Az ⓘ a fő menü minden pontján (22) és a panel tetején (a menü egészéről),
+  a fejlécben a tér sávján (5 részével: vissza, rendezés, frissítés, csatlakozás, társak), a belépő sávján és az állapot-soron. Az
+  alap-tartalom +30 bejegyzés (most 56). A menüpontot a felirata azonosítja — a pont saját címke-eleme, pontos egyezéssel (az
+  ikon és a számláló külön elemben áll, így a felirat tiszta). A szövegek a kódhoz igazítva: hat állítás kikerült vagy szűkült, mert a kódban nem
+  találtam alátámasztást (a síkidom a paklit is odaugratja; a tér kártyáinak számai név szerint; az értesítések összefoglaló küldése;
+  az új gondolat ablakában a szülő választása; a meghívó nyilatkozatának „felelsz érte” része; a koinon pontja az egyezményeken — az
+  csak a D130 után igaz). ⛔ **Leletek (a böngészős kipróbálás):** ① a kártyák saját menüje ugyanazt az elemet viseli, és
+  néhány pontja ugyanúgy hangzik — 30 ⓘ lett volna; a helyek most csak a fő menüre (`#hamburger-menu-kontener`) szólnak, a kártyák
+  menüje a ④b-é. ② A belépő sávját és az állapot-sort a lap minden frissítéskor újraírja — az „ez már megjelölt” jelzés az elemen
+  maradt, a jel nem; most a jel tényleges jelenlétét nézzük. ③ ⭐ A figyelő `requestAnimationFrame`-mel ütemezett — egy nem látható
+  fülön a böngésző azt nem futtatja, és a menü ⓘ-i ki sem kerültek (kézi hívásra igen: +25); most időzítővel (30 ms). ④ Az
+  állapot-sor és a tér sávja a lap zöld hátterén ül — a zöld jel elveszett rajta; ott is világos jel. A buborék a menüpont ⓘ-jére
+  kattintva nyílik, és a menüpontot magát nem indítja el (a „Keresés” ablaka zárva marad). Próba: a névellenőrzés (minden ⓘ-hely
+  neve szerepel az alap-tartalomban) a `menuPont(…)` alakot is olvassa.

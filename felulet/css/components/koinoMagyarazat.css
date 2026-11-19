@@ -21,8 +21,12 @@
   flex: none;
 }
 
-/* a sötét alsó sávon világos jel (különben a zöld a zöldön elveszik) */
-.also-sav .koino-magyarazat__jel {
+/* a sötét alsó sávon, a zöld menüpanelen és a lap zöld hátterén ülő fejléc-sorokon (állapot, tér) világos jel
+   (különben a zöld a zöldön elveszik — a böngészős kipróbálás lelete); a belépő sávjának saját, világos háttere van */
+.also-sav .koino-magyarazat__jel,
+.hamburger-menu-panel .koino-magyarazat__jel,
+#allapot > .koino-magyarazat__jel,
+#ter-sav > .koino-magyarazat__jel {
   color: #fff;
   background: rgba(255, 255, 255, 0.24);
 }

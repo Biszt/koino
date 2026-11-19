@@ -28,11 +28,33 @@ import { aktivEntitasMentese } from './utils/authHelper.js';
 // ===================================
 
 /**
- * Hova kerül ⓘ: a választó (a dokumentumban), ha kell a felirat eleje (`felirat`), a kézikönyv-név, és hogyan (`mod`):
- * `elejere` / `vegere` — az elem belsejébe, elölre / hátra; `utana` — az elem mögé (testvérként: gomb mellé).
+ * Hova kerül ⓘ: a választó (a dokumentumban), ha kell a felirat (`felirat` — az elem szövegének eleje; ha `cimke` is van, annak
+ * a belső elemnek a szövege, pontos egyezéssel), a kézikönyv-név, és hogyan (`mod`): `elejere` / `vegere` — az elem belsejébe,
+ * elölre / hátra; `utana` — az elem mögé (testvérként: gomb mellé).
  * ⭐ A próba (`meres/kezikonyvProba.js`) nézi, hogy minden itteni név szerepel-e a program alap-tartalmában.
  */
+// ⚠️ Csak a FŐ menü (`#hamburger-menu-kontener`): a kártyáknak is van menüjük ugyanazzal az elemmel, és néhány pontjuk ugyanúgy
+// hangzik (pl. „Értesítési beállítások” — ott a kártyáé); azok a kártyák magyarázatai közé tartoznak.
+const menuPont = (felirat, nev) => ({ hely: '#hamburger-menu-kontener .hamburger-menu-pont', cimke: '.hamburger-menu-pont__felirat',
+  felirat, nev: 'kezikonyv/menu/' + nev, mod: 'vegere' });
+
 export const MAGYARAZAT_HELYEK = Object.freeze([
+  // ----- a menü: a panel tetején a menü egésze, és minden pontja (a gomb végén — a kattintása a menüpontot nem indítja) -----
+  { hely: '#hamburger-menu-kontener .hamburger-menu-panel', nev: 'kezikonyv/menu', mod: 'elejere' },
+  menuPont('Keresés', 'kereses'), menuPont('Struktúra nézet', 'struktura'), menuPont('Világtérkép', 'vilagterkep'),
+  menuPont('Síkidom nézet', 'sikidom'), menuPont('Rendezés', 'rendezes'), menuPont('Nézetek…', 'nezetek'),
+  menuPont('A tér — a koinóim', 'ter'), menuPont('Bekapcsolódás…', 'bekapcsolodas'),
+  menuPont('Új koino-verzió (gyermek)…', 'koino-verzio'), menuPont('A program ezen a készüléken…', 'program'),
+  menuPont('Felderítések', 'felderitesek'), menuPont('Az egész koinó felderítése…', 'felderites-egesz'),
+  menuPont('Értesítések', 'ertesitesek'), menuPont('Értesítési beállítások', 'ertesitesi-beallitasok'),
+  menuPont('Új gondolat létrehozása', 'uj-gondolat'), menuPont('Új kategória létrehozása', 'uj-kategoria'),
+  menuPont('Új gondolat típus létrehozása', 'uj-gondolattipus'), menuPont('Új nézet…', 'uj-nezet'),
+  menuPont('Meghívóim', 'meghivoim'), menuPont('Készülékeim', 'keszulekeim'), menuPont('Tudatpontok', 'tudatpontok'),
+  menuPont('eember beállítások', 'eember-beallitasok'),
+  // ----- a fejléc: a tér sávja (egy ⓘ — a részei a buborékból), a belépő sávja, az állapot-sor -----
+  { hely: '#ter-sav', nev: 'kezikonyv/fejlec/ter-sav', mod: 'elejere' },
+  { hely: '#belepes-sav', nev: 'kezikonyv/fejlec/belepes', mod: 'elejere' },
+  { hely: '#allapot', nev: 'kezikonyv/fejlec/allapot', mod: 'elejere' },
   // ----- az alsó sáv: egyetlen ⓘ a sáv elején (telefonon egy sor — a részei a buborékból nyílnak) -----
   { hely: '.also-sav__infok', nev: 'kezikonyv/also-sav', mod: 'elejere' },
   // ----- a „📱 Készülékeim” ablak -----
@@ -45,7 +67,6 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
 ]);
 
 const JEL_OSZTALY = 'koino-magyarazat__jel';
-const MEGJELOLT = 'koinoMagyarazat';   // data-koino-magyarazat: ennél az elemnél már van ⓘ (a neve)
 
 const html = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
@@ -75,9 +96,16 @@ export function jelekElhelyezese(gyoker = document) {
   let uj = 0;
   for (const h of MAGYARAZAT_HELYEK) {
     for (const elem of gyoker.querySelectorAll(h.hely)) {
-      if (h.felirat && !elem.textContent.trim().startsWith(h.felirat)) continue;
-      if (elem.dataset[MEGJELOLT] === h.nev) continue;
-      elem.dataset[MEGJELOLT] = h.nev;
+      if (h.felirat) {
+        const szoveg = (h.cimke ? elem.querySelector(h.cimke)?.textContent : elem.textContent)?.trim() ?? '';
+        if (h.cimke ? szoveg !== h.felirat : !szoveg.startsWith(h.felirat)) continue;
+      }
+      // ⭐ Ott van-e MÁR — a jelet nézzük, nem egy jelzést az elemen: a lap egyes részeit (a belépő sávja, az állapot-sor) minden
+      // frissítéskor újraírja, és a jel ilyenkor eltűnik, az elem maga marad.
+      const megvan = h.mod === 'utana'
+        ? elem.nextElementSibling?.classList.contains(JEL_OSZTALY) && elem.nextElementSibling.dataset.nev === h.nev
+        : [...elem.children].some((c) => c.classList.contains(JEL_OSZTALY) && c.dataset.nev === h.nev);
+      if (megvan) continue;
       const jel = jelKeszitese(h.nev);
       if (h.mod === 'elejere') elem.prepend(jel);
       else if (h.mod === 'utana') elem.after(jel);
@@ -202,7 +230,9 @@ export function magyarazatInditasa() {
   new MutationObserver(() => {
     if (utemezve) return;
     utemezve = true;
-    requestAnimationFrame(() => { utemezve = false; jelekElhelyezese(); });
+    // ⛔ NEM `requestAnimationFrame`: a háttérben (egy nem látható fülön) a böngésző azt nem futtatja — a figyelő beragadt, és több
+    // ⓘ nem került ki (a böngészős kipróbálás lelete). Az időzítő a háttérben is lefut.
+    setTimeout(() => { utemezve = false; jelekElhelyezese(); }, 30);
   }).observe(document.body, { childList: true, subtree: true });
 
   // ⭐ Az ⓘ kattintása (és Enter/szóköz) — a szülő elem (gomb, címke, menüpont) ne kapja meg.

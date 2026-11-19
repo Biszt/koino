@@ -417,8 +417,11 @@ proba('⭐⭐ D129 (③): az alsó sáv számai — a kézikönyv nem gondolat (
 proba('⭐⭐ D129 (③): a felület minden ⓘ-helyének neve szerepel a program alap-tartalmában (különben a buborék „nincs magyarázat”-ot mondana)',
   async () => {
     const forras = await readFile(new URL('../felulet/js/koinoMagyarazat.js', import.meta.url), 'utf8');
-    const helyek = forras.slice(forras.indexOf('MAGYARAZAT_HELYEK'), forras.indexOf(']);', forras.indexOf('MAGYARAZAT_HELYEK')));
-    const nevek = [...helyek.matchAll(/nev: '([^']+)'/g)].map((m) => m[1]);
+    const kezdet = forras.indexOf('export const MAGYARAZAT_HELYEK');
+    const helyek = forras.slice(kezdet, forras.indexOf(']);', kezdet));
+    // a `nev: '…'` alakú bejegyzések, és a menüpontok (`menuPont('<felirat>', '<név vége>')` → `kezikonyv/menu/<név vége>`)
+    const nevek = [...[...helyek.matchAll(/nev: '([^']+)'/g)].map((m) => m[1]),
+      ...[...helyek.matchAll(/menuPont\('[^']*', '([^']+)'\)/g)].map((m) => 'kezikonyv/menu/' + m[1])];
     const alap = programAlapTartalma();
     const hianyzik = nevek.filter((n) => !alap.nevSzerint.has(n));
     if (nevek.length < 5 || hianyzik.length) { process.stderr.write('    (' + JSON.stringify({ nevek, hianyzik }) + ')\n'); return false; }

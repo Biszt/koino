@@ -12,6 +12,116 @@
       "szoveg": "A menü a lap bal alsó sarkában nyílik (☰). Innen éred el a nézeteket, a koinóidat, a felderítést, az értesítéseket, az új gondolat, kategória és gondolattípus létrehozását, és a fiókod dolgait (a meghívóidat, a készülékeidet, a tudatpontjaidat, az adataidat)."
     },
     {
+      "nev": "kezikonyv/menu/kereses",
+      "cim": "🔍 Keresés",
+      "szoveg": "Itt keresel a koinóban cím szerint: gondolatot, javaslatot, egyezményt, kategóriát, gondolattípust. Írj be egy-két szót — a program a szavak elejére is keres, így a toldalékos alakokat is megtalálja.\n\nAz első találatok abból jönnek, amit a készüléked már ismer. Ha a koinó nagyobb annál, amit a készüléked tárol, a program a háttérben a hálózaton is keres (a társaidtól), és az onnan jött találatokat a lista alján, utólag teszi hozzá — az ablak megmondja, hol tart a keresés.\n\nEgy találatra kattintva a pakli oda ugrik. Egy ágra szűkítheted a keresést: akkor csak az alatta lévő gondolatok közt keres."
+    },
+    {
+      "nev": "kezikonyv/menu/struktura",
+      "cim": "🗺️ Struktúra nézet",
+      "szoveg": "A koinó fája egyben: minden gondolat a szülője alatt, behúzással, a legerősebb ágaktól kifelé (az ágazati pont szerint — az ág minden tudatpontja együtt).\n\nA fa abból épül, amit a készüléked ismer. Ha valahol még hiányozhat egy ág, a nézet ezt kimondja, és a program elkéri a hiányzó részt a társaidtól — ilyenkor a fa a háttérben bővül. Egy nagyon nagy koinónál a nézet egy keretig (több ezer sor) mutatja a fát, a legerősebb ágakkal kezdve.\n\nEgy sorra kattintva a pakli oda ugrik. Egy ágra is megnyithatod: akkor csak az alatta lévő részfát látod."
+    },
+    {
+      "nev": "kezikonyv/menu/vilagterkep",
+      "cim": "🚧 Világtérkép",
+      "szoveg": "Ez a nézet még fejlesztésre vár: a koinó gondolatait egy világtérképen mutatná meg. A koinó elődje egy ilyen térképpel kezdődött; az újraépítése később jön."
+    },
+    {
+      "nev": "kezikonyv/menu/sikidom",
+      "cim": "🔷 Síkidom nézet",
+      "szoveg": "A koinó gondolatai síkidomokként: minden gondolat egy alakzat, amelynek a TERÜLETE a rá tett tudatpontokkal arányos — ami a közösségnek fontosabb, az nagyobb. A gyerekei az alakzat belsejében kapnak helyet.\n\nNagyíthatsz és mozoghatsz benne; egy alakzatra kattintva beljebb lépsz. Ha egy ág gyerekeit a készüléked még nem ismeri, a nézet kimondja, és a program elkéri őket."
+    },
+    {
+      "nev": "kezikonyv/menu/rendezes",
+      "cim": "↕️ Rendezés",
+      "szoveg": "Itt választod ki, milyen sorrendben mutassa a pakli a kártyákat.\n\n„Hierarchikus (kapcsolatok szerint)” — az alapnézet: egy kártya a felmenőivel, mellette a testvérei (tudatpont szerint). A lapos nézetek egy listát adnak: „idő” (mikor született), „saját pont” (mennyi tudatpont van rajta), „ágazati pont” (az egész ága mennyit kapott). Az irány csökkenő vagy növekvő, és a listát egy ágra is szűkítheted."
+    },
+    {
+      "nev": "kezikonyv/menu/nezetek",
+      "cim": "🧩 Nézetek…",
+      "szoveg": "A közösség által feltöltött nézetek: egy-egy kis program (egy HTML-fájl egy kártya szövegében), ami a koinó gondolatait a maga módján mutatja meg. A lista pont szerint rendezett, a bekapcsoltak elöl.\n\nEgy nézetet előbb be kell kapcsolnod: előtte egy ablak megmondja, ki tette fel, hány pont van rajta, mit lát a nézet és mit nem. A nézet zárt keretben fut: a koinóból csak olvasni tud, és semmit nem küldhet ki a hálózatra. A bekapcsolás a te készülékedé, és a kód lenyomatához kötött — ha egy egyezmény új kódot hoz, a nézet kikapcsol, és a lap szól."
+    },
+    {
+      "nev": "kezikonyv/menu/ter",
+      "cim": "🌐 A tér — a koinóim",
+      "szoveg": "A tér a koinóid FÖLÖTT áll: itt látod mindegyik koinót, amit ez a készülék ismer, kártyákon, a nevükkel és a legfontosabb számaikkal. Egy koinó kártyájára kattintva abba a koinóba lépsz, és a pakli azt mutatja.\n\nA tér sávján rendezheted a koinóidat, csatlakozhatsz egy újhoz (egy meghívóval vagy a nevével), és felvehetsz egy társat."
+    },
+    {
+      "nev": "kezikonyv/menu/bekapcsolodas",
+      "cim": "🌿 Bekapcsolódás…",
+      "szoveg": "Egy koinóból GYERMEK koinó születhet: egy új változat, más szabályokkal (például más tudatpont-kerettel) vagy más programmal. Itt kapcsolódhatsz be egy olyan gyermekbe, amit a készüléked ismer.\n\nA bekapcsolódás után a gyermekben is ott vagy, és a pontjaidat — amennyi a gyermek keretébe fér — magaddal viszed; ha nem fér mind, kiválaszthatod, mit hagysz el. A szülőben közben megmaradsz: a két koinó párhuzamosan él, és mindkettőben részt vehetsz."
+    },
+    {
+      "nev": "kezikonyv/menu/koino-verzio",
+      "cim": "🧬 Új koino-verzió (gyermek)…",
+      "szoveg": "Itt hozhatsz létre egy gyermek koinót: a nevét, a leírását, a szabályait (alapból a szülőéi), a nyíltságát, és hogy mennyi tudatpontot teszel rá. A gyermek a koino-verzió kártyájával születik a szülőben, és a kártya „Kód” fülén bárki megnézheti a teljes programot, amivel futni fog.\n\nA kód a te készülékeden FUTÓ program: aki egy új programverziót javasol, azt előbb telepíti, és onnan hozza létre a gyermeket. Aki csatlakozik, ugyanazzal a programmal fut."
+    },
+    {
+      "nev": "kezikonyv/menu/program",
+      "cim": "🧬 A program ezen a készüléken…",
+      "szoveg": "Itt látod, melyik program fut a készülékeden: a kódját (a koino-verzió kártyák „Kód” fülével összevethető), és hogy mikor telepítetted utoljára.\n\nHa egy kártyáról új programot telepítettél, és az nem úgy működik, ahogy vártad, innen visszatérhetsz az előzőre („↩ Vissza az előző programra”). A telepítéskor a program a régi mellé írja ki az újat, így a visszaút mindig megvan."
+    },
+    {
+      "nev": "kezikonyv/menu/felderitesek",
+      "cim": "📷 Felderítések",
+      "szoveg": "A felderítés egy pillanatkép: a program egy ágat (vagy az egész koinót) a megadott mélységig bejár, és elhozza a társaidtól, amit a készüléked még nem ismer — hogy ott is lásd, ahol nem tartasz tudatpontot.\n\nItt látod a felderítéseid állását (fut / kész / megállt / elakadt), újra elindíthatod vagy törölheted őket. ⚠️ A pillanatkép nem frissül magától, és nem értesít: ha egy ágat követni akarsz, tegyél rá tudatpontot."
+    },
+    {
+      "nev": "kezikonyv/menu/felderites-egesz",
+      "cim": "📷 Az egész koinó felderítése…",
+      "szoveg": "Egy felderítést indít az egész koinóra, a gyökértől. Beállíthatod, hány csomópontot hozzon el, milyen mélyen, a szövegekkel (a törzzsel) együtt-e, és legfeljebb hány MB-ot. Az őrjárat végzi a háttérben; az állását a „Felderítések” ablakban látod."
+    },
+    {
+      "nev": "kezikonyv/menu/ertesitesek",
+      "cim": "🔔 Értesítések",
+      "szoveg": "Itt látod, mi változott a koinóban azóta, hogy legutóbb megnézted — azokon a részeken, amiket követsz (ahol tudatpontod van, vagy amire értesítést kértél): új gondolatok, javaslatok, döntések, módosítások.\n\nAz értesítéseket a te készüléked számolja ki, a saját két pillanatképéből — nincs központ, ami küldené őket. A menügombon egy szám mutatja, hány olvasatlan van."
+    },
+    {
+      "nev": "kezikonyv/menu/ertesitesi-beallitasok",
+      "cim": "🔔 Értesítési beállítások",
+      "szoveg": "Itt állítod be, miről kérsz értesítést: alapból vagy egy-egy ágra. Egy ágra tett beállítás az alatta lévő részekre is öröklődik — így például az egész kézikönyvre is feliratkozhatsz, hogy lásd, ha valaki módosítást javasol benne."
+    },
+    {
+      "nev": "kezikonyv/menu/uj-gondolat",
+      "cim": "✏️ Új gondolat létrehozása",
+      "szoveg": "Itt írsz egy új gondolatot: a címét, a szövegét (a szerkesztőben szöveget, képet, fájlt, linket, más kártyára mutató hivatkozást is tehetsz bele), a típusát és a kategóriáit.\n\nA gondolatra tudatpontot kell tenned: amire senki nem tesz pontot, azt a koinó elfelejti. A pontoddal azt is mondod, hogy ez fontos neked — és a készüléked ezzel vállalja, hogy őrzi."
+    },
+    {
+      "nev": "kezikonyv/menu/uj-kategoria",
+      "cim": "🏷️ Új kategória létrehozása",
+      "szoveg": "A kategória a gondolatok besorolása, mint egy címke: egy gondolat több kategóriába is tartozhat. Itt hozhatsz létre egy újat (egy kategória alá is, alkategóriaként), egy névvel, ikonnal és leírással. A kategória is a közösségé: tudatpont kell rá, és javaslattal módosítható."
+    },
+    {
+      "nev": "kezikonyv/menu/uj-gondolattipus",
+      "cim": "🧩 Új gondolat típus létrehozása",
+      "szoveg": "A gondolattípus megmondja, milyen fajta egy gondolat: kérdés, válasz, témakör, ismeret, feladat — vagy amit a közösség kitalál. Itt hozhatsz létre egy újat, névvel, ikonnal és leírással. A típus is a közösségé: tudatpont kell rá, és javaslattal módosítható."
+    },
+    {
+      "nev": "kezikonyv/menu/uj-nezet",
+      "cim": "🧩 Új nézet…",
+      "szoveg": "Itt tölthetsz fel egy nézetet: egy HTML-fájlt (egy kis programot, ami a koinó gondolatait mutatja meg), egy címet, egy leírást, és a tudatpontot, amit rá teszel. A nézet egy kártya szövegében él, így bárki megnézheti a kódját, mielőtt bekapcsolja."
+    },
+    {
+      "nev": "kezikonyv/menu/meghivoim",
+      "cim": "✉️ Meghívóim",
+      "szoveg": "Itt hívhatsz meg valakit a koinóba. Megadod a nevét, és elfogadod a nyilatkozatot; a program egy SORT ad: egy telepítő sort a meghívóval. Ezt küldd el neki — a telefonján a Termuxba, Windowson a parancssorba másolja, és a program települ, majd a koinóba lép.\n\nA meghívó egy hónapig él, egyszer használható, és visszavonhatod. Amikor a meghívott készüléke először találkozik a tiéddel, a te készüléked magától aláírja a meghívást — utána tag. A listában látod a meghívóid állását."
+    },
+    {
+      "nev": "kezikonyv/menu/keszulekeim",
+      "cim": "📱 Készülékeim",
+      "szoveg": "A készülékeid (telefon, laptop…), amiken ugyanaz az e-ember vagy: a felvételük, a kizárásuk, és hogy mennyi tudatpontot adjanak egymásnak. Az ablak részeit ott, az ablakban magyarázza egy-egy ⓘ."
+    },
+    {
+      "nev": "kezikonyv/menu/tudatpontok",
+      "cim": "🌟 Tudatpontok",
+      "szoveg": "Itt látod, hova tetted a tudatpontjaidat: a gondolatokat, javaslatokat, amiken pontod van, a legtöbbtől kezdve — és hogy mennyi szabad pontod maradt.\n\nA tudatpont nem költődik el: bármikor átrendezheted, levehetsz egy gondolatról, és máshova teheted. Amiről mindenki leveszi a pontját, azt a koinó elfelejti (kivétel a kézikönyv: azon a koinon — a közösség közös tárhelye — is tart egy pontot)."
+    },
+    {
+      "nev": "kezikonyv/menu/eember-beallitasok",
+      "cim": "⚙️ eember beállítások",
+      "szoveg": "Itt adod meg az adataidat: a teljes nevedet, a becenevedet, az országodat, a régiódat, a településedet. Nem kötelező — de a többiek ezekből ismernek fel, és a beceneved áll az alsó sávban is. Egy koinó a születésekor kötelezővé tehet néhány mezőt; akkor a meghívásnál kell őket megadni."
+    },
+    {
       "nev": "kezikonyv/ablak",
       "cim": "Az ablakok",
       "szoveg": "Az ablakok (más néven modálok) a lap fölött nyílnak meg, amikor egy dolgot részletesen megnézel vagy szerkesztesz: egy gondolatot, egy javaslatot, a tudatpontjaidat, a keresést, a készülékeidet. Az ablak részei mellett egy-egy ⓘ jel magyarázza, mit látsz és mit tehetsz ott."
@@ -120,6 +230,46 @@
       "nev": "kezikonyv/fejlec",
       "cim": "A fejléc",
       "szoveg": "A fejléc a lap tetején áll: a koinóid terén itt váltasz a pakli és a tér között, itt rendezed a koinóidat, és itt csatlakozol egy új koinóhoz vagy veszel fel társat. Belépéskor itt látod, hol tart a belépésed."
+    },
+    {
+      "nev": "kezikonyv/fejlec/ter-sav",
+      "cim": "A tér sávja",
+      "szoveg": "Ez a sáv akkor látszik, amikor a teret nézed (a koinóidat). A részeire koppintva mindegyiknek elolvashatod a magyarázatát."
+    },
+    {
+      "nev": "kezikonyv/fejlec/ter-sav/vissza",
+      "cim": "📚 Vissza a paklihoz",
+      "szoveg": "Visszalép a térből a pakliba — abba a koinóba, ahol voltál."
+    },
+    {
+      "nev": "kezikonyv/fejlec/ter-sav/rendezes",
+      "cim": "Rendezés (a tér)",
+      "szoveg": "A koinóid sorrendje: a létrehozásuk ideje, amikor először láttad őket, vagy a nevük szerint — csökkenő vagy növekvő irányban. ⛔ Taglétszám szerint szándékosan nem lehet rendezni: az egy toplista lenne, amit hamis tagokkal fel lehetne tornászni."
+    },
+    {
+      "nev": "kezikonyv/fejlec/ter-sav/frissites",
+      "cim": "Frissítés",
+      "szoveg": "Újra lekéri a koinóid listáját — ha közben egy csere új koinót hozott, vagy csatlakoztál egyhez, most megjelenik."
+    },
+    {
+      "nev": "kezikonyv/fejlec/ter-sav/csatlakozas",
+      "cim": "🔗 Csatlakozás egy koinóhoz…",
+      "szoveg": "Egy koinóhoz csatlakozol: beillesztheted a meghívódat (a telepítő sort is, egészében), vagy a koinó nevét, ha már ismered. Meghívóval a program a meghívód készülékét társnak veszi és belép; a meghívód gépe a következő cserénél magától meghív — addig a lap kiírja, hol tart."
+    },
+    {
+      "nev": "kezikonyv/fejlec/ter-sav/tarsak",
+      "cim": "🤝 Társak…",
+      "szoveg": "A társak azok a készülékek (címek), akikkel a te készüléked cserélni próbál — a többieket ezeken keresztül ismeri meg. Itt felvehetsz egy címet (például egy barátodét a közös wifin), vagy levehetsz egyet. A legtöbbször nem kell hozzányúlnod: a program a meghívóból és a hálózatról magától talál társakat."
+    },
+    {
+      "nev": "kezikonyv/fejlec/belepes",
+      "cim": "A belépő sávja",
+      "szoveg": "Amíg még nem vagy tag, ez a sáv mutatja, hol tart az első kapcsolat a meghívóddal: ✔ a meghívót elfogadtad · 📡 a készüléked bejelentkezett a hálózaton · 🚪 kopog a meghívód készülékén · 🤝 megvan a kapcsolat · ✅ bent vagy.\n\nA meghívód készülékének is futnia kell, hogy befogadjon. Ha fél óráig nincs kapcsolat, a sáv megmondja, mi kell hozzá; és ha a te készülékeden nem fut az őrjárat, azt is — enélkül nincs keresés."
+    },
+    {
+      "nev": "kezikonyv/fejlec/allapot",
+      "cim": "Az állapot-sor",
+      "szoveg": "Ez a sor a pakli fölött mondja meg, mit látsz: hány kártya van a láncban (a kiválasztott és a felmenői), hány testvére van — és ha valami hiányzik, azt is: „a hiányzó részeket az őrjárat hozza el” (a program elkérte a társaidtól), vagy „a tartóit még keresem” (még nem talált senkit, aki őrizné).\n\nA koinóban nincs központ: a készüléked azt mutatja, amit ismer, és kimondja, ha valamit még nem."
     },
     {
       "nev": "kezikonyv/kartya",
