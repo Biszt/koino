@@ -87,6 +87,6 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
 ## 6. Napló
 
 - **2026-11-19** — a terv; az ① építése indul.
-- **2026-11-19** — ✅ **az ① kész**: 6 próba (), 12 rontás mind bukik (⛔ az első változat a
+- **2026-11-19** — ✅ **az ① kész** (`a309655`): 6 próba (`meres/kezikonyvProba.js`), 12 rontás mind bukik (⛔ az első változat a
   megkerülést — a név elhagyását — nem fogta meg: a nevesített javaslat neve „kisegítette” a név nélkülit; most egy másik
-  entitásra mutat); az  „a teljes = a mai értékek” próbája a kézikönyvvel kiegészítve. Teljes sor 1523/1523 + 2 ismert.
+  entitásra mutat); az `esemenyProba` „a teljes = a mai értékek” próbája a kézikönyvvel kiegészítve. Teljes sor 1523/1523 + 2 ismert.

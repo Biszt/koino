@@ -129,8 +129,8 @@ oszt — még hátravan).
 D129): ⓘ jel szinte mindenhol, buborékkal; a tartalma a **kézikönyv** — RENDSZER-ENTITÁSOK (a program alap-tartalma, esemény nélkül,
 az azonosító a koinóból és a névből), a pakliban struktúrában, **egy új koinó első témái**; a közösség javaslattal módosítja (csak
 módosítás és áthelyezés a kézikönyvön belül, óvatosabb alap-küszöbbel — legalább 3 nap); a D14 alól kivétel, mindenki tartja.
-✅ **① a mag** (a rendszer-entitás: ; a születés  szabálya, a kapu , a
-bejelentés a kézikönyv gyökeréhez, a D14 kivétele, a ≥ 3 napos küszöb, a vállalás — [](docs/magyarazat_reteg.md)) →
+✅ **① a mag** (a rendszer-entitás: `js/esemeny/rendszerEntitas.js`; a születés `kezikonyv` szabálya, a kapu `adat.rendszer`, a
+bejelentés a kézikönyv gyökeréhez, a D14 kivétele, a ≥ 3 napos küszöb, a vállalás — [`magyarazat_reteg.md`](docs/magyarazat_reteg.md)) →
 ⏭️ ② a javaslatok → ③ a felület (az ⓘ réteg — az örökölt fájlok érintetlenül) → ④ a szövegek → ⑤ a próba.
 
 **Az állapot:** **1525 önpróba** (72 próba-fájl; a legutóbbi teljes soron 1523/1523 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-19, a D129 ① (a kézikönyv magja) után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba és a csere „CSOMAGVESZTÉS (30%)” próbája, magukban zöldek) · 401 fájl / 8153,0 KB (⚠️ CR nélkül mérve —
