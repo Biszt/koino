@@ -6559,6 +6559,59 @@ korszakban tanúsított, fel nem sorolt készülék eseményei kiesnek, `kulcscs
 (saját QR-kódoló), `papir` / `papir kesz <kód>` (a leírt kód ellenőrzése után a fájl törlése), `kulcscsere <kód>`. ⭐ A ② a papírral ezzel kész; a 17. pont (a helyreállítás a segítőkkel) ②d–②f-ként folytatja, a ③ előtt: **②d** a papír visszavonása (`papir visszavon` — a 2. lépcsőn az állapot szól), a két ág közül az erősebb (nem a hosszabb) nyer, a vesztes ágon tanúsított készülék kiesik, a kulcscsere a fizetési kulcsot is cseréli; **②e** a helyreállítás a segítőkkel (a jóváhagyás, a megállítás, a szerepek; a lánc bejegyzése és a minden koinóban érvényes bizonyíték; a segítők készüléke a várakozás után magától véglegesít és beviszi); **②f** a parancsok (`helyreallitas kerelem` / `befejez` az új készüléken, `segit` az ellenőrző kóddal, `megallit`). ⭐ A ② ezzel kész. **③b** (2026-11-16) a kezelés minden koinómba, helyben: a kezelés-jegyzék (`kezeles.json` — a legerősebb kulcscsere-lánc a bizonyítékaival és a kizárások, amit a készülék bármelyik koinójában látott), a gondozás minden parancs elején és az őrjárat körében, a `kulcscsere` és a `papir visszavon` minden koinóba, és az új `kizar` parancs (a készülékeim listája; a kizárás koinónként a vágással, minden koinómba). **③c** a saját készülék a cserében: a kapu kötése a társ készülékét is megjegyzi (és egy még semmit nem írt saját telefon tanúsítványát a tárba veszi), a csere után a laptop a határig (a keret 20%-a — KH1) átad, a nekem szóló átadást a készülék a parancsok elején és az őrjárat körében átveszi; egy kizárt készüléknek semmit. **③d** a koinó-lista a saját készülékek között (a `CIMEK` `kl` mezője — csak a saját készüléknek, csak tőle), a `kizar` a kizárt készülék listájának koinóit is felsorolja, és ahová a listából tud, de ott nincs, oda csatlakozik (KH2 (A) — csak a bevitelhez); a `kulcscsere` ugyanígy; **③e** a csere állásában `szerzo` → `lanc`. ⭐ A ③ ezzel megépült. **③f** (KH3 (A)): a kulcscsere után csak a mostani kulccsal aláírt kizárás számít, és a vágása megtartja a régi készülék múltját (a tagságot, a pontokat); a kulcscsere az ezen a készüléken kiadott kizárásokat az új kulccsal újra aláírja (a gyűjtötteket nem — egy tolvaj régi kulcsú kizárása így nem válhat érvényessé). **④a** (KF1 (A)): a második készülék felvétele párosító kóddal a hálózaton (`keszulek felvesz` a kezelőn, `keszulek csatlakoz <kód>` az új készüléken — a titok bizonyítása a kézfogáshoz kötve, az ellenőrző kód mindkét gépen); a felvett készüléken NINCS az azonosság kulcsa (a kezelést kívánó parancsok a kezelőn mennek). **④c** a személyes határ (`keszulek hatar <készülék> <pont | alap>` — készülékenként, az alap a keret 20%-a). **④b** a lap: „📱 Készülékeim” (a készülékek, a felvétel — a telepítő sor a párosító kóddal és a QR-je: a telefonon egy bemásolt sor —, a kizárás, a határ, a papír állása); az indítók a párosító kódot felismerik. ⭐ A ④ ezzel kész. **⑤ a terep** (2026-11-17 — a laptop és Csaba telefonja, egy e-ember két készüléke): a telefon a hálózaton párosítva felkerült (az ellenőrző kód egyezett), és a laptop átadta, a telefon átvette a keretet (2000). Közben négy lelet: a felvett készülék a társ őrjáratának portját jegyzi; a felvett készülék az azonossága horgonyának szeletét is vállalja (a horgonyt a másik készülék írta — enélkül a keret átadása és a profil nem jutott át); a próbák „mindent” kiszolgálása ezt elfedte (a ④a próba most „alap”-pal cserél); „Az adataid” űrlapot a lap magától csak a kezelőn kínálja fel. ⏸️ Nyitott: a legutóbbi profil két készüléknél (a sorszám nem rendez két láncot). A
 részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.11–9.15.
 
+### D129. A MAGYARÁZAT-RÉTEG: „AZ ⓘ TARTALMA A KOINÓ ELSŐ TÉMÁJA” (2026-11-19)
+
+*Csaba (a ⑤ terep képei után, a „📱 Készülékeim” feliratain): „nem egyértelműek a leírások, a felületen. úgy kéne őket
+megfogalmazni, hogy a jövőbeli társak is megértsék. ezt az egész koino felületére értem. … az információk, egy "i" jelre kattínva,
+előjön egy értehtő magyarázat, arra a részre. ilyen i betüket, szinte minden hova rakni kéne, a menübe, az összes modal ősszes
+részéhez, az alsósáv is kapjon i betüt, meg a fejléc is” — „térjünk is rá erre a fejlesztésre, mert ha ez kész, könnyeben megértem
+majd azt, amit csináltál.” Az egy helyen tartott szövegekre: „ez nagyon tetszik. Amúgy is gondóltam, hogy kelleni, fog a program
+által, létrehozott, entitásokra is.” — és: „ha létrehozzuk azt, hogy az összes i betü tartalmát, a rendszer létrehozza, strukturában,
+és az e-emberek javaslatokkal tudják módosítani. ezek lennének az első témák.” A méretre: „nem baj. fontosnak tartom ezt a
+fejlesztést.”*
+
+**A döntés:**
+1. **Az ⓘ jel** (MA1 (A)): a felület szinte minden része mellett — a menü pontjai és csoportjai, minden ablak minden része, az alsó sáv
+   (a név, a tudatpont, a számlálók, a csere, a programverzió és a nyelv jele, a vissza/előre), a fejléc (a tér sávja, a belépő sáv,
+   az állapot-sor), és ami hozzájön: a kártyák és a füleik (a forrás-jelek ✓ ≈ +? ?, a szaggatott keret), a pakli (a testvérek
+   lapozója, a felmenők), a szövegszerkesztő eszköztára, a várakozó és üres állapotok. Rákattintva **buborék** nyílik az ⓘ mellett
+   (egy érintéssel bezárul, nem takarja el az ablakot), alján egy gomb az entitáshoz.
+2. **A hang** (MA2 (B)): részletes — mi ez, mire jó, mit tehetsz itt, és HOGYAN MŰKÖDIK; példával, belső kódok (D-számok,
+   kulcs-darabok) nélkül.
+3. **A fogalomtár** (MA3 (A)): minden koinós fogalom egy helyen (e-ember, tudatpont, gondolat, javaslat, egyezmény, küszöb, bizonyossági
+   mutató, társ, csere, őrjárat, készülék, kezelő, papír…), a menüből és a buborékokból elérhetően.
+4. **A RENDSZER-ENTITÁS — a kézikönyv.** A program egy fájlban hozza az **alap-tartalmat**: minden ⓘ magyarázatát és a fogalmakat, a
+   struktúrájukkal. Ez minden (kézikönyves) koinóban megvan, ahogy a program szabályai: nem esemény, senki nem írja alá, nem utazik a
+   hálózaton. Minden darabnak állandó NEVE van (pl. „menü / Keresés”), és az azonosítója a koinóból és ebből a névből számolódik —
+   mindenkinél ugyanaz, így bárki tehet rá tudatpontot és javaslatot, mint egy e-ember gondolatára. A hálózaton csak a közösség
+   módosításai utaznak.
+5. **A D14 kivétele** (MA4 (B)): a rendszer-entitás nem felejtődik el, és a közösség módosítása pont nélkül is megmarad. ⭐ Ebből
+   következik: a kézikönyv szeleteit **minden tag tartja** (mint a koinó születését) — különben egy pont nélküli módosítást senki nem
+   őrizne meg.
+6. **Az új programverzió** (MA5 (A)): az új név (pl. egy új menüpont magyarázata) magától megjelenik; a közösség által nem módosított
+   szöveg magától a program új szövegére vált; ahol a közösség módosított, ott a program nem ír felül — az új szöveg **a program által
+   megírt javaslatként** érkezik, amit egy e-ember elindíthat (Csaba 2026-09-11-i ötlete — `jegyzetek.md`).
+7. **A helye** (MA6 (A)): a pakliban, egy gyökér-gondolat („A koinó kézikönyve”) alatt, struktúrában (Menü, Ablakok — ablakonként a
+   részei —, Alsó sáv, Fejléc, Kártyák, Fogalomtár) — **egy új koinó első témái**; a struktúra és a síkidom nézet is mutatja.
+8. **A javaslatok** (MA7 (A)): a hétköznapi szabály (aki tudatpontot tett rá, javasolhat); csak **módosítás** és **áthelyezés a
+   kézikönyvön belül** — törlés és egyesítés nem (amíg a gomb a felületen van, az ⓘ-jének tartalma legyen).
+9. **A küszöb** (MA8 (B)): ugyanaz a szabály (a pont-tartók döntenek), de a kézikönyv **saját, óvatosabb alap-küszöbbel** születik —
+   legalább 3 nap döntési idő, hogy mások észrevehessék és csatlakozhassanak (ma 1 ponttal, egyedül, 1 mp alatt át lehetne írni);
+   a kézikönyvre fel lehet iratkozni (az értesítési beállítás az ágra öröklődik); a küszöböt érték javaslattal ugyanúgy meg lehet
+   változtatni.
+10. **A koinó szabálya** (D118/2): a kézikönyv a születés szabályai közé kerül (`kezikonyv` — a küszöbével); a régi születésben nincs,
+    tehát a régi (teszt) koinókban nem jelenik meg — egy születés szabályai utólag nem változnak. ⚠️ A régi program az ismeretlen
+    szabályú születést elutasítja: kézikönyves koinóhoz csak a frissített program csatlakozhat.
+
+**Az építés sorrendje:** ① **a mag** — az alap-tartalom fájlja (név, szülő, cím, szöveg, típus), az azonosító (koinó + név), az
+entitás születési esemény nélkül, a D14 kivétele, a kapu (pont és javaslat a rendszer-entitásra), a vállalás (mindenki tartja), a
+születés szabálya és a küszöb; ② **a javaslatok** — a módosítás és a kézikönyvön belüli áthelyezés, a tiltások (`szabalyok.js`
+`TILTOTT_MUVELETEK` mintájára), és az új programverzió belépése (MA5 (A)); ③ **a felület** — az ⓘ réteg (az örökölt, bájtra azonos
+fájlokhoz nem nyúl: a kirajzolás után teszi a helyére, mint a `koinoModalok.js` a koinós többletet), a buborék az entitás gombjával,
+a kézikönyv a pakliban, a struktúrában és a síkidomban; ④ **a szövegek** területenként (Készülékeim, alsó sáv, fejléc, menü, ablakok,
+kártyák, pakli), majd a fogalomtár; ⑤ **a próba**, ami figyeli, hogy minden ⓘ megtalálja a helyét, és minden névnek van szövege.
+A méret: az alap-tartalom becslés szerint 200–300 KB (a program ~8 MB).
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem

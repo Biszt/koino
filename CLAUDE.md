@@ -122,8 +122,16 @@ tanúsítványa: a szerző az azonosság, a lánc a készüléké — `lancKulcs
 tanúsítottat enged be; a láncán kívül utazó esemény a **kísérő burokkal** (`kiseroTanusitvany` — aláíratlan, a kapu leveszi), a csomagok
 `tanusitvanyok` mezőjével, a készülék **tanúsítvány-jegyzékével** (`<adat>/tanusitvanyok.jsonl`) és a **várakozó sorral**; ⏭️ ①b a második
 készülék, ①c a keret, ①d a kizárás) → ② a csere-kulcs → ③ a hálózat → ④ a lap → ⑤ a terep. Részletek: `kulcs_atvizsgalas.md` 9.7.
+✅ **A D128 megépült, a terep (⑤, 2026-11-17) is lezajlott** — a laptop és Csaba telefonja egy e-ember két készüléke; a keret átért
+(a leletek: `kulcs_atvizsgalas.md` 9.15; ⏸️ nyitott: a legutóbbi profil két készüléknél; a terep 3. lépése — a telefon tudatpontot
+oszt — még hátravan).
+📘 **D129 — a magyarázat-réteg: ELDÖNTVE** (Csaba, 2026-11-19 — MA1–MA8; [`fejlesztesi_terv_fazis2.md`](docs/fejlesztesi_terv_fazis2.md)
+D129): ⓘ jel szinte mindenhol, buborékkal; a tartalma a **kézikönyv** — RENDSZER-ENTITÁSOK (a program alap-tartalma, esemény nélkül,
+az azonosító a koinóból és a névből), a pakliban struktúrában, **egy új koinó első témái**; a közösség javaslattal módosítja (csak
+módosítás és áthelyezés a kézikönyvön belül, óvatosabb alap-küszöbbel — legalább 3 nap); a D14 alól kivétel, mindenki tartja.
+⏭️ **① a mag** → ② a javaslatok → ③ a felület (az ⓘ réteg — az örökölt fájlok érintetlenül) → ④ a szövegek → ⑤ a próba.
 
-**Az állapot:** **1518 önpróba** (71 próba-fájl; a legutóbbi teljes soron 1516/1516 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-16, a D128 ④ (a lap) után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba és a csere „CSOMAGVESZTÉS (30%)” próbája, magukban zöldek) · 399 fájl / 8120,1 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1519 önpróba** (71 próba-fájl; a legutóbbi teljes soron 1517/1517 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-19, a D128 ⑤ (a terep) után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba és a csere „CSOMAGVESZTÉS (30%)” próbája, magukban zöldek) · 399 fájl / 8125,5 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8
