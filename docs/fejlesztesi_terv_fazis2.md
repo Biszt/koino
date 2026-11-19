@@ -6619,6 +6619,33 @@ a kézikönyv a pakliban, a struktúrában és a síkidomban; ④ **a szövegek*
 kártyák, pakli), majd a fogalomtár; ⑤ **a próba**, ami figyeli, hogy minden ⓘ megtalálja a helyét, és minden névnek van szövege.
 A méret: az alap-tartalom becslés szerint 200–300 KB (a program ~8 MB).
 
+### D130. A KOINON: „A KÖZÖS TÉNYEK ŐRZÉSE — DARABOKBAN, REPLIKÁLVA” (2026-11-19)
+
+*Csaba: „hozzunk létre, egy koinon-t ami maga a program azon tárhelye, amit darabokban, replikálva, őriz meg, és neki, mondjuk végtelen
+tudatpontja lenne, és minden entitást, 1 tudatpontal hozza létre. és itt, most eszembe jutott az, hogy az általános egyezmények, mikor
+megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal biztosítva a létét.” Az átvizsgálás:
+[`koinon_atvizsgalas.md`](koinon_atvizsgalas.md); Csaba: **„ko1-4: (A) ko5: (B)”**.*
+
+**A döntés:**
+1. **A koinon** (a görög koinón: a közösség, a közös ügy) a közösség közös tárhelye mint tudatpont-tartó: nem e-ember — nem szavaz,
+   nem javasol, nem ad érték javaslatot, a pontja passzív (a részvétel nevezőjébe nem számít), nem a tudatpont-keretből jön, és senki
+   nem írja alá: minden készülék ugyanúgy kiszámolja. A kézikönyvnél (D129) már megépült.
+2. **Mi kap koinon-pontot** (KO1 (A)): a kézikönyv bejegyzései (D129) és az **elfogadott általános egyezmény**, a lezárása pillanatától,
+   örökre — így a D27 „a tény örök” mondata a D14 mellett is igaz. A szerkesztési egyezmény nem (a hatása a gondolaton él), az elvetett
+   javaslat sem.
+3. **Ki őrzi** (KO2 (A)): **a koinon darabjai** — egy koinon-entitás az azonosítója szerint egy darabba esik; minden készülék a kulcsa
+   szerinti darabot vállalja egy olyan mélységen, hogy minden darabnak ~`r` tartója legyen (a készülékek számából becsülve, óvatosan), és
+   a szomszéd szintet is (átfedés). Egy készülék terhe ~`entitások × r / készülékek` — nem nő a koinóval. Egy fenntartó kör (órás
+   ütemben) figyeli a darabok tartóit (a skálázási terv 5.2 „külön munkája”).
+4. **Mit őriznek** (KO3 (A)): tömören — a javaslatot, a döntés ellenőrizhető bizonyítékát (a lezárási összegzés — D95/1) és az
+   állásfoglalásokat (a hatály); a nyers szavazatokat nem.
+5. **A példányszám** (KO4 (A)): közösségi paraméter a koinó születésében (D118/2), alapból **`r` = 20** (30%-os elérhetőségnél 99,9%,
+   hogy legalább egy tartó válaszol).
+6. **A kézikönyv is** (KO5 (B)): már most a koinon darabjaiba kerül — nem tartja mindenki (a D129 „mindenki tartja” helyett).
+
+**Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
+a fenntartó kör terhe — a 95. mérés.
+
 ## Technológia-radar (jelöltek a Fázis 2 rétegeihez — 2026-07-17)
 
 *Csaba kérdésére (GunDB/OrbitDB) indított lista. Ezek NEM koino-versenytársak, hanem

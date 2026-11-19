@@ -5372,6 +5372,29 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 95. ⭐ A KOINON — a közös tények tömör alakja és a darabok tartói (D130, 2026-11-19, a laptopon)
+
+`meres/koinonMeres.js`. **A) A tömör alak** — egy elfogadott általános egyezmény: a teljes döntés-eseménykészlet (a javaslat, a pontok,
+az érték javaslat, a szavazatok) 10 szavazónál 25,2 KB, 100-nál 234,9 KB, 1000-nél 2332 KB — lineárisan nő; a tömör alak (a javaslat
+0,7 KB + a lezárási összegzés 0,9 KB + a minta) 19,8 / 22,9 / 26,0 KB — alig nő (a minta: 8 levél × 3 fa × egy aláírt esemény és a fa-útja,
+felső becslés). Egy állásfoglalás ~0,6 KB. ⭐ A tömör alak ~10 szavazó fölött kisebb, 1000-nél kilencvenszer.
+
+⛔ **Lelet (a mérés közben):** a lezárási összegzést ma az ELLENŐRZŐ sorsolta mintákkal ellenőrzi, és a mintákhoz a nyers szavazatok
+kellenek — ha a koinon darabjai csak a tömör alakot őrzik, egy később érkező tartó már nem kérhet mintát. ⭐ A minta helyeit ezért az
+összegzés SAJÁT lenyomatából kell kijelölni (a fa gyökere előbb rögzül, mint a helyek — az építő nem választhat kedvező helyet): így a
+tömör alak önmagában, bárki által, bármikor ellenőrizhető.
+
+**B) A darabok tartói** (r = 20; minden készülék BECSLI a készülékek számát — a hibája egyenletes a log-térben —, és a mélysége
+`floor(log2(becslés / r))`): átfedés NÉLKÜL a legrosszabb darab is 13–31 tartót kap (N = 100 … 1 000 000, kétszeres–négyszeres hibával),
+a medián 23–39, és 5 tartó alá egy sem esik; egy készülék terhe az ideálisnak 1,25–1,95-szöröse. Átfedéssel (a durvább szint is) a
+legrosszabb 47–91, de a teher 3,75–5,96-szoros. ⭐ Az átfedés itt háromszoros terhet hoz egy olyan biztonságért, ami nélküle is
+megvan (a `floor` maga is felfelé kerekíti a tartók számát). ⚠️ A veszélyes oldal a RENDSZERES túlbecslés (mindenki kétszer többet hisz —
+kevesebb tartó); ezért a becslés az ismert tagokból jöjjön (azt nem lehet túlbecsülni, csak alá) — az alábecslés csak terhet hoz.
+
+**C) A fenntartó kör:** készülékenként egy darab — óránként egy bejelentés és egy lekérdezés a címjegyzéken (átfedéssel kettő-kettő).
+
+---
+
 ## 94. ⭐ AZ ESEMÉNY MÉRETE A D128 UTÁN — a készülék mezője és a harmadik gyökér (a kapott) ára (D128 ①b (2b), 2026-11-14, a laptopon)
 
 *Az 53. mérés megismételve (`esemenyMeretMeres.js`), a D128 után: minden esemény a KÉSZÜLÉK kulcsát is hordozza (`keszulek`), és a
