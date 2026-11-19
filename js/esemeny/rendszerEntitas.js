@@ -91,6 +91,30 @@ export function rendszerAzonosito(nev) {
 /** A kézikönyv gyökerének azonosítója (ennek a szeletébe jelentődik be minden kézikönyv-esemény, és ezt tartja mindenki). */
 export const KEZIKONYV_GYOKER_AZONOSITO = rendszerAzonosito(KEZIKONYV_GYOKER);
 
+// ===================================
+// ⭐⭐ A KOINON — a közösség közös tárhelye mint tudatpont-tartó
+// ===================================
+//
+// Csaba (2026-11-19): „hozzunk létre, egy koinon-t ami maga a program azon tárhelye, amit darabokban, replikálva, őriz meg, és neki,
+// mondjuk végtelen tudatpontja lenne, és minden entitást, 1 tudatpontal hozza létre.” (A görög koinón: a közösség, a közös ügy — ebből
+// a „koino” is.) A kézikönyv-entitás így NEM kivétel a D14 alól (amire senki nem rak tudatpontot, azt a koinó elfelejti): 1 pontja
+// mindig van — a koinóné. A közösség módosítása ezért pont nélkül is megmarad (MA4 (B)).
+//
+// ⛔ A koinon NEM e-ember: nem szavaz, nem javasol, nem ad érték javaslatot; a pontja PASSZÍV (a részvétel nevezőjébe nem számít), nem
+// a tudatpont-keretből jön, és senki nem írja alá — minden készülék ugyanúgy számolja (a kézikönyvnél a nevekből). A szerző-kulcsok
+// 43 jelesek; a „koinon” név velük nem ütközhet.
+
+/** A koinon mint tartó (a hozzájárulók között ezen a néven áll). */
+export const KOINON = 'koinon';
+
+/** A koinon pontja egy kézikönyv-entitáson. */
+export const KOINON_PONT = 1;
+
+/** A koinon hozzájárulása (a hozzájárulók alakjában — passzív). */
+export function koinonHozzajarulasa() {
+  return { pont: KOINON_PONT, szerep: 'passziv' };
+}
+
 /**
  * Egy esemény rendszer-neveinek alaki hibája (a kapu kérdezi): hiányozhat; ha megvan, legfeljebb 8 érvényes név, ismétlés nélkül.
  * @param {*} nevek - az `adat.rendszer` mező

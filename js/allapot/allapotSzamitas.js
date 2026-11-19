@@ -35,7 +35,8 @@ import { koinoSzuleteseListabol, lancKulcsa, kesobbiAllitas } from '../esemeny/e
 import { koinoSzabalyai, kezikonyvesE } from '../esemeny/koinoSzabalyok.js';
 import { kizartakSzurese } from './kizaras.js';   // ⭐⭐ D128 (①d): a kizárt készülék eseményei
 // ⭐⭐ D129: a rendszer-entitások (a kézikönyv) — a nevükből az azonosító és a hely a fában
-import { esemenyRendszerNevei, nevEsFelmenoi, rendszerAzonosito, szuloNeve } from '../esemeny/rendszerEntitas.js';
+import { esemenyRendszerNevei, nevEsFelmenoi, rendszerAzonosito, szuloNeve, KOINON, KOINON_PONT, koinonHozzajarulasa }
+  from '../esemeny/rendszerEntitas.js';
 
 // ===================================
 // A BEMENET RENDEZÉSE — a determinizmus EGYETLEN forrása
@@ -450,6 +451,8 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
   // alap-tartalmat a mag nem kapja meg (különben minden új ⓘ „más számítás” lenne — D123); a lap rajzolja, amíg a közösség
   // módosítással meg nem adja. Csak a kézikönyves koinóban (a születése viszi a szabályát — `koinoSzabalyok.js`).
   // A sorrend a nevek szerinti (determinisztikus), a születéssel bírók után.
+  // ⭐⭐ A KOINON (Csaba, 2026-11-19): minden kézikönyv-entitáson 1 passzív pont a koinóné — így a D14 rá is vonatkozik, kivétel
+  // nélkül (`rendszerEntitas.js` `KOINON`); a koinon nem szavaz, a részvétel nevezőjébe nem számít (a döntés a pont-eseményekből számol).
   if (kezikonyvesE(koinoAdatok.szabalyok)) {
     const nevek = new Set();
     for (const e of szamitok) for (const n of esemenyRendszerNevei(e)) for (const f of nevEsFelmenoi(n)) nevek.add(f);
@@ -461,7 +464,8 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
         azonosito: az, tipus: 'Gondolat', cim: null, szoveg: null, ikon: null, gondolatTipus: null, kategoriak: [],
         szulo: sz === null ? null : rendszerAzonosito(sz), meret: 0,
         rendszer: nev,                                  // a kézikönyv-név (a lap ebből tudja, melyik ⓘ)
-        szerzo: null, letrehozva: null, osszesPont: 0, hozzajarulok: new Map(), kuszobok: null
+        szerzo: null, letrehozva: null, osszesPont: KOINON_PONT, hozzajarulok: new Map([[KOINON, koinonHozzajarulasa()]]),
+        kuszobok: null
       });
     }
   }
@@ -546,9 +550,8 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
 
   const elfelejtettek = [];
   for (const [azonosito, entitas] of entitasok) {
-    // ⭐⭐ D129 (MA4 (B) — Csaba, 2026-11-19): a kézikönyv-entitást a koinó NEM felejti el — a közösség módosítása pont nélkül
-    // is megmarad (a kézikönyv szeletét ezért mindenki tartja — `vallalas.js`).
-    if (entitas.rendszer !== undefined) continue;
+    // ⭐⭐ D129 (MA4 (B)): a kézikönyv-entitást nem kell kivenni — 1 pontja mindig van, a koinóné (fent); a közösség módosítása
+    // így pont nélkül is megmarad (a kézikönyv szeletét ezért mindenki tartja — `vallalas.js`).
     if (entitas.osszesPont <= 0) {
       // ⭐⭐ B/2 (D75/4): A D14 CSAK A TARTÓS TÁRRA VONATKOZIK. Ha az entitást csak az átmeneti tárból
       // ismerjük (pl. a szülője köréből jött a születése), és egyetlen pont-eseményét sem láttuk, akkor a

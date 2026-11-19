@@ -16,14 +16,22 @@ import { vallalasSzamitasa } from '../js/allapot/vallalas.js';
 import { alakiHiba, bejelentesHelyei } from '../js/esemeny/esemeny.js';
 import { koinoSzabalyai, teljesSzabalyok, szabalyokAlakiHibaja, kezikonyvesE, KEZIKONYV_ALAP_KUSZOBOK, ALAP_SZABALYOK }
   from '../js/esemeny/koinoSzabalyok.js';
-import { rendszerNevE, rendszerAzonosito, szuloNeve, nevEsFelmenoi, rendszerNevekAlakiHibaja, KEZIKONYV_GYOKER,
+import { rendszerNevE, rendszerAzonosito, szuloNeve, nevEsFelmenoi, rendszerNevekAlakiHibaja, KEZIKONYV_GYOKER, KOINON, KOINON_PONT,
   KEZIKONYV_GYOKER_AZONOSITO } from '../js/esemeny/rendszerEntitas.js';
 // ⭐⭐ D129 (②): a javaslatok szabályai, a végrehajtás, az alap-tartalom és az új programverzió
 import { szerkesztesiEgyezmenyekAlkalmazasa } from '../js/allapot/szerkesztesiVegrehajtas.js';
 import { alapTartalomAlakiHibaja, alapTartalomIndexe, programAlapTartalma, kezikonyvSzovege, programJavaslatai, bejegyzesLenyomata,
-  ALAP_TARTALOM_FAJTA } from '../js/kezikonyv/kezikonyv.js';
+  ALAP_TARTALOM_FAJTA, kezikonyvKepbe } from '../js/kezikonyv/kezikonyv.js';
+// ⭐⭐ D129 (③): a felület ⓘ helyei (a forrásból olvasva — a modul böngészős, Node-ban nem tölthető be); a pakli számai
+import { readFile, mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { esemenyTarNyitasa } from '../js/tar/fajlTar.js';
+import { esemenyMentese } from '../js/tar/esemenyTar.js';
+import { helyiStatisztika, ujPakliNezet } from '../js/allapot/pakli.js';
+import { GYOKER_KULCS } from '../js/csere/szeletEgyeztetes.js';
 
-const { proba, futtatas } = probaGyujtemeny('A kézikönyv (D129 ①–②)');
+const { proba, futtatas } = probaGyujtemeny('A kézikönyv (D129 ①–③)');
 
 const NAP = 86400 * 1000;
 const KEZDET = Date.UTC(2026, 10, 19);
@@ -121,10 +129,10 @@ proba('⭐⭐ D129 (①): a kapu az adat.rendszer alakját nézi; a kézikönyv-
   });
 
 // ===================================
-// 4. A LÉTEZÉS ÉS A D14 KIVÉTELE
+// 4. A LÉTEZÉS ÉS A KOINON
 // ===================================
 
-proba('⭐⭐ D129 (①, MA4 (B)): a kézikönyv-entitás születés nélkül létezik (a felmenőivel); a pontja levétele után sem felejtődik el — a hétköznapi gondolat igen; kézikönyv nélküli koinóban nincs',
+proba('⭐⭐ D129 (①, MA4 (B), a koinon): a kézikönyv-entitás születés nélkül létezik (a felmenőivel), a koinon 1 passzív pontjával; a közösség pontjainak levétele után sem felejtődik el (a koinoné marad) — a hétköznapi gondolat igen; kézikönyv nélküli koinóban nincs',
   async () => {
     const { a, K, g, esemenyek } = await eset();
     const elotte = await allapotbol(esemenyek);
@@ -138,13 +146,16 @@ proba('⭐⭐ D129 (①, MA4 (B)): a kézikönyv-entitás születés nélkül l�
     const utana = await allapotbol([...esemenyek, ...levesz]);
     const regi = await eset({ kezikonyv: false });
     const regiAllapot = await allapotbol(regi.esemenyek);
+    const koinon = (x) => x?.hozzajarulok?.get(KOINON);
     const r = {
-      letezik: e?.rendszer === KERESES && e.osszesPont === 100 && e.szerzo === null && e.cim === null
-        && e.szulo === rendszerAzonosito('kezikonyv/menu'),
+      // a közösség 100 pontja és a koinon 1-e
+      letezik: e?.rendszer === KERESES && e.osszesPont === 100 + KOINON_PONT && e.szerzo === null && e.cim === null
+        && e.szulo === rendszerAzonosito('kezikonyv/menu') && koinon(e)?.pont === KOINON_PONT && koinon(e).szerep === 'passziv',
       felmenok: menu?.rendszer === 'kezikonyv/menu' && menu.szulo === KEZIKONYV_GYOKER_AZONOSITO && gyoker?.rendszer === KEZIKONYV_GYOKER
-        && gyoker.szulo === null,
-      // ⭐ MA4 (B): a pontja levétele után is megvan; a hétköznapi gondolatot a D14 elfelejti
-      marad: utana.entitasok.get(K)?.osszesPont === 0 && utana.entitasok.has(rendszerAzonosito('kezikonyv/menu'))
+        && gyoker.szulo === null && menu.osszesPont === KOINON_PONT && koinon(gyoker)?.pont === KOINON_PONT,
+      // ⭐ MA4 (B): a közösség pontjainak levétele után is megvan — a koinon pontjával (a D14 KIVÉTEL NÉLKÜL vonatkozik rá); a
+      // hétköznapi gondolatot a D14 elfelejti
+      marad: utana.entitasok.get(K)?.osszesPont === KOINON_PONT && utana.entitasok.has(rendszerAzonosito('kezikonyv/menu'))
         && !utana.entitasok.has(g.azonosito),
       regi: !regiAllapot.entitasok.has(regi.K) && !regiAllapot.entitasok.has(KEZIKONYV_GYOKER_AZONOSITO)
     };
@@ -180,7 +191,9 @@ proba('⭐⭐ D129 (①, MA8 (B)): a kézikönyv-entitás javaslata a kéziköny
     const r = {
       nevvel: kNevvel?.kuszobok?.minimumDontesiIdo === 259200 && kNevvel.statusz !== kG?.statusz,
       nevNelkul: kNevNelkul?.kuszobok?.minimumDontesiIdo === 259200,
-      hetkoznapi: kG?.kuszobok?.minimumDontesiIdo === ALAP_SZABALYOK.alapKuszobok.minimumDontesiIdo
+      hetkoznapi: kG?.kuszobok?.minimumDontesiIdo === ALAP_SZABALYOK.alapKuszobok.minimumDontesiIdo,
+      // ⭐⭐ a koinon nem szavaz, és a részvétel nevezőjébe sem számít: az egyetlen e-ember szavazata teljes részvétel
+      koinonNemSzavaz: kNevvel?.reszveteliEzrelek === 1000 && kNevvel.szavazok === 1
     };
     if (!Object.values(r).every(Boolean)) {
       process.stderr.write('    (' + JSON.stringify({ r, kNevvel: { k: kNevvel?.kuszobok, s: kNevvel?.statusz },
@@ -344,6 +357,71 @@ proba('⭐⭐ D129 (②c, MA5 (A)): a program által megírt javaslat — ahol a
       regiben: regiben.length === 0, megjegyzesNelkul: megjegyzesNelkul.length === 0
     };
     if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify({ r, ujban }) + ')\n'); return false; }
+    return true;
+  });
+
+// ===================================
+// 10. ③ — A KÉZIKÖNYV A PAKLIBAN ÉS AZ ⓘ HELYEI
+// ===================================
+
+proba('⭐⭐ D129 (③, MA6 (A)): a kézikönyv a pakli képében — a meg nem érintett bejegyzések virtuálisan (a program szövegével), a megérintettek a megjelenítendő szöveggel és a forrásuk jelével; a különvált ág az eredeti szöveggel',
+  async () => {
+    const index = alapTartalomIndexe(probaTartalom('A keresés'));
+    const K = rendszerAzonosito(KERESES);
+    const M = rendszerAzonosito('kezikonyv/menu');
+    const G = 'x'.repeat(43);
+    const entitasok = new Map([
+      [M, { azonosito: M, rendszer: 'kezikonyv/menu', cim: 'Közösségi menü', szoveg: null, szulo: KEZIKONYV_GYOKER_AZONOSITO }],
+      [G, { azonosito: G, rendszerbol: KERESES, cim: null, szoveg: null, szulo: M }],
+      ['h'.repeat(43), { azonosito: 'h'.repeat(43), cim: 'Hétköznapi', szoveg: null, szulo: null }]
+    ]);
+    const uj = kezikonyvKepbe(entitasok, index);
+    const k = entitasok.get(K);
+    const m = entitasok.get(M);
+    const g = entitasok.get(G);
+    const r = {
+      uj: uj === 2 && entitasok.has(KEZIKONYV_GYOKER_AZONOSITO) && entitasok.get(KEZIKONYV_GYOKER_AZONOSITO).szulo === null,
+      virtualis: k?.virtualis === true && k.cim === 'A keresés' && k.szulo === M && k.osszesPont === KOINON_PONT
+        && k.hozzajarulok.get(KOINON)?.szerep === 'passziv' && k.kezikonyv?.forras === 'program'
+        && k.hozzajarulok instanceof Map,
+      modositott: m.cim === 'Közösségi menü' && m.szoveg === 'A menü.' && m.kezikonyv?.forras === 'kozosseg',
+      ag: g.cim === 'A keresés' && g.szoveg === 'Így keresel.',
+      hetkoznapi: entitasok.get('h'.repeat(43)).kezikonyv === undefined
+    };
+    if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify({ r, uj }) + ')\n'); return false; }
+    return true;
+  });
+
+proba('⭐⭐ D129 (③): az alsó sáv számai — a kézikönyv nem gondolat (a „📄” nem számolja), és nem ismert rész a gyökérnél (a „🔭 még nem ismert” a tartó bemondásából a kézikönyv nélkül számol)',
+  async () => {
+    const mappa = await mkdtemp(join(tmpdir(), 'koino-kezikonyv-'));
+    try {
+      const tar = await esemenyTarNyitasa('kk', mappa);
+      const alapito = await ujEember('kk');
+      const szuletes = await alapito.tesz('KoinoLetrehozas', { nev: 'Számok', leiras: null, alapitok: [], zart: true,
+        szabalyok: teljesSzabalyok() }, KEZDET);
+      const g = await alapito.tesz('GondolatLetrehozas', { cim: 'Egy gondolat', meret: 10 }, KEZDET + 1000);
+      const p = await alapito.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 50 }, KEZDET + 1000);
+      for (const e of [szuletes, g, p]) await esemenyMentese(tar, e);
+      // a gyökér tartója szerint a gyökér alatt 3 entitás van (ebből 1-et ismerek) — a kézikönyv nem része
+      const st = await helyiStatisztika(tar, 'kk', { nezet: ujPakliNezet({ tartott: async () => new Set([g.azonosito]) }),
+        fejlecTudas: new Map([[GYOKER_KULCS, { gy: 3, ad: 3 }]]) });
+      const r = { gondolat: st.gondolatokSzama === 1, ismeretlen: st.ismeretlenSzama === 2 };
+      if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify({ r, st }) + ')\n'); return false; }
+      return true;
+    } finally {
+      await rm(mappa, { recursive: true, force: true });
+    }
+  });
+
+proba('⭐⭐ D129 (③): a felület minden ⓘ-helyének neve szerepel a program alap-tartalmában (különben a buborék „nincs magyarázat”-ot mondana)',
+  async () => {
+    const forras = await readFile(new URL('../felulet/js/koinoMagyarazat.js', import.meta.url), 'utf8');
+    const helyek = forras.slice(forras.indexOf('MAGYARAZAT_HELYEK'), forras.indexOf(']);', forras.indexOf('MAGYARAZAT_HELYEK')));
+    const nevek = [...helyek.matchAll(/nev: '([^']+)'/g)].map((m) => m[1]);
+    const alap = programAlapTartalma();
+    const hianyzik = nevek.filter((n) => !alap.nevSzerint.has(n));
+    if (nevek.length < 5 || hianyzik.length) { process.stderr.write('    (' + JSON.stringify({ nevek, hianyzik }) + ')\n'); return false; }
     return true;
   });
 

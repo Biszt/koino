@@ -133,9 +133,14 @@ módosítás és áthelyezés a kézikönyvön belül, óvatosabb alap-küszöbb
 bejelentés a kézikönyv gyökeréhez, a D14 kivétele, a ≥ 3 napos küszöb, a vállalás — [`magyarazat_reteg.md`](docs/magyarazat_reteg.md)) →
 ✅ **② a javaslatok** (törlés, egyesítés tilos, áthelyezés csak a kézikönyvön belül; a nevek minden döntés-eseményen; az alap-tartalom
 `js/kezikonyv/`; a `kezikonyv` parancs és a program által megírt javaslat — MA5 (A)) →
-⏭️ ③ a felület (az ⓘ réteg — az örökölt fájlok érintetlenül) → ④ a szövegek → ⑤ a próba.
+✅ **③ a felület** (a kézikönyv a pakliban, a struktúrában, a síkidomban; az ⓘ réteg `felulet/js/koinoMagyarazat.js` — a kirajzolás után,
+az örökölt fájlok érintetlenül; a buborék; az első helyek: az alsó sáv és a „📱 Készülékeim”) →
+✅ **a koinon** (Csaba: „hozzunk létre, egy koinon-t … minden entitást, 1 tudatpontal hozza létre”): a kézikönyv-entitásokon 1 passzív
+pont a koinóné — a D14 kivétel nélkül igaz; a kézikönyv kártyáira ugyanaz a sorrend, mint bármelyikre (Csaba) →
+⏭️ ④ a szövegek → ⑤ a próba. 🔍 **D130 — a koinon az általános egyezményekhez** (a darabokra osztott, replikált őrzés): ÁTVIZSGÁLVA
+([`koinon_atvizsgalas.md`](docs/koinon_atvizsgalas.md)), ⏸️ a KO1–KO5 Csabánál.
 
-**Az állapot:** **1530 önpróba** (72 próba-fájl; a legutóbbi teljes soron 1528/1528 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-19, a D129 ② (a kézikönyv javaslatai) után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba és a csere „CSOMAGVESZTÉS (30%)” próbája, magukban zöldek) · 403 fájl / 8190,4 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1534 önpróba** (72 próba-fájl; a legutóbbi teljes soron 1531/1532 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család —, és a csere „lezárás 5×” próbája terhelés alatt bukott, magában 3/3 — 2026-11-19, a D129 ③ és a koinon után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba, a csere „CSOMAGVESZTÉS (30%)” és „lezárás 5×” próbája, magukban zöldek) · 405 fájl / 8238,3 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

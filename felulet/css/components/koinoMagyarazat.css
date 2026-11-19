@@ -1,0 +1,147 @@
+/* felulet/css/components/koinoMagyarazat.css */
+
+/* Felelősség: ⭐⭐ D129 (③) — az ⓘ jel és a magyarázat buboréka (`felulet/js/koinoMagyarazat.js`). A buborék minden fölött
+   (a modál 300, a struktúra 302 fölött is), az ⓘ mellett — telefonon a lap alján, teljes szélességben. A színek a lap változói. */
+
+.koino-magyarazat__jel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2em;
+  height: 1.2em;
+  margin: 0 0.3em;
+  border-radius: 50%;
+  font-size: 0.9em;
+  line-height: 1;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  color: var(--szin-elsodleges, #2d6a4f);
+  background: var(--szin-hatter-masodlagos, rgba(45, 106, 79, 0.1));
+  flex: none;
+}
+
+/* a sötét alsó sávon világos jel (különben a zöld a zöldön elveszik) */
+.also-sav .koino-magyarazat__jel {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.koino-magyarazat__jel:hover,
+.koino-magyarazat__jel:focus-visible {
+  outline: 2px solid var(--szin-elsodleges, #2d6a4f);
+  outline-offset: 1px;
+}
+
+.koino-magyarazat__buborek {
+  position: fixed;
+  z-index: 1000;
+  width: min(380px, calc(100vw - 16px));
+  max-height: 60vh;
+  overflow: auto;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--szin-keret, #d9d2bf);
+  border-radius: 12px;
+  background: var(--szin-hatter, #fffdf7);
+  color: var(--szin-szoveg, #2a2a2a);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.koino-magyarazat__fej {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.koino-magyarazat__cim {
+  flex: 1;
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
+
+.koino-magyarazat__bezar,
+.koino-magyarazat__vissza {
+  border: none;
+  background: none;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  padding: 0 0.2rem;
+}
+
+.koino-magyarazat__szoveg p {
+  margin: 0 0 0.55rem;
+}
+
+.koino-magyarazat__reszek {
+  margin: 0.2rem 0 0.4rem;
+  font-size: 0.88rem;
+}
+
+.koino-magyarazat__reszek ul {
+  margin: 0.2rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.koino-magyarazat__resz {
+  border: none;
+  background: none;
+  padding: 0.1rem 0;
+  cursor: pointer;
+  color: var(--szin-elsodleges, #2d6a4f);
+  text-decoration: underline;
+  text-align: left;
+  font: inherit;
+}
+
+.koino-magyarazat__ajanlat {
+  margin: 0.3rem 0;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  background: var(--szin-figyelmeztetes-hatter, #fff4d6);
+  font-size: 0.86rem;
+}
+
+.koino-magyarazat__lab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--szin-keret, #e5dfcf);
+  font-size: 0.82rem;
+  opacity: 0.95;
+}
+
+.koino-magyarazat__gomb {
+  border: 1px solid var(--szin-keret, #d9d2bf);
+  border-radius: 8px;
+  background: none;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.koino-magyarazat__betoltes {
+  margin: 0;
+  opacity: 0.7;
+}
+
+/* telefonon: a lap alján, teljes szélességben (a helyezés inline stílusát felülírva) */
+@media (max-width: 600px) {
+  .koino-magyarazat__buborek {
+    top: auto !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 8px;
+    width: auto;
+    max-height: 55vh;
+  }
+}

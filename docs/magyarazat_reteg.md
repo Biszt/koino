@@ -35,7 +35,8 @@ az MA5 (A) épp azt mondja, hogy ez magától, költözés nélkül lépjen be.
    marad — a „mai értékek soha nem változnak”); az új születésbe a `teljesSzabalyok` írja.
 3. **A kapu** (`esemeny.js` `alakiHiba`): az `adat.rendszer` — legfeljebb 8 név, mind érvényes útvonal.
 4. **Az állapot** (`allapotSzamitas.js`): ha a koinónak van kézikönyv-szabálya, minden esemény `adat.rendszer` nevei — és
-   a felmenőik — entitásként létrejönnek (`rendszer: <név>`, szerző és születés nélkül); a D14 felejtése kihagyja őket (MA4 (B)).
+   a felmenőik — entitásként létrejönnek (`rendszer: <név>`, szerző és születés nélkül); MA4 (B): ⭐ a koinon 1 passzív pontjával
+   (eredetileg a D14 kivételeként — lásd a naplót).
 5. **A küszöb** (`javaslatSzamitas.js`): a kézikönyv-entitás alap-küszöbe a koinó kézikönyv-szabályáé (ha a tulajdonosai érték
    javaslattal mást nem mondanak).
 6. **A bejelentés** (`esemeny.js` `bejelentesHelyei`): a kézikönyv-entitásra mutató esemény a kézikönyv GYÖKERÉNEK szeletébe is
@@ -98,3 +99,43 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   meg):** a javaslattevő automatikus támogató szavazata (a `javaslatLetrehozasa` maga írja, nem a `szavazas`) nem vitte a nevet —
   pont nélkül ez a szavazat elveszett volna a kézikönyv szeletéből. 16 rontás mind bukik. ⚠️ Próba nélkül: a lezárási összegzés
   kihagyása a kézikönyv-entitásnál (`koino.js` — csak 1000 eseménynél nagyobb szeletre fut; védekező lépés).
+- **2026-11-19** — ✅ **a ③ kész**: a program oldala — a pakli képe (`pakli.js` `kepetKerni`) a kézikönyvvel (`kezikonyv.js`
+  `kezikonyvKepbe`: a meg nem érintett bejegyzések virtuálisan, a megérintettek a megjelenítendő szöveggel és a `kezikonyv` jellel —
+  `forras: program|kozosseg`), így a pakli, a struktúra, a síkidom és a keresés külön kód nélkül mutatja; a `GET
+  /api/kezikonyv/bejegyzes?nev=` (a buborék — a részeivel); a „tartott” szeletek a kézikönyv azonosítóival (a pontjaik ismertek); az
+  alsó sáv számai a kézikönyv nélkül (a „📄 gondolatok”, és a „🔭 még nem ismert” — ⛔ a gyökér ismert része a kézikönyvvel a
+  tartó bemondását elnyelte volna). A felület (`felulet/js/koinoMagyarazat.js` + CSS): a helyek (választó → név), a figyelő
+  (`MutationObserver` — az örökölt fájlok érintetlenül), a buborék (a részei közt lépkedve, „‹”-gel vissza; „📖 A kézikönyvben” a
+  pakliban a bejegyzéshez ugrik; telefonon a lap alján). Az első helyek: az alsó sáv (EGY ⓘ a sáv elején — telefonon egy sor; a
+  részei a buborékból nyílnak) és a „📱 Készülékeim” ablak (az azonosság, a készülék sora, a határ, a kizárás, az új készülék, a
+  papír). Az alap-tartalom 26 bejegyzés (az alsó sáv 13 része és a Készülékeim 6 része részletesen — MA2 (B); a kódhoz igazítva:
+  az őrjárat alapból 5 perces, a kizárás nem vonható vissza). Böngészőben végigjárva (asztali és telefonos méret). Próba: +3
+  egység (most 13), +1 parancssor; 9 rontás mind bukik. ⏭️ A ④-hez feljegyezve: a kártya a szöveg bekezdéseit egybefolyatja (az
+  örökölt megjelenítő); a „📱 Készülékeim” saját szövegeiben belső kód áll („D128 17. pont”) — a ④ ezeket is átírja.
+  ⛔ **Lelet (a teljes sor fogta meg — 4 parancssor-próba):** a lap fájában most ott a kézikönyv (MA6 (A)), és ⭐ a bejáró
+  (`pakli.js` `biztosElotag`) egy helyet csak akkor mondott biztosnak, ha a pontja nagyobb egy ismeretlené lehetségesnél — a
+  kézikönyv 0 pontos bejegyzései így SOHA nem lettek volna biztosak, és a lap örökké „a sor folytatódhat”-ot mondott volna. Most: ha
+  semmi ismeretlen nem előzheti meg (a korlát 0), a kézikönyv-bejegyzés helye is biztos (rontással őrizve). A Struktúra, a Síkidom és a
+  lapos lista próbái a valódi gondolatokat ugyanúgy mérik, mellettük a kézikönyvet a méretével (a lapos „hierarchikus” lista az ágakat
+  az azonosítók szerint rakja egymás után — ez eddig is így volt).
+  ⛔ **Lelet (a második teljes sor — szeszélyes, ~minden hatodik futás):** a nézet-próba (D126) a nézet-felület alap rendezésével
+  (`hierarchikus`, növekvő — az ágak az azonosítók szerint) kérte az első 20 entitást, és az elsőt választotta: a kézikönyv ága
+  (a gyökere állandó azonosítójával) a véletlen azonosítójú gondolat elé kerülhetett, és kitolta a lapról. A program helyes (a nézet a
+  koinó egész fáját látja, abban a kézikönyvet is); a két nézet-próba most pont szerint kér, és név szerint választ — a kézikönyv
+  méretétől függetlenül. A bukás kiírása a nézet válaszait és a koinó eseményeit is mondja (eddig nem látszott, melyik kérdés ment
+  félre).
+  ⛔ **Lelet (a harmadik teljes sor — az FL1 próba):** a pakli alapból „a legerősebb gyökérrel” nyílik, holtversenyben az azonosító
+  dönt — egy még ismeretlen pontú (0) közösségi gondolat és a kézikönyv 0 pontos gyökere közül így néha a kézikönyv nyílt meg. Egy
+  külön szabály (azonos pontnál a közösség a kézikönyv előtt) után ⭐ **Csaba döntése (2026-11-19): „ugyan úgy kell rendezni a rendszer
+  entitás típusú kártyákat is, mint az többit”** — a külön szabály kikerült: a kézikönyv kártyáira ugyanaz a sorrend vonatkozik (pont
+  szerint, holtversenyben az azonosító). Az FL1 próba most a mért gondolatot nevezve kéri (nem a holtversenyre hagyatkozik).
+- **2026-11-19** — ⭐⭐ **A KOINON** (Csaba: „hozzunk létre, egy koinon-t … minden entitást, 1 tudatpontal hozza létre” — „rendben.
+  jöhet az 1-es, aztán mehetsz tovább a 2-essel”): a D14 kivétele helyett minden kézikönyv-entitáson 1 passzív pont a koinóné
+  (`rendszerEntitas.js` `KOINON`, `KOINON_PONT`; az állapotban és a pakli virtuális bejegyzésein ugyanúgy). Kikerült: a D14
+  kivétele és a bejáró külön szabálya (a 0 pontos kézikönyv-bejegyzés helye) — a kézikönyvre is ugyanaz a szabály vonatkozik, mint
+  bármely kártyára. A koinon nem szavaz, nem javasol, a részvétel nevezőjébe nem számít (a döntés a pont-eseményekből számol — a
+  koinonnak nincs ilyen); az ágak össz-pontjában esemény nélküli levél (mint az egyezmény által átvitt pont); a különválásnál a
+  koinon mindig marad (a főág nem ürül ki). A buborék és a `kezikonyv` parancs a közösség pontjait mondja (a koinon 1-e nélkül).
+  Következmény: egy friss koinóban a kézikönyv gyökere (a bejegyzései koinon-pontjaival) a legerősebb gyökér lehet — a pakli azzal
+  nyílik, amíg a közösség gondolatai nem erősebbek. ⏭️ D130: a koinon az általános egyezményekhez, a darabokra osztott, replikált
+  őrzéssel.

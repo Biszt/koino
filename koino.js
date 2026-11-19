@@ -191,7 +191,7 @@ import { sajatKodCsomag, kodCsomagTarolasa, kodJegyzekOlvasasa, sajatMag, magJeg
 import { kodKiirasa, telepitesHelye, valtozasRetegei } from './js/tar/programTelepites.js';
 import { szabalyokAlakiHibaja, ALAP_SZABALYOK, koinoSzabalyai, teljesSzabalyok, kezikonyvesE } from './js/esemeny/koinoSzabalyok.js';
 // ⭐⭐ D129: a kézikönyv — a nevek (a mag része) és az alap-tartalom (NEM a mag része: a szövegek a programé)
-import { rendszerNevE, rendszerAzonosito } from './js/esemeny/rendszerEntitas.js';
+import { rendszerNevE, rendszerAzonosito, KOINON } from './js/esemeny/rendszerEntitas.js';
 import { programAlapTartalma, kezikonyvSzovege, programJavaslatai } from './js/kezikonyv/kezikonyv.js';
 import { szuletesLanc, szuloTagsagaEpitese, bekapcsolodasokEllenorzese, koinoNezete, lancNezete } from './js/allapot/koinoLanc.js';
 import { koinoKepe } from './js/allapot/ketReteg.js';
@@ -344,6 +344,8 @@ import {
   hianyzoFelmenok,
   // ⭐ A ház (D100): a hierarchikus pakli.
   pakliHierarchia,
+  // ⭐⭐ D129 (③): egy kézikönyv-bejegyzés (az ⓘ buborékja)
+  kezikonyvBejegyzese,
   // ⭐ D101: a Tudatpontok modál listája (2026-10-23 óta lapozva).
   sajatHozzarendelesek, HOZZARENDELES_KORLAT,
   // ⭐ D101 ③: a Struktúra nézet.
@@ -4590,7 +4592,11 @@ async function eszlelesEsBejelentes(azonositok) {
 async function tartottSzeleteim() {
   try {
     if ((await kiszolgalasBeallitas()).mindent) return null;
-    return (await ketFokAllapota()).vallalas.szeletek;
+    const v = (await ketFokAllapota()).vallalas;
+    // ⭐⭐ D129 (③): a kézikönyv-entitások eseményei mind a kézikönyv gyökerének szeletében vannak (a bejelentés — `esemeny.js`),
+    // amit mindenki tart: a pontjaik tehát ismertek — a pakli ne mutasson „?”-et rajtuk.
+    if (!v.kezikonyv) return v.szeletek;
+    return new Set([...v.szeletek, ...programAlapTartalma().azonositoSzerint.keys()]);
   } catch {
     return null;
   }
@@ -8133,15 +8139,17 @@ try {
       const ajanlatNevek = new Set(ajanlatok.map((a) => a.nev));
       const sorok = [];
       const latott = new Set();
+      // ⭐⭐ a közösség pontjai (a koinon 1 pontja nélkül — az minden bejegyzésen ott van)
+      const kozossegi = (e) => Math.max(0, (e?.osszesPont ?? 0) - (e?.hozzajarulok?.get(KOINON)?.pont ?? 0));
       for (const b of index.bejegyzesek) {
         latott.add(b.nev);
         const e = allapot.entitasok.get(b.azonosito);
-        sorok.push({ nev: b.nev, sz: kezikonyvSzovege(e ?? { rendszer: b.nev, cim: null, szoveg: null }, index), pont: e?.osszesPont ?? 0 });
+        sorok.push({ nev: b.nev, sz: kezikonyvSzovege(e ?? { rendszer: b.nev, cim: null, szoveg: null }, index), pont: kozossegi(e) });
       }
       // a közösség által megérintett, de a programban (már vagy még) nem szereplő nevek
       for (const e of allapot.entitasok.values()) {
         if (e.rendszer === undefined || latott.has(e.rendszer)) continue;
-        sorok.push({ nev: e.rendszer, sz: kezikonyvSzovege(e, index), pont: e.osszesPont });
+        sorok.push({ nev: e.rendszer, sz: kezikonyvSzovege(e, index), pont: kozossegi(e) });
       }
       kiir(SZIN.vastag + 'A KÉZIKÖNYV (' + sorok.length + ' bejegyzés)' + SZIN.vege);
       for (const s of sorok) {
@@ -12781,6 +12789,13 @@ try {
         // ⭐⭐ D122: A PROFILOM (a lap első megnyitásakor ebből dönti el, felkínálja-e az űrlapot; az előtöltés a meghívóból).
         if (utvonal === '/api/profil') {
           return { adat: await profilomAllapota() };
+        }
+        // ⭐⭐ D129 (③): EGY KÉZIKÖNYV-BEJEGYZÉS — az ⓘ buborékja kéri (a név szerint): a megjelenítendő szöveg, honnan jön, az
+        // entitás (a „📖 A kézikönyvben” gombhoz), a pontok, és ha a program azóta új szöveget mond (MA5 (A)).
+        if (utvonal === '/api/kezikonyv/bejegyzes') {
+          const b = await kezikonyvBejegyzese(olvasoTar, KOINO, { nev: kereses.get('nev') ?? '', szerzo, nezet: pakliNezet });
+          if (!b) return { allapot: 404, adat: { hiba: 'nincs ilyen kézikönyv-bejegyzés (vagy ennek a koinónak nincs kézikönyve)' } };
+          return { adat: b };
         }
         // ⭐⭐ D121 (②): A TAGSÁGOM — a belépő lapja ebből mondja: „várakozás a meghívásra — a kódod: …”, vagy „✅ tag vagy”.
         if (utvonal === '/api/tagsagom') {

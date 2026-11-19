@@ -294,7 +294,8 @@ proba('⭐⭐ a LAP útjai: feltöltés, lista, a kártya a kimondással; a kere
     const kerdez = (kerdes, a = null) => f.hiv('/api/nezet/kerdes', { method: 'POST', body: JSON.stringify({ kartya, kerdes, adat: a }) });
     const koino = await kerdez('koino');
     const en = await kerdez('en');
-    const ent = await kerdez('entitasok', { darab: 50 });
+    // ⭐⭐ D129: pont szerint — a fa-rendezésben a kézikönyv (0 pontos bejegyzések) az azonosítója szerint elé kerülhet
+    const ent = await kerdez('entitasok', { darab: 50, rendezes: 'sajatPont' });
     const gondolat = (ent.adat?.valasz?.entitasok ?? []).find((e) => e.cim === 'Egy gondolat');
     const szoveg = gondolat ? await kerdez('szoveg', { azonosito: gondolat.azonosito }) : null;
     const tilos = await kerdez('tarsak');
@@ -458,8 +459,9 @@ proba('filereader-kep', function () { var png = atob('iVBORw0KGgoAAAANSUhEUgAAAA
 var kn = window.koinoNezet;
 jel('kliens', kn && kn.valtozat);
 function kerd(nev, kerdes, adat) { return kn.kerdez(kerdes, adat).then(function (v) { E.valaszok[nev] = v; return v; }, function (h) { E.hibak[nev] = h.message; }); }
-Promise.all([kerd('koino', 'koino'), kerd('en', 'en'), kerd('entitasok', 'entitasok', { darab: 20 }), kerd('tilos', 'tarsak')]).then(function () {
-  var g = (E.valaszok.entitasok && E.valaszok.entitasok.entitasok || []).filter(function (e) { return e.tipus === 'Gondolat'; })[0];
+// ⭐⭐ D129: pont szerint (a kézikönyv 0 pontos bejegyzései a fa-rendezésben az azonosítójuk szerint elé kerülhetnének), név szerint
+Promise.all([kerd('koino', 'koino'), kerd('en', 'en'), kerd('entitasok', 'entitasok', { darab: 20, rendezes: 'sajatPont' }), kerd('tilos', 'tarsak')]).then(function () {
+  var g = (E.valaszok.entitasok && E.valaszok.entitasok.entitasok || []).filter(function (e) { return e.cim === 'Egy gondolat'; })[0];
   var sajat = E.valaszok.koino && E.valaszok.koino.nezet && E.valaszok.koino.nezet.kartya;
   return Promise.all([g ? kerd('szoveg', 'szoveg', { azonosito: g.azonosito }) : null, sajat ? kerd('sajatSzoveg', 'szoveg', { azonosito: sajat }) : null]);
 }).then(function () {
@@ -591,7 +593,14 @@ proba('⭐⭐ az ELSZIGETELÉS a valódi lapon (fej nélküli Chrome, kontrollal
         && E?.valaszok?.fajl?.meret === Buffer.byteLength(kod) && E.valaszok.fajl.eleje === '<!doctype html>'
     };
     const ok = Object.values(jo).every(Boolean);
-    if (!ok) process.stderr.write('    (' + JSON.stringify({ jo, naplo, udpNaplo, lan, probak: p, hibak: E?.hibak, nav }) + ')\n');
+    // ⭐ (2026-11-19) a nézet kapott válaszai is (a „valaszok” bukásánál enélkül nem látszott, melyik kérdés ment félre)
+    if (!ok) {
+      process.stderr.write('    (' + JSON.stringify({ jo, naplo, udpNaplo, lan, probak: p, hibak: E?.hibak, nav,
+        valaszok: { koino: E?.valaszok?.koino?.nev, en: !!E?.valaszok?.en?.kulcs, entitasok: (E?.valaszok?.entitasok?.entitasok ?? [])
+          .map((x) => x.tipus + ':' + x.cim).slice(0, 8), szoveg: E?.valaszok?.szoveg?.szoveg?.slice(0, 60), fajl: E?.valaszok?.fajl
+          && { meret: E.valaszok.fajl.meret, eleje: E.valaszok.fajl.eleje } },
+        esemenyek: (await esemenyek(adat)).map((x) => x.e.tipus + ':' + (x.e.adat?.cim ?? x.e.adat?.pont ?? '')) }) + ')\n');
+    }
     return ok;
   } finally {
     cdp?.zar();

@@ -71,6 +71,7 @@
 @import './components/koinoVerzio.css';
 @import './components/koinoTelepites.css';
 @import './components/koinoKeszulekek.css';   /* ⭐⭐ D128 (④b): a „📱 Készülékeim” */
+@import './components/koinoMagyarazat.css';   /* ⭐⭐ D129 (③): az ⓘ jelek és a magyarázat buboréka */
 @import './components/koinoNezet.css';
 @import './components/koinoTorzs.css';
 @import './components/koinoCsatlakozas.css';

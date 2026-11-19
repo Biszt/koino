@@ -6585,9 +6585,16 @@ fejlesztést.”*
    hálózaton. Minden darabnak állandó NEVE van (pl. „menü / Keresés”), és az azonosítója a koinóból és ebből a névből számolódik —
    mindenkinél ugyanaz, így bárki tehet rá tudatpontot és javaslatot, mint egy e-ember gondolatára. A hálózaton csak a közösség
    módosításai utaznak.
-5. **A D14 kivétele** (MA4 (B)): a rendszer-entitás nem felejtődik el, és a közösség módosítása pont nélkül is megmarad. ⭐ Ebből
+5. **Nem felejtődik el** (MA4 (B)): a rendszer-entitás megmarad, és a közösség módosítása pont nélkül is megmarad. ⭐ Ebből
    következik: a kézikönyv szeleteit **minden tag tartja** (mint a koinó születését) — különben egy pont nélküli módosítást senki nem
-   őrizne meg.
+   őrizne meg. ⭐⭐ **A KOINON** (Csaba, 2026-11-19: *„hozzunk létre, egy koinon-t ami maga a program azon tárhelye, amit darabokban,
+   replikálva, őriz meg, és neki, mondjuk végtelen tudatpontja lenne, és minden entitást, 1 tudatpontal hozza létre”* — *„rendben.
+   jöhet az 1-es, aztán mehetsz tovább a 2-essel”*): a megmaradás nem a D14 kivétele, hanem minden kézikönyv-entitáson **1 passzív
+   pont a koinóné** — így a D14 kivétel nélkül igaz (nincs 0 pontos entitás). A koinon nem e-ember: nem szavaz, nem javasol, nem ad
+   érték javaslatot, a pontja nem számít a részvétel nevezőjébe, nem a tudatpont-keretből jön, és senki nem írja alá (minden készülék
+   ugyanúgy számolja — a nevekből). ⏭️ Az általános egyezmények koinon-pontja és a darabokra osztott, replikált őrzés: **D130**.
+   A sorrend (Csaba: *„ugyan úgy kell rendezni a rendszer entitás típusú kártyákat is, mint az többit”*): a kézikönyv kártyáira
+   ugyanaz — pont szerint, holtversenyben az azonosító; nincs külön szabály.
 6. **Az új programverzió** (MA5 (A)): az új név (pl. egy új menüpont magyarázata) magától megjelenik; a közösség által nem módosított
    szöveg magától a program új szövegére vált; ahol a közösség módosított, ott a program nem ír felül — az új szöveg **a program által
    megírt javaslatként** érkezik, amit egy e-ember elindíthat (Csaba 2026-09-11-i ötlete — `jegyzetek.md`).

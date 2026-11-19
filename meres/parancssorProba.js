@@ -36,6 +36,11 @@ import { lancUjEsemenyhez } from '../js/allapot/lancGyoker.js';
 // ⭐ D85 T3: a töredék azonosítója (a csomag szeletének kulcsa) — a próba maga számolja.
 import { toredekAzonosito } from '../js/allapot/szabalyok.js';
 import { sajatMag } from '../js/tar/kodCsomag.js';
+// ⭐⭐ D129: egy új koinó kézikönyves — a lap fájában (struktúra, síkidom, bejáró) a kézikönyv is ott van (MA6 (A)); a próbák a
+// valódi gondolatokat ugyanúgy mérik, és mellettük a kézikönyvet a méretével
+import { programAlapTartalma } from '../js/kezikonyv/kezikonyv.js';
+const KEZIKONYV_DB = programAlapTartalma().bejegyzesek.length;
+const KEZIKONYV_AZONOSITOK = new Set(programAlapTartalma().azonositoSzerint.keys());
 
 const { proba, futtatas } = probaGyujtemeny('A KÉZI ÚT — a parancssor végigjárása (4. szabály)');
 
@@ -1361,7 +1366,10 @@ proba('⭐⭐ FL1: a felület a belépett koinóban is teljesen dolgozik — a g
       // B felülete a P-vel indul, és a téren belép a C-be
       fb = await feluletet(b, FB, alap);
       const valt = await fb.hiv('/api/ter/valt', { method: 'POST', body: JSON.stringify({ koino: C }) });
-      const elotte = (await fb.hiv('/api/pakli/hierarchikus')).adat ?? {};
+      // ⭐⭐ D129: a gondolatot NEVEZVE kérjük — a „legerősebb gyökér” holtversenyben (a még ismeretlen pontú gondolat és a 0 pontos
+      // kézikönyv) az azonosító szerint dőlne el; a kézikönyv kártyáira ugyanaz a szabály (Csaba, 2026-11-19)
+      const pakliG = '/api/pakli/hierarchikus?entitas=' + encodeURIComponent(g ?? '');
+      const elotte = (await fb.hiv(pakliG)).adat ?? {};
       const kerelmek = JSON.parse(await readFile(join(b, C, 'kerelmek.json'), 'utf8').catch(() => '{}'));
       futok.push(spawn(process.execPath, [KOINO_JS, 'figyel', String(PA)],
         { env: { ...process.env, KOINO_ADAT: a, KOINO_NAPLO: '', ...alap }, stdio: 'ignore' }));
@@ -1372,7 +1380,7 @@ proba('⭐⭐ FL1: a felület a belépett koinóban is teljesen dolgozik — a g
       let utana = null;
       for (let i = 0; i < 90; i++) {
         await varj(500);
-        utana = (await fb.hiv('/api/pakli/hierarchikus')).adat ?? null;
+        utana = (await fb.hiv(pakliG)).adat ?? null;
         if ((utana?.pakli ?? []).some((k) => k.cim === 'A GERENDA') && utana?.betoltes === false) break;
       }
       const tudas = (await fb.hiv('/api/csere-allapot')).adat?.adatok?.tudas ?? null;
@@ -3973,8 +3981,9 @@ proba('⭐⭐ D129 (②): a kézikönyv a parancssorból — a nevek az esemény
       const nevvel = (tipus) => sorok.some((e) => e.tipus === tipus && (e.adat?.rendszer ?? []).includes(MENU));
       const menuSor = (s) => s.split(/\r?\n/).find((l) => l.includes(MENU + ' ')) ?? '';
       const r = {
-        elso: /A KÉZIKÖNYV \(\d+ bejegyzés\)/.test(elso) && /„A menü” · a program szövege/.test(menuSor(elso)),
-        modositva: /„A menü \(a ☰ gomb\)” · a közösség módosította/.test(menuSor(modositva)),
+        // ⭐⭐ (a koinon) a lista a közösség pontjait mondja: a meg nem érintetten a koinon 1 pontja nem látszik „pont”-ként
+        elso: /A KÉZIKÖNYV \(\d+ bejegyzés\)/.test(elso) && /„A menü” · a program szövege/.test(menuSor(elso)) && !/ pont/.test(menuSor(elso)),
+        modositva: /„A menü \(a ☰ gomb\)” · a közösség módosította · 10 pont/.test(menuSor(modositva)),
         nevek: ['TudatpontRendezes', 'ErtekJavaslat', 'Javaslat', 'Szavazat'].every(nevvel)
           // MINDEN szavazat (az automatikus és a kézi is) a nevet viszi
           && sorok.filter((e) => e.tipus === 'Szavazat').length >= 2
@@ -3996,6 +4005,45 @@ proba('⭐⭐ D129 (②): a kézikönyv a parancssorból — a nevek az esemény
       }
       return true;
     } finally {
+      await rm(L, { recursive: true, force: true });
+    }
+  });
+
+// ⭐⭐ D129 (③): A KÉZIKÖNYV A LAPON. Egy új koinó lapján a pakli „A koinó kézikönyve”-t mutatja (a program alap-tartalmából, MA6 (A)),
+// az ⓘ buborékja a bejegyzést kéri (a részeivel), az ismeretlen név 404; az alsó sáv számaiba a kézikönyv nem számít; a lap betölti
+// az ⓘ réteget (a modul, a stílusa, az indítása).
+proba('⭐⭐ D129 (③): a kézikönyv a lapon — a pakliban a gyökere, az ⓘ bejegyzése a részeivel (az ismeretlen 404), a számokba nem számít; az ⓘ réteg kiszolgálva',
+  async () => {
+    const L = await ujKeszulek();
+    let fl = null;
+    try {
+      await fut(L, 'koino', 'Lap-kézikönyv');
+      fl = await feluletet(L, 7879);
+      const pakli = (await fl.hiv('/api/pakli/hierarchikus')).adat;
+      const sav = await fl.hiv('/api/kezikonyv/bejegyzes?nev=' + encodeURIComponent('kezikonyv/also-sav'));
+      const nincs = await fl.hiv('/api/kezikonyv/bejegyzes?nev=' + encodeURIComponent('kezikonyv/nincs-ilyen'));
+      const stat = (await fl.hiv('/api/platform/statisztika')).adat;
+      const index = await fetch('http://127.0.0.1:7879/').then((v) => v.text());
+      const modul = await fetch('http://127.0.0.1:7879/js/koinoMagyarazat.js').then((v) => v.status);
+      const css = await fetch('http://127.0.0.1:7879/css/components/koinoMagyarazat.css').then((v) => v.status);
+      const mainCss = await fetch('http://127.0.0.1:7879/css/main.css').then((v) => v.text());
+      const r = {
+        pakli: (pakli.pakli ?? []).some((k) => k.cim === 'A koinó kézikönyve'),
+        sav: sav.allapot === 200 && sav.adat.cim === 'Az alsó sáv' && sav.adat.forras === 'program'
+          && (sav.adat.gyerekek ?? []).some((g) => g.nev === 'kezikonyv/also-sav/tudatpont') && /^[A-Za-z0-9_-]{43}$/.test(sav.adat.azonosito)
+          // ⭐⭐ a koinon pontja külön: a buborék a közösség pontjait mondja (itt 0)
+          && sav.adat.koinonPont === 1 && sav.adat.osszesPont === 1,
+        nincs: nincs.allapot === 404,
+        szamok: (stat?.data?.gondolatokSzama ?? stat?.gondolatokSzama) === 0,
+        lap: /magyarazatInditasa\(\)/.test(index) && modul === 200 && css === 200 && /koinoMagyarazat\.css/.test(mainCss)
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (D129 ③: ' + JSON.stringify({ r, sav: sav.adat, stat, pakli: (pakli.pakli ?? []).map((k) => k.cim) }) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      fl?.folyamat.kill();
       await rm(L, { recursive: true, force: true });
     }
   });
@@ -4889,7 +4937,9 @@ proba('⭐⭐ D100: a lap hierarchikus paklija elkéri, ami hiányzik — az őr
     await fut(b, 'tars', '127.0.0.1', '7968', 'A');
     await csereKor(a, b, 7968, alap);
     await feluletInditasa(7970);
-    const elotte = await lekeres(7970);
+    // ⭐⭐ D129: a háztetőt NEVEZVE kérjük — a pakli alapból a legerősebb gyökérrel nyílik, és az most a kézikönyv (a koinon pontjaival
+    // erősebb egy még ismeretlen pontú gondolatnál — Csaba: „a paklinak ugyan úgy a legerősebb győkér entitást kell mutatnia”)
+    const elotte = await lekeres(7970, gTeljes);
     const kerelmek = JSON.parse(await readFile(join(await koinoMappa(b), 'kerelmek.json'), 'utf8').catch(() => '{}'));
     // A figyel, B őrjárata (6 mp-es körrel) elhozza a függő kérelmeket.
     const figyelo = spawn(process.execPath, [KOINO_JS, 'figyel', '7968'], { env: { ...process.env, KOINO_ADAT: a, KOINO_NAPLO: '' }, stdio: 'ignore' });
@@ -4902,7 +4952,7 @@ proba('⭐⭐ D100: a lap hierarchikus paklija elkéri, ami hiányzik — az őr
     figyelo.kill();
     await varj(1000);
     // ⭐ UGYANAZ a felület-folyamat kérdez, ami az őrjárat előtt is futott.
-    const utana = await lekeres(7970);
+    const utana = await lekeres(7970, gTeljes);
     const elsoKartya = (x) => (x?.pakli ?? []).find((k) => k.azonosito.startsWith(g));
     const ki = {
       latja: !!elsoKartya(elotte) && elsoKartya(elotte).tartom === false && elsoKartya(elotte).osszPontForras === 'ismeretlen',
@@ -5241,9 +5291,13 @@ proba('⭐ D101 ③: a Struktúra a lapon — darabszám, a lapok Bearer-rel, á
     const agDarab = await hiv('/api/struktura/darabszam?agEntitasId=' + P);
     const azok = (x) => (x.adat?.sorok ?? []).map((s2) => s2.entitasId);
     const ki = {
-      darab: darab.adat.osszesDarab === 4 && darab.adat.ismert === 4 && /készülékeden ismert/.test(darab.adat.koinoMegjegyzes ?? ''),
-      // a sorrend az ágazati pont szerint csökkenő: R (60), P (30), C (10), Q (5) — a szülő mindig a gyereke előtt
-      bearer: lap.allapot === 200 && azok(lap).join() === [R, P, C, Q].join(),
+      // ⭐⭐ D129: a 4 gondolat mellett a kézikönyv is a fában van (MA6 (A))
+      darab: darab.adat.osszesDarab === 4 + KEZIKONYV_DB && darab.adat.ismert === 4 + KEZIKONYV_DB
+        && /készülékeden ismert/.test(darab.adat.koinoMegjegyzes ?? ''),
+      // a sorrend az ágazati pont szerint csökkenő: R (60), P (30), C (10), Q (5) — a szülő mindig a gyereke előtt. ⭐⭐ D129: a
+      // kézikönyv ága (a koinon pontjaival) a pontja szerinti helyén — ugyanaz a szabály (Csaba); a valódiak egymáshoz képest változatlanok
+      bearer: lap.allapot === 200 && azok(lap).filter((az) => !KEZIKONYV_AZONOSITOK.has(az)).join() === [R, P, C, Q].join()
+        && azok(lap).length === 4 + KEZIKONYV_DB,
       ag: ag.allapot === 200 && azok(ag).length === 2 && azok(ag)[0] === P && !azok(ag).includes(Q) && agDarab.adat.agDarab === 2
     };
     if (!Object.values(ki).every(Boolean)) {
@@ -5323,7 +5377,8 @@ proba('⭐⭐ D102: a bejáró a lapon — két ág mélyen, egy sorozatban, és
         && /folytatódhat|nem biztos|hiányozhat/.test(elotte.adat.koinoMegjegyzes ?? ''),
       melyenKert: melyek.includes(R1) && melyek.includes(R2),
       megjott: [P1, C1, P2].every((x) => azok(utana).includes(x)),
-      biztos: utana.adat.biztos === utana.adat.osszes && utana.adat.osszes === 5,
+      // ⭐⭐ D129: az 5 gondolat után a kézikönyv (0 pont) — ha minden ismert, az ő helyük is biztos
+      biztos: utana.adat.biztos === utana.adat.osszes && utana.adat.osszes === 5 + KEZIKONYV_DB,
       // ⭐ a mély válasz P1-et és C1-et is hozta: P1-re külön fejléc-kérés nem kellett
       egyValasz: !kesz.some((x) => x.fajta === 'fejlecek' && x.kulcs === P1),
       // ⭐ D102 (J3): a két ág kérése EGY munkában, egy kapcsolaton jött meg (a sorozat)
@@ -5420,7 +5475,11 @@ proba('⭐⭐ D101 ④: a Síkidom a lapon — a nem tartott síkidom gyerekei �
     const r1Sor = (gyokerElotte.adat?.gyerekek ?? []).find((g) => g.entitasId === R1);
     const p1Sor = (r1Utana.adat?.gyerekek ?? []).find((g) => g.entitasId === P1);
     const ki = {
-      gyoker: azok(gyokerElotte).join() === [R1, R2].join() && r1Sor?.vanGyereke === true && r1Sor?.hierarchikusOsszesPont === 60
+      // ⭐⭐ D129: a gyökérnél R1 és R2 mellett a kézikönyv gyökere (MA6 (A)) — a pontja (a koinon pontjai) szerinti helyén, ugyanazzal a
+      // szabállyal; R1 és R2 egymáshoz képest változatlan
+      gyoker: azok(gyokerElotte).filter((az) => !KEZIKONYV_AZONOSITOK.has(az)).join() === [R1, R2].join()
+        && azok(gyokerElotte).length === 3 && azok(gyokerElotte).some((az) => KEZIKONYV_AZONOSITOK.has(az))
+        && r1Sor?.vanGyereke === true && r1Sor?.hierarchikusOsszesPont === 60
         && /ismert részből/.test(gyokerElotte.adat?.koinoMegjegyzes ?? ''),
       // R1 gyerekeit még nem ismeri: üres, de kér, és a helyüket az össz-pontból foglalja (a bemondott 60 − a saját 30 —
       // a saját pontját a gyökér-darabbal ismeri, az össz-pont mégis a bemondás: D101 ④, `osszPont.js`)
@@ -6088,8 +6147,9 @@ proba('⭐ ÁTHELYEZÉSI javaslat a lapról — és a gyökérre helyezés is (`
     });
     if (javaslat.allapot !== 200) return false;
 
-    // ⭐ A hierarchikus rendezésben a gyerek a szülője alá kerül.
-    const oldal = await hiv('/api/pakli?darab=10&rendezes=hierarchikus');
+    // ⭐ A hierarchikus rendezésben a gyerek a szülője alá kerül. ⭐⭐ D129: a lapos fában a kézikönyv ága is ott van (az ágak
+    // sorrendje az azonosítóké) — a lap elég nagy, hogy a két gondolat biztosan rajta legyen.
+    const oldal = await hiv('/api/pakli?darab=' + (10 + KEZIKONYV_DB) + '&rendezes=hierarchikus');
     const k = oldal.adat.kartyak.find((x) => x.cim === 'A GYEREK');
     return k?.szulo === szulo.adat.data._id;
   } finally {

@@ -63,6 +63,10 @@ import { GYOKER_KULCS as GYOKER_TUDAS_KULCS } from '../csere/szeletEgyeztetes.js
 import { pillanatkep } from './ertesites.js';
 // ⭐ (Csaba, 2026-10-23: „(B) Az első 200-at”) — a Struktúra magától annyit kér, mint egy alapbeállítású felderítés.
 import { FELDERITES_ALAP } from './felderites.js';
+// ⭐⭐ D129 (③): a kézikönyv a pakli képében (a program alap-tartalma — a pakli nem a mag része)
+import { kezikonyvesE } from '../esemeny/koinoSzabalyok.js';
+import { programAlapTartalma, kezikonyvKepbe, programJavaslatai } from '../kezikonyv/kezikonyv.js';
+import { KOINON } from '../esemeny/rendszerEntitas.js';
 
 /**
  * ⭐ D72 (2026-09-26): a javaslatok változásaiban a SZÖVEG-HIVATKOZÁS feloldása — a felület
@@ -659,7 +663,9 @@ function forrasJelolese(e, o, bemondasok, tartott) {
 function felderitetlenTudas(entitasok, osszPontok, { tartott, gyokerTeljes = false, tudas = new Map(),
   gyerekek = gyerekJegyzek(entitasok) } = {}) {
   const ismertAlatta = ismertAlattaSzamitasa(entitasok, gyerekek);
-  const gyokerek = [...entitasok.values()].filter((e) => !e.szulo).map((e) => e.azonosito);
+  // ⭐⭐ D129: a kézikönyv (a program hozza — nincs születése, a tartó bemondásában sincs) nem számít a gyökér ismert részébe — különben
+  // a „még nem ismert” szám a kézikönyv méretével kevesebbet mondana
+  const gyokerek = [...entitasok.values()].filter((e) => !e.szulo && e.rendszer === undefined).map((e) => e.azonosito);
   const tudasa = (az) => tudas.get(az === GYOKER ? GYOKER_TUDAS_KULCS : az);
   const szamok = (az) => {
     const ismertek = az === GYOKER ? gyokerek : (gyerekek.get(az) ?? []);
@@ -752,7 +758,9 @@ export async function pakliHierarchia(tar, koino, beallitas = {}) {
       testverOsszes: p ? p.osszesGyerek : null
     };
   };
-  // ⭐ Az erősebb előbb, holtversenyben az azonosító (mint a kérelem fejléceinél — egy sorrend).
+  // ⭐ Az erősebb előbb, holtversenyben az azonosító (mint a kérelem fejléceinél — egy sorrend). ⭐⭐ D129 (Csaba, 2026-11-19:
+  // „ugyan úgy kell rendezni a rendszer entitás típusú kártyákat is, mint az többit”): a kézikönyv kártyáira is ugyanez — nincs
+  // külön szabály.
   const erosseg = (a, b) => (pontja(b) - pontja(a)) || (a < b ? -1 : a > b ? 1 : 0);
   const gyokerek = [...entitasok.values()].filter((e) => !e.szulo).map((e) => e.azonosito).sort(erosseg);
   const hianyzik = [];
@@ -916,6 +924,41 @@ export async function entitasSzovege(tar, koino, azonosito, beallitas = {}) {
  *
  * @returns {Promise<Object|null>}
  */
+/**
+ * ⭐⭐ D129 (③): EGY KÉZIKÖNYV-BEJEGYZÉS a lapnak (az ⓘ buborékja): a megjelenítendő cím és szöveg, honnan jön (a program vagy a
+ * közösség), az entitás azonosítója (a „📖 A kézikönyvben” gomb ide ugrik), a rajta lévő pontok (az enyém is), és ha a program
+ * azóta új szöveget mond (MA5 (A)).
+ * @param {Object} tar
+ * @param {string} koino
+ * @param {Object} beallitas - `{ nev, nezet, szerzo, horgony?, most? }`
+ * @returns {Promise<Object|null>} null, ha a koinóban nincs kézikönyv, vagy a név ismeretlen
+ */
+export async function kezikonyvBejegyzese(tar, koino, beallitas = {}) {
+  console.log('pakli.kezikonyvBejegyzese - KEZDÉS', { nev: beallitas.nev });
+  const kep = await lapKepe(tar, koino, beallitas);
+  if (!kezikonyvesE(kep.koino?.szabalyok) || typeof beallitas.nev !== 'string') return null;
+  const index = programAlapTartalma();
+  const azonosito = index.nevSzerint.get(beallitas.nev)?.azonosito
+    ?? [...kep.entitasok.values()].find((e) => e.rendszer === beallitas.nev)?.azonosito;
+  const e = azonosito ? kep.entitasok.get(azonosito) : null;
+  if (!e) return null;
+  const esemenyek = new Map((kep.kezikonyvEsemenyek ?? []).map((x) => [x.azonosito, x]));
+  const ajanlat = programJavaslatai({ allapot: kep, javaslatok: kep.javaslatok ?? new Map(), esemenyek, index })
+    .find((x) => x.nev === beallitas.nev) ?? null;
+  const gyerekek = [...kep.entitasok.values()].filter((x) => x.szulo === e.azonosito && x.rendszer !== undefined)
+    .map((x) => ({ nev: x.rendszer, cim: x.cim }));
+  console.log('pakli.kezikonyvBejegyzese - VÉGE', { azonosito: e.azonosito.slice(0, 8), forras: e.kezikonyv?.forras });
+  return {
+    nev: beallitas.nev, azonosito: e.azonosito, cim: e.cim, szoveg: e.szoveg,
+    forras: e.kezikonyv?.forras ?? 'program', ismert: e.kezikonyv?.ismert ?? true,
+    osszesPont: e.osszesPont ?? 0, sajatPont: beallitas.szerzo ? (e.hozzajarulok?.get(beallitas.szerzo)?.pont ?? 0) : 0,
+    // ⭐⭐ a koinon pontja külön (a buborék a közösség pontjait mondja — a koinoné mindig 1)
+    koinonPont: e.hozzajarulok?.get(KOINON)?.pont ?? 0,
+    programJavaslat: ajanlat ? { cim: ajanlat.cim } : null,
+    gyerekek
+  };
+}
+
 export async function entitasTudatpontja(tar, koino, azonosito, beallitas = {}) {
   console.log('pakli.entitasTudatpontja - KEZDÉS', { azonosito });
 
@@ -1199,6 +1242,7 @@ export function biztosElotag(lista, entitasok, agazati, { tartott, gyokerTeljes 
   // a `szukseges` helyen túl nincs mit kérni.
   let biztos = 0;
   for (const az of lista) {
+    // (⭐⭐ D129: a kézikönyv-bejegyzésnek is van pontja — a koinon 1 pontja —, így rá is ugyanez a szabály vonatkozik.)
     if (!(ertek(az) > korlat)) break;
     biztos++;
     if (!teljes(az)) {
@@ -1643,6 +1687,7 @@ export async function helyiStatisztika(tar, koino, beallitas = {}) {
   }).szamok(GYOKER);
   const db = { Gondolat: 0, Kategoria: 0, GondolatTipus: 0, Javaslat: 0, Egyezmeny: 0 };
   for (const e of kep.entitasok.values()) {
+    if (e.rendszer !== undefined) continue;   // ⭐⭐ D129: a kézikönyv nem a közösség gondolata — a számokba nem számít
     const tipus = kartyaTipusa(e, entitasDontese(e, kep.javaslatok));
     if (tipus in db) db[tipus]++;
   }
@@ -1862,6 +1907,14 @@ async function kepetKerni(nezet, koino, horgony, most, esemenyek, csakAtmeneti =
   // ⭐ A javaslatok is kártyák (5.5) — a képpel együtt tartjuk, hogy ne kelljen kétszer
   // kiszámolni őket.
   kep.javaslatok = javaslatok;
+
+  // ⭐⭐ D129 (③, MA6 (A)): a kézikönyv a pakliban — a meg nem érintett bejegyzések a program alap-tartalmából, a megérintettek a
+  // megjelenítendő szöveggel (a közösségé, ha módosította). Csak a kézikönyves koinóban; a mag állapota nem változik (a kép a
+  // pakli saját példánya).
+  if (kezikonyvesE(kep.koino?.szabalyok)) {
+    kezikonyvKepbe(kep.entitasok);
+    kep.kezikonyvEsemenyek = bemenet;   // a program-javaslatokhoz (az elfogadott módosítás `alapLenyomatok`-ja)
+  }
 
   nezet.horgony = kulcs;
   nezet.kep = kep;

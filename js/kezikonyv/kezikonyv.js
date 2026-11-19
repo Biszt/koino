@@ -19,7 +19,8 @@
 
 import { readFileSync } from 'node:fs';
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
-import { rendszerNevE, rendszerAzonosito, szuloNeve, KEZIKONYV_GYOKER } from '../esemeny/rendszerEntitas.js';
+import { rendszerNevE, rendszerAzonosito, szuloNeve, KEZIKONYV_GYOKER, KOINON, KOINON_PONT, koinonHozzajarulasa }
+  from '../esemeny/rendszerEntitas.js';
 
 /** Az alap-tartalom alakjának jele. */
 export const ALAP_TARTALOM_FAJTA = 'koino-kezikonyv-1';
@@ -123,6 +124,45 @@ export function kezikonyvSzovege(entitas, index = programAlapTartalma()) {
     modositott: sajatCim !== null || sajatSzoveg !== null,
     ismert: !!b
   };
+}
+
+// ===================================
+// ⭐⭐ D129 (③, MA6 (A)): A KÉZIKÖNYV A PAKLI KÉPÉBEN
+// ===================================
+
+/**
+ * A pakli képébe teszi a kézikönyvet (csak a MEGJELENÍTÉSHEZ — a mag állapota nem változik): az alap-tartalom meg nem érintett
+ * bejegyzései virtuális entitásként (a koinon 1 pontjával — mint a mag kézikönyv-entitásain), a megérintettek (és a különvált ágak)
+ * mezőnként a megjelenítendő szöveggel (`kezikonyvSzovege`). Így a pakli, a struktúra, a síkidom és a keresés minden további
+ * kód nélkül mutatja — „A koinó kézikönyve” egy új koinó első témája.
+ *
+ * Minden kézikönyv-entitás megkapja a `kezikonyv` jelet: `{ nev, forras: 'program'|'kozosseg', ismert }` (a lap kimondja, honnan
+ * jön a szöveg). ⚠️ A bemenet entitásait HELYBEN írja (a kép a pakli saját, kiszámolt példánya).
+ * @param {Map<string, Object>} entitasok - a pakli képének entitásai
+ * @param {ReturnType<typeof alapTartalomIndexe>} [index]
+ * @returns {number} hány virtuális entitás került a képbe
+ */
+export function kezikonyvKepbe(entitasok, index = programAlapTartalma()) {
+  let uj = 0;
+  for (const e of entitasok.values()) {
+    if (e.rendszer === undefined && e.rendszerbol === undefined) continue;
+    const sz = kezikonyvSzovege(e, index);
+    e.kezikonyv = { nev: sz.nev, forras: sz.modositott ? 'kozosseg' : 'program', ismert: sz.ismert };
+    e.cim = sz.cim;
+    e.szoveg = sz.szoveg;
+  }
+  for (const b of index.bejegyzesek) {
+    if (entitasok.has(b.azonosito)) continue;
+    entitasok.set(b.azonosito, {
+      azonosito: b.azonosito, tipus: 'Gondolat', cim: b.cim, szoveg: b.szoveg, ikon: null, gondolatTipus: null, kategoriak: [],
+      szulo: b.szulo === null ? null : rendszerAzonosito(b.szulo), meret: 0, rendszer: b.nev, szerzo: null, letrehozva: null,
+      // ⭐⭐ a koinon 1 pontja (mint a mag kézikönyv-entitásain — `allapotSzamitas.js`)
+      osszesPont: KOINON_PONT, hozzajarulok: new Map([[KOINON, koinonHozzajarulasa()]]), kuszobok: null,
+      kezikonyv: { nev: b.nev, forras: 'program', ismert: true }, virtualis: true
+    });
+    uj++;
+  }
+  return uj;
 }
 
 // ===================================
