@@ -96,3 +96,5 @@ darabnak 13+ tartója marad, az átfedés pedig háromszoros terhet hoz; (B) mar
   kérdése), utána az építés terve.
 - **2026-11-19** — a 95. mérés (`meres/koinonMeres.js`): a tömör alak 20–26 KB, a darabok átfedés nélkül is 13+ tartóval; két lelet
   (a minta a tömör alak saját lenyomatából; a becslés az ismert tagokból). ⏸️ KO6 (az átfedés) Csabánál. Az építés terve: 5. szakasz.
+- **2026-11-19** — ✅ **Csaba: „ko6: (A)”** — átfedés nélkül (a D130 3. pontja átvezetve). ⏭️ Előbb a D129 ④ (a szövegek), utána a D130
+  építése (az 5. szakasz 1–5. lépése).
