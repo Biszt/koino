@@ -359,7 +359,7 @@
     {
       "nev": "kezikonyv/kartya/szavazas",
       "cim": "A szavazás",
-      "szoveg": "A javaslat kártyáján, a „Szavazás” fülön szavazol: Támogatom, Ellenzem vagy Tartózkodom. A gomb azonnal hat; a szavazatodat megváltoztathatod, vagy visszavonhatod („Szavazat visszavonása”).\n\nAz szavazhat, akinek tudatpontja van az érintett gondolaton (a javaslaton magán nem kell). A szavazásnál mindenki egyenlő: a tudatpont a jogot adja, nem a szavazat súlyát. Aki szavaz, ezen a gondolaton aktív résztvevő lesz (lásd a kártya menüjében a „Részvételi beállítások”-at).\n\nA javaslat a döntési idő végén zárul (⏱ a kártyán): ha a támogatottság és a részvétel eléri a gondolat küszöbét, elfogadják, különben elvetik."
+      "szoveg": "A szerkesztési és az általános javaslat kártyáján, a „Szavazás” fülön szavazol: Támogatom, Ellenzem vagy Tartózkodom. A gomb azonnal hat. A szavazatodat bármikor megváltoztathatod — szavazz újra, mindig a legutóbbi számít —, de vissza nem vonhatod: ha nem akarsz állást foglalni, válaszd a Tartózkodom-ot. (Egy harmadik, „mégsem szavaztam” állapot a részvétel arányát tenné kétértelművé.)\n\nAz szavazhat, akinek tudatpontja van az érintett gondolaton (a szerkesztési vagy általános javaslaton magán nem kell). A szavazásnál mindenki egyenlő: a tudatpont a jogot adja, nem a szavazat súlyát. Aki szavaz, ezen a gondolaton aktív résztvevő lesz (lásd a kártya menüjében a „Részvételi beállítások”-at).\n\nA szerkesztési vagy általános javaslat a döntési idő végén zárul (⏱ a kártyán): ha a támogatottság és a részvétel eléri a gondolat küszöbét, elfogadják, különben elvetik."
     },
     {
       "nev": "kezikonyv/kartya/szavazas/kulonvalas",

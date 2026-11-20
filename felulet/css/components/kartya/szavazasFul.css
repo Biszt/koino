@@ -107,6 +107,13 @@
   display: none;
 }
 
+/* ⛔ A koinoban a szavazat NEM vonható vissza, csak megváltoztatható (5.4 — a meggondolás: szavazz újra; a semleges állás:
+   Tartózkodom). A gomb az örökölt `SzavazasFul.js`-é (bájtra a prototípusé), ezért itt rejtjük el: a háttér úgyis elutasítaná.
+   Csaba (2026-11-20): „meg lehet, hogy nem is kell, elegendő, ha módosítani tudja”. */
+.szavazas-ful__visszavonas-gomb {
+  display: none !important;
+}
+
 /* ----- ÁLLAPOT / HIBA ÜZENET ----- */
 .szavazas-ful__uzenet {
   font-size: var(--text-sm);
