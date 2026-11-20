@@ -112,16 +112,24 @@ export async function koinonCsomagEllenorzese(cs, { tagE, alapKuszobok } = {}) {
       || !Array.isArray(cs.esemenyek) || !Array.isArray(cs.tanusitvanyok)) {
     return hiba('nem tömör egyezmény-alak');
   }
-  // ----- a táblákból vissza: az azonosítóból az esemény, a készülékéből a kísérő tanúsítvány (a hitelességét az esemény
-  // ellenőrzése nézi — `esemenyEllenorzese`); ami nincs a táblában, az nincs (null — a hivatkozó elem elbukik) -----
-  const esemenyTabla = new Map(cs.esemenyek.filter((e) => typeof e?.azonosito === 'string').map((e) => [e.azonosito, e]));
-  const tanusitvanyTabla = new Map(cs.tanusitvanyok.filter((t) => typeof t?.keszulek === 'string').map((t) => [t.keszulek, t]));
-  const esemenye = (az) => {
+  return tomorAlakEllenorzese({ javaslatAz: cs.javaslat, reszek: cs.reszek, allasfoglalasok: cs.allasfoglalasok,
+    esemenye: tablaFeloldo(cs.esemenyek, cs.tanusitvanyok), tagE, alapKuszobok });
+}
+
+/**
+ * A táblákból vissza: az azonosítóból az esemény, a készülékéből a kísérő tanúsítvány (a hitelességét az esemény ellenőrzése nézi
+ * — `esemenyEllenorzese`); ami nincs a táblában, az nincs (null — a hivatkozó elem elbukik). A csomag és az esemény is ezt használja.
+ * @param {Array<Object>} esemenyek
+ * @param {Array<Object>} tanusitvanyok
+ * @returns {Function} async (azonosító) → az esemény (kísérővel) vagy null
+ */
+function tablaFeloldo(esemenyek, tanusitvanyok) {
+  const esemenyTabla = new Map(esemenyek.filter((e) => typeof e?.azonosito === 'string').map((e) => [e.azonosito, e]));
+  const tanusitvanyTabla = new Map(tanusitvanyok.filter((t) => typeof t?.keszulek === 'string').map((t) => [t.keszulek, t]));
+  return async (az) => {
     const e = typeof az === 'string' ? esemenyTabla.get(az) : null;
     return e ? kiseroval(e, tanusitvanyTabla.get(e.keszulek) ?? null) : null;
   };
-  return tomorAlakEllenorzese({ javaslatAz: cs.javaslat, reszek: cs.reszek, allasfoglalasok: cs.allasfoglalasok,
-    esemenye: async (az) => esemenye(az), tagE, alapKuszobok });
 }
 
 /**
@@ -187,9 +195,11 @@ async function tomorAlakEllenorzese({ javaslatAz, reszek, allasfoglalasok, eseme
 //
 // Csaba (2026-11-20, KO7 (A)): a lezárási összegzés nem esemény — a darab tartójához egy aláírt eseményben jut el, a meglévő
 // csere-úton (a kapu az ismeretlen típust nem tiltja: a régi program átengedi, csak nem érti — nem protokoll-törés). Az esemény a
-// csomag DÖNTÉS-része: a javaslat azonosítója és a részek (az összegzések és a mintáik — az események azonosítóival). ⛔ Az
-// állásfoglalások NEM kerülnek bele: a hatály ÉL (D27) — azok külön események, a darab hordja őket, és mindig a legutóbbi számít. A
-// hivatkozott események (a javaslat, a minták) a tárban vannak (a darab szeletében utaznak), a kísérővel.
+// csomag DÖNTÉS-része, BEÁGYAZVA: a javaslat azonosítója, a részek (az összegzések és a mintáik — az események azonosítóival), és a
+// táblák (a javaslat és a minták eseményei egyszer, a tanúsítványok készülékenként egyszer — mint a csomagban). ⭐ Így a darab
+// tartójának EZ AZ EGY esemény elég (a döntési és a tagsági csomag mintájára): a minták eseményei más szeletekben laknak (egy
+// tudatpont, egy érték javaslat magáról nem mondja meg, hogy egy darab része), hivatkozva a fogadó nem tudná, hogy átvegye-e őket.
+// ⛔ Az állásfoglalások NEM kerülnek bele: a hatály ÉL (D27) — azok külön események, a darab hordja őket, és mindig a legutóbbi számít.
 // ⭐ Az aláíró nem kap bizalmat (a tartalmát a minták igazolják); KO8 (A): bárki írhatja, aki a teljes bemenetet tartja.
 
 /** Az esemény típusa. */
@@ -199,30 +209,40 @@ export const KOINON_OSSZEGZES = 'KoinonOsszegzes';
 export const KOINON_OSSZEGZES_RESZ_KORLAT = 64;
 
 /**
- * A `KoinonOsszegzes` esemény adata a csomagból (a döntés-rész — az állásfoglalások nélkül).
+ * A `KoinonOsszegzes` esemény adata a csomagból (a döntés-rész a táblákkal — az állásfoglalások nélkül, és a táblákból is
+ * kimaradnak az állásfoglalások eseményei és a csak általuk használt tanúsítványok).
  * @param {Object} cs - a `koinonCsomagEpitese` csomagja
- * @returns {{javaslat: string, reszek: Array<Object>}}
+ * @returns {{javaslat: string, reszek: Array<Object>, esemenyek: Array<Object>, tanusitvanyok: Array<Object>}}
  */
 export function koinonOsszegzesAdata(cs) {
-  return { javaslat: cs.javaslat, reszek: cs.reszek };
+  const kell = new Set([cs.javaslat]);
+  for (const r of cs.reszek) {
+    const m = r.mintak ?? {};
+    for (const x of [...(m.szavazat ?? []), ...(m.nevezo ?? []), ...Object.values(m.ertek ?? {}).flat()]) {
+      if (typeof x?.esemeny === 'string') kell.add(x.esemeny);
+    }
+  }
+  const esemenyek = cs.esemenyek.filter((e) => kell.has(e.azonosito));
+  const keszulekek = new Set(esemenyek.map((e) => e.keszulek));
+  return { javaslat: cs.javaslat, reszek: cs.reszek, esemenyek, tanusitvanyok: cs.tanusitvanyok.filter((t) => keszulekek.has(t.keszulek)) };
 }
 
 /**
- * A `KoinonOsszegzes` esemény ellenőrzése — a hivatkozott eseményekkel a tárból (az olvasó a kísérőt adja). ⚠️ Az esemény
- * aláírását a kapu nézi (a tárba csak hiteles kerül); itt a TARTALMA: a javaslat hiteles általános javaslat, minden érintettjéről
- * van összegzés, és az a saját lenyomatából számolt helyeken vett mintákkal igaz. Az állásfoglalásokat nem nézi (azok külön élnek).
+ * A `KoinonOsszegzes` esemény ellenőrzése — ÖNMAGÁBÓL (a beágyazott táblákból). ⚠️ Az esemény aláírását a kapu nézi (a tárba csak
+ * hiteles kerül); itt a TARTALMA: a javaslat hiteles általános javaslat, minden érintettjéről van összegzés, és az a saját
+ * lenyomatából számolt helyeken vett mintákkal igaz. Az állásfoglalásokat nem nézi (azok külön élnek).
  * @param {Object} e - az esemény
- * @param {Function} esemenyOlvas - async (azonosító) → esemény (kísérővel) vagy null
  * @param {Object} [b] - `{ tagE, alapKuszobok }`
  * @returns {Promise<Object>} mint a csomagé; `osszegzesek`: az ellenőrzött lezárási összegzések (a D95/1 útjára)
  */
-export async function koinonOsszegzesEllenorzese(e, esemenyOlvas, { tagE, alapKuszobok } = {}) {
+export async function koinonOsszegzesEllenorzese(e, { tagE, alapKuszobok } = {}) {
   const a = e?.adat;
   if (e?.tipus !== KOINON_OSSZEGZES || !a || typeof a.javaslat !== 'string' || !Array.isArray(a.reszek)
-      || !a.reszek.length || a.reszek.length > KOINON_OSSZEGZES_RESZ_KORLAT) {
+      || !a.reszek.length || a.reszek.length > KOINON_OSSZEGZES_RESZ_KORLAT || !Array.isArray(a.esemenyek)
+      || !Array.isArray(a.tanusitvanyok)) {
     return { rendben: false, ok: 'nem a döntés tömör alakja' };
   }
   if (e.entitas !== a.javaslat) return { rendben: false, ok: 'nem a javaslat szeletében él' };
   return tomorAlakEllenorzese({ javaslatAz: a.javaslat, reszek: a.reszek, allasfoglalasok: [],
-    esemenye: async (az) => (typeof az === 'string' ? (await esemenyOlvas(az)) ?? null : null), tagE, alapKuszobok });
+    esemenye: tablaFeloldo(a.esemenyek, a.tanusitvanyok), tagE, alapKuszobok });
 }

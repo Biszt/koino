@@ -6230,7 +6230,7 @@ async function koinonOsszegzesekKiadasa() {
     // ⭐ KO8 (A): ha a szeletben már van ÉRVÉNYES (bárkitől), nem adunk ki újat
     let vanErvenyes = false;
     for (const e of (await tar.szeletEsemenyei(az)).filter((x) => x.tipus === KOINON_OSSZEGZES && x.adat?.javaslat === az)) {
-      if ((await koinonOsszegzesEllenorzese(e, olvas)).rendben) { vanErvenyes = true; break; }
+      if ((await koinonOsszegzesEllenorzese(e)).rendben) { vanErvenyes = true; break; }
     }
     if (vanErvenyes) { koinonOsszegzettek.add(az); continue; }
     const je = await esemenyLekerese(tar, az);
@@ -8854,15 +8854,13 @@ try {
       // elfogadott általános egyezményei, és hogy van-e mindegyikhez érvényes tömör alak a tárban.
       const db = await koinonOsszegzesekKiadasa();
       const { javaslatok } = await kepetKeszit();
-      const ad = kiseroAdo(tar, { minden: true });
-      const olvas = async (az) => ad(await esemenyLekerese(tar, az));
       const egyezmenyek = [...javaslatok].filter(([, j]) => j.fajta === 'altalanos' && j.statusz === 'elfogadva' && !j.mult);
       kiir((db ? SZIN.jo : SZIN.halvany) + db + ' új tömör alak kiadva' + SZIN.vege + SZIN.halvany + ' · ' + egyezmenyek.length
         + ' elfogadott általános egyezmény' + SZIN.vege);
       for (const [az, j] of egyezmenyek) {
         let ervenyes = 0;
         for (const e of (await tar.szeletEsemenyei(az)).filter((x) => x.tipus === KOINON_OSSZEGZES && x.adat?.javaslat === az)) {
-          if ((await koinonOsszegzesEllenorzese(e, olvas)).rendben) ervenyes++;
+          if ((await koinonOsszegzesEllenorzese(e)).rendben) ervenyes++;
         }
         kiir('  ' + az.slice(0, 8) + '  ' + (j.erintettek?.[0]?.entitas ?? j.erintett ?? '').slice(0, 8) + '  '
           + (ervenyes ? SZIN.jo + '📜 tömör alak: ' + ervenyes + ' érvényes' : SZIN.halvany + '— még nincs tömör alak') + SZIN.vege);

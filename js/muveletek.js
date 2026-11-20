@@ -842,7 +842,7 @@ export function lezarasiOsszegzesKiadasa(kornyezet, osszegzes) {
  * tartja: a javaslat szeletébe kerül, és az érintettjeihez bejelentődik (`esemeny.js`). A tartalmát bárki ellenőrzi a mintákkal (a
  * helyek a saját lenyomatából — `koinonCsomag.js`) — az aláírás csak azt mondja meg, ki adta ki.
  * @param {Object} kornyezet
- * @param {Object} adat - `koinonOsszegzesAdata(csomag)` (`{ javaslat, reszek }`)
+ * @param {Object} adat - `koinonOsszegzesAdata(csomag)` (`{ javaslat, reszek, esemenyek, tanusitvanyok }` — önmagában ellenőrizhető)
  */
 export function koinonOsszegzesKiadasa(kornyezet, adat) {
   return esemenytTeszek(kornyezet, 'KoinonOsszegzes', adat, { entitas: adat.javaslat });

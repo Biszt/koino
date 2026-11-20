@@ -101,6 +101,8 @@ program átenged és tárol, csak nem érti — nem törés.
    születésben nincs: 20). Egy egyezmény a javaslata azonosítója szerint esik egy darabba (ugyanaz a lenyomat, mint a gyökér-darabé).
 2. **Mi van benne:** az elfogadott általános egyezmény tömör alakjának eseményei — a javaslat, a döntés tömör alakja (lásd KO7), az
    állásfoglalások, a minták eseményei. A darab a vonalon SZELETKÉNT megy (a gyökér-darab mintájára — felismerhető kulcs).
+   ⚠️ *Az építéskor pontosítva (③c, a napló 2026-11-20):* a javaslat és a minták eseményei a `KoinonOsszegzes`-be BEÁGYAZVA utaznak,
+   így a darab két fajtát hord: a `KoinonOsszegzes`-t és az állásfoglalásokat.
 3. **A tartó döntése:** az ellenőrzött tömör alak a meglévő úton (D95/1 `osszegzesek`) adja a döntést — így a darab tartója a teljes
    szelet nélkül is tudja: elfogadva → a koinon pontja (①) → az egyezmény él.
 4. **A kézikönyv** (KO5 (B)): a bejegyzései a darabokba, az azonosítójuk szerint (a „mindenki tartja” helyett).
@@ -165,3 +167,15 @@ program átenged és tárol, csak nem érti — nem törés.
   ellenőrzi. Az őrjárat háztartása hívja (a lezárási összegzés után), és kézzel a `koinon` parancs (listáz is: van-e érvényes tömör
   alak). Próba: +1 parancssor (a teljes tartó kiadja, a második kör nem), 1 rontás bukik. ⚠️ Próba nélkül: a „teljes bemenet”
   feltétele (ahhoz két készülék kell, egy részleges tartással) — a terepen.
+- **2026-11-20** — ⭐ **a ③c előtt: a `KoinonOsszegzes` BEÁGYAZVA** (a KO7 (A)-n belül — továbbra is egy aláírt esemény a meglévő
+  csere-úton). ⛔ **Lelet (a darab tervezésekor, a kódból):** a fogadó egy eseményről MAGÁBÓL dönti el, hogy átveszi-e
+  (`szeletEgyeztetes.js` `szeletbeTartozik` — a vonal ezzel szűr). A minták eseményei (egy tudatpont-rendezés, egy érték javaslat)
+  a saját szeletükben laknak, magukról nem mondják meg, hogy egy koinon-darab részei — hivatkozva a darab tartója nem kapná meg
+  őket, és a tömör alak nála ellenőrizhetetlen maradna. ⭐ Ezért az esemény a csomag tábláit is hordja (a javaslat és a minták
+  eseményei egyszer, a tanúsítványaik készülékenként egyszer — a döntési és a tagsági csomag mintájára), és **önmagából
+  ellenőrizhető, tár nélkül**. Az állásfoglalások továbbra sem (a hatály él — D27), és a táblából is kimaradnak a csak általuk
+  használt események és tanúsítványok. Mérve: 13 szavazónál az esemény 33,0 KB (15 esemény, 9 tanúsítvány) — a csomag 34,4 KB; a
+  vonal sor-korlátja 8 MB. `koinonCsomag.js`: `tablaFeloldo` (a csomag és az esemény közös tábla-olvasója), `koinonOsszegzesAdata`
+  (a táblák, szűrve), `koinonOsszegzesEllenorzese(e)` (olvasó nélkül); `koino.js` két hívása ennek megfelelően. Próba: a ③a
+  átírva (önmagából ellenőriz; a hiányos esemény a táblából hiányzik; a táblák benne, az állásfoglalások eseményei nem), 5 rontás
+  mind bukik; a ③b parancssori próbája rendben. ⏭️ A ③c: a darab — a kulcsa, a bejelentése, a vonalon és a vállalásban.
