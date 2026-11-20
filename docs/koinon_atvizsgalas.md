@@ -122,6 +122,36 @@ program átenged és tárol, csak nem érti — nem törés.
   a buborék kéri). (A) ⭐ így rendben (a KO5 (B) szerint — a kézikönyv a koinóval nőhet); (B) a kézikönyv maradjon mindenkinél (a KO5
   visszavonása — kicsi, és az ⓘ így mindig azonnal a közösség szövegét mondja).
 
+## 8. A ③d terve — a tartó döntése (2026-11-20, kód előtt)
+
+**Ami a kódból látszik:** a darab tartója a ③c óta megkapja a `KoinonOsszegzes`-t és az állásfoglalásokat, de a képe az egyezményt
+még nem ismeri: a javaslat eseménye csak a `KoinonOsszegzes` belsejében van (beágyazva), a tárban nincs.
+
+**A terv (ehhez nem kell döntés — a 7. szakasz 3. pontja):** a tartó a tárában lévő `KoinonOsszegzes`-t ellenőrzi (önmagából), és ha
+rendben: (1) a beágyazott javaslat eseményét a tárba menti (mint a két fokú tartás a lezárási összegzés javaslatát — D95/1); (2) a
+részek ellenőrzött összegzését a döntés kapja (`osszegzesek`, ugyanaz az út, mint a D95/1-é), ott, ahol az érintett szeletét nem
+tartom egészében. Így a tartónál a javaslat elfogadva → a koinon pontja (①) → az egyezmény él — a helye (a gondolat, ami alatt áll)
+nélkül is: a sosem látott szülőt a számítás nem bántja („hiány, nem tény” — D19). Az eredmény egy kis tárolóba kerül (ne kelljen
+minden körben újra ellenőrizni), és a tömörítés a megmentett javaslatot megtartja. Ha egy javaslathoz több érvényes tömör alak van,
+a legkisebb azonosítójú számít (KO8 (A)).
+
+**⛔ A lelet (a kódból — `szabalyok.js`, az állásfoglalás joga):** állást az foglalhat, akinek pontja van az egyezmény helyén vagy
+alatta (D27/4); a szabály ezt a szerző LÁNCÁBÓL és a FÁBÓL nézi. A darab tartója a hely ágát nem tartja: ma, amíg az egyezményt sem
+ismeri, az állásfoglalás „nem ellenőrizhető” (számít, de jelölve — D19). ⚠️ A ③d után viszont az egyezményt ismerné, a helyét nem —
+és a szabály ezt „nincs tudatpontod ezen az ágon” KIVÉTELNEK olvasná: egy hamis ítélet (a hiány tényként). Ugyanez a csapda, amit a
+D85 T3 a javaslatnál és a szavazatnál a lánc-gyökeres önbizonyítással oldott meg — az állásfoglalás ezt sosem kapta meg. (A
+szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ágat nem, ahol a szerző pontja van.)
+
+**A kérdés (Csabáé):**
+- **KO10 — hogyan ítéljen a tartó az állásfoglalás jogáról, ha a hely ágát nem ismeri?** (A) ⭐ **nem ítél:** ha a helyet magát sem
+  ismeri, az állásfoglalás „nem ellenőrizhető” (számít, de jelölve — a D19 szabálya, ugyanúgy, mint ma az ismeretlen egyezménynél).
+  Kicsi (egy feltétel a szabályban, a mag része), a hatályt a tartó így mondja: „ennyien, ellenőrizetlenül” — a teljes ítélet annál,
+  aki az ágat tartja; a szigorú (b) mélyebb-ág esetét nem javítja. (B) **az állásfoglalás maga bizonyítja a jogát** (a D85 T3
+  mintája): a lánc-gyökeres állásfoglalás a szerző kiosztás-fájából hozza a pontját, és hogy az az entitás a hely alatt van — bárki
+  ellenőrzi az ág nélkül. Teljes megoldás (a (b) esetét is javítja), de nagy: a „hely alatt van” bizonyítása az áthelyezések miatt
+  nem egy születés-esemény, hanem egy út a fában; új mező, a kapu is nézi. (C) **a tartó a hatályt nem számolja** (csak a tényt
+  őrzi: az egyezmény él, a hatály „nem ismert”) — az állásfoglalásokat csak továbbadja annak, aki ítélni tud.
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
@@ -205,3 +235,5 @@ program átenged és tárol, csak nem érti — nem törés.
   (a D124 két „valódi régi program” próbája). ⚠️ Próba nélkül: a `koino.js` csak küldő ágának koinon-kulcsa (a
   mechanizmust a darab-próba a saját kulcsaival méri; a valódi programban 1+ mélység kell hozzá — 2r tag —, és a darab helye a
   készülékkulcson múlik) — a terepen. ⏭️ ③d a tartó döntése (a D95/1 útján), ④ a darab hirdetése a címjegyzéken.
+- **2026-11-20** — a ③d terve (8. szakasz). ⛔ Lelet: a ③d után a tartó az egyezményt ismerné, a helyét nem — és az állásfoglalás
+  jogát a szabály hamis kivételnek olvasná. ⏸️ **KO10** (a tartó ítélete az állásfoglalás jogáról) Csabánál.
