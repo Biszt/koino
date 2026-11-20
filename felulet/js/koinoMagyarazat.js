@@ -73,7 +73,7 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   kartyaMenuPont('Struktúra nézet', 'struktura'), kartyaMenuPont('Síkidom nézet', 'sikidom'),
   kartyaMenuPont('Világtérkép', 'vilagterkep'), kartyaMenuPont('Rendezés', 'rendezes'),
   kartyaMenuPont('Új gondolat létrehozása ebből', 'uj-gondolat'), kartyaMenuPont('Új alkategória létrehozása', 'uj-alkategoria'),
-  kartyaMenuPont('Javaslat létrehozása', 'javaslat'), kartyaMenuPont('Tudatpont módosítás', 'tudatpont-modositas'),
+  kartyaMenuPont('Szerkesztési javaslat létrehozása', 'javaslat'), kartyaMenuPont('Tudatpont módosítás', 'tudatpont-modositas'),
   kartyaMenuPont('Részletes adatok', 'reszletes-adatok'), kartyaMenuPont('Küszöb érték javaslat', 'kuszob-ertek-javaslat'),
   kartyaMenuPont('Értesítési beállítások', 'ertesitesi-beallitasok'), kartyaMenuPont('Felderítés…', 'felderites'),
   // ----- ⭐ D129 (④c) az ablakok: az ablak CÍME mellett egy ⓘ. Ahol a menüpont ⓘ-je már elmondja az ablakot, az ablaké UGYANARRA a

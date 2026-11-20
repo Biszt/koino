@@ -9,9 +9,9 @@ import { masodpercFelirat } from '../../utils/idoFormazo.js';
 // ===== ESEMÉNYTÍPUS → EMBERI SZÖVEG =====
 // (A szavazatErkezett a tulajdonos döntése alapján elhagyva – ezért nincs itt.)
 const TIPUS_SZOVEG = {
-  ujJavaslat:         'Új javaslat',
-  javaslatElfogadas:  'Javaslat elfogadva',
-  javaslatElvetve:    'Javaslat elvetve',
+  ujJavaslat:         'Új szerkesztési vagy általános javaslat',
+  javaslatElfogadas:  'Szerkesztési vagy általános javaslat elfogadva',
+  javaslatElvetve:    'Szerkesztési vagy általános javaslat elvetve',
   szavazasiHatarido:  'Szavazási határidő közeleg',
   tudatpontValtozas:  'Tudatpont-változás',
   ujGyerekEntitas:    'Új gondolat jött létre',

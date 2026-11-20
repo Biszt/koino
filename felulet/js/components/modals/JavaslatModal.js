@@ -82,7 +82,7 @@ class JavaslatModal {
     if (!formHtml) return;
 
     this.modal = new Modal(this.kontenerAzonosito, {
-      cim:      'Javaslat indítása',
+      cim:      'Szerkesztési javaslat indítása',
       tartalom: formHtml,
       meret:    'korlatlan', // A szerkesztő olyan széles lehessen, mint a (korlátlan) kártyák
       gombok:   [],
@@ -145,7 +145,7 @@ class JavaslatModal {
     }
 
     this.egyezmenyTarhelyMezo = new EntitasKeresoMezo(kontener, {
-      cimke:       'Egyezmény tárhely (opcionális)', // A 3. lépésre lépéskor típusfüggően frissül (Csomagnál kötelező)
+      cimke:       'A szerkesztési egyezmény tárhelye (opcionális)', // A 3. lépésre lépéskor típusfüggően frissül (Csomagnál kötelező)
       placeholder: 'Keress cím alapján a tárhelynek',
       tipusok:     ['Gondolat'], // Az egyezmény tárhelye mindig gondolat
       token:       this.token
@@ -388,7 +388,7 @@ class JavaslatModal {
     this.aktivLepes = ujLepes;
 
     const cimek = {
-      1: 'Javaslat indítása',
+      1: 'Szerkesztési javaslat indítása',
       2: this._tipusCimLekerese(this.kivalasztottTipus),
       3: 'Indoklás'
     };
@@ -401,9 +401,9 @@ class JavaslatModal {
     // (a létrehozó dönt, nincs automatikus levezetés). Minden más típusnál opcionális.
     if (ujLepes === 3 && this.egyezmenyTarhelyMezo) {
       if (this.kivalasztottTipus === 'Csomag') {
-        this.egyezmenyTarhelyMezo.cimkeFrissitese('Egyezmény tárhely * (ide kerül a csomag egyezménye)');
+        this.egyezmenyTarhelyMezo.cimkeFrissitese('A szerkesztési egyezmény tárhelye * (ide kerül a csomag szerkesztési egyezménye)');
       } else {
-        this.egyezmenyTarhelyMezo.cimkeFrissitese('Egyezmény tárhely (opcionális)');
+        this.egyezmenyTarhelyMezo.cimkeFrissitese('A szerkesztési egyezmény tárhelye (opcionális)');
       }
     }
 
@@ -416,11 +416,11 @@ class JavaslatModal {
     console.log('JavaslatModal._tipusCimLekerese - KEZDÉS', { tipus });
 
     const cimek = {
-      Torles:     'Törlési javaslat',
-      Modositas:  'Módosítási javaslat',
-      Athelyezes: 'Áthelyezési javaslat',
-      Egyesites:  'Egyesítési javaslat',
-      Csomag:     'Csomag javaslat'
+      Torles:     'Szerkesztési javaslat (törlés)',
+      Modositas:  'Szerkesztési javaslat (módosítás)',
+      Athelyezes: 'Szerkesztési javaslat (áthelyezés)',
+      Egyesites:  'Szerkesztési javaslat (egyesítés)',
+      Csomag:     'Szerkesztési javaslat (csomag)'
     };
 
     const cim = cimek[tipus] ?? 'Javaslat';
@@ -490,7 +490,7 @@ class JavaslatModal {
 
     const szoveg = document.createElement('p');
     szoveg.className   = 'javaslat-modal__figyelmeztetes-szoveg';
-    szoveg.textContent = `„${entitasNev}" törlésére vonatkozó javaslat kerül benyújtásra. A törlés csak akkor lép érvénybe, ha a közösség elfogadja.`;
+    szoveg.textContent = `„${entitasNev}" törlésére vonatkozó szerkesztési javaslat kerül benyújtásra. A törlés csak akkor lép érvénybe, ha a közösség elfogadja.`;
 
     figyelmeztetesDiv.appendChild(szoveg);
     kontener.appendChild(figyelmeztetesDiv);
@@ -1213,7 +1213,7 @@ class JavaslatModal {
     gomb.type      = 'button';
     gomb.id        = 'javaslat-beküldes-gomb';
     gomb.className = 'javaslat-modal__beküldes-gomb';
-    gomb.textContent = 'Javaslat beküldése';
+    gomb.textContent = 'Szerkesztési javaslat beküldése';
 
     gomb.addEventListener('click', () => this._mentes());
 
@@ -1253,7 +1253,7 @@ class JavaslatModal {
 
     if (!this.kivalasztottTipus) {
       console.log('JavaslatModal._validalas - VÉGE: típus hiányzik');
-      return 'Kérjük, válassz javaslat típust.';
+      return 'Kérjük, válaszd ki, mit javasolsz (a szerkesztési javaslat típusát).';
     }
 
     // =============================================
@@ -1324,7 +1324,7 @@ class JavaslatModal {
       // Csomagnál KÖTELEZŐ az egyezmény tárhely: a létrehozó dönti el, hova kerül
       // az elfogadott csomag egyezménye (nincs automatikus levezetés).
       if (!this.egyezmenyTarhelyMezo?.getId()) {
-        return 'Csomag javaslatnál kötelező kiválasztani az egyezmény tárhelyét (keress cím alapján).';
+        return 'Csomagnál kötelező kiválasztani a szerkesztési egyezmény tárhelyét (keress cím alapján).';
       }
     }
 

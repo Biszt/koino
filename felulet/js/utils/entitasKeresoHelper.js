@@ -116,8 +116,8 @@ export function tipusFelirat(tipus) {
     Gondolat:      'Gondolat',
     Kategoria:     'Kategória',
     GondolatTipus: 'Gondolattípus',
-    Egyezmeny:     'Egyezmény',
-    Javaslat:      'Javaslat',
+    Egyezmeny:     'Szerkesztési vagy általános egyezmény',
+    Javaslat:      'Szerkesztési vagy általános javaslat',
   };
   return feliratok[tipus] ?? tipus;
 }

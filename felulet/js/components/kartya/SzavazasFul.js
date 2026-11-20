@@ -84,7 +84,7 @@ class SzavazasFul {
     const bevezeto = document.createElement('p');
     bevezeto.className   = 'szavazas-ful__bevezeto';
     bevezeto.textContent = this.szavazhat
-      ? 'Hogyan döntesz erről a javaslatról? A szavazatodat később bármikor megváltoztathatod.'
+      ? 'Hogyan döntesz? A szavazatodat később bármikor megváltoztathatod.'
       : this.tiltvaIndok;
     this.kontener.appendChild(bevezeto);
 

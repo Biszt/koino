@@ -327,7 +327,7 @@ class ReszletekModal {
     const sajatSzavazat = data.eeEmberSzavazat ?? null;
 
     // --- ALAPADATOK ---
-    this._sor(lista, 'Javaslat típusa', JAVASLAT_TIPUS_FELIRAT[javaslat.javaslatTipus] ?? javaslat.javaslatTipus ?? '—');
+    this._sor(lista, 'Művelet', JAVASLAT_TIPUS_FELIRAT[javaslat.javaslatTipus] ?? javaslat.javaslatTipus ?? '—');
     this._sor(lista, 'Státusz',         STATUSZ_FELIRAT[javaslat.statusz] ?? javaslat.statusz ?? '—');
     this._sor(lista, 'Létrehozó',       javaslat.letrehozo?.eemberNev ?? '—');
     this._sor(lista, 'Létrehozva',      this._datumFelirat(javaslat.letrehozva));
@@ -365,7 +365,7 @@ class ReszletekModal {
     const tudatpont = data.tudatpontok ?? {};
 
     // --- ALAPADATOK ---
-    this._sor(lista, 'Javaslat típusa', JAVASLAT_TIPUS_FELIRAT[egyezmeny.javaslatTipus] ?? egyezmeny.javaslatTipus ?? '—');
+    this._sor(lista, 'Művelet', JAVASLAT_TIPUS_FELIRAT[egyezmeny.javaslatTipus] ?? egyezmeny.javaslatTipus ?? '—');
     this._sor(lista, 'Létrehozó',       egyezmeny.letrehozo?.eemberNev ?? '—');
     this._sor(lista, 'Végrehajtva',     this._datumFelirat(egyezmeny.vegrehajtva));
 

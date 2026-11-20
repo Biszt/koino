@@ -74,7 +74,7 @@ class EgyezmenyKartya extends Kartya {
     // Megnevezés – pl. „Módosítási egyezmény", csomagnál „Egyezmény csomag"
     const tipusElem = document.createElement('span');
     tipusElem.className   = 'egyezmeny-kartya__tipus';
-    tipusElem.textContent = javaslatMegnevezes(adatok.javaslatTipus, 'egyezmény');
+    tipusElem.textContent = javaslatMegnevezes(adatok.javaslatTipus, 'egyezmény', adatok.javaslatFajta);
     cimSav.appendChild(tipusElem);
 
     // --- MUTATÓK (2. sor): a négy szavazati arány (Modell A – együtt 100%) + a döntés dátuma ---
@@ -311,7 +311,7 @@ class EgyezmenyKartya extends Kartya {
       },
       {
         ikon:           '🌿',
-        felirat:        'Javaslat létrehozása',
+        felirat:        'Szerkesztési javaslat létrehozása',
         // Egyezményre a domain szerint KIZÁRÓLAG áthelyezési javaslat indítható —
         // a JavaslatModal a típusgombokat entitástípus szerint szűri (a backend is).
         // Tudatpont-függő, mint a többi kártyán.
@@ -392,7 +392,7 @@ class EgyezmenyKartya extends Kartya {
     const ertesitesiBeallitasModal = new ErtesitesiBeallitasModal(this.modalKontenerAzon, {
       entitasId:    entitas.entitasId,
       entitasTipus: 'Egyezmeny',
-      entitasCim:   javaslatMegnevezes(entitas.adatok?.javaslatTipus, 'egyezmény'),
+      entitasCim:   javaslatMegnevezes(entitas.adatok?.javaslatTipus, 'egyezmény', entitas.adatok?.javaslatFajta),
       token:        this.token
     });
 

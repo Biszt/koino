@@ -31,8 +31,8 @@ const TIPUS_FELIRAT = {
   Gondolat:      'Gondolat',
   Kategoria:     'Kategória',
   GondolatTipus: 'Gondolattípus',
-  Javaslat:      'Javaslat',
-  Egyezmeny:     'Egyezmény',
+  Javaslat:      'Szerkesztési vagy általános javaslat',
+  Egyezmeny:     'Szerkesztési vagy általános egyezmény',
 };
 
 // Az ágazati (hierarchikus) össztudatpont ikonja a közeli csomóponton —

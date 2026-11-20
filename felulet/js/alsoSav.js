@@ -480,7 +480,7 @@ export class AlsoSav {
         elem.classList.remove('also-sav__program--info');
         elem.title = p.mag?.koinoe
           ? 'Ez a koino ezzel a számítással (a program MAGJÁVAL) született: ' + rovid(p.mag.koinoe) + '. Ezen a készüléken más mag fut: '
-            + rovid(p.mag.sajat) + ' — ebben a koinoban itt mást láthatsz (más egyezményt, más pontszámot), mint a többiek. Nem '
+            + rovid(p.mag.sajat) + ' — ebben a koinoban itt mást láthatsz (más szerkesztési vagy általános egyezményt, más pontszámot), mint a többiek. Nem '
             + 'tiltjuk; a koino magjával futó program a koino-verzió kártyáján ellenőrizhető.'
           : 'Ez a koino ezzel a kóddal született: ' + rovid(p.koinoe) + ' (a koino-verzió kártyáján ellenőrizhető). Ezen a készüléken '
             + 'más fut: ' + rovid(p.sajat) + '. Nem tiltjuk — de ha a két verzió szabálya eltér, a számításuk is eltérhet.';

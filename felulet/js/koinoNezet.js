@@ -205,7 +205,7 @@ export async function nezetBekapcsolasMegnyitasa({ kartya, utana = null }) {
   const rajzol = (folyamatban = false, kesz = false) => {
     if (kesz) {
       tartalom.innerHTML = '<p class="koino-nezet__siker">✅ Bekapcsolva ezen a készüléken, ebben a koinoban.</p>'
-        + '<p class="koino-nezet__leiras">A fő menü „🧩 Nézetek…” pontjából is megnyithatod. Ha egy egyezmény új kódot hoz a kártyára, '
+        + '<p class="koino-nezet__leiras">A fő menü „🧩 Nézetek…” pontjából is megnyithatod. Ha egy szerkesztési egyezmény új kódot hoz a kártyára, '
         + 'a nézet kikapcsol — az új kódot újra meg kell nézned.</p><div class="koino-nezet__gombok"><button type="button" '
         + 'class="koino-nezet__gomb koino-nezet__gomb--fo" data-muvelet="megnyit">▶ Megnyitás most</button></div>';
       return;

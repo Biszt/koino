@@ -1,37 +1,36 @@
 // frontend/js/utils/javaslatMegnevezes.js
 
-// ===== JAVASLAT / EGYEZMÉNY MEGNEVEZÉS =====
+// ===== SZERKESZTÉSI / ÁLTALÁNOS JAVASLAT ÉS EGYEZMÉNY MEGNEVEZÉSE =====
 // Felelősség: a javaslat- és egyezmény-kártya FELSŐ sorának (cím-sáv) szövegét
 //   képzi a backend `javaslatTipus` enum-értékéből.
-//   - A négy alapművelet MELLÉKNÉVI (jelzői) alakja + az utótag,
-//     pl. Modositas → „Módosítási javaslat" / „Módosítási egyezmény".
-//   - A Csomag típus külön: az utótag kerül elöre nagybetűvel, utána „csomag",
-//     pl. „Javaslat csomag" / „Egyezmény csomag".
+//   ⭐ Csaba (2026-11-20): „Az egyezményt, és a javaslat szót önmagában ne használjuk sehol. mindig vagy szerkesztési
+//   javaslat/egyezmény, vagy általános javaslat/egyezmény.” Ezért a fajta áll elöl, a művelet zárójelben:
+//   - a szerkesztési fajta: „Szerkesztési javaslat (módosítás)” / „Szerkesztési egyezmény (csomag)”;
+//   - az általános fajta (a művelete az álláspont — `Allaspont`): „Általános javaslat” / „Általános egyezmény”.
+//   (A prototípusban „Módosítási javaslat” / „Javaslat csomag” volt — a koinoban a prototípus már nincs befagyasztva.)
 // Használják: JavaslatKartya, EgyezmenyKartya.
 
-// A javaslatTipus enum melléknévi (jelzői) alakjai.
-// (A ReszletekModal főnévi alakokat használ – Módosítás/Törlés –, itt szándékosan
-//  a jelzői alak kell, ezért külön térkép.)
-const TIPUS_JELZO = {
-  Torles:     'Törlési',
-  Modositas:  'Módosítási',
-  Egyesites:  'Egyesítési',
-  Athelyezes: 'Áthelyezési'
+// A javaslatTipus enum főnévi alakjai (a zárójelbe).
+const TIPUS_FONEV = {
+  Torles:     'törlés',
+  Modositas:  'módosítás',
+  Egyesites:  'egyesítés',
+  Athelyezes: 'áthelyezés',
+  Csomag:     'csomag'
 };
+
+// Az általános javaslat (D27) művelete — a koino `szabalyok.js` `ALLASPONT_MUVELET`-je.
+const ALLASPONT = 'Allaspont';
 
 // ----- MEGNEVEZÉS KÉPZÉSE -----
 // @param {string} javaslatTipus - a backend enum-értéke
-//   (Torles / Modositas / Egyesites / Athelyezes / Csomag)
+//   (Torles / Modositas / Egyesites / Athelyezes / Csomag / Allaspont)
 // @param {string} utotag - a második szó: 'javaslat' vagy 'egyezmény'
+// @param {string} [fajta] - 'Szerkesztési' | 'Általános' (a kártya adataiból — `kartyaAdat.js` `javaslatFajta`)
 // @returns {string} a fejléc felső sorának szövege
-export function javaslatMegnevezes(javaslatTipus, utotag) {
-  // Csomag: „Javaslat csomag" / „Egyezmény csomag" – az utótag elöl, nagy kezdőbetűvel
-  if (javaslatTipus === 'Csomag') {
-    const utotagNagy = utotag.charAt(0).toUpperCase() + utotag.slice(1);
-    return `${utotagNagy} csomag`;
-  }
-
-  // A négy alapművelet: jelzői alak + utótag (pl. „Módosítási javaslat")
-  const jelzo = TIPUS_JELZO[javaslatTipus] ?? javaslatTipus ?? '(típus nélkül)';
-  return `${jelzo} ${utotag}`;
+export function javaslatMegnevezes(javaslatTipus, utotag, fajta) {
+  const altalanos = fajta === 'Általános' || javaslatTipus === ALLASPONT;
+  if (altalanos) return `Általános ${utotag}`;
+  const muvelet = TIPUS_FONEV[javaslatTipus];
+  return `Szerkesztési ${utotag}` + (muvelet ? ` (${muvelet})` : '');
 }

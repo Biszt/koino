@@ -137,8 +137,8 @@ class EntitasHivatkozasPanel {
       { ertek: 'Gondolat',      felirat: '📄 Gondolat' },
       { ertek: 'Kategoria',     felirat: '🏷️ Kategória' },
       { ertek: 'GondolatTipus', felirat: '🧩 Gondolat típus' },
-      { ertek: 'Egyezmeny',     felirat: '🤝 Egyezmény' },
-      { ertek: 'Javaslat',      felirat: '💡 Javaslat' },
+      { ertek: 'Egyezmeny',     felirat: '🤝 Szerkesztési vagy általános egyezmény' },
+      { ertek: 'Javaslat',      felirat: '💡 Szerkesztési vagy általános javaslat' },
     ];
 
     tipusok.forEach(tipus => {

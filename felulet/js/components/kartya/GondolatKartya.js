@@ -421,7 +421,7 @@ class GondolatKartya extends Kartya {
       },
       {
         ikon:           '🌿',
-        felirat:        'Javaslat létrehozása',
+        felirat:        'Szerkesztési javaslat létrehozása',
         // Csak akkor aktív, ha az eembernek van tudatpontja az entitáson.
         // A menü megnyitásakor ellenőrzi a Kartya alaposztály (backend hívás).
         tudatpontFuggo: true,

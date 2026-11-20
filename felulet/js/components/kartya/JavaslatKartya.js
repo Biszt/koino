@@ -75,7 +75,7 @@ class JavaslatKartya extends Kartya {
     // --- MEGNEVEZÉS (a felső sávba) – pl. „Módosítási javaslat", csomagnál „Javaslat csomag" ---
     const tipusElem = document.createElement('span');
     tipusElem.className   = 'javaslat-kartya__tipus';
-    tipusElem.textContent = javaslatMegnevezes(adatok.javaslatTipus, 'javaslat');
+    tipusElem.textContent = javaslatMegnevezes(adatok.javaslatTipus, 'javaslat', adatok.javaslatFajta);
     cimSav.appendChild(tipusElem);
 
     // --- STÁTUSZ + TÖREDÉK (a CÍM-sorba, jobbra igazítva) ---
@@ -99,7 +99,7 @@ class JavaslatKartya extends Kartya {
         toredekElem.className   = 'javaslat-kartya__toredek';
         toredekElem.textContent = `${toredekSorszam ?? '?'} / ${toredekDarab ?? '?'}`;
         toredekElem.setAttribute('aria-label',
-          `Töredék javaslat: ${toredekSorszam}. rész, összesen ${toredekDarab}`
+          `Töredék: ${toredekSorszam}. rész, összesen ${toredekDarab}`
         );
         statuszKontener.appendChild(toredekElem);
       }
@@ -212,7 +212,7 @@ class JavaslatKartya extends Kartya {
         javaslatId:  this.entitas.entitasId,
         token:       this.token,
         szavazhat:   adatok.szavazhat === true,
-        tiltvaIndok: 'Ehhez az érintett gondolaton kell tudatpont (a javaslaton magán nem szükséges).'
+        tiltvaIndok: 'Ehhez az érintett gondolaton kell tudatpont (a szerkesztési vagy általános javaslaton magán nem szükséges).'
       });
       // A saját szavazat lekérése + kiemelés (async, nem blokkoló)
       this.szavazasFul.betoltes();
@@ -406,7 +406,7 @@ class JavaslatKartya extends Kartya {
     const ertesitesiBeallitasModal = new ErtesitesiBeallitasModal(this.modalKontenerAzon, {
       entitasId:    entitas.entitasId,
       entitasTipus: 'Javaslat',
-      entitasCim:   javaslatMegnevezes(entitas.adatok?.javaslatTipus, 'javaslat'),
+      entitasCim:   javaslatMegnevezes(entitas.adatok?.javaslatTipus, 'javaslat', entitas.adatok?.javaslatFajta),
       token:        this.token
     });
 

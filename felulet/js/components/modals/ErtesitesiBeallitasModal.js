@@ -11,10 +11,10 @@ import { tokenLekerese } from '../../utils/authHelper.js';
 // a backend enumban dormant módon megmarad). A `szavazasiHatarido` 2026-07-18 óta
 // ÉLES (a cron küldi, ha egy aktív javaslat határideje közeleg).
 const ERTESITES_TIPUSOK = [
-  { ertek: 'ujJavaslat',        felirat: 'Új javaslat',        magyarazat: 'Ha új javaslat érkezik ebben az ágazatban.' },
-  { ertek: 'javaslatElfogadas', felirat: 'Javaslat elfogadva', magyarazat: 'Ha egy javaslatból egyezmény lesz.' },
-  { ertek: 'javaslatElvetve',   felirat: 'Javaslat elvetve',   magyarazat: 'Ha egy javaslat nem lép hatályba.' },
-  { ertek: 'szavazasiHatarido', felirat: 'Szavazási határidő', magyarazat: 'Ha egy javaslat döntési ideje hamarosan lejár ebben az ágazatban.' },
+  { ertek: 'ujJavaslat',        felirat: 'Új szerkesztési vagy általános javaslat',        magyarazat: 'Ha új szerkesztési vagy általános javaslat érkezik ebben az ágazatban.' },
+  { ertek: 'javaslatElfogadas', felirat: 'Szerkesztési vagy általános javaslat elfogadva', magyarazat: 'Ha egy szerkesztési vagy általános javaslatot elfogadnak.' },
+  { ertek: 'javaslatElvetve',   felirat: 'Szerkesztési vagy általános javaslat elvetve',   magyarazat: 'Ha egy szerkesztési vagy általános javaslat nem lép hatályba.' },
+  { ertek: 'szavazasiHatarido', felirat: 'Szavazási határidő', magyarazat: 'Ha egy szerkesztési vagy általános javaslat döntési ideje hamarosan lejár ebben az ágazatban.' },
   { ertek: 'tudatpontValtozas', felirat: 'Tudatpont-változás', magyarazat: 'Ha a tudatpont-eloszlás változik az entitáson.' },
   { ertek: 'ujGyerekEntitas',   felirat: 'Új gyerek entitás',  magyarazat: 'Ha új gondolat/entitás jön létre ez alatt.' },
   { ertek: 'kuszobValtozas',    felirat: 'Küszöbváltozás',     magyarazat: 'Ha az entitás érvényes küszöbértékei (mediánjai) változnak.' },

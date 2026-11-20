@@ -18,8 +18,8 @@ const TIPUS_FORMA = {
   Gondolat:      { forma: 'kor',     oldalak: 0, kezdoSzogFok: 0,   szin: '#2d5a27', nev: 'Gondolat' },
   Kategoria:     { forma: 'sokszog', oldalak: 3, kezdoSzogFok: -90, szin: '#7d5ba6', nev: 'Kategória' },
   GondolatTipus: { forma: 'sokszog', oldalak: 4, kezdoSzogFok: -45, szin: '#b07d2a', nev: 'Gondolattípus' },
-  Javaslat:      { forma: 'sokszog', oldalak: 5, kezdoSzogFok: -90, szin: '#1f6e8c', nev: 'Javaslat' },
-  Egyezmeny:     { forma: 'sokszog', oldalak: 6, kezdoSzogFok: -90, szin: '#6d6a62', nev: 'Egyezmény' },
+  Javaslat:      { forma: 'sokszog', oldalak: 5, kezdoSzogFok: -90, szin: '#1f6e8c', nev: 'Szerkesztési vagy általános javaslat' },
+  Egyezmeny:     { forma: 'sokszog', oldalak: 6, kezdoSzogFok: -90, szin: '#6d6a62', nev: 'Szerkesztési vagy általános egyezmény' },
 };
 
 // Ismeretlen típus tartaléka

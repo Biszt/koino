@@ -12,8 +12,8 @@ const TIPUS_MEGJELENES = {
   Gondolat:      { ikon: '📄', felirat: 'Gondolat' },
   Kategoria:     { ikon: '🏷️', felirat: 'Kategória' },
   GondolatTipus: { ikon: '🧩', felirat: 'Gondolattípus' },
-  Javaslat:      { ikon: '✍️', felirat: 'Javaslat' },
-  Egyezmeny:     { ikon: '🤝', felirat: 'Egyezmény' },
+  Javaslat:      { ikon: '✍️', felirat: 'Szerkesztési vagy általános javaslat' },
+  Egyezmeny:     { ikon: '🤝', felirat: 'Szerkesztési vagy általános egyezmény' },
 };
 
 // Egyszerre ennyi hozzárendelést kérünk le (a saját aktív hozzárendelések a

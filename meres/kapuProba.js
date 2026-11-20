@@ -497,7 +497,15 @@ proba('⛔ Jelszó-mentes lista NÉLKÜL minden /api/ zárva marad (ez az alapé
 const SZANDEKOSAN_MAS = [
   'utils/apiHelper.js',        // JWT → a helyi kapu jelszava (D15)
   'utils/authHelper.js',       // a koinoban nincs bejelentkezés (D15)
-  'components/kartya/kartyaGyar.js'                  // 5.3: nincs Kategória/GondolatTípus… (majd lett)
+  'components/kartya/kartyaGyar.js',                 // 5.3: nincs Kategória/GondolatTípus… (majd lett)
+  // ⭐ Csaba (2026-11-20): „már nincsen befagyasztva, nyugodtan lehet módosítani” — és: „Az egyezményt, és a javaslat szót
+  // önmagában ne használjuk sehol. mindig vagy szerkesztési javaslat/egyezmény, vagy általános javaslat/egyezmény.” A feliratok:
+  'components/kartya/EgyezmenyKartya.js', 'components/kartya/GondolatKartya.js', 'components/kartya/GondolatTipusKartya.js',
+  'components/kartya/JavaslatKartya.js', 'components/kartya/KategoriaKartya.js', 'components/kartya/SzavazasFul.js',
+  'components/modals/ErtesitesekModal.js', 'components/modals/ErtesitesiBeallitasModal.js', 'components/modals/JavaslatModal.js',
+  'components/modals/ReszletekModal.js', 'components/modals/StrukturaModal.js', 'components/modals/TudatpontokModal.js',
+  'components/szovegSzerkeszto/eszkoztar/TipusFuggoEszkozokSav/EntitasHivatkozasPanel.js',
+  'utils/entitasKeresoHelper.js', 'utils/javaslatMegnevezes.js', 'utils/sikidomFormak.js'
 ];
 // ⭐ HÁROM FÁJL — és a `FeltoltesKezelo` 2026-09-12-óta MÁR NEM köztük van: a fájl-réteg
 // megépültével bájtra visszakerült a prototípus változata, és csak az `apiHelper` két
