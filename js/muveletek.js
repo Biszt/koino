@@ -837,6 +837,17 @@ export function lezarasiOsszegzesKiadasa(kornyezet, osszegzes) {
   return esemenytTeszek(kornyezet, 'LezarasiOsszegzes', osszegzes, { entitas: osszegzes.javaslat });
 }
 
+/**
+ * ⭐⭐ D130 (③a, KO7 (A), KO8 (A)): A DÖNTÉS TÖMÖR ALAKJÁNAK KIADÁSA — egy elfogadott általános egyezményről, aki a teljes bemenetét
+ * tartja: a javaslat szeletébe kerül, és az érintettjeihez bejelentődik (`esemeny.js`). A tartalmát bárki ellenőrzi a mintákkal (a
+ * helyek a saját lenyomatából — `koinonCsomag.js`) — az aláírás csak azt mondja meg, ki adta ki.
+ * @param {Object} kornyezet
+ * @param {Object} adat - `koinonOsszegzesAdata(csomag)` (`{ javaslat, reszek }`)
+ */
+export function koinonOsszegzesKiadasa(kornyezet, adat) {
+  return esemenytTeszek(kornyezet, 'KoinonOsszegzes', adat, { entitas: adat.javaslat });
+}
+
 export async function tagsagiCsomagKiadasa(kornyezet) {
   const szerzo = kornyezet.szerzo;
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, szerzo);

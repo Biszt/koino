@@ -151,3 +151,10 @@ program átenged és tárol, csak nem érti — nem törés.
   aláírt eseményben (`KoinonOsszegzes`), KO8 (A) bárki írja, aki a teljes bemenetet tartja, KO9 (A) a kézikönyv a darabokban (kérésre
   látszik). ⏭️ A ③ építése: ③a az esemény (alakja, ellenőrzése a tárból), ③b ki és mikor írja (az őrjárat), ③c a darab a vonalon és a
   vállalásban, ③d a tartó döntése (D95/1 út), ③e a kézikönyv a darabokba, ③f az `r` a születésben (KO4).
+- **2026-11-20** — ✅ **a ③a kész: a `KoinonOsszegzes` esemény.** `koinonCsomag.js`: az ellenőrzés közös MAGJA
+  (`tomorAlakEllenorzese` — a csomagé a tábláiból, az eseményé a tárból kapja a hivatkozott eseményeket, a kísérővel; az ellenőrzött
+  összegzéseket is visszaadja a ③d-nek), `koinonOsszegzesAdata` (a csomag döntés-része — ⛔ az állásfoglalások NEM: a hatály él),
+  `koinonOsszegzesEllenorzese` (a tartalom — az aláírást a kapu nézi; a javaslat szeletében kell élnie); `muveletek.js`
+  `koinonOsszegzesKiadasa`; `esemeny.js` `bejelentesHelyei` (az érintettjeinél is hír, mint a `LezarasiOsszegzes`, legfeljebb 64);
+  `koinoLanc.js` (a múlt rétegéé — a gyermek jelenébe nem jön át). A kapu átengedi (az ismeretlen típust nem tiltja, méret-korlátja
+  nincs). Próba: +1 (`koinonCsomagProba.js`), 3 rontás mind bukik.

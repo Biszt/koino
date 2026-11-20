@@ -120,44 +120,109 @@ export async function koinonCsomagEllenorzese(cs, { tagE, alapKuszobok } = {}) {
     const e = typeof az === 'string' ? esemenyTabla.get(az) : null;
     return e ? kiseroval(e, tanusitvanyTabla.get(e.keszulek) ?? null) : null;
   };
-  const mintaVissza = (m) => (m && m.esemeny !== undefined ? { ...m, esemeny: esemenye(m.esemeny) } : m);
-  const mintakVissza = (ms) => (!ms || typeof ms !== 'object' ? ms : {
-    szavazat: Array.isArray(ms.szavazat) ? ms.szavazat.map(mintaVissza) : ms.szavazat,
-    nevezo: Array.isArray(ms.nevezo) ? ms.nevezo.map(mintaVissza) : ms.nevezo,
+  return tomorAlakEllenorzese({ javaslatAz: cs.javaslat, reszek: cs.reszek, allasfoglalasok: cs.allasfoglalasok,
+    esemenye: async (az) => esemenye(az), tagE, alapKuszobok });
+}
+
+/**
+ * ⭐ AZ ELLENŐRZÉS MAGJA — a csomagé és az eseményé (`KoinonOsszegzes`) is ezt hívja; a különbség csak az, honnan jönnek a
+ * hivatkozott események (`esemenye`: a csomag táblájából, vagy a tárból — mindkét esetben a kísérő tanúsítvánnyal).
+ * @param {Object} b
+ * @param {string} b.javaslatAz
+ * @param {Array<Object>} b.reszek - `[{ osszegzes, mintak }]` (a mintákban az események azonosítói)
+ * @param {Array<string>} b.allasfoglalasok - az állásfoglalások azonosítói
+ * @param {Function} b.esemenye - async (azonosító) → az esemény (kísérővel) vagy null
+ * @returns {Promise<Object>} `{ rendben, ok?, elfogadva, lezaras, ellenorzott, nemEllenorizheto, osszegzesek }`
+ */
+async function tomorAlakEllenorzese({ javaslatAz, reszek, allasfoglalasok, esemenye, tagE, alapKuszobok }) {
+  const hiba = (ok) => ({ rendben: false, ok });
+  if (!Array.isArray(reszek) || !Array.isArray(allasfoglalasok)) return hiba('nem tömör egyezmény-alak');
+  const mintaVissza = async (m) => (m && m.esemeny !== undefined ? { ...m, esemeny: await esemenye(m.esemeny) } : m);
+  const lista = async (l) => (Array.isArray(l) ? Promise.all(l.map(mintaVissza)) : l);
+  const mintakVissza = async (ms) => (!ms || typeof ms !== 'object' ? ms : {
+    szavazat: await lista(ms.szavazat), nevezo: await lista(ms.nevezo),
     ertek: ms.ertek && typeof ms.ertek === 'object'
-      ? Object.fromEntries(Object.entries(ms.ertek).map(([n, l]) => [n, Array.isArray(l) ? l.map(mintaVissza) : l])) : ms.ertek
+      ? Object.fromEntries(await Promise.all(Object.entries(ms.ertek).map(async ([n, l]) => [n, await lista(l)]))) : ms.ertek
   });
 
-  const j = esemenye(cs.javaslat);
+  const j = await esemenye(javaslatAz);
   if (j?.tipus !== 'Javaslat' || j.adat?.fajta !== 'altalanos') return hiba('nem általános javaslat');
   if (!(await esemenyEllenorzese(j)).rendben) return hiba('a javaslat nem hiteles');
 
   const entitasok = javaslatEntitasai(j).filter((je) => je.resz).map((je) => je.resz.entitas);
-  if (cs.reszek.length !== entitasok.length) return hiba('nem minden érintett része van meg');
+  if (reszek.length !== entitasok.length) return hiba('nem minden érintett része van meg');
   let elfogadva = true;
   let lezaras = 0;
   let ellenorzott = 0;
   let nemEllenorizheto = 0;
+  const osszegzesek = [];
   for (const entitas of entitasok) {
-    const r = cs.reszek.find((x) => x?.osszegzes?.entitas === entitas);
+    const r = reszek.find((x) => x?.osszegzes?.entitas === entitas);
     if (!r) return hiba('hiányzik egy rész összegzése');
     // ⛔ a helyeket MI számoljuk — a csomag nem mondhatja meg, hol nézzünk
     const v = await lezarasiOsszegzesEllenorzese({ osszegzes: r.osszegzes, javaslatEsemeny: j, helyek: onalloMintaHelyek(r.osszegzes),
-      mintak: mintakVissza(r.mintak), ...(tagE ? { tagE } : {}), ...(alapKuszobok ? { alapKuszobok } : {}) });
+      mintak: await mintakVissza(r.mintak), ...(tagE ? { tagE } : {}), ...(alapKuszobok ? { alapKuszobok } : {}) });
     if (!v.rendben) return hiba('egy rész: ' + v.ok);
     if (!v.allas?.kuszobTeljesul) elfogadva = false;
     lezaras = Math.max(lezaras, r.osszegzes.lezaras);
     ellenorzott += v.ellenorzott;
     nemEllenorizheto += v.nemEllenorizheto;
+    osszegzesek.push(r.osszegzes);
   }
 
   const szerzok = new Set();
-  for (const az of cs.allasfoglalasok) {
-    const a = esemenye(az);
+  for (const az of allasfoglalasok) {
+    const a = await esemenye(az);
     if (a?.tipus !== 'Allasfoglalas' || a.adat?.egyezmeny !== j.azonosito) return hiba('idegen állásfoglalás');
     if (szerzok.has(a.szerzo)) return hiba('egy e-embertől két állásfoglalás');
     szerzok.add(a.szerzo);
     if (!(await esemenyEllenorzese(a)).rendben) return hiba('az állásfoglalás nem hiteles');
   }
-  return { rendben: true, elfogadva, lezaras, ellenorzott, nemEllenorizheto };
+  return { rendben: true, elfogadva, lezaras, ellenorzott, nemEllenorizheto, osszegzesek };
+}
+
+// ===================================
+// ⭐⭐ D130 (③a, KO7 (A)): A DÖNTÉS TÖMÖR ALAKJA EGY ALÁÍRT ESEMÉNYBEN — `KoinonOsszegzes`
+// ===================================
+//
+// Csaba (2026-11-20, KO7 (A)): a lezárási összegzés nem esemény — a darab tartójához egy aláírt eseményben jut el, a meglévő
+// csere-úton (a kapu az ismeretlen típust nem tiltja: a régi program átengedi, csak nem érti — nem protokoll-törés). Az esemény a
+// csomag DÖNTÉS-része: a javaslat azonosítója és a részek (az összegzések és a mintáik — az események azonosítóival). ⛔ Az
+// állásfoglalások NEM kerülnek bele: a hatály ÉL (D27) — azok külön események, a darab hordja őket, és mindig a legutóbbi számít. A
+// hivatkozott események (a javaslat, a minták) a tárban vannak (a darab szeletében utaznak), a kísérővel.
+// ⭐ Az aláíró nem kap bizalmat (a tartalmát a minták igazolják); KO8 (A): bárki írhatja, aki a teljes bemenetet tartja.
+
+/** Az esemény típusa. */
+export const KOINON_OSSZEGZES = 'KoinonOsszegzes';
+
+/** Egy rész legfeljebb ennyi lehet egy eseményben (a javaslat érintettjeinek korlátja — a szavazat bizonyítéka is ennyi). */
+export const KOINON_OSSZEGZES_RESZ_KORLAT = 64;
+
+/**
+ * A `KoinonOsszegzes` esemény adata a csomagból (a döntés-rész — az állásfoglalások nélkül).
+ * @param {Object} cs - a `koinonCsomagEpitese` csomagja
+ * @returns {{javaslat: string, reszek: Array<Object>}}
+ */
+export function koinonOsszegzesAdata(cs) {
+  return { javaslat: cs.javaslat, reszek: cs.reszek };
+}
+
+/**
+ * A `KoinonOsszegzes` esemény ellenőrzése — a hivatkozott eseményekkel a tárból (az olvasó a kísérőt adja). ⚠️ Az esemény
+ * aláírását a kapu nézi (a tárba csak hiteles kerül); itt a TARTALMA: a javaslat hiteles általános javaslat, minden érintettjéről
+ * van összegzés, és az a saját lenyomatából számolt helyeken vett mintákkal igaz. Az állásfoglalásokat nem nézi (azok külön élnek).
+ * @param {Object} e - az esemény
+ * @param {Function} esemenyOlvas - async (azonosító) → esemény (kísérővel) vagy null
+ * @param {Object} [b] - `{ tagE, alapKuszobok }`
+ * @returns {Promise<Object>} mint a csomagé; `osszegzesek`: az ellenőrzött lezárási összegzések (a D95/1 útjára)
+ */
+export async function koinonOsszegzesEllenorzese(e, esemenyOlvas, { tagE, alapKuszobok } = {}) {
+  const a = e?.adat;
+  if (e?.tipus !== KOINON_OSSZEGZES || !a || typeof a.javaslat !== 'string' || !Array.isArray(a.reszek)
+      || !a.reszek.length || a.reszek.length > KOINON_OSSZEGZES_RESZ_KORLAT) {
+    return { rendben: false, ok: 'nem a döntés tömör alakja' };
+  }
+  if (e.entitas !== a.javaslat) return { rendben: false, ok: 'nem a javaslat szeletében él' };
+  return tomorAlakEllenorzese({ javaslatAz: a.javaslat, reszek: a.reszek, allasfoglalasok: [],
+    esemenye: async (az) => (typeof az === 'string' ? (await esemenyOlvas(az)) ?? null : null), tagE, alapKuszobok });
 }

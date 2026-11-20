@@ -248,6 +248,11 @@ export function bejelentesHelyei(e) {
     // ⭐ D95/1: a lezárási összegzés a javaslat szeletében él, és az érintettjénél is hír (annak tartói ebből tudják meg
     // a nagy szeletű rész döntését).
     hozza(e.adat?.entitas);
+  } else if (e?.tipus === 'KoinonOsszegzes') {
+    // ⭐⭐ D130 (③a): a döntés tömör alakja (a lezárási összegzések) a javaslat szeletében él, és minden érintettjénél hír —
+    // ugyanaz, mint a `LezarasiOsszegzes`-é, részenként (legfeljebb 64 — a javaslat érintettjeinek korlátja).
+    const reszek = Array.isArray(e.adat?.reszek) ? e.adat.reszek.slice(0, 64) : [];
+    for (const r of reszek) hozza(r?.osszegzes?.entitas);
   }
   // ⭐⭐ D129: ami kézikönyv-entitásra mutat (a nevét hozza), az a kézikönyv GYÖKERÉNEK szeletébe is bejelentődik — EGY szelet
   // hordja az egész kézikönyvet, és azt mindenki tartja (MA4 (B): a pont nélkül megmaradó módosítást is őrizni kell).

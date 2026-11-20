@@ -291,7 +291,8 @@ export function koinohozTartozik(e, koino, szuletesek, osok) {
 
 // ⭐⭐ D128 (9.9): a keret mozgása (átadás, átvétel) koinónként él — a gyermek jelenébe nem jön át (a gyermek keretét a saját
 // horgonya osztja ki).
-const JELENBOL_KIZART = new Set(['KoinoLetrehozas', 'DontesiCsomag', 'LezarasiOsszegzes', 'TagsagiCsomag',
+// ⭐⭐ D130 (③a): a döntés tömör alakja (KoinonOsszegzes) — mint a lezárási összegzés, a múlt rétegéé.
+const JELENBOL_KIZART = new Set(['KoinoLetrehozas', 'DontesiCsomag', 'LezarasiOsszegzes', 'KoinonOsszegzes', 'TagsagiCsomag',
   'KeretAtadas', 'KeretAtvetel']);
 const MINDENKIE = new Set(['GondolatLetrehozas', 'Ellentmondas']);
 

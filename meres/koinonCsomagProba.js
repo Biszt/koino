@@ -9,10 +9,11 @@
 
 import { probaGyujtemeny, ujEember, tagokkal, probaKiseroval } from './probaFuttato.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
-import { koinonCsomagEpitese, koinonCsomagEllenorzese, KOINON_CSOMAG } from '../js/allapot/koinonCsomag.js';
+import { koinonCsomagEpitese, koinonCsomagEllenorzese, KOINON_CSOMAG, koinonOsszegzesAdata, koinonOsszegzesEllenorzese, KOINON_OSSZEGZES }
+  from '../js/allapot/koinonCsomag.js';
 import { onalloMintaHelyek, lezarasiMintaHelyek, lezarasiOsszegzesEpitese, lezarasiMintakValasza } from '../js/allapot/lezarasiOsszegzes.js';
 import { ALLASPONT_MUVELET } from '../js/allapot/szabalyok.js';
-import { kiseroNelkul, KISERO_MEZO } from '../js/esemeny/esemeny.js';
+import { kiseroNelkul, KISERO_MEZO, szelet, bejelentesHelyei, alakiHiba } from '../js/esemeny/esemeny.js';
 
 const { proba, futtatas } = probaGyujtemeny('Az egyezmény tömör alakja (D130 ②)');
 
@@ -154,6 +155,32 @@ proba('⭐ D130 ②: az ELVETETT általános javaslat csomagja is ellenőrizhet�
     const d = await dontes({ szavazok: 12, ellenzok: 10 });
     const v = await koinonCsomagEllenorzese(d.csomag);
     if (!(v.rendben === true && v.elfogadva === false)) { process.stderr.write('    (' + JSON.stringify(v) + ')\n'); return false; }
+    return true;
+  });
+
+// Rontás: (a) az esemény nem jelentődik be az érintettnél → bukik; (b) a szelet-kulcsát nem nézi (más szeletben is elfogadja) →
+// bukik; (c) az állásfoglalások is az eseménybe kerülnek (a hatály megfagyna) → bukik.
+proba('⭐⭐ D130 ③a: a döntés tömör alakja egy ALÁÍRT eseményben (KoinonOsszegzes, KO7 (A)) — a csomagból írva, a tárból ellenőrizve (a hivatkozott események kísérővel); a javaslat szeletében él, az érintettnél is bejelentődik; az állásfoglalások nincsenek benne; a meghamisított, a hiányos és a más szeletű elbukik',
+  async () => {
+    const d = await dontes();
+    const adat = koinonOsszegzesAdata(d.csomag);
+    const e = await d.gazda.tesz(KOINON_OSSZEGZES, adat, KESOBB, { entitas: d.j.azonosito });
+    const v = await koinonOsszegzesEllenorzese(e, d.olvas);
+    const hamis = masolat(e);
+    hamis.adat.reszek[0].osszegzes.szamok.tamogatok += 1;
+    const elsoMinta = adat.reszek[0].mintak.szavazat[0]?.esemeny;
+    const hianyos = await koinonOsszegzesEllenorzese(e, async (az) => (az === elsoMinta ? null : d.olvas(az)));
+    const masSzelet = { ...masolat(e), entitas: d.g.azonosito };
+    const r = {
+      rendben: v.rendben === true && v.elfogadva === true && v.osszegzesek?.length === 1 && v.osszegzesek[0].entitas === d.g.azonosito,
+      szelet: szelet(e) === d.j.azonosito && bejelentesHelyei(e).includes(d.g.azonosito),
+      kapu: alakiHiba(e) === null,
+      hatalyNelkul: !('allasfoglalasok' in e.adat),
+      hamis: (await koinonOsszegzesEllenorzese(hamis, d.olvas)).rendben === false,
+      hianyos: hianyos.rendben === false,
+      masSzelet: (await koinonOsszegzesEllenorzese(masSzelet, d.olvas)).rendben === false
+    };
+    if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify({ r, v, hianyos }) + ')\n'); return false; }
     return true;
   });
 
