@@ -924,10 +924,12 @@ async function egyReszVegrehajtasa(allapot, egyezmeny, resz, alkalmazottak, kiha
     return { rendben: true, csendben: true };
   }
 
+  // ⭐ A RÉGI ÁLLAPOT A MÓDOSÍTÁS ELŐTT (lent) — a szerkesztési egyezmény „Lecserélt gondolat” füle is ezt mutatja.
+  let regi = null;
   if (muvelet === 'Modositas') {
     // ⭐ A RÉGI ÁLLAPOT A MÓDOSÍTÁS ELŐTT — ezt viszik a különválók. A prototípus is a
     // felülírás ELŐTT menti el (`regiAdatok`); utána már nem lenne visszafejthető.
-    const regi = { cim: entitas.cim, szoveg: entitas.szoveg };
+    regi = { cim: entitas.cim, szoveg: entitas.szoveg };
     eredmeny = modositas(entitas, resz.valtozas);
 
     // ⭐⭐ ÉS AKI ELLENEZTE, DE KÜLÖN ÁGAT KÉRT, AZ MOST LÉP KI (2026-09-08).
@@ -959,7 +961,10 @@ async function egyReszVegrehajtasa(allapot, egyezmeny, resz, alkalmazottak, kiha
   if (eredmeny.rendben) {
     alkalmazottak.push({
       javaslat: egyezmeny.javaslat, erintett: resz.entitas,
-      muvelet, mezok: eredmeny.mezok
+      muvelet, mezok: eredmeny.mezok,
+      // ⭐ (2026-11-20): a módosítás előtti cím és szöveg — a szerkesztési egyezmény „Lecserélt gondolat” fülének (`pakli.js`
+      // `entitasSzovege`). A számítást nem érinti: csak megőrzi, ami a felülírás után már nem lenne visszafejthető.
+      ...(regi ? { regi } : {})
     });
   } else {
     kihagyottak.push({

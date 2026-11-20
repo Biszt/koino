@@ -890,13 +890,15 @@ export async function entitasSzovege(tar, koino, azonosito, beallitas = {}) {
   const f = await szovegFeloldasa(entitas.szoveg ?? null, beallitas.darabOlvas);
   const dontes = entitasDontese(entitas, kep.javaslatok);
   const modositott = await modositottValtozat(entitas, dontes, kep.entitasok, beallitas.darabOlvas);
+  const lecserelt = await lecsereltValtozat(entitas, dontes, kep.szerkesztesiAlkalmazasok, beallitas.darabOlvas);
   const eredmeny = {
     azonosito: entitas.azonosito,
     tipus: kartyaTipusa(entitas, dontes),
     cim: entitas.cim,
     szoveg: f.szoveg,
     ...(f.hianyzik ? { szovegHianyzik: true, szovegLenyomat: f.lenyomat } : {}),
-    ...(modositott ? { modositottGondolat: modositott } : {})
+    ...(modositott ? { modositottGondolat: modositott } : {}),
+    ...(lecserelt ? { lecsereltGondolat: lecserelt } : {})
   };
   console.log('pakli.entitasSzovege - VÉGE', { van: eredmeny.szoveg !== null, modositott: !!modositott });
   return eredmeny;
@@ -924,6 +926,28 @@ async function modositottValtozat(entitas, dontes, entitasok, darabOlvas) {
   const szoveg = 'szoveg' in v ? { szoveg: v.szoveg, hianyzik: !!v.szovegHianyzik }
     : await szovegFeloldasa(most?.szoveg ?? null, darabOlvas);
   return { cim: v.cim ?? most?.cim ?? null, szoveg: szoveg.szoveg ?? null, ...(szoveg.hianyzik ? { szovegHianyzik: true } : {}) };
+}
+
+/**
+ * ⭐ A SZERKESZTÉSI EGYEZMÉNY „LECSERÉLT GONDOLAT” FÜLE — a „Módosított gondolat” ikertestvére (2026-11-20, ugyanaz a rés: az
+ * örökölt `EgyezmenyKartya` a szöveg-válasz `lecsereltGondolat` mezőjéből rajzolja, a koino nem küldte). A módosítás előtti cím és
+ * szöveg a végrehajtásból jön (`szerkesztesiVegrehajtas.js` — a végrehajtott rész `regi`-je), töredéknél a saját részéé.
+ * @param {Object} entitas - az egyezmény (a javaslat entitása vagy a töredéke)
+ * @param {Object|null} dontes
+ * @param {Array<Object>|undefined} alkalmazasok - `allapot.szerkesztesiAlkalmazasok`
+ * @param {Function} [darabOlvas]
+ * @returns {Promise<{cim: string|null, szoveg: Array|string|null}|null>}
+ */
+async function lecsereltValtozat(entitas, dontes, alkalmazasok, darabOlvas) {
+  if (entitas.tipus !== 'Javaslat' || dontes?.fajta !== 'szerkesztesi' || dontes.statusz !== 'elfogadva') return null;
+  const resz = entitas.toredek ? (dontes.reszek?.[entitas.toredek.sorszam - 1] ?? null) : null;
+  const erintett = resz ? resz.entitas : dontes.erintett;
+  const javaslat = entitas.toredek?.csoport ?? entitas.azonosito;
+  const a = (Array.isArray(alkalmazasok) ? alkalmazasok : [])
+    .find((x) => x.javaslat === javaslat && x.erintett === erintett && x.muvelet === 'Modositas' && x.regi);
+  if (!a) return null;
+  const f = await szovegFeloldasa(a.regi.szoveg ?? null, darabOlvas);
+  return { cim: a.regi.cim ?? null, szoveg: f.szoveg ?? null, ...(f.hianyzik ? { szovegHianyzik: true } : {}) };
 }
 
 /**

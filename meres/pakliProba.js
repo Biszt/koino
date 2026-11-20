@@ -521,6 +521,33 @@ proba('⭐ A SZERKESZTÉSI JAVASLAT szövege a MÓDOSÍTOTT változatot is hozza
   return Object.values(r).every(Boolean);
 });
 
+// ⭐ (2026-11-20) a „Módosított gondolat” ikertestvére: az örökölt `EgyezmenyKartya` a „Lecserélt gondolat” fület a szöveg-válasz
+// `lecsereltGondolat` mezőjéből rajzolja — a koino ezt sem küldte. A régi cím és szöveg a végrehajtásból jön. Rontás: a végrehajtás
+// nem őrzi meg (`regi`) → bukik; a válasz nem hozza → bukik.
+proba('⭐ Az elfogadott SZERKESZTÉSI EGYEZMÉNY szövege a LECSERÉLT (módosítás előtti) változatot is hozza — a kártya „Lecserélt gondolat” füléhez; a folyamatban lévő szerkesztési javaslatnál még nincs', async () => {
+  const { tar, anna } = await ujKoino();
+  const kezdet = Date.UTC(2026, 0, 1);
+  const g = await anna.tesz('GondolatLetrehozas', { cim: 'RÉGI CÍM', szoveg: 'RÉGI SZÖVEG', meret: 10 }, kezdet);
+  await esemenyMentese(tar, g);
+  await esemenyMentese(tar, await anna.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 100 }, kezdet));
+  await esemenyMentese(tar, await anna.tesz('ErtekJavaslat', { entitas: g.azonosito,
+    ertekek: { elfogadasiKuszob: 51, reszveteliKuszob: 0, minimumDontesiIdo: 3600, maximumDontesiIdo: 7200 } }, kezdet));
+  const j = await anna.tesz('Javaslat', { fajta: 'szerkesztesi', erintett: g.azonosito, muvelet: 'Modositas',
+    valtozas: { cim: 'ÚJ CÍM', szoveg: 'ÚJ SZÖVEG' }, indoklas: null }, kezdet + 1000);
+  await esemenyMentese(tar, j);
+  for (const ev of await anna.szavaz(j, { szavazat: 'Tamogat' }, kezdet + 2000)) await esemenyMentese(tar, ev);
+  const kozben = await entitasSzovege(tar, KOINO, j.azonosito, { most: kezdet + 2500 });
+  const utana = await entitasSzovege(tar, KOINO, j.azonosito, { most: kezdet + 30 * 24 * 3600 * 1000 });
+  const gondolat = await entitasSzovege(tar, KOINO, g.azonosito, { most: kezdet + 30 * 24 * 3600 * 1000 });
+  const r = {
+    kozben: !!kozben && !('lecsereltGondolat' in kozben),
+    utana: utana?.tipus === 'Egyezmeny' && utana.lecsereltGondolat?.cim === 'RÉGI CÍM' && utana.lecsereltGondolat.szoveg === 'RÉGI SZÖVEG',
+    gondolat: gondolat?.cim === 'ÚJ CÍM' && gondolat.szoveg === 'ÚJ SZÖVEG'
+  };
+  if (!Object.values(r).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ r, utana }).slice(0, 700) + ')\n');
+  return Object.values(r).every(Boolean);
+});
+
 proba('⛔ Ismeretlen entitás szövege: null, nem hiba', async () => {
   const { tar, anna } = await ujKoino();
   await gondolat(tar, anna, 'Egy', 100);
