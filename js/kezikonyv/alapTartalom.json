@@ -54,12 +54,12 @@
     {
       "nev": "kezikonyv/menu/koino-verzio",
       "cim": "🧬 Új koino-verzió (gyermek)…",
-      "szoveg": "Itt hozhatsz létre egy gyermek koinót: a nevét, a leírását, a szabályait (alapból a szülőéi), a nyíltságát, és hogy mennyi tudatpontot teszel rá. A gyermek a koino-verzió kártyájával születik a szülőben, és a kártya „Kód” fülén bárki megnézheti a teljes programot, amivel futni fog.\n\nA kód a te készülékeden FUTÓ program: aki egy új programverziót javasol, azt előbb telepíti, és onnan hozza létre a gyermeket. Aki csatlakozik, ugyanazzal a programmal fut."
+      "szoveg": "Itt hozhatsz létre egy gyermek koinót: a nevét, a leírását, a szabályait (alapból a szülőéi), a nyíltságát, és hogy mennyi tudatpontot teszel rá. A gyermek a koino-verzió kártyájával születik a szülőben, és a kártya „Kód” fülén bárki megnézheti a teljes programot, amivel futni fog.\n\nA kód a te készülékeden FUTÓ program: aki egy új programverziót javasol, azt előbb telepíti, és onnan hozza létre a gyermeket. Aki csatlakozik, a kártya „Kód” fülének „⬇ Telepítés erre a készülékre…” gombjával ugyanezt a programot telepítheti; ha más programmal fut, a lap ezt kimondja, de nem tiltja."
     },
     {
       "nev": "kezikonyv/menu/program",
       "cim": "🧬 A program ezen a készüléken…",
-      "szoveg": "Itt látod, melyik program fut a készülékeden: a kódját (a koino-verzió kártyák „Kód” fülével összevethető), és hogy mikor telepítetted utoljára.\n\nHa egy kártyáról új programot telepítettél, és az nem úgy működik, ahogy vártad, innen visszatérhetsz az előzőre („↩ Vissza az előző programra”). A telepítéskor a program a régi mellé írja ki az újat, így a visszaút mindig megvan."
+      "szoveg": "Itt látod, melyik program fut a készülékeden: a lenyomatát és a magjáét (a számítás magja — ezzel vethető össze egy koino-verzió kártya kódja: ha a mag más, ugyanabból a koinóból más számítás jönne ki), és ha volt, az utolsó telepítés eredményét.\n\nHa egy kártyáról új programot telepítettél, és az nem úgy működik, ahogy vártad, innen visszatérhetsz az előzőre („↩ Vissza az előző programra”). A telepítéskor a program a régi mellé írja ki az újat, így a visszaút megvan."
     },
     {
       "nev": "kezikonyv/menu/felderitesek",
@@ -180,6 +180,16 @@
       "nev": "kezikonyv/ablak/eloszlas",
       "cim": "📊 Egy küszöb eloszlása",
       "szoveg": "Egy küszöbre beadott érték javaslatok: melyik értéket hányan javasolták. Ezekből számolódik a középérték (medián) — a gondolat tényleges küszöbe; ha még senki nem adott be érték javaslatot, a koinó alapja érvényes."
+    },
+    {
+      "nev": "kezikonyv/ablak/telepites",
+      "cim": "⬇ Telepítés a kártyáról",
+      "szoveg": "Egy koino-verzió kártya „Kód” fülének „⬇ Telepítés erre a készülékre…” gombja nyitja. Mielőtt telepítesz, az ablak megmutatja: ki tette fel a kódot, hány tudatpont van rajta, megvan-e minden fájlja (ha nem, elkérheted), rétegenként mi változik a futó programodhoz képest, és melyik koinódban futnál más számítással — ezt kimondja, de nem tiltja. ⚠️ A kód a kulcsaiddal fut: csak olyat telepíts, amiben megbízol.\n\nTelepítéskor a program az új kódot a régi mellé írja ki, és cserél: a futó program leáll, az új egy új fülön nyílik meg; ha az új nem felel, a régi fut újra. A visszaút („↩ Vissza az előző programra”) itt és a fő menü „🧬 A program ezen a készüléken…” ablakában van."
+    },
+    {
+      "nev": "kezikonyv/ablak/felderites",
+      "cim": "📷 A felderítés beállítása",
+      "szoveg": "Egy felderítés pillanatkép egy ágról (a kártya menüjéből) vagy az egész koinóról (a fő menüből): a program a megadott mélységig bejárja, és elhozza a társaidtól, amit a készüléked még nem ismer — hogy ott is lásd, ahol nem tartasz tudatpontot.\n\nBeállítod, hány csomópontot hozzon el, milyen mélyen, a szövegekkel (a törzzsel) együtt-e, és legfeljebb hány MB-ot; a határokat a program szabja meg. Az őrjárat végzi a háttérben, az állását a „📷 Felderítések” ablakban látod. ⚠️ A pillanatkép nem frissül magától, és nem értesít: ha egy ágat követni akarsz, tegyél rá tudatpontot."
     },
     {
       "nev": "kezikonyv/ablak/keszulekeim",

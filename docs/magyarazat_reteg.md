@@ -218,3 +218,11 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   meghívottnál már fut a koino, a lapon is beillesztheti; ④ a Tudatpontok listája a LEGUTÓBB RENDEZETTEL kezdődik (nem a
   legtöbbel — `sajatHozzarendelesek`), és a nem ismert kártyán lévő pont is látszik; ⑤ az adatoknál a „beceneved áll az alsó
   sávban” nem igazolható — kivéve; a kötelező mezőket csillag jelöli, és a meghívó viszi. Böngészőben mind az öt ablak ⓘ-je a helyén.
+- **2026-11-20** — ✅ **a ④c negyedik csoportja: a koinó ablakai** (a címükről — mind koinós): a Csatlakozás és a Társak (a tér
+  sávjának bejegyzései), a Bekapcsolódás, az Új koino-verzió, a program ezen a készüléken, a Felderítések, és két új bejegyzés: a
+  „⬇ Telepítés a kártyáról” előnézete (ki tette fel, a pontja, a fájljai, rétegenként mi változik, hol futnál más számítással — a kód a
+  kulcsaiddal fut; a régi mellé, az új egy új fülön, ha nem felel, a régi fut újra) és a felderítés beállítása (egy ágé és az egészé
+  ugyanaz az ablak). ⛔ **A ④a két szövege:** a koino-verziónál „aki csatlakozik, ugyanazzal a programmal fut” túlzás volt (a más
+  programot a lap kimondja, nem tiltja — TK3; a kártyáról telepíthető); a program ablaka nem azt mondja, „mikor telepítetted”, hanem a
+  futó program és a magja lenyomatát, és az utolsó telepítés eredményét. Böngészőben hét ablak ⓘ-je a helyén (a telepítés
+  előnézete koino-verzió kártya nélkül nem nyitható — ugyanaz a cím-alapú hely, mint a többié). Az alap-tartalom 92 bejegyzés.

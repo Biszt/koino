@@ -121,6 +121,16 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   { hely: '.modal-panel:has(#meghivo-info) .modal-cim', nev: 'kezikonyv/menu/meghivoim', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '📝 Az adataid', nev: 'kezikonyv/menu/eember-beallitasok', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '⚙️ eember beállítások', nev: 'kezikonyv/menu/eember-beallitasok', mod: 'vegere' },
+  // ----- ⭐ D129 (④c 4) a koinó ablakai (a koinósak — a címükről): a tér sávjának két ablaka, a bekapcsolódás, a koino-verzió, a
+  // program és a telepítés a kártyáról, a felderítés (egy ágé és az egészé ugyanaz az ablak) és a felderítések -----
+  { hely: '.modal-cim', felirat: '🔗 Csatlakozás egy koinóhoz', nev: 'kezikonyv/fejlec/ter-sav/csatlakozas', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🤝 Társak', nev: 'kezikonyv/fejlec/ter-sav/tarsak', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🌿 Bekapcsolódás egy gyermek-koinóba', nev: 'kezikonyv/menu/bekapcsolodas', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🧬 Új koino-verzió', nev: 'kezikonyv/menu/koino-verzio', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🧬 A program ezen a készüléken', nev: 'kezikonyv/menu/program', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '⬇ Telepítés a kártyáról', nev: 'kezikonyv/ablak/telepites', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: 'Felderítés', nev: 'kezikonyv/ablak/felderites', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '📷 Felderítések', nev: 'kezikonyv/menu/felderitesek', mod: 'vegere' },
   // ----- a „📱 Készülékeim” ablak -----
   { hely: '.koino-keszulekek__leiras', nev: 'kezikonyv/ablak/keszulekeim', mod: 'vegere' },
   { hely: '.koino-keszulekek__keszulek .koino-keszulekek__fej', nev: 'kezikonyv/ablak/keszulekeim/keszulek', mod: 'vegere' },
