@@ -2096,8 +2096,12 @@ async function gyermekSzuletesElokeszitese(szuloErv, { nyilt, szabalyok }) {
 
 /** ⭐ D118/2 (①b): a koinó szabályai egy sorban (`kulcs=érték`, a küszöbök is). */
 function szabalyokSzovege(sz) {
-  const { alapKuszobok, ...tobbi } = sz;
-  return [...Object.entries(tobbi), ...Object.entries(alapKuszobok ?? {})].map(([k, v]) => k + '=' + v).join(' ');
+  const { alapKuszobok, kezikonyv, ...tobbi } = sz;
+  // ⭐⭐ D129: a kézikönyv szabálya egy objektum (a saját alap-küszöbeivel) — ⛔ eddig „kezikonyv=[object Object]”-et írt ki
+  const kk = kezikonyv ? ['kezikonyv=van (a küszöbei: ' + Object.entries(kezikonyv.alapKuszobok ?? {}).map(([k, v]) => k + '=' + v)
+    .join(' ') + ')'] : [];
+  return [...Object.entries(tobbi).map(([k, v]) => k + '=' + v), ...kk,
+    ...Object.entries(alapKuszobok ?? {}).map(([k, v]) => k + '=' + v)].join(' ');
 }
 
 /**
