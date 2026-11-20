@@ -31,7 +31,7 @@ import { GYOKER_KULCS } from '../js/csere/szeletEgyeztetes.js';
 import { ALAP_KUSZOBOK } from '../js/allapot/javaslatSzamitas.js';
 
 import { probaGyujtemeny, ujEember, ujTag, tagsagiEsemenyei } from './probaFuttato.js';
-import { toredekAzonosito } from '../js/allapot/szabalyok.js';
+import { toredekAzonosito, ALLASPONT_MUVELET } from '../js/allapot/szabalyok.js';
 
 const { proba, futtatas } = probaGyujtemeny('A KÉRDEZHETŐ PAKLI (Szakasz 5 / 5.2)');
 
@@ -484,6 +484,41 @@ proba('⭐⭐ …és a szöveg is a MEGVÁLTOZOTT alakot adja egyezmény után',
   const kesoi = await entitasSzovege(tar, KOINO, g.azonosito,
     { most: kezdet + 30 * 24 * 3600 * 1000 });
   return kesoi.szoveg === 'ÚJ SZÖVEG';
+});
+
+// ⭐ Csaba (2026-11-20): „A módosítási javaslatnak nincsen olyan füle, ami a módosított verziót megmutatná.” Az örökölt
+// `JavaslatKartya` a „Módosított gondolat” fület a szöveg-válasz `modositottGondolat` mezőjéből rajzolja — a koino eddig nem küldte.
+// Rontás: a mező kimarad → bukik; a csak címet módosító javaslatnál a szöveg nem a gondolat mostanié → bukik.
+proba('⭐ A SZERKESZTÉSI JAVASLAT szövege a MÓDOSÍTOTT változatot is hozza (a kártya „Módosított gondolat” füléhez) — a cím és a szöveg; ha csak a cím változik, a szöveg a gondolat mostanié; az általános javaslatnál és a gondolatnál nincs', async () => {
+  const { tar, anna } = await ujKoino();
+  const kezdet = Date.UTC(2026, 0, 1);
+  const g = await anna.tesz('GondolatLetrehozas', { cim: 'Cím', szoveg: 'RÉGI SZÖVEG', meret: 10 }, kezdet);
+  await esemenyMentese(tar, g);
+  await esemenyMentese(tar, await anna.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 100 }, kezdet));
+  await esemenyMentese(tar, await anna.tesz('ErtekJavaslat', { entitas: g.azonosito,
+    ertekek: { elfogadasiKuszob: 51, reszveteliKuszob: 0, minimumDontesiIdo: 3600, maximumDontesiIdo: 7200 } }, kezdet));
+  const teljes = await anna.tesz('Javaslat', { fajta: 'szerkesztesi', erintett: g.azonosito, muvelet: 'Modositas',
+    valtozas: { cim: 'ÚJ CÍM', szoveg: 'ÚJ SZÖVEG' }, indoklas: null }, kezdet + 1000);
+  const csakCim = await anna.tesz('Javaslat', { fajta: 'szerkesztesi', erintett: g.azonosito, muvelet: 'Modositas',
+    valtozas: { cim: 'CSAK A CÍM' }, indoklas: null }, kezdet + 1100);
+  const altalanos = await anna.tesz('Javaslat', { fajta: 'altalanos',
+    erintettek: [{ entitas: g.azonosito, muvelet: ALLASPONT_MUVELET, valtozas: { cim: 'AZ ELV' } }], indoklas: null }, kezdet + 1200);
+  for (const e of [teljes, csakCim, altalanos]) {
+    await esemenyMentese(tar, e);
+    // a javaslattevő pontja a javaslaton (D85/2) — nélküle a D14 elfelejtené
+    await esemenyMentese(tar, await anna.tesz('TudatpontRendezes', { entitas: e.azonosito, pont: 10 }, e.ido + 1));
+  }
+  const most = { most: kezdet + 1500 };
+  const sz = async (e) => entitasSzovege(tar, KOINO, e.azonosito, most);
+  const [t, c, a, gy] = [await sz(teljes), await sz(csakCim), await sz(altalanos), await sz(g)];
+  const r = {
+    teljes: t?.modositottGondolat?.cim === 'ÚJ CÍM' && t.modositottGondolat.szoveg === 'ÚJ SZÖVEG',
+    csakCim: c?.modositottGondolat?.cim === 'CSAK A CÍM' && c.modositottGondolat.szoveg === 'RÉGI SZÖVEG',
+    altalanos: !!a && !('modositottGondolat' in a),
+    gondolat: !!gy && !('modositottGondolat' in gy)
+  };
+  if (!Object.values(r).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ r, t, c, a }).slice(0, 900) + ')\n');
+  return Object.values(r).every(Boolean);
 });
 
 proba('⛔ Ismeretlen entitás szövege: null, nem hiba', async () => {

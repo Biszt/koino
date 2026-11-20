@@ -901,15 +901,42 @@ export async function entitasSzovege(tar, koino, azonosito, beallitas = {}) {
   // ⭐ D72: ha a szöveg külön darab, a darab-tárból oldjuk fel (`beallitas.darabOlvas`); ha
   // még nem érkezett meg, azt kimondjuk — nem hiba, hanem hiány (D19).
   const f = await szovegFeloldasa(entitas.szoveg ?? null, beallitas.darabOlvas);
+  const dontes = entitasDontese(entitas, kep.javaslatok);
+  const modositott = await modositottValtozat(entitas, dontes, kep.entitasok, beallitas.darabOlvas);
   const eredmeny = {
     azonosito: entitas.azonosito,
-    tipus: kartyaTipusa(entitas, entitasDontese(entitas, kep.javaslatok)),
+    tipus: kartyaTipusa(entitas, dontes),
     cim: entitas.cim,
     szoveg: f.szoveg,
-    ...(f.hianyzik ? { szovegHianyzik: true, szovegLenyomat: f.lenyomat } : {})
+    ...(f.hianyzik ? { szovegHianyzik: true, szovegLenyomat: f.lenyomat } : {}),
+    ...(modositott ? { modositottGondolat: modositott } : {})
   };
-  console.log('pakli.entitasSzovege - VÉGE', { van: eredmeny.szoveg !== null });
+  console.log('pakli.entitasSzovege - VÉGE', { van: eredmeny.szoveg !== null, modositott: !!modositott });
   return eredmeny;
+}
+
+/**
+ * ⭐ A SZERKESZTÉSI JAVASLAT „MÓDOSÍTOTT GONDOLAT” FÜLE (Csaba, 2026-11-20: „nincsen olyan füle, ami a módosított verziót
+ * megmutatná”): az örökölt `JavaslatKartya` a fület a szöveg-válasz `modositottGondolat` mezőjéből (`{ cim, szoveg }`) rajzolja
+ * — a prototípus háttere ezt küldte, a koino eddig nem, ezért a fül soha nem jelent meg. A javasolt cím és szöveg a javaslat
+ * (töredéknél a saját része) `valtozas`-ából jön; ami nem változik, az a gondolat mostani állapotából (a kártya kommentje szerint:
+ * „a backend a jelenlegi gondolattal olvassa össze”). Csak módosításnál, és csak a szerkesztési javaslatnál.
+ * @param {Object} entitas - a javaslat (vagy a töredéke)
+ * @param {Object|null} dontes - `entitasDontese`
+ * @param {Map} entitasok
+ * @param {Function} [darabOlvas] - a D72 szöveg-darabok olvasója
+ * @returns {Promise<{cim: string|null, szoveg: Array|null}|null>}
+ */
+async function modositottValtozat(entitas, dontes, entitasok, darabOlvas) {
+  if (entitas.tipus !== 'Javaslat' || dontes?.fajta !== 'szerkesztesi') return null;
+  const resz = entitas.toredek ? (dontes.reszek?.[entitas.toredek.sorszam - 1] ?? null) : null;
+  const o = resz ?? dontes;
+  if (o?.muvelet !== 'Modositas' || !o.valtozas || typeof o.valtozas !== 'object') return null;
+  const v = await valtozasFeloldasa(o.valtozas, darabOlvas);
+  const most = entitasok.get(resz ? resz.entitas : dontes.erintett) ?? null;
+  const szoveg = 'szoveg' in v ? { szoveg: v.szoveg, hianyzik: !!v.szovegHianyzik }
+    : await szovegFeloldasa(most?.szoveg ?? null, darabOlvas);
+  return { cim: v.cim ?? most?.cim ?? null, szoveg: szoveg.szoveg ?? null, ...(szoveg.hianyzik ? { szovegHianyzik: true } : {}) };
 }
 
 /**
