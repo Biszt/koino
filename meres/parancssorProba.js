@@ -330,7 +330,7 @@ proba('⭐⭐ D130 ③c: a koinon DARABJA a cserében — a szigorú vendég az 
     const bKep = await fut(b, 'allapot', alap);
     await fut(b, 'tomorit', alap);
     const bV2 = await fut(b, 'vallalas', alap);
-    const darabSor = /a koinon darabja: 0\. mélység \(\d+ ismert tag, r = 20 — egy darab: az egész koinon\) · 1 egyezmény, 2 esemény/;
+    const darabSor = /a koinon darabja: 0\. mélység \(\d+ ismert tag, r = 20 — egy darab: az egész koinon\) · 1 általános egyezmény, 2 esemény/;
     const r = {
       kiadva: /1 új tömör alak kiadva/.test(kiadas),
       gazda: darabSor.test(aV),
@@ -3630,8 +3630,8 @@ proba('⭐⭐ D128 (②f): a HELYREÁLLÍTÁS a parancssorból — kérelem az �
       const nev = (ki) => ki.split('\n').map((l) => l.trim()).find((l) => /^[A-Za-z0-9_-]{43}$/.test(l));
       const r = {
         kerelem: !!kerelem && !!kod, blokkolt: /helyreállításod folyamatban/.test(blokkolt),
-        f: /Jóváhagytad/.test(fKi) && /új javaslat/.test(fKi), rosszKod: /NEM egyezik/.test(rosszKod),
-        h2: /meglévő javaslathoz/.test(h2Ki), h3: /Elindult: 3 segítő; a várakozás 7 nap/.test(h3Ki),
+        f: /Jóváhagytad/.test(fKi) && /új helyreállítási kérelem/.test(fKi), rosszKod: /NEM egyezik/.test(rosszKod),
+        h2: /meglévő helyreállítási kérelemhez/.test(h2Ki), h3: /Elindult: 3 segítő; a várakozás 7 nap/.test(h3Ki),
         ertesites: /Valaki az azonosságod HELYREÁLLÍTÁSÁT kezdte/.test(xAllapot),
         fV: /1 véglegesítve, 0 bevíve/.test(fV), h2V: /1 véglegesítve, 0 bevíve/.test(h2V), h3V: /1 véglegesítve, 1 bevíve/.test(h3V),
         kiad: /Kiadva/.test(kiadKi), befejez: /Visszakaptad az azonosságodat/.test(befejezKi),
@@ -4071,7 +4071,7 @@ proba('⭐⭐ D129 (②): a kézikönyv a parancssorból — a nevek az esemény
           && sorok.some((e) => e.tipus === 'Javaslat' && typeof e.adat?.alapLenyomatok?.[MENU] === 'string'),
         torles: /kézikönyv-entitáson nem indítható Torles/.test(torolve),
         ujProgram: /⭐ a program új szöveget javasol: node koino.js kezikonyv javasol kezikonyv\/menu/.test(menuSor(ujProgram)),
-        javasol: /A program által megírt javaslat elindítva/.test(javasol)
+        javasol: /A program által megírt szerkesztési javaslat elindítva/.test(javasol)
           && sorok.some((e) => e.tipus === 'Javaslat' && e.adat?.programJavaslata === true),
         utana: /„A menü — az új program szövege” · a közösség módosította/.test(menuSor(utana)) && !/⭐/.test(menuSor(utana))
       };

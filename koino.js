@@ -1785,7 +1785,7 @@ async function nezetBekapcsolasaKeszuleken(kartyaAz, lenyomat = null) {
   const n = await nezetKartyaja(kartyaAz);
   if (!n.kod) throw new Error('Ennek a nézet-kártyának a szövegében nincs csatolt fájl — nincs mit bekapcsolni.');
   if (lenyomat && lenyomat !== n.kod.lenyomat) {
-    const h = new Error('A nézet kódja közben megváltozott (egy egyezmény új kódot hozott) — nézd meg újra, mielőtt bekapcsolod.');
+    const h = new Error('A nézet kódja közben megváltozott (egy szerkesztési egyezmény új kódot hozott) — nézd meg újra, mielőtt bekapcsolod.');
     h.kod = 'VALTOZOTT';
     throw h;
   }
@@ -1813,7 +1813,7 @@ async function nezetKerete(kartyaAz) {
   const n = await nezetKartyaja(kartyaAz);
   if (n.allas !== 'be') {
     const h = new Error(n.allas === 'valtozott'
-      ? 'A nézet kódja azóta megváltozott, hogy bekapcsoltad (egy egyezmény új kódot hozott) — nézd meg, és kapcsold be újra.'
+      ? 'A nézet kódja azóta megváltozott, hogy bekapcsoltad (egy szerkesztési egyezmény új kódot hozott) — nézd meg, és kapcsold be újra.'
       : 'Ez a nézet nincs bekapcsolva ezen a készüléken.');
     h.kod = n.allas === 'valtozott' ? 'VALTOZOTT' : 'KI';
     throw h;
@@ -6815,7 +6815,7 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
     const { kiadva } = await dontesiCsomagokKiadasa(kornyezet, { csakSajat: true });
     if (kiadva.length) {
       kiir(SZIN.halvany + '  📦 ' + ora() + ' ' + kk + '' + kiadva.length + ' döntési csomag a töredékekbe'
-        + ' (a lezárt, több érintettes javaslataimhoz)' + SZIN.vege);
+        + ' (a lezárt, több érintettes szerkesztési és általános javaslataimhoz)' + SZIN.vege);
     }
     // ⭐ D95/1: a nagy szelet teljes tartójaként (a „mindent” beállítással) a lezárt döntések összegzése.
     const lo = await lezarasiOsszegzesekKiadasa();
@@ -6823,7 +6823,7 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
     // ⭐⭐ D130 (③b): az elfogadott általános egyezmények tömör alakja (ahol a döntés teljes bemenetét tartom, és még nincs érvényes).
     try {
       const ko = await koinonOsszegzesekKiadasa();
-      if (ko) kiir(SZIN.halvany + '  📜 ' + ora() + ' ' + kk + ko + ' egyezmény tömör alakja a koinonnak' + SZIN.vege);
+      if (ko) kiir(SZIN.halvany + '  📜 ' + ora() + ' ' + kk + ko + ' általános egyezmény tömör alakja a koinonnak' + SZIN.vege);
     } catch (hiba) { console.warn('a tömör alak kiadása nem sikerült', { ok: hiba.message }); }
     // ⭐ D75/1, D73: naponta egyszer a tár tömörítése (a szigorú (b) alatt; csak az író — az őrjárat az).
     if (tar.iroE?.() && await tomoritesEsedekesE()) {
@@ -7717,7 +7717,7 @@ async function allapotKiirasa(napokMulva) {
     kiir();
     kiir(SZIN.vastag + 'ÁLTALÁNOS EGYEZMÉNYEK' + SZIN.vege);
     for (const j of altalanosEgyezmenyek) egyezmenyKiirasa(j);
-    kiir(SZIN.halvany + '  Állást foglalni: node koino.js allast <egyezmény> '
+    kiir(SZIN.halvany + '  Állást foglalni: node koino.js allast <általános egyezmény> '
       + 'csatlakozik|tiltakozik|utkozik' + SZIN.vege);
   }
 }
@@ -8256,7 +8256,7 @@ try {
         }
         const az = feloldas(nev, []);
         if (!((allapot.entitasok.get(az)?.hozzajarulok.get(szerzo)?.pont ?? 0) > 0)) {
-          throw new Error('Javaslatot csak az tehet, aki tudatpontot tett rá — előbb: node koino.js pont ' + nev + ' 1');
+          throw new Error('Szerkesztési javaslatot csak az tehet, aki tudatpontot tett rá — előbb: node koino.js pont ' + nev + ' 1');
         }
         const e = await javaslatLetrehozasa(kornyezet, {
           fajta: 'szerkesztesi',
@@ -8265,7 +8265,7 @@ try {
           pont: KEZDO_PONT,
           programJavaslata: true
         });
-        kiir('A program által megírt javaslat elindítva: ' + e.azonosito.slice(0, 8) + ' (' + nev + ')');
+        kiir('A program által megírt szerkesztési javaslat elindítva: ' + e.azonosito.slice(0, 8) + ' (' + nev + ')');
         break;
       }
       const ajanlatNevek = new Set(ajanlatok.map((a) => a.nev));
@@ -8373,7 +8373,7 @@ try {
       if (ervek[0] === 'visszavon' || ervek[0] === 'kiad') {
         if (!ervek[1] || !ervek[2]) {
           throw new Error(ervek[0] === 'kiad' ? 'node koino.js segit kiad <a helyreállított horgonya> <fájl>'
-            : 'node koino.js segit visszavon <a helyreállítandó horgonya> <a javaslat jele>');
+            : 'node koino.js segit visszavon <a helyreállítandó horgonya> <a helyreállítási kérelem jele>');
         }
         const adatok = await allitasAdatai(ervek[1]);
         const allasok = await helyreallitasokAllapota(tar, KOINO, adatok.horgonya);
@@ -8397,7 +8397,7 @@ try {
       const [horgonyErv, kerelemErv, kodErv] = ervek;
       if (!horgonyErv || !kerelemErv || !kodErv) {
         throw new Error('node koino.js segit <a helyreállítandó horgonya> <a kérelme> <az ellenőrző kód, amit szóban mond>'
-          + ' [masodik <a megállított javaslat jele>]');
+          + ' [masodik <a megállított helyreállítási kérelem jele>]');
       }
       const kerelem = kerelemSzovegbol(kerelemErv);
       const kod = await kerelemEllenorzoKodja(kerelem);
@@ -8411,8 +8411,8 @@ try {
       await helyreallitasJovahagyasa(kornyezet, adatok, javaslat, 'kezdes');
       const jel = await helyreallitasJele(javaslat);
       const a = (await helyreallitasokAllapota(tar, KOINO, adatok.horgonya)).find((x) => x.jel === jel);
-      kiir(SZIN.jo + 'Jóváhagytad a helyreállítást' + (uj ? ' (új javaslat).' : ' (a meglévő javaslathoz csatlakoztál).') + SZIN.vege);
-      kiir('  a javaslat jele: ' + jel);
+      kiir(SZIN.jo + 'Jóváhagytad a helyreállítást' + (uj ? ' (új helyreállítási kérelem).' : ' (a meglévő helyreállítási kérelemhez csatlakoztál).') + SZIN.vege);
+      kiir('  a helyreállítási kérelem jele: ' + jel);
       kiir(a?.elindult
         ? '  Elindult: ' + a.kezdok.size + ' segítő; a várakozás ' + a.varakozasNap + ' nap — utána a készüléked magától véglegesít.'
         : '  Még nem indult el: ' + (a?.kezdok.size ?? 1) + ' segítő hagyta jóvá (egy régi ismerős és két élő tanúsító kell — vagy tíz'
@@ -8423,7 +8423,7 @@ try {
     // ⭐⭐ D128 (②e3 — 17. pont): A HELYREÁLLÍTÁS MEGÁLLÍTÁSA — „ezt nem én kértem”. Az 1. kört érvényteleníti (a 2. kör — 5 segítő,
     // kétszeres várakozás — nem állítható meg). A jelét az állapot írja ki.
     case 'megallit': {
-      if (!ervek[0]) throw new Error('Melyik helyreállítást? node koino.js megallit <a javaslat jele> (az állapot kiírja)');
+      if (!ervek[0]) throw new Error('Melyik helyreállítást? node koino.js megallit <a helyreállítási kérelem jele> (az állapot kiírja)');
       // ⛔ Csak egy, az ÉN azonosságomról szóló javaslatot (egy elírt jelre ne írjunk alá semmit).
       const horgonyom = await sajatHorgonyom();
       const ismert = horgonyom ? (await helyreallitasokAllapota(tar, KOINO, horgonyom)).some((a) => a.jel === ervek[0]) : false;
@@ -8580,8 +8580,8 @@ try {
       const { kiadva, javaslatok } = await dontesiCsomagokKiadasa(kornyezet, { javaslat: ervek[0] ?? null });
       if (!javaslatok) {
         kiir(SZIN.halvany + (ervek[0]
-          ? 'Ehhez a javaslathoz most nem jár csomag (nincs meg, nem számít, egy érintettes, vagy még nyitva).'
-          : 'Nincs lezárt, több érintettes javaslat.') + SZIN.vege);
+          ? 'Ehhez a szerkesztési vagy általános javaslathoz most nem jár csomag (nincs meg, nem számít, egy érintettes, vagy még nyitva).'
+          : 'Nincs lezárt, több érintettes szerkesztési vagy általános javaslat.') + SZIN.vege);
         break;
       }
       const esemenyDarab = kiadva.reduce((n, e) => n + e.adat.esemenyek.length - 1, 0);
@@ -9188,7 +9188,7 @@ try {
         kiir('  Most: ' + ALLAS_SZOVEG[n.allas]);
         if (ervek[2] === 'igen') {
           await nezetBekapcsolasaKeszuleken(n.azonosito, n.kod?.lenyomat ?? null);
-          kiir(SZIN.jo + '✓ Bekapcsolva ezen a készüléken, ebben a koinoban — a kód lenyomatához kötve (ha egy egyezmény új kódot hoz, '
+          kiir(SZIN.jo + '✓ Bekapcsolva ezen a készüléken, ebben a koinoban — a kód lenyomatához kötve (ha egy szerkesztési egyezmény új kódot hoz, '
             + 'kikapcsol). A lapon: a fő menü „🧩 Nézetek…”.' + SZIN.vege);
         } else if (n.allas !== 'be') {
           kiir(SZIN.halvany + 'A bekapcsolás: nezet be ' + ervek[1] + ' igen' + SZIN.vege);
@@ -9745,7 +9745,7 @@ try {
 
       await ertekJavaslat(kornyezet, entitas, ertekek);
       kiir('Érték javaslat beadva: ' + rovidAzonosito(entitas));
-      kiir(SZIN.halvany + '⚠️ Ez JAVASLAT, nem parancs: az érvényes küszöb a tulajdonosok '
+      kiir(SZIN.halvany + '⚠️ Ez ÉRTÉK JAVASLAT, nem parancs: az érvényes küszöb a tulajdonosok '
         + 'érték javaslatainak MEDIÁNJA (D4).' + SZIN.vege);
       break;
     }
@@ -9897,7 +9897,7 @@ try {
       kiir('Általános javaslat beadva: ' + e.azonosito.slice(0, 8));
       kiir(SZIN.halvany + 'Helye: „' + (allapot.entitasok.get(hely)?.cim ?? '?')
         + '" — innen örökli a szavazói kört és a küszöbeit.' + SZIN.vege);
-      kiir(SZIN.halvany + '⚠️ Ha elfogadják, SEMMI nem hajtódik végre — az egyezmény MAGA '
+      kiir(SZIN.halvany + '⚠️ Ha elfogadják, SEMMI nem hajtódik végre — az általános egyezmény MAGA '
         + 'az álláspont, és ÉL: csatlakozni, tiltakozni, ütközést jelölni lehet hozzá.'
         + SZIN.vege);
       kiir(SZIN.halvany + 'Most szavazhatsz rá: node koino.js szavaz '
@@ -9973,7 +9973,7 @@ try {
       });
 
       kiir('Szerkesztési javaslat beadva (' + muvelet + '): ' + e.azonosito.slice(0, 8));
-      kiir(SZIN.halvany + 'Kapott ' + KEZDO_PONT + ' tudatpontot tőled — a javaslat is '
+      kiir(SZIN.halvany + 'Kapott ' + KEZDO_PONT + ' tudatpontot tőled — a szerkesztési javaslat is '
         + 'entitás, enélkül a koino elfelejtené.' + SZIN.vege);
       if (muvelet === 'Torles') {
         // ⚠️ A KÉZI ÚT KIMONDVA: a koino nem veheti vissza más nevében a pontokat.
@@ -10160,7 +10160,7 @@ try {
 
           kiir(SZIN.jo + '✓ A lap kiírva: ' + fajl + SZIN.vege);
           kiir(SZIN.halvany + '  ' + lapSzoveg.length + ' bájt · ' + allapot.entitasok.size
-            + ' entitás · ' + javaslatok.size + ' javaslat' + SZIN.vege);
+            + ' entitás · ' + javaslatok.size + ' szerkesztési és általános javaslat' + SZIN.vege);
           kiir(SZIN.halvany + '  ujjlenyomat: '
             + await allapotUjjlenyomata(allapot, javaslatok) + SZIN.vege);
           kiir();
@@ -10246,7 +10246,7 @@ try {
         + '   (ami ebből következik — ennek is egyeznie kell)' + SZIN.vege);
       kiir('  ' + await allapotUjjlenyomata(allapot, javaslatok));
       kiir(SZIN.halvany + '  ' + allapot.entitasok.size + ' entitás · '
-        + javaslatok.size + ' javaslat' + SZIN.vege);
+        + javaslatok.size + ' szerkesztési és általános javaslat' + SZIN.vege);
       kiir();
       kiir(SZIN.halvany + '⚠ Az ÁLLAPOT ujjlenyomata IDŐFÜGGŐ (a döntések lezárulnak),'
         + ' ezért csak azonos pillanatra hasonlítható össze.' + SZIN.vege);
@@ -10525,7 +10525,7 @@ try {
           : ered.mintazott ? SZIN.jo + '✓ ellenőrizve (' + (ered.minta.ellenorzott + (ered.minta.darabEllenorzott ?? 0))
             + ' minta)' + SZIN.vege
             : SZIN.halvany + (t.forras === 'bemondott' ? 'bemondás (a tartója sem tartja)' : 'bemondás') + SZIN.vege;
-        const cim = t.letrehozo?.adat?.cim ?? (t.letrehozo?.tipus === 'Javaslat' ? '(javaslat)' : '');
+        const cim = t.letrehozo?.adat?.cim ?? (t.letrehozo?.tipus === 'Javaslat' ? (t.letrehozo?.adat?.fajta === 'altalanos' ? '(általános javaslat)' : '(szerkesztési javaslat)') : '');
         // ⭐ D116: és hány entitás van alatta (a tartó szerint; „+”, ha ő maga sem tudja pontosan)
         kiir(behuz + SZIN.halvany + t.az.slice(0, 8) + SZIN.vege + '  ' + cim + SZIN.halvany + '  · össz-pont ' + t.osszPont
           + (Number.isSafeInteger(t.ad) ? ' · alatta ' + t.ad + (t.adb ? '+' : '') : '')
@@ -10655,7 +10655,7 @@ try {
       const koinonbol = (await tar.bejelentesek(KOINON_KULCS)).filter((e) => esemenyKoinoja(e) === KOINO && knV.tartja(e));
       kiir(SZIN.halvany + '  a koinon darabja: ' + knV.melyseg + '. mélység (' + knV.tagok + ' ismert tag, r = ' + KOINON_R
         + (knV.melyseg ? ' — 2^' + knV.melyseg + ' darabból egy' : ' — egy darab: az egész koinon') + ') · '
-        + new Set(koinonbol.map((e) => szelet(e))).size + ' egyezmény, ' + koinonbol.length + ' esemény (D130)' + SZIN.vege);
+        + new Set(koinonbol.map((e) => szelet(e))).size + ' általános egyezmény, ' + koinonbol.length + ' esemény (D130)' + SZIN.vege);
       for (const [az, p] of pontosak.sort((a, b) => b[1] - a[1])) {
         const o = kf.fokok.get(az) === 'osszegzo' ? osszT.szeletek[az] : null;
         kiir('  ' + SZIN.halvany + az.slice(0, 8) + SZIN.vege + '  ' + (allapot.entitasok.get(az)?.cim ?? '(ismeretlen)')
@@ -12628,7 +12628,7 @@ try {
           if (utvonal === '/api/javaslat') {
             const { erintettEntitasok, indoklas, kezdoTudatpont } = test ?? {};
             if (!Array.isArray(erintettEntitasok) || !erintettEntitasok.length) {
-              return { allapot: 400, adat: { hiba: 'melyik entitást érinti a javaslat?' } };
+              return { allapot: 400, adat: { hiba: 'melyik entitást érinti a szerkesztési javaslat?' } };
             }
 
             // ----- A FORDÍTÁS: a prototípus alakja → a koino `erintettek`-je -----
@@ -12802,7 +12802,7 @@ try {
             const { javaslatId, szavazatTipus, kulonvalasIgeny } = test ?? {};
             if (typeof javaslatId !== 'string'
                 || !['Tamogat', 'Ellenez', 'Tartozkodik'].includes(szavazatTipus)) {
-              return { allapot: 400, adat: { hiba: 'melyik javaslatra hogyan szavazol?' } };
+              return { allapot: 400, adat: { hiba: 'melyik szerkesztési vagy általános javaslatra hogyan szavazol?' } };
             }
             // ⚠️⚠️ A kulonvalasIgeny MOST ELVESZIK — de NEM azért, mert nincs megfelelője.
             // *(2026-09-06-án ezt írtam ide, és tévedtem.)*
@@ -13349,7 +13349,7 @@ try {
           // ⭐ D85/5: töredék-kártyáról a csoport szavazatát kérdezzük.
           const csoport = dontesAzonositoja(kep, javaslatId);
           if (!javaslatok.has(csoport)) {
-            return { allapot: 404, adat: { hiba: 'nincs ilyen javaslat' } };
+            return { allapot: 404, adat: { hiba: 'nincs ilyen szerkesztési vagy általános javaslat' } };
           }
           // ⚠️ NULL, ha még nem szavaztam — a fül ebből tudja, hogy egyik gomb sem aktív.
           //
@@ -13524,16 +13524,16 @@ try {
       kiir('           koinoverzio <név> [leírás] [pont=N] [becenev=…] · bekapcsolodas <gyermek> [elhagy=…] [fájl]   (D119, D118)');
       kiir('           nezet [uj <fájl> "<cím>" [pont=N] | kod|be|ki <kártya>]   (D126: a közösség feltöltött nézetei)');
       kiir('           pont <azonosító> <pont> [passziv] · javaslat <azonosító> <új cím> [indoklás]');
-      kiir('           kezikonyv [javasol <név>]   (D129: a kézikönyv — az ⓘ jelek; a pont, a javaslat, az athelyez a nevet is: kezikonyv/menu/…)');
+      kiir('           kezikonyv [javasol <név>]   (D129: a kézikönyv — az ⓘ jelek; a pont, a javaslat és az athelyez parancs a nevet is: kezikonyv/menu/…)');
       kiir('           torol <azonosító> [indoklás] · athelyez <mit> <hova|gyoker> [indoklás]');
       kiir('           egyesit <az1>,<az2>[,...] <egyesített cím> [indoklás]');
       kiir('           ertek <azonosító> <elfogadási%> <részvételi%> <min mp> <max mp>');
       kiir('           belep [alapítás] · meghiv|felhatalmaz|tanusit|bemutatkoz|visszavon <horgony>');
       kiir('           lattam   (az AZONOSSÁG szakasz mutatja, hol tartasz)');
       kiir('           altalanos <álláspont> <hely> [indoklás]  (ÁLTALÁNOS javaslat — D27)');
-      kiir('           allast <egyezmény> csatlakozik|tiltakozik|utkozik [másik] [indoklás]');
+      kiir('           allast <általános egyezmény> csatlakozik|tiltakozik|utkozik [másik] [indoklás]');
       kiir('           felszabadit [buli]  (a törölt gondolatokra tett pontod visszavétele)');
-      kiir('           szavaz <javaslat> tamogat|ellenez|tartozkodik [kulonag]');
+      kiir('           szavaz <szerkesztési vagy általános javaslat> tamogat|ellenez|tartozkodik [kulonag]');
       kiir('           kivisz <fájl> [mind|sajat|<azonosító>] · behoz <fájl>   (a KÉZI ÚT)');
       kiir('           kereso [felajanl <fájl> | behoz <fájl> | kivisz <fájl>]   (a KERESŐ-TÁR — a kereső-réteg ③)');
       kiir('           ter [letrehozva|eloszorLattam|nev] [csokkeno|novekvo]  (A BELÉPŐ TÉR)');
@@ -13544,7 +13544,7 @@ try {
       kiir('           kerelem fejlecek <az|gyoker> [cím] [port] [n] [d] · kerelem torzs <az> [cím] [port]   (D92)');
       kiir('           profil nev=... [telepules=...] · tagsag   (D93: a profil, a tagságom és a tagsági csomag; D94: a 2. lépcső bemondása)');
       kiir('           jelzes [horgony]   (D93/6: a kontraszt-jelzés kérésre — kiket tanúsított, van-e önálló életük)');
-      kiir('           csomag [javaslat]   (a lezárt, több érintettes döntés csomagja — D85 T3)');
+      kiir('           csomag [szerkesztési vagy általános javaslat]   (a lezárt, több érintettes döntés csomagja — D85 T3)');
       kiir('           kiszolgalas [mindent|alap] · osszegzes   (D95/1: a két fokú vállalás — a nagy szelet összegezve)');
       kiir('           koinon   (D130: az elfogadott általános egyezmények tömör alakja — kiadja, ahol a döntést egészében tartom, és listáz)');
       kiir('           pajzsfuro <cím> [port] [helyi port] · tukor <cím> [port] · kulsoport [port]');
