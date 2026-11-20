@@ -4,7 +4,7 @@
     {
       "nev": "kezikonyv",
       "cim": "A koino kézikönyve",
-      "szoveg": "Ez a kézikönyv a koino minden részét elmagyarázza: a menüt, az ablakokat, az alsó sávot, a fejlécet, a kártyákat, és a koino fogalmait. Minden ⓘ jel mögött egy itteni magyarázat áll.\n\nA kézikönyvet a program hozza, de a koino közössége alakítja: ha egy magyarázat nem érthető, tegyél rá tudatpontot, és javasolj jobbat. A javaslatról a magyarázaton tudatpontot tartók döntenek, legalább 3 nap alatt, hogy mások is észrevehessék és csatlakozhassanak.\n\nA kézikönyv nem tűnik el akkor sem, ha senki nem tart rajta tudatpontot: a közösség módosításai megmaradnak, és minden tag készüléke őrzi őket. Törölni és más gondolattal egyesíteni nem lehet — amíg egy rész a lapon van, a magyarázatának is lennie kell."
+      "szoveg": "Ez a kézikönyv a koino minden részét elmagyarázza: a menüt, az ablakokat, az alsó sávot, a fejlécet, a kártyákat, és a koino fogalmait. Minden ⓘ jel mögött egy itteni magyarázat áll.\n\nA kézikönyvet a program hozza, de a koino közössége alakítja: ha egy magyarázat nem érthető, tegyél rá tudatpontot, és javasolj jobbat (egy szerkesztési javaslattal). Róla a magyarázaton tudatpontot tartók döntenek, legalább 3 nap alatt, hogy mások is észrevehessék és csatlakozhassanak.\n\nA kézikönyv nem tűnik el akkor sem, ha senki nem tart rajta tudatpontot: a közösség módosításai megmaradnak, és minden tag készüléke őrzi őket. Törölni és más gondolattal egyesíteni nem lehet — amíg egy rész a lapon van, a magyarázatának is lennie kell."
     },
     {
       "nev": "kezikonyv/menu",
@@ -14,7 +14,7 @@
     {
       "nev": "kezikonyv/menu/kereses",
       "cim": "🔍 Keresés",
-      "szoveg": "Itt keresel a koinoban cím szerint: gondolatot, kategóriát vagy gondolattípust (a javaslatokat és az egyezményeket nem) — a pipákkal a fajtákat szűkítheted. A program azokat a címeket hozza, amelyekben a beírt szöveg benne van (a kis- és a nagybetű mindegy): így egy szó eleje a toldalékos alakokat is megtalálja. Több szót egymás mellett, a beírt sorrendben keres.\n\nAz első találatok abból jönnek, amit a készüléked már ismer. Közben a program a háttérben a hálózaton is kérdez (a társaidtól) — a koinoból, ami a készülékeden nincs meg, az onnan jöhet —, és az onnan jött találatokat utólag teszi a listához — az ablak megmondja, hol tart a keresés.\n\nEgy találatra kattintva a pakli oda ugrik. Egy ágra szűkítheted a keresést: akkor csak az alatta lévő gondolatok közt keres."
+      "szoveg": "Itt keresel a koinoban cím szerint: gondolatot, kategóriát vagy gondolattípust (a szerkesztési és az általános javaslatokat és egyezményeket nem) — a pipákkal a fajtákat szűkítheted. A program azokat a címeket hozza, amelyekben a beírt szöveg benne van (a kis- és a nagybetű mindegy): így egy szó eleje a toldalékos alakokat is megtalálja. Több szót egymás mellett, a beírt sorrendben keres.\n\nAz első találatok abból jönnek, amit a készüléked már ismer. Közben a program a háttérben a hálózaton is kérdez (a társaidtól) — a koinoból, ami a készülékeden nincs meg, az onnan jöhet —, és az onnan jött találatokat utólag teszi a listához — az ablak megmondja, hol tart a keresés.\n\nEgy találatra kattintva a pakli oda ugrik. Egy ágra szűkítheted a keresést: akkor csak az alatta lévő gondolatok közt keres."
     },
     {
       "nev": "kezikonyv/menu/struktura",
@@ -39,7 +39,7 @@
     {
       "nev": "kezikonyv/menu/nezetek",
       "cim": "🧩 Nézetek…",
-      "szoveg": "A közösség által feltöltött nézetek: egy-egy kis program (egy HTML-fájl egy kártya szövegében), ami a koino gondolatait a maga módján mutatja meg. A lista pont szerint rendezett, a bekapcsoltak elöl.\n\nEgy nézetet előbb be kell kapcsolnod: előtte egy ablak megmondja, ki tette fel, hány pont van rajta, mit lát a nézet és mit nem. A nézet zárt keretben fut: a koinoból csak olvasni tud, és semmit nem küldhet ki a hálózatra. A bekapcsolás a te készülékedé, és a kód lenyomatához kötött — ha egy egyezmény új kódot hoz, a nézet kikapcsol, és a lap szól."
+      "szoveg": "A közösség által feltöltött nézetek: egy-egy kis program (egy HTML-fájl egy kártya szövegében), ami a koino gondolatait a maga módján mutatja meg. A lista pont szerint rendezett, a bekapcsoltak elöl.\n\nEgy nézetet előbb be kell kapcsolnod: előtte egy ablak megmondja, ki tette fel, hány pont van rajta, mit lát a nézet és mit nem. A nézet zárt keretben fut: a koinoból csak olvasni tud, és semmit nem küldhet ki a hálózatra. A bekapcsolás a te készülékedé, és a kód lenyomatához kötött — ha egy szerkesztési egyezmény új kódot hoz, a nézet kikapcsol, és a lap szól."
     },
     {
       "nev": "kezikonyv/menu/ter",
@@ -74,7 +74,7 @@
     {
       "nev": "kezikonyv/menu/ertesitesek",
       "cim": "🔔 Értesítések",
-      "szoveg": "Itt látod, mi változott a koinoban azokon a részeken, amiket a készüléked tart — ahol tudatpontod van: új javaslat, döntés (elfogadás, elvetés), szavazat, közeledő határidő, tudatpont-változás, új gyerek, küszöb-változás —, az értesítési beállításaid szerint.\n\nAz értesítéseket a te készüléked számolja ki, két pillanatkép különbségéből — nincs központ, ami küldené őket. Ami egy olyan ágon történik, amit a készüléked nem tart, arról nem tud, és nem is jelez. A legelső számolás csak kiindulópont: egy friss készülék nem kap értesítést a teljes múltról. A menügombon egy szám mutatja, hány olvasatlan van."
+      "szoveg": "Itt látod, mi változott a koinoban azokon a részeken, amiket a készüléked tart — ahol tudatpontod van: új szerkesztési vagy általános javaslat, döntés (elfogadás, elvetés), szavazat, közeledő határidő, tudatpont-változás, új gyerek, küszöb-változás —, az értesítési beállításaid szerint.\n\nAz értesítéseket a te készüléked számolja ki, két pillanatkép különbségéből — nincs központ, ami küldené őket. Ami egy olyan ágon történik, amit a készüléked nem tart, arról nem tud, és nem is jelez. A legelső számolás csak kiindulópont: egy friss készülék nem kap értesítést a teljes múltról. A menügombon egy szám mutatja, hány olvasatlan van."
     },
     {
       "nev": "kezikonyv/menu/ertesitesi-beallitasok",
@@ -89,12 +89,12 @@
     {
       "nev": "kezikonyv/menu/uj-kategoria",
       "cim": "🏷️ Új kategória létrehozása",
-      "szoveg": "A kategória a gondolatok besorolása, mint egy címke: egy gondolat legfeljebb három kategóriába tartozhat. Itt hozhatsz létre egy újat egy névvel, egy ikonnal (képfájl — kötelező) és leírással; alkategóriát egy kategória kártyájának menüjéből („Új alkategória létrehozása”). A kategória is a közösségé: tudatpont kell rá, és javaslattal módosítható."
+      "szoveg": "A kategória a gondolatok besorolása, mint egy címke: egy gondolat legfeljebb három kategóriába tartozhat. Itt hozhatsz létre egy újat egy névvel, egy ikonnal (képfájl — kötelező) és leírással; alkategóriát egy kategória kártyájának menüjéből („Új alkategória létrehozása”). A kategória is a közösségé: tudatpont kell rá, és szerkesztési javaslattal módosítható."
     },
     {
       "nev": "kezikonyv/menu/uj-gondolattipus",
       "cim": "🧩 Új gondolat típus létrehozása",
-      "szoveg": "A gondolattípus megmondja, milyen fajta egy gondolat: kérdés, válasz, témakör, ismeret, feladat — vagy amit a közösség kitalál. Itt hozhatsz létre egy újat egy névvel, egy ikonnal (képfájl — kötelező) és leírással. A típus is a közösségé: tudatpont kell rá, és javaslattal módosítható."
+      "szoveg": "A gondolattípus megmondja, milyen fajta egy gondolat: kérdés, válasz, témakör, ismeret, feladat — vagy amit a közösség kitalál. Itt hozhatsz létre egy újat egy névvel, egy ikonnal (képfájl — kötelező) és leírással. A típus is a közösségé: tudatpont kell rá, és szerkesztési javaslattal módosítható."
     },
     {
       "nev": "kezikonyv/menu/uj-nezet",
@@ -124,27 +124,27 @@
     {
       "nev": "kezikonyv/ablak",
       "cim": "Az ablakok",
-      "szoveg": "Az ablakok (más néven modálok) a lap fölött nyílnak meg, amikor egy dolgot részletesen megnézel vagy szerkesztesz: egy gondolatot, egy javaslatot, a tudatpontjaidat, a keresést, a készülékeidet. Az ablak részei mellett egy-egy ⓘ jel magyarázza, mit látsz és mit tehetsz ott."
+      "szoveg": "Az ablakok (más néven modálok) a lap fölött nyílnak meg, amikor egy dolgot részletesen megnézel vagy szerkesztesz: egy gondolatot, egy szerkesztési javaslatot, a tudatpontjaidat, a keresést, a készülékeidet. Az ablak részei mellett egy-egy ⓘ jel magyarázza, mit látsz és mit tehetsz ott."
     },
     {
       "nev": "kezikonyv/ablak/szerkeszto",
       "cim": "📝 A szöveg-szerkesztő",
-      "szoveg": "A szöveg blokkokból áll. A szerkesztő tetején választod, milyen blokkot teszel be: ¶ szöveg, 🖼 kép, 📎 fájl, 🔗 link, vagy ⬡ hivatkozás egy másik kártyára (gondolatra, kategóriára, gondolattípusra, javaslatra, egyezményre — a kártyán rákoppintva a pakli oda ugrik). A blokkokat mozgathatod és átméretezheted, a lépéseidet visszavonhatod.\n\nA szöveg-blokkban formázhatsz: félkövér, dőlt, aláhúzott, betűméret, szín, igazítás. Egy hosszabb írást oldalakra is bonthatsz — az oldalak a kártyán füleken jelennek meg.\n\nA képek és a fájlok — és a hosszú szöveg is — külön darabként utaznak a társaid közt: a kártya csak a lenyomatukat hordozza (ebből ellenőrzi bárki, hogy azt kapta-e, amit a szerző aláírt), a tartalmukat a program akkor hozza el, amikor kell."
+      "szoveg": "A szöveg blokkokból áll. A szerkesztő tetején választod, milyen blokkot teszel be: ¶ szöveg, 🖼 kép, 📎 fájl, 🔗 link, vagy ⬡ hivatkozás egy másik kártyára (gondolatra, kategóriára, gondolattípusra, szerkesztési vagy általános javaslatra és egyezményre — a kártyán rákoppintva a pakli oda ugrik). A blokkokat mozgathatod és átméretezheted, a lépéseidet visszavonhatod.\n\nA szöveg-blokkban formázhatsz: félkövér, dőlt, aláhúzott, betűméret, szín, igazítás. Egy hosszabb írást oldalakra is bonthatsz — az oldalak a kártyán füleken jelennek meg.\n\nA képek és a fájlok — és a hosszú szöveg is — külön darabként utaznak a társaid közt: a kártya csak a lenyomatukat hordozza (ebből ellenőrzi bárki, hogy azt kapta-e, amit a szerző aláírt), a tartalmukat a program akkor hozza el, amikor kell."
     },
     {
       "nev": "kezikonyv/ablak/kuszobok",
       "cim": "⚖️ A küszöbértékek",
-      "szoveg": "Négy szám dönti el, mikor fogadja el a közösség egy javaslatot ezen a gondolaton:\n\nTámogatottsági küszöb (%) — a szavazók hány százaléka támogassa (legalább 51; a tartózkodó is szavazónak számít).\nRészvételi arány küszöb (%) — a döntésben aktívan részt vevők hány százaléka szavazzon (0: nincs ilyen feltétel).\nMinimum döntési idő — ennél hamarabb egy javaslat nem zárul (hogy legyen idő észrevenni).\nMaximum döntési idő — ennél tovább nem tart.\nA kettő között a döntési idő a bizonyosságtól függ: minél egyértelműbb az eredmény és minél többen szavaznak, annál hamarabb zárul.\n\nAmit itt beírsz, az a TE érték javaslatod. A gondolat tényleges küszöbe a rajta tudatpontot tartók érték javaslatainak középértéke (mediánja); ha senki nem mondott semmit, a koino alapja. Az ablak a koino alapértékeit tölti be: ha nem változtatsz rajtuk, nem adsz be érték javaslatot, és a gondolat a koino alapját követi. Később a kártya menüjében („⚖️ Küszöb érték javaslat”) bármikor megadhatod vagy megváltoztathatod."
+      "szoveg": "Négy szám dönti el, mikor fogadja el a közösség egy szerkesztési vagy általános javaslatot ezen a gondolaton:\n\nTámogatottsági küszöb (%) — a szavazók hány százaléka támogassa (legalább 51; a tartózkodó is szavazónak számít).\nRészvételi arány küszöb (%) — a döntésben aktívan részt vevők hány százaléka szavazzon (0: nincs ilyen feltétel).\nMinimum döntési idő — ennél hamarabb egy szerkesztési vagy általános javaslat nem zárul (hogy legyen idő észrevenni).\nMaximum döntési idő — ennél tovább nem tart.\nA kettő között a döntési idő a bizonyosságtól függ: minél egyértelműbb az eredmény és minél többen szavaznak, annál hamarabb zárul.\n\nAmit itt beírsz, az a TE érték javaslatod. A gondolat tényleges küszöbe a rajta tudatpontot tartók érték javaslatainak középértéke (mediánja); ha senki nem mondott semmit, a koino alapja. Az ablak a koino alapértékeit tölti be: ha nem változtatsz rajtuk, nem adsz be érték javaslatot, és a gondolat a koino alapját követi. Később a kártya menüjében („⚖️ Küszöb érték javaslat”) bármikor megadhatod vagy megváltoztathatod."
     },
     {
       "nev": "kezikonyv/ablak/kezdo-tudatpont",
       "cim": "🌟 A kezdő tudatpont",
-      "szoveg": "Ennyi tudatpontot teszel rá rögtön, a szabad pontjaidból (legalább 1). Pont nélkül a koino elfelejtené: amin senki nem tart tudatpontot, az eltűnik — a javaslat is entitás, rá is ugyanez vonatkozik. A pontot később átrendezheted; amíg rajta van, a készüléked őrzi."
+      "szoveg": "Ennyi tudatpontot teszel rá rögtön, a szabad pontjaidból (legalább 1). Pont nélkül a koino elfelejtené: amin senki nem tart tudatpontot, az eltűnik — a szerkesztési és az általános javaslat is entitás, rájuk is ugyanez vonatkozik. A pontot később átrendezheted; amíg rajta van, a készüléked őrzi."
     },
     {
       "nev": "kezikonyv/ablak/javaslat",
-      "cim": "🌿 A javaslat ablaka",
-      "szoveg": "Egy javaslat három lépésben készül: (1) kiválasztod, mit javasolsz — törlést, módosítást, áthelyezést, egyesítést, vagy ezekből egy csomagot; (2) megadod a részleteit (az új címet és szöveget, az új szülőt, az egyesítendő kártyát); (3) megírod az indoklást, és megadod a kezdő tudatpontot.\n\nA javaslat maga is kártya lesz a pakliban (a gondolat alatt): a „Szavazás” fülén azok szavaznak, akiknek tudatpontjuk van az érintett gondolaton — te is, magától támogatóként. A javaslat a döntési idő végén zárul; ha elfogadják, a változás végrehajtódik, és egyezmény lesz belőle."
+      "cim": "🌿 A szerkesztési javaslat ablaka",
+      "szoveg": "Egy szerkesztési javaslat három lépésben készül: (1) kiválasztod, mit javasolsz — törlést, módosítást, áthelyezést, egyesítést, vagy ezekből egy csomagot; (2) megadod a részleteit (az új címet és szöveget, az új szülőt, az egyesítendő kártyát); (3) megírod az indoklást, és megadod a kezdő tudatpontot.\n\nA szerkesztési javaslat maga is kártya lesz a pakliban (a gondolat alatt): a „Szavazás” fülén azok szavaznak, akiknek tudatpontjuk van az érintett gondolaton — te is, magától támogatóként. A szerkesztési javaslat a döntési idő végén zárul; ha elfogadják, a változás végrehajtódik, és szerkesztési egyezmény lesz belőle.\n\n(Általános javaslatot — a közösség egy álláspontját, ami semmit nem változtat meg — ma a parancssor ad be: node koino.js altalanos <cím> <a gondolat, ami alatt áll>.)"
     },
     {
       "nev": "kezikonyv/ablak/javaslat/torles",
@@ -154,7 +154,7 @@
     {
       "nev": "kezikonyv/ablak/javaslat/modositas",
       "cim": "✍️ Módosítás",
-      "szoveg": "A kártya címének vagy szövegének új változatát javaslod — a szerkesztőben, ugyanúgy, mint egy új gondolatnál. Ha elfogadják, a kártya az új változatot mutatja; a régi az egyezmény „Lecserélt gondolat” fülén megmarad.\n\nAki nem ért egyet, és a szavazásánál külön ágat kér, annak a régi változat új ágként megmarad, a pontjaival (lásd a különválást a kártya szavazás-füleinél)."
+      "szoveg": "A kártya címének vagy szövegének új változatát javaslod — a szerkesztőben, ugyanúgy, mint egy új gondolatnál. Ha elfogadják, a kártya az új változatot mutatja; a régi a szerkesztési egyezmény „Lecserélt gondolat” fülén megmarad.\n\nAki nem ért egyet, és a szavazásánál külön ágat kér, annak a régi változat új ágként megmarad, a pontjaival (lásd a különválást a kártya szavazás-füleinél)."
     },
     {
       "nev": "kezikonyv/ablak/javaslat/athelyezes",
@@ -164,7 +164,7 @@
     {
       "nev": "kezikonyv/ablak/javaslat/egyesites",
       "cim": "🔀 Egyesítés",
-      "szoveg": "Két vagy több kártyából egy lesz, a javaslatban megadott címmel és szöveggel. Az marad meg (az azonosítójával, a rá mutató hivatkozásokkal), amelyiknek több tudatpont-tulajdonosa van; holtversenynél az első érintett. Az egyesített kártya a forrásai legközelebbi közös őse alá kerül.\n\nA többi beolvad: a tudatpontok átvándorolnak az egyesítettre, és a gyerekeik is oda kerülnek. Ha egy beolvadó kártyának voltak olyan ellenzői, akik külön ágat kértek, az a kártya megmarad nekik — a többiek pontjai akkor is átkerülnek. A kézikönyv bejegyzései nem egyesíthetők."
+      "szoveg": "Két vagy több kártyából egy lesz, a szerkesztési javaslatban megadott címmel és szöveggel. Az marad meg (az azonosítójával, a rá mutató hivatkozásokkal), amelyiknek több tudatpont-tulajdonosa van; holtversenynél az első érintett. Az egyesített kártya a forrásai legközelebbi közös őse alá kerül.\n\nA többi beolvad: a tudatpontok átvándorolnak az egyesítettre, és a gyerekeik is oda kerülnek. Ha egy beolvadó kártyának voltak olyan ellenzői, akik külön ágat kértek, az a kártya megmarad nekik — a többiek pontjai akkor is átkerülnek. A kézikönyv bejegyzései nem egyesíthetők."
     },
     {
       "nev": "kezikonyv/ablak/javaslat/csomag",
@@ -239,7 +239,7 @@
     {
       "nev": "kezikonyv/also-sav/tudatpont",
       "cim": "🌟 A szabad tudatpontjaid",
-      "szoveg": "Ennyi tudatpontod szabad még EZEN A KÉSZÜLÉKEN — ennyit tehetsz még gondolatokra, javaslatokra.\n\nA tudatpont nem pénz és nem szavazat: azt mutatja, mi fontos neked. Mindenkinek ugyanannyi van (a koino keretében — alapból 10 000), nem költöd el, csak elosztod, és bármikor átrendezheted. Szavazásnál mindenki egyenlő: a pont nem ad nagyobb szavazati erőt — de javasolni és szavazni csak arról tudsz, amire pontot tettél.\n\nAmire senki nem tesz tudatpontot, azt a koino elfelejti (kivétel ez a kézikönyv). Ha több készüléked van, a kereted megoszlik köztük, és a készülékek magától átadnak egymásnak (lásd: 📱 Készülékeim, a határ)."
+      "szoveg": "Ennyi tudatpontod szabad még EZEN A KÉSZÜLÉKEN — ennyit tehetsz még gondolatokra, szerkesztési és általános javaslatokra.\n\nA tudatpont nem pénz és nem szavazat: azt mutatja, mi fontos neked. Mindenkinek ugyanannyi van (a koino keretében — alapból 10 000), nem költöd el, csak elosztod, és bármikor átrendezheted. Szavazásnál mindenki egyenlő: a pont nem ad nagyobb szavazati erőt — de javasolni és szavazni csak arról tudsz, amire pontot tettél.\n\nAmire senki nem tesz tudatpontot, azt a koino elfelejti (kivétel ez a kézikönyv). Ha több készüléked van, a kereted megoszlik köztük, és a készülékek magától átadnak egymásnak (lásd: 📱 Készülékeim, a határ)."
     },
     {
       "nev": "kezikonyv/also-sav/eemberek",
@@ -254,7 +254,7 @@
     {
       "nev": "kezikonyv/also-sav/kategoriak",
       "cim": "🏷️ Kategóriák",
-      "szoveg": "Hány kategóriát ismer ez a készülék. A kategória a gondolatok besorolása (mint egy címke) — a gondolatot egy vagy több kategóriába teheted, és a kategória maga is a közösségé: tudatpont kell rá, és javaslattal módosítható."
+      "szoveg": "Hány kategóriát ismer ez a készülék. A kategória a gondolatok besorolása (mint egy címke) — a gondolatot egy vagy több kategóriába teheted, és a kategória maga is a közösségé: tudatpont kell rá, és szerkesztési javaslattal módosítható."
     },
     {
       "nev": "kezikonyv/also-sav/gondolattipusok",
@@ -263,18 +263,18 @@
     },
     {
       "nev": "kezikonyv/also-sav/javaslatok",
-      "cim": "📋 Javaslatok",
-      "szoveg": "Hány javaslatot ismer ez a készülék. Egy gondolat módosítását, áthelyezését, törlését vagy egyesítését javaslattal lehet kezdeményezni — de csak az javasolhat, aki tudatpontot tett arra a gondolatra.\n\nA javaslatról a gondolaton tudatpontot tartók szavaznak. A döntés akkor születik meg, amikor a támogatottság és a részvétel eléri a gondolat küszöbét — a minimum és a maximum döntési idő között: minél egyértelműbb az eredmény és nagyobb a részvétel, annál hamarabb."
+      "cim": "📋 Szerkesztési és általános javaslatok",
+      "szoveg": "Hány szerkesztési és általános javaslatot ismer ez a készülék. Egy gondolat módosítását, áthelyezését, törlését vagy egyesítését szerkesztési javaslattal lehet kezdeményezni, a közösség egy álláspontját általános javaslattal — de csak az javasolhat, aki tudatpontot tett arra a gondolatra.\n\nMindkettőről a gondolaton tudatpontot tartók szavaznak. A döntés akkor születik meg, amikor a támogatottság és a részvétel eléri a gondolat küszöbét — a minimum és a maximum döntési idő között: minél egyértelműbb az eredmény és nagyobb a részvétel, annál hamarabb."
     },
     {
       "nev": "kezikonyv/also-sav/egyezmenyek",
-      "cim": "🤝 Egyezmények",
-      "szoveg": "Hány egyezményt ismer ez a készülék. Az egyezmény egy elfogadott javaslat eredménye: senki nem „mondja ki” — a szavazatokból és a tudatpontokból minden készülék ugyanúgy kiszámolja. Ha egy módosításról egyezmény született, a gondolat a javaslat szerint megváltozik."
+      "cim": "🤝 Szerkesztési és általános egyezmények",
+      "szoveg": "Hány szerkesztési és általános egyezményt ismer ez a készülék. A szerkesztési egyezmény egy elfogadott szerkesztési javaslat eredménye, az általános egyezmény egy elfogadott általános javaslaté: senki nem „mondja ki” — a szavazatokból és a tudatpontokból minden készülék ugyanúgy kiszámolja. Ha egy módosításról szerkesztési egyezmény született, a gondolat a szerkesztési javaslat szerint megváltozik; az általános egyezmény semmit nem változtat meg, a közösség álláspontját rögzíti."
     },
     {
       "nev": "kezikonyv/also-sav/ismeretlen",
       "cim": "🔭 Még nem ismert",
-      "szoveg": "Ennyi entitás (gondolat, javaslat…) van még a koinoban, amit ez a készülék nem ismer — a gyökér szintjének tartója szerint. A „+” jel azt jelenti: legalább ennyi (valahol mélyebben nem tudni pontosan); a „?” azt, hogy még a tartó sem mondta meg.\n\nA koinoban nincs központ: minden készülék csak azt tárolja, ami fontos neki (amire tudatpontot tett), és amit böngészés közben megnézett. Amit nem ismersz, azt böngészéssel vagy a menü „Felderítések” pontjával hozhatod el a társaidtól."
+      "szoveg": "Ennyi entitás (gondolat, szerkesztési vagy általános javaslat…) van még a koinoban, amit ez a készülék nem ismer — a gyökér szintjének tartója szerint. A „+” jel azt jelenti: legalább ennyi (valahol mélyebben nem tudni pontosan); a „?” azt, hogy még a tartó sem mondta meg.\n\nA koinoban nincs központ: minden készülék csak azt tárolja, ami fontos neki (amire tudatpontot tett), és amit böngészés közben megnézett. Amit nem ismersz, azt böngészéssel vagy a menü „Felderítések” pontjával hozhatod el a társaidtól."
     },
     {
       "nev": "kezikonyv/also-sav/csere",
@@ -284,7 +284,7 @@
     {
       "nev": "kezikonyv/also-sav/programverzio",
       "cim": "⚠ Más programverzió",
-      "szoveg": "Ez a jel csak akkor látszik, ha ezen a készüléken más program fut, mint amivel ez a koino született.\n\n„ℹ más felület”: a számítás (a program magja) ugyanaz — a koinot itt is ugyanúgy látod, mint a többiek; csak a felület vagy a hálózati rész más. Nincs teendő.\n\n„⚠ más számítás”: a program magja más, mint a koinoé — itt mást láthatsz (más egyezményt, más pontszámot), mint a többiek. A koino kártyáján (koino-verzió) ellenőrizheted, melyik programmal született, és azt telepítheted."
+      "szoveg": "Ez a jel csak akkor látszik, ha ezen a készüléken más program fut, mint amivel ez a koino született.\n\n„ℹ más felület”: a számítás (a program magja) ugyanaz — a koinot itt is ugyanúgy látod, mint a többiek; csak a felület vagy a hálózati rész más. Nincs teendő.\n\n„⚠ más számítás”: a program magja más, mint a koinoé — itt mást láthatsz (más szerkesztési vagy általános egyezményt, más pontszámot), mint a többiek. A koino kártyáján (koino-verzió) ellenőrizheted, melyik programmal született, és azt telepítheted."
     },
     {
       "nev": "kezikonyv/also-sav/nyelv",
@@ -344,7 +344,7 @@
     {
       "nev": "kezikonyv/kartya",
       "cim": "A kártyák",
-      "szoveg": "A kártya a koino egy dolgát mutatja a pakliban: egy gondolatot, egy javaslatot, egy egyezményt, egy kategóriát vagy egy gondolattípust. Felül a címe áll, alatta balra a kártya saját menüje (☰), jobbra a számai — a rá tett tudatpontok, és hogy hány része van alatta és mellette.\n\nEgy kártyára koppintva kiválasztod: a kiválasztott kártya kinyílik, és a szövegét is mutatja; ha több része van (egy javaslat indoklása és a szavazás), azok füleken. Ha a szöveg nem fér el, a „...” gomb — vagy a szövegre dupla koppintás — kinyitja az egészet.\n\nA kártya ⓘ jele a számok elején áll; a részeit innen is eléred."
+      "szoveg": "A kártya a koino egy dolgát mutatja a pakliban: egy gondolatot, egy szerkesztési vagy általános javaslatot, egy szerkesztési vagy általános egyezményt, egy kategóriát vagy egy gondolattípust. Felül a címe áll, alatta balra a kártya saját menüje (☰), jobbra a számai — a rá tett tudatpontok, és hogy hány része van alatta és mellette.\n\nEgy kártyára koppintva kiválasztod: a kiválasztott kártya kinyílik, és a szövegét is mutatja; ha több része van (egy szerkesztési javaslat indoklása és a szavazás), azok füleken. Ha a szöveg nem fér el, a „...” gomb — vagy a szövegre dupla koppintás — kinyitja az egészet.\n\nA kártya ⓘ jele a számok elején áll; a részeit innen is eléred."
     },
     {
       "nev": "kezikonyv/kartya/szamok",
@@ -354,12 +354,12 @@
     {
       "nev": "kezikonyv/kartya/tipus-sor",
       "cim": "A második sor: a típus és a mutatók",
-      "szoveg": "A számok alatti második sor a kártya fajtájától függ.\n\nGondolatnál: 🧩 után a gondolat típusa, 🏷️ után a kategóriái (ha vannak).\nKategóriánál és gondolattípusnál: 📄 — hány gondolat használja, mellette egy dátum (a részleteit a „Részletes adatok” mondja meg).\nJavaslatnál és egyezménynél a döntés mutatói, százalékban: 👥 a részvétel, ✔️ a támogatók, ❌ az ellenzők, ➖ a tartózkodók aránya.\n\nA javaslatnál ⏱ a döntési idő: minél egyértelműbb az eredmény és minél többen vesznek részt, annál rövidebb — a küszöbökben megadott legrövidebb és leghosszabb idő között. A javaslat a születése után ennyi idővel zárul. Az egyezménynél a döntés dátuma áll."
+      "szoveg": "A számok alatti második sor a kártya fajtájától függ.\n\nGondolatnál: 🧩 után a gondolat típusa, 🏷️ után a kategóriái (ha vannak).\nKategóriánál és gondolattípusnál: 📄 — hány gondolat használja, mellette egy dátum (a részleteit a „Részletes adatok” mondja meg).\nSzerkesztési és általános javaslatnál és egyezménynél a döntés mutatói, százalékban: 👥 a részvétel, ✔️ a támogatók, ❌ az ellenzők, ➖ a tartózkodók aránya.\n\nA szerkesztési és az általános javaslatnál ⏱ a döntési idő: minél egyértelműbb az eredmény és minél többen vesznek részt, annál rövidebb — a küszöbökben megadott legrövidebb és leghosszabb idő között. A szerkesztési vagy általános javaslat a születése után ennyi idővel zárul. A szerkesztési és az általános egyezménynél a döntés dátuma áll."
     },
     {
       "nev": "kezikonyv/kartya/fulek",
       "cim": "A kártya fülei",
-      "szoveg": "Ha egy kártyának több része van, a szövege fölött fülek állnak; egy fülre koppintva az a rész látszik. Ha csak egy része van, nincs fülsáv.\n\nGondolatnál: „Gondolat” — maga a szöveg; „Másik ág” — ha a gondolat egy döntésnél kettévált, itt látod, mikor és hogyan, és a másik ágra koppintva a pakli oda ugrik (több különválásnál a fülek számozottak).\nJavaslatnál: „Indoklás” — miért javasolja a szerzője; „Módosított gondolat” — módosításnál az új változat; „Szavazás” — itt szavazol.\nEgyezménynél: „Lecserélt gondolat” — a módosítás előtti változat; „Indoklás”."
+      "szoveg": "Ha egy kártyának több része van, a szövege fölött fülek állnak; egy fülre koppintva az a rész látszik. Ha csak egy része van, nincs fülsáv.\n\nGondolatnál: „Gondolat” — maga a szöveg; „Másik ág” — ha a gondolat egy döntésnél kettévált, itt látod, mikor és hogyan, és a másik ágra koppintva a pakli oda ugrik (több különválásnál a fülek számozottak).\nSzerkesztési és általános javaslatnál: „Indoklás” — miért javasolja a szerzője; „Módosított gondolat” — módosításnál az új változat; „Szavazás” — itt szavazol.\nSzerkesztési egyezménynél: „Lecserélt gondolat” — a módosítás előtti változat; „Indoklás”."
     },
     {
       "nev": "kezikonyv/kartya/szavazas",
@@ -369,7 +369,7 @@
     {
       "nev": "kezikonyv/kartya/szavazas/kulonvalas",
       "cim": "A különválás",
-      "szoveg": "Ha támogatod vagy ellenzed a javaslatot, megjelölheted: „Ha a döntés nem a te álláspontodat követi, szeretnél külön ágat?” — tartózkodásnál ez nem választható.\n\nEgy módosításnál: ha a javaslatot elfogadják, és te külön ággal ellenezted, a gondolat RÉGI változata új ágként megmarad, a te tudatpontjaiddal. Ha elvetik, és te külön ággal támogattad, a MÓDOSÍTOTT változat lesz új ág, a pontjaiddal. A két ágat a kártya „Másik ág” füle köti össze.\n\nHa mindenki külön válna, nincs kettéválás — a főág nem maradhat gazdátlanul."
+      "szoveg": "Ha támogatod vagy ellenzed a szerkesztési javaslatot, megjelölheted: „Ha a döntés nem a te álláspontodat követi, szeretnél külön ágat?” — tartózkodásnál ez nem választható.\n\nEgy módosításnál: ha a szerkesztési javaslatot elfogadják, és te külön ággal ellenezted, a gondolat RÉGI változata új ágként megmarad, a te tudatpontjaiddal. Ha elvetik, és te külön ággal támogattad, a MÓDOSÍTOTT változat lesz új ág, a pontjaiddal. A két ágat a kártya „Másik ág” füle köti össze.\n\nHa mindenki külön válna, nincs kettéválás — a főág nem maradhat gazdátlanul."
     },
     {
       "nev": "kezikonyv/kartya/pakli",
@@ -379,7 +379,7 @@
     {
       "nev": "kezikonyv/kartya/menu",
       "cim": "A kártya menüje",
-      "szoveg": "A kártya bal oldali ☰ gombja a kártya saját menüjét nyitja. Ezek a pontok EZT a kártyát érintik — és az ágát, mindent, ami alatta van —, nem az egész koinot, mint a lap bal alsó menüje.\n\nMinden kártyán: értesítések, tudatpontok, részvételi beállítások, keresés, struktúra, síkidom, világtérkép és rendezés — ennek a kártyának az ágára szűkítve —, és a felderítés innen. A kártya fajtája szerint: új gondolat ebből, javaslat, tudatpont módosítás, részletes adatok, küszöb érték javaslat és értesítési beállítások (kategóriánál új alkategória is).\n\nNéhány ponthoz tudatpont kell ezen a kártyán — amíg nincs, az a pont nem választható."
+      "szoveg": "A kártya bal oldali ☰ gombja a kártya saját menüjét nyitja. Ezek a pontok EZT a kártyát érintik — és az ágát, mindent, ami alatta van —, nem az egész koinot, mint a lap bal alsó menüje.\n\nMinden kártyán: értesítések, tudatpontok, részvételi beállítások, keresés, struktúra, síkidom, világtérkép és rendezés — ennek a kártyának az ágára szűkítve —, és a felderítés innen. A kártya fajtája szerint: új gondolat ebből, szerkesztési javaslat, tudatpont módosítás, részletes adatok, küszöb érték javaslat és értesítési beállítások (kategóriánál új alkategória is).\n\nNéhány ponthoz tudatpont kell ezen a kártyán — amíg nincs, az a pont nem választható."
     },
     {
       "nev": "kezikonyv/kartya/menu/ertesitesek",
@@ -433,8 +433,8 @@
     },
     {
       "nev": "kezikonyv/kartya/menu/javaslat",
-      "cim": "🌿 Javaslat létrehozása",
-      "szoveg": "Javaslatot teszel erre a kártyára: módosítás (a cím vagy a szöveg), áthelyezés (más szülő alá), törlés, vagy egyesítés egy másikkal — több ilyen egy csomagban is mehet. Ehhez tudatpont kell ezen a kártyán.\n\nA javaslatról azok döntenek szavazással, akiknek tudatpontjuk van a kártyán. A kézikönyv bejegyzéseinél csak módosítás és áthelyezés lehet."
+      "cim": "🌿 Szerkesztési javaslat létrehozása",
+      "szoveg": "Szerkesztési javaslatot teszel erre a kártyára: módosítás (a cím vagy a szöveg), áthelyezés (más szülő alá), törlés, vagy egyesítés egy másikkal — több ilyen egy csomagban is mehet. Ehhez tudatpont kell ezen a kártyán.\n\nRóla azok döntenek szavazással, akiknek tudatpontjuk van a kártyán. A kézikönyv bejegyzéseinél csak módosítás és áthelyezés lehet."
     },
     {
       "nev": "kezikonyv/kartya/menu/tudatpont-modositas",
@@ -444,12 +444,12 @@
     {
       "nev": "kezikonyv/kartya/menu/reszletes-adatok",
       "cim": "ℹ️ Részletes adatok",
-      "szoveg": "A kártya adatai egy ablakban. Gondolatnál: a címe, a típusa, a kategóriái, mikor jött létre és mikor módosult, a tudatpontjai (a tiéd, az összes rajta, a hozzájárulók, az ágazati), a küszöbértékei és az azonosítója. Javaslatnál a szavazás állása és a saját részvételed, egyezménynél a szavazás a végrehajtáskor és az érintett entitások is. A tudatpontoknál a hozzájárulók listája, a küszöböknél egy-egy küszöb eloszlása külön ablakban nyílik."
+      "szoveg": "A kártya adatai egy ablakban. Gondolatnál: a címe, a típusa, a kategóriái, mikor jött létre és mikor módosult, a tudatpontjai (a tiéd, az összes rajta, a hozzájárulók, az ágazati), a küszöbértékei és az azonosítója. Szerkesztési és általános javaslatnál a szavazás állása és a saját részvételed, szerkesztési és általános egyezménynél a szavazás a végrehajtáskor és az érintett entitások is. A tudatpontoknál a hozzájárulók listája, a küszöböknél egy-egy küszöb eloszlása külön ablakban nyílik."
     },
     {
       "nev": "kezikonyv/kartya/menu/kuszob-ertek-javaslat",
       "cim": "⚖️ Küszöb érték javaslat",
-      "szoveg": "Itt mondod meg, szerinted mekkora támogatottság és részvétel kelljen ezen a gondolaton egy javaslat elfogadásához, és mennyi legyen a legrövidebb és a leghosszabb döntési idő.\n\nEz érték javaslat — nem javaslat: nincs róla szavazás. A gondolat küszöbei a rajta tudatpontot tartók érték javaslatainak középértékéből (mediánjából) számolódnak; ha senki nem adott meg semmit, az alapértékekből. Ehhez tudatpont kell ezen a kártyán."
+      "szoveg": "Itt mondod meg, szerinted mekkora támogatottság és részvétel kelljen ezen a gondolaton egy szerkesztési vagy általános javaslat elfogadásához, és mennyi legyen a legrövidebb és a leghosszabb döntési idő.\n\nEz érték javaslat — nem szerkesztési és nem általános javaslat: nincs róla szavazás. A gondolat küszöbei a rajta tudatpontot tartók érték javaslatainak középértékéből (mediánjából) számolódnak; ha senki nem adott meg semmit, az alapértékekből. Ehhez tudatpont kell ezen a kártyán."
     },
     {
       "nev": "kezikonyv/kartya/menu/ertesitesi-beallitasok",
@@ -474,7 +474,7 @@
     {
       "nev": "kezikonyv/fogalom/koino",
       "cim": "koino",
-      "szoveg": "Egy közösség közös tere: a gondolatai, javaslatai, egyezményei, és a szabályai, amelyekkel született (például a tudatpont-keret és az alap-küszöbök). Nincs központja: a tagok készülékei együtt tartják, darabokban, egymással cserélve. A neve a görög koinón — „közös”."
+      "szoveg": "Egy közösség közös tere: a gondolatai, szerkesztési és általános javaslatai és egyezményei, és a szabályai, amelyekkel született (például a tudatpont-keret és az alap-küszöbök). Nincs központja: a tagok készülékei együtt tartják, darabokban, egymással cserélve. A neve a görög koinón — „közös”."
     },
     {
       "nev": "kezikonyv/fogalom/tudatpont",
@@ -489,37 +489,37 @@
     {
       "nev": "kezikonyv/fogalom/kategoria",
       "cim": "kategória",
-      "szoveg": "A gondolatok besorolása, mint egy címke; alkategóriái is lehetnek. A kategória is a közösségé: tudatpont kell rá, és javaslattal módosítható."
+      "szoveg": "A gondolatok besorolása, mint egy címke; alkategóriái is lehetnek. A kategória is a közösségé: tudatpont kell rá, és szerkesztési javaslattal módosítható."
     },
     {
       "nev": "kezikonyv/fogalom/gondolattipus",
       "cim": "gondolattípus",
-      "szoveg": "Megmondja, milyen fajta egy gondolat: kérdés, válasz, témakör, ismeret, feladat — vagy amit a közösség kitalál. A gondolattípus is a közösségé: tudatpont kell rá, és javaslattal módosítható."
+      "szoveg": "Megmondja, milyen fajta egy gondolat: kérdés, válasz, témakör, ismeret, feladat — vagy amit a közösség kitalál. A gondolattípus is a közösségé: tudatpont kell rá, és szerkesztési javaslattal módosítható."
     },
     {
       "nev": "kezikonyv/fogalom/javaslat",
-      "cim": "javaslat",
-      "szoveg": "Egy kártya megváltoztatásának kezdeményezése: módosítás, áthelyezés, törlés, egyesítés — vagy ezek csomagja. Az tehet javaslatot, akinek tudatpontja van a kártyán, és azok szavaznak róla, akiknek ott pontjuk van. A javaslat maga is kártya: pont nélkül elfelejtődne."
+      "cim": "szerkesztési javaslat és általános javaslat",
+      "szoveg": "Két fajtája van. A SZERKESZTÉSI JAVASLAT egy kártya megváltoztatásának kezdeményezése: módosítás, áthelyezés, törlés, egyesítés — vagy ezek csomagja. Az ÁLTALÁNOS JAVASLAT a közösség egy álláspontját javasolja egy gondolat alatt (az adja a helyét): semmit nem változtat meg, elfogadva általános egyezmény lesz belőle. Mindkettőt az teheti, akinek tudatpontja van az érintett gondolaton, és azok szavaznak róla, akiknek ott pontjuk van. Mindkettő maga is kártya: pont nélkül elfelejtődne."
     },
     {
       "nev": "kezikonyv/fogalom/ertek-javaslat",
       "cim": "érték javaslat",
-      "szoveg": "KÜLÖN fogalom — nem javaslat! Egy e-ember véleménye egy gondolat küszöbeiről (mekkora támogatottság és részvétel kell, mennyi legyen a legrövidebb és a leghosszabb döntési idő). Nincs róla szavazás: a gondolat küszöbe a rajta pontot tartók érték javaslatainak középértéke (mediánja)."
+      "szoveg": "KÜLÖN fogalom — nem szerkesztési és nem általános javaslat! Egy e-ember véleménye egy gondolat küszöbeiről (mekkora támogatottság és részvétel kell, mennyi legyen a legrövidebb és a leghosszabb döntési idő). Nincs róla szavazás: a gondolat küszöbe a rajta pontot tartók érték javaslatainak középértéke (mediánja)."
     },
     {
       "nev": "kezikonyv/fogalom/egyezmeny",
-      "cim": "egyezmény",
-      "szoveg": "Egy elfogadott javaslat eredménye: a változás végrehajtódik, az egyezmény pedig megőrzi a tényt — mi változott, mi volt előtte (a „Lecserélt gondolat”), és hogyan szavaztak. Senki nem „mondja ki”: minden készülék ugyanazokból az aláírt eseményekből ugyanazt számolja ki."
+      "cim": "szerkesztési egyezmény és általános egyezmény",
+      "szoveg": "Egy elfogadott szerkesztési vagy általános javaslat eredménye. A SZERKESZTÉSI EGYEZMÉNY: a változás végrehajtódik, a szerkesztési egyezmény pedig megőrzi a tényt — mi változott, mi volt előtte (a „Lecserélt gondolat”), és hogyan szavaztak. Az ÁLTALÁNOS EGYEZMÉNY a közösség elfogadott álláspontja: a tény örök (a koinon őrzi), a hatálya viszont élő — csatlakozhatsz hozzá, tiltakozhatsz ellene, vagy ütközést jelölhetsz egy másikkal. Senki nem „mondja ki” egyiket sem: minden készülék ugyanazokból az aláírt eseményekből ugyanazt számolja ki."
     },
     {
       "nev": "kezikonyv/fogalom/kuszob",
       "cim": "küszöb",
-      "szoveg": "Gondolatonként négy szám: a támogatottsági és a részvételi küszöb, a legrövidebb és a leghosszabb döntési idő. Ezek döntik el, mikor fogadnak el egy javaslatot. Ha senki nem adott be érték javaslatot, a koino alap-küszöbe érvényes."
+      "szoveg": "Gondolatonként négy szám: a támogatottsági és a részvételi küszöb, a legrövidebb és a leghosszabb döntési idő. Ezek döntik el, mikor fogadnak el egy szerkesztési vagy általános javaslatot. Ha senki nem adott be érték javaslatot, a koino alap-küszöbe érvényes."
     },
     {
       "nev": "kezikonyv/fogalom/bizonyossagi-mutato",
       "cim": "bizonyossági mutató",
-      "szoveg": "Az eredmény egyértelműségének (a támogatók és az ellenzők arányának különbsége) és a részvételnek az átlaga. Minél nagyobb, annál hamarabb zárul a javaslat — a legrövidebb és a leghosszabb döntési idő között."
+      "szoveg": "Az eredmény egyértelműségének (a támogatók és az ellenzők arányának különbsége) és a részvételnek az átlaga. Minél nagyobb, annál hamarabb zárul a szerkesztési vagy általános javaslat — a legrövidebb és a leghosszabb döntési idő között."
     },
     {
       "nev": "kezikonyv/fogalom/kulonvalas",
@@ -569,7 +569,7 @@
     {
       "nev": "kezikonyv/fogalom/koinon",
       "cim": "koinon",
-      "szoveg": "A közösség közös tárhelye. Ma a kézikönyv minden bejegyzésén tart egy passzív tudatpontot — ezért a kézikönyv akkor sem felejtődik el, ha senki nem tart rajta pontot. A terv szerint később az elfogadott közös egyezményeket is ő őrzi, darabokban, sok készüléken. A koinon nem szavaz, és nem javasol."
+      "szoveg": "A közösség közös tárhelye. Ma a kézikönyv minden bejegyzésén tart egy passzív tudatpontot — ezért a kézikönyv akkor sem felejtődik el, ha senki nem tart rajta pontot. Az elfogadott általános egyezményeken is tart egy passzív pontot (a lezárásuktól): így egy általános egyezmény akkor sem felejtődik el, ha mindenki levette róla a pontját, és a tömör alakját (a döntés bizonyítékát és az állásfoglalásokat) a koinon darabjai őrzik, sok készüléken. A koinon nem szavaz, és nem javasol."
     },
     {
       "nev": "kezikonyv/fogalom/mag",
