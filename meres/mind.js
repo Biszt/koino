@@ -37,7 +37,8 @@ import identitas from './identitasProba.js';
 import helyreallitas from './helyreallitasProba.js';   // ⭐⭐ D128 (②e): a helyreállítás a segítőkkel
 import kezeles from './kezelesProba.js';   // ⭐⭐ D128 (③b): a kezelés minden koinómba
 import kezikonyv from './kezikonyvProba.js';
-import magyarazat from './magyarazatProba.js';   // ⭐⭐ D129 (⑤, MA10 (C)): az ⓘ jelek a felületen — a fájlokban és a valódi lapon   // ⭐⭐ D129 (①): a kézikönyv magja (a rendszer-entitás)
+import magyarazat from './magyarazatProba.js';
+import koinoncsomag from './koinonCsomagProba.js';   // ⭐⭐ D130 (②): az egyezmény tömör alakja   // ⭐⭐ D129 (⑤, MA10 (C)): az ⓘ jelek a felületen — a fájlokban és a valódi lapon   // ⭐⭐ D129 (①): a kézikönyv magja (a rendszer-entitás)
 import kapu from './kapuProba.js';
 import pakli from './pakliProba.js';
 import ter from './terProba.js';
@@ -136,6 +137,7 @@ const PROBAK = [
   { nev: 'kezeles', futtat: kezeles },
   { nev: 'kezikonyv', futtat: kezikonyv },
   { nev: 'magyarazat', futtat: magyarazat },
+  { nev: 'koinoncsomag', futtat: koinoncsomag },
   { nev: 'kapu', futtat: kapu },
   { nev: 'pakli', futtat: pakli },
   { nev: 'ter', futtat: ter },
@@ -214,7 +216,7 @@ const CSOPORTOK = {
   // a kanonikus alak, a kulcs, az aláírt esemény és a tár (az íróval)
   alap: ['kanonikus', 'kulcs', 'papir', 'esemeny', 'keszulek', 'tar', 'iro', 'atmeneti', 'keresotar', 'keresomegujitas'],
   // események → állapot: entitások, döntéshozatal, szabályok, egyezmények, tagság
-  allapot: ['allapot', 'javaslat', 'szabaly', 'egyezmeny', 'dontesicsomag', 'lezarasiosszegzes', 'osszpont', 'felszabaditas', 'identitas', 'helyreallitas', 'kezeles', 'kezikonyv', 'tagsag', 'ertesites', 'felderites', 'koinolanc', 'ketreteg', 'bekapcsolodas', 'koinoverzio'],
+  allapot: ['allapot', 'javaslat', 'szabaly', 'egyezmeny', 'dontesicsomag', 'lezarasiosszegzes', 'osszpont', 'felszabaditas', 'identitas', 'helyreallitas', 'kezeles', 'kezikonyv', 'koinoncsomag', 'tagsag', 'ertesites', 'felderites', 'koinolanc', 'ketreteg', 'bekapcsolodas', 'koinoverzio'],
   // a felületnek felelő réteg
   felulet: ['kapu', 'pakli', 'ter', 'csereallapot', 'magyarazat'],
   // két készülék között: a párbeszéd, a kézi út, a társak, a kapu, a kötések, a tábla, a DHT

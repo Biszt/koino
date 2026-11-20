@@ -5393,6 +5393,14 @@ kevesebb tartó); ezért a becslés az ismert tagokból jöjjön (azt nem lehet 
 
 **C) A fenntartó kör:** készülékenként egy darab — óránként egy bejelentés és egy lekérdezés a címjegyzéken (átfedéssel kettő-kettő).
 
+⛔ **Helyesbítés (2026-11-20, a D130 ② megépítése — a valódi tömör alak, `koinonCsomag.js`):** az A) becslése alacsony volt. A minta
+nem 8 × 3 levél, hanem 52: a szavazat- és a nevező-fából 8–8, és a NÉGY küszöb-naplóból 9–9 (a medián és 8 véletlen) — ezt a becslés
+kihagyta —, és minden minta-esemény a készüléke tanúsítványával utazik (a D128 óta ~0,5 KB). A valódi alak beágyazott eseményekkel 13
+szavazónál 83 KB volt (ebből 66 KB ismétlés: 52 mintában csak 17–32 különböző esemény — egy érték javaslat mind a négy naplóban ott
+áll). ⭐ Ezért a csomag minden eseményt és tanúsítványt EGYSZER tart (táblában, a minták hivatkoznak): 13 szavazónál ~35–44 KB, 61-nél
+~69 KB, 301-nél ~91 KB — a minták száma állandó, csak a fa-utak hosszabbak. A teljes döntés 1000 szavazónál 2,3 MB: a tömör alak ott is
+~20–25-ször kisebb. A B) (a tartók száma) a mérettől független — változatlan.
+
 ---
 
 ## 94. ⭐ AZ ESEMÉNY MÉRETE A D128 UTÁN — a készülék mezője és a harmadik gyökér (a kapott) ára (D128 ①b (2b), 2026-11-14, a laptopon)

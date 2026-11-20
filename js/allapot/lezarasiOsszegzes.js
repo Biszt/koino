@@ -31,7 +31,8 @@
 //
 // Használják: a döntés-számítás (a nagy szeletű rész — a bekötés a következő lépés), a csere (a minták), a próbák.
 
-import { randomInt } from 'node:crypto';
+import { randomInt, createHash } from 'node:crypto';
+import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 import {
   ujAllapotFa, allapotBeallitas, allapotGyokere, allapotBizonyitek, allapotBizonyitekEllenorzese,
   allapotSulyozottKeresese, allapotSulyozottEllenorzese, levelOsszegzes, naploGyokere, naploBizonyitek,
@@ -112,24 +113,41 @@ export async function lezarasiOsszegzesEpitese(esemenyek, javaslatEsemeny, entit
  * A minta-helyek (az ELLENŐRZŐ sorsolja, a gyökér bemondása UTÁN): a szavazat-fából (a három fajta együtt, egyenletesen),
  * a nevező-fából, és küszöbönként a rendezett naplóból — a medián helye MINDIG, mellé k véletlen index.
  */
-export function lezarasiMintaHelyek(osszegzes, k = LEZARASI_MINTA) {
+export function lezarasiMintaHelyek(osszegzes, k = LEZARASI_MINTA, veletlen = randomInt) {
   const db = Math.max(0, Math.min(LEZARASI_MINTA_KORLAT, k));
   const sz = osszegzes.szamok;
   const szavazok = sz.tamogatok + sz.ellenzok + sz.tartozkodok;
   const szavazat = [];
   for (let j = 0; j < (szavazok > 0 ? db : 0); j++) {
-    let r = randomInt(szavazok);
+    let r = veletlen(szavazok);
     let i = 0;
     for (const n of [sz.tamogatok, sz.ellenzok, sz.tartozkodok]) { if (r < n) break; r -= n; i++; }
     szavazat.push({ r, i });
   }
-  const nevezo = sz.nevezo > 0 ? Array.from({ length: db }, () => randomInt(sz.nevezo)) : [];
+  const nevezo = sz.nevezo > 0 ? Array.from({ length: db }, () => veletlen(sz.nevezo)) : [];
   const ertek = {};
   for (const nev of KUSZOB_NEVEK) {
     const n = osszegzes.fak.ertek[nev].d;
-    ertek[nev] = n > 0 ? [kozepe(n), ...Array.from({ length: db }, () => randomInt(n))] : [];
+    ertek[nev] = n > 0 ? [kozepe(n), ...Array.from({ length: db }, () => veletlen(n))] : [];
   }
   return { szavazat, nevezo, ertek };
+}
+
+/**
+ * ⭐⭐ D130 (②) — A MINTA HELYEI AZ ÖSSZEGZÉS SAJÁT LENYOMATÁBÓL (a 95. mérés lelete): a koinon darabjának tartója a tömör alakot
+ * KÉSŐBB kapja, az építő nélkül — nem sorsolhat, és nem kérdezhet. Ezért a helyek az összegzés teljes tartalmának lenyomatából
+ * jönnek (a javaslat, az érintett, a számok, a küszöbök, a lezárás, a fák gyökerei — semmi szabadon választható mező): az építő
+ * nem sorsolhat újra kedvezőbb helyeket (egy más összegzés már más fákat jelent), és bárki ugyanazokat számolja ki. A sorsolás
+ * UGYANAZ a kód (`lezarasiMintaHelyek`), csak a véletlen forrása más: a lenyomat-lánc (sha256, számlálóval; 48 bit, modulo n —
+ * a torzítás a valódi méreteknél elhanyagolható).
+ * @param {Object} osszegzes
+ * @param {number} [k]
+ */
+export function onalloMintaHelyek(osszegzes, k = LEZARASI_MINTA) {
+  const mag = lenyomatSzinkron({ fajta: 'koinon-minta', osszegzes });
+  let szamlalo = 0;
+  const veletlen = (n) => createHash('sha256').update(mag + ':' + (szamlalo++)).digest().readUIntBE(0, 6) % n;
+  return lezarasiMintaHelyek(osszegzes, k, veletlen);
 }
 
 /**
