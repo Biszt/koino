@@ -274,6 +274,34 @@ proba('⛔ A hely KÖTELEZŐ — nélküle nincs kör, aki dönt róla (D27/4)',
   }
 });
 
+// ⭐⭐ D130 (③b, KO8 (A)): az elfogadott általános egyezmény tömör alakját (KoinonOsszegzes) az adja ki, aki a döntés teljes
+// bemenetét tartja (itt a javaslattevő) — egyszer: a második körben a tárban már ott az érvényes, nem ad újat.
+// Rontás: se a saját kiadását, se a tárban lévő érvényeset nem nézi → a második kör is kiad → bukik. ⚠️ Próba nélkül: a „teljes
+// bemenet” feltétele (egy csak részben tartó készülék nem ad ki) — ahhoz két készülék kell, egy részleges tartással.
+proba('⭐⭐ D130 ③b: az elfogadott általános egyezmény tömör alakját a teljes tartó kiadja (`koinon` — az őrjárat is), és csak egyszer: a második körben a tárban már ott az érvényes (KO8 (A))', async () => {
+  const hely = await ujKeszulek();
+  try {
+    await fut(hely, 'koino', 'Koinon-próba');
+    const gondolat = azonosito(await fut(hely, 'gondolat', 'A HELY'), 'Létrejött:');
+    if (!gondolat) return false;
+    await fut(hely, 'ertek', gondolat, '51', '0', '2', '2');
+    const javaslat = azonosito(await fut(hely, 'altalanos', 'A KÖZÖS ÁLLÁSPONT', gondolat), 'Általános javaslat beadva:');
+    if (!javaslat) return false;
+    await fut(hely, 'szavaz', javaslat, 'tamogat');
+    await varj(3000);                                    // a lezárás (a döntési idő 2 mp)
+    const elso = await fut(hely, 'koinon');
+    const masodik = await fut(hely, 'koinon');
+    const r = {
+      elso: /1 új tömör alak kiadva/.test(elso) && /1 elfogadott általános egyezmény/.test(elso) && /tömör alak: 1 érvényes/.test(elso),
+      masodik: /0 új tömör alak kiadva/.test(masodik) && /tömör alak: 1 érvényes/.test(masodik)
+    };
+    if (!Object.values(r).every(Boolean)) process.stdout.write('  koinon — ami bukott: ' + JSON.stringify({ r, elso, masodik }).slice(0, 900) + '\n');
+    return Object.values(r).every(Boolean);
+  } finally {
+    await rm(hely, { recursive: true, force: true });
+  }
+});
+
 // ===================================
 // ⭐ ÉS A SZERKESZTÉSI KÖR IS — hogy a fenti ne legyen egyedi
 // ===================================

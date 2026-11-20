@@ -158,3 +158,10 @@ program átenged és tárol, csak nem érti — nem törés.
   `koinonOsszegzesKiadasa`; `esemeny.js` `bejelentesHelyei` (az érintettjeinél is hír, mint a `LezarasiOsszegzes`, legfeljebb 64);
   `koinoLanc.js` (a múlt rétegéé — a gyermek jelenébe nem jön át). A kapu átengedi (az ismeretlen típust nem tiltja, méret-korlátja
   nincs). Próba: +1 (`koinonCsomagProba.js`), 3 rontás mind bukik.
+- **2026-11-20** — ✅ **a ③b kész: ki és mikor adja ki** (KO8 (A)). `koino.js` `koinonOsszegzesekKiadasa` (a koinó-példány része, a
+  lezárási összegzés kiadásának mintájára): a jelen réteg elfogadott általános egyezményei közül ott, ahol a javaslat szeletét és
+  minden érintettjéét EGÉSZÉBEN tartom (a vállalásomban, nem összegezve — ⛔ egy hiányzó szavazattal hamis összegzés születne);
+  kihagyja, ahol már én kiadtam, vagy ahol a javaslat szeletében már van érvényes (bárkitől); a kiadás előtt a saját csomagját is
+  ellenőrzi. Az őrjárat háztartása hívja (a lezárási összegzés után), és kézzel a `koinon` parancs (listáz is: van-e érvényes tömör
+  alak). Próba: +1 parancssor (a teljes tartó kiadja, a második kör nem), 1 rontás bukik. ⚠️ Próba nélkül: a „teljes bemenet”
+  feltétele (ahhoz két készülék kell, egy részleges tartással) — a terepen.
