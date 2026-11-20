@@ -51,6 +51,25 @@ const STATUSZ_KIFELE = {
 };
 
 /**
+ * ⭐ AZ IKON CÍME (Csaba, 2026-11-20: a „Kérdés” gondolattípus ikonja helyett a fejlécen a `/api/fajl/…` szöveg állt). A feltöltött
+ * ikon az eseményben RELATÍV címmel él (`/api/fajl/<lenyomat>` — `apiHelper.js` `formDataJsonna`; a többi készüléken is ugyanaz, ezért
+ * nem lehet abszolút), az örökölt kártyák (`GondolatTipusKartya`, `KategoriaKartya`, `GondolatKartya`) viszont csak `http(s)://`-sel
+ * kezdődőt rajzolnak képnek, a többit szövegnek (a prototípusban az ikon emoji vagy teljes cím volt). ⭐ Itt fordítunk, a lap saját
+ * címével — a kártyák bájtra a prototípuséi maradnak. A `/api/fajl/` jelszó nélkül is kérhető (tartalom-címzett — `koino.js`
+ * `jelszoMentes`), tehát a kép betölt.
+ * @param {*} ikon
+ * @returns {*}
+ */
+export function ikonCime(ikon) {
+  if (typeof ikon !== 'string' || !ikon.startsWith('/api/fajl/')) return ikon ?? null;
+  const eredet = typeof globalThis.location?.origin === 'string' ? globalThis.location.origin : '';
+  return eredet ? eredet + ikon : ikon;
+}
+
+/** A feloldott besorolás ({ azonosito, nev, ikon }) az ikon címével. */
+const besorolasIkonnal = (b) => (b && typeof b === 'object' ? { ...b, ikon: ikonCime(b.ikon) } : b);
+
+/**
  * Egy `/api/pakli` kártya → a prototípus kártya-alakja.
  *
  * @param {Object} k - a koino kártya-adata
@@ -112,12 +131,12 @@ export function kartyaAdatta(k) {
       // változtatás nélkül működik rajtuk, nincs párhuzamos `nev` mező. A prototípus
       // kártyái más szót használnak, tehát **itt fordítunk** — ez a fájl dolga.
       nev: k.cim ?? '',
-      ikon: k.ikon ?? null,
+      ikon: ikonCime(k.ikon),
 
       // ⭐ FELOLDVA érkezik a programtól ({ azonosito, nev, ikon }), nem azonosítóként —
       // a feloldás keresés az állapotban, tehát számítás, tehát a programé.
-      gondolatTipus: k.gondolatTipus ?? null,
-      kategoriak: k.kategoriak ?? [],
+      gondolatTipus: besorolasIkonnal(k.gondolatTipus ?? null),
+      kategoriak: (k.kategoriak ?? []).map(besorolasIkonnal),
 
       // ----- ⭐ A JAVASLAT MEZŐI (5.5) -----
       //

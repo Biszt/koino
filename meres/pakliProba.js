@@ -924,6 +924,37 @@ proba('⭐ A MEGNYITOTT KÁRTYA SZÖVEGE: ha a darab hiányzik, kérendő törzs
   return h.hianyzik.some((x) => x.fajta === 'torzs' && x.kulcs === e.azonosito);
 });
 
+// ⭐ Csaba (2026-11-20): a „Kérdés” gondolattípus ikonja helyett a fejlécen a `/api/fajl/…` szöveg állt (a feltöltött ikon az
+// eseményben relatív címmel él, az örökölt kártya csak a `http(s)://`-t rajzolja képnek) — a lap fordít a saját címével, a
+// gondolattípus és a kategóriák ikonját is; és „az összes kártya típus címe úgy viselkedjen, mint a gondolaté” (a gyár az
+// alaposztályon kapcsolja be a hossz szerinti méretezést). Az örökölt kártya-fájlok bájtra a prototípuséi maradnak (`kapuProba`).
+// Rontás: a fordító nem alakítja a címet → bukik; a gyár nem kapcsolja be → bukik.
+proba('⭐ a feltöltött ikon képként jelenik meg (a relatív `/api/fajl/` cím a lap címével — a kártyáé, a gondolattípusé, a kategóriáké; az emoji marad), és MINDEN kártyatípus címe a hossza szerint méreteződik', async () => {
+  const volt = Object.getOwnPropertyDescriptor(globalThis, 'location');
+  globalThis.location = { search: '?kulcs=proba', origin: 'http://127.0.0.1:7600' };
+  try {
+    const { kartyaAdatta } = await import('../felulet/js/kartyaAdat.js');
+    await import('../felulet/js/components/kartya/kartyaGyar.js');
+    const k = kartyaAdatta({ azonosito: 'a', tipus: 'GondolatTipus', cim: 'Kérdés', ikon: '/api/fajl/L1',
+      gondolatTipus: { azonosito: 'b', nev: 'T', ikon: '/api/fajl/L2' },
+      kategoriak: [{ azonosito: 'c', nev: 'K', ikon: '/api/fajl/L3' }, { azonosito: 'd', nev: 'E', ikon: '🌟' }] });
+    const tipusok = [];
+    for (const n of ['GondolatKartya', 'GondolatTipusKartya', 'KategoriaKartya', 'JavaslatKartya', 'EgyezmenyKartya']) {
+      tipusok.push((await import('../felulet/js/components/kartya/' + n + '.js')).default.prototype._cimDinamikusMeretu() === true);
+    }
+    const r = {
+      ikon: k.adatok.ikon === 'http://127.0.0.1:7600/api/fajl/L1',
+      tipus: k.adatok.gondolatTipus.ikon === 'http://127.0.0.1:7600/api/fajl/L2',
+      kategoriak: k.adatok.kategoriak[0].ikon === 'http://127.0.0.1:7600/api/fajl/L3' && k.adatok.kategoriak[1].ikon === '🌟',
+      cimMeret: tipusok.every(Boolean)
+    };
+    if (!Object.values(r).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ r, tipusok }) + ')\n');
+    return Object.values(r).every(Boolean);
+  } finally {
+    if (volt) Object.defineProperty(globalThis, 'location', volt); else delete globalThis.location;
+  }
+});
+
 // ⭐ A ház (D100, H3): a felület az örökölt `Pakli.js`-t futtatja, ami a PROTOTÍPUS útvonalait kérdezi, és a prototípus
 // alakját várja — a lap fordít (`felulet/js/kartyaAdat.js`). A fordító tiszta függvények, node alatt is futnak: a valódi
 // `pakliHierarchia` válaszából a `Pakli.js` alakja (a kiválasztott a típusával, a mélység és a létrehozás a kártya legfelső

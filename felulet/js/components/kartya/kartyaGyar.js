@@ -24,6 +24,13 @@ import GondolatTipusKartya from './GondolatTipusKartya.js';
 import JavaslatKartya from './JavaslatKartya.js';
 import EgyezmenyKartya from './EgyezmenyKartya.js';
 
+// ⭐ A KOINOBAN MINDEN KÁRTYA CÍME A HOSSZA SZERINT MÉRETEZŐDIK (Csaba, 2026-11-20: „szeretném, ha az összes kártya típus címe
+// úgy viselkedne, mint a gondolaté”). A prototípusban csak a `GondolatKartya` kapcsolta be (`_cimDinamikusMeretu` → igaz), a
+// többi típus címe fix méretű volt. ⭐ Az örökölt kártyák bájtra a prototípuséi maradnak (`kapuProba.js`): a koino itt, a
+// gyárban kapcsolja be az alaposztályon — minden típusra, egy helyen. (A méretezés a kártya felépítésekor dől el, ezért az
+// osztályon, nem a példányon.)
+Kartya.prototype._cimDinamikusMeretu = function () { return true; };
+
 // Entitástípus → kártya-osztály
 const TIPUS_KARTYA = {
   Gondolat:      GondolatKartya,
