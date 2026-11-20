@@ -160,21 +160,25 @@ export function sajatGyokerDarabjai(alairo, bitek, darab = 1) {
 // visszafejti, mit jelent: a halmazát bárki kiszámolja a saját tárából (a gyökérhez bejelentett születések közül a darabba
 // esők). ⭐ D106: a darab jegyeinek száma a mélységből jön — 16 mélységig négy (34 nullával, bájtra a D106 előtti kulcs),
 // fölötte annyi, amennyi a darabhoz kell (a 144-es mélységen 36, két nullával); a nullák a 43 jelet töltik ki. Egy darabnak
-// egyetlen kulcsa van (a jegyek száma kötött). ⭐ D105: a kereső-réteg régiójának kulcsa ugyanez az alak, `k` jellel. ⭐ A
+// egyetlen kulcsa van (a jegyek száma kötött). ⭐ D105: a kereső-réteg régiójának kulcsa ugyanez az alak, `k` jellel; ⭐⭐ D130
+// (③c): a koinon darabjáé `n` jellel. ⭐ A
 // készülék a saját darabjában a mélysége ±1 szintjén vesz részt — a mélységet ki-ki a maga tudásából becsli, és a
 // szomszédos becslésűek így is találkoznak (a darabok egymásba ágyazottak: a mélyebb darab a sekélyebb fele).
 
 const KULCS_HOSSZ = 43;
-/** A darab-kulcsok jele: `g` — a gyökér darabja (D95/4), `k` — a kereső-réteg régiója (D105). */
-export const DARAB_JELEK = ['g', 'k'];
-const DARAB_MINTA = /^(0+)([gk])([0-9a-f]{2})([0-9a-f]{4,36})00$/;
+/**
+ * A darab-kulcsok jele: `g` — a gyökér darabja (D95/4), `k` — a kereső-réteg régiója (D105), `n` — a koinon darabja (D130).
+ * ⛔ Nem lehet hexa jegy (a nullák és a mélység közt állna), és nem lehet `s` (a koinó születésének kulcsa — `szeletEgyeztetes.js`).
+ */
+export const DARAB_JELEK = ['g', 'k', 'n'];
+const DARAB_MINTA = /^(0+)([gkn])([0-9a-f]{2})([0-9a-f]{4,36})00$/;
 
 /** Hány hexa jegyen áll egy darab a kulcsban (16 mélységig 4 — a D106 előtti alak). */
 const darabJegyei = (melyseg) => Math.max(4, Math.ceil(melyseg / 4));
 
 /**
  * Egy darab kulcsa a vonalon (közös).
- * @param {string} jel - `g` (a gyökér darabja) vagy `k` (a kereső-réteg régiója)
+ * @param {string} jel - `g` (a gyökér darabja), `k` (a kereső-réteg régiója) vagy `n` (a koinon darabja)
  * @param {number} melyseg - 0..`DARAB_MAX_MELYSEG`
  * @param {bigint|number} darab - 0..2^mélység − 1
  * @returns {string}
@@ -334,6 +338,119 @@ export function gyokerJelOlvasasa(szoveg) {
   const melyseg = parseInt(g[0], 10);
   if (melyseg > GYOKER_MAX_MELYSEG) return null;
   return { melyseg, lenyomatok: g.slice(1).map((x) => x || null) };
+}
+
+// ===================================
+// ⭐⭐ D130 (③c — KO2 (A), KO4, KO6 (A)): A KOINON DARABJAI
+// ===================================
+//
+// Az elfogadott általános egyezmények tényét és hatályát (a `KoinonOsszegzes` — a döntés tömör alakja — és az állásfoglalások)
+// a koinon DARABJAI őrzik: egy egyezmény az azonosítója szerint egy darabba esik, a készülék a tábla-aláírója szerinti darabot
+// tartja. ⭐ A gyökér-darab mintája (ugyanaz a lenyomat-tér és kulcs-alak, a koinon sójával, `n` jellel) — két eltéréssel:
+// - **a mélység a TARTÓK számából jön, nem az elemekéből** (KO2 (A)): annyi bit, hogy egy darabnak ~`r` tartója legyen
+//   (`floor(log2(tagok / r))` — a 95. mérés). A tagok száma az ISMERT tagoké: azt alulbecsülni lehet (az csak terhet hoz),
+//   túlbecsülni nem (a veszélyes oldal — kevesebb tartó);
+// - **átfedés nélkül** (KO6 (A)): a készülék CSAK a saját mélységén lévő darabját tartja (nem a szomszéd szintet is). A cserében
+//   a szomszéd mélységű társsal a kettő közös része egyeztetődik — a MÉLYEBB darab (a sekélyebbnek az egyik fele: mindkettőnél
+//   egészében megvan) —, nem a sekélyebb (az a mélyebb becslésűnél csak félig). Ezért a jel a saját darab mellett a két felét
+//   viszi (a gyökéré a ±1 szintet).
+
+const KOINON_SO = 'koino-koinon-darab-1';
+/** ⭐ KO4: a koinon példányszáma (egy darab ennyi tartója) — alapból 20 (a koinó születése mondja ki: ③f). */
+export const KOINON_PELDANY = 20;
+
+/**
+ * Egy egyezmény (a javaslata azonosítója) KOINON-LENYOMATA — a darab-számítás lenyomata a koinon sójával.
+ * @param {string} azonosito
+ * @returns {bigint}
+ */
+export function koinonLenyomata(azonosito) {
+  return darabLenyomata(KOINON_SO, azonosito);
+}
+
+/**
+ * Egy egyezmény koinon-darabjának kulcsa egy mélységen (a javaslata azonosítójából).
+ * @param {string} azonosito
+ * @param {number} melyseg
+ * @returns {string}
+ */
+export function egyezmenyKoinonDarabKulcsa(azonosito, melyseg) {
+  return koinonDarabKulcsa(melyseg, lenyomatDarabja(koinonLenyomata(azonosito), melyseg));
+}
+
+/**
+ * Egy koinon-darab kulcsa a vonalon.
+ * @param {number} melyseg - 0..`DARAB_MAX_MELYSEG`
+ * @param {bigint|number} darab - 0..2^mélység − 1
+ * @returns {string}
+ */
+export function koinonDarabKulcsa(melyseg, darab) {
+  return darabKulcsa('n', melyseg, darab);
+}
+
+/**
+ * A kulcsból a mélység és a darab — vagy null, ha nem koinon-darab kulcs.
+ * @returns {{melyseg: number, darab: bigint}|null}
+ */
+export function koinonDarabBol(kulcs) {
+  const d = darabKulcsBol(kulcs);
+  return d && d.jel === 'n' ? { melyseg: d.melyseg, darab: d.darab } : null;
+}
+
+/**
+ * A készülék koinon-darabjának kulcsai: a SAJÁT darabja a mélységén, és a két FELE eggyel mélyebben (a legmélyebb szinten csak
+ * a saját). A NYITÁS jele ezek rövid lenyomatát viszi, ebben a sorrendben (a társ a tábla-aláírómból ugyanezeket számolja).
+ * ⭐ KO6 (A): mindhármat egészében tartom (a felek a darabom részei) — a sekélyebb társsal a darabom, a mélyebbel annak a fele
+ * a közös, és mindkettő lenyomata a jelben van.
+ * @param {string} alairo
+ * @param {number} melyseg
+ * @returns {Array<string>}
+ */
+export function koinonDarabKulcsai(alairo, melyseg) {
+  const d = keszulekDarabjai(KOINON_SO, alairo, melyseg, 1)[0];
+  const ki = [koinonDarabKulcsa(melyseg, d)];
+  if (melyseg < DARAB_MAX_MELYSEG) ki.push(koinonDarabKulcsa(melyseg + 1, 2n * d), koinonDarabKulcsa(melyseg + 1, 2n * d + 1n));
+  return ki;
+}
+
+/**
+ * ⭐ KO2 (A), 95. mérés: A KOINON MÉLYSÉGE a tagok számából — `floor(log2(tagok / r))`: 2^mélység ≤ tagok / r, így egy
+ * darabra átlagosan legalább `r` tartó jut (a lefelé kerekítés a tartók felé dönt). Kevés tagnál (2r alatt) 0 — egy darab:
+ * mindenki mindent tart.
+ * @param {number} tagok - az ismert tagok száma
+ * @param {number} [r] - a példányszám
+ * @returns {number} 0..`DARAB_MAX_MELYSEG`
+ */
+export function koinonMelysege(tagok, r = KOINON_PELDANY) {
+  const n = Number.isFinite(tagok) && tagok > 0 ? tagok : 0;
+  const p = Number.isFinite(r) && r >= 1 ? r : KOINON_PELDANY;
+  if (n < 2 * p) return 0;
+  return Math.min(DARAB_MAX_MELYSEG, Math.floor(Math.log2(n / p)));
+}
+
+/**
+ * ⭐ KO6 (A): A KÖZÖS KOINON-DARAB két készülék között — a két darab közül a KISEBBIK, ha benne van a nagyobbikban (egy
+ * mélységen: ha ugyanaz; szomszéd mélységen: ha a mélyebbé a sekélyebbé egyik fele) — az mindkettőnél egészében megvan. A
+ * lenyomata a mélyebbnél a saját darabjáé, a sekélyebbnél a megfelelő feléé (a jelben ott van). Mindkét fél ugyanezt számolja
+ * (a két nyitásból). ⛔ Két szint távolságnál nincs közös darab (a jel a saját szintet és a felét viszi).
+ * @param {{alairo: string, melyseg: number, lenyomatok: Array<string|null>}} a - a jel (`koinonDarabKulcsai` sorrendjében)
+ * @param {{alairo: string, melyseg: number, lenyomatok: Array<string|null>}} b
+ * @returns {{kulcs: string, a: string|null, b: string|null}|null}
+ */
+export function kozosKoinonDarab(a, b) {
+  const darabja = (x) => keszulekDarabjai(KOINON_SO, x.alairo, x.melyseg, 1)[0];
+  const l = (x, i) => x.lenyomatok[i] ?? null;
+  if (a.melyseg === b.melyseg) {
+    const d = darabja(a);
+    return d === darabja(b) ? { kulcs: koinonDarabKulcsa(a.melyseg, d), a: l(a, 0), b: l(b, 0) } : null;
+  }
+  const [sekely, mely] = a.melyseg < b.melyseg ? [a, b] : [b, a];
+  if (mely.melyseg !== sekely.melyseg + 1) return null;
+  const dm = darabja(mely);
+  if ((dm >> 1n) !== darabja(sekely)) return null;
+  const sekelyL = l(sekely, 1 + Number(dm & 1n));
+  const melyL = l(mely, 0);
+  return { kulcs: koinonDarabKulcsa(mely.melyseg, dm), a: a === sekely ? sekelyL : melyL, b: b === sekely ? sekelyL : melyL };
 }
 
 // ===================================

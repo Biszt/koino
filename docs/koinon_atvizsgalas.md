@@ -99,6 +99,8 @@ program átenged és tárol, csak nem érti — nem törés.
 **A terv:**
 1. **A darab:** `keszulekDarabjai('koinon', aláíró, bitek)`, `bitek = floor(log2(ismert tagok / r))` (r a születésből — KO4; a régi
    születésben nincs: 20). Egy egyezmény a javaslata azonosítója szerint esik egy darabba (ugyanaz a lenyomat, mint a gyökér-darabé).
+   ⚠️ *Az építéskor pontosítva (③c):* ugyanaz a számítás, a koinon SAJÁT sójával (a készüléké és az egyezményé is) — így a koinon
+   tartói nem ugyanazok, mint a gyökér-darabé; és a cserében a két mélység közül a mélyebbik darab a közös (a napló).
 2. **Mi van benne:** az elfogadott általános egyezmény tömör alakjának eseményei — a javaslat, a döntés tömör alakja (lásd KO7), az
    állásfoglalások, a minták eseményei. A darab a vonalon SZELETKÉNT megy (a gyökér-darab mintájára — felismerhető kulcs).
    ⚠️ *Az építéskor pontosítva (③c, a napló 2026-11-20):* a javaslat és a minták eseményei a `KoinonOsszegzes`-be BEÁGYAZVA utaznak,
@@ -179,3 +181,27 @@ program átenged és tárol, csak nem érti — nem törés.
   (a táblák, szűrve), `koinonOsszegzesEllenorzese(e)` (olvasó nélkül); `koino.js` két hívása ennek megfelelően. Próba: a ③a
   átírva (önmagából ellenőriz; a hiányos esemény a táblából hiányzik; a táblák benne, az állásfoglalások eseményei nem), 5 rontás
   mind bukik; a ③b parancssori próbája rendben. ⏭️ A ③c: a darab — a kulcsa, a bejelentése, a vonalon és a vállalásban.
+- **2026-11-20** — ✅ **a ③c kész: a koinon darabja a cserében** (KO2 (A), KO6 (A) — a gyökér-darab mintájára). `cimjegyzek.js`: az
+  `n` jelű darab-kulcs (a gyökér `g`-je és a kereső-réteg `k`-ja mellett), a koinon saját sója, a mélység `koinonMelysege(tagok, r)` =
+  `floor(log2(tagok / r))` (2r tag alatt 0: egy darab, mindenki mindent tart); a készülék kulcsai a saját darabja és annak két fele.
+  ⛔ **Lelet (a tervezéskor, a kódból):** a gyökér-darab a mélysége ±1 szintjén vesz részt, és a LEGSEKÉLYEBB közös darabot egyezteti
+  — átfedés nélkül (KO6 (A)) ez rossz volna: a sekélyebb darab a mélyebb becslésű készüléknél csak félig van meg, a csere a másik felét
+  is áttolná neki. ⭐ A koinonnál a közös darab a KISEBBIK (a mélyebb — `kozosKoinonDarab`), ezért a NYITÁS `knd` jele a saját darab
+  mellett a két FELE lenyomatát viszi (a gyökéré a ±1 szintet): a szomszéd mélységű társ így pontosan a közös részt látja.
+  `esemeny.js`: a `KOINON_KULCS` (virtuális tár-kulcs, mint a gyökéré a '' — nem darab-kulcs); a `KoinonOsszegzes` és az
+  `Allasfoglalas` oda is bejelentődik (⚠️ a mag változott — D123; a régi tár pillanatképe az első olvasáskor újraépül, mint a
+  D129-nél). `szeletEgyeztetes.js`: a darab halmaza a koinon kulcsához bejelentettek közül azok, amelyeknek az EGYEZMÉNYE (a
+  szelet-kulcsuk) a darabba esik — egy egyezmény minden eseménye egy darabban —, a változat-jele és a fogadó szűrője. `vonal.js`: a
+  `knd` jel, a közös eltérő darab, a részvétel; ⛔ a koinon kulcsa egészében sosem cserélődik („mindent” módban sem), a régi program
+  (jel nélkül) semmit nem lát belőle, és a csere nem drágul. `koino.js`: `koinonMelysegem` (az ismert tagok — a horgonyok szerzői —,
+  a tár eseményszáma szerint gyorsítótárazva; `r` = 20 a ③f-ig), a csere beállítása, a tömörítés megtartja a darabom eseményeit, a
+  csak küldő út a saját koinon-eseményemet az egyezménye darabja alatt is felajánlja, és a `vallalas` kimondja (a mélység, az ismert
+  tagok, a darab egyezményei és eseményei). ⚠️ A `vallalas.js` nem változott: a darab — mint a gyökéré — a csere, a tömörítés és a
+  csak küldő út szintjén él. ⛔ A zárt koinó nem tagja nem kap belőle (a vonal korlátja, mint a gyökérnél) — a parancssori próba
+  első futása ezen bukott (a vendég egy alapból zárt koinóba csak csatlakozott, nem lépett be): a kód helyes volt, a próba nyílt
+  koinóval fut. Próba: +11 (`koinonDarabProba.js`, a `csere` csoportban), 12 rontás mind bukik; +1 parancssor (a szigorú vendég az
+  egyezmény szelete nélkül megkapja a tömör alakot és az állásfoglalást, a `vallalas` kimondja, a tömörítés után is megvan), 2 rontás
+  bukik; a `csere` csoport 488/488 + 2 ismert (a fél-jel előtt); ⭐ a TELJES sor (a mag és a csere változott): 1556/1556 + 2 ismert
+  (a D124 két „valódi régi program” próbája). ⚠️ Próba nélkül: a `koino.js` csak küldő ágának koinon-kulcsa (a
+  mechanizmust a darab-próba a saját kulcsaival méri; a valódi programban 1+ mélység kell hozzá — 2r tag —, és a darab helye a
+  készülékkulcson múlik) — a terepen. ⏭️ ③d a tartó döntése (a D95/1 útján), ④ a darab hirdetése a címjegyzéken.

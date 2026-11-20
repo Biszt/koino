@@ -27,12 +27,18 @@
 // A gyökér darabjai „szeletként” mennek a vonalon (a kulcsuk felismerhető — `cimjegyzek.js` `gyokerDarabKulcsa`): a
 // halmazuk a gyökérhez bejelentett születések közül a darabba esők. Itt a halmaz, a változat-jel és a fogadó szűrője.
 //
+// ===== ⭐⭐ D130 (③c): A KOINON DARABJAI =====
+//
+// Ugyanígy a koinon darabjai (`cimjegyzek.js` `koinonDarabKulcsa`): a halmazuk a koinon kulcsához (`KOINON_KULCS`) bejelentett
+// események (a döntés tömör alakja, az állásfoglalások) közül azok, amelyeknek az EGYEZMÉNYE (a szelet-kulcsuk — a javaslat
+// azonosítója) a darabba esik. Egy egyezmény minden koinon-eseménye így ugyanabba a darabba kerül.
+//
 // Használja: csere/vonal.js (a párbeszéd), a próbák.
 
-import { alakiHiba, szelet, bejelentesHelyei, azonositoAlaku, esemenyKoinoja } from '../esemeny/esemeny.js';
+import { alakiHiba, szelet, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, KOINON_KULCS } from '../esemeny/esemeny.js';
 import { koinoNezete } from '../allapot/koinoLanc.js';   // ⭐ D118 (②b): a koinó-szabály
 import { rendezettHalmaz, halmazLenyomata } from '../esemeny/halmaz.js';
-import { gyokerDarabBol, gyokerLenyomata, darabbaEsik } from './cimjegyzek.js';
+import { gyokerDarabBol, gyokerLenyomata, darabbaEsik, koinonDarabBol, koinonLenyomata } from './cimjegyzek.js';
 
 /**
  * A gyökér kulcsa a vonalon (a tárban: ''). ⭐ Egy érvényes alakú, 43 jeles szöveg, amit egyetlen
@@ -74,6 +80,12 @@ export async function egyeztetettEsemenyek(tar, koino, kulcs) {
     return (await egyeztetettEsemenyek(tar, koino, GYOKER_KULCS))
       .filter((e) => darabbaEsik(gyokerLenyomata(e.azonosito), darab.melyseg, darab.darab));
   }
+  // ⭐⭐ D130 (③c): egy koinon-darab halmaza — a koinon kulcsához bejelentettek közül, amelyeknek az egyezménye a darabba esik.
+  const kd = koinonDarabBol(kulcs);
+  if (kd) {
+    return (await egyeztetettEsemenyek(tar, koino, KOINON_KULCS))
+      .filter((e) => darabbaEsik(koinonLenyomata(szelet(e)), kd.melyseg, kd.darab));
+  }
   const s = tarKulcsa(kulcs);
   const sajat = s === '' ? [] : await tar.szeletEsemenyei(s);
   const bejelentettek = await tar.bejelentesek(s);
@@ -108,8 +120,9 @@ const gyorsitotar = new WeakMap();
 export async function szeletPar(tar, koino, kulcs) {
   let tarbeli = gyorsitotar.get(tar);
   if (!tarbeli) { tarbeli = new Map(); gyorsitotar.set(tar, tarbeli); }
-  // ⭐ D95/4: a gyökér-darab a gyökér változásával változik.
-  const valtozat = koino + '|' + tar.szeletValtozata(gyokerDarabBol(kulcs) ? '' : tarKulcsa(kulcs));
+  // ⭐ D95/4: a gyökér-darab a gyökér változásával változik. ⭐ D130 (③c): a koinon-darab a koinon kulcsáéval.
+  const valtozat = koino + '|' + tar.szeletValtozata(gyokerDarabBol(kulcs) ? '' : koinonDarabBol(kulcs) ? KOINON_KULCS
+    : tarKulcsa(kulcs));
   const kesz = tarbeli.get(kulcs);
   if (kesz && kesz.valtozat === valtozat) return kesz.par;
   const halmaz = await egyeztetesiHalmaz(tar, koino, kulcs);
@@ -177,6 +190,14 @@ export function szeletbeTartozik(e, kulcsok) {
     const h = gyokerLenyomata(e.azonosito);
     for (const k of kulcsok) {
       const d = gyokerDarabBol(k);
+      if (d && darabbaEsik(h, d.melyseg, d.darab)) return true;
+    }
+  }
+  // ⭐⭐ D130 (③c): a koinon kulcsához bejelentett esemény abba a koinon-darabba is tartozik, amelyikbe az egyezménye esik.
+  if (helyek.includes(KOINON_KULCS)) {
+    const h = koinonLenyomata(szelet(e));
+    for (const k of kulcsok) {
+      const d = koinonDarabBol(k);
       if (d && darabbaEsik(h, d.melyseg, d.darab)) return true;
     }
   }

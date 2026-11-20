@@ -302,6 +302,54 @@ proba('⭐⭐ D130 ③b: az elfogadott általános egyezmény tömör alakját a
   }
 });
 
+// ⭐⭐ D130 (③c — KO2 (A), KO6 (A)): a koinon DARABJA a valódi programban — egy SZIGORÚ (b) vendég, akinek az egyezmény szeletében
+// nincs pontja (a szeletet nem is tartja), a cserében a koinon-darabján át megkapja a döntés tömör alakját és az állásfoglalást;
+// a `vallalas` kimondja (a mélység az ismert tagokból — kis koinóban 0: egy darab), és a tömörítés után is megvan (a darabom
+// eseményei maradnak). Rontás: (a) a csere nem kapja meg a koinon mélységét → nem jön át → bukik; (b) a tömörítés nem tartja
+// meg a darabom eseményeit → a `tomorit` után eltűnnek → bukik.
+proba('⭐⭐ D130 ③c: a koinon DARABJA a cserében — a szigorú vendég az egyezmény szelete nélkül is megkapja a tömör alakot és az állásfoglalást, a `vallalas` kimondja, és a tömörítés után is megvan', async () => {
+  const a = await ujKeszulek();
+  const b = await ujKeszulek();
+  const alap = { KOINO_KISZOLGALAS: 'alap', KOINO_DHT_BELEPOK: 'nincs', KOINO_TUKOR: '127.0.0.1:9' };
+  try {
+    // ⚠️ nyílt koinó: a zártban a csatlakozott, de be nem lépett vendég nem tag — annak a koinon nem jár (a vonal kihagyja;
+    // a `koinonDarabProba.js` méri).
+    await fut(a, 'koino', 'Koinon-darab', 'nyilt', alap);
+    const gondolat = azonosito(await fut(a, 'gondolat', 'A HELY', alap), 'Létrejött:');
+    if (!gondolat) return false;
+    await fut(a, 'ertek', gondolat, '51', '0', '2', '2', alap);
+    const javaslat = azonosito(await fut(a, 'altalanos', 'A KÖZÖS ÁLLÁSPONT', gondolat, alap), 'Általános javaslat beadva:');
+    if (!javaslat) return false;
+    await fut(a, 'szavaz', javaslat, 'tamogat', alap);
+    await varj(3000);                                    // a lezárás (a döntési idő 2 mp)
+    await fut(a, 'allast', javaslat, 'csatlakozik', alap);
+    const kiadas = await fut(a, 'koinon', alap);
+    const aV = await fut(a, 'vallalas', alap);
+    await csereKor(a, b, 7499, alap);
+    const bV = await fut(b, 'vallalas', alap);
+    const bKep = await fut(b, 'allapot', alap);
+    await fut(b, 'tomorit', alap);
+    const bV2 = await fut(b, 'vallalas', alap);
+    const darabSor = /a koinon darabja: 0\. mélység \(\d+ ismert tag, r = 20 — egy darab: az egész koinon\) · 1 egyezmény, 2 esemény/;
+    const r = {
+      kiadva: /1 új tömör alak kiadva/.test(kiadas),
+      gazda: darabSor.test(aV),
+      vendeg: darabSor.test(bV),
+      // a vendég a szeletet nem tartja: a javaslatot (és a gondolatot) a képe nem ismeri — csak a koinon-darab hozta át
+      szeletNelkul: !bKep.includes('A KÖZÖS ÁLLÁSPONT'),
+      tomorites: darabSor.test(bV2)
+    };
+    if (!Object.values(r).every(Boolean)) {
+      const sor = (x) => (x.split('\n').find((s) => s.includes('a koinon darabja')) ?? '(nincs sor)');
+      process.stdout.write('  koinon-darab — ami bukott: ' + JSON.stringify({ r, aV: sor(aV), bV: sor(bV), bV2: sor(bV2) }).slice(0, 900) + '\n');
+    }
+    return Object.values(r).every(Boolean);
+  } finally {
+    await rm(a, { recursive: true, force: true });
+    await rm(b, { recursive: true, force: true });
+  }
+});
+
 // ===================================
 // ⭐ ÉS A SZERKESZTÉSI KÖR IS — hogy a fenti ne legyen egyedi
 // ===================================

@@ -49,7 +49,7 @@
 // ⚠️ 2026-09-26-IG ITT ÁLLT A `node:net` IMPORTJA (TCP). A D69/2 óta a párbeszéd csak egy
 // foglalat-szerű kapcsolatot kap (a UDP-résen: `udpVonal.js` → `udpKapcsolat`).
 
-import { koinoSzuleteseE } from '../esemeny/esemeny.js';
+import { koinoSzuleteseE, KOINON_KULCS } from '../esemeny/esemeny.js';
 // ⭐⭐ D128: az utazó esemény mellé a készülék tanúsítványa (a fogadónál a lánca első eseménye gyakran nincs meg).
 import { kiseroAdo } from '../tar/esemenyTar.js';
 // ⭐⭐ D124 (PR6 ①): a nyelvváltozat — a jel minden munka első üzenetében, és a társé ellenőrizve, mielőtt bármi újat tennénk.
@@ -67,7 +67,8 @@ import {
 } from './szeletEgyeztetes.js';
 import { rendezettHalmaz, halmazLenyomata } from '../esemeny/halmaz.js';
 import {
-  gyokerDarabBol, gyokerDarabKulcsai, gyokerJelSzovege, gyokerJelOlvasasa, GYOKER_MAX_MELYSEG
+  gyokerDarabBol, gyokerDarabKulcsai, gyokerJelSzovege, gyokerJelOlvasasa, GYOKER_MAX_MELYSEG,
+  koinonDarabBol, koinonDarabKulcsai, kozosKoinonDarab
 } from './cimjegyzek.js';
 // ⭐⭐ D107 L2 (a kereső-réteg ③b): a kereső-régiók a cserében — a kulcsok és a hely (tiszta számítás), a befogadás a
 // kereső-tár kapuján (`keresoTar.js` — ugyanaz az `esemenyMentese`, 3. szabály).
@@ -306,6 +307,8 @@ export function uzenetSor(kapcsolat) {
  * @param {Function} [beallitas.reszvesz] - (szelet-kulcs) → részt veszek-e benne; alapból mind (a)
  * @param {number} [beallitas.gyokerMelyseg] - ⭐ D95/4: a gyökér becsült mélysége — ha megvan (és a tábla-kulcs is), a gyökér
  *   darabonként cserélődik
+ * @param {number} [beallitas.koinonMelyseg] - ⭐⭐ D130 (③c): a koinon mélysége (az ismert tagokból) — ha megvan (és a
+ *   tábla-kulcs is), a koinon-darabom egyeztetődik a társéval (a NYITÁS `knd` jele)
  * @param {Function} [beallitas.reszvetelHalmaz] - ⭐ D97/1: async () → a részvételi halmazom (Set), vagy null („minden”)
  * @param {Object} [beallitas.halmazTar] - ⭐ D97/1: { sajatNaplo(kulcsok), tarsOlvas(aláíró), tarsIr(aláíró, ismert) }
  * @param {Array<Object>} [beallitas.koinoSzuletesLanc] - ⭐ D118 (②a): a koinó születéseinek lánca a gyökértől (az utolsó a
@@ -361,9 +364,24 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     return r && keresoTar ? keresoTar.regioHalmaza(r.melyseg, r.darab) : [];
   };
 
+  // ===== ⭐⭐ D130 (③c): A KOINON DARABJA (a gyökér-darab mintája — KO6 (A): átfedés nélkül) =====
+  //
+  // Ha a hívó megadja a koinon mélységét, a NYITÁS `knd` jele a koinon-darabom és a két fele rövid lenyomatát viszi (a
+  // kulcsokat a társ a tábla-aláírómból számolja — a gyökér jelének alakja). Tartani csak a SAJÁT darabomat tartom: a közös
+  // darab a kettő közül a kisebbik, ha a nagyobbikban van (`cimjegyzek.js` `kozosKoinonDarab`) — az mindkét félnél egészében
+  // megvan. ⛔ A nyitó lenyomatba nem kerül (mint a gyökér-darab), és a koinon kulcsa (`KOINON_KULCS` — a darabok közös
+  // halmaza) egészében sosem cserélődik.
+  const koinonMelyseg = Number.isInteger(beallitas.koinonMelyseg) && beallitas.koinonMelyseg >= 0
+    && beallitas.koinonMelyseg <= GYOKER_MAX_MELYSEG && typeof tablaKulcsElore?.alairo === 'string'
+    ? beallitas.koinonMelyseg : null;
+  const sajatKoinonKulcsok = koinonMelyseg === null ? [] : koinonDarabKulcsai(tablaKulcsElore.alairo, koinonMelyseg);
+  const sajatKoinonSet = new Set(sajatKoinonKulcsok);
+
   // A gyökér-darabban a saját darabjaim döntenek; a teljes gyökér pedig, ha darabonként megy, egészében nem cserélődik.
   // ⭐ D96: a koinó születésének (esemény-)kulcsában mindenki részt vesz. ⭐ D107 L2: a kereső-régióban a saját régióim.
+  // ⭐⭐ D130 (③c): a koinon-darabban a saját darabom és a két fele; a koinon kulcsában soha.
   const reszvesz = (k) => (k === KOINO_SZULETES_KULCS ? true : keresoRegioBol(k) ? sajatRegioSet.has(k)
+    : k === KOINON_KULCS ? false : koinonDarabBol(k) ? sajatKoinonSet.has(k)
     : gyokerDarabBol(k) ? sajatDarabSet.has(k)
     : (k === GYOKER_KULCS && sajatDarabSet.size ? false : hivoReszvesz(k)));
 
@@ -554,6 +572,13 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     }
     sajatKd = { m: keresoMelyseg, l, szoveg: gyokerJelSzovege(keresoMelyseg, l) };
   }
+  // ⭐⭐ D130 (③c): a koinon-darabom és a két fele rövid lenyomata — ugyanaz az alak (`m:l1:l2:l3`; az üres darabé üres).
+  let sajatKnd = null;
+  if (sajatKoinonKulcsok.length) {
+    const l = [];
+    for (const k of sajatKoinonKulcsok) l.push((await szeletPar(tar, koino, k))?.slice(44, 55) ?? null);
+    sajatKnd = { m: koinonMelyseg, l, szoveg: gyokerJelSzovege(koinonMelyseg, l) };
+  }
   // ⭐ D95/2: van-e FÜGGŐ tagság-kérdésem (akinek a tagságát a szeleteimben nem tudom)? Ha igen, a tagsági kör akkor is
   // lemegy, ha a szeletek egyeznek — a társnál lehet meg a csomag. ⚠️ Csak egy jel a nyitásban (1 bájt), ha van.
   let sajatTk = false;
@@ -594,6 +619,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     ...(sajatTk ? { tk: 1 } : {}),
     ...(sajatGyd ? { gyd: sajatGyd.szoveg } : {}),
     ...(sajatKd ? { kd: sajatKd.szoveg } : {}),
+    ...(sajatKnd ? { knd: sajatKnd.szoveg } : {}),
     ...(sajatNaplo ? { pv: sajatNaplo.v } : {})
   });
 
@@ -949,6 +975,16 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
       if (i >= 0 && oveL.get(sajatRegioKulcsok[i]) !== sajatKd.l[i]) elteroRegiok.push(sajatRegioKulcsok[i]);
     }
   }
+  // ⭐⭐ D130 (③c): a közös koinon-darab — a kettő közül a kisebbik, ha eltér (mindkét fél ugyanazt számolja).
+  const elteroKoinon = [];
+  {
+    const g = gyokerJelOlvasasa(oveNyitas.knd);
+    if (sajatKnd && typeof kapottTablaKulcs?.alairo === 'string' && g) {
+      const k = kozosKoinonDarab({ alairo: tablaKulcsElore.alairo, melyseg: koinonMelyseg, lenyomatok: sajatKnd.l },
+        { alairo: kapottTablaKulcs.alairo, melyseg: g.melyseg, lenyomatok: g.lenyomatok });
+      if (k && k.a !== k.b) elteroKoinon.push(k.kulcs);
+    }
+  }
 
   // ----- ⭐⭐ D97/1: A KÖZÖS HALMAZ ELŐKÉSZÍTÉSE — mindkét fél tudja, kell-e (a két nyitásból) -----
   //
@@ -1299,7 +1335,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     catch (hiba) { console.warn('parbeszed - a társankénti emlékezet nem írható', { ok: hiba.message }); }
   };
 
-  if (nyitoOve === nyitoSajat && !elteroDarabok.length && !elteroRegiok.length) {
+  if (nyitoOve === nyitoSajat && !elteroDarabok.length && !elteroRegiok.length && !elteroKoinon.length) {
     // ⭐ Ugyanazt tudjuk minden közös szeletről — a hétköznapi eset, egyetlen nyitás-csere.
     // ⭐ D95/2: ha bármelyik félnek függő tagság-kérdése van (a nyitás jele), a tagsági kör ekkor is lemegy.
     if (sajatTk || oveNyitas.tk === 1) await tagsagKor([]);
@@ -1398,6 +1434,8 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ⭐ D107 L2: a közös, eltérő kereső-régió is (a korlátozott társnál — zárt koinó, nem tag — a részvétel kimondja, hogy
   // kimarad: a kereső-index tartalma sem jár a nem tagnak).
   for (const k of elteroRegiok) mindketten.add(k);
+  // ⭐⭐ D130 (③c): a közös, eltérő koinon-darab is (a korlátozott társnál a részvétel kimondja, hogy kimarad).
+  for (const k of elteroKoinon) mindketten.add(k);
   const csakNalam = new Set([...sajatLelet.nalam, ...kulcsLista(oveLelet.nalad)].filter(korlatonBelul));
   const csakNala = new Set([...sajatLelet.nalad, ...kulcsLista(oveLelet.nalam)].filter(korlatonBelul));
 

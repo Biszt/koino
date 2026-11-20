@@ -6647,7 +6647,9 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
    az ismert tagokból: azt alá lehet becsülni, túl nem). ⭐ KO6 (A) (Csaba: „ko6: (A)”): **átfedés nélkül** — a 95. mérés szerint nélküle
    is minden darabnak 13+ tartója marad, az átfedés háromszoros terhet hozna. A minta helyei a tömör alak saját lenyomatából (a 95. mérés
    lelete). Egy készülék terhe ~`entitások × r / készülékek` — nem nő a koinóval. Egy fenntartó kör (órás
-   ütemben) figyeli a darabok tartóit (a skálázási terv 5.2 „külön munkája”).
+   ütemben) figyeli a darabok tartóit (a skálázási terv 5.2 „külön munkája”). ✅ *A darab a cserében megépült (③c, 2026-11-20 —
+   `koinon_atvizsgalas.md` napló):* `n` jelű darab-kulcs, a mélység `floor(log2(ismert tagok / r))`; a szomszéd mélységű társsal a
+   mélyebb darab a közös (az átfedés nélkül is mindkettőnél megvan).
 4. **Mit őriznek** (KO3 (A)): tömören — a javaslatot, a döntés ellenőrizhető bizonyítékát (a lezárási összegzés — D95/1) és az
    állásfoglalásokat (a hatály); a nyers szavazatokat nem.
 5. **A példányszám** (KO4 (A)): közösségi paraméter a koinó születésében (D118/2), alapból **`r` = 20** (30%-os elérhetőségnél 99,9%,
@@ -6656,8 +6658,10 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
    ⭐ KO9 (A) (Csaba, 2026-11-20: „elfogadom, a javaslataidat”): a következményével együtt — a közösség módosításait az a készülék,
    amelyik a bejegyzés darabját nem tartja, KÉRÉSRE látja (mint bármely nem tartott kártyát; a program szövege mindenkinél ott van).
 7. **Hogyan utazik a döntés tömör alakja** (KO7 (A), 2026-11-20): egy új ALÁÍRT eseményben (`KoinonOsszegzes` — a lezárási
-   összegzések és a mintáik hivatkozásai), a meglévő csere-úton: a kapu az ismeretlen eseménytípust nem tiltja, a régi program átengedi
-   (nem protokoll-törés); bárki ellenőrzi (a minták önállók), az aláíró csak a nevét adja.
+   összegzések és a mintáik), a meglévő csere-úton: a kapu az ismeretlen eseménytípust nem tiltja, a régi program átengedi
+   (nem protokoll-törés); bárki ellenőrzi (a minták önállók), az aláíró csak a nevét adja. ⚠️ *Az építéskor pontosítva (③c előtt):*
+   a minták eseményei és tanúsítványai BEÁGYAZVA (egyszer, táblában) — így az esemény önmagából, tár nélkül ellenőrizhető, és a darab
+   tartójának ez az egy esemény elég (13 szavazónál 33 KB); az állásfoglalások továbbra is külön (a hatály él).
 8. **Ki írja meg** (KO8 (A), 2026-11-20): bárki, aki a döntés teljes bemenetét tartja, és még nem lát érvényeset (a lezárás után — az
    őrjárat); ha több is készül, a tartó egyet tart meg (a legkisebb azonosítójút) — a tartalmuk úgyis ugyanaz.
 

@@ -203,6 +203,8 @@ export function szuleteseSzuloje(e) {
  *     szerző láncának átfésülése nélkül — a kontraszt-jelzés bemenete. ⚠️ A horgonyt a szerző mondja; a jelzés csak a
  *     szerző saját állításait számolja (egy idegen horgonyra mutató bejelentés nem hamisít semmit).
  *   · ⭐ D95/1: a `LezarasiOsszegzes` → az érintettjénél (`adat.entitas`).
+ *   · ⭐⭐ D130 (③c): a `KoinonOsszegzes` és az `Allasfoglalas` → a KOINON kulcsánál is (`KOINON_KULCS`): a koinon darabjai
+ *     innen szűrik a magukét (`szeletEgyeztetes.js`), mint a gyökér-darabok a gyökérhez bejelentett születésekből.
  *
  * ⛔ Csak azonosító alakú kulcs (D77: amit nem lehet a vonalon kimondani, az megakasztaná a cserét), és a
  * saját szelete nem (az úgyis az övé). ⭐ Az eseményből MAGÁBÓL olvasható — a tár mutatója más esemény
@@ -220,6 +222,16 @@ export const AZONOSSAG_ALLITASOK = new Set(['Meghivas', 'Felhatalmazas', 'Felhat
 
 /** ⭐⭐ D128 (②e — 17. pont): a helyreállítás jóváhagyásának fázisai (a segítő egyszer cselekszik; a készüléke véglegesít). */
 export const HELYREALLITAS_FAZISOK = new Set(['kezdes', 'veglegesites', 'visszavonas']);
+
+/**
+ * ⭐⭐ D130 (③c): A KOINON KULCSA — egy virtuális tár-kulcs (mint a gyökéré, a ''), ahová a koinon eseményei (a döntés tömör
+ * alakja és az állásfoglalások) bejelentődnek; a darabjai ebből a halmazból szűrik a magukét. Érvényes alakú, 43 jeles
+ * szöveg, amit egyetlen esemény azonosítója sem vehet fel (az azonosító lenyomat), és NEM darab-kulcs (a darab-kulcs két
+ * nullára végződik — `cimjegyzek.js`). ⛔ Egészében sosem cserélődik (a vonal kizárja), csak a darabjai.
+ */
+export const KOINON_KULCS = '0'.repeat(42) + 'n';
+/** ⭐ D130 (③c): a koinon eseménytípusai — a koinon kulcsához bejelentődnek. */
+export const KOINON_TIPUSOK = new Set(['KoinonOsszegzes', 'Allasfoglalas']);
 
 export function bejelentesHelyei(e) {
   const helyek = new Set();
@@ -254,6 +266,8 @@ export function bejelentesHelyei(e) {
     const reszek = Array.isArray(e.adat?.reszek) ? e.adat.reszek.slice(0, 64) : [];
     for (const r of reszek) hozza(r?.osszegzes?.entitas);
   }
+  // ⭐⭐ D130 (③c): a koinon eseményei a koinon kulcsánál is (a darabjaik ebből szűrnek).
+  if (KOINON_TIPUSOK.has(e?.tipus)) hozza(KOINON_KULCS);
   // ⭐⭐ D129: ami kézikönyv-entitásra mutat (a nevét hozza), az a kézikönyv GYÖKERÉNEK szeletébe is bejelentődik — EGY szelet
   // hordja az egész kézikönyvet, és azt mindenki tartja (MA4 (B): a pont nélkül megmaradó módosítást is őrizni kell).
   if (esemenyRendszerNevei(e).length) hozza(KEZIKONYV_GYOKER_AZONOSITO);
