@@ -1,6 +1,6 @@
 # A magyarázat-réteg (D129) — a kézikönyv és az ⓘ jelek
 
-*A döntés: [`fejlesztesi_terv_fazis2.md`](fejlesztesi_terv_fazis2.md) D129 (Csaba, 2026-11-19 — MA1–MA8; 2026-11-20 — MA9). Ez a dokumentum az
+*A döntés: [`fejlesztesi_terv_fazis2.md`](fejlesztesi_terv_fazis2.md) D129 (Csaba, 2026-11-19 — MA1–MA8; 2026-11-20 — MA9, MA10). Ez a dokumentum az
 építés terve és naplója.*
 
 ## 1. Röviden
@@ -241,4 +241,13 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   fát a kézikönyv méretével nagyított lapon kérte, de egy lap legfeljebb 100 kártya (`MAX_DARAB`): 115 bejegyzés mellett a két
   gondolat a következő lapra csúszott (magában is bukott — nem szeszély). A program helyes; a próba most a szülő ágára szűkítve
   kérdez (a kártya menüjének Rendezése is így), a kézikönyv méretétől függetlenül. A másik bukás a csere ismert, terhelés alatti
-  „lezárás 5×” próbája (magában zöld). ⏭️ Az ⑤ (a felület próbája) — Csaba döntésére.
+  „lezárás 5×” próbája (magában zöld).
+- **2026-11-20** — ✅ **az ⑤ kész: a felület próbája** (MA10 (C), Csaba: „ma10: (c)”) — `meres/magyarazatProba.js` (a `felulet` csoportban,
+  +2 próba): ① a FÁJLOKBAN — minden ⓘ-hely címének darabjai (az osztály- és azonosító-nevek, a választó értékei, a felismerő
+  feliratok) ott vannak a felület programjában (a `koinoMagyarazat.js` és a stíluslapok nélkül — különben minden név „megvan”); ②
+  a VALÓDI LAPON, fej nélküli Chrome-mal (a nézet-próba eszközével, csomag nélkül): egy friss koinón az alsó sáv, az állapot-sor, a
+  kártya, a fő menü és a kártya menüje ⓘ-i kikerülnek (a két menü nem keveredik), a Keresés ablakának címe ⓘ-t kap, a buborék a
+  program szövegével nyílik, az ⓘ a menüpontot nem indítja el, és minden kikerült név az alap-tartalomban van. Ha nincs Chrome, kimarad.
+  6 rontás mind bukik (elírt hely-osztály és ablak-cím — a fájlokban; a menü választója, a továbbmenő kattintás, a rossz buborék-út, a
+  meg nem ismételt elhelyezés — a lapon). A `felulet` csoport 162/162.
+- **2026-11-20** — ⭐⭐ **A D129 KÉSZ** (①–⑤). ⏭️ D130 — a koinon az egyezményekhez (KO1–KO6 eldöntve; `docs/koinon_atvizsgalas.md` 5.).

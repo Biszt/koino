@@ -36,7 +36,8 @@ import tarsak from './tarsakProba.js';
 import identitas from './identitasProba.js';
 import helyreallitas from './helyreallitasProba.js';   // ⭐⭐ D128 (②e): a helyreállítás a segítőkkel
 import kezeles from './kezelesProba.js';   // ⭐⭐ D128 (③b): a kezelés minden koinómba
-import kezikonyv from './kezikonyvProba.js';   // ⭐⭐ D129 (①): a kézikönyv magja (a rendszer-entitás)
+import kezikonyv from './kezikonyvProba.js';
+import magyarazat from './magyarazatProba.js';   // ⭐⭐ D129 (⑤, MA10 (C)): az ⓘ jelek a felületen — a fájlokban és a valódi lapon   // ⭐⭐ D129 (①): a kézikönyv magja (a rendszer-entitás)
 import kapu from './kapuProba.js';
 import pakli from './pakliProba.js';
 import ter from './terProba.js';
@@ -134,6 +135,7 @@ const PROBAK = [
   { nev: 'helyreallitas', futtat: helyreallitas },
   { nev: 'kezeles', futtat: kezeles },
   { nev: 'kezikonyv', futtat: kezikonyv },
+  { nev: 'magyarazat', futtat: magyarazat },
   { nev: 'kapu', futtat: kapu },
   { nev: 'pakli', futtat: pakli },
   { nev: 'ter', futtat: ter },
@@ -214,7 +216,7 @@ const CSOPORTOK = {
   // események → állapot: entitások, döntéshozatal, szabályok, egyezmények, tagság
   allapot: ['allapot', 'javaslat', 'szabaly', 'egyezmeny', 'dontesicsomag', 'lezarasiosszegzes', 'osszpont', 'felszabaditas', 'identitas', 'helyreallitas', 'kezeles', 'kezikonyv', 'tagsag', 'ertesites', 'felderites', 'koinolanc', 'ketreteg', 'bekapcsolodas', 'koinoverzio'],
   // a felületnek felelő réteg
-  felulet: ['kapu', 'pakli', 'ter', 'csereallapot'],
+  felulet: ['kapu', 'pakli', 'ter', 'csereallapot', 'magyarazat'],
   // két készülék között: a párbeszéd, a kézi út, a társak, a kapu, a kötések, a tábla, a DHT
   csere: ['csere', 'fajlcsere', 'tarsak', 'tartomany', 'titkositas', 'udpkapu', 'kotes', 'tabla', 'dht', 'cimjegyzek', 'kerelem', 'osszegzotartas', 'tagsagkisero', 'gyokerdarab', 'kereso', 'kozoshalmaz', 'reszvetel', 'tarsemlekezet', 'vizsga', 'kiszolgalasikeret', 'keresoregio', 'melysegtanulas', 'felajanlas', 'kereses', 'meghivo', 'nyelv'],
   // a fájl-bájtok és a szöveg-darab: tár, igény, kérelem, átvitel

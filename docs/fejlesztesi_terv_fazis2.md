@@ -6614,6 +6614,10 @@ fejlesztést.”*
     `alapKuszobok`-ja, nem a prototípus 51 % / 51 % / 0 mp / 1 év-e), és a program **csak akkor ment érték javaslatot, ha a létrehozó
     változtatott** rajtuk — különben a gondolat a koinó alapját követi, amíg valaki mást nem mond (a mediánba csak az számít, aki
     tényleg mondott valamit). Eddig a felületről írt gondolat a prototípus értékeit kapta a létrehozó érték javaslataként.
+12. **A felület próbája** (MA10 (C), Csaba, 2026-11-20: „ma10: (c)”): az ⓘ helyeit két próba őrzi — a **fájlokban** (minden hely
+    címének darabjai — az osztály- és azonosító-nevek, a felismerő feliratok — ott vannak-e a felület programjában: egy átnevezett
+    elemről az ⓘ némán eltűnne), és a **valódi lapon**, fej nélküli Chrome-mal (a nézet-próba eszközével, csomag nélkül): a fő
+    felületeken az ⓘ ténylegesen kikerül, a buborék a program szövegével nyílik, és az ⓘ a gombját nem indítja el.
 
 **Az építés sorrendje:** ① **a mag** — az alap-tartalom fájlja (név, szülő, cím, szöveg, típus), az azonosító (koinó + név), az
 entitás születési esemény nélkül, a D14 kivétele, a kapu (pont és javaslat a rendszer-entitásra), a vállalás (mindenki tartja), a
