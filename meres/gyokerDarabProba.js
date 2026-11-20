@@ -4,7 +4,7 @@
 // darab kulcsa felismerhető és visszafejthető; a mélység becslése a saját darabból ugyanaz, mint a teljes tudásból; a
 // valódi cserén (UDP-rés, titkosítva) a KÖZÖS darab születései átjönnek, a nem közösé nem, és ha csak nem közös darab
 // tér el, a csere az első szint nélkül véget ér (a „nincs újdonság” nem drágul); a saját legfelső szintű születésem a
-// csak küldő úton eljut a darab tartójához; a zárt koinó nem tagja nem kap a gyökérből (és a csere nem csúszik el).
+// csak küldő úton eljut a darab tartójához; a zárt koino nem tagja nem kap a gyökérből (és a csere nem csúszik el).
 //
 // Futtatás: node meres/mind.js gyokerdarab
 
@@ -121,11 +121,11 @@ proba('⭐ a darab halmaza a gyökérhez bejelentett születések közül a dara
 });
 
 // ===================================
-// ⭐⭐ D106: A DARAB-SZÁM A KOINÓ SAJÁT HATÁRÁIG (144 bit)
+// ⭐⭐ D106: A DARAB-SZÁM A KOINO SAJÁT HATÁRÁIG (144 bit)
 // ===================================
 //
-// A „végtelen” mércéje (D106): a darab-szám nem állhat meg a koinó saját határa (~2^128 entitás) előtt. A D106 előtt 16
-// bites volt — ~16,8 millió legfelső szintű gondolat fölött a darab a koinóval nőtt volna. Rontás: `GYOKER_MAX_MELYSEG`
+// A „végtelen” mércéje (D106): a darab-szám nem állhat meg a koino saját határa (~2^128 entitás) előtt. A D106 előtt 16
+// bites volt — ~16,8 millió legfelső szintű gondolat fölött a darab a koinoval nőtt volna. Rontás: `GYOKER_MAX_MELYSEG`
 // = 16 → a kulcs 16 fölött nem készül, a becslés 16-nál megáll, a nyitás jele 16 fölött nem olvasható.
 
 proba('⭐⭐ D106: a darab kulcsa 144 mélységig oda-vissza, egy darabnak egy kulcsa — és 16 mélységig bájtra a régi alak', () => {
@@ -264,7 +264,7 @@ proba('⭐⭐ a SAJÁT legfelső szintű születésem a csak küldő úton eljut
   return !!(await tarA.esemeny(x.azonosito)) && r.b.kezbesitve.includes(x.azonosito);
 });
 
-proba('⛔ zárt koinóban a NEM TAGNAK nem jár a gyökér — a közös darab kimarad, és a csere nem csúszik el', async () => {
+proba('⛔ zárt koinoban a NEM TAGNAK nem jár a gyökér — a közös darab kimarad, és a csere nem csúszik el', async () => {
   const { letrehozas, g } = await szuletesek(6);
   const [tA, tB] = await kulcsPar(0, true);
   const tarA = await tar([letrehozas, ...g]);

@@ -4,7 +4,7 @@
 
 > **Mi ez a dokumentum?** Az ÚJ program (`koino/` — a P2P koino) **működése képekben**: mi fut egy
 > készüléken, merre megy egy esemény, mit csinál az őrjárat egy körben, hogyan beszél két készülék,
-> hogyan találják meg egymást, mi az e-ember útja, mi a koinó családja — és a tervezéshez: **mi kész,
+> hogyan találják meg egymást, mi az e-ember útja, mi a koino családja — és a tervezéshez: **mi kész,
 > mi nyitott, mi nincs még** (8. ábra).
 >
 > A [`gepezet.md`](gepezet.md) testvére: az a **döntés-gépezet** képei (javaslat → egyezmény, a
@@ -19,7 +19,7 @@
 e-ember, a társak, a DHT, a fájl).
 
 **Az ábrák:** 1. A nagy kép · 2. Egy esemény útja · 3. Az őrjárat köre · 4. Egy csere · 5. Hogyan
-találják meg egymást · 6. Az e-ember útja · 7. A koinó családja · 8. ⭐ Hol tartunk — a tervezés térképe
+találják meg egymást · 6. Az e-ember útja · 7. A koino családja · 8. ⭐ Hol tartunk — a tervezés térképe
 
 **Hogyan használd a tervezéshez:** egy új lépésnél keresd meg a dobozát (a 8. ábrán), és nézd meg,
 mire épül és mi épül rá — a nyilak a függőséget mutatják. A doboz D-száma a
@@ -45,8 +45,8 @@ flowchart TB
     subgraph KESZ["📱 EGY KÉSZÜLÉK — a koino itt fut, szerver nélkül"]
         BEJ["🖥️ A LAP a böngészőben — pakli, kártyák, modálok<br/>a helyi kapun át: 127.0.0.1 + jelszó — kapu.js<br/>⌨️ A PARANCSSOR — koino.js, a fejlesztői eszköz"]
         MUV["✍️ MŰVELET — muveletek.js<br/>a lánc vége → ALÁÍRT ESEMÉNY<br/>a kulcs maga a személy — Ed25519"]
-        GATE{{"⛔ AZ EGYETLEN KAPU — esemenyMentese<br/>alak · aláírás · koinó · lánc · bizonyíték"}}
-        TAR["🗄️ A TÁRAK — az író fűz hozzájuk, koinónként egy<br/>tartós: amit VÁLLALOK · átmeneti: amit csak LÁTTAM<br/>kereső-tár: a régióm · fájl-tár: szöveg, kép, kód"]
+        GATE{{"⛔ AZ EGYETLEN KAPU — esemenyMentese<br/>alak · aláírás · koino · lánc · bizonyíték"}}
+        TAR["🗄️ A TÁRAK — az író fűz hozzájuk, koinonként egy<br/>tartós: amit VÁLLALOK · átmeneti: amit csak LÁTTAM<br/>kereső-tár: a régióm · fájl-tár: szöveg, kép, kód"]
         SZ["🧮 SZÁMÍTÁS — koinoKepe<br/>szabályok → entitások → döntések → végrehajtás<br/>az egyezmény is itt születik — D17"]
         ORJ["🔁 AZ ŐRJÁRAT — percenként, a fal órájához<br/>állandó UDP-kapu: postaláda, titkosított rés<br/>a háztartás a háttérben"]
     end
@@ -81,14 +81,14 @@ flowchart TB
 - **Egy kapu mindenre (3. szabály).** A saját műveletem, a társtól jött esemény (`beolvasztas`), a
   kérelem válasza és a fájlból behozott mind az `esemenyMentese`-n megy át. *A hálózat nem kap
   engedékenyebb kaput.*
-- **Négy tár.** A tartósban az van, amit VÁLLALOK (amire pontot tettem, a saját azonosságom, a koinó
+- **Négy tár.** A tartósban az van, amit VÁLLALOK (amire pontot tettem, a saját azonosságom, a koino
   születése — `vallalas.js`, D75), az átmenetiben, amit csak LÁTTAM (eldobható, ≤ 20 MB), a kereső-tár
   a megtalálhatóság puha állapota (D107 L1), a fájl-tár a szövegek, képek és a kód tartalom-címzett
   tára.
 - **Az állapot nem tárolt, hanem számított (D17).** A lap, a parancssor és a művelet ugyanazt a képet
   számolja (`ketReteg.js` `koinoKepe`) — ezért mond ugyanazt. A lap soha nem kap „mindent”: a pakli
   egy oldalnyi kártyát ad (5.2).
-- **Az író (D70).** Egy készüléken több folyamat dolgozik, de koinónként csak egy fűz a tárhoz; a többi
+- **Az író (D70).** Egy készüléken több folyamat dolgozik, de koinonként csak egy fűz a tárhoz; a többi
   az aláírt eseményt átadja neki.
 - **Ami kívül van, az segédeszköz (2. és 4. szabály).** A DHT nélkül is megy a koino (csak a leszakadt
   társ visszatalálása lassul), és a kézi út hálózat nélkül is.
@@ -97,7 +97,7 @@ flowchart TB
 
 ## 2. EGY ESEMÉNY ÚTJA — a kattintástól a másik lapjáig
 
-Anna egy gondolatot ír; Béla ugyanannak a koinónak a tagja, egy másik készüléken. *(A „készülék” itt a
+Anna egy gondolatot ír; Béla ugyanannak a koinonak a tagja, egy másik készüléken. *(A „készülék” itt a
 felület és az őrjárat együtt — a két folyamat ugyanazt a kaput és tárat használja.)*
 
 ```mermaid
@@ -145,14 +145,14 @@ futtatja). A kör mindig a fal órájához igazodik: az epoch szerinti percfordu
 %%{init: {"flowchart": {"wrappingWidth": 440}}}%%
 flowchart TD
     P(["⏰ a percforduló — a fal órája<br/>a két fél ugyanakkor ébred"])
-    CS["a család új koinói<br/>újraindítás nélkül — D119 ⑥"]
-    CEL["KIRE KOPOGJAK? — négy forrás<br/>① a kötéseim: ≤ 3 cím, a név a tábla-kulcs<br/>② a friss UDP-címek<br/>③ a koinók céljai: raj, fájl-források,<br/>függő kérelmek, továbbítások, kopogtatók<br/>④ az induló címek — a tars parancs"]
+    CS["a család új koinoi<br/>újraindítás nélkül — D119 ⑥"]
+    CEL["KIRE KOPOGJAK? — négy forrás<br/>① a kötéseim: ≤ 3 cím, a név a tábla-kulcs<br/>② a friss UDP-címek<br/>③ a koinok céljai: raj, fájl-források,<br/>függő kérelmek, továbbítások, kopogtatók<br/>④ az induló címek — a tars parancs"]
     KI["kimarad: akivel e fél körben már cseréltem,<br/>és azóta nincs újdonságom — D99<br/>aki „később”-t mondott — D109 · saját magam"]
     KOP["🚪 KOPOGÁS — egyszerre mindenkire<br/>a lyukfúrás: a két rés középen találkozik"]
-    MU["🤝 MUNKA társanként, a védett résen<br/>válasz vissza · továbbadás · függő kérelem · vagy CSERE<br/>+ fájl-randevú + a család többi közös koinója"]
+    MU["🤝 MUNKA társanként, a védett résen<br/>válasz vissza · továbbadás · függő kérelem · vagy CSERE<br/>+ fájl-randevú + a család többi közös koinoja"]
     UJ{"jött újdonság,<br/>és tart még az ablak?"}
     FEL["feljegyzés a lapnak — csere.json<br/>az alsó sáv: 🔄 2 perce +3 · ⏭ 0:42"]
-    HAT["🧹 A HÁTTÉR — egyszerre egy, a kör nem várja meg — D115<br/>hirdetőtábla: a néma kötések új címe · a saját címem, ha változott<br/>háztartás koinónként: címjegyzék a DHT-n · felszabadítás ·<br/>előléptetés · tagsági és döntési csomag · tömörítés ·<br/>kereső-tár · felderítés · a fájl-tár kerete · értesítések"]
+    HAT["🧹 A HÁTTÉR — egyszerre egy, a kör nem várja meg — D115<br/>hirdetőtábla: a néma kötések új címe · a saját címem, ha változott<br/>háztartás koinonként: címjegyzék a DHT-n · felszabadítás ·<br/>előléptetés · tagsági és döntési csomag · tömörítés ·<br/>kereső-tár · felderítés · a fájl-tár kerete · értesítések"]
     ALV(["💤 alvás a következő percfordulóig"])
     BEK["🔔 közben a kapu MINDIG nyitva — postaláda, D34<br/>aki bekopog, azzal ugyanez a munka indul"]
 
@@ -193,13 +193,13 @@ sequenceDiagram
     A->>B: kézfogás — egyszeri X25519 kulcs, 33 bájt
     B->>A: kézfogás
     Note over A,B: innen minden csomag titkosítva, AES-256-GCM — D89/1<br/>a munka végén a kulcs elvész: a rögzített múlt később sem nyitható ki
-    A->>B: NYITÁS — a koinó, a családja, a közös halmaz lenyomata,<br/>a gyökér-darab és a kereső-régió jele, a tábla-kulcs
+    A->>B: NYITÁS — a koino, a családja, a közös halmaz lenyomata,<br/>a gyökér-darab és a kereső-régió jele, a tábla-kulcs
     B->>A: NYITÁS
     opt a kiszolgálási keretem betelt — D109
         B-->>A: KÉSŐBB — ennyi mp múlva, tiszta vég
     end
     A->>B: CÍMEK — kiket ismerek · a tábla-kulcs aláírja a kézfogás átiratát
-    opt zárt koinó, ismeretlen társ — D93/3
+    opt zárt koino, ismeretlen társ — D93/3
         B->>A: KELL
         A->>B: TAGSÁG — a személyes aláírás, a horgony, a tagsági csomag
     end
@@ -215,7 +215,7 @@ sequenceDiagram
         A->>B: LÁNCKÉREK → LÁNCVÁLASZ — ép-e a szerzők lánca
     end
     A->>B: fájl-randevú: FÁJLKÉREK → FÁJLSZELET … → FÁJLVÉGE<br/>a szöveg mindig — a nem vállaltból ≤ 1 MB magától, D120
-    Note over A,B: utána: a kötés és a raj jegyzi a társat, a társ-emlékezet feljegyez,<br/>és ugyanezen a résen a család többi közös koinója — koinónként új kézfogással
+    Note over A,B: utána: a kötés és a raj jegyzi a társat, a társ-emlékezet feljegyez,<br/>és ugyanezen a résen a család többi közös koinoja — koinonként új kézfogással
 ```
 
 - **A csere helyett jöhet KÉRELEM is** (D92 — „add ide ezt”): a nyitás helyett `KERELEM`, és a válasz
@@ -223,7 +223,7 @@ sequenceDiagram
   (`TORZS` → a fájlok), keresés vagy felajánlás. Ha egy munkában mindkét fél kérne, a kisebbik megy
   elöl, a másik kiszolgálja (az ütközés — a ⑦ terepi lelete).
 - **A két szint:** előbb a SZELETEK lenyomatai (melyik szelet tér el), aztán csak az eltérőkben a
-  TARTOMÁNYOK (mely események) — a forgalom az eltérések számától függ, nem a koinó méretétől (D74).
+  TARTOMÁNYOK (mely események) — a forgalom az eltérések számától függ, nem a koino méretétől (D74).
 - **A társ-emlékezet (F, D98/1):** ha mindkét fél emlékszik a legutóbbi cseréjükre, az első szint
   elmarad, és csak az azóta változott szeletek mennek (70. mérés).
 
@@ -305,7 +305,7 @@ flowchart TD
     end
     subgraph CSA["4. A CSALÁD"]
         direction TB
-        D1["🧬 új koino-verzió: gyermek koinó, a kártyáján a kód"]
+        D1["🧬 új koino-verzió: gyermek koino, a kártyáján a kód"]
         D2["🧳 költözés a gyermekbe"]
         D1 --> D2
     end
@@ -330,19 +330,19 @@ flowchart TD
 
 ---
 
-## 7. A KOINÓ CSALÁDJA — gyermek, költözés, családi őrjárat
+## 7. A KOINO CSALÁDJA — gyermek, költözés, családi őrjárat
 
 ```mermaid
 %%{init: {"flowchart": {"wrappingWidth": 420}}}%%
 flowchart TD
-    SZ["🌳 a SZÜLŐ koinó<br/>a neve a születése lenyomata — D118/2<br/>a szabályai a születésben"]
+    SZ["🌳 a SZÜLŐ koino<br/>a neve a születése lenyomata — D118/2<br/>a szabályai a születésben"]
     UJ["🧬 Új koino-verzió… — a szülő TAGJA indítja<br/>a gyermek aláírt születése: a szülő, a létrehozó tagsága, a program neve"]
     KV["a KOINO-VERZIÓ KÁRTYA a szülőben<br/>a születés beágyazva + a teljes program kódja<br/>a feltöltő pontot tesz rá — D119"]
-    GY["🌱 a GYERMEK koinó<br/>a szülő szabályait és zártságát örökli<br/>a létrehozó a születésével költözik"]
+    GY["🌱 a GYERMEK koino<br/>a szülő szabályait és zártságát örökli<br/>a létrehozó a születésével költözik"]
     KI["📤 kiköltözés — a szülőben<br/>itt vezetné ki a pénzt — az még nincs"]
     BE["📥 beköltözés — a gyermekben<br/>a láncom a vágásig + a vágáskori tagság<br/>+ amit elhagyok — KZ3"]
     KEP["🧮 a gyermek KÉPE két rétegben — D118 ③<br/>MÚLT: a szülőé a vágásig — közös, rögzítve<br/>JELEN: a szerkezet mindenkié, a súly csak a költözőké"]
-    CSO["🔁 CSALÁDI ŐRJÁRAT — D119<br/>egy őrjárat a közös gyökerű koinóknak<br/>egy társsal egy munka, a közös koinók sorban"]
+    CSO["🔁 CSALÁDI ŐRJÁRAT — D119<br/>egy őrjárat a közös gyökerű koinoknak<br/>egy társsal egy munka, a közös koinok sorban"]
     SZ --> UJ --> KV
     UJ --> GY
     SZ --> KI --> BE --> GY
@@ -360,8 +360,8 @@ flowchart TD
 - **A gyermek a kódot is magával hozza (D119 ①).** A koino-verzió kártya „Kód” fülén a teljes program; a
   lap kimondja, ha a készülék más verziót futtat. *(Ez a forráskód-kormányzás 2. szintje — a
   [`kormanyzas.md`](kormanyzas.md).)*
-- **A családot egy őrjárat cseréli (D119 ③–④).** A közös gyökerű koinók egy munkában mennek, társanként;
-  a független koinók külön családok maradnak (⑤ — külön kötés-jegyzék, külön tábla-rekesz).
+- **A családot egy őrjárat cseréli (D119 ③–④).** A közös gyökerű koinok egy munkában mennek, társanként;
+  a független koinok külön családok maradnak (⑤ — külön kötés-jegyzék, külön tábla-rekesz).
 
 ---
 
@@ -375,10 +375,10 @@ szakaszában és az [`alappillerek.md`](alappillerek.md)-ben.
 %%{init: {"flowchart": {"wrappingWidth": 460}}}%%
 flowchart TB
     ALAP["🧱 AZ ALAP<br/>aláírt esemény · kanonikus alak · a kulcs — D15<br/>az egyetlen kapu · a tár és a mutató · az író — D70, D73<br/>összegző Merkle-fa · lánc-gyökér · lánc-ellenőrzés — D78–D82, D98"]
-    SZAM["🧮 A SZÁMÍTÁS<br/>szabályok · entitások · döntés → egyezmény · végrehajtás<br/>— D17, D85<br/>identitás: tagság · 2. lépcső szúrópróbával · kontraszt-jelzés<br/>— D56–D62, D93–D94<br/>a koinó szabályai a születésben · a két réteg — D118"]
+    SZAM["🧮 A SZÁMÍTÁS<br/>szabályok · entitások · döntés → egyezmény · végrehajtás<br/>— D17, D85<br/>identitás: tagság · 2. lépcső szúrópróbával · kontraszt-jelzés<br/>— D56–D62, D93–D94<br/>a koino szabályai a születésben · a két réteg — D118"]
     HAL["🌐 A HÁLÓZAT<br/>UDP-kapu · lyukfúrás · titkosítás — D69, D89<br/>szeletenkénti csere · szigorú (b) · közös halmaz<br/>· társ-emlékezet — D74, D97, D98<br/>kötések · hirdetőtábla · DHT-címjegyzék · raj — D71, D91<br/>kérelem · függő kérelem · továbbadás · kiszolgálási keret<br/>— D92, D109<br/>kereső-réteg · felderítés · törzs-határ · több forrás<br/>— D105–D114, D120<br/>családi őrjárat és csere — D119"]
-    FEL["🖥️ A FELÜLET<br/>pakli · modálok · alsó sáv · értesítések — D100–D104<br/>tér · csatlakozás · társak · költözés · koino-verzió — D118–D119<br/>meghívás a lapon: Meghívóim + profil — D121–D122<br/>a belépő megtalálása: a meghívó rekesze a BEP 44-en — M8,<br/>terepen igazolva mobilneten (11-05)<br/>telepítés egy bemásolt sorral — a Termux marad, D30; Windowson is (232.)<br/>a program rétegei: a koinó a számítás MAGJÁT nevezi meg,<br/>a lap két szinten szól — D123 ①; a telepítő sor frissít is — ②"]
-    NY["⏸️ NYITOTT — Csabánál, vagy a terepen mérendő<br/>a program rétegei: D123 ③ a protokoll nyelvváltozata (D124) —<br/>①–⑤ kész (a jel, a kopogásé, az emlékezet és a kimondás, a fordító-szél, a kiírt alakok) · ④ telepítés a kártyáról — építve (D125), a terepen próbálandó ·<br/>⑤ feltöltött nézetek — építve (D126), a telefonon kipróbálva · D127 a bekapcsolódás (a régi költözés)<br/>a BEP 5 utak (BP1–BP4) — átvizsgálva<br/>az őrjárat egyszeri megállása a terepen (11-05) — mérjük<br/>gyökér-koinó a lapról nem hozható létre<br/>a családi őrjárat terepi leletei — 18. szakasz<br/>a meghívás mellékes megfigyelései<br/>a 🅱️ terep: két mobilnet — kihagyva · IPv6<br/>régebbi kérdések: véletlen séta · olcsóbb tábla-kulcs ·<br/>a fájl-bájtok kézi útja · a hívás ötlete"]
+    FEL["🖥️ A FELÜLET<br/>pakli · modálok · alsó sáv · értesítések — D100–D104<br/>tér · csatlakozás · társak · költözés · koino-verzió — D118–D119<br/>meghívás a lapon: Meghívóim + profil — D121–D122<br/>a belépő megtalálása: a meghívó rekesze a BEP 44-en — M8,<br/>terepen igazolva mobilneten (11-05)<br/>telepítés egy bemásolt sorral — a Termux marad, D30; Windowson is (232.)<br/>a program rétegei: a koino a számítás MAGJÁT nevezi meg,<br/>a lap két szinten szól — D123 ①; a telepítő sor frissít is — ②"]
+    NY["⏸️ NYITOTT — Csabánál, vagy a terepen mérendő<br/>a program rétegei: D123 ③ a protokoll nyelvváltozata (D124) —<br/>①–⑤ kész (a jel, a kopogásé, az emlékezet és a kimondás, a fordító-szél, a kiírt alakok) · ④ telepítés a kártyáról — építve (D125), a terepen próbálandó ·<br/>⑤ feltöltött nézetek — építve (D126), a telefonon kipróbálva · D127 a bekapcsolódás (a régi költözés)<br/>a BEP 5 utak (BP1–BP4) — átvizsgálva<br/>az őrjárat egyszeri megállása a terepen (11-05) — mérjük<br/>gyökér-koino a lapról nem hozható létre<br/>a családi őrjárat terepi leletei — 18. szakasz<br/>a meghívás mellékes megfigyelései<br/>a 🅱️ terep: két mobilnet — kihagyva · IPv6<br/>régebbi kérdések: véletlen séta · olcsóbb tábla-kulcs ·<br/>a fájl-bájtok kézi útja · a hívás ötlete"]
     NI["○ MÉG NINCS<br/>a pénz — a 2. lépcső pénztárcája,<br/>a kiköltözés kivezetése<br/>a forráskód-kormányzás 2. és 5. lépcsője:<br/>az elismerés és a sürgősségi út — N9"]
     ALAP --> SZAM
     ALAP --> HAL
@@ -397,26 +397,26 @@ flowchart TB
 
 **A nyitott ágak, egy mondatban mindegyik** (hol a részlet):
 
-- **A program rétegei** (D123, Csaba 2026-11-06: „Mindet elfogadom”) — ✅ ① a koinó a számítás magját nevezi meg, a lap
+- **A program rétegei** (D123, Csaba 2026-11-06: „Mindet elfogadom”) — ✅ ① a koino a számítás magját nevezi meg, a lap
   két szinten szól; ✅ ② a telepítő sor a már telepített programot is frissíti (PR7); 🚧 ③ a protokoll nyelvváltozata (PR6 — D124: ✅ ① a jel és az egyezés; ⏭️ ② a kopogás jele → ③ a kimondás → ④ a fordító-szél
   → ⑤ a kiírt alakok — [`protokoll_valtozat_atvizsgalas.md`](protokoll_valtozat_atvizsgalas.md)) →
   ✅ ④ telepítés a kártyáról (PR5 — D125, építve, a terepen próbálandó) → ✅ ⑤ a közösség feltöltött nézetei (PR4 — D126, építve: a kód a
-  kártya szövegében, a saját koinójában, négy réteg mögött; a valódi lapon fej nélküli Chrome-mal és a telefon Brave-jén mérve, kontrollal —
+  kártya szövegében, a saját koinojában, négy réteg mögött; a valódi lapon fej nélküli Chrome-mal és a telefon Brave-jén mérve, kontrollal —
   [`nezetek_atvizsgalas.md`](nezetek_atvizsgalas.md)).
   → [`program_retegek_atvizsgalas.md`](program_retegek_atvizsgalas.md) 6–7. szakasz.
-- **A koinó többi BEP 5 útja** (2026-11-05, kód nélkül átvizsgálva) — a BEP 44 felé; ⏸️ BP1–BP4 Csabánál. →
+- **A koino többi BEP 5 útja** (2026-11-05, kód nélkül átvizsgálva) — a BEP 44 felé; ⏸️ BP1–BP4 Csabánál. →
   [`bep5_utak_atvizsgalas.md`](bep5_utak_atvizsgalas.md).
 - **Az őrjárat egyszeri megállása** (a terep, 2026-11-05) — a laptop őrjárata egy tábla-találat után 35 percre
   megállt (a gép nem aludt); az oka ismeretlen, a processzoridőt mérjük. →
   [`belepo_megtalalasa_atvizsgalas.md`](belepo_megtalalasa_atvizsgalas.md) 9. szakasz.
-- **Gyökér-koinó a lapról** — gyermeket már lehet a lapról (a fő menü „🧬 Új koino-verzió…”), de egy
-  független, új koinót csak a `koino "<név>"` parancs hoz létre.
+- **Gyökér-koino a lapról** — gyermeket már lehet a lapról (a fő menü „🧬 Új koino-verzió…”), de egy
+  független, új koinot csak a `koino "<név>"` parancs hoz létre.
 - **A családi őrjárat terepi leletei** (2026-11-01) — a többi között: a DHT-n a vakított témáinkon
   idegen címek is jelentkeznek, és a kör rájuk is kopog (~0,9 MB/nap); a jegyzetlen becenévvel a program
-  csendben üres, régi alakú koinót indít; a lap a megjegyzett entitást a rossz koinóban kéri; és a „⚠ más
+  csendben üres, régi alakú koinot indít; a lap a megjegyzett entitást a rossz koinoban kéri; és a „⚠ más
   programverzió” minden frissítés után megjelent (✅ D123 ① óta csak a mag eltérése figyelmeztet). → [`csaladi_orjarat_atvizsgalas.md`](csaladi_orjarat_atvizsgalas.md)
   18. szakasz, „Még nyitott leletek”.
-- **A meghívás mellékes megfigyelései** (2026-11-04) — az üres koinó alapítójának lapja is „a hiányzó
+- **A meghívás mellékes megfigyelései** (2026-11-04) — az üres koino alapítójának lapja is „a hiányzó
   részek tartóit még keresem”-et ír, és a meghívó címei közé a gép virtuális hálókártyájáé is bekerül.
   → [`meghivas_atvizsgalas.md`](meghivas_atvizsgalas.md) 8. szakasz vége.
 - **A terep 🅱️** (két mobilnetes telefon — Csaba: „ezt hagyjuk ki”) és **az IPv6** (egy második út a két

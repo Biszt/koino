@@ -14,11 +14,11 @@
 //   · a KÉSZÜLÉKKULCS (minden készüléknek saját — ez a fájl) írja alá a mindennapi eseményeket, a SAJÁT
 //     láncán: két készülék soha nem ágaztatja el egymást.
 //
-// ===== A TANÚSÍTVÁNY — KOINÓK FÖLÖTT (KU2 (A)) =====
+// ===== A TANÚSÍTVÁNY — KOINOK FÖLÖTT (KU2 (A)) =====
 //
 // `{ tipus, azonossag, keszulek, nev, ido, alairas }` — az azonosság kulcsa írja alá (a tartalom lenyomatát,
-// mint az eseményét). ⭐ Nincs benne koinó: egy tanúsítvány az azonosság MINDEN koinójában érvényes (a kulcs is
-// mindenhol ugyanaz — D25). Egy koinóban a készülék láncának ELSŐ eseménye hozza (`esemeny.js`
+// mint az eseményét). ⭐ Nincs benne koino: egy tanúsítvány az azonosság MINDEN koinojában érvényes (a kulcs is
+// mindenhol ugyanaz — D25). Egy koinoban a készülék láncának ELSŐ eseménye hozza (`esemeny.js`
 // `tanusitvanyKell`), és a kapu csak tanúsított eseményt enged be (`esemenyTar.js`).
 //
 // ⛔ A készülék kulcsa nem lehet az azonosság kulcsa: az azonosság nem ír a mindennapokban (KU6 (A)).
@@ -189,15 +189,15 @@ export async function tanusitvanyEllenorzese(t) {
 // ===================================
 //
 // `{ tipus, azonossag, keszulek, koinok: [{ koino, vagas, orokos }], ido, alairas }` — az azonosság kulcsa írja alá, mint a
-// készülék-tanúsítványt; koinók fölött. A `keszulek` a KIZÁRT; koinónként a VÁGÁS (a kizárt lánc utolsó még érvényes sorszáma —
-// 0: egy sem) és az ÖRÖKÖS (az azonosság egy másik készüléke, ő folytatja a láncot). ⭐ Ahol egy koinó nincs felsorolva, ott a
+// készülék-tanúsítványt; koinok fölött. A `keszulek` a KIZÁRT; koinonként a VÁGÁS (a kizárt lánc utolsó még érvényes sorszáma —
+// 0: egy sem) és az ÖRÖKÖS (az azonosság egy másik készüléke, ő folytatja a láncot). ⭐ Ahol egy koino nincs felsorolva, ott a
 // kizárt készülék egyetlen eseménye sem számít (8.2) — a vágás ott 0, örökös nincs. Nem a szabály szigorítása (D47), hanem annak
 // kimondása, hogy azok az események nem tőled jöttek.
 
 /** A kizárás-tanúsítvány fajtája (a lenyomatolt tartalom része). */
 export const KIZARAS_TIPUS = 'KeszulekKizaras';
 
-/** Egy kizárás legfeljebb ennyi koinót sorol fel. */
+/** Egy kizárás legfeljebb ennyi koinot sorol fel. */
 export const KIZARAS_KOINO_KORLAT = 256;
 
 const KIZARAS_MEZOK = 'alairas,azonossag,ido,keszulek,koinok,szuletes,tipus';   // ⭐⭐ (②a): a születéssel
@@ -227,15 +227,15 @@ export function kizarasAlakiHibaja(k) {
   if (typeof k.keszulek !== 'string' || !AZONOSITO.test(k.keszulek)) return 'a kizárt készülék egy nyilvános kulcs';
   if (k.azonossag === k.keszulek) return 'az azonosság kulcsa nem zárható ki (az a kulcscsere — ②)';
   if (!Array.isArray(k.koinok) || k.koinok.length > KIZARAS_KOINO_KORLAT) {
-    return 'a kizárás koinói egy lista (legfeljebb ' + KIZARAS_KOINO_KORLAT + ')';
+    return 'a kizárás koinoi egy lista (legfeljebb ' + KIZARAS_KOINO_KORLAT + ')';
   }
   let elozo = null;
   for (const x of k.koinok) {
     if (!x || typeof x !== 'object' || Array.isArray(x) || Object.keys(x).sort().join(',') !== 'koino,orokos,vagas') {
-      return 'a kizárás egy koinója: { koino, vagas, orokos }';
+      return 'a kizárás egy koinoja: { koino, vagas, orokos }';
     }
-    if (typeof x.koino !== 'string' || !x.koino.length || x.koino.length > 200) return 'a kizárás koinója egy név';
-    if (elozo !== null && !(x.koino > elozo)) return 'a kizárás koinói rendezve, egyszer';
+    if (typeof x.koino !== 'string' || !x.koino.length || x.koino.length > 200) return 'a kizárás koinoja egy név';
+    if (elozo !== null && !(x.koino > elozo)) return 'a kizárás koinoi rendezve, egyszer';
     elozo = x.koino;
     if (!Number.isSafeInteger(x.vagas) || x.vagas < 0) return 'a vágás egy nemnegatív egész (a még érvényes utolsó sorszám)';
     if (typeof x.orokos !== 'string' || !AZONOSITO.test(x.orokos) || x.orokos === k.keszulek || x.orokos === k.azonossag) {
@@ -248,7 +248,7 @@ export function kizarasAlakiHibaja(k) {
 }
 
 /**
- * Az azonosság kulcsa aláírja: „ez a készülék nem az enyém többé — koinónként eddig a sorszámig, onnan az örökös folytatja”.
+ * Az azonosság kulcsa aláírja: „ez a készülék nem az enyém többé — koinonként eddig a sorszámig, onnan az örökös folytatja”.
  * @param {CryptoKeyPair} azonossagKulcspar
  * @param {string} keszulek - a kizárt készülék kulcsa
  * @param {Array<{koino: string, vagas: number, orokos: string}>} koinok
@@ -290,7 +290,7 @@ export async function kizarasEllenorzese(k) {
 }
 
 /**
- * A kizárás egy koinóban: a vágás és az örökös — ha a koinó nincs felsorolva, a vágás 0 (a kizárt egyetlen eseménye sem
+ * A kizárás egy koinoban: a vágás és az örökös — ha a koino nincs felsorolva, a vágás 0 (a kizárt egyetlen eseménye sem
  * számít), örökös nincs.
  * @returns {{vagas: number, orokos: string|null}}
  */

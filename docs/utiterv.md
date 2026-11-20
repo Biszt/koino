@@ -105,7 +105,7 @@
 > ⛔ A **séta elvetve** (mérve gyenge, és a D62 óta a szerepe is megszűnt) ·
 > ⏸️ a **`lancGyoker`** jelentése rögzítve (D63), a megvalósítás mérés alapján jön.
 > ✅ **Csaba lezárta a méréseket:** *„eleget mértünk. Nekem ez így már megfelel, első
-> koinónak."*
+> koinonak."*
 >
 > ⭐⭐⭐ **A SZERKEZET, EGY MONDATBAN (D56):** *az 1. lépcső olcsó, mert a kapu úgysem véd;
 > a 2. lépcső drága, mert ott a zsákmány; és a védelem egyikben sem a kapu, hanem hogy a
@@ -499,7 +499,7 @@ a másik entitásból semmit; másodszorra 2 érkezett, de **0 új** (a kapu fel
 rendes csere változatlanul működik. **217 önpróba rendben** (203 + 14).
 
 ⚠️ **Egy ismert viselkedés:** a szelet-lekérés **az entitást hozza, nem a környezetet** — ha
-a koino-létrehozás eseménye nincs meg, a készülék azt mondja, „még nincs koinód". A
+a koino-létrehozás eseménye nincs meg, a készülék azt mondja, „még nincs koinod". A
 gyakorlatban ez nem gond (böngészni azon belül szoktunk), de tudni kell róla.
 
 ### 3.3 ⏸️ AZ ENTITÁS-KÖZPONTÚ TÁR — elhalasztva (2026-09-03)
@@ -528,7 +528,7 @@ a koino méretével.
 | **SK10** | láthatósági küszöb a keresőn | Szakasz 6 |
 | **SK7** | DHT vagy bizalmi hálós útvonal | Szakasz 6, **méréssel** |
 | **—** | a **születéskori tanúsítás-öröklés** csak szétváláskor, vagy szándékos alapításnál is? | ⏸️ Csaba: *„maradhat későbbre"* — Szakasz 4 |
-| **—** | ⚠️ **mi a felület futtatókörnyezete?** A D29 szerint a koino önálló program, nem böngésző — de a felület a prototípus böngészős paklijából öröklődik. Helyi kiszolgáló + böngésző mint kliens (7. szabály engedi), vagy natív felület? | ✅ **ELDŐLT (2026-09-06):** helyi kiszolgáló + böngésző mint kliens, **vékony lappal**. A natív elesett (mind függőség → 6. szabály kemény fele), a „lap futtatja a koinót" a D29 miatt. ⭐ A böngésző **cserélhető rajzoló**: a program nem importálja a felületet, és a CLI teljes út marad — [`felulet_terv.md`](felulet_terv.md) 3. pont |
+| **—** | ⚠️ **mi a felület futtatókörnyezete?** A D29 szerint a koino önálló program, nem böngésző — de a felület a prototípus böngészős paklijából öröklődik. Helyi kiszolgáló + böngésző mint kliens (7. szabály engedi), vagy natív felület? | ✅ **ELDŐLT (2026-09-06):** helyi kiszolgáló + böngésző mint kliens, **vékony lappal**. A natív elesett (mind függőség → 6. szabály kemény fele), a „lap futtatja a koinot" a D29 miatt. ⭐ A böngésző **cserélhető rajzoló**: a program nem importálja a felületet, és a CLI teljes út marad — [`felulet_terv.md`](felulet_terv.md) 3. pont |
 
 ---
 

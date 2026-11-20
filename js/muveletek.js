@@ -37,8 +37,8 @@ import { helyreallitasokAllapota, helyreallitasBizonyiteka, azonossagLancaTarbol
   JOVAHAGYAS } from './allapot/helyreallitas.js';   // ⭐⭐ D128 (②e)
 import { tarKizarasai, tarKulcscserei, cserenKivulE, tanusitvanyKorszaka } from './allapot/kizaras.js';   // ⭐⭐ D128 (③c)
 import { tarKezelese, jegyzekbe, kezelesHianyai, elvetesFeljegyzese, lancBizonyitekai, lancJele, ujKezelesJegyzek }
-  from './allapot/kezelesTerjesztes.js';   // ⭐⭐ D128 (③b): a kezelés minden koinómba
-import { lancNezete } from './allapot/koinoLanc.js';   // ⭐ D118 (③, ⑤b): a szerző lánca a koinóban, a jelen réteg szerint
+  from './allapot/kezelesTerjesztes.js';   // ⭐⭐ D128 (③b): a kezelés minden koinomba
+import { lancNezete } from './allapot/koinoLanc.js';   // ⭐ D118 (③, ⑤b): a szerző lánca a koinoban, a jelen réteg szerint
 import { koinoSzabalyai, teljesSzabalyok } from './esemeny/koinoSzabalyok.js';
 // ⭐⭐ D129 (②b): a kézikönyv-nevek az eseményeken (a döntés minden eseménye a kézikönyv szeletébe kerül — MA4 (B))
 import { esemenyRendszerNevei, ESEMENY_NEV_KORLAT } from './esemeny/rendszerEntitas.js';
@@ -195,7 +195,7 @@ async function esemenytTeszek(kornyezet, tipus, adat, beallitas = {}) {
 }
 
 /**
- * ⭐⭐ D118/2 (①b): a koinó SZABÁLYAI a születéséből — lenyomat-nevű koinónál a születés azonosítója maga a koinó neve,
+ * ⭐⭐ D118/2 (①b): a koino SZABÁLYAI a születéséből — lenyomat-nevű koinonál a születés azonosítója maga a koino neve,
  * tehát egyetlen tár-kérdés. Ha nincs meg (vagy a régi alak), a mai értékek.
  * @returns {Promise<Object>} `koinoSzabalyok.js` `koinoSzabalyai` alakja
  */
@@ -206,7 +206,7 @@ export async function koinomSzabalyai(kornyezet) {
 }
 
 /**
- * Egy szerző AZONOSSÁG-HORGONYA ebben a koinóban (D56): az alapítóé a `KoinoLetrehozas`, mindenki
+ * Egy szerző AZONOSSÁG-HORGONYA ebben a koinoban (D56): az alapítóé a `KoinoLetrehozas`, mindenki
  * másé a (legkorábbi) `Belepes` eseménye. ⚠️ A tárban lévő láncából — ha nincs meg, null (D19).
  * @returns {Promise<string|null>}
  */
@@ -235,7 +235,7 @@ export async function ellentmondasBejelentese(kornyezet, adat) {
   // tanúsítványa sincs meg — a bizonyítéka nálunk úgysem ellenőrizhető).
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, adat?.kit);
   if (!horgony) {
-    throw new Error('A vádoltnak nincs azonosság-szelete ebben a koinóban (se Belepes, se '
+    throw new Error('A vádoltnak nincs azonosság-szelete ebben a koinoban (se Belepes, se '
       + 'KoinoLetrehozas nálunk) — a bizonyíték nem helyezhető el (D80).');
   }
   const vad = await ellentmondasEllenorzese(adat, kornyezet.koino,
@@ -281,7 +281,7 @@ const ELAVULT_PROBAK = 20;
  */
 async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
   const { entitas = null, horgonyozzunk = false } = beallitas;
-  // ⭐ D118 (⑤b): a koinóbeli láncom végére (a nem bekapcsolódó gyermekbeli lánca 1-ről indul; a bekapcsolódás a lánc-pontja után).
+  // ⭐ D118 (⑤b): a koinobeli láncom végére (a nem bekapcsolódó gyermekbeli lánca 1-ről indul; a bekapcsolódás a lánc-pontja után).
   const veg = await ujSajatHelye(kornyezet.tar, sajatLanc(kornyezet), kornyezet.koino, tipus, adat);
 
   // A saját szeletét nyitó eseménynél az entitás-sorszám mindig 1 — nincs mihez képest
@@ -361,14 +361,14 @@ async function esemenyAlairasa(kornyezet, tipus, adat, beallitas) {
 async function sajatKiosztott(kornyezet, entitas) {
   const { alap, alapok } = await sajatAlapjaim(kornyezet);
   // ⭐⭐ D118 (③): a JELEN réteg szerint — a bekapcsolódó (a létrehozó) szülőbeli pontjai is a láncom (a hozott kiosztás);
-  // ugyanaz a szabály, amit a szabály-réteg a koinó képében lát (`jelenbenSzamit`), különben a bemondott összeg
+  // ugyanaz a szabály, amit a szabály-réteg a koino képében lát (`jelenbenSzamit`), különben a bemondott összeg
   // ellentmondana a láncomnak.
   // ⭐ ④a: a saját bekapcsolódásom (a láncomban) mondja meg, mit hozok — a lánc-pontot és az elhagyott pontokat.
   // ⭐ D118 (⑤b): a LÁNCOM (a hozott előtaggal) adja a folytonosságot, a jelen réteg a súlyt — mint a szabály-rétegben, ahol a
   // láncon lévő, de a jelenből kizárt esemény ismert sorszám, nem hézag.
   const nezet = await lancNezete(kornyezet.tar, kornyezet.koino, sajatLanc(kornyezet));
   const lanc = (await sajatLancEsemenyei(kornyezet.tar, sajatLanc(kornyezet))).filter(nezet.tagja);
-  // ⭐ D118/2: a keret a koinóé (a születéséből) — ⭐⭐ D128 (9.9): és a LÁNCÉ (a készülékemé): az alap (ha én írtam a horgonyt) +
+  // ⭐ D118/2: a keret a koinoé (a születéséből) — ⭐⭐ D128 (9.9): és a LÁNCÉ (a készülékemé): az alap (ha én írtam a horgonyt) +
   // a kapott (az átvételeim) — eseményenként, ugyanaz, amit a szabály-réteg használ (`lancLepese`).
   const allas = ujLancAllas();
   // ⭐ A folytonosságot is ugyanúgy követjük, mint a szabály (a saját láncunk rendes esetben
@@ -396,8 +396,8 @@ async function sajatKiosztott(kornyezet, entitas) {
 }
 
 /**
- * ⭐⭐ D128 (9.9): a láncaim ALAPJA ebben a koinóban — a sajátomé (a koinó kerete, ha ez a készülék írta az azonosságom
- * horgonyát; különben 0), és a többi készülékemé (az átvételek ítéletéhez). A koinó kerete, ha a környezet szabályt ad.
+ * ⭐⭐ D128 (9.9): a láncaim ALAPJA ebben a koinoban — a sajátomé (a koino kerete, ha ez a készülék írta az azonosságom
+ * horgonyát; különben 0), és a többi készülékemé (az átvételek ítéletéhez). A koino kerete, ha a környezet szabályt ad.
  * @returns {Promise<{alap: number, alapok: Object}>}
  */
 async function sajatAlapjaim(kornyezet) {
@@ -410,7 +410,7 @@ async function sajatAlapjaim(kornyezet) {
 }
 
 /**
- * ⭐ D119 (①a): mennyi tudatpontom szabad még ebben a koinóban (a keret − a kiosztott) — ugyanabból a számításból, mint a
+ * ⭐ D119 (①a): mennyi tudatpontom szabad még ebben a koinoban (a keret − a kiosztott) — ugyanabból a számításból, mint a
  * bemondott összeg (`sajatKiosztott`). A koino-verzió ezzel néz meg előre, mielőtt a gyermek megszületne.
  * @param {Object} kornyezet
  * @returns {Promise<number>}
@@ -421,7 +421,7 @@ export async function szabadTudatpontjaim(kornyezet) {
 }
 
 /**
- * ⭐⭐ D128 (9.9): a SAJÁT LÁNCOM (készülékem) kerete ebben a koinóban — az alap (a koinó kerete, ha ez a készülék írta az
+ * ⭐⭐ D128 (9.9): a SAJÁT LÁNCOM (készülékem) kerete ebben a koinoban — az alap (a koino kerete, ha ez a készülék írta az
  * azonosságom horgonyát; különben 0) + a kapott (amit a többi készülékemtől átvettem).
  * @param {Object} kornyezet
  * @returns {Promise<number>}
@@ -455,7 +455,7 @@ export async function keretAtadasa(kornyezet, kinek, tobblet) {
     throw new Error('A fogadó nem a te készüléked — a tanúsítványa az azonosságodtól nincs meg nálam.');
   }
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
-  if (!horgony) throw new Error('Ebben a koinóban nincs azonosság-szeleted (nem léptél be) — nincs mit átadni.');
+  if (!horgony) throw new Error('Ebben a koinoban nincs azonosság-szeleted (nem léptél be) — nincs mit átadni.');
   // ⭐ D70: az adat függvény — a bemondott összeg a friss láncomból.
   const adat = async () => {
     const { osszeg, regi, keret } = await sajatKiosztott(kornyezet, kinek);
@@ -507,7 +507,7 @@ export async function keretAtfolyasa(kornyezet, kinek, { hatar }) {
 }
 
 /**
- * ⭐⭐ D128 (③c — 9.12, KH1 (A)): AZ ÁTFOLYÁS HATÁRÁNAK ALAPÉRTÉKE — a koinó keretének 20%-a (10 000-nél 2000). Csaba (2026-11-16):
+ * ⭐⭐ D128 (③c — 9.12, KH1 (A)): AZ ÁTFOLYÁS HATÁRÁNAK ALAPÉRTÉKE — a koino keretének 20%-a (10 000-nél 2000). Csaba (2026-11-16):
  * „jó a 2000, de írdfel, hogy ezek az értékek, személyre szabhatók lesznek majd.” — ez csak az alapérték: a határt mindenki maga
  * szabja meg, készülékenként (a lapon — ④); addig ez érvényes.
  */
@@ -519,7 +519,7 @@ export function atfolyasHatarAlap(keret) {
 }
 
 /**
- * ⭐⭐ D128 (③c): ÉRVÉNYES-E a készülékem ebben a koinóban — a tanúsítványa az azonosságomé, nincs kizárva, és a kulcscsere sem ejtette
+ * ⭐⭐ D128 (③c): ÉRVÉNYES-E a készülékem ebben a koinoban — a tanúsítványa az azonosságomé, nincs kizárva, és a kulcscsere sem ejtette
  * ki (a tár szerint). Egy kizárt (ellopott) készüléknek semmit nem adunk, és tőle semmit nem veszünk át.
  * @param {Object} kornyezet
  * @param {string} keszulek
@@ -535,7 +535,7 @@ export async function sajatKeszulekErvenyesE(kornyezet, keszulek) {
 }
 
 /**
- * ⭐⭐ D128 (③c — 9.12): A NEKEM SZÓLÓ ÁTADÁSOK ÁTVÉTELE — ha egy másik (érvényes) készülékem átadást írt nekem ebben a koinóban, és
+ * ⭐⭐ D128 (③c — 9.12): A NEKEM SZÓLÓ ÁTADÁSOK ÁTVÉTELE — ha egy másik (érvényes) készülékem átadást írt nekem ebben a koinoban, és
  * még nem vettem át mindet (a halmozott összeg több, mint amit tőle kaptam), átveszem a legutolsót (az a halmozott — `keretAtvetele`).
  * ⭐ Találkozás nem kell: az átadás a cserével (vagy egy harmadik készülékkel) jön, és a parancsok elején, az őrjárat körében és a
  * saját készülékkel való csere után is lefut. ⚠️ Amit a számítás nem fogadna el (pl. az adó közben kiesett), azt kihagyja.
@@ -571,7 +571,7 @@ export async function keretAtvetelekGondozasa(kornyezet) {
 /**
  * ⭐⭐ D128 (③c — 9.12, KH1 (A)): A SAJÁT KÉSZÜLÉKEM A CSERÉBEN — ha a társ az én (érvényes) készülékem: a nekem szóló átadásait
  * átveszem, és ha nálam több a szabad pont, a különbség felét átadom neki, de a része legfeljebb a határig nő (`keretAtfolyasa` —
- * a határ az ADÓ szabálya; alapból a koinó keretének 20%-a). A határ fölött nem adok magától (a kérdés a lapé — ④). Egy kizárt vagy a
+ * a határ az ADÓ szabálya; alapból a koino keretének 20%-a). A határ fölött nem adok magától (a kérdés a lapé — ④). Egy kizárt vagy a
  * kulcscsere által kiejtett készüléknek semmit.
  * @param {Object} kornyezet
  * @param {string} tarsKeszulek - a társ készülékének kulcsa (a kapu kötéséből)
@@ -585,7 +585,7 @@ export async function sajatKeszulekTalalkozasa(kornyezet, tarsKeszulek, { hatar 
   console.log('muveletek.sajatKeszulekTalalkozasa - KEZDÉS', { tars: tarsKeszulek.slice(0, 8) });
   ki.ervenyes = true;
   ki.atvetelek = (await keretAtvetelekGondozasa(kornyezet)).atvetelek;
-  // ⭐⭐ (④c) a személyes határ (a fogadó készülékre — a lapon vagy a `keszulek hatar`-ral), de a koinó keretén túl nem
+  // ⭐⭐ (④c) a személyes határ (a fogadó készülékre — a lapon vagy a `keszulek hatar`-ral), de a koino keretén túl nem
   const keret = (await koinomSzabalyai(kornyezet)).tudatpontKeret;
   const h = Number.isSafeInteger(hatar) && hatar >= 0 ? Math.min(hatar, keret) : atfolyasHatarAlap(keret);
   const r = await keretAtfolyasa(kornyezet, tarsKeszulek, { hatar: h });
@@ -608,7 +608,7 @@ export async function keretAtvetele(kornyezet, atadas) {
     throw new Error('Ez nem egy másik készülékednek nekem szóló keret-átadása.');
   }
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
-  if (!horgony) throw new Error('Ebben a koinóban nincs azonosság-szeleted (nem léptél be).');
+  if (!horgony) throw new Error('Ebben a koinoban nincs azonosság-szeleted (nem léptél be).');
   const ado = lancKulcsa(atadas);
   // ⭐ Előre ugyanaz az ítélet, amit a számítás mond majd (`keretAtvetelMerlege`) — egy nem számító átvételt nem írunk alá.
   const { allas, folytonos, alapok } = await sajatKiosztott(kornyezet, null);
@@ -627,7 +627,7 @@ export async function keretAtvetele(kornyezet, atadas) {
 // ===================================
 
 /**
- * Létrehoz egy koinót. A Szakasz 1-ben a MINIMUMOT tartalmazza (név, leírás); a D25
+ * Létrehoz egy koinot. A Szakasz 1-ben a MINIMUMOT tartalmazza (név, leírás); a D25
  * további paraméterei (belépési szabály, hitelesítési küszöb) a bizalmi hálóval együtt
  * jönnek majd, és a D13/c szerint amúgy is entitássá válnak.
  *
@@ -653,21 +653,21 @@ export function koinoLetrehozasa(kornyezet, nev, leiras, alapitok, beallitas = {
     leiras: leiras || null,
     alapitok: Array.isArray(alapitok) ? [...alapitok] : [],
     // ⭐⭐ D89/2 (Csaba, 2026-10-02/03): ZÁRT vagy NYÍLT — a létrehozáskor dől el, és nem változtatható.
-    // Alapból ZÁRT (a nyílthoz ki kell mondani). A zárt koinó tartalmát a készülék csak tagnak adja ki —
+    // Alapból ZÁRT (a nyílthoz ki kell mondani). A zárt koino tartalmát a készülék csak tagnak adja ki —
     // ⚠️ a betartatás az E-vel jön (a tag a kézfogásban bizonyítja magát); addig a mező ott van, de nem tilt.
     zart: beallitas.zart !== false,
-    // ⭐ D93/5 (D28/3): a koinó kötelező profil-mezői (pl. ['nev', 'telepules']) — ha nincs, a koinó nem vár profilt.
+    // ⭐ D93/5 (D28/3): a koino kötelező profil-mezői (pl. ['nev', 'telepules']) — ha nincs, a koino nem vár profilt.
     ...(Array.isArray(beallitas.profil) && beallitas.profil.length ? { profil: [...beallitas.profil] } : {}),
-    // ⭐⭐ D118/2 (①b): a koinó SZABÁLYAI — MIND (a megadottak a mai értékek helyén), hogy egy későbbi program alapértéke ne
-    // írhassa át őket; a kapu ellenőrzi (`koinoSzabalyok.js`). Nem változtatható: egy másik szabály egy másik koinó (a bekapcsolódás).
+    // ⭐⭐ D118/2 (①b): a koino SZABÁLYAI — MIND (a megadottak a mai értékek helyén), hogy egy későbbi program alapértéke ne
+    // írhassa át őket; a kapu ellenőrzi (`koinoSzabalyok.js`). Nem változtatható: egy másik szabály egy másik koino (a bekapcsolódás).
     szabalyok: teljesSzabalyok(beallitas.szabalyok),
     // ⭐⭐ D118 (②a): a GYERMEK születése a szülő nevét és a létrehozó tagsági bizonyítékát hozza (KZ2 — `koinoLanc.js`).
     ...(beallitas.szulo ? { szulo: beallitas.szulo, szuloTagsag: beallitas.szuloTagsag } : {}),
     // ⭐⭐ D119 (A): amit a létrehozó a születésével NEM hoz (KZ3 (A) — a koino-verzió kártyáira tett pontja: a szülő ügye).
     ...(beallitas.szulo && Array.isArray(beallitas.elhagy) && beallitas.elhagy.length ? { elhagy: [...beallitas.elhagy] } : {}),
-    // ⭐⭐ D119 (①a): a koinó PROGRAMJA — a kód-csomag jegyzékének hivatkozása (`tar/kodCsomag.js`): a kód köti a koinót.
+    // ⭐⭐ D119 (①a): a koino PROGRAMJA — a kód-csomag jegyzékének hivatkozása (`tar/kodCsomag.js`): a kód köti a koinot.
     ...(beallitas.program ? { program: { ...beallitas.program } } : {}),
-    // ⭐⭐ D123 (PR1): a koinó MAGJA — a számítás magjának hivatkozása (`tar/kodCsomag.js` `magJegyzeke`): ez köti a koinót egy
+    // ⭐⭐ D123 (PR1): a koino MAGJA — a számítás magjának hivatkozása (`tar/kodCsomag.js` `magJegyzeke`): ez köti a koinot egy
     // számításhoz; a teljes program (`program`) csak tájékoztat (a felület, a protokoll, a helyi viselkedés szabadon változhat).
     ...(beallitas.mag ? { mag: { lenyomat: beallitas.mag.lenyomat, bajt: beallitas.mag.bajt } } : {})
   });
@@ -679,7 +679,7 @@ export function koinoLetrehozasa(kornyezet, nev, leiras, alapitok, beallitas = {
  * darab — D72), és magába ágyazza a gyermek aláírt születését (`szuletes`) — ebből tudja a szülő, hogy van gyermeke —, a
  * kódot pedig a születés programjával nevezi meg (`kod`). A kapu a beágyazott születést a szülő születésével ellenőrzi.
  * ⚠️ A pontot a hívó rendeli hozzá (D14: pont nélkül az entitás nem létezik — mint a gondolatnál).
- * @param {Object} kornyezet - a szülő koinó környezete
+ * @param {Object} kornyezet - a szülő koino környezete
  * @param {{szuletes: Object, leiras?: string, kodBajt?: number}} adatok - a gyermek születése (a programmal); a `kodBajt` a
  *   kód-csomag teljes mérete (a jegyzék és a fájlok — a tárolási vállalás mértékébe, D26)
  */
@@ -755,7 +755,7 @@ function allitokRola(kornyezet, tipus, { kit, horgonya, sajatBelepes, profil, fe
   // ⭐ D93/5: a meghívás megnevezheti a meghívott profiljának lenyomatát (a meghívó ezzel tanúsítja a nevet — D28/2).
   const adat = { kit, sajatBelepes, ...(tipus === 'Meghivas' && typeof profil === 'string' ? { profil } : {}),
     // ⭐ D122: a meghívó nyilatkozata (a meghívó kiállításakor: a meghívott valódi személy, és tudomása szerint még nem csatlakozott
-    // ehhez a koinóhoz) — állítás, a számítás nem ellenőrzi; a visszacsatolásnak bizonyíték (D56).
+    // ehhez a koinohoz) — állítás, a számítás nem ellenőrzi; a visszacsatolásnak bizonyíték (D56).
     ...(tipus === 'Meghivas' && nyilatkozat === true ? { nyilatkozat: true } : {}),
     // ⛔ A TANÚSÍTÁS BEMONDÁSA (D47) — 2026-10-04-ig ITT ELVESZETT (a 9/c 4.5 óta csak `{ kit, sajatBelepes }` ment ki), így
     // egy nem alapító tanúsító kézi tanúsítása soha nem számított („nem mondta be, mire támaszkodott”). A D94 próbája találta.
@@ -765,7 +765,7 @@ function allitokRola(kornyezet, tipus, { kit, horgonya, sajatBelepes, profil, fe
 }
 
 /**
- * ⭐⭐ D93/5: A PROFIL (D28 a D88 alakjában) — a darab (a koinó kötelező mezői + egy véletlen só) a fájl-tárba kerül,
+ * ⭐⭐ D93/5: A PROFIL (D28 a D88 alakjában) — a darab (a koino kötelező mezői + egy véletlen só) a fájl-tárba kerül,
  * az esemény (a SAJÁT azonosság-szeletembe) csak a darab lenyomatát hordozza: só nélkül egy név kitalálható volna,
  * így nem. A törlés: a darabot senki nem szolgálja ki tovább (D88/2); az utolsó Profil számít (D28/3).
  * @param {Object} kornyezet - { tar, koino, kulcspar, darabTar }
@@ -789,7 +789,7 @@ export async function profilMegadasa(kornyezet, mezok) {
  * azonosság-szeletembe (a D85 T3 mintája). Ha már van ugyanilyen (vagy rövidebb) csomagom, nem írok újat.
  * @returns {Promise<{kiadva: boolean, ok: string, melyseg?: number, esemeny?: Object}>}
  */
-/** ⭐ D94: a folyamat emléke — melyik tanúsítás-halmazt néztük már végig (koinó + horgony → az azonosítók). */
+/** ⭐ D94: a folyamat emléke — melyik tanúsítás-halmazt néztük már végig (koino + horgony → az azonosítók). */
 const LEPCSO_BEMONDAS_EMLEK = new Map();
 
 /**
@@ -803,7 +803,7 @@ export async function lepcsoBemondasKiadasa(kornyezet) {
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
   if (!horgony) return { kiadva: false, ok: 'nincs horgonyom (belep)' };
   if (await alapitoHorgony(kornyezet.tar, kornyezet.koino, horgony)) {
-    return { kiadva: false, ok: 'alapító — a 2. lépcsőm a koinó létrehozásából következik' };
+    return { kiadva: false, ok: 'alapító — a 2. lépcsőm a koino létrehozásából következik' };
   }
   // ⚠️ Az őrjárat minden körben hív: ha a szeletemben lévő tanúsítások halmaza azóta nem változott, nem számolunk újra
   // (különben egy odaszórt hamis tanúsítás minden körben teljes újraszámolást váltana ki). Folyamatonkénti emlék.
@@ -859,7 +859,7 @@ export async function tagsagiCsomagKiadasa(kornyezet) {
   if (r.melyseg === 0) {
     // ⭐ D118 (④b): a bekapcsolódott horgonya maga a bizonyíték (a bekapcsolódás — a tagsági kísérők viszik), az alapítóé a születés.
     return { kiadva: false, melyseg: 0, ok: idx.horgonyok.get(horgony)?.tipus === 'Bekapcsolodas'
-      ? 'bekapcsolódott — a horgonyom maga a bizonyíték (a bekapcsolódásom)' : 'alapító — a láncom maga a koinó létrehozása' };
+      ? 'bekapcsolódott — a horgonyom maga a bizonyíték (a bekapcsolódásom)' : 'alapító — a láncom maga a koino létrehozása' };
   }
   const lanc = tagsagiLanc(idx, horgony);
   // Van-e már legalább ilyen rövid csomagom (a meglévő csomag mélysége a saját láncából számítható)?
@@ -880,7 +880,7 @@ export async function tagsagiCsomagKiadasa(kornyezet) {
 }
 
 /**
- * ⭐ BELÉPÉS: megnyitom a SAJÁT azonosság-szeletemet ebben a koinóban.
+ * ⭐ BELÉPÉS: megnyitom a SAJÁT azonosság-szeletemet ebben a koinoban.
  *
  * Ez még nem tagság — csak annyit mond: *„ide szeretnék tartozni."* A tagság ebből és a
  * kapott meghívásokból SZÁMÍTÓDIK (`allapot/identitas.js`), nem ez az esemény adja.
@@ -917,7 +917,7 @@ export function bekapcsolodas(kornyezet, adat) {
 }
 
 /**
- * ⭐ MEGHÍVÁS: behívok valakit a koinóba.
+ * ⭐ MEGHÍVÁS: behívok valakit a koinoba.
  *
  * Az esemény a MEGHÍVOTT szeletébe kerül (`entitas` = az ő horgonya), nem az enyémbe —
  * ettől lesz a „hányan hívták be X-et?” kérdés korlátos, akárhányan vagyunk.
@@ -1161,7 +1161,7 @@ export async function gondolatLetrehozasa(
 // KATEGÓRIA ÉS GONDOLATTÍPUS (Szakasz 5.4)
 // ===================================
 //
-// ⭐⭐ EZ A KÉT TÍPUS 2026-09-06-IG NEM LÉTEZETT A KOINÓBAN — a végpont-térkép találata
+// ⭐⭐ EZ A KÉT TÍPUS 2026-09-06-IG NEM LÉTEZETT A KOINOBAN — a végpont-térkép találata
 // volt (`docs/szakasz5_terv.md` 7. szakasz, 2. pont): a prototípus tíz végpontja mögött
 // nem volt esemény. A domain-fogalom viszont mindig is megvolt: *„a kategóriák és a
 // gondolattípusok rendszerezik a gondolatokat."*
@@ -1178,7 +1178,7 @@ export async function gondolatLetrehozasa(
 /**
  * A közös váz: kategória és gondolattípus ugyanaz, csak a `tipus` más.
  *
- * ⚠️ A NÉV a `cim` mezőbe kerül. Ez szándékos: a koinóban MINDEN entitásnak `cim`-e van,
+ * ⚠️ A NÉV a `cim` mezőbe kerül. Ez szándékos: a koinoban MINDEN entitásnak `cim`-e van,
  * és így az állapot-számítás, a rendezés, a keresés és az egyezmény-végrehajtás
  * változtatás nélkül működik rajtuk. A prototípus kártyái `nev`-et olvasnak — azt a
  * felület fordítja (`felulet/js/kartyaAdat.js`).
@@ -1252,7 +1252,7 @@ export async function tudatpontRendezese(kornyezet, entitas, pont, szerep = 'akt
   // friss láncból újraszámolja a bemondott összeget, mielőtt újra aláírna.
   const adat = async () => {
     // A tudatpont ÁTRENDEZHETŐ: ami ezen az entitáson már ott van, az nem „új" kiadás.
-    // ⭐ D118/2: a koinó kerete — ⭐⭐ D128 (9.9): a készülékemé (az alap + a kapott).
+    // ⭐ D118/2: a koino kerete — ⭐⭐ D128 (9.9): a készülékemé (az alap + a kapott).
     const { osszeg, regi, keret } = await sajatKiosztott(kornyezet, entitas);
     const kiosztva = osszeg - regi + pont;
 
@@ -1447,8 +1447,8 @@ export function kezdoPontokElosztasa(osszes, darab) {
 // ===================================
 
 /**
- * A kizárás BEVITELE ebbe a koinóba: a tanúsítványát (az azonosság kulcsa írta alá) egy `Kizaras` esemény hozza, a kizárt
- * azonosságának szeletébe. ⭐ Bárki beviheti, akihez eljutott (mint az ellentmondás bizonyítékát — D80); a felsorolt koinókba az
+ * A kizárás BEVITELE ebbe a koinoba: a tanúsítványát (az azonosság kulcsa írta alá) egy `Kizaras` esemény hozza, a kizárt
+ * azonosságának szeletébe. ⭐ Bárki beviheti, akihez eljutott (mint az ellentmondás bizonyítékát — D80); a felsorolt koinokba az
  * örökös hozza, a folytatás előtt.
  * @param {Object} kornyezet
  * @param {Object} kizaras - a kizárás-tanúsítvány (`kulcs/keszulek.js` `kizarasKeszitese`)
@@ -1458,7 +1458,7 @@ export async function kizarasBevitele(kornyezet, kizaras) {
   console.log('muveletek.kizarasBevitele - KEZDÉS', { keszulek: kizaras?.keszulek?.slice(0, 8) });
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kizaras?.azonossag);
   if (!horgony) {
-    throw new Error('A kizárt azonosságnak nincs azonosság-szelete ebben a koinóban — a kizárás nem helyezhető el (D80).');
+    throw new Error('A kizárt azonosságnak nincs azonosság-szelete ebben a koinoban — a kizárás nem helyezhető el (D80).');
   }
   return esemenytTeszek(kornyezet, 'Kizaras', { kizaras }, { entitas: horgony });
 }
@@ -1484,7 +1484,7 @@ export async function helyreallitasJovahagyasa(kornyezet, { kit, horgonya, sajat
   if (!HELYREALLITAS_FAZISOK.has(fazis)) throw new Error('A fázis: kezdes, veglegesites vagy visszavonas.');
   if (!azonositoAlaku(kit) || !azonositoAlaku(horgonya)) throw new Error('Kell a helyreállítandó neve és a horgonya.');
   if (kit === kornyezet.szerzo) throw new Error('A saját helyreállításodat nem hagyhatod jóvá — ehhez segítők kellenek.');
-  if (!azonositoAlaku(sajatBelepes)) throw new Error('Előbb neked is be kell lépned ebbe a koinóba (a horgonyod kell).');
+  if (!azonositoAlaku(sajatBelepes)) throw new Error('Előbb neked is be kell lépned ebbe a koinoba (a horgonyod kell).');
   return esemenytTeszek(kornyezet, 'HelyreallitasJovahagyas', { kit, sajatBelepes, javaslat, fazis }, { entitas: horgonya });
 }
 
@@ -1499,7 +1499,7 @@ export async function helyreallitasMegallitasa(kornyezet, jel) {
   console.log('muveletek.helyreallitasMegallitasa - KEZDÉS');
   if (!azonositoAlaku(jel)) throw new Error('Melyik helyreállítást? (a javaslat jele — 43 jel)');
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, kornyezet.szerzo);
-  if (!horgony) throw new Error('Ebben a koinóban nincs azonosság-szeleted — itt nincs mit megállítani.');
+  if (!horgony) throw new Error('Ebben a koinoban nincs azonosság-szeleted — itt nincs mit megállítani.');
   return esemenytTeszek(kornyezet, 'HelyreallitasMegallitas', { javaslat: jel }, { entitas: horgony });
 }
 
@@ -1507,13 +1507,13 @@ export async function helyreallitasMegallitasa(kornyezet, jel) {
 const NAP_MS = 86400 * 1000;
 
 /**
- * ⭐⭐ D128 (②e3 — 17. pont, Csaba: „a segítők EGYSZER cselekszenek”): A SEGÍTŐ KÉSZÜLÉKÉNEK GONDOZÁSA ebben a koinóban — minden
+ * ⭐⭐ D128 (②e3 — 17. pont, Csaba: „a segítők EGYSZER cselekszenek”): A SEGÍTŐ KÉSZÜLÉKÉNEK GONDOZÁSA ebben a koinoban — minden
  * helyreállításnál, amit az azonosságom jóváhagyott (és nem vont vissza, nem véglegesített):
  *   · ha a SAJÁT ÓRÁM szerint letelt a várakozás (a kezdésemtől — az út és a kör szerinti napok), és nem jött megállítás (és a 2.
  *     körnél az 1. meg van állítva), VÉGLEGESÍT;
- *   · ha a helyreállítás így (vagy már korábban) TELJES, és a koinóban még nincs bent: a láncot (a tárból — a javaslat helyéig) a
+ *   · ha a helyreállítás így (vagy már korábban) TELJES, és a koinoban még nincs bent: a láncot (a tárból — a javaslat helyéig) a
  *     helyreállítás bejegyzésével és a BIZONYÍTÉKOKKAL egy `Kulcscsere` eseményben beviszi (bárki beviheti — önmagát igazolja).
- * ⭐ Idő nélkül dönt a koinó (D17) — a várakozást itt, a segítő készülékén mérjük.
+ * ⭐ Idő nélkül dönt a koino (D17) — a várakozást itt, a segítő készülékén mérjük.
  * @param {Object} kornyezet
  * @param {{most?: number}} [beallitas] - a „most” (a próbáknak)
  * @returns {Promise<{veglegesitettek: Array<string>, bevittek: Array<string>}>} a javaslatok jelei
@@ -1576,9 +1576,9 @@ export async function helyreallitasokGondozasa(kornyezet, { most = Date.now() } 
 }
 
 /**
- * ⭐⭐ D128 (②b): a KULCSCSERE bevitele ebbe a koinóba — a születés és a cserék lánca (önmagát igazolja: bárki beviheti, mint a
- * kizárást), az azonosság szeletébe. A koinó ettől tudja, hogy a régi kulccsal felvett, nem felsorolt készülékek eseményei nem számítanak.
- * ⭐ (②c) Ha az azonosság ebben a koinóban NEM TAG (nincs azonosság-szelete), itt nincs mit bevinni: `null` — nem hiba (a csere a
+ * ⭐⭐ D128 (②b): a KULCSCSERE bevitele ebbe a koinoba — a születés és a cserék lánca (önmagát igazolja: bárki beviheti, mint a
+ * kizárást), az azonosság szeletébe. A koino ettől tudja, hogy a régi kulccsal felvett, nem felsorolt készülékek eseményei nem számítanak.
+ * ⭐ (②c) Ha az azonosság ebben a koinoban NEM TAG (nincs azonosság-szelete), itt nincs mit bevinni: `null` — nem hiba (a csere a
  * gépen már megtörtént, és a lánca a tanúsítványokkal jár, ha később belép).
  * @param {Object} kornyezet
  * @param {Object} szuletes
@@ -1589,7 +1589,7 @@ export async function kulcscsereBevitele(kornyezet, szuletes, cserek, bizonyitek
   console.log('muveletek.kulcscsereBevitele - KEZDÉS', { cserek: cserek?.length });
   const horgony = await azonossagHorgonya(kornyezet.tar, kornyezet.koino, cserek?.[0]?.azonossag);
   if (!horgony) {
-    console.log('muveletek.kulcscsereBevitele - VÉGE (ebben a koinóban nincs szelete)');
+    console.log('muveletek.kulcscsereBevitele - VÉGE (ebben a koinoban nincs szelete)');
     return null;
   }
   // ⭐⭐ (②e2) a láncban álló helyreállítások bizonyítékai (jel → bizonyíték) — ha vannak
@@ -1597,8 +1597,8 @@ export async function kulcscsereBevitele(kornyezet, szuletes, cserek, bizonyitek
 }
 
 /**
- * Egy készülékem KIZÁRÁSA (az azonosság kulcsával): a tanúsítvány koinónként a vágással és az örökössel, és a bevitele ebbe a
- * koinóba (a többi felsorolt koinóba az örökös viszi — ott is `kizarasBevitele`). ⚠️ Az azonosság kulcsa kell hozzá (KU6:
+ * Egy készülékem KIZÁRÁSA (az azonosság kulcsával): a tanúsítvány koinonként a vágással és az örökössel, és a bevitele ebbe a
+ * koinoba (a többi felsorolt koinoba az örökös viszi — ott is `kizarasBevitele`). ⚠️ Az azonosság kulcsa kell hozzá (KU6:
  * később papírról).
  * @param {Object} kornyezet
  * @param {CryptoKeyPair} azonossagKulcspar
@@ -1613,11 +1613,11 @@ export async function keszulekKizarasa(kornyezet, azonossagKulcspar, kizart, koi
 }
 
 // ===================================
-// ⭐⭐ D128 (③b — 9.12): AZ AZONOSSÁGOM KEZELÉSE MINDEN KOINÓMBA — HELYBEN
+// ⭐⭐ D128 (③b — 9.12): AZ AZONOSSÁGOM KEZELÉSE MINDEN KOINOMBA — HELYBEN
 // ===================================
 
 /**
- * Az azonosságom kezelése EBBE A KOINÓBA: a jegyzékbe veszi, amit itt lát (a legerősebb kulcscsere-láncot a bizonyítékaival, a
+ * Az azonosságom kezelése EBBE A KOINOBA: a jegyzékbe veszi, amit itt lát (a legerősebb kulcscsere-láncot a bizonyítékaival, a
  * kizárásokat), és ha az azonosságomnak itt szelete van, beviszi, ami innen hiányzik — előbb a láncot (a kapu így a benne álló
  * helyreállításokat is felveszi), utána a kizárásokat. Amit a kapu elvet, azt feljegyzi (`elvetve` — egy napig nem próbálja újra).
  * ⚠️ A jegyzék tárolása a hívóé (`koino.js` — `kezeles.json`): ez a függvény a régit kapja, az újat adja vissza.

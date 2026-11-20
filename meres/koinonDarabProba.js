@@ -6,7 +6,7 @@
 // állásfoglalások) a koinon kulcsához bejelentődnek, és a darab halmaza az egyezményük szerint szűr; a valódi cserén
 // (UDP-rés, titkosítva) a KÖZÖS darab eseményei átjönnek — a szomszéd mélységű társsal a MÉLYEBB darab (KO6 (A): átfedés
 // nélkül, mindkettőnél egészében megvan), a nem közösé nem, és a második csere a nyitásnál véget ér; a saját állásfoglalásom a
-// csak küldő úton eljut a darab tartójához; a koinon kulcsa egészében sosem cserélődik; a zárt koinó nem tagja nem kap belőle.
+// csak küldő úton eljut a darab tartójához; a koinon kulcsa egészében sosem cserélődik; a zárt koino nem tagja nem kap belőle.
 //
 // Futtatás: node meres/mind.js koinondarab
 
@@ -107,7 +107,7 @@ async function megvan(t, lista) {
 // 1. A KULCS, A MÉLYSÉG, A BEJELENTÉS ÉS A HALMAZ
 // ===================================
 
-proba('⭐ a koinon-darab kulcsa érvényes vonal-kulcs, visszafejthető, és nem keveredik a gyökér-darabbal, a koinó születésével és a koinon kulcsával (az nem darab)', () => {
+proba('⭐ a koinon-darab kulcsa érvényes vonal-kulcs, visszafejthető, és nem keveredik a gyökér-darabbal, a koino születésével és a koinon kulcsával (az nem darab)', () => {
   const k = koinonDarabKulcsa(5, 29);
   const v = koinonDarabBol(k);
   const ki = {
@@ -128,7 +128,7 @@ proba('⭐ a koinon-darab kulcsa érvényes vonal-kulcs, visszafejthető, és ne
   return Object.values(ki).every(Boolean);
 });
 
-proba('⭐⭐ KO2 (A), 95. mérés: a mélység az ismert tagokból — `floor(log2(tagok / r))`, 2r alatt 0 (egy darab), a koinó határán megáll', () => {
+proba('⭐⭐ KO2 (A), 95. mérés: a mélység az ismert tagokból — `floor(log2(tagok / r))`, 2r alatt 0 (egy darab), a koino határán megáll', () => {
   const ki = {
     kicsi: koinonMelysege(0) === 0 && koinonMelysege(1) === 0 && koinonMelysege(39) === 0,
     kuszob: koinonMelysege(40) === 1 && koinonMelysege(79) === 1 && koinonMelysege(80) === 2,
@@ -286,7 +286,7 @@ proba('⛔ a koinon kulcsa EGÉSZÉBEN sosem cserélődik — „mindent” mód
   return (await megvan(tarB, a)) === a.length && r.b.elteroSzeletek === a.length;
 });
 
-proba('⛔ zárt koinóban a NEM TAGNAK nem jár a koinon — a közös darab kimarad, és a csere nem csúszik el', async () => {
+proba('⛔ zárt koinoban a NEM TAGNAK nem jár a koinon — a közös darab kimarad, és a csere nem csúszik el', async () => {
   const { letrehozas, a } = await allasfoglalasok(6, 'za');
   const [tA, tB] = await kulcsPar(() => true);
   const tarA = await tar([letrehozas, ...a]);

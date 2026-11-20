@@ -1,6 +1,6 @@
 /* felulet/css/components/koinoBekapcsolodas.css */
 
-/* Felelősség: ⭐ D118 ⑥ — a bekapcsolódás ablaka (koinós többlet): a gyermekek sorai, az elhagyandó pontok (KZ3), a megerősítés.
+/* Felelősség: ⭐ D118 ⑥ — a bekapcsolódás ablaka (koinos többlet): a gyermekek sorai, az elhagyandó pontok (KZ3), a megerősítés.
    A színek a lap meglévő változóiból (`base/variables.css`), a felderítés ablakának mintájára. */
 
 .koino-bekapcsolodas { display: flex; flex-direction: column; gap: 10px; }

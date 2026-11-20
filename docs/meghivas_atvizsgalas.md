@@ -12,18 +12,18 @@ megmaradt, az a belépés és a meghívás — ez az átvizsgálás arról szól
 A terepi próbán (2026-11-01) így lett a telefonból tag:
 
 1. a telefonra a program (ma már egy sor — 224.);
-2. a koinó 43 jeles NEVE valahogy átjut (üzenetben), és a telefon a lapján csatlakozik („🔗 Csatlakozás egy koinóhoz…”);
+2. a koino 43 jeles NEVE valahogy átjut (üzenetben), és a telefon a lapján csatlakozik („🔗 Csatlakozás egy koinohoz…”);
 3. a telefon a lapján felveszi a meghívó címét társnak („🤝 Társak…” — IP + port, kézzel);
 4. a telefon a PARANCSSORBAN belép (`koino belep`), és kiírja a 43 jeles HORGONYÁT;
 5. a horgony visszajut a meghívóhoz (üzenetben);
 6. a meghívó a PARANCSSORBAN meghívja (`koino meghiv <horgony>`); a meghívás a következő cserével a telefonra ér.
 
 **Amit a kód ma tud, és amire építeni lehet:**
-- A belépés (`Belepes`) egy esemény a belépő saját azonosság-szeletében; a zárt koinó kapuja (D93/3) a nem tagtól is átveszi a
-  SAJÁT azonosság-szeletét, és neki a koinó születését adja — ezért a belépés a meghívás ELŐTT átér a meghívóhoz (a terepen
+- A belépés (`Belepes`) egy esemény a belépő saját azonosság-szeletében; a zárt koino kapuja (D93/3) a nem tagtól is átveszi a
+  SAJÁT azonosság-szeletét, és neki a koino születését adja — ezért a belépés a meghívás ELŐTT átér a meghívóhoz (a terepen
   mérve: a telefon belépése a cserével a laptopra ért, utána ment a `meghiv`).
 - A meghívás (`allitokRola`) a meghívott szeletébe kerül, és a meghívó horgonyát hozza; a parancs a belépést a tárból veszi
-  (`allitasAdatai`), és ha a koinó profilt vár (D93/5), a meghívott legutóbbi profiljának lenyomatát is (`meghivottProfilja`).
+  (`allitasAdatai`), és ha a koino profilt vár (D93/5), a meghívott legutóbbi profiljának lenyomatát is (`meghivottProfilja`).
 - A csatlakozás (`koinoCsatlakozas`) és a társ felvétele (`tarsFelvetele`) már a lapon van (⑥); a belépés és a meghívás nincs.
 - A kopogtatás (D92/1): aki egy készülékhez akar szólni, de a NAT miatt nem éri el, a készülék kopogtató témáján jelentkezik a
   DHT-n (a tábla-aláírójából számolva), és a készülék őrjárata visszakopog — ma a függő kérelmek útja.
@@ -36,30 +36,30 @@ belépő lapján is; ha egyezik (élőben, telefonon összemondják), a meghív�
 
 ## 3. A javasolt menet
 
-**(a) A meghívó (a MEGHÍVÓ SZÖVEGE).** Egy sor, pl. `koino-meghivo:1:<base64url>`, benne: a koinó neve · a meghívó készülékének
+**(a) A meghívó (a MEGHÍVÓ SZÖVEGE).** Egy sor, pl. `koino-meghivo:1:<base64url>`, benne: a koino neve · a meghívó készülékének
 címei (a helyi hálózaton, és a nyilvános, ha a készülék tudja) a kapu portjával · a meghívó készülékének tábla-aláírója (a
 kopogtatáshoz és ahhoz, hogy a belépő tudja, KIT keres — D71) · egy megnevezés („Csaba laptopja” — kényelem, nem ellenőrzött).
-Titok nincs benne: a koinó neve nem jogosít semmire (a zárt koinó tartalmát a tagság védi), a címek a cserében úgyis utaznak.
+Titok nincs benne: a koino neve nem jogosít semmire (a zárt koino tartalmát a tagság védi), a címek a cserében úgyis utaznak.
 Becsült hossza ~200 jel — üzenetben, papíron is átvihető (4. szabály: a kézi út maga a szöveg).
 
 **(b) A belépő oldala.** A lap „🔗 Csatlakozás” ablaka a meghívó szöveget is elfogadja (a puszta név mellett). Beillesztés után a
 program: csatlakozik (a felület becenevével, ha szabad — mint ma), felveszi a meghívó címeit társnak, és **belép** (a `Belepes` —
-ugyanaz a függvény, mint a `belep` parancsé). Ha a koinó profilt vár (D93/5 — ezt a születés mondja meg, ami az első cserével
+ugyanaz a függvény, mint a `belep` parancsé). Ha a koino profilt vár (D93/5 — ezt a születés mondja meg, ami az első cserével
 jön), a lap egy űrlapot mutat a mezőkkel, és a profilt is ő teszi (`profilMegadasa`). A lap ezután kiírja: „Várakozás a
 meghívásra — a meghívód ezt a kódot látja: **4F7-KQ2**”.
 
 **(c) A jelentkezés.** Ugyanazon a wifin a helyi cím elég (a terepen mérve: a laptop az ismeretlen bekopogóval is cserélt). Két
 külön hálózat között a belépő a meghívó készülékének kopogtató témáján jelentkezik a DHT-n (a meghívóban ott a tábla-aláíró), a
 meghívó őrjárata visszakopog, a rés megnyílik, és az első csere a belépést a meghívóhoz viszi — a D92/1 meglévő útja (a
-belépő egy függő kérelmet vesz fel a koinó születésére, a meghívó készülékének kopogtatójával). ⚠️ A két mobilnet közötti rés
+belépő egy függő kérelmet vesz fel a koino születésére, a meghívó készülékének kopogtatójával). ⚠️ A két mobilnet közötti rés
 mérése (a terep 🅱️) még nincs meg — ugyanazon a wifin és PC–mobil között mérve működik.
 
 **(d) A meghívó oldala.** A fő menüben „👋 Belépők”: a még meg nem hívott belépések, amelyeket a készülék ismer (a legfrissebb
-elöl), mindegyiknél az ellenőrző kód, a profil (ha a koinó vár), mikor jött; és egy „Meghívom” gomb (ugyanaz a függvény, mint a
-`meghiv` parancsé). Új belépő érkezésekor a készülék saját értesítése (D103): „Új belépő vár a koinóban — kód: 4F7-KQ2”.
+elöl), mindegyiknél az ellenőrző kód, a profil (ha a koino vár), mikor jött; és egy „Meghívom” gomb (ugyanaz a függvény, mint a
+`meghiv` parancsé). Új belépő érkezésekor a készülék saját értesítése (D103): „Új belépő vár a koinoban — kód: 4F7-KQ2”.
 
 **(e) A tagság.** A meghívás a következő cserével a belépőhöz ér; a lapja kimondja: „✅ Tag vagy”. A gyermekbe a tagság a
-költözéssel jön (D118/3) — a meghívás a gyökér-koinóé (vagy annak a koinónak, ahová a meghívó szól).
+költözéssel jön (D118/3) — a meghívás a gyökér-koinoé (vagy annak a koinonak, ahová a meghívó szól).
 
 **Az ellenőrző kód:** a belépés horgonyának lenyomatából 6 jel (könnyen kimondható ábécéből, két hármas csoportban). Mire
 véd: ha a meghívó szöveg idegenhez is eljut (továbbküldik, ellopják), az idegen is beléphet és várhat — de az ő kódja más, és a
@@ -73,11 +73,11 @@ tud rá hangolni. ⭐ A védelem itt is az ember, nem a kapu — a D56 szerint a
   böngészőkben van, és a 7. szabály szerint a böngészőre nem építhetünk).
 - **MH2 — egyszer használható jel a meghívóban.** (A) ⭐ nincs: a védelem az ellenőrző kód, a meghívó szöveg nem titok · (B) a
   meghívó egy véletlen jelet hordoz, amit a belépés eseménye megnevez (új eseménymező — utazó bájt, 6. szabály), és a meghívó
-  lapja csak a saját meghívóival jött belépőket mutatja — nagy koinóban kevesebb zaj, de az ellen nem véd, akihez a szöveg
+  lapja csak a saját meghívóival jött belépőket mutatja — nagy koinoban kevesebb zaj, de az ellen nem véd, akihez a szöveg
   eljut.
 - **MH3 — az ellenőrző kód.** (A) ⭐ 6 jel a horgonyból, mindkét lapon; a meghívó az összevetés után nyom gombot · (B) nincs kód —
   az első jelentkező (megtéveszthető).
-- **MH4 — a belépő oldala.** (A) ⭐ a beillesztés után minden magától (csatlakozás, társ, belépés; profil-űrlap, ha a koinó vár)
+- **MH4 — a belépő oldala.** (A) ⭐ a beillesztés után minden magától (csatlakozás, társ, belépés; profil-űrlap, ha a koino vár)
   · (B) lépésenként külön gombok.
 - **MH5 — a meghívó oldala.** (A) ⭐ „👋 Belépők” ablak a fő menüben, ÉS a készülék értesítése az új belépőről (D103) · (B) csak
   az ablak.
@@ -109,29 +109,29 @@ Csaba: *„minden javaslatodat, elfogadom, mehetünk tovább.”* — MH1–MH6 
 - ✅ **② a belépő útja és ④ a meghívó oldala — a program és a lap végpontjai** (elágazás 226): `meghivoElfogadasa` (a
   csatlakozás, a meghívó készüléke társnak, a belépés — `belepesHaNincs`; a kód), `meghivoSzovege` (a helyi IPv4-címek a futó
   őrjárat portján, és a nyilvános cím, amit az őrjárat a kör feljegyzésébe ír — `csere.json` `kor.kulso`), `belepokJegyzeke`
-  (⭐ a zárt kapu feljegyzéséből — `azonossagok.json`, ≤ 256 —, nem a tár végigolvasásával: a terhe nem nő a koinóval), a
+  (⭐ a zárt kapu feljegyzéséből — `azonossagok.json`, ≤ 256 —, nem a tár végigolvasásával: a terhe nem nő a koinoval), a
   `meghivasVegrehajtasa` (a horgony VAGY a kód — a `meghiv` parancs és a lap közös útja), `tagsagAllapotom`; a parancsok
   (`csatlakoz <meghívó>`, `meghivo [megnevezés]`, `belepok`, `meghiv <kód>`) és a lap végpontjai (`GET /api/meghivo`,
   `GET /api/belepok`, `GET /api/tagsagom`, `POST /api/meghivas`, `POST /api/csatlakozas` a `meghivo` mezővel — a lap ilyenkor
-  magától az új koinóba lép). ⛔ Mérve (a parancssor-próba): a hosszan futó felület a belépőt nem látta, amíg a tárat nem olvasta
+  magától az új koinoba lép). ⛔ Mérve (a parancssor-próba): a hosszan futó felület a belépőt nem látta, amíg a tárat nem olvasta
   újra (az őrjárat írta bele — a D100 tanulsága); most a három lekérdezés előbb frissít.
-- ⛔ **A LELET (mérve, 2026-11-01): NYÍLT koinóban az „alap” meghívóhoz a belépés nem ér át.** Zárt koinóban a kapu korlátozott
+- ⛔ **A LELET (mérve, 2026-11-01): NYÍLT koinoban az „alap” meghívóhoz a belépés nem ér át.** Zárt koinoban a kapu korlátozott
   útja a társ azonosság-szeletét a vállalástól függetlenül egyezteti — a belépés átér („küldtem 1”), a `meghiv` működik. Nyílt
-  koinóban nincs kapu, és a szigorú (b) szerint a belépő azonosság-szeletét a meghívó nem vállalja, a belépő a meghívóét nem —
+  koinoban nincs kapu, és a szigorú (b) szerint a belépő azonosság-szeletét a meghívó nem vállalja, a belépő a meghívóét nem —
   a közös halmazban nincs („küldtem 0” — „Nincs ilyen azonosító”). A mai parancssoros meghívásnak is hiánya (a próbák „mindent”
-  módban futnak, ezért nem látszott). ⏸️ **MH7 Csabánál:** (A) ⭐ a nyílt koinó kapuja is elkéri a még ismeretlen társ személyét
+  módban futnak, ezért nem látszott). ⏸️ **MH7 Csabánál:** (A) ⭐ a nyílt koino kapuja is elkéri a még ismeretlen társ személyét
   (a zárt kapu TAGSAG köre — a 64. mérés szerint első találkozáskor +0,5 KB, utána 0), és az azonosság-szeletét a vállalástól
   függetlenül egyezteti (nem zár — csak a kért szelet kerül a közösbe); így a belépők jegyzéke is mindkét fajtában telik · (B) a
   még nem tag belépő a saját azonosság-szeletét a csak küldő úton is felajánlja, és a fogadó az átmeneti tárába veszi (új fogadó-
-  szabály) · (C) a lapos meghívás csak zárt koinóban; nyílt koinóban a meghívó „mindent” módban vagy a kézi úton.
-- ✅ **MH7 (A)** (Csaba, 2026-11-02: *„elfogadom az (A)-t, mehetünk tovább”*; elágazás 227): a nyílt koinó kapuja is elkéri a
+  szabály) · (C) a lapos meghívás csak zárt koinoban; nyílt koinoban a meghívó „mindent” módban vagy a kézi úton.
+- ✅ **MH7 (A)** (Csaba, 2026-11-02: *„elfogadom az (A)-t, mehetünk tovább”*; elágazás 227): a nyílt koino kapuja is elkéri a
   még ismeretlen társ személyét (`tarsKapuja` — `kell`, nem zár; a feljegyzés `azonossagok.json`), és ha a társ nem tag, a
   belépése pedig nincs a két tár egyikében sem, a tag készülék függő szelet-kérelmet vesz fel a horgonyára a társ címével
   (`belepoSzeleteKerese` — a következő munka hozza, az átmeneti tárba); a belépők jegyzéke és a meghívás adatai a két tárból
   (`ketTarNezet`; a teljes horgony közvetlenül). ⭐ A közös halmaz (D97/1) gépezetéhez nem kellett nyúlni — két meglévő út: a
-  kapu köre és a kérelem. Mérve (parancssor, nyílt koinó, két „alap” őrjárat): a belépő 4 mp után a jegyzékben, a meghívás után 2
+  kapu köre és a kérelem. Mérve (parancssor, nyílt koino, két „alap” őrjárat): a belépő 4 mp után a jegyzékben, a meghívás után 2
   mp-cel tag; 4 rontás mind bukik.
-- ✅ **③ a jelentkezés két hálózat között (MH6)** (elágazás 228): a meghívó elfogadása egy függő kérelmet is felvesz a koinó
+- ✅ **③ a jelentkezés két hálózat között (MH6)** (elágazás 228): a meghívó elfogadása egy függő kérelmet is felvesz a koino
   születésére — CÉL NÉLKÜL, csak a meghívó készülékének kopogtatójával (`fuggoKerelemFelvetele` `kopogtatok`): a belépő őrjárata
   a DHT-n a meghívó készülék-témáján jelentkezik, a meghívó őrjárata (ami a saját készülék-témáját figyeli) visszakopog. Ugyanazon
   a wifin nem lassít: a cél nélküli kérelmet a munka csak egy ismeretlen bekopogónál választja (mérve: a lapos próba ugyanúgy
@@ -149,15 +149,15 @@ Csaba: *„minden javaslatodat, elfogadom, mehetünk tovább.”* — MH1–MH6 
   ment elöl”).
 - ✅ **⑥ a terep (2026-11-02):** Csaba a telefonon MINDENT törölt (a programot, az összes koino-adatot, a `koino` parancsot, a
   Node-ot és a gitet — „hogy rekonstruáljunk egy új telefont”), és a telepítési útmutató egy sorával telepített: a Node, a git, a
-  letöltés, az Ed25519 vizsgája, a `koino` parancs, az indítás — a lap magától megnyílt. A laptop új koinót kapott („Meghívás
-  próba”, zárt — parancssorból: gyökér-koinó a lapról ma nem hozható létre); a laptop a lapján elkészítette a meghívót, Csaba
+  letöltés, az Ed25519 vizsgája, a `koino` parancs, az indítás — a lap magától megnyílt. A laptop új koinot kapott („Meghívás
+  próba”, zárt — parancssorból: gyökér-koino a lapról ma nem hozható létre); a laptop a lapján elkészítette a meghívót, Csaba
   üzenetben átküldte, a telefon a lapján beillesztette, a laptop a „👋 Belépők” között ugyanazt a kódot látta és meghívta — a
   telefon tag lett (a laptop szerint: 2 tag). ⛔ **Két lap-lelet, javítva (elágazás 229):** a tér a csatlakozás pillanatának képét
   mutatta (az indító az őrjáratot pár másodperccel később indítja, a születés az első cserével jön — „nem fut őrjárata”, „nem
   ismerem a születését”, „0 tag” maradt) → a tér 15 mp-enként magától frissül, amíg látszik (böngészőben mérve: az őrjárat indítása
-  után „↻ Az őrjárata fut”, a koinó neve, „1 tag”); a javasolt indító parancs a telefonon `node koino.js orjarat …` volt (a
+  után „↻ Az őrjárata fut”, a koino neve, „1 tag”); a javasolt indító parancs a telefonon `node koino.js orjarat …` volt (a
   Termux mappájából el sem indul) → az indító jelével (`KOINO_INDITO=koino`) `koino orjarat …`.
-- ⏸️ **Ami még hiányzik a laptól:** gyökér-koinó létrehozása (ma csak `koino "<név>"`); a QR-kód (MH1 (A): később); a két
+- ⏸️ **Ami még hiányzik a laptól:** gyökér-koino létrehozása (ma csak `koino "<név>"`); a QR-kód (MH1 (A): később); a két
   hálózat közötti jelentkezés terepi mérése (a 🅱️).
 
 ## 8. ✅ D122 — a meghívó kulcs: egy bemásolás, és a következő csere után bent vagy (2026-11-03)
@@ -169,13 +169,13 @@ a meghívó kulcs — aki elsőként használja, az jut be (egyszer használhat�
 olcsó). **A döntés: D122** (a fázis-2 terv).
 
 **Az építés:**
-- `js/csere/meghivo.js` — a meghívó 2. alakja (`koino-meghivo:2:` — az azonosító és a titok, a meghívott neve, a lejárat, a koinó
+- `js/csere/meghivo.js` — a meghívó 2. alakja (`koino-meghivo:2:` — az azonosító és a titok, a meghívott neve, a lejárat, a koino
   kötelező profil-mezői), a telepítő sor (`TELEPITO_SOR`, `telepitoSorMeghivoval`), a bizonyíték (`meghivoBizonyitek`,
   `bizonyitekEllenorzese` — HMAC, időben állandó összevetéssel); a régi (titok nélküli) meghívóra: „kérj újat”.
 - `koino.js` — a kiadott meghívók (`<koino>/meghivok.json` — a titkok is, helyi): `meghivoKiadasa` (a név és a nyilatkozat
   kötelező, csak tag), `kiadottMeghivok`, `meghivoVisszavonasa`; a kapu (`tarsKapuja`) a személy-körben kapott bizonyítékot
   igazolja (`meghivoIgazolasa`); az `igazoltMeghivasokAlairasa` (SORBAN — mérve: két párhuzamos munka kétszer írta alá) a csere után
-  és az őrjárat minden körében aláírja, amint a belépés (és ha a koinó vár, a profil) megvan, a nyilatkozattal; a hír a naplóban és a
+  és az őrjárat minden körében aláírja, amint a belépés (és ha a koino vár, a profil) megvan, a nyilatkozattal; a hír a naplóban és a
   készülék értesítésében („X belépett a meghívóddal”). A belépő: `meghivoElfogadasa` a meghívót a `<koino>/meghivom.json`-be jegyzi,
   a `meghivoBizonyitekom` a kapu személy-körébe adja (`azonossagBeallitasa` → `vonal.js` `sajatBizonyitek`); `profilomAllapota`.
   A parancsok: `meghivo "<név>" kijelentem`, `meghivok`, `meghivo visszavon <az>`; a `belepok` és a kódos `meghiv` megszűnt (a
@@ -183,39 +183,39 @@ olcsó). **A döntés: D122** (a fázis-2 terv).
   `/api/meghivo/:id/visszavonas`, `/api/meghivo/kotelezo`), és a profil (`GET`/`POST /api/profil`).
 - `termux/indit.sh` — ha az első argumentum egy meghívó (a telepítő sor vége), előbb elfogadja, aztán indul.
 - A lap: a prototípus `MeghivoModal`-ja, `meghivoModal.html`-je és `meghivoModal.css`-e, a `regisztracioForm.css` — bájtra; a
-  koinós többlet (`koinoMeghivas.js`): a nyilatkozat szövege, egy magyarázó sor, a lejárt felirata, a 📋 az egész sort másolja (a
+  koinos többlet (`koinoMeghivas.js`): a nyilatkozat szövege, egy magyarázó sor, a lejárt felirata, a 📋 az egész sort másolja (a
   listában — és a visszavonás kérdésében — a rövid kód látszik, mint a prototípusban: `XXXX-XXXX-XXXX` a meghívó azonosítójából), a
   profil-űrlap (a regisztrációs űrlap osztályaival), az első megnyitás; a fő menüben „✉️ Meghívóim” és „⚙️ eember beállítások”.
   ⚠️ Az ország / régió / település automatikus kiegészítése kimaradt (a prototípusban egy központi helyadatbázisból jött).
 - **A próbák:** a modul (+1 — a bizonyíték kötései), a parancssor: a lapos meghívás (A kiállítja, B beilleszti, B MAGÁTÓL tag; egy
-  aláírás a nyilatkozattal; az értesítés; a profil előtöltése és mentése), a meghívó kulcs (nyílt koinóban is; a felhasznált, a
+  aláírás a nyilatkozattal; az értesítés; a profil előtöltése és mentése), a meghívó kulcs (nyílt koinoban is; a felhasznált, a
   visszavont és a meghamisított nem nyit) és a kérelem útja (lent). Rontás minden ágra (a meghamisított titok egy még AKTÍV meghívóra
   szól — egy felhasznált meghívón a felhasználtság elfedte volna, hogy a bizonyíték nincs ellenőrizve).
 
-**Böngészőben végigjárva (2026-11-03)** — két próba-készülék a laptopon (A: egy friss, zárt koinó alapítója; B: üres készülék), és
+**Böngészőben végigjárva (2026-11-03)** — két próba-készülék a laptopon (A: egy friss, zárt koino alapítója; B: üres készülék), és
 egy harmadik (C) az első megnyitáshoz: A a „Meghívóim” ablakban kiállít (a prototípus ablaka, a „Kijelentem…” szöveggel), B lapja
 magától a csatlakozás ablakával nyílik, B beilleszti az EGÉSZ sort, a lap kimondja, hogy az őrjárata nem fut (a parancs másoló
 gombbal), B őrjáratával az ablak magától „✅ Tag vagy” lesz, A naplójában „✉️ meghívtam: Nagy Béla — a meghívómmal lépett be”, a
 lista „Felhasznált → Nagy Béla”; B „📝 Az adataim” űrlapja a névvel előtöltve, a mentés után az „eember beállítások” a mentett
-értékekkel; C első megnyitásakor magától a profil-űrlap („Üdv a koinóban!”), a „Most kihagyom” után nem jön újra; A a 🗑️-vel
+értékekkel; C első megnyitásakor magától a profil-űrlap („Üdv a koinoban!”), a „Most kihagyom” után nem jön újra; A a 🗑️-vel
 visszavon (a megerősítés a rövid kóddal), a sor „Visszavont”. ⚠️ A 📋 vágólapra írását a beépített böngésző tiltja (a próba
 környezete — egy rendes böngészőben a 127.0.0.1 biztonságos környezet). **Három lelet, javítva:**
 1. a lista kód-oszlopában a telepítő sor eleje állt („yes | pkg up…”), és a visszavonás kérdésében az egész sor → a rövid kód
    (fent);
-2. ⛔ **a bizonyíték csak a CSERÉBEN utazott**: B lapja a koinót üresnek látta, és a gyökér fejléceit kérte (függő kérelem) — egy
+2. ⛔ **a bizonyíték csak a CSERÉBEN utazott**: B lapja a koinot üresnek látta, és a gyökér fejléceit kérte (függő kérelem) — egy
    nem tagnak ezt a zárt kapu nem adja ki, és amíg a kérelem függött, B és A között minden munka kérelem lett, nem csere; B csak a
    harmadik körben lett tag (~1,5 perc; egy perces körrel — 5 perces körrel, két hálózat között a következő résig). Két hálózat
    között a belépő ELSŐ munkája a jelentkezés (MH6) — az is kérelem. **Most a kérelem útján is:** a kérő a `KELL`-re adott
    `TAGSAG`-ban a meghívó bizonyítékát is küldi (`vonal.js` `tagsagValasz` — ⛔ a szelet-kérelem a saját azonosság-objektumát rakta
    össze, abból kimaradt: `udpVonal.js` `szeletUdpResen`), a kiszolgáló kérelem-ága a kapunak adja, és a meghívó a kiszolgált
    szelet-kérelem és az elutasított kérelem után is lefuttatja a belépő útját (a belépése elkérése, az automatikus aláírás —
-   `koino.js` `belepoUtja`). A próba: F a jelentkezés alakjával (`hozd <a koinó> <cím> <port>`), G a lap kérésével (`kerelem
+   `koino.js` `belepoUtja`). A próba: F a jelentkezés alakjával (`hozd <a koino> <cím> <port>`), G a lap kérésével (`kerelem
    fejlecek gyoker <cím> <port>` — elutasítva), csere nélkül — mindkettő meghívása aláírva; A őrjárata 5 perces körrel (a háztartása
    is aláír — 3 mp-es körrel elfedte volna); F és G külön mérve (G aláírása F igazolt meghívóját is aláírná). Öt rontás, mind bukik;
 3. a profil-űrlap tagnak is azt írta, hogy „a meghívód a meghíváskor ezt tanúsítja” — a meghívás már lement → csak a még nem tag,
    meghívóval érkezett belépőnek.
 
-✅ **Terepen (2026-11-04, laptop + telefon egy wifin)** — a laptopon egy friss készülék és egy új zárt koinó („Meghívókulcs-próba”),
+✅ **Terepen (2026-11-04, laptop + telefon egy wifin)** — a laptopon egy friss készülék és egy új zárt koino („Meghívókulcs-próba”),
 a „Meghívóim” ablakból egy sor; a telefonon minden törölve (a Node maradt), a sor bemásolva a Termuxba — a telefon tag lett, a
 laptop magától meghívta. ⚠️ A sor egy már telepített (régebbi) programot NEM frissít (`[ -d ~/koino_1.1 ] || git clone`), és a régi
 kód az új meghívót nem fogadja el — friss telefonon megy; hogy frissítsen-e, az döntési kérdés (D119: a program nem frissül
@@ -223,7 +223,7 @@ magától). *(✅ D123 ② (PR7, 2026-11-06): a sor frissít — `program_retege
 (`/api/eember/sajat-adatok` `eemberNev`; az adatlap mentése után azonnal — `koino:profilValtozas`); a lapos D122-próba méri,
 rontással.
 
-⏸️ **Mellékes megfigyelések (nem javítva — átbeszélendő):** az üres koinó ALAPÍTÓJÁNAK lapja is azt írja, hogy „a hiányzó részek
+⏸️ **Mellékes megfigyelések (nem javítva — átbeszélendő):** az üres koino ALAPÍTÓJÁNAK lapja is azt írja, hogy „a hiányzó részek
 tartóit még keresem … meghívót kaptál?”, és függő kérelmet tesz a gyökér fejléceire (a nem tag B még át is vette továbbadásra) — az
 alapítónak nincs mit keresnie; a meghívó címei közé a gép minden IPv4-címe bekerül, a Hyper-V/WSL virtuális kártyájáé is
 (172.25.176.1 — két rés, két munka ugyanazzal a társsal, amíg a kötés nem csoportosítja őket).
@@ -245,7 +245,7 @@ tartónál jelentkeztem”), és percenként kopogott a meghívó címeire. A la
   telefon utolsó címe Éváék hálózatán volt).
 - ⛔ **A DHT-n a laptop témáin szinte csak ZAJ**: a „tartóként” visszajövő címek (31.200.249.x, 130.43.x és mások) **három véletlen,
   soha nem használt témán is ugyanígy jönnek** — a DHT néhány gépe bármilyen kérdésre ezt adja. Ez a ⑦ 1. leletének (idegen címek
-  a vakított témákon) a mérése: nem koinós készülékek, és a kör percenként rájuk kopog.
+  a vakított témákon) a mérése: nem koinos készülékek, és a kör percenként rájuk kopog.
 - A barátod valódi bejelentését (`130.43.211.148:24653`) a laptop ~20 percenkénti keresése nem kapta meg (21:12:48: „1 kérő vár
   rám” — a zaj), egy második kézi keresés megtalálta. ⚠️ *Helyesbítés: a telefon „4 tartónál jelentkeztem” sora négy TÉMÁT jelent, nem
   négy gépet — az esti elemzésben félreolvastam.*

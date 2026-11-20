@@ -2,7 +2,7 @@
 //
 // Egyetlen kérdést tesz fel, sokféleképpen:
 //
-//   ⭐ HA KÉT KÉSZÜLÉK KICSERÉLI, AMIT TUD, UGYANAZT A KOINÓT LÁTJA-E?
+//   ⭐ HA KÉT KÉSZÜLÉK KICSERÉLI, AMIT TUD, UGYANAZT A KOINOT LÁTJA-E?
 //
 // Nem „ugyanannyi eseményt" — UGYANAZT AZ ÁLLAPOTOT: ugyanazokat az entitásokat,
 // ugyanazokkal a tudatpontokkal és küszöbökkel, ugyanazt a javaslat-eredményt, ugyanazt
@@ -202,7 +202,7 @@ function lancElejeivel(minden, resz) {
 }
 
 function ketfele(esemenyek) {
-  // ⭐⭐ D128: a láncok ELSŐ eseményei (a készülékek tanúsítványai — itt a koinó születése és a szerzők első eseménye)
+  // ⭐⭐ D128: a láncok ELSŐ eseményei (a készülékek tanúsítványai — itt a koino születése és a szerzők első eseménye)
   // mindkét gépen megvannak, mint a valóságban a tagság (a tagsági kísérő hozza); a többi felváltva oszlik meg. Nélkülük a
   // lánc többi eseménye be sem jutna a kapun.
   const egyike = esemenyek.filter((e, i) => e.tanusitvany || i % 2 === 0);
@@ -481,8 +481,8 @@ proba('⭐ HÁROM KÉSZÜLÉK: a harmadik is ugyanoda jut, láncolt cserével', 
 // ELTÁROLJA, és a következő beszélgetésnél TOVÁBBADJA. Anna és Béla soha nem beszélt
 // egymással, mégis mindent tudnak.
 //
-// ⚠️ A HATÁR, amit ez a próba NEM fed: Cili csak abban a koinóban postaláda, amelyikben
-// ő maga is benne van (a tára koinónként külön mappa). Egy idegen koino forgalmát ma nem
+// ⚠️ A HATÁR, amit ez a próba NEM fed: Cili csak abban a koinoban postaláda, amelyikben
+// ő maga is benne van (a tára koinonként külön mappa). Egy idegen koino forgalmát ma nem
 // veszi át. Ez nem hiba, hanem felírt korlát — a terjedés szempontjából majd kérdés lesz.
 
 proba('⭐⭐ A POSTALÁDA (D34): Anna és Béla SOHA nem beszélt, mégis ugyanazt tudja', async () => {

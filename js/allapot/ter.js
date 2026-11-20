@@ -1,22 +1,22 @@
 // js/allapot/ter.js
 
-// Felelősség: A BELÉPŐ TÉR — egy kártya minden koinóról, amit ez a készülék ismer.
+// Felelősség: A BELÉPŐ TÉR — egy kártya minden koinoról, amit ez a készülék ismer.
 //
 // ===== ⭐ MI EZ (D25, Szakasz 5.6) =====
 //
 // *„A belépő tér is követné ugyanazt a stílust meg logikát, mint a pakli nézet, annyi
-// különbséggel, hogy itt a kártyákon a **koinók** kapnak helyet."* — Csaba, 2026-08-27
+// különbséggel, hogy itt a kártyákon a **koinok** kapnak helyet."* — Csaba, 2026-08-27
 //
-// A pakli egy koinón BELÜL mutat kártyákat; a tér a koinók FÖLÖTT. ⭐ És a készülék erre
+// A pakli egy koino-n BELÜL mutat kártyákat; a tér a koinok FÖLÖTT. ⭐ És a készülék erre
 // félig már fel volt készülve: a **kulcs** (`kulcs.json`) és a **társ-lista**
-// (`tarsak.json`) eddig is a koinók FÖLÖTT laktak, egy szinttel az esemény-mappák felett.
+// (`tarsak.json`) eddig is a koinok FÖLÖTT laktak, egy szinttel az esemény-mappák felett.
 // *Az azonosságod téri, a tagságod koino-helyi — pontosan ezt mondja a D25.*
 //
 // ===== ⛔⛔ A HATÓKÖR, KIMONDVA: AMIT EZ A KÉSZÜLÉK ISMER =====
 //
-// A D25 tere egyszer olyan koinókat is mutatna, amikben nem vagy benne — de ahhoz a
+// A D25 tere egyszer olyan koinokat is mutatna, amikben nem vagy benne — de ahhoz a
 // **kereső-réteg** kell, ami szándékosan elhagyható, és nincs megépítve. Amíg nincs, ez a
-// lista **a készüléken lévő koinókról** szól, és ezt a felületnek **ki kell mondania**:
+// lista **a készüléken lévő koinokról** szól, és ezt a felületnek **ki kell mondania**:
 // *nem hazudunk teljességet* (D19 — bejelent, nem hallgat).
 //
 // ===== ⭐⭐ ÉS EBBŐL KÖVETKEZIK EGY JÓ HÍR A LÉTSZÁMRÓL =====
@@ -24,7 +24,7 @@
 // A `felulet_terv.md` attól tartott, hogy a téren átnézve a létszám **a koino állítása**,
 // kívülről igazolhatatlan — és ezért lenne belőle hamisítható toplista (D18/2).
 //
-// ⭐ **Ez csak arra a koinóra igaz, aminek NINCS meg az adata.** Amelyiknek megvan, ott a
+// ⭐ **Ez csak arra a koinora igaz, aminek NINCS meg az adata.** Amelyiknek megvan, ott a
 // számot **aláírt eseményekből magunk számoljuk** — nem állítás, hanem tény. A v1
 // hatókörében tehát a veszély nem áll fenn; az a kereső-réteg jövőbeli gondja.
 //
@@ -74,10 +74,10 @@ export const ALAP_RENDEZES = 'letrehozva';
 /**
  * Egy koino kártyája — a tér egy sora.
  *
- * ⚠️ EGY OLVASÁS KOINÓNKÉNT. Az összes szám (létrehozó esemény, horgonyok, eseményszám)
+ * ⚠️ EGY OLVASÁS KOINONKÉNT. Az összes szám (létrehozó esemény, horgonyok, eseményszám)
  * ugyanabból a bejárásból jön — nem olvassuk végig négyszer. A `koinoEsemenyei` korlátja
  * itt is igaz, de ⭐ **a szám, ami itt sokasodik, nem az e-embereké, hanem hogy ez a
- * KÉSZÜLÉK hány koinóban van benne** — az pedig szerkezetileg kicsi marad (egy ember
+ * KÉSZÜLÉK hány koinoban van benne** — az pedig szerkezetileg kicsi marad (egy ember
  * néhány közösségben él). *Ez a 9. szabály kérdésére az őszinte válasz.*
  *
  * @param {string} hely - az adat-mappa
@@ -96,18 +96,18 @@ export async function koinoKartyaja(hely, koino, beallitas = {}) {
   // ⚠️ HIÁNYOZHAT, ÉS AZ NEM HIBA (D19). Ha az eseményeket fájlból hoztam be, vagy a csere
   // még nem ért ide, lehet, hogy a koino gondolatait ismerem, a SZÜLETÉSÉT nem. Olyankor
   // a kártya megmondja, hogy nem tudja — nem talál ki nevet.
-  // ⭐ D118/2: EGY szabállyal (`koinoSzuleteseListabol`) — a mappa neve a koinó neve.
+  // ⭐ D118/2: EGY szabállyal (`koinoSzuleteseListabol`) — a mappa neve a koino neve.
   const alapitas = koinoSzuleteseListabol(esemenyek, koino);
 
-  // ----- A HORGONYOK: ki lépett be ebbe a koinóba? -----
+  // ----- A HORGONYOK: ki lépett be ebbe a koinoba? -----
   // Szerzőnként EGY horgony számít (az elsője); a `Belepes` és a `KoinoLetrehozas`
   // ugyanúgy horgony (D56 — az alapító a rekurzió alapesete).
-  // ⭐ D118 (⑥): a BEKAPCSOLÓDÁS is horgony (a bekapcsolódóé a gyermekben — `tagsag.js` `HORGONY_TIPUSOK`); eddig a gyermek-koinó
+  // ⭐ D118 (⑥): a BEKAPCSOLÓDÁS is horgony (a bekapcsolódóé a gyermekben — `tagsag.js` `HORGONY_TIPUSOK`); eddig a gyermek-koino
   // kártyája a bekapcsolódókat nem számolta, és a bekapcsolódó a sajátján „nem léptem be”-t látott.
   const horgonyok = new Map();                       // szerző → a horgony azonosítója
   for (const e of esemenyek) {
     if (!HORGONY_TIPUSOK.has(e.tipus)) continue;
-    if (e.tipus === 'KoinoLetrehozas' && e !== alapitas) continue;   // csak a koinó születése horgony
+    if (e.tipus === 'KoinoLetrehozas' && e !== alapitas) continue;   // csak a koino születése horgony
     if (!horgonyok.has(e.szerzo)) horgonyok.set(e.szerzo, e.azonosito);
   }
 
@@ -150,7 +150,7 @@ export async function koinoKartyaja(hely, koino, beallitas = {}) {
 
     // ⭐ „Benne vagyok-e?" — és a `miert` a D19 miatt kell: a „nem" legyen indokolt.
     enTagVagyok: en?.igen ?? false,
-    miert: en?.ok ?? 'nem léptem be ebbe a koinóba',
+    miert: en?.ok ?? 'nem léptem be ebbe a koinoba',
     enAlapitottam: !!alapitas && alapitas.szerzo === beallitas.szerzo,
 
     // ⭐⭐ D118 (⑥): A CSALÁDFA — a szülője (a születéséből; a neve és a gyermekek a tér egészéből — `terKartyai`), és ⭐ D127:
@@ -178,9 +178,9 @@ function ertekhez(kartya, rendezes, jegyzet) {
 /**
  * A belépő tér kártyái.
  *
- * ⚠️ NINCS KURZOR, ÉS EZ NEM FELEDÉKENYSÉG. A pakli lapoz, mert egy koinóban milliárdnyi
- * gondolat lehet; a tér listája viszont **a készüléken lévő koinók** száma, ami
- * szerkezetileg kicsi. ⭐ Ha egyszer a kereső-réteg idegen koinókat is idehoz, **az** a
+ * ⚠️ NINCS KURZOR, ÉS EZ NEM FELEDÉKENYSÉG. A pakli lapoz, mert egy koinoban milliárdnyi
+ * gondolat lehet; a tér listája viszont **a készüléken lévő koinok** száma, ami
+ * szerkezetileg kicsi. ⭐ Ha egyszer a kereső-réteg idegen koinokat is idehoz, **az** a
  * lekérdezés fog lapozni — de az már más kérdés, más réteggel.
  *
  * @param {string} [hely] - az adat-mappa
@@ -210,7 +210,7 @@ export async function terKartyai(hely = alapHely(), beallitas = {}) {
   // ----- ⭐ AZ „ELŐSZÖR LÁTTAM" FELJEGYZÉSE -----
   //
   // ⚠️ HELYI FELJEGYZÉS, NEM ESEMÉNY (3. szabály): sosem terjed, két készüléken mást
-  // jelent, és semmit nem dönt el a koinóban. Az első lekéréskor íródik — vagyis az érték
+  // jelent, és semmit nem dönt el a koinoban. Az első lekéréskor íródik — vagyis az érték
   // az, hogy *mikor került először a szemem elé*, nem hogy mikor jött létre.
   const jegyzo = terJegyzekTarolo(hely);
   const jegyzet = await jegyzo.olvas();
@@ -229,7 +229,7 @@ export async function terKartyai(hely = alapHely(), beallitas = {}) {
     kartyak.push(kartya);
   }
 
-  // ----- ⭐⭐ D118 (⑥): A CSALÁDFA — a szülő neve és a gyermekek (csak a készüléken ismert koinók közül: a tér hatóköre) -----
+  // ----- ⭐⭐ D118 (⑥): A CSALÁDFA — a szülő neve és a gyermekek (csak a készüléken ismert koinok közül: a tér hatóköre) -----
   const nevSzerint = new Map(kartyak.map((k) => [k.azonosito, k.nev]));
   for (const k of kartyak) {
     k.szuloIsmert = !!k.szulo && nevSzerint.has(k.szulo);
@@ -238,7 +238,7 @@ export async function terKartyai(hely = alapHely(), beallitas = {}) {
     // ⭐ D127: innen hova kapcsolódtam be — a gyermekek kártyáiból (ahol a horgonyom a bekapcsolódásom); itt közben megmaradtam
     k.bekapcsolodtam = kartyak.filter((g) => g.szulo === k.azonosito && g.enBekapcsolodtam).map((g) => g.azonosito);
     // ⭐⭐ D119 (①b): és a koino-verzió kártyákról ismert gyermekek — a tárukat a készülék még nem ismeri (a kártya a szülő
-    // cseréjével jön); a hívó adja (`kartyaGyermekek`: koinó → [{ azonosito, nev }]).
+    // cseréjével jön); a hívó adja (`kartyaGyermekek`: koino → [{ azonosito, nev }]).
     for (const g of beallitas.kartyaGyermekek?.get?.(k.azonosito) ?? []) {
       if (!k.gyermekek.some((x) => x.azonosito === g.azonosito)) {
         k.gyermekek.push({ azonosito: g.azonosito, nev: g.nev ?? null, kartyarol: true, zart: g.zart ?? null });
@@ -251,9 +251,9 @@ export async function terKartyai(hely = alapHely(), beallitas = {}) {
     const ae = ertekhez(a, rendezes, jegyzet);
     const be = ertekhez(b, rendezes, jegyzet);
 
-    // ⚠️ A HIÁNYZÓ ÉRTÉK MINDIG HÁTRA. Amelyik koinónak nem ismerem a születését, annak
+    // ⚠️ A HIÁNYZÓ ÉRTÉK MINDIG HÁTRA. Amelyik koinonak nem ismerem a születését, annak
     // nincs létrehozási ideje — az ilyen a lista VÉGÉRE kerül, akármelyik irányba
-    // rendezünk. Különben megfordításkor épp a legkevésbé ismert koinók ugranának előre.
+    // rendezünk. Különben megfordításkor épp a legkevésbé ismert koinok ugranának előre.
     if (ae === null && be === null) return a.azonosito < b.azonosito ? -1 : 1;
     if (ae === null) return 1;
     if (be === null) return -1;
@@ -272,7 +272,7 @@ export async function terKartyai(hely = alapHely(), beallitas = {}) {
     koinok: kartyak.length,
     rendezes,
     irany,
-    // ⛔⛔ A FELÜLETNEK KI KELL MONDANIA: ez nem a világ összes koinója, csak amit ez a
+    // ⛔⛔ A FELÜLETNEK KI KELL MONDANIA: ez nem a világ összes koinoja, csak amit ez a
     // készülék ismer. A kereső-réteg nélkül nincs más igazság — és a hallgatás itt
     // teljességet ígérne, amit nem tudunk tartani (D19).
     csakAmitIsmerunk: true

@@ -1,6 +1,6 @@
 // felulet/js/koinoFelderites.js
 
-// Felelősség: ⭐⭐ A FELDERÍTÉS A FELÜLETEN (D108/1, D112 ⑤ — F5 (A)) — koinós többlet, a prototípusban nincs ilyen:
+// Felelősség: ⭐⭐ A FELDERÍTÉS A FELÜLETEN (D108/1, D112 ⑤ — F5 (A)) — koinos többlet, a prototípusban nincs ilyen:
 //   · a kártya menüjében egy „📷 Felderítés…” pont (a kártya bővítési pontján — `extraMenuOpciok` —, a prototípus kártyája
 //     bájtra változatlan), ami a beállító ablakot nyitja: hány csomópont (K), milyen mélyen, a törzzsel-e, hány MB-ig;
 //   · a fő menüben a „📷 Felderítések” ablak: a felderítések állása (fut / kész / megállt / elakadt), újrafelderítés, törlés —
@@ -56,7 +56,7 @@ Kartya.prototype.init = function (...ervek) {
 // ===================================
 
 /**
- * A felderítés beállítása és indítása egy ágra (a kártya menüjéből; `ag: 'gyoker'` az egész koinó).
+ * A felderítés beállítása és indítása egy ágra (a kártya menüjéből; `ag: 'gyoker'` az egész koino).
  * @param {{ag: string, cim?: string}} b
  */
 export async function felderitesInditasa({ ag, cim = '' }) {
@@ -68,7 +68,7 @@ export async function felderitesInditasa({ ag, cim = '' }) {
   const tartalom = document.createElement('div');
   tartalom.className = 'koino-felderites';
   tartalom.innerHTML = `
-    <p class="koino-felderites__cim">📷 ${ag === 'gyoker' ? 'Az egész koinó' : html(cim || 'Ez az ág')}</p>
+    <p class="koino-felderites__cim">📷 ${ag === 'gyoker' ? 'Az egész koino' : html(cim || 'Ez az ág')}</p>
     <p class="koino-felderites__leiras">Egyszeri pillanatkép: az ág legfontosabb csomópontjai a háttérben érkeznek (az
       őrjárat hozza), és a készülékeden maradnak. Nem frissül és értesítést nem ad — amit követni akarsz, arra tegyél
       tudatpontot.</p>
@@ -119,7 +119,7 @@ export async function felderitesInditasa({ ag, cim = '' }) {
 // ===================================
 
 function felderitesSora(f) {
-  const cim = f.ag === 'gyoker' ? 'Az egész koinó' : (f.agCim ? html(f.agCim) : html(f.ag.slice(0, 12)) + '…');
+  const cim = f.ag === 'gyoker' ? 'Az egész koino' : (f.agCim ? html(f.agCim) : html(f.ag.slice(0, 12)) + '…');
   const fazis = f.allapot === 'fut' && f.torzs ? (f.fazis === 'torzs'
     ? ' — a törzs: ' + (f.torzsHianyzik ?? '?') + ' csomópontnak hiányzik' : ' — a fejlécek') : '';
   // ⭐ D116: az ág teljes mérete a tartója szerint (a program jegyzi — `felderitesAllasa`); ha nem tudjuk, nem írjuk ki.

@@ -67,7 +67,7 @@ import { esemenyRendszerNevei, nevEsFelmenoi, rendszerAzonosito } from '../eseme
 // változtatjuk, a régi és az új program **mást számol** ugyanabból az eseményhalmazból.
 // Az `ALAP_KUSZOBOK` a hat ilyen egyike — vagyis ez a sor **együtt mozog a koino nevével**.
 //
-// ⭐⭐ D118/2 (①b, 2026-10-24): az értékek a `koinoSzabalyok.js`-ben élnek (EGY forrás) — és a koinó a SZÜLETÉSÉBEN mást
+// ⭐⭐ D118/2 (①b, 2026-10-24): az értékek a `koinoSzabalyok.js`-ben élnek (EGY forrás) — és a koino a SZÜLETÉSÉBEN mást
 // mondhat (`szabalyok.alapKuszobok`); a döntés onnan veszi (`javaslatokSzamitasa`, `lezarasiPillanatkep`). Ez itt a mai
 // érték: elfogadás 51%, részvétel 0%, a döntési idő 1 mp – 7 nap.
 export const ALAP_KUSZOBOK = ALAP_SZABALYOK.alapKuszobok;
@@ -339,7 +339,7 @@ export function allasSzamokbol(javaslatEsemeny, { tamogatok, ellenzok, tartozkod
 // entitásonként külön dől el, és **ÉS**-sel áll össze. *Aki a gondolatot tartja, az dönt a
 // sorsáról — akkor is, ha a javaslat egy másik gondolatot is érint.*
 //
-// ⚠️ AMIT ÁT KELLETT ALAKÍTANI: a koinóban NINCS N darab tárolt töredék, mert egy aláírt
+// ⚠️ AMIT ÁT KELLETT ALAKÍTANI: a koinoban NINCS N darab tárolt töredék, mert egy aláírt
 // `Javaslat` esemény van. A töredék a Mongo tárolási kényszere volt; a **logikai kapcsolat**
 // viszont átjön: N tárolt rekord helyett N SZÁMÍTOTT RÉSZ. Ugyanaz a minta, mint a D17-nél
 // — ami ott adatbázis-sor, az itt számítás. És a szavazat is egy esemény: a prototípus
@@ -461,7 +461,7 @@ function reszekSzamitasa(javaslatEsemeny, kik, szavazatok, tudatpontok, ertekJav
       if ((tulajdonosok.get(entitas).get(szerzo)?.pont ?? 0) > 0) ervenyesek.push(bejegyzes.ertekek);
     }
 
-    // ⭐ D118/2: a koinó alapértékei (a születéséből); ⭐⭐ D129 (MA8 (B)): a kézikönyv-entitásé a kézikönyv óvatosabb alap-küszöbe
+    // ⭐ D118/2: a koino alapértékei (a születéséből); ⭐⭐ D129 (MA8 (B)): a kézikönyv-entitásé a kézikönyv óvatosabb alap-küszöbe
     const eredmeny = { ...(kezikonyv?.azonositok.has(entitas) ? kezikonyv.kuszobok : alapKuszobok) };
     for (const nev of KUSZOB_NEVEK) {
       const szamok = ervenyesek
@@ -743,9 +743,9 @@ function csoportSzamitasa(e, kik, { szavazatok, tudatpontok, ertekJavaslatok }, 
 /**
  * ⭐⭐ D129 (MA8 (B)): A KÉZIKÖNYV a döntéshez — a kézikönyv-entitások azonosítói (minden esemény neveiből és a felmenőikből,
  * ugyanúgy, mint az állapot — `allapotSzamitas.js`) és az óvatosabb alap-küszöbük. ⛔ NEM a javaslat saját állításából: egy
- * javaslattevő a név elhagyásával különben megkerülhetné a küszöböt. A kézikönyv nélküli koinóban null.
+ * javaslattevő a név elhagyásával különben megkerülhetné a küszöböt. A kézikönyv nélküli koinoban null.
  * @param {Array<Object>} esemenyek
- * @param {Object|null|undefined} kuszobok - a koinó kézikönyv-szabályának alap-küszöbei
+ * @param {Object|null|undefined} kuszobok - a koino kézikönyv-szabályának alap-küszöbei
  * @returns {{azonositok: Set<string>, kuszobok: Object}|null}
  */
 function kezikonyvDonteshez(esemenyek, kuszobok) {
@@ -789,10 +789,10 @@ export function lezarasiPillanatkep(esemenyek, javaslatEsemeny,
 export function javaslatokSzamitasa(esemenyek, allapot, most = Date.now(), beallitas = {}) {
   const osszegzesek = beallitas.osszegzesek instanceof Map ? beallitas.osszegzesek : new Map();
   const rogzitettek = beallitas.rogzitettek instanceof Map ? beallitas.rogzitettek : null;
-  // ⭐⭐ D118/2 (①b): a küszöbök alapértékei a koinó születéséből (az állapotban, vagy a bemenetben).
+  // ⭐⭐ D118/2 (①b): a küszöbök alapértékei a koino születéséből (az állapotban, vagy a bemenetben).
   const alapKuszobok = beallitas.alapKuszobok ?? allapot?.koino?.szabalyok?.alapKuszobok
     ?? koinoSzabalyai(koinoSzuleteseListabol(esemenyek)).alapKuszobok;
-  // ⭐⭐ D129 (MA8 (B)): a kézikönyv-entitások azonosítói és az óvatosabb alap-küszöbük (a kézikönyv nélküli koinóban null)
+  // ⭐⭐ D129 (MA8 (B)): a kézikönyv-entitások azonosítói és az óvatosabb alap-küszöbük (a kézikönyv nélküli koinoban null)
   const kezikonyv = kezikonyvDonteshez(esemenyek, (allapot?.koino?.szabalyok
     ?? koinoSzabalyai(koinoSzuleteseListabol(esemenyek))).kezikonyv?.alapKuszobok);
   console.log('javaslatokSzamitasa - KEZDÉS', { esemenyDarab: esemenyek.length });

@@ -10,7 +10,7 @@
 
 Egy készülék ma mások kérésére dolgozik — elküld eseményeket, fejléceket, fájlokat, és számol hozzájuk. **Mennyit szolgáljon
 ki, és kinek?** A becsületes használatot (egy új tag böngészése, egy felderítés, a mindennapi csere) a keret soha ne fogja
-meg; a mohó vagy átírt programot (ami újra és újra, új kulcsokkal kér) viszont igen — és a készülék terhe ne nőjön a koinó
+meg; a mohó vagy átírt programot (ami újra és újra, új kulcsokkal kér) viszont igen — és a készülék terhe ne nőjön a koino
 méretével (a „végtelen”, 9. szabály).
 
 ## 2. Hol dolgozik egy készülék MÁSNAK — a térkép (a kódból)
@@ -35,11 +35,11 @@ kérés, a bejárás legfeljebb 5000 lépés; társanként egyszerre egy munka. 
 következő jöhet — ugyanattól, vagy egy új tábla-kulccsal (ingyen van).
 
 ⛔ **És a kérelemben a kiszolgáló ma nem tudja, KI kér:** a tábla-kulcs aláírása csak a cserében jön (a `CIMEK`-ben); a
-kérelemben zárt koinóban a személy (`ki`) igen, nyíltban csak a cím (IP:port — a mobil NAT portot vált).
+kérelemben zárt koinoban a személy (`ki`) igen, nyíltban csak a cím (IP:port — a mobil NAT portot vált).
 
 ## 4. A 76. mérés — mennyibe kerül egy kérés kiszolgálása (`kiszolgalasMeres.js`)
 
-Egy szintetikus koinón (120 tag-szerző, a gondolatok egy fában, mindegyiken a szerzője pontja és fele eséllyel egy
+Egy szintetikus koino-n (120 tag-szerző, a gondolatok egy fában, mindegyiken a szerzője pontja és fele eséllyel egy
 másiké), a memóriában, a kiszolgáló valódi függvényeivel:
 
 ```
@@ -62,7 +62,7 @@ A mai felső határokból számolva a legrosszabb válasz: egy szelet ≈ 2,1 MB
 2. ⛔ **A SZÁMÍTÁS VISZONT A TÁRRAL NŐ:** minden fejléc-kérelem a TELJES állapotot újraszámolja (`kepetKeszit` —
    gyorsítótár nélkül, ~7,5 µs eseményenként), és a válasz maga is a teljes entitás-halmazon számol össz-pontot és
    gyerek-jegyzéket. Egy „alap” készüléknél a tár a vállalásával arányos (kicsi); egy „mindent” tartónál (az önkéntes teljes
-   tartó — a laptop) a koinó méretével nő: 125 000 eseménynél **~1,1 s CPU kérésenként** (+ a beolvasás), egy 16-os
+   tartó — a laptop) a koino méretével nő: 125 000 eseménynél **~1,1 s CPU kérésenként** (+ a beolvasás), egy 16-os
    sorozatra ~18 s. ⭐ Ez a „végtelen” megsértése a kiszolgáló oldalán, és egy mohó kérő ezzel terheli legjobban — nem a
    bájtokkal. A kérések SZÁMA csak akkor jó mérce, ha egy kérés ára korlátos.
 
@@ -78,7 +78,7 @@ törzsnél számít igazán.
   állása szerint gyorsítótárban tartja, rövid időkorláttal (a döntések időfüggők) — így egy kérés a lista hosszával arányos,
   nem a tárral.
 - **A keret két mércével** (KK2): a kimenő BÁJT és a KÉRÉSEK száma, csúszó órás ablakban, helyi feljegyzésként (nem esemény).
-- **A társ** (KK3): zárt koinóban a személy, egyébként a tábla-kulcs (amit a kérelembe is beteszünk), végső esetben a cím;
+- **A társ** (KK3): zárt koinoban a személy, egyébként a tábla-kulcs (amit a kérelembe is beteszünk), végső esetben a cím;
   a KÖZÖS keret a sok-azonosságos kerülőút ellen.
 - **Ami alá tartozik** (KK4): minden, amit MÁSNAK teszek, a kötéseimmel folytatott cserét kivéve (D108: a saját cserém).
 - **Az elsőbbség** (D108): a kötéseim → az ismert tagok → az idegenek; az idegenek a közös keretnek legfeljebb a felét
@@ -87,7 +87,7 @@ törzsnél számít igazán.
   mond, a kérő a megadott ideig mást kérdez.
 
 ⭐ A „végtelen” próbája: minden keret időablakra szól, és egy kérés ára (KK1 után) korlátos — egy készülék kiszolgálási
-terhe nem nő a koinó méretével.
+terhe nem nő a koino méretével.
 
 ## 6. ✅ A kérdések — D109 (Csaba, 2026-10-17: „minden javaslatodat elfogadom, mehetünk tovább.”): mind (A)
 
@@ -96,7 +96,7 @@ terhe nem nő a koinó méretével.
   tár állása, az átmeneti tár változata és a vállalás szerint megmarad, legfeljebb ~60 mp-ig (a döntés lezárása idő
   kérdése). A 76. mérés szerint egy meleg fejléc-válasz így a lista hosszával arányos (a 2–4 ms-os tartomány), nem a tárral.
 - **(B) Nincs gyorsítótár, a keret a CPU-időt is méri:** egyszerűbb, de a „mindent” tartó a saját ugyanilyen kéréseire is
-  lassú marad, és a keret a nagy koinóban a becsületes kérőt is hamar megfogná.
+  lassú marad, és a keret a nagy koinoban a becsületes kérőt is hamar megfogná.
 
 **KK2. Mit mér a keret?**
 - **(A) ⭐ Két mércét: a kimenő bájtot és a kérések számát, csúszó óránként — ezt javaslom.** A bájt a törzset és a nagy
@@ -104,7 +104,7 @@ terhe nem nő a koinó méretével.
 - **(B) Csak a bájtot:** egyszerűbb, de a sok kis kérés (minden csak néhány KB) bájtban alig látszik.
 
 **KK3. Ki a „társ” a társankénti kerethez?**
-- **(A) ⭐ Zárt koinóban a személy (a `ki` — már ma jön), egyébként a tábla-kulcs, amit a kérelembe is beteszünk (a kérő
+- **(A) ⭐ Zárt koinoban a személy (a `ki` — már ma jön), egyébként a tábla-kulcs, amit a kérelembe is beteszünk (a kérő
   vele is aláírja a kézfogás átiratát, mint a cserében — ~+100 B kérésenként); ha egyik sincs, a cím — ezt javaslom.** A
   tábla-kulcs ingyen van, ezért a KÖZÖS keret fogja a sok-azonosságos kérőt; a társankénti a mohó egyént.
 - **(B) Csak a cím:** a vonalhoz nem kell nyúlni, de a mobil NAT portváltása és az egy IP mögötti család összemosódik.
@@ -112,7 +112,7 @@ terhe nem nő a koinó méretével.
 **KK4. Mi tartozik a keret alá?**
 - **(A) ⭐ Minden, amit másnak teszek — a kérelem (mindhárom fajta, a kísérőkkel), a továbbadás, a fájl-randevú törzse, és a
   csere azzal, aki NEM a kötésem —; a kötéseimmel folytatott csere nem — ezt javaslom.** Az idegen csere az út, amin egy
-  új tábla-kulccsal érkező „mindent kérő” újra és újra lehúzhatná egy „mindent” tartótól a koinót; a kötés a saját cserém
+  új tábla-kulccsal érkező „mindent kérő” újra és újra lehúzhatná egy „mindent” tartótól a koinot; a kötés a saját cserém
   (D108).
 - **(B) Csak a kérelem:** egyszerűbb, de a csere nyitva hagyja a fenti utat.
 
@@ -160,12 +160,12 @@ kap).
   közül (`kotesek.js` `kotesek`), legalább három találkozással, és az első legalább egy keretnyi (egy óra) ideje — ⛔ a
   jegyzékben a legutóbbi öt találkozás áll, és egy idegen egyetlen csere után bekerülne; onnantól a keret nem fogná (a
   próbák a kor-feltételt `KOINO_KERET_KOTES_KOR`-ral nullázhatják).
-- **A társ kulcsa egy helyen** (`koino.js` `keretTarsa`): zárt koinóban a személy (a kérelemben bizonyított, vagy a
-  cserében a tábla-kulcsához megjegyzett), egyébként a tábla-kulcs, végül a cím — ⛔ mérve: nyílt koinóban a kérelem a
+- **A társ kulcsa egy helyen** (`koino.js` `keretTarsa`): zárt koinoban a személy (a kérelemben bizonyított, vagy a
+  cserében a tábla-kulcsához megjegyzett), egyébként a tábla-kulcs, végül a cím — ⛔ mérve: nyílt koinoban a kérelem a
   személy, a csere a tábla-kulcs alatt számolt, és ugyanaz a társ két külön keretet kapott.
 - **A tag jel** (`koino.js` `tarsKapuja`, `tagsagItelete`): a kapu `tag: true`-t csak ellenőrzött tagságnál mond; nyílt
-  koinóban a kérelemben bizonyított személyt a nálam lévő lánca igazolja (a cserében ott személy nincs). ⛔ Mérve: a vonal a
-  kapu `szabad`-ját vette tagságnak, és nyílt koinóban mindenki szabad — az idegenek felének a korlátja soha nem fogott.
+  koinoban a kérelemben bizonyított személyt a nálam lévő lánca igazolja (a cserében ott személy nincs). ⛔ Mérve: a vonal a
+  kapu `szabad`-ját vette tagságnak, és nyílt koinoban mindenki szabad — az idegenek felének a korlátja soha nem fogott.
 - **A ki nem szolgált kérelem nem csere** (`vonal.js` `kerelem: true`, `koino.js`): ⛔ mérve — a „később”-t kapott (vagy
   tiltott) kérelem után a munka cserét könyvelt (az alsó sáv csere-ideje, a keret egy csere-tétele, a D99 ideje).
 - **A kérő** (`koino.js` `kesobbTarsak`): aki „később”-t mondott (cserében vagy függő kérelemben), azt a kör és a függő

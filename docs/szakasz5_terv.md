@@ -39,7 +39,7 @@ kapcsolat egyetlen fájlban fut össze (`frontend/js/utils/apiHelper.js`, `API_A
 
 ### Amit az „authentikáció" helyettesít
 
-A prototípus végpontjait `authMiddleware` védte (JWT, bejelentkezés után). **A P2P koinóban
+A prototípus végpontjait `authMiddleware` védte (JWT, bejelentkezés után). **A P2P koinoban
 nincs bejelentkezés** (D15): a személyazonosság a **készülék kulcsa**. Ezért:
 
 | Prototípus | P2P koino |
@@ -49,7 +49,7 @@ nincs bejelentkezés** (D15): a személyazonosság a **készülék kulcsa**. Ez�
 | `/sajat-*` végpontok | ugyanaz, csak a „saját" a **helyi kulcsot** jelenti |
 | „nyilvános" végpont | ⭐ **nincs különbség** — a tár helyi, minden olvasás helyi |
 
-⚠️ **A helyi kapu jelszava NEM biztonsági réteg a koinón belül** (3. szabály: a bizalom sose
+⚠️ **A helyi kapu jelszava NEM biztonsági réteg a koino-n belül** (3. szabály: a bizalom sose
 a csatornából jöjjön). Egyetlen dolgot véd: hogy egy **másik weboldal** ne írhasson eseményt
 a nevemben a `127.0.0.1`-en át. A koino kapuja változatlanul az `esemenyMentese`.
 
@@ -66,7 +66,7 @@ a nevemben a `127.0.0.1`-en át. A koino kapuja változatlanul az `esemenyMentes
 > ### ⛔⛔ A `GET /api/pakli/` A `betolt()` ALAKJA — ITT DŐL EL A 9. SZABÁLY
 >
 > A prototípusban ez Mongo-lekérdezés volt, szerver-oldali rendezéssel és lapozással. A P2P
-> koinóban az állapot **számítás** az eseményekből — és a mai számítás **az összes eseményt**
+> koinoban az állapot **számítás** az eseményekből — és a mai számítás **az összes eseményt**
 > kapja (`allapotSzamitasa(await koinoEsemenyei(tar, KOINO))`).
 >
 > ⚠️ **Ez az utolsó megmaradt nem-skálázó út a programban.** A Szakasz 3 szándékosan
@@ -103,7 +103,7 @@ Mindhárom **ugyanaz az öt végpont** (`/api/gondolat`, `/api/kategoria`, `/api
 
 > ### ⚠️ KÉT HIÁNY, AMIT EZ A TÉRKÉP TALÁLT
 >
-> **(a) A kategória és a gondolattípus NEM LÉTEZIK a P2P koinóban.** A `muveletek.js` ma
+> **(a) A kategória és a gondolattípus NEM LÉTEZIK a P2P koinoban.** A `muveletek.js` ma
 > **13 műveletet** ismer, és entitást csak egyet tud létrehozni: `gondolatLetrehozasa`
 > (`tipus: 'Gondolat'`). A prototípus **10 végpontja** (kategória 5 + gondolattípus 5) tehát
 > nem „átemelendő", hanem **megépítendő** — a domain-fogalom megvan (a kategóriák és
@@ -207,7 +207,7 @@ javaslat-réteg nem tud visszahatni az entitásra.
 
 ⚠️ **A prototípusban ez külön réteg volt:** `services/javaslat/javaslatVegrehajtasiService.js`
 + négy végrehajtó (`vegrehajtok/`: módosítási, áthelyezési, törlési, egyesítési). **A P2P
-koinóban ez a réteg nincs megépítve.**
+koinoban ez a réteg nincs megépítve.**
 
 ⭐ **Miért blokkolja a kártyákat?** Mert a kártya a címet és a szöveget mutatja. Elfogadott
 egyezmény után a **régit** mutatná — és a legrosszabb kimenet az volna, ha ezt a felületen
@@ -297,7 +297,7 @@ helye. *A „vékony lap" a SZÁMÍTÁSRÓL szól, nem az elnevezésekről.*
 1. ✅ **A pakli-lekérdezés kérdezhető alakja** — *kész az 5.2-ben.* Ez volt az utolsó
    `betolt()`-alakú út; ha elrontottuk volna, a felület bebetonozza.
 2. ✅ **A kategória és a gondolattípus** — *megépítve az 5.4-ben* (12. szakasz).
-3. ✅ **A `PATCH` értelme** — *eldőlt (5.4):* nincs közvetlen módosítás. A koinóban a
+3. ✅ **A `PATCH` értelme** — *eldőlt (5.4):* nincs közvetlen módosítás. A koinoban a
    szerkesztés **javaslat → szavazás → egyezmény** (D27), és az egyezményt azóta rá is
    vezetjük az entitásra. ⭐ A prototípus `PATCH`-ének tehát **nincs megfelelője, és nem is
    lesz** — ez nem hiány, hanem a modell.
@@ -343,7 +343,7 @@ felosztására — **„természetesen megértem, hogy szakaszokra/állomásokra
 
 ✅ **A PAKLI A PROTOTÍPUSÉ (D100, „a ház”, 2026-10-10):** az örökölt `Pakli.js` (a láncos-testvéres nézet a
 `TestverJelzo`-val és a `testverRendezes`-sel) bájtra változatlanul a felületen; a régi ideiglenes lista
-(`pakliNezet.js`) eltűnt. A lap fordít (`kartyaAdat.js` `prototipusUtvonala`, `apiHelper.js`), a koinós többlet a
+(`pakliNezet.js`) eltűnt. A lap fordít (`kartyaAdat.js` `prototipusUtvonala`, `apiHelper.js`), a koinos többlet a
 `koinoPakli.js`-ben (a hiányzót az őrjárat hozza, a lap csendben újrakérdez; az össz-pont forrásának jele; a lapos
 nézet lapozása). A részletek: [`haz_pakli_atvizsgalas.md`](haz_pakli_atvizsgalas.md), a fázis-2 terv D100-a.
 ⏭️ **Ami a felületből hátravan: a maradék modálok (5.8)** — a kártya-menük nyolc helyőrzője (Rendezés, Struktúra,
@@ -365,7 +365,7 @@ keresés még nincs. ✅ **Az értesítés-réteg (2026-10-13):** az `Ertesitese
 prototípuséi; a postafiók a készüléken számolódik (két pillanatkép különbségéből, a tartott szeletekből), a beállítások
 öröklődnek, a kártyák számlálója él; a levél helyett a készülék saját értesítése jelez (D103, 2026-10-13). Helyőrző modál
 már nincs. ✅ **Az alsó sáv (2026-10-15):** a prototípus `foOldalForm.html`-jének sávja a lap alján (a fő menü, vissza/előre,
-az infók — a készüléken ismert rész számai), és a koinós többlet: a csere ideje, és ha egy csere újat hozott, a lap magától
+az infók — a készüléken ismert rész számai), és a koinos többlet: a csere ideje, és ha egy csere újat hozott, a lap magától
 frissül. ⏭️ A következő: a kereső-réteg (⑦ — külön pillér; átvizsgálva: [`kereso_reteg_atvizsgalas.md`](kereso_reteg_atvizsgalas.md),
 a K1–K8 Csabánál).
 
@@ -442,7 +442,7 @@ volna mit mutatnia.*
 
 ⏸️ **És egy nyitott döntés, ami az 5.6-ot érinti:** kérdezzen-e a **szabály-réteg** tagságot?
 ⛔ Ha igen, a válasz nem lehet „kidobom": P2P-n a *„nem tag"* és a *„még nem láttam a
-bizonyítékát"* ugyanaz — a koinónak van erre szava (`nemEllenorizhetok`, D19).
+bizonyítékát"* ugyanaz — a koinonak van erre szava (`nemEllenorizhetok`, D19).
 
 ✅ **ÉS EZ MEGÉPÜLT (2026-09-12): `kivisz` + `behoz`** — a 4. szabály hiánya pótolva
 (`js/csere/fajlCsere.js`). ⭐ A behozatal **nem ír új beolvasztó logikát**, hanem a `csere.js`
@@ -457,7 +457,7 @@ engedékenyebb kaput* (3. szabály). A kivitel alakja **bájtra a táré**, ezé
 ⭐ **Csaba két döntése, amire épül:**
 
 1. **A hatókör:** a v1 azt mutatja, amit **ez a készülék ismer**. A D25 tere egyszer idegen
-   koinókat is mutatna, de ahhoz a **kereső-réteg** kell, ami szándékosan elhagyható és nincs
+   koinokat is mutatna, de ahhoz a **kereső-réteg** kell, ami szándékosan elhagyható és nincs
    megépítve. ⛔ A felület ezért **kimondja a határt** (`csakAmitIsmerunk`) — próba őrzi, nem
    csak komment. *A hallgatás teljességet ígérne, amit nem tudunk tartani (D19).*
 2. **A rendezés:** **létrehozási idő, új elöl.** A `KoinoLetrehozas.ido` a szerző órája, tehát
@@ -473,26 +473,26 @@ AZONOSSÁG szakasz használ — nem kellett hozzá új gépezet. ⭐ **A külön
 ahol 900-an beléptek, de 12-nek van visszavezethető meghívási lánca, az **ránézésre más**,
 mint ahol 900-ból 900.
 
-**És a „létszám = a koino állítása" aggály szűkebb, mint hittük:** ez csak arra a koinóra
+**És a „létszám = a koino állítása" aggály szűkebb, mint hittük:** ez csak arra a koinora
 igaz, aminek **nincs meg az adata**. Amelyiknek megvan, ott a számot **aláírt eseményekből
 számoljuk** — tény, nem állítás. ⛔ **Rendezni viszont továbbra sem lehet szerinte** (D18/2),
 és ezt próba őrzi: a `RENDEZESEK` lista nem tartalmazhat ilyet.
 
-### ⛔⛔ A szerkezeti darab: a felület koinót vált
+### ⛔⛔ A szerkezeti darab: a felület koinot vált
 
-A parancssor **egy koinóra szól** (a `KOINO_AZONOSITO` indításkor eldől), és ez helyes. A
-belépő tér viszont a koinók FÖLÖTT áll: a lap belép az egyikbe, majd egy másikba,
-**újraindítás nélkül**. ⭐ Ezért a felület koinónként tart egy **nyitott állapotot** — saját
+A parancssor **egy koinora szól** (a `KOINO_AZONOSITO` indításkor eldől), és ez helyes. A
+belépő tér viszont a koinok FÖLÖTT áll: a lap belép az egyikbe, majd egy másikba,
+**újraindítás nélkül**. ⭐ Ezért a felület koinonként tart egy **nyitott állapotot** — saját
 tár, saját környezet, saját pakli-nézet —, és a kezelő **árnyékolja** a neveket, ezért
 egyetlen végpont kódját sem kellett átírni miatta.
 
-⚠️ **A pakli-nézet koinónként külön**, mert a horgony „az első N esemény" képe, és az
-eseményhalmaz koinónként más — egy közös nézet a váltás után **másik koino képét** adná
+⚠️ **A pakli-nézet koinonként külön**, mert a horgony „az első N esemény" képe, és az
+eseményhalmaz koinonként más — egy közös nézet a váltás után **másik koino képét** adná
 vissza a gyorsítótárból.
 
-⚠️ **A „belépés" NEM bejelentkezés** (D15): a kulcsod minden koinóban ugyanaz, csak a lap
-néz máshová. ⛔ És csak **létező** koinóra lehet váltani: az `esemenyTarNyitasa` létrehozná a
-mappát, tehát egy elgépelt név némán új, üres koinót csinálna a téren.
+⚠️ **A „belépés" NEM bejelentkezés** (D15): a kulcsod minden koinoban ugyanaz, csak a lap
+néz máshová. ⛔ És csak **létező** koinora lehet váltani: az `esemenyTarNyitasa` létrehozná a
+mappát, tehát egy elgépelt név némán új, üres koinot csinálna a téren.
 
 ### ⚠️ Amit a böngésző mondott meg
 
@@ -520,18 +520,18 @@ A pakli mutatta a gondolatokat, de újat csak a parancssorból lehetett — *a 4
 fordítottja: itt a kéz volt meg, a lap nem.* Most megvan: `POST /api/gondolat`.
 
 ⭐ **HÁROM ALÁÍRT ESEMÉNY, nem egy „mentés".** A prototípusban egy POST hozta létre a
-gondolatot, a kezdő tudatpontot és a küszöbeit; a koinóban ez három **külön állítás**,
+gondolatot, a kezdő tudatpontot és a küszöbeit; a koinoban ez három **külön állítás**,
 három esemény, ugyanazon az `esemenyMentese` kapun.
 
 ⛔⛔ **ÉS AMI NEM JÖTT ÁT: a kÖZVETLEN SZERKESZTÉS.** A prototípusban a szerző egyszerűen
-átírhatta a gondolatát (`PATCH /api/gondolat/:id`). A koinóban egy létrejött entitást
+átírhatta a gondolatát (`PATCH /api/gondolat/:id`). A koinoban egy létrejött entitást
 **csak egyezmény** változtathat meg (D8/D27) — tehát a végpont **őszinte 400-at ad**, és
 megmondja, mit tegyen helyette. *(Ugyanaz a minta, mint a szavazat visszavonásánál.)*
 
 ### ⛔⛔ AMI NYITVA MARADT: A KÉPEK ÉS FÁJLOK HELYE (D3)
 
 A prototípusban a kép egy **szerver-mappába** került, és a blokk egy **URL-t** tárolt.
-A koinóban nincs szerver — és ez nem pótolható egy másik szerverrel sem:
+A koinoban nincs szerver — és ez nem pótolható egy másik szerverrel sem:
 
 - ⛔ **2. szabály** — semmi ne múljon egyetlen címen vagy szolgáltatáson;
 - ⛔ **6. szabály (KEMÉNY)** — egy esemény ma ~400 bájt, egy fénykép ennek több ezerszerese;
@@ -593,7 +593,7 @@ vállal egy készülék · és a **felső mérethatár** (a 6. szabály az esem�
 videóra is kell egy „eddig és ne tovább").
 
 ⏸️ **A javaslat, ha majd eldől:** a koino saját mintája — a fájlt a **lenyomata** nevezi
-meg (mint mindent a koinóban), az esemény csak ezt a ~100 bájtos hivatkozást hordozza, a
+meg (mint mindent a koinoban), az esemény csak ezt a ~100 bájtos hivatkozást hordozza, a
 bájtok pedig a tartalmi rétegben utaznak. Az ellenőrzés ingyen van: újra-lenyomatolni és
 összevetni — *a csatornát nem kell megbízhatóvá tenni* (3. szabály).
 
@@ -631,8 +631,8 @@ közül a kártya-osztályok, a hamburger menü, a szövegmegjelenítő, az öt 
 | Fájl | Miért |
 |---|---|
 | `utils/apiHelper.js` | a JWT token helyett a **kapu jelszava** (D15: nincs bejelentkezés) |
-| `utils/authHelper.js` | **kicserélve** — a fájl egész tárgya (bejelentkezés, token) nem létezik a koinóban; ⭐ az **export-nevek** viszont ugyanazok, ezért a `Kartya.js` nem változott |
-| `kartya/kartyaGyar.js` | a `KategoriaKartya` és a `GondolatTipusKartya` kimaradt — **a koinóban ez a két entitástípus nem létezik** (a végpont-térkép 2. találata) |
+| `utils/authHelper.js` | **kicserélve** — a fájl egész tárgya (bejelentkezés, token) nem létezik a koinoban; ⭐ az **export-nevek** viszont ugyanazok, ezért a `Kartya.js` nem változott |
+| `kartya/kartyaGyar.js` | a `KategoriaKartya` és a `GondolatTipusKartya` kimaradt — **a koinoban ez a két entitástípus nem létezik** (a végpont-térkép 2. találata) |
 
 ### ⭐⭐ A modal-csapda megoldása: 13 helyőrző
 
@@ -677,7 +677,7 @@ hogy a növekmény **majdnem teljes egészében örökölt, változatlan kód**.
 
 ## 12. ✅ AZ 5.4 ELKÉSZÜLT (2026-09-06) — a kategória és a gondolattípus
 
-A végpont-térkép 2. találata volt: *„a koinóban ez a két entitástípus nem létezik"* — tíz
+A végpont-térkép 2. találata volt: *„a koinoban ez a két entitástípus nem létezik"* — tíz
 prototípus-végpont mögött nem volt esemény, pedig a domain-fogalom mindig megvolt
 (*a kategóriák és a gondolattípusok rendszerezik a gondolatokat*).
 
@@ -699,7 +699,7 @@ mondja meg.*
 küszöbök, egyezmény. ⭐ *Egy kategória neve is közösségi döntéssel változik — nem egy mező
 átírásával.* (És mivel az egyezmény-végrehajtás az 5.3 előtt elkészült, ez már működik is.)
 
-A név a **`cim` mezőbe** kerül, nem egy külön `nev`-be: a koinóban minden entitásnak `cim`-e
+A név a **`cim` mezőbe** kerül, nem egy külön `nev`-be: a koinoban minden entitásnak `cim`-e
 van, így az állapot-számítás, a rendezés és az egyezmény-végrehajtás **változtatás nélkül**
 működik rajtuk. A prototípus kártyái `nev`-et olvasnak — azt a felület fordítja
 (`felulet/js/kartyaAdat.js`). *Nincs párhuzamos mező, amit külön kellene karbantartani.*
@@ -707,7 +707,7 @@ működik rajtuk. A prototípus kártyái `nev`-et olvasnak — azt a felület f
 ### ⛔⛔ A max-3 korlát a SZÁMÍTÁSBAN van, nem a felületen
 
 A prototípus Mongoose-validátorral tartotta (*„Maximum 3 különböző kategória"*). A P2P
-koinóban **nincs szerver, ami visszautasítsa** — ezért a korlát a `szabalyok.js`-be került
+koinoban **nincs szerver, ami visszautasítsa** — ezért a korlát a `szabalyok.js`-be került
 (`KATEGORIA_KORLAT`), a duplikátum-szűréssel együtt. *Amit a számítás nem ellenőriz, az nem
 szabály, csak illemtan.*
 
@@ -810,7 +810,7 @@ kerül — próbával igazolva, hogy **szomszédosak**.
 
 ### ⛔ A szavazat visszavonása: őszinte nem
 
-A `SzavazasFul`-on ott a „Szavazat visszavonása" gomb — a koinóban viszont **nincs ilyen
+A `SzavazasFul`-on ott a „Szavazat visszavonása" gomb — a koinoban viszont **nincs ilyen
 művelet** (5.4 döntés). ⚠️ Nem némán nyeljük el: a végpont **400-at ad, indoklással** —
 *„a szavazat nem vonható vissza, csak megváltoztatható; ha nem akarsz állást foglalni,
 szavazz Tartózkodom-ra."*
@@ -1012,7 +1012,7 @@ GET /api/pakli?rendezes=<hierarchikus|ido|sajatPont|agazatiPont>
 A tudatpont **bármikor átrendezhető**, tehát a rendezés kulcsa két lekérés között
 megváltozhat: egy kártya átugrik a lapok határán, és **kimarad vagy kétszer jön**.
 
-⭐ A koinóban van rá szép válasz: **a tár hozzáfűzhető, tehát az első N esemény halmaza soha
+⭐ A koinoban van rá szép válasz: **a tár hozzáfűzhető, tehát az első N esemény halmaza soha
 nem változik.** A lapozás ezért egy horgonyhoz kötődik — *„az állapot, ahogy az első N
 eseményből látszott"* —, és a további oldalak ugyanabból a képből jönnek. **Nem az időt
 fagyasztjuk be, hanem a bemenetet.**

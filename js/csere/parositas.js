@@ -20,7 +20,7 @@
 //      egyeznie kell), a telefon elküldi a KÉSZÜLÉKKULCSÁT és a nevét, a titok BIZONYÍTÁSÁVAL (HMAC a titokkal — a kézfogás
 //      átiratához kötve: egy lehallgatott bizonyítás másik beszélgetésben nem ér semmit, és a titok maga nem utazik).
 //   3. A laptop aláírja a tanúsítványt (az azonosság kulcsával), és visszaküldi — az azonosság nyilvános részeivel (a név, a születés,
-//      a kulcscserék lánca) és a koinó-listájával. A titok egyszer használható.
+//      a kulcscserék lánca) és a koino-listájával. A titok egyszer használható.
 //   4. Mindkét gép kiír egy 6 jeles ELLENŐRZŐ KÓDOT (a titokból és a készülékkulcsból) — összeveted: ha nem egyezik, nem a te telefonod
 //      került fel (a lap — ④b — a kizárást kínálja).
 //

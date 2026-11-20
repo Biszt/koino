@@ -6,7 +6,7 @@
 import { allapotSzamitasa, median, szetosztottPontok } from '../js/allapot/allapotSzamitas.js';
 
 import { probaGyujtemeny, ujEember, tagokkal, tesztKeszulek } from './probaFuttato.js';
-// ⭐ D89/2: a zárt/nyílt koinó — valódi művelettel és a kapuval.
+// ⭐ D89/2: a zárt/nyílt koino — valódi művelettel és a kapuval.
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -305,11 +305,11 @@ proba('Az ISMERETLEN esemény-típus nem töri el a számítást', async () => {
 });
 
 // ===================================
-// ⭐⭐ D89/2 (Csaba, 2026-10-02/03): ZÁRT VAGY NYÍLT KOINÓ
+// ⭐⭐ D89/2 (Csaba, 2026-10-02/03): ZÁRT VAGY NYÍLT KOINO
 // ===================================
 //
 // A létrehozáskor dől el (alapból ZÁRT, a nyílthoz ki kell mondani), nem változtatható, és a mező nélküli
-// régi koinó is zártnak számít (D89/5). ⚠️ A betartatás az E-vel jön — itt a mező és a számítás.
+// régi koino is zártnak számít (D89/5). ⚠️ A betartatás az E-vel jön — itt a mező és a számítás.
 
 async function zartKoino(beallitas) {
   const tar = await esemenyTarNyitasa('zart-proba', await mkdtemp(join(tmpdir(), 'koino-zart-')));
@@ -320,7 +320,7 @@ async function zartKoino(beallitas) {
   return { tar, k, e, allapot: allapotSzamitasa(await koinoEsemenyei(tar, 'zart-proba')) };
 }
 
-proba('⭐⭐ D89/2: a koinó alapból ZÁRT, a nyílt kimondható, és a mező nélküli régi koinó is zárt', async () => {
+proba('⭐⭐ D89/2: a koino alapból ZÁRT, a nyílt kimondható, és a mező nélküli régi koino is zárt', async () => {
   const alap = await zartKoino();
   const nyilt = await zartKoino({ zart: false });
   // A régi alak: a KoinoLetrehozas `zart` nélkül (kézzel aláírva, ahogy a D89 előtti program írta).

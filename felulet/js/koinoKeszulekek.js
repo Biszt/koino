@@ -1,12 +1,12 @@
 // felulet/js/koinoKeszulekek.js
 
-// Felelősség: ⭐⭐ D128 (④b — 9.14) — „📱 KÉSZÜLÉKEIM” A LAPON — koinós többlet, a prototípusban nincs ilyen:
-//   · A KÉSZÜLÉKEK: a nevük, a rövid kulcsuk, koinónként a láncuk vége (és amit a koinó-listájukban mondtak — ③d), a kizártak, a
+// Felelősség: ⭐⭐ D128 (④b — 9.14) — „📱 KÉSZÜLÉKEIM” A LAPON — koinos többlet, a prototípusban nincs ilyen:
+//   · A KÉSZÜLÉKEK: a nevük, a rövid kulcsuk, koinonként a láncuk vége (és amit a koino-listájukban mondtak — ③d), a kizártak, a
 //     régebbi kulccsal tanúsítottak (KH3 (A): kizárás nélkül a múltjuk nem számít);
 //   · A FELVÉTEL (KF1 (A)): „➕ Új készülék felvétele” — a program párosítást indít (a kapu a párosítás idejére nyitva), a lap a
 //     telepítő sort mutatja a párosító kóddal és a QR-ét (a telefon kamerája szöveggé olvassa — egy sor a Termuxba), és vár; ha a
 //     telefon felkerült, az ellenőrző kódot (a telefonon ugyanezt kell látnod);
-//   · A KIZÁRÁS: egy készülék kizárása (kétszeri kattintással — a második megerősít); a koinók, ahová bekerült;
+//   · A KIZÁRÁS: egy készülék kizárása (kétszeri kattintással — a második megerősít); a koinok, ahová bekerült;
 //   · A HATÁR (④c — KH1): a saját készülékemnek magától legfeljebb ennyit adok — készülékenként; üresen az alap (a keret 20%-a);
 //   · A PAPÍR: él-e, a gépen van-e még a fájlja, és a 2. lépcső figyelmeztetése.
 // Egy FELVETT készüléken (az azonosság kulcsa nincs rajta) a felvétel és a kizárás nem látszik — a lap kimondja, hogy az a kezelőn megy.
@@ -35,7 +35,7 @@ function keszulekHtml(d, kezelo) {
       + ' a múltja nem számít; a kizárása a vágásig megtartja.">régebbi kulcs</span>');
   }
   const koinok = [...d.koinok.map((x) => koinoNeve(x) + ': ' + x.n + ' esemény'),
-    ...d.listaKoinok.map((x) => koinoNeve(x) + ': a listája szerint ' + x.n + ' esemény (' + (x.ismert ? 'itt nincs láncrésze' : 'itt nem ismert koinó') + ')')];
+    ...d.listaKoinok.map((x) => koinoNeve(x) + ': a listája szerint ' + x.n + ' esemény (' + (x.ismert ? 'itt nincs láncrésze' : 'itt nem ismert koino') + ')')];
   const hatar = !d.sajat && !d.kizarva
     ? '<div class="koino-keszulekek__hatar"><label>Határ (ennyit adok neki magától): <input type="number" min="0" step="100" '
       + 'data-hatar="' + html(d.k) + '" value="' + (d.hatar ?? '') + '" placeholder="alap: a keret 20%-a"></label> '
@@ -163,8 +163,8 @@ export async function keszulekeimMegnyitasa() {
         }
         kizarKerdes = null;
         const r = await apiPost('keszulek/kizar', { keszulek: k });
-        uzenet = 'Kizártad: „' + (r.nev ?? k.slice(0, 8)) + '” — ' + r.koinok.length + ' koinóban a vágásig marad a láncából, a többiben semmi.'
-          + (r.csatlakozasok.length ? ' ' + r.csatlakozasok.length + ' koinóhoz csatlakoztam (csak ott volt tag).' : '')
+        uzenet = 'Kizártad: „' + (r.nev ?? k.slice(0, 8)) + '” — ' + r.koinok.length + ' koinoban a vágásig marad a láncából, a többiben semmi.'
+          + (r.csatlakozasok.length ? ' ' + r.csatlakozasok.length + ' koinohoz csatlakoztam (csak ott volt tag).' : '')
           + (r.hibak.length ? ' ⚠ ' + r.hibak.join('; ') : '');
         await betolt();
       }

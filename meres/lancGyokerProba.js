@@ -351,7 +351,7 @@ async function egyesitoJavaslat() {
   return { tar, A, g1, g2, j };
 }
 
-/** Amit a csak-G1-tartó lát: a G1 szelete és ami oda bejelentődik (meg a koinó születése). */
+/** Amit a csak-G1-tartó lát: a G1 szelete és ami oda bejelentődik (meg a koino születése). */
 const csakEgyNezete = (esemenyek, g) => esemenyek.filter((e) => e.tipus === 'KoinoLetrehozas'
   || szelet(e) === g || bejelentesHelyei(e).includes(g));
 
@@ -404,14 +404,14 @@ proba('⛔⛔ D85 T3 előfeltétele: a hamis bizonyítékú javaslatot a kapu el
 });
 
 // ===================================
-// ⭐ D118/2 (①b): A GYORSÍTÓTÁR A KOINÓ KERETÉHEZ KÖTÖTT
+// ⭐ D118/2 (①b): A GYORSÍTÓTÁR A KOINO KERETÉHEZ KÖTÖTT
 // ===================================
 //
-// A keret a koinó születéséből jön (`koinoKerete`); amíg a születés nincs meg, a mai érték. Ha a gyorsítótár egy kép
+// A keret a koino születéséből jön (`koinoKerete`); amíg a születés nincs meg, a mai érték. Ha a gyorsítótár egy kép
 // után megérkezik a születés (más kerettel), a régi kép nem érvényes — a láncot az új kerettel kell újraszámolni (a
 // szabály-réteg is azzal ítél). ⚠️ Rontás: a jelölt kerete nélkül (a régi feltétel) a memória és a fájl képe is
 // átmegy, és a gyökér a mai kerettel számolt marad.
-proba('⭐ D118/2 (①b): a lánc-gyökér gyorsítótára a koinó keretéhez kötött — a később érkező születés (500) után a memória és a fájl képe sem érvényes',
+proba('⭐ D118/2 (①b): a lánc-gyökér gyorsítótára a koino keretéhez kötött — a később érkező születés (500) után a memória és a fájl képe sem érvényes',
   async () => {
     const alapitoKulcs = await tesztKeszulek();
     const szuletes = await esemenyLetrehozasa({ koino: '', tipus: 'KoinoLetrehozas', elozo: null, sorszam: 1,

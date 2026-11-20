@@ -2,7 +2,7 @@
 
 // Felelősség: ⭐⭐ A KÖZÖSSÉG FELTÖLTÖTT NÉZETEINEK PRÓBÁJA (D126 — a D123 PR4-e; `js/allapot/nezetKartya.js`, `js/felulet/nezetFelulet.js`,
 // a `nezet` parancs, a lap útjai, `felulet/js/koinoNezetKeret.js`):
-//   · a KÁRTYA szabályai: a kód a szöveg ELSŐ fájl-blokkja; a kód UTF-8 szöveg; a bekapcsolás koinónként és a LENYOMATHOZ kötve (ha a
+//   · a KÁRTYA szabályai: a kód a szöveg ELSŐ fájl-blokkja; a kód UTF-8 szöveg; a bekapcsolás koinonként és a LENYOMATHOZ kötve (ha a
 //     kód változik: `valtozott`), korlátosan, a hibás jegyzék-rész eldobva;
 //   · a NÉZET-FELÜLET alakja: a keret tartalma (a CSP és az őr a LEGELEJÉN, a kliens, a kód), a válasz csak a kimondott mezőkkel, a
 //     kérdés-készlet (az ismeretlen kérdés megnevezve, a darab korlátos);
@@ -76,9 +76,9 @@ proba('⭐ a KÁRTYA: a szövege a leírás és a kód fájl-blokkja; a kód a s
   return ok;
 });
 
-// Rontás: (a) az állás a lenyomatot nem nézi → `be` a más kódra → bukik; (b) a koinót nem nézi → egy másik koinóban is `be` → bukik;
+// Rontás: (a) az állás a lenyomatot nem nézi → `be` a más kódra → bukik; (b) a koinot nem nézi → egy másik koinoban is `be` → bukik;
 // (c) a korlát elmarad → a 65. is bekapcsol → bukik; (d) a kikapcsolás a többit is viszi → bukik.
-proba('⭐ a BEKAPCSOLÁS: koinónként és a kód LENYOMATÁHOZ kötve (más kód: `valtozott`), korlátosan; a kikapcsolás csak azt viszi; a hibás jegyzék-rész eldobva', () => {
+proba('⭐ a BEKAPCSOLÁS: koinonként és a kód LENYOMATÁHOZ kötve (más kód: `valtozott`), korlátosan; a kikapcsolás csak azt viszi; a hibás jegyzék-rész eldobva', () => {
   let j = nezetJegyzekAlakja(null);
   j = nezetBekapcsolasa(j, { koino: 'K1', kartya: L('a'), lenyomat: L('x'), cim: 'Térkép', most: 1000 });
   j = nezetBekapcsolasa(j, { koino: 'K1', kartya: L('b'), lenyomat: L('y'), most: 2000 });
@@ -164,7 +164,7 @@ async function parancs(adat, ervek, env = {}) {
   }
 }
 
-/** A koinó eseményei (az adat-mappa minden koinójából). */
+/** A koino eseményei (az adat-mappa minden koinojából). */
 async function esemenyek(adat) {
   const ki = [];
   for (const m of await readdir(adat).catch(() => [])) {
@@ -176,7 +176,7 @@ async function esemenyek(adat) {
 
 const NEZET_HTML = '<!doctype html>\n<title>Próba</title>\n<p>Egy próba-nézet — é, ő, ű</p>\n';
 
-/** Egy friss koinó egy nézettel (a parancssorból). */
+/** Egy friss koino egy nézettel (a parancssorból). */
 async function koinoNezettel(elotag, html = NEZET_HTML) {
   const otthon = await ujMappa(elotag);
   const adat = join(otthon, 'adat');
@@ -215,7 +215,7 @@ proba('⭐⭐ a PARANCSSOR: `nezet uj` (a kép a típust és a szöveget hordozz
     fajlIgeny: /\(2 \/ 2 megvan\)/.test(fajlok),
     lista: /„A térkép” · 12 pont · terkep\.html · kikapcsolva/.test(lista),
     kod: kodKi.includes(NEZET_HTML.trim()) && kodKi.includes(kod?.lenyomat ?? '?'),
-    elonezet: /Mit lát: a koinó közös képét/.test(elonezet) && /hamis rajzot/.test(elonezet) && /nezet be .* igen/.test(elonezet)
+    elonezet: /Mit lát: a koino közös képét/.test(elonezet) && /hamis rajzot/.test(elonezet) && /nezet be .* igen/.test(elonezet)
       && jegyzekElotte === null,
     be: /✓ Bekapcsolva/.test(be) && bekapcsolt?.lenyomat === kod?.lenyomat && /🧩 bekapcsolva/.test(listaBe),
     ki: /kikapcsolva ezen a készüléken/.test(ki) && Object.keys(jegyzekKi.koinok ?? {}).length === 0
@@ -507,7 +507,7 @@ proba('⭐⭐ az ELSZIGETELÉS a valódi lapon (fej nélküli Chrome, kontrollal
   await new Promise((kesz) => udp.bind(0, '0.0.0.0', kesz));
   await new Promise((kesz) => udpK.bind(0, '0.0.0.0', kesz));
   const lan = lanCim();
-  // ----- a koinó a rossz nézettel, bekapcsolva -----
+  // ----- a koino a rossz nézettel, bekapcsolva -----
   const otthon = await ujMappa('koino-nezet-chrome-');
   const adat = join(otthon, 'adat');
   await parancs(adat, ['koino', 'Elszigetelés-próba']);

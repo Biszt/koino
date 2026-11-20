@@ -17,7 +17,7 @@ ugyanazzal a maggal. A telepítéshez tehát nem kell új adat — a munka a **c
 
 ⭐ A javaslat (4.): a kártya kódja egy `koino-uj` mappába kerül (ellenőrizve), és onnan a **mai frissítés lánca** fut tovább — ugyanaz,
 amit a telepítő sor indít (PR7): az új telepítő leállítja a régit, a régit `koino-regi`-be teszi, az újat a helyére, és indít. A lap
-előtte megmutatja a szerzőt, a pontot, rétegenként a változást, és ⚠️ hogy melyik koinódban lesz „más számítás”.
+előtte megmutatja a szerzőt, a pontot, rétegenként a változást, és ⚠️ hogy melyik koinodban lesz „más számítás”.
 
 ⛔ A mérés egy hibát is talált, ami a mai programban él (2.) — javítva.
 
@@ -30,7 +30,7 @@ A mérés ennek a programnak a kód-csomagjából (ahogy a kártya ma készül �
 - **(c)** ⛔ **a kiírt mappa a saját kódjának MÁS nevet számolt**: a git nélküli mappát a program bejárja (nem a git kérdezi), és a
   bejárás szűrője a telepítőket (`termux/indit.sh`, `termux/telepit.sh`, `windows/indit.ps1`, `windows/koino.cmd`,
   `windows/telepit.ps1`) kihagyta — 362 fájl a 367-ből. A mag ugyanaz volt;
-- **(d)** a kiírt program elindul (egy koinó születése és a `koino` parancs, egy üres adat-mappával — ~1,3 s), és a magja „ezen a
+- **(d)** a kiírt program elindul (egy koino születése és a `koino` parancs, egy üres adat-mappával — ~1,3 s), és a magja „ezen a
   készüléken is ez fut”;
 - **(e)** ugyanez egy `.git` nélküli másolattal, ahogy a Windowsos telepítés a GitHub zip-jéből: ugyanaz a hiba.
 
@@ -49,8 +49,8 @@ a mérés (c)-je és (e)-je: 367 fájl, a név ugyanaz.
 - **A telepítés helye.** A telefonon `~/koino` (egy git-munkakönyvtár — a telepítő sor `git fetch` + `git reset`-tel frissít), a
   Windowson `%USERPROFILE%\koino` (git nélkül — a zip-ből; a sor a `koino-uj`-ba tölt, az új telepítő leállít, a régit
   `koino-regi`-be teszi, az újat a helyére, és indít — PR7). Az adat mindkét helyen a mappán KÍVÜL (`koino-adat`).
-- **Egy program egy készüléken.** A családi őrjárat egy folyamatban a család minden koinóját futtatja (D119) — ugyanazzal a
-  programmal, tehát ugyanazzal a MAGGAL. A lap koinónként kimondja, ha a futó mag nem a koinóé (D123 ①).
+- **Egy program egy készüléken.** A családi őrjárat egy folyamatban a család minden koinoját futtatja (D119) — ugyanazzal a
+  programmal, tehát ugyanazzal a MAGGAL. A lap koinonként kimondja, ha a futó mag nem a koinoé (D123 ①).
 - **A kártyát bárki feltöltheti**, aki tag (a D14 pontjával). A kártya pontja a közösség jelzése, nem engedély.
 
 ## 4. A javaslat — a menet
@@ -58,7 +58,7 @@ a mérés (c)-je és (e)-je: 367 fájl, a név ugyanaz.
 1. **A lap a kártyán** („🧬 Kód” fül mellett): „⬇ Telepítés erre a készülékre…” — és a kézi út, egy parancs (`telepit <kártya>`;
    4. szabály).
 2. **Az előnézet** (a telepítés előtt, egy ablakban): ki tette fel, hány pont van rajta; rétegenként mi változik a FUTÓ
-   programhoz képest — a **mag** (más-e; és ⚠️ melyik koinóidban lesz „más számítás” — TK3), a **felület** (`felulet/`), a **többi**
+   programhoz képest — a **mag** (más-e; és ⚠️ melyik koinoidban lesz „más számítás” — TK3), a **felület** (`felulet/`), a **többi**
    (a protokoll és a helyi viselkedés — fájlnév szerint; a protokoll SZÁMAI csak futtatva derülnének ki, a lap a kártya kódját nem
    futtatja); a változott fájlok listája (a „Kód” fülön olvashatók); és kimondva: *„a kód a kulcsaiddal fog futni — a lenyomat azt
    bizonyítja, hogy ez az a kód, amit a kártya megnevez, azt nem, hogy jó”*.
@@ -80,14 +80,14 @@ a mérés (c)-je és (e)-je: 367 fájl, a név ugyanaz.
   ahogy ma is); (B) verziónként külön mappa és egy mutató az adat-mappában, melyik fut (több visszaút, de az indítók, a telepítő sor
   és a lap is a mutatót követné — több új rész).
 - **TK2 — Mit mondjon a lap előtte, és legyen-e küszöb?** (A) ⭐ **az előnézet (4. 2.), küszöb nélkül:** a szerző, a pont, a
-  rétegenkénti változás, a mag koinónként, a figyelmeztetés — és az e-ember dönt (a jelenlét személyes; a pont tájékoztat);
-  (B) küszöb: csak a koinó legtöbb pontú kártyája, vagy egy pont-arány fölött telepíthető (a közösség „engedélye” — de a pont
+  rétegenkénti változás, a mag koinonként, a figyelmeztetés — és az e-ember dönt (a jelenlét személyes; a pont tájékoztat);
+  (B) küszöb: csak a koino legtöbb pontú kártyája, vagy egy pont-arány fölött telepíthető (a közösség „engedélye” — de a pont
   prioritás, nem szavazat: D-fogalom).
-- **TK3 — Ha a kártya magja más, mint egy koinódé?** Egy program fut a készüléken (D119), tehát a család minden koinója az új maggal
-  számol: ahol a koinó más maggal született, ott a lap „⚠ más számítás”-t mond (a koinó képe ott eltérhet a többiekétől). (A) ⭐
-  **kimondva, nem tiltva:** az előnézet megnevezi ezeket a koinókat („a Szülő-koinóban más számítással futnál — ha ott maradsz, a
-  régit futtasd”), a telepítés mehet; (B) tiltva, amíg az érintett koinóban tag vagy (biztonságosabb, de aki átköltözött, a régit
-  még nem hagyta el — a szülőben maradó tagságot a mai program nem tudja „elhagyottnak” látni); (C) koinónként külön program (a
+- **TK3 — Ha a kártya magja más, mint egy koinodé?** Egy program fut a készüléken (D119), tehát a család minden koinoja az új maggal
+  számol: ahol a koino más maggal született, ott a lap „⚠ más számítás”-t mond (a koino képe ott eltérhet a többiekétől). (A) ⭐
+  **kimondva, nem tiltva:** az előnézet megnevezi ezeket a koinokat („a Szülő-koinoban más számítással futnál — ha ott maradsz, a
+  régit futtasd”), a telepítés mehet; (B) tiltva, amíg az érintett koinoban tag vagy (biztonságosabb, de aki átköltözött, a régit
+  még nem hagyta el — a szülőben maradó tagságot a mai program nem tudja „elhagyottnak” látni); (C) koinonként külön program (a
   családi őrjárat több folyamat) — nem most: a D119 egy folyamatra épült.
 - **TK4 — Ha nincs meg minden fájl?** (A) ⭐ **az előnézet kimondja és felajánlja az elhozást** (a törzs-kérelem — a vállalóktól),
   telepíteni csak a teljes kóddal lehet; (B) a telepítés maga kéri el, és vár (egy gombnyomás, de a lap percekig „telepít”, és a
@@ -103,7 +103,7 @@ a mérés (c)-je és (e)-je: 367 fájl, a név ugyanaz.
   „Kód” fülön, az előnézet a változott fájlokat mutatja) és a kilépés joga (D123 PR5).
 - **A Node-ot.** A kártya a programot hozza, a futtatót nem; egy Node-ot igénylő változás (új beépített modul) a régi Node-on nem
   indulna — a TK5 (A) ezt is visszafordítja.
-- **A koinónkénti programot** (TK3 (C)) — egy készülék egy programot futtat.
+- **A koinonkénti programot** (TK3 (C)) — egy készülék egy programot futtat.
 - **A protokoll SZÁMAIT előre** — a nyelv, a szállítás és a kiírt alakok változata a kártya kódjából csak futtatva derülne ki; a
   lap a kártya kódját nem futtatja. A kimondás a telepítés UTÁN jön (D124 ③ — a társak felé).
 
@@ -111,7 +111,7 @@ a mérés (c)-je és (e)-je: 367 fájl, a név ugyanaz.
 
 ✅ **A 91. mérés lelete** (a git nélküli bejárás a telepítőket is viszi — elágazás 246) → ✅ ① **a kiírás és az ellenőrzés** → ✅ ②
 **a csere** a két platformon és a **visszaút** → ✅ ③ **a lap** → ⏭️ ④ **terepi próba** (laptop + telefon: egy kártyáról telepítve,
-és vissza). *(Megépült 2026-11-07/08 — elágazás 247:* **① a kiírás** (`js/tar/programTelepites.js` `kodKiirasa`: előbb minden fájl beolvasva és ellenőrizve — megvan-e, a mérete és a lenyomata a jegyzéké-e, az útja biztonságos-e —, csak utána ír; a kiírt mappa kód-csomagja a kártya `kod`-ját kell nevezze, különben törlődik; megnevezett hibák: `HIANYZO-FAJL`, `ROSSZ-FAJL`, `TILTOTT-UT`, `KIIRT-MAS`) és **az előnézet** (`telepitesElonezete` — a szerző, a pont, a fájlok állása, a rétegek: `valtozasRetegei`, a mag koinónként: a készülék koinóinak születési magja a kártya kódjáéhoz képest) · **② a csere** a FUTÓ program saját szkriptjével (`windows/csere.ps1`, `termux/csere.sh` — az adat-mappába másolva, leválasztva): leállít, a régi a `-regi`-be (a telefonon a `.git` az új programmal megy), az új a helyére, indít (Windowson egy új ablakban, mint az asztali ikon; a telefonon a háttérben), és 30 mp-ig vár, hogy feleljen — ha nem, a régit teszi vissza (a nem induló a `-hibas`-ba); a visszaút a `-regi`-vel helyet cserél; az eredmény az adat-mappa `telepites.json`-ja (és `telepites.log`). ⛔ **Mérve:** a leválasztott (`detached`) PowerShell konzol nélkül azonnal kilép — ezért egy rövid PowerShell a `Start-Process`-szel indítja a szkriptet, saját rejtett ablakban; a kártya és a kód neve base64url (kötőjellel is kezdődhet — a PowerShell paraméternévnek venné): környezetben megy; a szkript 4 mp-et vár a leállítás előtt (1,5 mp alatt a hívó felület a válasza előtt leállt). **A parancs:** `telepit` (az állapot) · `telepit <kártya>` (az előnézet) · `telepit <kártya> kiir` · `telepit <kártya> igen` · `telepit vissza`. · **③ a lap:** a „🧬 Kód” fül „⬇ Telepítés erre a készülékre…” gombja → az előnézet (`felulet/js/koinoTelepites.js`) → „Igen, telepítem”; a fő menü „🧬 A program ezen a készüléken…” (a kód, az utolsó telepítés, „↩ Vissza az előző programra”); a lap kulcsa indításonként új, ezért a régi fül a RÉGI kulcsával figyel (ha a válasz „engedély nincs”, már az új fut), az új program a saját lapját nyitja meg, és az az eredményt betöltéskor egyszer kimondja. Böngészőben végigjárva (a telepítés és a visszaút). **A próbák:** `meres/telepitesProba.js` (8 — a kiírás szabályai, a csere helye, a rétegek, az éles út két programmal, a lap útjai, a valódi windowsos csere előre és vissza, a TK5 visszafordítás, a telefon szkriptje a Git Bash-sel a valódi `indit.sh`-val), a meghívó-próba a `csere.ps1` BOM-jával és értelmezésével; 16 rontás, mind bukik. ⚠️ **A terepen próbálandó:** a telefon futó koinójának leállítása (`pkill` — itt nincs) és a háttérben indulás; egy valódi koino-verzió kártya egy másik készülékről.)*
+és vissza). *(Megépült 2026-11-07/08 — elágazás 247:* **① a kiírás** (`js/tar/programTelepites.js` `kodKiirasa`: előbb minden fájl beolvasva és ellenőrizve — megvan-e, a mérete és a lenyomata a jegyzéké-e, az útja biztonságos-e —, csak utána ír; a kiírt mappa kód-csomagja a kártya `kod`-ját kell nevezze, különben törlődik; megnevezett hibák: `HIANYZO-FAJL`, `ROSSZ-FAJL`, `TILTOTT-UT`, `KIIRT-MAS`) és **az előnézet** (`telepitesElonezete` — a szerző, a pont, a fájlok állása, a rétegek: `valtozasRetegei`, a mag koinonként: a készülék koinoinak születési magja a kártya kódjáéhoz képest) · **② a csere** a FUTÓ program saját szkriptjével (`windows/csere.ps1`, `termux/csere.sh` — az adat-mappába másolva, leválasztva): leállít, a régi a `-regi`-be (a telefonon a `.git` az új programmal megy), az új a helyére, indít (Windowson egy új ablakban, mint az asztali ikon; a telefonon a háttérben), és 30 mp-ig vár, hogy feleljen — ha nem, a régit teszi vissza (a nem induló a `-hibas`-ba); a visszaút a `-regi`-vel helyet cserél; az eredmény az adat-mappa `telepites.json`-ja (és `telepites.log`). ⛔ **Mérve:** a leválasztott (`detached`) PowerShell konzol nélkül azonnal kilép — ezért egy rövid PowerShell a `Start-Process`-szel indítja a szkriptet, saját rejtett ablakban; a kártya és a kód neve base64url (kötőjellel is kezdődhet — a PowerShell paraméternévnek venné): környezetben megy; a szkript 4 mp-et vár a leállítás előtt (1,5 mp alatt a hívó felület a válasza előtt leállt). **A parancs:** `telepit` (az állapot) · `telepit <kártya>` (az előnézet) · `telepit <kártya> kiir` · `telepit <kártya> igen` · `telepit vissza`. · **③ a lap:** a „🧬 Kód” fül „⬇ Telepítés erre a készülékre…” gombja → az előnézet (`felulet/js/koinoTelepites.js`) → „Igen, telepítem”; a fő menü „🧬 A program ezen a készüléken…” (a kód, az utolsó telepítés, „↩ Vissza az előző programra”); a lap kulcsa indításonként új, ezért a régi fül a RÉGI kulcsával figyel (ha a válasz „engedély nincs”, már az új fut), az új program a saját lapját nyitja meg, és az az eredményt betöltéskor egyszer kimondja. Böngészőben végigjárva (a telepítés és a visszaút). **A próbák:** `meres/telepitesProba.js` (8 — a kiírás szabályai, a csere helye, a rétegek, az éles út két programmal, a lap útjai, a valódi windowsos csere előre és vissza, a TK5 visszafordítás, a telefon szkriptje a Git Bash-sel a valódi `indit.sh`-val), a meghívó-próba a `csere.ps1` BOM-jával és értelmezésével; 16 rontás, mind bukik. ⚠️ **A terepen próbálandó:** a telefon futó koinojának leállítása (`pkill` — itt nincs) és a háttérben indulás; egy valódi koino-verzió kártya egy másik készülékről.)*
 
 *Kapcsolódik:* `program_retegek_atvizsgalas.md` (D123, PR5), `csaladi_orjarat_atvizsgalas.md` (D119 — a koino-verzió kártya, a
 kód-csomag), `torzs_hatar_atvizsgalas.md` (D120 — a kártya kódja elemként), `meres/eredmenyek.md` 91., `windows/telepit.ps1` és

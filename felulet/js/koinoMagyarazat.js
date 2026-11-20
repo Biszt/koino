@@ -1,6 +1,6 @@
 // felulet/js/koinoMagyarazat.js
 
-// Felelősség: ⭐⭐ D129 (③) — AZ ⓘ JELEK ÉS A BUBORÉK — koinós többlet, a prototípusban nincs ilyen.
+// Felelősség: ⭐⭐ D129 (③) — AZ ⓘ JELEK ÉS A BUBORÉK — koinos többlet, a prototípusban nincs ilyen.
 //
 // Csaba (2026-11-19): „az információk, egy "i" jelre kattínva, előjön egy értehtő magyarázat, arra a részre. ilyen i betüket, szinte
 // minden hova rakni kéne, a menübe, az összes modal ősszes részéhez, az alsósáv is kapjon i betüt, meg a fejléc is”.
@@ -8,7 +8,7 @@
 //   · A HELYEK (`MAGYARAZAT_HELYEK`): egy CSS-választó (és ha kell, a felirat eleje) → egy kézikönyv-név. ⛔ Az örökölt, a
 //     prototípussal BÁJTRA azonos fájlokhoz nem nyúlunk (`meres/kapuProba.js`): a jelet a lap KIRAJZOLÁSA UTÁN tesszük a helyére —
 //     egy figyelő (`MutationObserver`) minden változás után megnézi, hol hiányzik (ahogy a `koinoModalok.js` is a modálok köré
-//     írja a koinós többletet).
+//     írja a koinos többletet).
 //   · A BUBORÉK (MA1 (A)): az ⓘ mellett nyílik, egy érintéssel bezárul, nem takarja el az ablakot (telefonon a lap alján); a
 //     tartalma a kézikönyvé (`/api/kezikonyv/bejegyzes` — a program alap-tartalma, vagy a közösség módosítása, MA5 (A)): a cím,
 //     a szöveg (MA2 (B): részletes), a részei (rájuk koppintva a buborék azokat mutatja — így egy sáv egyetlen ⓘ-je is mindent
@@ -47,9 +47,9 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   { hely: '#hamburger-menu-kontener .hamburger-menu-panel', nev: 'kezikonyv/menu', mod: 'elejere' },
   menuPont('Keresés', 'kereses'), menuPont('Struktúra nézet', 'struktura'), menuPont('Világtérkép', 'vilagterkep'),
   menuPont('Síkidom nézet', 'sikidom'), menuPont('Rendezés', 'rendezes'), menuPont('Nézetek…', 'nezetek'),
-  menuPont('A tér — a koinóim', 'ter'), menuPont('Bekapcsolódás…', 'bekapcsolodas'),
+  menuPont('A tér — a koinoim', 'ter'), menuPont('Bekapcsolódás…', 'bekapcsolodas'),
   menuPont('Új koino-verzió (gyermek)…', 'koino-verzio'), menuPont('A program ezen a készüléken…', 'program'),
-  menuPont('Felderítések', 'felderitesek'), menuPont('Az egész koinó felderítése…', 'felderites-egesz'),
+  menuPont('Felderítések', 'felderitesek'), menuPont('Az egész koino felderítése…', 'felderites-egesz'),
   menuPont('Értesítések', 'ertesitesek'), menuPont('Értesítési beállítások', 'ertesitesi-beallitasok'),
   menuPont('Új gondolat létrehozása', 'uj-gondolat'), menuPont('Új kategória létrehozása', 'uj-kategoria'),
   menuPont('Új gondolat típus létrehozása', 'uj-gondolattipus'), menuPont('Új nézet…', 'uj-nezet'),
@@ -78,13 +78,13 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   kartyaMenuPont('Értesítési beállítások', 'ertesitesi-beallitasok'), kartyaMenuPont('Felderítés…', 'felderites'),
   // ----- ⭐ D129 (④c) az ablakok: az ablak CÍME mellett egy ⓘ. Ahol a menüpont ⓘ-je már elmondja az ablakot, az ablaké UGYANARRA a
   // bejegyzésre mutat (egy magyarázat egy dologról — a közösség egy helyen javítja). Az örökölt ablakot a tartalma jelöli
-  // (`:has(...)` — a kártyáról nyitott, ágra szűkített változat is), a koinósat a címe. -----
+  // (`:has(...)` — a kártyáról nyitott, ágra szűkített változat is), a koinosat a címe. -----
   { hely: '.modal-panel:has(.kereses-modal) .modal-cim', nev: 'kezikonyv/menu/kereses', mod: 'vegere' },
   { hely: '.modal-panel:has(.struktura-modal) .modal-cim', nev: 'kezikonyv/menu/struktura', mod: 'vegere' },
   // ⚠️ a Síkidom ablaka a címét elrejti (teljes képernyő) — az ⓘ a súgó-sor elején áll (a böngészős kipróbálás lelete)
   { hely: '.sikidom-modal__sugo', nev: 'kezikonyv/menu/sikidom', mod: 'elejere' },
   { hely: '.modal-panel:has(.rendezes-modal) .modal-cim', nev: 'kezikonyv/menu/rendezes', mod: 'vegere' },
-  { hely: '.modal-cim', felirat: '🧩 A koinó nézetei', nev: 'kezikonyv/menu/nezetek', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🧩 A koino nézetei', nev: 'kezikonyv/menu/nezetek', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '🧩 Nézet bekapcsolása', nev: 'kezikonyv/menu/nezetek', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '🧩 Új nézet', nev: 'kezikonyv/menu/uj-nezet', mod: 'vegere' },
   // ----- ⭐ D129 (④c 2a) a létrehozó ablakok: a címnél a menüpont bejegyzése — CSAK létrehozáskor (a küszöb-szakasz látszik; a
@@ -121,11 +121,11 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   { hely: '.modal-panel:has(#meghivo-info) .modal-cim', nev: 'kezikonyv/menu/meghivoim', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '📝 Az adataid', nev: 'kezikonyv/menu/eember-beallitasok', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '⚙️ eember beállítások', nev: 'kezikonyv/menu/eember-beallitasok', mod: 'vegere' },
-  // ----- ⭐ D129 (④c 4) a koinó ablakai (a koinósak — a címükről): a tér sávjának két ablaka, a bekapcsolódás, a koino-verzió, a
+  // ----- ⭐ D129 (④c 4) a koino ablakai (a koinosak — a címükről): a tér sávjának két ablaka, a bekapcsolódás, a koino-verzió, a
   // program és a telepítés a kártyáról, a felderítés (egy ágé és az egészé ugyanaz az ablak) és a felderítések -----
-  { hely: '.modal-cim', felirat: '🔗 Csatlakozás egy koinóhoz', nev: 'kezikonyv/fejlec/ter-sav/csatlakozas', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🔗 Csatlakozás egy koinohoz', nev: 'kezikonyv/fejlec/ter-sav/csatlakozas', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '🤝 Társak', nev: 'kezikonyv/fejlec/ter-sav/tarsak', mod: 'vegere' },
-  { hely: '.modal-cim', felirat: '🌿 Bekapcsolódás egy gyermek-koinóba', nev: 'kezikonyv/menu/bekapcsolodas', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '🌿 Bekapcsolódás egy gyermek-koinoba', nev: 'kezikonyv/menu/bekapcsolodas', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '🧬 Új koino-verzió', nev: 'kezikonyv/menu/koino-verzio', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '🧬 A program ezen a készüléken', nev: 'kezikonyv/menu/program', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '⬇ Telepítés a kártyáról', nev: 'kezikonyv/ablak/telepites', mod: 'vegere' },

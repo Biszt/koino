@@ -18,7 +18,7 @@
 //   · a lánc-szerű ('friss') növekedés lineáris — azt egyetlen rögzített korlát sem fedi (a válasz a rövidítés: egy
 //     közelebbi tag ingyenes meghívása — 63. mérés); itt nem szerepel.
 // A szimuláció a mért méreteken (egyenletes 10^8-ig, aktív 10^7-ig) a fa magasságát adja (és az O(1) tagot), a pontos
-// eloszlás (10^7-ig) a közelítést ellenőrzi; a koinó saját határáig (~2^128 — D106) a tételek vetítik ki. ⚠️ Egy fa
+// eloszlás (10^7-ig) a közelítést ellenőrzi; a koino saját határáig (~2^128 — D106) a tételek vetítik ki. ⚠️ Egy fa
 // egyetlen futása erősen ingadozik (az átlagos mélység szórása ~0,6, a farok hányada ~2×): a farkat ezért nem a
 // szimulációból, hanem a pontos eloszlásból mérjük.
 //
@@ -29,7 +29,7 @@ const LEPES_BAJT = 1237;                 // egy lépés a tagsági bizonyítékb
 const KORLATOK = [64, 128, 256];
 const GAMMA = 0.5772156649;
 const PORT_EGYUTTHATO = 1.79556;         // a sík-rendezett rekurzív fa magasságának együtthatója: 1/(2s), s·e^(1+s) = 1
-const HATAR = 128 * Math.LN2;            // ln(2^128) — a koinó saját határa (D106)
+const HATAR = 128 * Math.LN2;            // ln(2^128) — a koino saját határa (D106)
 const EMBERISEG = Math.log(1e10);        // D106 (B): az e-ember élő, külön ember
 
 function veletlenGyar(mag) {
@@ -173,13 +173,13 @@ kiir('\n  A kivetítéshez az O(1) tag: egyenletes ' + cE.toFixed(1) + ' (átlag
   + '), aktív ' + cA.toFixed(1) + ' (átlag ' + atlagC(illesztes.aktiv).toFixed(1) + ') — a legnagyobb, óvatosan.');
 
 // ===== ② A KIVETÍTÉS =====
-kiir('\n② A KIVETÍTÉS — a legmélyebb tag (a fa magassága) az emberiségnél (10^10) és a koinó saját határánál (2^128 ≈ 3,4·10^38):');
+kiir('\n② A KIVETÍTÉS — a legmélyebb tag (a fa magassága) az emberiségnél (10^10) és a koino saját határánál (2^128 ≈ 3,4·10^38):');
 for (const [nev, lnN] of [['10^10', EMBERISEG], ['10^11 (×10)', EMBERISEG + Math.LN10], ['2^128', HATAR]]) {
   kiir('  ' + nev.padEnd(12) + '  egyenletes: átlag ~' + (lnN + GAMMA - 1).toFixed(0).padStart(3) + ', a legmélyebb ~'
     + egyenletesMagassag(lnN, cE).toFixed(0).padStart(3) + '   ·   aktív: a legmélyebb ~' + aktivMagassag(lnN, cA).toFixed(0).padStart(3));
 }
 
-kiir('\n③ A KORLÁTOK — hol éri el a legmélyebb tag; és a koinó saját határánál a tagok hányada (és száma) a korlátnál mélyebben:');
+kiir('\n③ A KORLÁTOK — hol éri el a legmélyebb tag; és a koino saját határánál a tagok hányada (és száma) a korlátnál mélyebben:');
 for (const L of KORLATOK) {
   const lE = hol(egyenletesMagassag, cE, L);
   const lA = hol(aktivMagassag, cA, L);

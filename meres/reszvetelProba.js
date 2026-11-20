@@ -1,7 +1,7 @@
 // meres/reszvetelProba.js
 
-// Felelősség: a BEKAPCSOLÁS próbái (D96, D97 — a részvétel a vállalásból): a koinó születése mint esemény mindenkihez
-// eljut (a szelete — az alapító állításaival — nem); a zárt koinó korlátozott útja a megengedett szeleteket a saját
+// Felelősség: a BEKAPCSOLÁS próbái (D96, D97 — a részvétel a vállalásból): a koino születése mint esemény mindenkihez
+// eljut (a szelete — az alapító állításaival — nem); a zárt koino korlátozott útja a megengedett szeleteket a saját
 // vállalástól függetlenül szolgálja ki (a meghívás így jut el a még nem taghoz); és aki meghívást kapott, de a saját
 // tagsága nem bizonyítható, magát is megkérdezi (a meghívója összerakja a láncát).
 //
@@ -69,10 +69,10 @@ async function csere(tarA, tarB, bA, bB) {
 }
 
 // ===================================
-// ⭐ D96: A KOINÓ SZÜLETÉSE MINT ESEMÉNY
+// ⭐ D96: A KOINO SZÜLETÉSE MINT ESEMÉNY
 // ===================================
 
-proba('⭐⭐ D96: a koinó születése ESEMÉNYKÉNT eljut ahhoz, akinél hiányzik — a szelete (az alapító állításai) nem', async () => {
+proba('⭐⭐ D96: a koino születése ESEMÉNYKÉNT eljut ahhoz, akinél hiányzik — a szelete (az alapító állításai) nem', async () => {
   const v = await vilag();
   // A mindent tud (az alapító meghívásai a születés szeletébe is bejelentődnek); B semmit, csak a saját belépését.
   const tarA = await tar([v.szuletes, v.belepesA, v.meghivasA, v.belepesC, v.meghivasC]);
@@ -88,22 +88,22 @@ proba('⭐⭐ D96: a koinó születése ESEMÉNYKÉNT eljut ahhoz, akinél hián
   return vanSzuletes && !vanAllitas && r.b.uj === 1 && !(await tarB2.esemeny(v.szuletes.azonosito));
 });
 
-proba('⛔ a koinó születésének kulcsán MÁS esemény (vagy más koinó létrehozása) nem jön át', async () => {
+proba('⛔ a koino születésének kulcsán MÁS esemény (vagy más koino létrehozása) nem jön át', async () => {
   const v = await vilag();
   const masik = await ujEember('masik');
   const idegen = await masik.tesz('KoinoLetrehozas', { nev: 'Idegen', leiras: null, alapitok: [], zart: true });
   const tarA = await tar([v.szuletes]);
   const tarB = await tar([]);
-  // A hamis „születést” ad: egy másik koinóét (a vonal a saját koinója szerint szűr).
+  // A hamis „születést” ad: egy másik koinoét (a vonal a saját koinoja szerint szűr).
   await csere(tarA, tarB, { reszvesz: () => false, koinoSzuletes: idegen }, { reszvesz: () => false });
   return !(await tarB.esemeny(idegen.azonosito)) && !(await tarB.esemeny(v.szuletes.azonosito));
 });
 
 // ===================================
-// ⭐ A ZÁRT KOINÓ KORLÁTOZOTT ÚTJA
+// ⭐ A ZÁRT KOINO KORLÁTOZOTT ÚTJA
 // ===================================
 
-proba('⭐⭐ zárt koinóban a tag a NEM TAG azonosság-szeletét a saját vállalásától függetlenül egyezteti — a meghívás eljut', async () => {
+proba('⭐⭐ zárt koinoban a tag a NEM TAG azonosság-szeletét a saját vállalásától függetlenül egyezteti — a meghívás eljut', async () => {
   const v = await vilag();
   const tarA = await tar([v.szuletes, v.belepesA, v.meghivasA, v.belepesB, v.meghivasB]);
   const tarB = await tar([v.belepesB]);

@@ -1,6 +1,6 @@
 // felulet/js/koinoNezetKeret.js
 
-// Felelősség: ⭐⭐ EGY FELTÖLTÖTT NÉZET FUTTATÁSA A LAPON (D126 — a D123 PR4-e; NZ4–NZ6) — koinós többlet, a prototípusban nincs ilyen:
+// Felelősség: ⭐⭐ EGY FELTÖLTÖTT NÉZET FUTTATÁSA A LAPON (D126 — a D123 PR4-e; NZ4–NZ6) — koinos többlet, a prototípusban nincs ilyen:
 //   · A KERET (NZ5 (A)): a pakli helyén, egész lapon, felirattal (*„🧩 <cím> — feltöltött nézet: olvas, nem ír”*) és bezárással;
 //     egy `<iframe sandbox="allow-scripts">` — semmi más engedély, `allow-same-origin` sem —, a tartalma `srcdoc`, amit a program
 //     állít össze (a nézet CSP-je, az őr, a kliens és a kód — `js/felulet/nezetFelulet.js`). A keret semmit nem tölt be: a kódot a
@@ -51,7 +51,7 @@ export async function nezetFuttatasa({ kartya }) {
   doboz.className = 'koino-nezet-futas';
   doboz.setAttribute('aria-label', 'Feltöltött nézet: ' + (k.cim ?? ''));
   doboz.innerHTML = '<div class="koino-nezet-futas__sav"><span class="koino-nezet-futas__felirat" title="A nézet a közösség feltöltött '
-    + 'kódja: a koinó közös képét látja, írni nem tud, és kifelé nem szólhat. A rajza nem bizonyíték — a döntés a lap saját kártyáin '
+    + 'kódja: a koino közös képét látja, írni nem tud, és kifelé nem szólhat. A rajza nem bizonyíték — a döntés a lap saját kártyáin '
     + 'van.">🧩 ' + html(k.cim) + ' — feltöltött nézet: olvas, nem ír</span><button type="button" class="koino-nezet-futas__bezar" '
     + 'data-muvelet="bezar">✕ Bezárás</button></div>';
   const keret = document.createElement('iframe');

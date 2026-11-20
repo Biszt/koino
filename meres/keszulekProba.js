@@ -7,7 +7,7 @@
 //   · a kapu csak tanúsított eseményt enged be: a lánc első eseménye nélkül „hiányzik”; egy idegen azonosság nevében írt esemény
 //     (saját vagy semmilyen tanúsítvánnyal) elbukik; egy készüléket csak egy azonosság tanúsíthat;
 //   · két készülék egy azonossággal: azonos sorszámuk nem elágazás, mindkét lánc bejut és számít;
-//   · ⭐ (①b (2a)) a keret a horgony láncáé: a belépést író készülék kapja a koinó keretét, a többié 0 — a szabály-réteg és a tár
+//   · ⭐ (①b (2a)) a keret a horgony láncáé: a belépést író készülék kapja a koino keretét, a többié 0 — a szabály-réteg és a tár
 //     (a művelet, a vád) ugyanazt mondja;
 //   · ⭐ (①b (2b)) a keret átadása és átvétele: a fogadó kerete nő (a lánc-gyökér kapott-fája), az adóé fogy; a csökkenő átadás, a
 //     kereten túli átadás átvétele és az ismételt átvétel nem számít; a hamis kapott-bizonyíték a kapun elbukik; és az átvétel
@@ -18,7 +18,7 @@
 //     levél a láncok pont-eseményeinek összege, a tartó mintái mindet hozzák) és a döntésben (a tulajdonos, a küszöb);
 //   · ⭐ (①b (4)) a szavazás és a javaslattétel joga készülékenként: ahol a pont a másik készülékemen van, ez előbb 1 pontot tesz rá;
 //   · ⭐ (①d) a kizárás és az örökös: a vágás utáni (ellopott) események nem számítanak, az örökös folytatja a láncot; a fel nem
-//     sorolt koinóban a kizárt minden eseménye kiesik; a hamis kizárást és az illetéktelen folytatást a kapu elveti;
+//     sorolt koinoban a kizárt minden eseménye kiesik; a hamis kizárást és az illetéktelen folytatást a kapu elveti;
 //   · a készülék a gépen: létrejön, újranyitáskor ugyanaz, másik azonosságnál új;
 //   · a csomag tanúsítvány-keresője csak a hiteles, a szerzőt és a készüléket nevező tanúsítványt veszi fel.
 //
@@ -279,7 +279,7 @@ proba('⭐⭐ AZ AZONOSSÁG UTOLSÓ ÁLLÍTÁSA (9.5 — „legyen az idő”) �
   return idoben === 70 && korai === 60 && szavazat === 'Ellenez';
 });
 
-proba('⭐⭐ A KERET A HORGONY LÁNCÁÉ (9.9) — a belépést író készülék kapja a koinó keretét, a másiké 0: a pontja elvetődik; a tár (a művelet és a vád) ugyanígy látja', async () => {
+proba('⭐⭐ A KERET A HORGONY LÁNCÁÉ (9.9) — a belépést író készülék kapja a koino keretét, a másiké 0: a pontja elvetődik; a tár (a művelet és a vád) ugyanígy látja', async () => {
   const tar = await ujTar();
   const laptop = await ujEember(KOINO);
   const telefon = await ujEember(KOINO, await tesztKeszulek('telefon', laptop.kulcspar.azonossagKulcspar));
@@ -660,7 +660,7 @@ proba('⭐⭐ A KIZÁRÁS ÉS AZ ÖRÖKÖS (①d) — az ellopott telefon vágá
     && !!alakiHiba({ ...folytatas, lanc: folytatas.keszulek });
 });
 
-proba('⛔ A FEL NEM SOROLT KOINÓBAN A KIZÁRT MINDEN ESEMÉNYE KIESIK — amint a kizárás odaér (bárki beviheti); egy MÁSIK azonosság kizárása semmit nem zár ki', async () => {
+proba('⛔ A FEL NEM SOROLT KOINOBAN A KIZÁRT MINDEN ESEMÉNYE KIESIK — amint a kizárás odaér (bárki beviheti); egy MÁSIK azonosság kizárása semmit nem zár ki', async () => {
   const KOINO2 = 'kizaras-proba-masik';
   const laptop = await ujEember(KOINO2);
   const telefon = await ujEember(KOINO2, await tesztKeszulek('telefon', laptop.kulcspar.azonossagKulcspar));
@@ -668,7 +668,7 @@ proba('⛔ A FEL NEM SOROLT KOINÓBAN A KIZÁRT MINDEN ESEMÉNYE KIESIK — amin
   // A telefon gondolata — a laptop pontjával (a telefoné itt kizárás nélkül számít).
   const tg = await telefon.tesz('GondolatLetrehozas', { cim: 'A telefon gondolata' });
   const lp = await laptop.tesz('TudatpontRendezes', { entitas: tg.azonosito, pont: 10 });
-  // A kizárás egy MÁSIK koinót sorol fel — ebben a koinóban a vágás 0: a telefon egyetlen eseménye sem számít.
+  // A kizárás egy MÁSIK koinot sorol fel — ebben a koinoban a vágás 0: a telefon egyetlen eseménye sem számít.
   const kizaras = await kizarasKeszitese(laptop.kulcspar.azonossagKulcspar, telefon.keszulek,
     [{ koino: KOINO, vagas: 5, orokos: laptop.keszulek }]);
   const bevitel = await idegen.tesz('Kizaras', { kizaras });                    // bárki beviheti (D80 mintája)

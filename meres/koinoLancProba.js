@@ -1,9 +1,9 @@
 // meres/koinoLancProba.js — ⭐⭐ D118 (a bekapcsolódás ②a): a gyermek születése és a születések lánca
 //
-// Azt bizonyítja, hogy egy koinó a szülőjére épülhet, és ezt bárki ellenőrizheti a két születésből: a gyermek születése a
+// Azt bizonyítja, hogy egy koino a szülőjére épülhet, és ezt bárki ellenőrizheti a két születésből: a gyermek születése a
 // létrehozó tagsági bizonyítékát hozza a szülőben (KZ2), a zárt szülőnek csak zárt gyermeke lehet (D118/5), és a kapu a
 // hamisat — a nem tag létrehozót, az átírt vagy idegen bizonyítékot — elveti. ⭐ A születések lánca a gyökértől jön: a
-// beolvasztás a kapott születésekből és a tárból együtt követi, és a koinó őseinek születését (más koinó-névvel) is beveszi
+// beolvasztás a kapott születésekből és a tárból együtt követi, és a koino őseinek születését (más koino-névvel) is beveszi
 // — ami nincs a láncon, az idegen marad.
 
 import { mkdtemp } from 'node:fs/promises';
@@ -24,7 +24,7 @@ const { proba, futtatas } = probaGyujtemeny('A gyermek születése és a szület
 
 // ===== SEGÉDEK =====
 
-/** Egy új alakú koinó (a neve a születése lenyomata) — az alapító utána a koinó nevén ír. */
+/** Egy új alakú koino (a neve a születése lenyomata) — az alapító utána a koino nevén ír. */
 async function ujKoino(alapito, { zart = true, nev = 'Szülő' } = {}) {
   alapito.koinotValt('');
   const sz = await alapito.tesz('KoinoLetrehozas', { nev, leiras: null, alapitok: [], zart });
@@ -106,7 +106,7 @@ proba('⛔ KZ2: aki csak BELÉPETT (senki nem hívta meg), az nem hozhat létre 
   return epito === null && !r.rendben && /nem tagja a szülőnek/.test(r.ok);
 });
 
-proba('⛔ KZ2: a HAMIS bizonyíték elbukik — átírt esemény, más horgonya, a szülő születése vagy egy idegen koinó eseménye a láncban',
+proba('⛔ KZ2: a HAMIS bizonyíték elbukik — átírt esemény, más horgonya, a szülő születése vagy egy idegen koino eseménye a láncban',
   async () => {
     const alapito = await ujEember('');
     const sz = await ujKoino(alapito);
@@ -120,7 +120,7 @@ proba('⛔ KZ2: a HAMIS bizonyíték elbukik — átírt esemény, más horgonya
     const b = await gyermekSzuletesEllenorzese(await gyermekSzuletes(nemTag, sz.azonosito, jo), sz);
     // (c) a szülő születése a láncban
     const c = await gyermekSzuletesEllenorzese(await gyermekSzuletes(tag, sz.azonosito, { ...jo, lanc: [...jo.lanc, sz] }), sz);
-    // (d) egy másik koinó eseménye
+    // (d) egy másik koino eseménye
     const masAlapito = await ujEember('');
     const mas = await ujKoino(masAlapito, { nev: 'Más' });
     const masBe = await (await ujEember(mas.azonosito)).tesz('Belepes', {});
@@ -192,7 +192,7 @@ proba('⭐⭐ D118 (②a): a beolvasztás a lánc születéseit akármilyen sorr
   });
 
 // ===================================
-// 5. ⭐⭐ ②b — A KAPU KOINÓ-SZABÁLYA: az ős vágás előtti eseményei a gyermekbe tartoznak
+// 5. ⭐⭐ ②b — A KAPU KOINO-SZABÁLYA: az ős vágás előtti eseményei a gyermekbe tartoznak
 // ===================================
 //
 // Egy esemény a gyermeké, ha a gyermeké; vagy a lánc egy születése; vagy egy ős eseménye a vágása előtt — a nem bekapcsolódóé
@@ -232,7 +232,7 @@ async function nemzedekekTaggal() {
   return { G, P, C, gElotte, gUtana, be, m, tElotte, eElotte, tUtana, eUtanaCsuszo, cSajat };
 }
 
-proba('⭐⭐ ②b: a koinó-szabály — az ős vágás előtti eseménye a gyermeké (a nem bekapcsolódóé az óra, a létrehozóé a lánc-pont szerint), a vágás utáni nem',
+proba('⭐⭐ ②b: a koino-szabály — az ős vágás előtti eseménye a gyermeké (a nem bekapcsolódóé az óra, a létrehozóé a lánc-pont szerint), a vágás utáni nem',
   async () => {
     const n = await nemzedekekTaggal();
     const tar = await ujTar(n.C.azonosito);

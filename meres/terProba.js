@@ -2,7 +2,7 @@
 
 // Mit bizonyít ez a lap?
 //
-// ⭐ Hogy a tér **a koinók FÖLÖTT** lát — és hogy közben egyik szabályt sem lépi át:
+// ⭐ Hogy a tér **a koinok FÖLÖTT** lát — és hogy közben egyik szabályt sem lépi át:
 //
 //   · ⛔ **nem lehet létszám szerint rendezni** (D18/2: a hamisítható toplista alakja),
 //   · ⭐ **a létszám SÚLYA látszik**: három szám, nem egy (tag · nem ellenőrizhető · belépő),
@@ -28,7 +28,7 @@ const { proba, futtatas } = probaGyujtemeny('A BELÉPŐ TÉR (Szakasz 5.6)');
 // SEGÉDEK
 // ===================================
 
-/** Egy eldobható „készülék": egy adat-mappa, több koinóval. */
+/** Egy eldobható „készülék": egy adat-mappa, több koinoval. */
 async function ujKeszulek() {
   return mkdtemp(join(tmpdir(), 'koino-ter-'));
 }
@@ -69,7 +69,7 @@ async function meghiv(tar, meghivo, meghivott, sajatBelepes) {
 // 1. MIT LÁT A TÉR?
 // ===================================
 
-proba('⭐ A tér felsorolja a készüléken lévő koinókat — és CSAK azokat', async () => {
+proba('⭐ A tér felsorolja a készüléken lévő koinokat — és CSAK azokat', async () => {
   const hely = await ujKeszulek();
   await koinotAlapit(hely, 'falu', 'Faluközösség');
   await koinotAlapit(hely, 'kert', 'Közösségi kert');
@@ -101,7 +101,7 @@ proba('⛔⛔ A tér KIMONDJA a határát — nem ígér teljességet (D19)', as
   const hely = await ujKeszulek();
   await koinotAlapit(hely, 'falu', 'Faluközösség');
 
-  // ⚠️ A kereső-réteg nélkül ez nem a világ összes koinója. Ha a mező eltűnne, a felület
+  // ⚠️ A kereső-réteg nélkül ez nem a világ összes koinoja. Ha a mező eltűnne, a felület
   // némán teljességet ígérne — ezért méri próba, nem csak komment.
   const { csakAmitIsmerunk } = await terKartyai(hely);
   return csakAmitIsmerunk === true;

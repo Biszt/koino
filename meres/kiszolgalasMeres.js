@@ -6,7 +6,7 @@
 // dolgot kell tudni: (1) mennyibe kerül a KISZOLGÁLÓNAK egy-egy kéréstípus (a válasz bájtjai ÉS a számítás ideje), és (2)
 // mennyit kér egy BECSÜLETES használat (egy új tag böngészése, egy felderítés) — a keret ezt soha ne fogja meg.
 //
-// Mit mér (egy szintetikus koinón, a memóriában — a valódi aláírt eseményekkel, a kiszolgáló valódi függvényeivel):
+// Mit mér (egy szintetikus koino-n, a memóriában — a valódi aláírt eseményekkel, a kiszolgáló valódi függvényeivel):
 //   · az ÁLLAPOT kiszámítása (a `kepetKeszit` magja — ma MINDEN fejléc-kérelem újraszámolja, gyorsítótár nélkül);
 //   · a FEJLÉCEK válasza (`fejlecekValasza` — a gyökér mélyen és egy belső csomópont egy szinten, n = 50) és a MINTÁK
 //     (`mintakValasza` a kérdező alap-választásával): idő és bájt, hidegen és melegen (a részfa-karbantartó megmarad);
@@ -50,7 +50,7 @@ const bajt = (x) => Buffer.byteLength(JSON.stringify(x));
 async function idozit(fn) { const t0 = performance.now(); const r = await fn(); return { r, t: performance.now() - t0 }; }
 
 /**
- * A koinó: `g` gondolat, ~50 legfelső szintű, a többi egy korábbi alá (a frissebbek felé húzva — mély ágak is vannak);
+ * A koino: `g` gondolat, ~50 legfelső szintű, a többi egy korábbi alá (a frissebbek felé húzva — mély ágak is vannak);
  * mindegyiken a szerzője pontja, és fele eséllyel egy másik e-emberé is. A szerzők tagok (`tagokkal`).
  */
 async function koinoEpitese(g, lapos = false) {
@@ -149,8 +149,8 @@ for (const g of GONDOLATOK) {
   kiir('');
 }
 
-// ===== ⭐ D109 (KK1): a LAPOS koinó — minden gondolat legfelső szintű, a gyökér gyerekszáma maga a koinó =====
-// A lusta összefésülés előtt a gyökér minden gyereke minden kérésnél a kupacba került (a koinóval nőtt); a kép rendezett
+// ===== ⭐ D109 (KK1): a LAPOS koino — minden gondolat legfelső szintű, a gyökér gyerekszáma maga a koino =====
+// A lusta összefésülés előtt a gyökér minden gyereke minden kérésnél a kupacba került (a koinoval nőtt); a kép rendezett
 // gyereklistájával a kérés a lista hossza.
 {
   const g = Math.max(...GONDOLATOK);
@@ -163,7 +163,7 @@ for (const g of GONDOLATOK) {
   const kep = await idozit(() => fejlecKepe(allapot, osszPontokSzamitasa(allapot.entitasok, new Map(), () => true)));
   await fejlecKeres(allapot, terkep, karbantarto, GYOKER_KULCS, true, kep.r);
   const keppel = await fejlecKeres(allapot, terkep, karbantarto, GYOKER_KULCS, true, kep.r);
-  kiir('— LAPOS koinó: ' + g + ' legfelső szintű gondolat (' + esemenyek.length + ' esemény) — a gyökér fejlécei mélyen, n = 50, melegen:');
+  kiir('— LAPOS koino: ' + g + ' legfelső szintű gondolat (' + esemenyek.length + ' esemény) — a gyökér fejlécei mélyen, n = 50, melegen:');
   kiir('   kép nélkül (minden kérés mindent számol és rendez): ' + ms(kepNelkul.tFej)
     + ' · a kép gyorsítótárával: ' + ms(keppel.tFej) + ' (a kép egyszer: ' + ms(kep.t) + ')');
   kiir('');

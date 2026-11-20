@@ -1,21 +1,21 @@
 // js/allapot/ketReteg.js
 
-// Felelősség: ⭐⭐ D118 (a bekapcsolódás ③, 2026-10-24) — A KOINÓ KÉPE KÉT RÉTEGBEN: a múlt az ős szabályaival, a jelen a
-// koinóéval.
+// Felelősség: ⭐⭐ D118 (a bekapcsolódás ③, 2026-10-24) — A KOINO KÉPE KÉT RÉTEGBEN: a múlt az ős szabályaival, a jelen a
+// koinoéval.
 //
 // A számítás három fázis (`allapotSzamitasa` → `javaslatokSzamitasa` → `szerkesztesiEgyezmenyekAlkalmazasa`). Egy
-// szülőre épülő koinónál a bemenet (a koinó-szabály szerint — `koinoLanc.js`, ②b) az ősök vágás előtti eseményeit is
+// szülőre épülő koinonál a bemenet (a koino-szabály szerint — `koinoLanc.js`, ②b) az ősök vágás előtti eseményeit is
 // hordozza; ez a modul két rétegre bontja:
 //
 //   · A MÚLT (a talaj): nemzedékenként, a gyökértől lefelé — az ős eseményei az ŐS szabályaival (a születéséből), a vágás
 //     pillanatára számolva, és az ős saját múltjával (rekurzívan). Ebből a gyermekbe a LEZÁRT döntések kerülnek át,
 //     rögzítve (D118/3: mindenki szavazatával, a szülő küszöbeivel — nem fordulhatnak meg).
-//   · A JELEN: a koinó saját eseményei, és az ősökéből a szerkezet (mindenkié) és a súly (csak a bekapcsolódóké, a
-//     lánc-pontjukig — `jelenbenSzamit`), a koinó szabályaival; a D14 itt ítél.
+//   · A JELEN: a koino saját eseményei, és az ősökéből a szerkezet (mindenkié) és a súly (csak a bekapcsolódóké, a
+//     lánc-pontjukig — `jelenbenSzamit`), a koino szabályaival; a D14 itt ítél.
 //   · A VÉGREHAJTÁS: a múlt rögzített és a jelen elfogadott egyezményei egy sorban (a lejárat szerint, ugyanazzal a kóddal) —
 //     az entitások a vágáskori alakjukat kapják, és a jelen változásai arra épülnek.
 //
-// ⭐ Szülő nélküli koinónál (és a régi alaknál) a kép UGYANAZ, mint eddig: a bemenet egyetlen réteg.
+// ⭐ Szülő nélküli koinonál (és a régi alaknál) a kép UGYANAZ, mint eddig: a bemenet egyetlen réteg.
 //
 // ⚠️ A múlt nem változik, csak bővül (a csere hozza a késve érkezőt) — a múlt képe gyorsítótárban, a bemenete szerint.
 //
@@ -34,7 +34,7 @@ import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 // ===================================
 
 /**
- * A koinó születéseinek lánca a bemenetből (a gyermektől a gyökér felé) — a bemenet a koinó-szabály szerint a lánc
+ * A koino születéseinek lánca a bemenetből (a gyermektől a gyökér felé) — a bemenet a koino-szabály szerint a lánc
  * születéseit is hordozza (②b). Ahol egy születés hiányzik, ott véget ér.
  * @param {Array<Object>} esemenyek
  * @param {string} koino
@@ -63,10 +63,10 @@ export function lancBemenetbol(esemenyek, koino) {
 // ===================================
 
 /**
- * ⭐⭐ A KOINÓ KÉPE — a három fázis, szülőre épülő koinónál két rétegben.
- * @param {Array<Object>} esemenyek - a koinó bemenete (a koinó-szabály szerint — `koinoBemenete`)
+ * ⭐⭐ A KOINO KÉPE — a három fázis, szülőre épülő koinonál két rétegben.
+ * @param {Array<Object>} esemenyek - a koino bemenete (a koino-szabály szerint — `koinoBemenete`)
  * @param {Object} beallitas
- * @param {string} [beallitas.koino] - a koinó neve (ha nincs, egy réteg)
+ * @param {string} [beallitas.koino] - a koino neve (ha nincs, egy réteg)
  * @param {number} [beallitas.most]
  * @param {Map} [beallitas.osszegzesek] - a jelen réteg ellenőrzött lezárási összegzései (D95/1)
  * @param {Set<string>} [beallitas.csakAtmeneti] - a D14 kivétele (B/2)
@@ -84,7 +84,7 @@ export async function koinoKepe(esemenyek, beallitas = {}) {
   return nemzedekKepe(esemenyek, lanc, bekapcsolodok, 0, most, beallitas);
 }
 
-/** A `lanc[i]` koinó képe `most`-kor: a múltja (ha van) a vágásakor, rögzítve; a jelene. */
+/** A `lanc[i]` koino képe `most`-kor: a múltja (ha van) a vágásakor, rögzítve; a jelene. */
 async function nemzedekKepe(esemenyek, lanc, bekapcsolodok, i, most, beallitas) {
   let mult = null;
   let rogzitettek = null;

@@ -57,7 +57,7 @@ const kulcsFajlbol = (nev) => {
  * Az átmeneti tár megnyitása.
  *
  * @param {string} koino
- * @param {string} mappa - a koinó mappája (`<adat>/<koino>`) — az átmeneti tár ennek `atmeneti/` almappája
+ * @param {string} mappa - a koino mappája (`<adat>/<koino>`) — az átmeneti tár ennek `atmeneti/` almappája
  * @param {Object} [beallitas] - `korlat` (bájt), `most` (óra, a próbáknak)
  */
 export async function atmenetiTarNyitasa(koino, mappa, beallitas = {}) {
@@ -117,8 +117,8 @@ export async function atmenetiTarNyitasa(koino, mappa, beallitas = {}) {
       if (!sor.trim()) continue;
       let e;
       try { e = JSON.parse(sor); } catch { continue; }
-      // ⭐ D118 (⑤a): a koinó nevére NEM szűrünk — a fájlba csak a kapun (`beolvasztas` — a koinó-szabály szerint) átjutott
-      // esemény kerül, és abban az ős vágás előtti eseménye is lehet (a kérelem válasza). A koinó eseményeit az olvasó választja
+      // ⭐ D118 (⑤a): a koino nevére NEM szűrünk — a fájlba csak a kapun (`beolvasztas` — a koino-szabály szerint) átjutott
+      // esemény kerül, és abban az ős vágás előtti eseménye is lehet (a kérelem válasza). A koino eseményeit az olvasó választja
       // ki (`ketTarBemenete`, a szelet halmaza).
       if (alakiHiba(e) || szelet(e) !== kulcs) continue;
       felvesz(e, Buffer.byteLength(sor, 'utf8') + 1);
@@ -363,7 +363,7 @@ export async function atmenetiTarNyitasa(koino, mappa, beallitas = {}) {
  * @returns {Promise<{esemenyek: Array<Object>, csakAtmeneti: Set<string>}>}
  */
 export async function ketTarBemenete(tartos, atmeneti, koino) {
-  // ⭐⭐ D118 (③): a koinó-szabály szerint (az ősök vágás előtti eseményei is — a két réteg ebből számol).
+  // ⭐⭐ D118 (③): a koino-szabály szerint (az ősök vágás előtti eseményei is — a két réteg ebből számol).
   const tartosak = await koinoBemenete(tartos, koino);
   if (!atmeneti) return { esemenyek: tartosak, csakAtmeneti: new Set() };
   await atmeneti.frissit?.();

@@ -9,7 +9,7 @@
 //     a kérdés és a válasz `postMessage`-en). A másik két réteg a lapé: a keret `sandbox="allow-scripts"` (`koinoNezetKeret.js`), és
 //     a lap `frame-src 'none'`-ja (a kapu fejléce — `kapu.js`).
 //   · ⭐ A KÉRDÉS-KÉSZLET (NZ4 (A)): egy külön, kicsi, SZÁMOZOTT felület (`NEZET_FELULET` — ma az 1-es), nem a lap belső útjai — azok
-//     szabadon változnak (R4), és minden változásuk eltörné a nézeteket. A nézet a koinó KÖZÖS képét látja és azt, hogy melyik az én
+//     szabadon változnak (R4), és minden változásuk eltörné a nézeteket. A nézet a koino KÖZÖS képét látja és azt, hogy melyik az én
 //     kulcsom, a pontjaimmal (NZ3 (A)); meghívót, társat, értesítést, telepítést, kulcsot nem — írni nem tud (NZ6 (A): olvas, és
 //     kérheti, hogy a lap megnyisson egy kártyát).
 //
@@ -37,7 +37,7 @@ export const NEZET_LAP_DARAB = 100;
  * nem bizonyíték.
  */
 export const NEZET_KIMONDAS = Object.freeze({
-  latja: 'a koinó közös képét (a kártyákat, a pontokat, a javaslatok állását, a szövegeket és a csatolt fájlokat), és hogy melyik a '
+  latja: 'a koino közös képét (a kártyákat, a pontokat, a javaslatok állását, a szövegeket és a csatolt fájlokat), és hogy melyik a '
     + 'te kulcsod, a pontjaiddal',
   nemLatja: 'a lap jelszavát és a kulcsodat nem kapja, írni nem tud (pontot, javaslatot, szavazatot nem tesz), meghívót, társat, '
     + 'értesítést nem lát, és kifelé nem szólhat (a böngészőben mért kijutási utak zárva)',

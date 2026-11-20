@@ -23,7 +23,7 @@
 //
 // ⭐ A régiók: egy fiók (vagy a darabja) helye a lenyomat-térben; egy készülék a saját régióját tartja (a tábla-aláírójából,
 // a gyökér-darabjától FÜGGETLEN helyen — más só), m mélységen ~`KERESO_REGIO_CEL` = 512 bejegyzéssel, a ±1 szinten. A régió
-// kulcsa a gyökér-darab kulcsának alakja `k` jellel; a DHT-témája vakított (a koinó a só — D91).
+// kulcsa a gyökér-darab kulcsának alakja `k` jellel; a DHT-témája vakított (a koino a só — D91).
 //
 // ⚠️ Egy cím legfeljebb `CIM_KULCS_KORLAT` kulcsot ad (az elejéről): egy felajánlás ára így korlátos (9. szabály), és egy
 // hosszú, „mindent bele” cím sem írhat sok fiókba.
@@ -277,7 +277,7 @@ export function keresoMelysegBecslese(helyek, sajat, cel = KERESO_REGIO_CEL) {
   return melysegBecslese(helyek, sajat, cel);
 }
 
-/** Egy kereső-régió témája a DHT-n — vakított: a koinó azonosítója a só (D91); `n`: a témák változata (D124 ⑤). */
+/** Egy kereső-régió témája a DHT-n — vakított: a koino azonosítója a só (D91); `n`: a témák változata (D124 ⑤). */
 export function keresoRegioTemaja(koino, melyseg, darab, n = 1) {
   return cimjegyzekTema(koino, 'kereso', melyseg + ':' + darab, n);
 }

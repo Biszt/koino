@@ -1,16 +1,16 @@
 // js/esemeny/koinoSzabalyok.js
 
-// Felelősség: ⭐⭐ D118/2 (a bekapcsolódás ①b, 2026-10-24) — A KOINÓ SZABÁLYAI A SZÜLETÉSÉBEN, nem a programban.
+// Felelősség: ⭐⭐ D118/2 (a bekapcsolódás ①b, 2026-10-24) — A KOINO SZABÁLYAI A SZÜLETÉSÉBEN, nem a programban.
 //
 // Az állapotot befolyásoló számok (a tudatpont-keret, a kategória-korlát, a tanúsítás-szám, a felhatalmazás
-// alapértéke, a küszöbök alapértékei) a koinó születésének (`KoinoLetrehozas`) `szabalyok` mezőjébe kerülnek. Ettől:
-//   · egy szabály-változás nem programváltozás, hanem egy új koinó születése ugyanazzal a programmal (D25 1. mód,
+// alapértéke, a küszöbök alapértékei) a koino születésének (`KoinoLetrehozas`) `szabalyok` mezőjébe kerülnek. Ettől:
+//   · egy szabály-változás nem programváltozás, hanem egy új koino születése ugyanazzal a programmal (D25 1. mód,
 //     D13/b paraméter-pluralizmus);
 //   · a szülő múltját (a bekapcsolódás) ugyanaz a kód számolja, a szülő szabályaival;
-//   · a 15. mérés néma kettéhasadása (ugyanaz a koinó-név, más állandó a két gépen) szerkezetileg megszűnik — az
-//     állandó a koinóhoz kötött, és a koinó neve a születés lenyomata (D118/2, `esemeny.js`).
+//   · a 15. mérés néma kettéhasadása (ugyanaz a koino-név, más állandó a két gépen) szerkezetileg megszűnik — az
+//     állandó a koinohoz kötött, és a koino neve a születés lenyomata (D118/2, `esemeny.js`).
 //
-// ⭐ A program az új születésbe MINDEN szabályt kiír (`teljesSzabalyok`) — az új koinó szabályai így teljesen a születésben
+// ⭐ A program az új születésbe MINDEN szabályt kiír (`teljesSzabalyok`) — az új koino szabályai így teljesen a születésben
 // állnak. ⚠️ A mező elhagyható: aminek nincs `szabalyok` mezője (a régi születések), vagy csak egy része van, az a hiányzókat
 // a mai értékekkel számolja — ugyanazt, mint eddig (⛔ ezért a mai értékek soha nem változnak — lent). A hiányzó születésnél (még nem érkezett meg) is a mai értékek: a keret felső határa a mai 10 000, tehát a
 // kapu a születés nélkül a legengedékenyebb — semmi érvényeset nem dob el (a szabály-réteg később a születés szerint ítél).
@@ -31,12 +31,12 @@
 // ===================================
 
 /**
- * A koinó szabályai, ha a születése mást nem mond (a régi koinók és a hiányzó születés).
+ * A koino szabályai, ha a születése mást nem mond (a régi koinok és a hiányzó születés).
  *
  * ⛔⛔ EZEK A SZÁMOK SOHA NEM VÁLTOZNAK. A program az új születésbe MINDEN szabályt kiír (`teljesSzabalyok`), tehát egy új
- * koinó nem ezekre támaszkodik — de a régi alakú (mező nélküli) születés igen, és ha egy későbbi program itt mást mondana,
- * ugyanaz a régi koinó két programon két állapotot számolna (a 15. mérés néma kettéhasadása — a megismételt mérés ezt
- * mutatja). Egy új koinó más szabállyal: a születésébe írva, nem ide.
+ * koino nem ezekre támaszkodik — de a régi alakú (mező nélküli) születés igen, és ha egy későbbi program itt mást mondana,
+ * ugyanaz a régi koino két programon két állapotot számolna (a 15. mérés néma kettéhasadása — a megismételt mérés ezt
+ * mutatja). Egy új koino más szabállyal: a születésébe írva, nem ide.
  */
 export const ALAP_SZABALYOK = Object.freeze({
   tudatpontKeret: 10000,
@@ -55,8 +55,8 @@ export const ALAP_SZABALYOK = Object.freeze({
 // ⭐⭐ D129: A KÉZIKÖNYV SZABÁLYA — CSAK AZ ÚJ SZÜLETÉSBEN
 // ===================================
 //
-// A kézikönyv (a rendszer-entitások: az ⓘ jelek magyarázatai — `rendszerEntitas.js`) a koinó szabálya: ha a születés `kezikonyv`
-// mezőt visz, a koinóban a kézikönyv-entitások léteznek (a D14 alól kivételek), és a saját alap-küszöbükkel döntenek. ⛔ Az
+// A kézikönyv (a rendszer-entitások: az ⓘ jelek magyarázatai — `rendszerEntitas.js`) a koino szabálya: ha a születés `kezikonyv`
+// mezőt visz, a koinoban a kézikönyv-entitások léteznek (a D14 alól kivételek), és a saját alap-küszöbükkel döntenek. ⛔ Az
 // `ALAP_SZABALYOK` NEM kapja meg — a mező nélküli (régi) születés így kézikönyv NÉLKÜLI marad (a „mai értékek soha nem
 // változnak”): ez az ELSŐ szabály, aminek a HIÁNYA is jelent valamit. Az új születésbe a `teljesSzabalyok` írja.
 //
@@ -95,7 +95,7 @@ const KUSZOB_HATAROK = {
 const egeszKozte = (x, [also, felso]) => Number.isSafeInteger(x) && x >= also && x <= felso;
 
 /**
- * Egy küszöb-objektum alaki hibája (a koinó alap-küszöbei és a kézikönyvé ugyanígy): csak ismert küszöbök, a határokon belül, és
+ * Egy küszöb-objektum alaki hibája (a koino alap-küszöbei és a kézikönyvé ugyanígy): csak ismert küszöbök, a határokon belül, és
  * a kiegészített alakban a legkisebb döntési idő nem nagyobb a legnagyobbnál.
  * @param {*} v
  * @param {Object} alap - amivel a hiányzókat kiegészítjük
@@ -105,7 +105,7 @@ const egeszKozte = (x, [also, felso]) => Number.isSafeInteger(x) && x >= also &&
 function kuszobokAlakiHibaja(v, alap, mi) {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return mi + ' egy objektum';
   for (const [kk, vv] of Object.entries(v)) {
-    if (!KUSZOB_HATAROK[kk]) return 'ismeretlen küszöb a koinó szabályaiban: ' + kk;
+    if (!KUSZOB_HATAROK[kk]) return 'ismeretlen küszöb a koino szabályaiban: ' + kk;
     if (!egeszKozte(vv, KUSZOB_HATAROK[kk])) return 'a(z) ' + kk + ' küszöb a határon kívül';
   }
   const k2 = { ...alap, ...v };
@@ -120,7 +120,7 @@ function kuszobokAlakiHibaja(v, alap, mi) {
  */
 export function szabalyokAlakiHibaja(sz) {
   if (sz === undefined) return null;
-  if (!sz || typeof sz !== 'object' || Array.isArray(sz)) return 'a koinó szabályai egy objektum';
+  if (!sz || typeof sz !== 'object' || Array.isArray(sz)) return 'a koino szabályai egy objektum';
   for (const [k, v] of Object.entries(sz)) {
     if (k === 'alapKuszobok') {
       const h = kuszobokAlakiHibaja(v, ALAP_SZABALYOK.alapKuszobok, 'a küszöbök alapértékei');
@@ -137,15 +137,15 @@ export function szabalyokAlakiHibaja(sz) {
       }
       continue;
     }
-    if (!HATAROK[k]) return 'ismeretlen szabály a koinó születésében: ' + k;
+    if (!HATAROK[k]) return 'ismeretlen szabály a koino születésében: ' + k;
     if (!egeszKozte(v, HATAROK[k])) return 'a(z) ' + k + ' szabály a határon kívül (' + HATAROK[k].join('–') + ')';
   }
   return null;
 }
 
 /**
- * Az új születésbe írandó szabályok: MIND, a megadottak a mai értékek helyén. ⭐ Így az új koinó szabályai teljesen a
- * születésében állnak, és egy későbbi program alapértéke nem írhatja át őket (fent). +206 bájt, egyszer koinónként.
+ * Az új születésbe írandó szabályok: MIND, a megadottak a mai értékek helyén. ⭐ Így az új koino szabályai teljesen a
+ * születésében állnak, és egy későbbi program alapértéke nem írhatja át őket (fent). +206 bájt, egyszer koinonként.
  * @param {Object} [megadott] - az eltérő szabályok (`{ tudatpontKeret: 500, alapKuszobok: { elfogadasiKuszob: 66 } }`)
  * @returns {Object} sima (nem fagyasztott) objektum — az esemény adata
  */
@@ -158,11 +158,11 @@ export function teljesSzabalyok(megadott = {}) {
 }
 
 /**
- * A koinó szabályai a születéséből — a mai értékekkel kiegészítve (ami nincs megadva, az a mai). A hiányzó vagy régi
+ * A koino szabályai a születéséből — a mai értékekkel kiegészítve (ami nincs megadva, az a mai). A hiányzó vagy régi
  * születés: a mai értékek.
- * @param {Object|null} szuletes - a koinó `KoinoLetrehozas` eseménye
+ * @param {Object|null} szuletes - a koino `KoinoLetrehozas` eseménye
  * ⭐⭐ D129: ha a születés a kézikönyv szabályát viszi, a `kezikonyv` mező (`{ alapKuszobok }`, a hiányzók a
- * `KEZIKONYV_ALAP_KUSZOBOK`-ból); ha nem, a mező NINCS — a koinóban nincs kézikönyv.
+ * `KEZIKONYV_ALAP_KUSZOBOK`-ból); ha nem, a mező NINCS — a koinoban nincs kézikönyv.
  * @returns {{tudatpontKeret: number, kategoriaKorlat: number, tanusitasKell: number, felhatalmazasKell: number,
  *   alapKuszobok: Object, kezikonyv?: {alapKuszobok: Object}}}
  */
@@ -179,7 +179,7 @@ export function koinoSzabalyai(szuletes) {
 }
 
 /**
- * ⭐⭐ D129: van-e a koinóban kézikönyv (a születése viszi-e a szabályát).
+ * ⭐⭐ D129: van-e a koinoban kézikönyv (a születése viszi-e a szabályát).
  * @param {Object} szabalyok - a `koinoSzabalyai` eredménye
  * @returns {boolean}
  */

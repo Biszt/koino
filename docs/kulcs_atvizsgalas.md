@@ -17,9 +17,9 @@ darabolva a hálózatban. Három dolgot a kód mond meg, amit a terv nem mondott
    („a bemondott összeg ellentmond a saját láncának”). És a D42 lényege — *„egyetlen eseményből eldől, a lánc többi része nélkül;
    szeletelt tárban ez az EGYETLEN mód a keret ellenőrzésére”* — a **közös keretnél elveszne**: egy esemény nem tudja, a másik
    készülék közben mennyit adott ki. → **KU1** (az ET-3/3 újra).
-2. **A készülék felvételének a koinók FÖLÖTT kell érvényesnek lennie.** A kulcs minden koinódban ugyanaz (**D15 — a kulcs hitelesít,
-   nem titkol**), egy esemény viszont koinóhoz kötött (a koinó neve az első aláírt mező — **D66 — a megújulás**). Egy koinóbeli
-   `Keszulek` esemény a másik koinóban nem érvényes. → **KU2** (egy koinótól független tanúsítvány).
+2. **A készülék felvételének a koinok FÖLÖTT kell érvényesnek lennie.** A kulcs minden koinodban ugyanaz (**D15 — a kulcs hitelesít,
+   nem titkol**), egy esemény viszont koinohoz kötött (a koino neve az első aláírt mező — **D66 — a megújulás**). Egy koinobeli
+   `Keszulek` esemény a másik koinoban nem érvényes. → **KU2** (egy koinotól független tanúsítvány).
 3. **A személyes kulcs a hálózatban KÉT helyen ír alá** — a csere kézfogásában (a tag ott bizonyítja magát) és a kereső-bejegyzések
    megújításában; ezt a kettőt kell a készülékkulcsra tenni. *(Helyesbítve a tervező ág nyomán, a kódban ellenőrizve: a hirdetőtábla
    már ma a készülék saját tábla-kulcsával ír — D6, szándékosan elválasztva a személytől —, a meghívó rekesze a meghívó titkából
@@ -29,7 +29,7 @@ darabolva a hálózatban. Három dolgot a kód mond meg, amit a terv nem mondott
 szavazata magától rendben van; az író készülékenként egy (**D70 — a tár mögött az író áll**) — a készülék-lánc pontosan erre illik; a
 láncok összefésülése olcsó (100 000 esemény ~30 ms — 93. (d)).
 
-**A hálózati darabolt mentés nem a mag része** (csak a csere-kulcs lenyomata az) → később építhető, új koinó-család nélkül. A
+**A hálózati darabolt mentés nem a mag része** (csak a csere-kulcs lenyomata az) → később építhető, új koino-család nélkül. A
 kriptográfiája a legkockázatosabb: a jelszavas visszaadáshoz tetszőleges görbe-szorzás kell, a WebCrypto X25519-e viszont a skalárt
 csonkolja (mérve: 20/20) — egy saját BigInt-létra kell (2,2 ms / szorzás, a WebCryptóval összevetve helyes).
 
@@ -54,7 +54,7 @@ valódi feloldással (`elagazasokFeloldasa`):
   eseményből eldől, offline is, a mai gépezet változatlan.
 
 **(c) Az esemény mérete** — egy mai pont-esemény 624 B; egy `keszulek` mezővel 681 B (**+57 B**); egy beágyazott készülék-tanúsítvánnyal
-947 B (+323 B, **+52%**). A tanúsítvány maga 251 B → ne minden eseményben utazzon (6. szabály), hanem készülékenként és koinónként
+947 B (+323 B, **+52%**). A tanúsítvány maga 251 B → ne minden eseményben utazzon (6. szabály), hanem készülékenként és koinonként
 egyszer.
 
 **(d) A láncok összefésülése** — 2–3 készülék, minden esemény mondja, a többi készülékből meddig látott; egy rögzített sorrend (a
@@ -73,7 +73,7 @@ nélkül 77% marad meg, **havi újraosztással 99,99%**; 70%-nál 97%, illetve ~
 ## 3. A mai helyzet (a kódból)
 
 - **A kulcs:** Ed25519 a WebCryptóból (`js/kulcs/kulcsTar.js`); az esemény `szerzo` mezője a nyilvános kulcs, az aláírt mezők
-  (`esemeny.js` `TARTALOM_MEZOK`): koinó, típus, szerző, előző, sorszám, idő, szelet, látott, lánc-gyökér, adat.
+  (`esemeny.js` `TARTALOM_MEZOK`): koino, típus, szerző, előző, sorszám, idő, szelet, látott, lánc-gyökér, adat.
 - **A lánc egy szerzőé:** az elágazás sorszámonként oldódik fel (`allapotSzamitas.js`), és erre épül: a bemondás és a folytonosság
   (`szabalyok.js`), a lánc-gyökér (`lancGyoker.js`), a vád és az elágazás bizonyítéka (`ellentmondas.js`, `eszlelo.js`), a lánc-kör
   (`lancEllenorzes.js`), a bekapcsolódás lánc-pontja (`koinoLanc.js`), a lánc vége (`iro.js`), az idő-monotonitás.
@@ -90,9 +90,9 @@ nélkül 77% marad meg, **havi újraosztással 99,99%**; 70%-nál 97%, illetve ~
    készülékkulcs nyilvános része; az aláírás a készülékkulccsal. A lánc (sorszám, előző, lánc-gyökér) a **(szerző, készülék)** páré.
    ⭐ Így minden, ami a szerzőre épül — a tagság, a meghívás, a tanúsítás, a szavazat —, változatlan marad; a láncra épülő rész
    készülékenként fut (a mai gépezet, csak a kulcsa más).
-2. **A készülék-tanúsítvány** (KU2): az azonosság kulcsa aláírja, koinótól függetlenül: *„ez a kulcs az én készülékem (»telefon«)”*.
-   Egy koinóban a készülék első eseménye hozza (D81), és ha hiányzik, a kérelem elkéri; az esemény csak a `keszulek` mezővel nő (+57 B).
-   **A kizárás** is tanúsítvány: a készülék láncából koinónként meddig érvényes (**D47 — az ellenőrzés az aláírás pillanatában
+2. **A készülék-tanúsítvány** (KU2): az azonosság kulcsa aláírja, koinotól függetlenül: *„ez a kulcs az én készülékem (»telefon«)”*.
+   Egy koinoban a készülék első eseménye hozza (D81), és ha hiányzik, a kérelem elkéri; az esemény csak a `keszulek` mezővel nő (+57 B).
+   **A kizárás** is tanúsítvány: a készülék láncából koinonként meddig érvényes (**D47 — az ellenőrzés az aláírás pillanatában
    történik, és befagy**).
 3. **A sorrend egy azonosság eseményei között:** a `latott` mintájára minden esemény mondja, a többi készülékem láncából meddig
    látott; egy rögzített sorrend (93. (d)). Ami ehhez kell: a szavazatnál semmi (ma is időrend), a keretnél a KU1.
@@ -101,7 +101,7 @@ nélkül 77% marad meg, **havi újraosztással 99,99%**; 70%-nál 97%, illetve ~
 5. **A hálózat:** a kézfogásban a készülékkulcs + a tanúsítvány (a tagságot az azonosság hozza); a kereső megújítását a készülék írja
    alá, az azonosság nevében. A tábla és a DHT már ma készülékenkénti (a tábla-kulcs — D6), a rekesz a meghívóé: ott nincs teendő.
 6. **A csere-kulcs:** az azonosság születésében lekötve (a lenyomata — a **KERI** „elő-rotáció” mintája); a **kulcscsere** is
-   koinótól független tanúsítvány (a csere-kulcs írja alá: új azonosság-kulcs, új lekötés). A név a kulcscsere után is marad (KU3).
+   koinotól független tanúsítvány (a csere-kulcs írja alá: új azonosság-kulcs, új lekötés). A név a kulcscsere után is marad (KU3).
 7. **A mentés:** most a csere-kulcs papíron vagy fájlban (a mai `mentes` mintájára, a lapon is); a darabolt hálózati mentés később
    (KU5), saját átvizsgálással — nem mag.
 8. **A fizetési kulcs** (az ET-11-ből): a nyilvános része már az azonosság születésében lekötve? (KU4)
@@ -121,14 +121,14 @@ nélkül 77% marad meg, **havi újraosztással 99,99%**; 70%-nál 97%, illetve ~
     szabad pontját magához húzza (93. (g)) → **a határ helye:** (a) ⭐ **az adó készülék szabálya** — magától csak a fogadó határáig
     (a lapon állítható), fölötte az adó megkérdez; a mag nem tud róla, és a változtatásához nem kell az azonosság kulcsa; (b) a határ
     a készülék tanúsítványában (a mag ellenőrzi, de változtatni csak az azonosság kulcsával — papírról); (c) határ nélkül ⛔.
-- **KU2 — A készülék felvétele:** (A) ⭐ egy koinótól független tanúsítvány, a készülék első eseménye hozza egy koinóban, a kérelem
-  elkéri (+57 B eseményenként); (B) koinónként egy `Keszulek` esemény (a készüléket minden koinódban külön kell felvenni); (C) a
-  tanúsítvány minden eseményben (+52%). **+ a tervező kiegészítése (8.2):** ahol egy koinó nincs felsorolva a kizárásban, ott a
-  kizárt készülék egyetlen eseménye sem számít (egy tolvaj új koinóban sem léphet fel a nevedben).
+- **KU2 — A készülék felvétele:** (A) ⭐ egy koinotól független tanúsítvány, a készülék első eseménye hozza egy koinoban, a kérelem
+  elkéri (+57 B eseményenként); (B) koinonként egy `Keszulek` esemény (a készüléket minden koinodban külön kell felvenni); (C) a
+  tanúsítvány minden eseményben (+52%). **+ a tervező kiegészítése (8.2):** ahol egy koino nincs felsorolva a kizárásban, ott a
+  kizárt készülék egyetlen eseménye sem számít (egy tolvaj új koinoban sem léphet fel a nevedben).
 - **KU3 — A név a kulcscsere után:** (A) ⭐ marad — a név az első kulcs, a mostani aláíró kulcsot a csere-tanúsítványok lánca mondja
   meg; (B) a kulcscsere új nevet ad, a régire egy átirányítás.
 - **KU4 — A fizetési kulcs** (az ET-11 — az átutalás): (A) ⭐ a nyilvános része már az azonosság születésében lekötve — a pénz
-  bevezetése így nem kíván új koinó-családot, és (a tervező érve) egy tolvaj nem köthetné le előbb a sajátját; (B) a pénzzel együtt
+  bevezetése így nem kíván új koino-családot, és (a tervező érve) egy tolvaj nem köthetné le előbb a sajátját; (B) a pénzzel együtt
   (akkor új család).
 - **KU5 — A sorrend:** (A) ⭐ most a mag része (a készülék, a tanúsítvány, a kizárás, a keret, a csere-kulcs lekötése, a kulcscsere, a
   papír- és fájl-mentés); a darabolt hálózati mentés később, saját átvizsgálással; (B) mind egyszerre.
@@ -137,7 +137,7 @@ nélkül 77% marad meg, **havi újraosztással 99,99%**; 70%-nál 97%, illetve ~
   de egy lopásnál a kezelés és a mindennapi lánc együtt vész).
 - **KU7 — Egy kizárt (elveszett) készülék elhelyezett pontjai** (új — a 8.1 ára nyitotta meg: egy készülék csak a maga tett pontjait
   rendezheti át, egy elveszett készülék pedig már soha nem fut):
-  - (A) ⭐ **az örökös átveszi:** a kizárás megnevezi a másik készülékedet; az koinónként egy átvétellel folytatja a kizárt készülék
+  - (A) ⭐ **az örökös átveszi:** a kizárás megnevezi a másik készülékedet; az koinonként egy átvétellel folytatja a kizárt készülék
     vágásig érvényes elhelyezéseit és a szabad részét — a pontok a gondolatokon maradnak, és ezentúl ő rendezi át őket. (Az átvétel
     egyszer kívánja a kizárt lánc vágásig tartó részét — a bizonyítéka az eseménnyel utazik, mint a D81-nél; az építésnél mérjük.)
   - (B) a vágásnál felszabadulnak: a pontok lekerülnek a gondolatokról, a rész az örökösé. ⛔ Egy gondolat, amin csak ezek a pontok
@@ -146,12 +146,12 @@ nélkül 77% marad meg, **havi újraosztással 99,99%**; 70%-nál 97%, illetve ~
 
 ## 6. Amit ez nem old meg (kimondott határok)
 
-- **A kizárás terjedése:** koinónként jut el; ahol még nem ért oda, ott a tolvaj eseménye addig számít (D19 — kimondva). A pénznél az
+- **A kizárás terjedése:** koinonként jut el; ahol még nem ért oda, ott a tolvaj eseménye addig számít (D19 — kimondva). A pénznél az
   ET-11 fizetési kulcsa véd (a készülékkulccsal nem lehet átutalni).
 - **Ha minden elveszett, a jelszó is:** új regisztráció (az ET-3/6), kimondva.
 - **A kriptográfia:** a jelszavas visszaadáshoz a görbe-szorzás mellé egy „hash-to-curve” (Elligator) és a skalár-inverz is saját kód
   lesz — ennek külön átvizsgálás és mérés jár (a darabolt mentéssel).
-- **A mag változik** → a régi koinók „más számítást” mutatnak; az első szélesebb körben terjesztett koinó már ezzel születik.
+- **A mag változik** → a régi koinok „más számítást” mutatnak; az első szélesebb körben terjesztett koino már ezzel születik.
 
 ## 7. Az építés sorrendje (ha a kérdések eldőlnek)
 
@@ -182,12 +182,12 @@ készülék csak a saját részét adhatja oda, és csak a te másik készülék
   Kettőnél több készüléknél a tolvaj legfeljebb a becsületes készülékenkénti határok összegét gyűjtheti — ezt a lap mutassa.
 - ✓ **Az ár elfogadható**, de egy kérdést nyit: mi lesz egy **elveszett** készülék elhelyezett pontjaival, ha az már soha nem fut? → **KU7**.
 
-**8.2 A kizárás** (a KU2-höz): *ahol egy koinó nincs felsorolva a kizárásban, ott a kizárt készülék egyetlen eseménye sem számít — így
-egy tolvaj egy új koinóban sem léphet fel a nevedben.*
+**8.2 A kizárás** (a KU2-höz): *ahol egy koino nincs felsorolva a kizárásban, ott a kizárt készülék egyetlen eseménye sem számít — így
+egy tolvaj egy új koinoban sem léphet fel a nevedben.*
 - ✓ Egyetértek. **Kimondva két következménye:** (1) ez visszamenőleges — a D47 (az ellenőrzés az aláírás pillanatában történik, és befagy)
   a szabály szigorítását tartja előre hatónak; a kizárás nem szigorítás, hanem annak kimondása, hogy azok az események nem tőled jöttek.
-  (2) Egy ELVESZETT (nem ellopott) készülék becsületes eseményei egy olyan koinóban, amiről a többi készüléked nem tud, mind elvesznek. ⭐ A
-  készülékeid ezért találkozáskor a koinó-listájukat is kicserélik, hogy a kizárás mindet felsorolhassa.
+  (2) Egy ELVESZETT (nem ellopott) készülék becsületes eseményei egy olyan koinoban, amiről a többi készüléked nem tud, mind elvesznek. ⭐ A
+  készülékeid ezért találkozáskor a koino-listájukat is kicserélik, hogy a kizárás mindet felsorolhassa.
 - A 6. szakasz első határa marad: ahova a kizárás még nem ért el, ott a tolvaj eseménye addig számít.
 
 **8.3 A helyesbítés:** *a hirdetőtábla és a meghívó rekesze már ma sem a személyes kulccsal ír; a személyes kulcsot csak a csere
@@ -206,7 +206,7 @@ horgára: minden, ami LÁNCOT néz (a tár indexe, a sorszám, az előző, az el
 író), ezt kérdezi; ami az AZONOSSÁGOT (a tagság, a horgony, a meghívás, a tanúsítás, a szavazat, az ellentmondás vádlottja), az a
 szerzőt. A pontok (lánc, entitás) szerint állnak, az azonosság pontja egy entitáson ezek összege.
 
-**9.2 A készülék-tanúsítvány** (koinók fölött): `{ azonossag, keszulek, nev, ido }` + az azonosság kulcsának aláírása. **Egy koinóban
+**9.2 A készülék-tanúsítvány** (koinok fölött): `{ azonossag, keszulek, nev, ido }` + az azonosság kulcsának aláírása. **Egy koinoban
 a készülék láncának ELSŐ eseménye hozza** — egy új burkolat-mezőben, a `tanusitvany`-ban (mindig jelen; csak a lánc első eseményén nem
 üres: az 1. sorszámon, a `Bekapcsolodas`-on és a gyermek születésén, ami a szülőbeli láncot folytatja). *(Az építés pontosítása: egy
 külön bemutató esemény a lánc sorszámait eltolná; így a második készülék is ugyanúgy hozza, mint az első — a horgonytól
@@ -217,17 +217,17 @@ születése…) ugyanez: a tanúsítvány a csomagból vagy a tárból. **A lán
 minden azonosító — a csere így kimondhatja): egy készüléket csak egy azonosság tanúsíthat, a kapu a második azonosság tanúsítványát
 elutasítja.
 
-**9.3 A keret** (KU1): láncónként. Az alap a koinó kerete annak a láncnak, amelyik az azonosság horgonyát írta (abban a koinóban az
+**9.3 A keret** (KU1): láncónként. Az alap a koino kerete annak a láncnak, amelyik az azonosság horgonyát írta (abban a koinoban az
 „első készülék” az, amelyikkel beléptél), a többié 0. A lánc-gyökér harmadik összegzése a **kapott** (adónként a halmozottan átvett
 pont) → a D42: `kiosztva ≤ alap + kapott`, egyetlen eseményből. **Az átadás** (`KeretAtadas`, az adó láncában): a kiosztás-fában a fogadó
 készülék alatt a halmozott átadott pont (a bemondott összege ezzel nő). **Az átvétel** (`KeretAtvetel`, a fogadó láncában): az adó
 aláírt átadását hozza, és a kapott-fában az adó értékét a halmozott átadottra emeli — ugyanazt kétszer nem lehet átvenni, mert a
 halmozott érték nem nő tőle. **A határ** az adó őrjáratának szabálya (a lapon állítható — 8.1).
 
-**9.4 A kizárás és az örökös** (KU7): a kizárás-tanúsítvány (az azonosság kulcsa írja alá) megnevezi a készüléket, koinónként a vágást
-(sorszám) és az örököst. Egy `KeszulekKizaras` esemény hozza a koinóidba (az örökös írja, mindegyikbe). A felsorolt koinóban a vágás
+**9.4 A kizárás és az örökös** (KU7): a kizárás-tanúsítvány (az azonosság kulcsa írja alá) megnevezi a készüléket, koinonként a vágást
+(sorszám) és az örököst. Egy `KeszulekKizaras` esemény hozza a koinoidba (az örökös írja, mindegyikbe). A felsorolt koinoban a vágás
 utáni, a kizárt kulccsal írt események nem számítanak, és **a láncot az örökös folytatja** (a vágás utáni sorszámokon az örökös kulcsa ír
-alá): a lánc pontjai és a része így nála vannak, és átrendezheti őket. A fel nem sorolt koinóban a kizárt készülék egyetlen eseménye
+alá): a lánc pontjai és a része így nála vannak, és átrendezheti őket. A fel nem sorolt koinoban a kizárt készülék egyetlen eseménye
 sem számít (8.2). Ahova a kizárás még nem ért el, ott addig számít (6.) — a terjesztése a ③ hálózaté.
 
 **9.5 A sorrend az azonosság eseményei között** — ✅ **eldöntve: az idő** (Csaba, 2026-11-14: *„legyen az idő, mehetünk tovább”*): ahol az azonosság UTOLSÓ állítása számít (az
@@ -251,8 +251,8 @@ Mind folyamaton belüli próbával (két készülék, egy azonosság, offline is
 kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a hálózaton egy készülék él.
 
 **9.9 A keret pontos alakja** (az ①b (2) terve, 2026-11-14 — a 9.3 megvalósítása):
-- **Egy lánc kerete = az alap + a kapott.** Az **alap** a koinó kerete annak a láncnak, amelyik az azonosság HORGONYÁT írta ebben a
-  koinóban (a `Belepes`, a `KoinoLetrehozas`, a `Bekapcsolodas` — a tagság úgyis tudja), minden más láncé 0. A **kapott** a
+- **Egy lánc kerete = az alap + a kapott.** Az **alap** a koino kerete annak a láncnak, amelyik az azonosság HORGONYÁT írta ebben a
+  koinoban (a `Belepes`, a `KoinoLetrehozas`, a `Bekapcsolodas` — a tagság úgyis tudja), minden más láncé 0. A **kapott** a
   lánc-gyökér HARMADIK összegzése (`{ naplo, kiosztas, kapott }`): adó készülékenként a halmozottan átvett pont — a gyökér összege
   a kapott összesen. ⭐ Így a D42 (a bemondott összeg) továbbra is egyetlen eseményből dönt: `kiosztva ≤ alap + kapott`.
 - **Az átadás** (`KeretAtadas` — a 9.3 szerint saját típus) **a pont-esemény gépezetével:** a kiosztás-fában a levele a FOGADÓ
@@ -269,7 +269,7 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
   a kisebb azonosító; ha egy második készülék később maga is belép, a keret marad az elsőé) és `azonossagAlapjai`/`alapokAlapja` (a szabály-réteg
   láncónkénti kerete — ADATKÉNT, nem beadott függvényként: D123 PR2), `lancGyoker.js` `lancAlapjai`/`lancAlapKerete` (ugyanaz a tárból — a lánc-gyökér, a művelet, a kapu és az észlelő vád-ellenőrzése
   ezt kérdezi), `muveletek.js` `sajatKeretem` (a szabad pontjaim és a pont-rendezés a KÉSZÜLÉKEM keretével). Ha a horgony nincs meg
-  nálunk, a lánc kerete a koinóé (a tagság nélküli pont úgysem számít — D93/1). A próba: `keszulekProba.js` „A KERET A HORGONY
+  nálunk, a lánc kerete a koinoé (a tagság nélküli pont úgysem számít — D93/1). A próba: `keszulekProba.js` „A KERET A HORGONY
   LÁNCÁÉ” és „A MŰVELET IS A LÁNC KERETÉVEL SZÁMOL” (7 rontás). ⚠️ A vád-ellenőrzés kerete (a bemondás és a folytonosság vádja a
   keretet túllépő pont-eseménynél) most a lánc alapja — próbát a (2b)-vel kap, amikor a kapott miatt a lánc kerete egy ESEMÉNYHEZ
   kötött érték lesz (a vádpontkori kapott, a lánc-gyökérből), nem a láncé egészében.
@@ -290,7 +290,7 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
   · **A vád** (`ellentmondas.js`): a hívó a lánc ALAPJÁT adja, a kapottat a vádolt esemény aláírt előképe (a vádpontkori kapott).
     ⏭️ A kapott-fa folytonosságának vádja (két szomszédos esemény kapott-gyökere nem egymásból jön) a (2c) után, saját lépésben.
   · **A művelet:** `keretAtadasa(kornyezet, kinek, tobblet)`, `keretAtvetele(kornyezet, atadas)` (előre ugyanazzal az ítélettel —
-    nem számító átvételt nem ír alá); `sajatKeretem` = az alap + a kapott. A keret mozgása koinónként él: a gyermek jelenébe nem
+    nem számító átvételt nem ír alá); `sajatKeretem` = az alap + a kapott. A keret mozgása koinonként él: a gyermek jelenébe nem
     jön át (`koinoLanc.js` `JELENBOL_KIZART`).
   · A próba: `keszulekProba.js` „A KERET ÁTADÁSA ÉS ÁTVÉTELE”, „A KERET NEM SZAPORODHAT”, „CSAK A MÁSIK KÉSZÜLÉKEM IDE SZÓLÓ
     ÁTADÁSA”, „AZ ÁTVÉTEL EGY ESEMÉNYBŐL ELLENŐRIZHETŐ” (20 rontás — a (2a) próbái az adatként átadott alappal újra).
@@ -317,22 +317,22 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
   a szavazat, és az idegen gondolat, ahol nem tesz pontot — 5 rontás).
 
 **9.10 A kizárás és az örökös — a pontos alak** (az ①d terve, 2026-11-14 — a 9.4 és a KU7 (A) megvalósítása):
-- **A kizárás-tanúsítvány** (`KeszulekKizaras` — az azonosság kulcsa írja alá, mint a készülék-tanúsítványt; koinók fölött):
-  `{ tipus, azonossag, keszulek, koinok: [{ koino, vagas, orokos }], ido, alairas }`. A `keszulek` a kizárt; koinónként a VÁGÁS (a
-  kizárt lánc utolsó még érvényes sorszáma — 0: egy sem) és az ÖRÖKÖS (az azonosság egy másik, tanúsított készüléke); a koinók
+- **A kizárás-tanúsítvány** (`KeszulekKizaras` — az azonosság kulcsa írja alá, mint a készülék-tanúsítványt; koinok fölött):
+  `{ tipus, azonossag, keszulek, koinok: [{ koino, vagas, orokos }], ido, alairas }`. A `keszulek` a kizárt; koinonként a VÁGÁS (a
+  kizárt lánc utolsó még érvényes sorszáma — 0: egy sem) és az ÖRÖKÖS (az azonosság egy másik, tanúsított készüléke); a koinok
   rendezve, egyszer. Egy készüléket egyszer lehet kizárni (az első hiteles tanúsítvány számít — a második nem írhatja át a vágást).
-- **Az esemény** (`Kizaras` — a tanúsítványt hozza a koinóba): a felsorolt koinókba az örökös írja (a saját láncán, az azonosság
+- **Az esemény** (`Kizaras` — a tanúsítványt hozza a koinoba): a felsorolt koinokba az örökös írja (a saját láncán, az azonosság
   szeletébe); ⭐ és BÁRKI beviheti, akihez eljutott (mint az ellentmondás bizonyítékát — D80): a tartalma önmagát igazolja. Így jut el
-  a fel nem sorolt koinóba is (a terjesztése a ③ hálózaté — 6. szakasz: ahova még nem ért el, ott addig számít).
-- **A számítás:** egy koinóban, ahol a kizárás megvan, a kizárt kulccsal aláírt események a vágás UTÁN nem számítanak (a fel nem
-  sorolt koinóban egyik sem — a vágás 0); nem elágazások, nem vádak — egyszerűen nem a te eseményeid (8.2: nem a szabály szigorítása,
+  a fel nem sorolt koinoba is (a terjesztése a ③ hálózaté — 6. szakasz: ahova még nem ért el, ott addig számít).
+- **A számítás:** egy koinoban, ahol a kizárás megvan, a kizárt kulccsal aláírt események a vágás UTÁN nem számítanak (a fel nem
+  sorolt koinoban egyik sem — a vágás 0); nem elágazások, nem vádak — egyszerűen nem a te eseményeid (8.2: nem a szabály szigorítása,
   hanem annak kimondása, hogy nem tőled jöttek).
-- **A folytatás:** a felsorolt koinóban a kizárt LÁNCÁT az örökös folytatja a vágás utáni sorszámokon — az eseményein egy új, aláírt,
+- **A folytatás:** a felsorolt koinoban a kizárt LÁNCÁT az örökös folytatja a vágás utáni sorszámokon — az eseményein egy új, aláírt,
   nem kötelező mező: `lanc` (a folytatott lánc kulcsa; `lancKulcsa(e) = e.lanc ?? e.keszulek`). A kapu csak akkor engedi be, ha a
-  koinóban megvan a kizárás, az író az örökös, és a sorszám a vágás után van. ⭐ Így a lánc pontjai, a kerete (alap + kapott) és a
+  koinoban megvan a kizárás, az író az örökös, és a sorszám a vágás után van. ⭐ Így a lánc pontjai, a kerete (alap + kapott) és a
   szabad része az örökösnél vannak, és átrendezheti őket — a D42 gépezete változatlan, a lánc ugyanaz.
 - **A próba:** két készülék, a telefon „ellopva”: a vágás után írt eseményei nem számítanak; a laptop folytatja a láncát (a pontjait
-  átrendezi); egy idegen koinóban a telefon minden eseménye kiesik, amint a kizárás odaér; a hamis kizárás (más kulcs írta, más
+  átrendezi); egy idegen koinoban a telefon minden eseménye kiesik, amint a kizárás odaér; a hamis kizárás (más kulcs írta, más
   azonosság, nem tanúsított örökös) a kapun elbukik.
 - **Az építés — ①d** (2026-11-14): `kulcs/keszulek.js` (`kizarasKeszitese`, `kizarasEllenorzese`, `kizarasKoinoban`), `allapot/kizaras.js`
   (`kizartakSzurese` — a számítás elején, az elágazás előtt; `kizartE`: csak a SAJÁT azonosság zárhat ki; több kizárásból a
@@ -343,9 +343,9 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
   (`fajlTar.js` `kizarasEsemenyei`, a pillanatkép 5. változata): a kapu MINDEN eseménynél kérdezi — index nélkül az azonosság összes
   eseményének testét betöltené (a mérés: a képből nyitott tárban a kérdés egy testet tölt be). ⛔ Lelet: a pillanatkép alakjának
   ellenőrzése a mezők számát is nézi — az új mezővel minden kép eldobódott volna (néma lassulás); a próba fogta meg. A próba: „A
-  KIZÁRÁS ÉS AZ ÖRÖKÖS”, „A FEL NEM SOROLT KOINÓBAN” (18 rontás). ⏭️ A
-  kizárás terjesztése (a koinó-listák cseréje a készülékek között, a más által bevitt kizárás) a ③ hálózaté; a kezelése (a parancs, a
-  lap) a ④-é. ⚠️ A folytatott lánc műveleteihez a kizárást az örökös saját `Kizaras` eseménye adja (a felsorolt koinókba ő viszi).
+  KIZÁRÁS ÉS AZ ÖRÖKÖS”, „A FEL NEM SOROLT KOINOBAN” (18 rontás). ⏭️ A
+  kizárás terjesztése (a koino-listák cseréje a készülékek között, a más által bevitt kizárás) a ③ hálózaté; a kezelése (a parancs, a
+  lap) a ④-é. ⚠️ A folytatott lánc műveleteihez a kizárást az örökös saját `Kizaras` eseménye adja (a felsorolt koinokba ő viszi).
 
 **9.11 A ② terve — a csere-kulcs lekötése, a kulcscsere, a mentés** (2026-11-15; ✅ **eldöntve** — Csaba: KC1 (A), KC2 (A), KC3 (A);
 D128 13–15.):
@@ -356,15 +356,15 @@ D128 13–15.):
   csere-kulcs aláír egy kulcscserét (új kezelő kulcs, új lekötés); a tolvaj, akinél csak a régi kulcs van, nem cserélhet kulcsot. A
   születés a fizetési kulcs nyilvános részét is leköti (KU4 (A)).
 - ⛔ **A gond, amit az építés előtt meg kell oldani:** ha a név maga az első kulcs (KU3 (A) mai olvasata), akkor a lekötés csak egy
-  aláírt születés-tanúsítvány — és aki a kulcsot ellopta, aláírhat egy MÁSIKAT (a saját csere-kulcsával), és egy új koinóban azt
-  mutathatja be. Az idő önbevallás (visszadátumozható); a „melyiket látták előbb” a hálózaté, és egy új koinó tagjai az eredetit nem
+  aláírt születés-tanúsítvány — és aki a kulcsot ellopta, aláírhat egy MÁSIKAT (a saját csere-kulcsával), és egy új koinoban azt
+  mutathatja be. Az idő önbevallás (visszadátumozható); a „melyiket látták előbb” a hálózaté, és egy új koino tagjai az eredetit nem
   látták. ⭐ A KERI megoldása: a NÉV A SZÜLETÉS LENYOMATA („önmagát címző azonosító”) — a születés az első kulcsot, a csere-kulcs
   lenyomatát és a fizetési kulcsot együtt köti, és a név ebből jön: ugyanarra a névre más lekötés nem létezhet.
-- **KC1 — A lekötés köteléke:** (A) ⭐ **a név a születés lenyomata** — a születés (`{ kulcs, csere, fizetes, ido }`) minden koinóban a
+- **KC1 — A lekötés köteléke:** (A) ⭐ **a név a születés lenyomata** — a születés (`{ kulcs, csere, fizetes, ido }`) minden koinoban a
   horgonnyal utazik, a tanúsítványok ellenőrzése belőle (és a kulcscserék láncából) veszi a mostani kezelő kulcsot; a név továbbra is
   43 jel, és a kulcscsere után is marad (KU3 (A) szelleme: a név nem változik). Ára: a név már nem maga a kulcs — a tanúsítvány
   ellenőrzéséhez a születés is kell (a horgony hozza). (B) a név marad az első kulcs, a születés egy külön tanúsítvány — egy tolvaj egy
-  új koinóban más lekötést mutathat be; az elsőként látott számít, a terjesztés a ③-é.
+  új koinoban más lekötést mutathat be; az elsőként látott számít, a terjesztés a ③-é.
 - **KC2 — A kulcscsere után a régi kulccsal aláírtak** (a készülék-tanúsítványok, a kizárások): (A) ⭐ **a kulcscsere felsorolja a
   megmaradó készülékeket** — a többi (a tolvaj által a régi kulccsal felvett is) érvénytelen, a felsoroltak újra-tanúsítás nélkül
   maradnak; (B) ami a régi kulccsal a csere IDEJE előtt készült, marad — ⛔ az idő önbevallás, a tolvaj visszadátumozhat; (C) minden
@@ -374,7 +374,7 @@ D128 13–15.):
   jelszóval titkosítva — kényelmesebb, de egy lopás (a jelszó kitalálásával) viheti.
 - **A sorrend az építésben** (a döntés után): ②a a születés és a név (KC1), a horgony hozza, a tanúsítványok ellenőrzése belőle →
   ②b a kulcscsere-tanúsítvány és a kezelő kulcs a láncból (KC2) → ②c a mentés és a visszaállítás (KC3; a mai `mentes` /
-  `visszatolt` helyett: a csere-kulcs papíron vagy fájlban; a lap a ④-ben). ⛔ A mag változik → új koinó-család (mint a D128 eleje).
+  `visszatolt` helyett: a csere-kulcs papíron vagy fájlban; a lap a ④-ben). ⛔ A mag változik → új koino-család (mint a D128 eleje).
 - ⭐ **Az építés közben kiderült — a ③ két pontja ELŐRE kell** (2026-11-15): a csere kézfogása (`titkositas.js`
   `szemelyesKezfogasEllenorzese`) és a kereső megújítása (`keresoMegujitas.js`) a NEVET használta ellenőrző kulcsként — a KC1 (A) után
   (a név a születés lenyomata) eltörnének. ✅ **③a:** mindkettőt a KÉSZÜLÉK kulcsa írja alá (D128 10. pont): a kézfogásban a személy
@@ -388,7 +388,7 @@ D128 13–15.):
   csere-kulcs lenyomata (`csereLenyomata`), `ujAzonossag`. A készülék- és a kizárás-tanúsítvány a születést HOZZA (+312 B — a
   tanúsítvány 605 B, 94. mérés): az ellenőrzés helyben nézi, hogy a név a születés lenyomata, és a születés kulcsa írta alá (a
   kulcscserék láncát a ②b teszi hozzá). `kulcsTar.js`: az azonosság a születéssel és a fizetési kulccsal a gépen; a régi (születés
-  nélküli) kulcsfájl születést kap — a NÉV megváltozik (új koinó-család); a csere-kulcs kiadásra megy (`csereKulcsKiadasa` —
+  nélküli) kulcsfájl születést kap — a NÉV megváltozik (új koino-család); a csere-kulcs kiadásra megy (`csereKulcsKiadasa` —
   `koino.js` a `csere-kulcs.json`-ba írja, és amíg ott van, minden induláskor szól: vidd el, töröld; a papír a ②c-vel). ⛔ **Lelet:**
   a mentés (`kulcsparKimentese`) csak a kulcsot vitte — a visszatöltés ÚJ születést (új nevet) adott volna, az azonosság elveszett
   volna; most a születést és a fizetési kulcsot is viszi (a próba fogta meg). A próba: keszulek („A NÉV A SZÜLETÉS LENYOMATA”, és a
@@ -426,32 +426,32 @@ D128 13–15.):
   az 5. verzió, 37×37 modul. `koino.js`: `papir` (a 14 csoport és a QR), `papir kesz <a leírt kód>` (a LEÍRT kódot összeveti a gépen
   lévő fájléval, és ha egyezik, a fájlt törli — a KC3 (A) „megkéri, hogy mentsd el, és utána törli magáról”-ja: a törlés előtt
   kiderül, ha a leírásba hiba csúszott), `kulcscsere <a kód>` (egyben vagy csoportonként). ⛔ **Lelet (a kézi kipróbálásból):** a
-  `kulcscsere` a koinón kívül (ahol az azonosságnak nincs szelete) „Nem sikerült”-et írt — pedig a gépen a kulcs már kicserélődött, és
-  a régi csere-kulcs elhasználódott; most ELŐBB a csere eredménye és az új csere-kulcs helye íródik ki, és a koinóba vitel `null`, ha
+  `kulcscsere` a koino-n kívül (ahol az azonosságnak nincs szelete) „Nem sikerült”-et írt — pedig a gépen a kulcs már kicserélődött, és
+  a régi csere-kulcs elhasználódott; most ELŐBB a csere eredménye és az új csere-kulcs helye íródik ki, és a koinoba vitel `null`, ha
   ott nincs mit bevinni (a lánc a tanúsítványokkal jár). A próba: `papirProba.js` (15) — a kód oda-vissza, elnézően, kimerítően minden
   elírás (56 hely × 31 jel) és minden csere; a QR a szabvány ismert értékeivel (a „HELLO WORLD” 1-M kódszavai, a formátum 32 bitsora, a
   verzió bitjei, a teljes alfanumerikus kapacitás-tábla 160 pontja — a hibajavító táblák MÁSIK forrása —, az igazító minták helyei) és
   egy a kódolótól FÜGGETLENÜL írt próba-olvasóval (az 1–40. verzió mind a négy szinten, a maszkokkal; a Reed–Solomon szindrómák
-  külön táblával); parancssor (a `papir`, a `papir kesz` elírt, idegen és jó kóddal, a kulcscsere a kódból, a koinón kívül) — 20
+  külön táblával); parancssor (a `papir`, a `papir kesz` elírt, idegen és jó kóddal, a kulcscsere a kódból, a koino-n kívül) — 20
   rontás. ⚠️ A QR végső próbája a telefon kamerája (⑤ terep). ⭐ A ② a papírral ezzel kész; ⏭️ a D128 17. pontja (a helyreállítás a segítőkkel — 9.13) ②d–②f-ként, utána a
-  ③ a hálózat (a kizárás és a kulcscsere terjesztése, a koinó-lista a készülékek között; az átfolyás határának alapértéke — Csaba döntése).
+  ③ a hálózat (a kizárás és a kulcscsere terjesztése, a koino-lista a készülékek között; az átfolyás határának alapértéke — Csaba döntése).
 
 **9.12 A ③ terve — a hálózat: a saját készülékek találkozása és a kezelés eljuttatása** (2026-11-15; ✅ KH1 és KH2 eldöntve
 2026-11-16)
 
-*Ami már eldőlt (D128):* a készülékek találkozáskor kicserélik a koinó-listájukat (4. pont); a keret magától átfolyik, amikor
+*Ami már eldőlt (D128):* a készülékek találkozáskor kicserélik a koino-listájukat (4. pont); a keret magától átfolyik, amikor
 találkoznak — a fogadó-oldali határig, a határ az adó szabálya (a lapon állítható), fölötte az adó megkérdez (5. pont); a kézfogás és
 a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③-ban épül:
-- **③b A kezelés minden koinómba — helyben.** A kizárás és a kulcscsere egy-egy koinóba bevitt ESEMÉNY: egy másik koinó csak akkor
-  tud róla, ha ott is bekerül. ⛔ Ma egy kulcscsere csak abba a koinóba jut, ahol a parancsot kiadták — a többiben a tolvaj által
-  felvett készülék tovább számít. Ezért minden készülék, amikor fut, a SAJÁT összes koinójába beviszi az azonossága kezelését: a cserék
-  láncát (a `kulcs.json`-ból, vagy amit bármelyik koinójában lát) és a kizárásokat (amit bármelyik koinójában lát; a felsorolt
-  koinókba, és abba, ahol a kizárt készüléknek eseménye van).
+- **③b A kezelés minden koinomba — helyben.** A kizárás és a kulcscsere egy-egy koinoba bevitt ESEMÉNY: egy másik koino csak akkor
+  tud róla, ha ott is bekerül. ⛔ Ma egy kulcscsere csak abba a koinoba jut, ahol a parancsot kiadták — a többiben a tolvaj által
+  felvett készülék tovább számít. Ezért minden készülék, amikor fut, a SAJÁT összes koinojába beviszi az azonossága kezelését: a cserék
+  láncát (a `kulcs.json`-ból, vagy amit bármelyik koinojában lát) és a kizárásokat (amit bármelyik koinojában lát; a felsorolt
+  koinokba, és abba, ahol a kizárt készüléknek eseménye van).
 - **③c A saját készülék a cserében.** A kézfogás a társ nevét a készülék tanúsítványával bizonyítja (③a) — ha a név az enyém, a társ
   a saját készülékem. Ilyenkor (1) a nekem szóló keret-átadást magától átveszem (`keretAtvetele`); (2) ha nálam több a szabad pont,
   átadok a határig (`keretAtfolyasa`); a határ fölött nem adok magától (a kérdés a ④ lapé).
-- **③d A koinó-lista.** A saját készülékek a titkosított cserében megmondják egymásnak, mely koinókban vannak, és ott hol tart a
-  láncuk (csak a saját készülék kapja; a láncra soha — D6). Ebből készül a kizárás koinónkénti vágása: a felsorolt koinóban a vágásig
+- **③d A koino-lista.** A saját készülékek a titkosított cserében megmondják egymásnak, mely koinokban vannak, és ott hol tart a
+  láncuk (csak a saját készülék kapja; a láncra soha — D6). Ebből készül a kizárás koinonkénti vágása: a felsorolt koinoban a vágásig
   megmarad, ami jogos volt; a fel nem soroltban minden kiesik.
 - **③e** A csere állásában a lánc mezője `szerzo` → `lanc` (belső átnevezés).
 
@@ -466,62 +466,62 @@ a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③
   személyre szabhatók lesznek majd.”* Vagyis a 2000 csak az ALAPÉRTÉK — az, ami addig érvényes, amíg az e-ember át nem írja; a
   határt mindenki maga szabja meg, készülékenként (a lapon — ④). A keret (10 000) nem ilyen: az mindenkinek ugyanannyi (a tudatpont
   alapelve).
-- **KH2 — ahová egyik másik készülékem sem jár.** Ha az ellopott telefon egy olyan koinóban is tag, ahol egyik másik készüléked sem
-  (a laptop sem): a kizárást és a kulcscserét oda csak az viheti be, aki ott van. (A) a koinó-lista a koinó nevét hozza, és a
+- **KH2 — ahová egyik másik készülékem sem jár.** Ha az ellopott telefon egy olyan koinoban is tag, ahol egyik másik készüléked sem
+  (a laptop sem): a kizárást és a kulcscserét oda csak az viheti be, aki ott van. (A) a koino-lista a koino nevét hozza, és a
   kezelő készülék (ahol a kizárást vagy a kulcscserét kiadod) magától csatlakozik oda — csak a bevitelhez (pontja ott nincs, a láncán
   egy-két esemény); (B) nem: ott a tolvaj készüléke tovább számít, amíg valamelyik másik készüléked be nem lép oda. ⚠️ Amit a
   telefon az utolsó találkozás UTÁN lépett be, arról a laptop egyik esetben sem tud.
   ✅ **Eldöntve (2026-11-16) — (A).** A példa, amin Csaba eldöntötte: a telefon a „Kertváros”-ban és az „Olvasókör”-ben tag, a
-  laptop csak a Kertvárosban; az Olvasókörben a telefon tartja a koinó TELJES keretét (az írta a horgonyt — `tagsag.js`
+  laptop csak a Kertvárosban; az Olvasókörben a telefon tartja a koino TELJES keretét (az írta a horgonyt — `tagsag.js`
   `alapHorgony`), és a KH1 határa sem fékezi (az csak két saját készülék között számít). Csaba: *„IGEN MEHETÜNK TOVÁBB”*.
 
 *Az építés:*
-- ✅ **③b — a kezelés minden koinómba, helyben** (2026-11-16): `allapot/kezelesTerjesztes.js` — a KEZELÉS-JEGYZÉK (`kezeles.json`,
+- ✅ **③b — a kezelés minden koinomba, helyben** (2026-11-16): `allapot/kezelesTerjesztes.js` — a KEZELÉS-JEGYZÉK (`kezeles.json`,
   készülék-szintű helyi feljegyzés, mint a társ-lista): a legerősebb kulcscsere-lánc (a születésével és a benne álló helyreállítások
-  bizonyítékaival) és a kizárások, amit a készülék BÁRMELYIK koinójában látott, és a saját kulcsfájljának lánca. `muveletek.js`
-  `kezelesGondozasa`: egy koinóban a jegyzékbe veszi, amit ott lát, és ha az azonosságnak ott szelete van, beviszi, ami onnan hiányzik
+  bizonyítékaival) és a kizárások, amit a készülék BÁRMELYIK koinojában látott, és a saját kulcsfájljának lánca. `muveletek.js`
+  `kezelesGondozasa`: egy koinoban a jegyzékbe veszi, amit ott lát, és ha az azonosságnak ott szelete van, beviszi, ami onnan hiányzik
   (előbb a láncot — a kapu így a helyreállításait is felveszi —, utána a kizárásokat). ⭐ A jegyzék csak gyorsítótár: a kapu mindent
   újra ellenőriz. Amit a kapu elvetett (pl. ezt a készüléket a kulcscsere nem sorolta fel), azt egy napig nem próbálja újra abban a
-  koinóban. Bizonyíték nélkül egy helyreállítást tartalmazó láncot nem visz be (kimondja). `koino.js`: a gondozás minden parancs
-  elején és az őrjárat minden körében (az éppen futó koinóba — a családi őrjárat a család minden koinójába); a `kulcscsere` és a
-  `papir visszavon` MINDEN koinóba beviszi (`kezelesMindenKoinomba` — a tér koinói); a `helyreallitas befejez` a láncot a
+  koinoban. Bizonyíték nélkül egy helyreállítást tartalmazó láncot nem visz be (kimondja). `koino.js`: a gondozás minden parancs
+  elején és az őrjárat minden körében (az éppen futó koinoba — a családi őrjárat a család minden koinojába); a `kulcscsere` és a
+  `papir visszavon` MINDEN koinoba beviszi (`kezelesMindenKoinomba` — a tér koinoi); a `helyreallitas befejez` a láncot a
   bizonyítékokkal a jegyzékbe írja (a kulcsfájl a bizonyítékot nem őrzi). ⭐ **Új parancs: `kizar`** — a készülékeim listája (a
-  tanúsítványuk neve, koinónként a láncuk vége, a kizártak); `kizar <készülék — a neve vagy a kulcsa eleje> [orokos <készülék>]` a
-  kizárás: koinónként a VÁGÁS a kizárt lánc vége, ameddig ez a készülék ismeri (a koinó-lista — ③d — nélkül is: ahol a kezelő is
-  tag, a saját tárából tudja), az örökös ez a készülék; a kizárás minden koinómba bekerül. ⚠️ A kizárás a terv „a felsorolt koinókba,
-  és ahol a kizárt készüléknek eseménye van” helyett MINDEN koinómba megy, ahol az azonosságomnak szelete van: egy tolvaj a telefonnal
-  később is írhat egy olyan koinóban, ahol tag vagyok — ott a kizárás már várja. A próba: `kezelesProba.js` (a jegyzék; a terjesztés
-  az A koinóból a B-be — ott a telefon eseménye kiesik —, másodszor semmi, ahol nincs szeletem, oda semmi; az elvetés egy napig), a
-  helyreállítás a bizonyítékkal a másik koinóba (`helyreallitasProba.js`), a parancssor (a `kizar` listája és a kizárás két koinóba;
-  egy másik készülékem kizárása az A-ból egy B-beli parancs elején a B-be; a kulcscsere két koinóba; a ②f befejezése a jegyzékbe)
+  tanúsítványuk neve, koinonként a láncuk vége, a kizártak); `kizar <készülék — a neve vagy a kulcsa eleje> [orokos <készülék>]` a
+  kizárás: koinonként a VÁGÁS a kizárt lánc vége, ameddig ez a készülék ismeri (a koino-lista — ③d — nélkül is: ahol a kezelő is
+  tag, a saját tárából tudja), az örökös ez a készülék; a kizárás minden koinomba bekerül. ⚠️ A kizárás a terv „a felsorolt koinokba,
+  és ahol a kizárt készüléknek eseménye van” helyett MINDEN koinomba megy, ahol az azonosságomnak szelete van: egy tolvaj a telefonnal
+  később is írhat egy olyan koinoban, ahol tag vagyok — ott a kizárás már várja. A próba: `kezelesProba.js` (a jegyzék; a terjesztés
+  az A koinoból a B-be — ott a telefon eseménye kiesik —, másodszor semmi, ahol nincs szeletem, oda semmi; az elvetés egy napig), a
+  helyreállítás a bizonyítékkal a másik koinoba (`helyreallitasProba.js`), a parancssor (a `kizar` listája és a kizárás két koinoba;
+  egy másik készülékem kizárása az A-ból egy B-beli parancs elején a B-be; a kulcscsere két koinoba; a ②f befejezése a jegyzékbe)
   — 15 rontás. ⚠️ Az őrjárat körének hívását csak a parancsok elejéé méri (ugyanaz a függvény).
 - ✅ **③c — a saját készülék a cserében** (2026-11-16): a kapu kötése (a társ tábla-aláírója → a személye) mostantól a társ
   KÉSZÜLÉKÉT is megjegyzi (a bizonyításban benne van) — ebből tudja a csere, hogy a társ a saját készülékem, és melyik. ⛔ **Lelet (a
   terv helyesbítése):** a 9.12 fent azt feltételezte, hogy a kézfogás MINDIG megmondja a társ nevét — valójában a személyét a kapu
-  bizonyítási köre (`TAGSAG`) hozza, első találkozáskor (nyílt és zárt koinóban is — D121 MH7 (A)), utána a kötés emlékszik; egy ③c
+  bizonyítási köre (`TAGSAG`) hozza, első találkozáskor (nyílt és zárt koinoban is — D121 MH7 (A)), utána a kötés emlékszik; egy ③c
   előtti, a saját nevemhez kötött, de készülék nélküli kötést a kapu egyszer újra kér. ⛔ **Lelet (a parancssor-próba fogta meg):** egy
   új telefon még semmit nem írt (kerete sincs, hát nem is írhat) — a tanúsítványa nem volt a laptop tárában, és a laptop nem ismerte el
   a saját készülékének; most a saját készülékem tanúsítványát (a kézfogás ellenőrizte) a kötéskor a tárba veszem. `muveletek.js`:
-  `atfolyasHatarAlap` (a koinó keretének 20%-a, 10 000-nél 2000 — KH1: csak az alapérték, a személyes határ a lappal jön — ④),
+  `atfolyasHatarAlap` (a koino keretének 20%-a, 10 000-nél 2000 — KH1: csak az alapérték, a személyes határ a lappal jön — ④),
   `sajatKeszulekErvenyesE` (a tanúsítványa az azonosságomé, nincs kizárva, a kulcscsere nem ejtette ki — egy kizárt telefonnak
   semmit), `keretAtvetelekGondozasa` (a nekem szóló, még át nem vett átadás átvétele — a parancsok elején és az őrjárat körében is:
   ehhez találkozás nem kell, az átadás a cserével jön), `sajatKeszulekTalalkozasa` (a csere után: az átvételek, és ha nálam több a
   szabad pont, az átfolyás a határig — `keretAtfolyasa`; a határ fölött nem ad magától). `koino.js`: a horog a csere végén
   (`resMunka` — a hívó és a figyelő oldalon is). A próba: `kezelesProba.js` („A SAJÁT KÉSZÜLÉK A CSERÉBEN” — a határ, a függő átadás,
-  az egyszeri átvétel, egy magasabb határ, az idegen, a más koinóbeli és a kizárt készülék), parancssor (a laptop és a friss telefon
+  az egyszeri átvétel, egy magasabb határ, az idegen, a más koinobeli és a kizárt készülék), parancssor (a laptop és a friss telefon
   cseréje: a kötés a készülékkel, a 2000-es átadás, a telefon egy parancs elején átveszi) — 9 rontás. ⚠️ Az őrjárat körének átvételét
   csak a parancsok elejéé méri (ugyanaz a függvény).
-- ✅ **③d — a koinó-lista és a csatlakozás (KH2 (A))** (2026-11-16): a saját készülékek a cserében megmondják egymásnak, mely
-  koinókban vannak, és ott hol tart a láncuk — a `CIMEK` üzenet elhagyható `kl` mezője (`csere/vonal.js`), CSAK a saját
+- ✅ **③d — a koino-lista és a csatlakozás (KH2 (A))** (2026-11-16): a saját készülékek a cserében megmondják egymásnak, mely
+  koinokban vannak, és ott hol tart a láncuk — a `CIMEK` üzenet elhagyható `kl` mezője (`csere/vonal.js`), CSAK a saját
   készülékemnek (a kapu kötése szerint: az én nevem és egy másik készülékem), és a fogadó is csak tőle fogadja el; a kapott listát a
   bizonyítási kör UTÁN dolgozza fel (első találkozáskor épp az köti meg, hogy a társ a saját készülékem). A készülék megjegyzi
-  (`sajatkeszulekek.json` — helyi feljegyzés, nem esemény; D6: a láncra soha). A `kizar` ebből a kizárt készülék listájának koinóit is
+  (`sajatkeszulekek.json` — helyi feljegyzés, nem esemény; D6: a láncra soha). A `kizar` ebből a kizárt készülék listájának koinoit is
   felsorolja (a vágás a nagyobbik: amit a készülék a legutóbbi találkozáskor mondott, és amit én láttam), és ahová a listából tudok,
-  de ezen a készüléken nincs, oda CSATLAKOZIK (KH2 (A) — csak a bevitelhez: kiírja a koinó őrjáratának indító parancsát, ha nem fut);
-  amint a koinó eseményei megjönnek, egy ottani parancs elején (vagy az őrjáratában) a kezelés-jegyzékből a kizárás bekerül. A
-  `kulcscsere` ugyanígy csatlakozik a fel nem sorolt készülékeim listáinak koinóihoz. A `kizar` listája a koinó-listából ismert
+  de ezen a készüléken nincs, oda CSATLAKOZIK (KH2 (A) — csak a bevitelhez: kiírja a koino őrjáratának indító parancsát, ha nem fut);
+  amint a koino eseményei megjönnek, egy ottani parancs elején (vagy az őrjáratában) a kezelés-jegyzékből a kizárás bekerül. A
+  `kulcscsere` ugyanígy csatlakozik a fel nem sorolt készülékeim listáinak koinoihoz. A `kizar` listája a koino-listából ismert
   készülékeket is mutatja (egy új telefon még semmit nem írt — a nevét a kapu által a tárba vett tanúsítványa adja). ⛔ **Lelet (a
-  parancssor-próba fogta meg):** ha a telefonnál a koinó születése még nem volt meg, a kapuja nem kérte a laptop személyét — a
+  parancssor-próba fogta meg):** ha a telefonnál a koino születése még nem volt meg, a kapuja nem kérte a laptop személyét — a
   telefon nem tudta, hogy a társ a saját laptopja, és a laptop a telefon listáját sem kapta meg; a valóságban a következő csere pótolja
   (addigra a születés megjön), a próba ezért a születéssel indul. ⚠️ **A vágás korlátja:** a lista is, a saját tár is azt mondja,
   ameddig a készülék a lánca végén tartott — ha a tolvaj a lopás után még találkozott a laptoppal, az ő eseményei is a vágásig
@@ -533,14 +533,14 @@ a kereső megújítása a készülékkulccsal (10. pont — ✅ ③a). Ami a ③
   mérő-szkripttel ellenőrizve; eldöntve 2026-11-16 — (A)): a kulcscsere (és a helyreállítás) után minden FEL NEM SOROLT régi készülék
   MINDEN eseménye kiesik a számításból — a lopás vagy az elvesztés előttiek is: a belépése (a tagság), a pontjai, a szavazatai
   (`allapot/kizaras.js` `cserenKivulE` — a KC2 (A) szó szerint). Ha minden készülék elveszett, és a segítők visszaadják az
-  azonosságot, a NÉV és a pénztárca megmarad, de a koinókban olyan, mintha sosem lett volna ott — épp az, ami ellen a 17. pont
+  azonosságot, a NÉV és a pénztárca megmarad, de a koinokban olyan, mintha sosem lett volna ott — épp az, ami ellen a 17. pont
   született („mi lessz a koinos megtakarításával?”). És fordítva: egy RÉGI kulccsal aláírt kizárás (a tolvajé, akinél az azonosság
   kulcsa volt) ma a megmaradónak felsorolt laptopot is kizárja — a KC2 (A) „a felsoroltak … maradnak”-ja ellenére.
   (A) ⭐ a kizárás vágása itt is érvényes: a kulcscsere (vagy a helyreállítás) UTÁN az új kezelő kulccsal aláírt kizárás a régi
   készülék vágásig tartó múltját megtartja (a tagságát, a pontjait — az örökös folytatja a láncát); kizárás nélkül a régi készülék
   minden eseménye kiesik, mint ma (a tolvaj ismeretlen készülékei); egy régi kulccsal aláírt kizárás a megmaradót nem zárhatja ki, és
   a kulcscsere után a jegyzék kizárásait a készülék az új kulccsal újra aláírja. A helyreállítás után az új készülék, amint egy
-  koinóban látja a régi készülékeit, felajánlja a kizárásukat (a `kizar` listája). (B) marad, ahogy van (a múlt elvész). (C) a
+  koinoban látja a régi készülékeit, felajánlja a kizárásukat (a `kizar` listája). (B) marad, ahogy van (a múlt elvész). (C) a
   kulcscsere előtti események mind maradnak — ⛔ a tolvaj régi kulccsal felvett készülékeié is.
   ✅ **Eldöntve (2026-11-16) — (A).** Csaba: *„rendben. mehetünk, tovább, ha kész a próbasór.”* — a ③f építi (a ③d–③e után).
 - ✅ **③f — KH3 (A): a régi készülék múltja** (2026-11-16): `allapot/kizaras.js` (a mag) — `kizarasMostaniE`: ha az azonosságnak van
@@ -579,9 +579,9 @@ vonnánk be, akik ismerik, tehát vagy a meghívója, vagy valakik azok közűl,
 - **A várakozás** (Csaba: „rendben”): a folytonosság egyetlen emberen áll — ha ő rosszhiszemű, két tanúsítót talál maga mellé. Ezért a
   helyreállítás várakozás után lép életbe; közben minden meglévő készülék értesítést kap, és megállíthatja. (Az elrettentés mellette
   már megvan: a rossz tanúsító elveszíti a szerepét — `identitas.js`, 4.5.)
-- **Minden koinóban érvényes** (Csaba: „rendben”): a lépcső és a tanúsítói jog koinónként van, a kulcs koinók fölött — a helyreállítás
+- **Minden koinoban érvényes** (Csaba: „rendben”): a lépcső és a tanúsítói jog koinonként van, a kulcs koinok fölött — a helyreállítás
   a bizonyítékát (ki hagyta jóvá, és hogy ott tanúsító volt) magával viszi (D93: „a bizonyíték a tagnál utazik”); különben a tolvaj a
-  többi koinóban továbbra is te lennél.
+  többi koinoban továbbra is te lennél.
 
 - **A várakozás hossza, a bemutatkozók útja, a megállítás után** (Csaba: *„minden javaslatodat, elfogadom, mehetünk tovább.”*): a
   rendes úton **7 nap**; a bemutatkozók útján (a 10 bemutatkozó a régi ismerőst pótolja, a két élő tanúsító mellett) **30 nap**;
@@ -592,7 +592,7 @@ vonnánk be, akik ismerik, tehát vagy a meghívója, vagy valakik azok közűl,
 *A terv — az építő megoldása (a döntések megvalósítása):*
 1. **Két fázis — a várakozást a SEGÍTŐK KÉSZÜLÉKEI őrzik.** A P2P-ben nincs közös óra, és az esemény ideje önbevallás (egy
    visszadátumozott helyreállítás átugraná a várakozást). Ezért a helyreállítás két aláírás-körből áll: **(a) a kezdés** — a segítők
-   aláírják (az új kezelő kulcs, az új készülék, az új fizetési kulcs, az 1. lépcsőn az új papír lekötése); a koinókba kerül, és az
+   aláírják (az új kezelő kulcs, az új készülék, az új fizetési kulcs, az 1. lépcsőn az új papír lekötése); a koinokba kerül, és az
    azonosság minden meglévő készüléke értesítést kap; **(b) a véglegesítés** — ugyanazok aláírják újra, de egy segítő készüléke CSAK
    akkor, ha a SAJÁT órája szerint letelt a várakozás a saját kezdés-aláírása óta, és nem látott megállítást. ⭐ A számítás így időt
    nem néz (D17 — egy eredmény mindenütt ugyanaz): a helyreállítás érvényes, ha a kezdés és a véglegesítés megvan, a segítők szerepe
@@ -601,17 +601,17 @@ vonnánk be, akik ismerik, tehát vagy a meghívója, vagy valakik azok közűl,
 2. **A megállítás** — az azonosság egy, a kezdéskor érvényes készülékének aláírt eseménye, a kezdésre hivatkozik. Bármikor jön, az 1.
    kört érvényteleníti — ha az már véglegesült, visszamenőleg (mint a kizárás, D128 4. pont). Utána a 2. kör (5 segítő, kétszeres
    várakozás), amit már semmi nem állít meg.
-3. **A szerep bizonyítéka** — a segítő a jóváhagyása mellé hozza, hogy azon a koinón, ahol aláír, a meghívód, a tanúsítód, a
+3. **A szerep bizonyítéka** — a segítő a jóváhagyása mellé hozza, hogy azon a koino-n, ahol aláír, a meghívód, a tanúsítód, a
    bemutatkozód, illetve élő tanúsító (a D93 csomagja: az identitás eseményei a gyökérig — mérve logaritmikus, 12.2). Így bármelyik
-   koinód ellenőrizheti — egy koinóban jóváhagyott helyreállítás mindegyikben érvényes.
+   koinod ellenőrizheti — egy koinoban jóváhagyott helyreállítás mindegyikben érvényes.
 4. **A segítők erősebbek a papírnál** — a kulcscserék láncában ugyanattól a lekötéstől induló két ág közül a segítők által jóváhagyott
    nyer (a mai „a hosszabb nyer” helyett, ami a papír tolvaját segítette — a (b) rés). Papír a papír ellen (csak lopott vagy másolt
    papírral lehet) nem dönt: a segítők döntenek.
-5. **A papír visszavonása a 2. lépcsőn** — amikor egy koinóban eléred a 2. lépcsőt, a program egyszer kéri a papír kódját, és a papír
+5. **A papír visszavonása a 2. lépcsőn** — amikor egy koinoban eléred a 2. lépcsőt, a program egyszer kéri a papír kódját, és a papír
    aláír egy utolsó cserét: a lekötés ezentúl „a segítők” (nem újabb papír) — utána papír nem írhat alá. ⚠️ Nem az azonosság kulcsa írja
    alá: különben a laptop tolvaja kapcsolhatná át. Ha a papír már elveszett, a 4. pont véd: aki megtalálja, azt a segítők felülírják.
 6. **A fizetési kulcs** — a kulcscsere és a helyreállítás új fizetési kulcsot is köt (a születésé a lánc elején áll) — a (c) rés.
-7. **Az új készülék** — üres gépen a nevedet (43 jel) sem tudod (az (a) rés): a segítőd készüléke hozza — a koinójában ismer, a
+7. **Az új készülék** — üres gépen a nevedet (43 jel) sem tudod (az (a) rés): a segítőd készüléke hozza — a koinojában ismer, a
    horgonyod a születéssel ott van —, a D121 mintájára (két ember, két gomb, egy összevetett kód).
 
 *Az építés sorrendje* (a ② folytatása, a ③ előtt): **②d** a lánc két aláírója és a fizetési kulcs (a kulcscsere-bejegyzés papírral
@@ -628,7 +628,7 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
   ág közül a vesztesen tanúsított készülék MEGMARADT (a korszak-száma nem volt kisebb a nyertesénél) — a próba fogta meg.
   `kulcsTar.js`: `papirVisszavonasa` (a papír utolsó aláírása — nem a kezelő kulcsé), `papirEl`; a kulcscsere új fizetési kulcsot
   ad (a titkos fele a tárolóban). `koino.js`: `papir visszavon <a papír kódja | csere-kulcs.json>` (a fájlt is törli, és a
-  visszavonást a koinóba is beviszi); az állapot (és a `papir`) a 2. lépcsőn szól, amíg a papír él (az alapító — az alapító kör —
+  visszavonást a koinoba is beviszi); az állapot (és a `papir`) a 2. lépcsőn szól, amíg a papír él (az alapító — az alapító kör —
   rögtön 2. lépcsős). A próba: keszulek („A PAPÍR VISSZAVONÁSA ÉS AZ ERŐSEBB ÁG”), kulcs („(②d) a PAPÍR VISSZAVONÁSA a gépen”),
   parancssor (a parancs és a figyelmeztetés) — 13 rontás. ⏭️ ②e: a helyreállítás a segítőkkel.
 - **A ②e két kérdése** (2026-11-15 — Csaba: *„minden javaslatodat elfogadom, mehetünk tovább.”*): **(1) a segítők EGYSZER
@@ -637,7 +637,7 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
   **(2) a bemutatkozós út MINDIG választható** (a 30 napos várakozással) — a program nem tudja megállapítani, hogy a meghívó és a
   tanúsítók „nincsenek meg” (meghaltak, vagy csak nem segítenek); a hosszabb idő a védelem.
 - **A ②e szerkezete** (az építő terve, a kódból — 2026-11-15):
-  · **Hol él a helyreállítás:** abban a koinóban (A), ahol a segítők tagok — az azonosság (X) horgonyának SZELETÉBEN, a meglévő
+  · **Hol él a helyreállítás:** abban a koinoban (A), ahol a segítők tagok — az azonosság (X) horgonyának SZELETÉBEN, a meglévő
     „állítás másról” alakkal (`kit` = X, `sajatBelepes` = a segítő horgonya — mint a meghívás és a tanúsítás, `identitas.js`):
     `HelyreallitasJovahagyas { kit, sajatBelepes, javaslat, szerep, fazis }` (a `javaslat`: az új kezelő kulcs, az új készülék, az
     új fizetési kulcs, az 1. lépcsőn az új papír lekötése, a kör, a 2. körben a megállított 1. kör jele; a `fazis`: kezdés,
@@ -647,19 +647,19 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
     szeletében); bemutatkozó = `Bemutatkozas` X-ről (D62); élő tanúsító = `tanusithatE` (a felhatalmazása él). A szabály: (1. kör)
     1 régi ismerős + 2 élő tanúsító, vagy 10 bemutatkozó + 2 élő tanúsító — három (ill. tizenkét) KÜLÖNBÖZŐ azonosság; (2. kör) +2
     élő tanúsító, és CSAK egy megállított 1. kör után (különben egy csaló rögtön a megállíthatatlan 2. körrel kezdene).
-  · **A bizonyíték** (a minden koinóban érvényesség — a D93/2 tagsági csomag mintája): a `Kulcscsere` esemény lánca egy
+  · **A bizonyíték** (a minden koinoban érvényesség — a D93/2 tagsági csomag mintája): a `Kulcscsere` esemény lánca egy
     `AzonossagHelyreallitas` bejegyzéssel zárul, és HOZZA a bizonyítékát: A születését, a jóváhagyásokat (mindkét fázist), és a
     szerepek eseményeit (a meghívást vagy a tanúsítást, a bemutatkozásokat, és az élő tanúsítók láncát a gyökérig — mérve
-    logaritmikus, 12.2). Bármelyik kapu (B koinóé is) a csomagból egy memóriabeli tárat épít, és ugyanazzal a `identitas.js`-sel
-    ellenőrzi (A koinójaként, teljes ellenőrzéssel — szúrópróba nélkül, hogy minden készülék ugyanarra jusson). ⭐ A számítás (a mag)
+    logaritmikus, 12.2). Bármelyik kapu (B koinoé is) a csomagból egy memóriabeli tárat épít, és ugyanazzal a `identitas.js`-sel
+    ellenőrzi (A koinojaként, teljes ellenőrzéssel — szúrópróba nélkül, hogy minden készülék ugyanarra jusson). ⭐ A számítás (a mag)
     a tagsági csomag mintájára a kapura bízza az aláírásokat és a szerepeket; ő a lánc alakját és a bejegyzések erejét nézi. ⚠️ A
-    maradék kockázat: a csomag összeállítója egy felhatalmazás VISSZAVONÁSÁT kihagyhatja — B koinó nem látja; A koinó készülékei
+    maradék kockázat: a csomag összeállítója egy felhatalmazás VISSZAVONÁSÁT kihagyhatja — B koino nem látja; A koino készülékei
     igen, és a várakozás és a megállítás ez ellen is véd.
   · **A lánc:** a helyreállítás bejegyzése a legerősebb (a 2. kör az 1.-nél is) — `lancErosebbE`; a kezelő kulcs láncát
     (`kezeloKulcsLanc`) a kapu által ELLENŐRZÖTT helyreállítások halmazával (adatként — D123 PR2) kérdezzük; a kézfogás a tár
     halmazát kapja.
   · **Az építés:** **②e1** az események és a szerepek (a jóváhagyás, a megállítás, a visszavonás; a kör és az út szabálya — egy
-    koinóban, a tárból) → **②e2** a lánc bejegyzése és a bizonyíték (a csomag, a kapu, a kezelő kulcs, az erő, a kizárás, a kézfogás)
+    koinoban, a tárból) → **②e2** a lánc bejegyzése és a bizonyíték (a csomag, a kapu, a kezelő kulcs, az erő, a kizárás, a kézfogás)
     → **②e3** a segítők készülékei (a várakozás utáni magától véglegesítés; az értesítés X készülékein) → **②f** a parancsok (az új
     készüléken a kérelem kódja és a befejezés; a segítés, a visszavonás, a megállítás).
 - ✅ **Az építés — ②e1 az események és a szerepek** (2026-11-15): `azonossag.js` — a javaslat alakja
@@ -679,7 +679,7 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
   feljegyzi, mit olvasott ki a szerep-ellenőrzés) és a MEMÓRIABELI tár (egy esemény-listából, ugyanazokkal a műveletekkel).
   `allapot/helyreallitas.js`: `helyreallitasBizonyiteka` (a teljes helyreállítás olvasásai a rögzítő tárral — TELJES ellenőrzéssel:
   a keret végtelen, szúrópróba nincs, minden kapu ugyanarra jut) és `helyreallitasBizonyitekEllenorzese` (az alak; minden esemény
-  hiteles és A koinóé; a horgony a helyreállítandóé; a memóriabeli tárban a helyreállítás TELJES, a bejegyzés jelével). Mérve: az
+  hiteles és A koinoé; a horgony a helyreállítandóé; a memóriabeli tárban a helyreállítás TELJES, a bejegyzés jelével). Mérve: az
   alapító körrel 11 esemény, 13 KB. `azonossag.js`: a lánc új bejegyzése, az `AzonossagHelyreallitas` (`{ tipus, azonossag, ...a
   javaslat, jel }` — nem aláírt; a helye a sorszám és az előző bejegyzés jele; a lekötés nem köti — a visszavonás után is), az ereje
   (2, a 2. körben 3 — a segítők a papír fölött), a lánc-jel (`bejegyzesJele` — a kulcscseréé az aláírása), és a NYILVÁNTARTÁS (az
@@ -691,15 +691,15 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
   nyilvántartásból; a folyamat induláskor a tár összes helyreállítását felveszi (`fajlTar.js` `kezelesAzonossagai`, `koino.js`). ⭐ A
   MAG: a kapu így az `identitas.js`-t is importálja — a mag része lett (a helyreállítás elfogadásáról az identitás szabályai döntenek);
   a belső `feltetel` váza a kimondott listán (D123 PR2). A próba: `helyreallitasProba.js` (+4 — a bizonyíték: csonka, hamisított,
-  más jelű, más azonosságé, idegen koinóé; a lánc; a kapu egy MÁSIK koinóban: bizonyíték nélkül és csonkával nem, utána az új készülék
+  más jelű, más azonosságé, idegen koinoé; a lánc; a kapu egy MÁSIK koinoban: bizonyíték nélkül és csonkával nem, utána az új készülék
   be, a régi ki; a kézfogás) — 14 rontás. ⏭️ ②e3: a segítők készülékei (a várakozás utáni magától véglegesítés és a Kulcscsere
   bevitele a bizonyítékkal; az értesítés X készülékein).
 - ✅ **Az építés — ②e3 a segítők készülékei** (2026-11-16 — Csaba: „a segítők EGYSZER cselekszenek”): `muveletek.js`
   `helyreallitasokGondozasa` — minden helyreállításnál, amit az azonosságom jóváhagyott (és nem vont vissza, nem véglegesített): ha a
   SAJÁT ÓRÁM szerint letelt a várakozás a kezdésemtől (az út és a kör napjai), és nem jött megállítás, VÉGLEGESÍT; ha a helyreállítás
-  így (vagy már korábban) TELJES, és a koinóban még nincs bent, a láncot (a tárból, a javaslat helyéig — `allapot/helyreallitas.js`
+  így (vagy már korábban) TELJES, és a koinoban még nincs bent, a láncot (a tárból, a javaslat helyéig — `allapot/helyreallitas.js`
   `azonossagLancaTarbol`, `javaslatElotagja`) a bejegyzéssel és a bizonyítékokkal (a lánc-elejében álló korábbi helyreállításokéval is)
-  egy `Kulcscsere` eseményben BEVISZI — egyszer. A koinó idő nélkül dönt (D17); a várakozást a segítő készüléke méri. `koino.js`:
+  egy `Kulcscsere` eseményben BEVISZI — egyszer. A koino idő nélkül dönt (D17); a várakozást a segítő készüléke méri. `koino.js`:
   minden parancs elején és az őrjárat minden körében (a hibája nem akaszt meg semmit); az állapot SZÓL, ha valaki az én
   helyreállításomat kezdte (a segítők száma, az út, a várakozás, és a `megallit <jel>` parancs); a `megallit` csak az én
   azonosságomról szóló javaslatot fogadja el. A próba: „A SEGÍTŐ KÉSZÜLÉKE” (a várakozás előtt nem, utána igen; a harmadik véglegesítő
@@ -728,7 +728,7 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
 **9.14 A ④ terve — a lap: „📱 Készülékeim” és a második készülék felvétele** (2026-11-16; ✅ KF1 eldöntve: (A))
 
 *Ami már eldőlt:* új készüléket csak az azonosság kulcsa vesz fel, ami a kezelő készüléken és a mentésben él (ET-3/4 (A)); a
-tanúsítvány koinók fölött érvényes (KU2 (A)); az azonosság kulcsa csak kezel (KU6 (A)). ⚠️ **Ami ma van:** második készülék csak a
+tanúsítvány koinok fölött érvényes (KU2 (A)); az azonosság kulcsa csak kezel (KU6 (A)). ⚠️ **Ami ma van:** második készülék csak a
 `kulcs.json` átmásolásával jön létre — így az azonosság kulcsa (a kezelés: a kizárás, a kulcscsere, a felvétel) MINDEN készüléken
 ott van, és egy ellopott telefonnal a tolvaj a laptopot is kizárhatja (a ③f után a papíros kulcscsere ezt rendbe teszi — de ehhez a
 papír kell). A ③ próbái is így állították fel a két készüléket. A ④-ben a második készülék CSAK a tanúsítványát kapja meg.
@@ -737,7 +737,7 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
 - **④a A felvétel.** Az új készülék „kezelő nélküli”: a kulcsfájlja a nevet, a születést és a láncot hordozza, titkos kulcs nélkül;
   a kezelést kívánó parancsok (`kizar`, a felvétel, a `papir`) kimondják, hogy ez a kezelő készüléken megy. A papíros kulcscsere
   innen is megy — utána ez a készülék a kezelő.
-- **④b A lap: „📱 Készülékeim”** — a készülékek (a nevük, koinónként a láncuk vége, a kizártak, a régebbi kulccsal tanúsítottak), a
+- **④b A lap: „📱 Készülékeim”** — a készülékek (a nevük, koinonként a láncuk vége, a kizártak, a régebbi kulccsal tanúsítottak), a
   felvétel, a kizárás (a vágás állítható), a keret részei és a személyes határ (készülékenként — KH1: csak az alapérték a 20%), a
   mentés (a papír) állása.
 - **④c A személyes határ** — a fogadó készülékenként, a lapon; a `sajatKeszulekTalalkozasa` ezt kapja az alapérték helyett.
@@ -758,16 +758,16 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
   titokkal, a kézfogás átiratához és a készülékkulcshoz kötve — a titok maga nem utazik, és egy lehallgatott bizonyítás másik
   beszélgetésben nem ér semmit), az ELLENŐRZŐ KÓD (6 jel, a titokból és a készülékkulcsból), és a két oldal a védett résen, saját
   üzenetekkel (`PAROSITAS_NYIT` — a kezelő a tábla-kulcsával aláírja az átiratot, ebből tudja az új készülék, hogy a kódot kiíró géppel
-  beszél; `PAROSITAS`; `PAROSITAS_KESZ` — a tanúsítvány, az azonosság nyilvános részei, a koinók a beceneveikkel); a csere
+  beszél; `PAROSITAS`; `PAROSITAS_KESZ` — a tanúsítvány, az azonosság nyilvános részei, a koinok a beceneveikkel); a csere
   párbeszédéhez nem nyúl. `kulcsTar.js`: a KEZELŐ NÉLKÜLI azonosság (`koino-azonossag-keszulek` — a név, a születés, a lánc, titkos
   kulcs nélkül): betölthető, a biztosítás nem szül újat, a mentés kimondja, hogy ez a kezelőn megy; `keszulek.js`: egy felvett készülék
   magát nem tanúsíthatja. `koino.js`: `keszulek felvesz` (a kezelőn — a kód és a QR, a kapu a párosítás idejére nyitva, legfeljebb 10
   percig; a felvett készüléket a saját készülékei közé jegyzi a nevével) és `keszulek csatlakoz <kód> [nev=…] [felulir]` (az új
   készüléken, a kulcs-biztosítás ELŐTT — mint a helyreállítás: a tanúsítványt ellenőrzi, a kezelő nélküli azonosságot és a
-  készülékkulcsot menti, a koinókat a kezelő beceneveivel ismertté teszi, a kezelőt társnak veszi); a kezelést kívánó parancsok (a
+  készülékkulcsot menti, a koinokat a kezelő beceneveivel ismertté teszi, a kezelőt társnak veszi); a kezelést kívánó parancsok (a
   `kizar`, a felvétel, a papír visszavonása, a mentés) a felvett készüléken kimondják, hogy a kezelőn mennek; a papíros kulcscsere
-  innen is megy. ⛔ **Lelet (a parancssor-próba fogta meg):** a frissen felvett telefonnál a koinó születése még nincs meg, ezért az
-  első cserében a kapuja nem kéri a laptop személyét, és a koinó-listák nem cserélődnek (a ③d korlátja — itt a szokásos eset) — a
+  innen is megy. ⛔ **Lelet (a parancssor-próba fogta meg):** a frissen felvett telefonnál a koino születése még nincs meg, ezért az
+  első cserében a kapuja nem kéri a laptop személyét, és a koino-listák nem cserélődnek (a ③d korlátja — itt a szokásos eset) — a
   laptop listáján a telefon nem látszott; most a felvételkor a kezelő rögtön feljegyzi (a nevével). ⚠️ A két gépnek el kell érnie
   egymást (ugyanaz a hálózat, vagy egy továbbított port — a kód a kezelő helyi címeit hordozza). A próba: `papirProba.js` (a kód
   oda-vissza, a hibás alakok, a bizonyítás kötése, az ellenőrző kód), `kulcsProba.js` (a kezelő nélküli azonosság), parancssor (a
@@ -775,13 +775,13 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
   felvétel a kezelőé; a csere után a telefon keretet kap) — 10 rontás. ⏭️ ④b a lap („📱 Készülékeim”), ④c a személyes határ.
 - ✅ **④c — a személyes határ** (2026-11-16; KH1 — Csaba: *„ezek az értékek, személyre szabhatók lesznek majd”*): `keszulek hatar
   <készülék> <pont | alap>` — a saját készülékemnek magától legfeljebb ennyit adok (a határ az ADÓ szabálya — KU1 (a): ezen a
-  készüléken él, a `sajatkeszulekek.json`-ban, a fogadó készülékenként); az `alap` a koinó keretének 20%-a; a koinó keretén túl a
-  határ sem ér (`sajatKeszulekTalalkozasa` — `Math.min`). A koinó-lista fogadása és a felvétel feljegyzése a határt megtartja. A
+  készüléken él, a `sajatkeszulekek.json`-ban, a fogadó készülékenként); az `alap` a koino keretének 20%-a; a koino keretén túl a
+  határ sem ér (`sajatKeszulekTalalkozasa` — `Math.min`). A koino-lista fogadása és a felvétel feljegyzése a határt megtartja. A
   `kizar` listája kimondja (a sor végén — ⛔ az első változat a név után írta, és ez a ③d-próba „régebbi kulcs” sorát szétvágta).
-  A próba: parancssor (az 1000-es határral a csere után 1000 megy — közben a koinó-lista is megjön, és a határ megmarad; a lista; az
+  A próba: parancssor (az 1000-es határral a csere után 1000 megy — közben a koino-lista is megjön, és a határ megmarad; a lista; az
   `alap`; a rossz érték) — 4 rontás. A lapon (④b) ugyanez állítható.
-- ✅ **④b — a lap: „📱 Készülékeim”** (2026-11-16): a fő menü „Fiók” csoportjában. A készülékek (a nevük, a rövid kulcsuk, koinónként a
-  láncuk vége és amit a koinó-listájukban mondtak, a jelek: „ez a készülék”, „kizárva”, „régebbi kulcs”), a HATÁR készülékenként
+- ✅ **④b — a lap: „📱 Készülékeim”** (2026-11-16): a fő menü „Fiók” csoportjában. A készülékek (a nevük, a rövid kulcsuk, koinonként a
+  láncuk vége és amit a koino-listájukban mondtak, a jelek: „ez a készülék”, „kizárva”, „régebbi kulcs”), a HATÁR készülékenként
   (üresen az alap), a KIZÁRÁS (a második kattintás erősít meg), az ÚJ KÉSZÜLÉK FELVÉTELE (a program a lap folyamatában párosít — a lap
   a TELEPÍTŐ SORT kapja a párosító kóddal és a QR-ét: a telefonon EGY bemásolt sor a Termuxba telepít/frissít és párosít; 📋 a Termuxba,
   💻 Windowsra, Mégse; a lap kérdezi az állását, és ha a telefon felkerült, kimondja az ellenőrző kódot), és a PAPÍR állása (él-e, a
@@ -798,16 +798,16 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
   a QR, a gombok, a papír). ⚠️ Az indítók párosító ága próba nélkül (a terepen — ⑤).
 
 **9.15 A ⑤ terep — a laptop és Csaba telefonja, egy e-ember két készüléke** (2026-11-17):
-- **A menet.** A laptop (a kezelő) új koinót hozott létre („Terep — két készülék”), a telefon (Termux) a telepítő sor végére
+- **A menet.** A laptop (a kezelő) új koinot hozott létre („Terep — két készülék”), a telefon (Termux) a telepítő sor végére
   tett párosító kóddal a hálózaton felkerült — az ellenőrző kód (VF4-KB9) a két gépen egyezett. A laptop a csere után a határig
   (2000 — a keret 20%-a, KH1) átadta a keretet; a telefon a javított programmal **átvette** (a `KeretAtvetel` 19:02:00-kor, a laptop
   19:03-kor megkapta), és a laptop listája kimondja: „telefon · határ: a keret 20%-a (alap) — a láncán 1 esemény”.
 - ⛔ **1. lelet — a társ portja** (2742884): a felvétel után a telefon a laptopot a párosító kapu (bezárult, véletlen) portjával
   jegyezte fel, nem az őrjáratéval. Most a `PAROSITAS_KESZ` a kezelő őrjáratának portját is hozza (`kapuPort`).
 - ⛔ **2. lelet — a keret nem jutott át** (8766d3d). A laptop 18:27-kor aláírta az átadást, a telefon mégsem kapta meg. Az átadás az
-  e-ember AZONOSSÁG-szeletébe kerül (a horgonya szelete — itt a laptop írta koinó-születés), és a telefon ezt a szeletet nem vállalta: a
+  e-ember AZONOSSÁG-szeletébe kerül (a horgonya szelete — itt a laptop írta koino-születés), és a telefon ezt a szeletet nem vállalta: a
   vállalás az azonosság-szeletet a SAJÁT láncom belépéséből ismeri, a felvett telefon láncában viszont nincs belépés (a horgonyt a
-  laptop írta); a koinó születését pedig a csere vállalása nem kapja meg (a raj `sajatVallalasa(null)`, a szeletek foka a tár
+  laptop írta); a koino születését pedig a csere vállalása nem kapja meg (a raj `sajatVallalasa(null)`, a szeletek foka a tár
   születéséből — a telefonon az első cserékig nincs). ⭐ A javítás: a vállalás az azonosságom horgonyát (`sajatHorgonyom` — bármelyik
   készülékem írta) is az enyémnek veszi (`vallalas.js` `azonossagHorgonyai`; a `koino.js` mindkét hívása átadja).
 - ⛔ **3. lelet — a próba vakfoltja.** A ④a próba eleinte kivisz/behoz-zal vitte át az átadást, és a javítás után is zöld maradt a
@@ -835,7 +835,7 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
     kereső-bejegyzés minden eseményhez (ott a fogadó egyenként ellenőriz);
   - **a csomagok** a belső eseményeik tanúsítványát viszik (a döntési és a tagsági csomag `tanusitvanyok` mezője), és a kapu a
     csomag beágyazott eseményeinek tanúsítványából a csomag szerzőjét is igazolja;
-  - **a készülék tanúsítvány-jegyzéke** (`tar/tanusitvanyJegyzek.js`, `<adat>/tanusitvanyok.jsonl` — koinótól független, mert a
+  - **a készülék tanúsítvány-jegyzéke** (`tar/tanusitvanyJegyzek.js`, `<adat>/tanusitvanyok.jsonl` — koinotól független, mert a
     tanúsítvány is az): amit a kapu mellékelve kapott (vagy a lánc első eseményéből), azt feljegyzi; a tár ebből is felel, és az
     átmeneti tár eldobott eseményével a tudás nem vész el.
 - **A várakozó sor:** ami a tanúsítványa előtt érkezik (a köteg sorrendje nem a láncé), azt a kapu tárolónként egy korlátos,

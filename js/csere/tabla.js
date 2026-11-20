@@ -69,7 +69,7 @@ const alakja = (n) => 'koino-cim-' + n;
  *
  * ⭐⭐ D119 (⑤c): ÉS A CSALÁDÉ — a kötés-jegyzék családonként külön (`fajlTar.js` `kotesTarolo`), és két független
  * család őrjárata két porton figyel: ha a két család ugyanabba a rekeszbe írna, a későbbi felülírná a korábbi címét, és a
- * társ a másik család kapujára kopogna („MÁSIK koinóé”). A család (a gyökere — a koinó neve, a két fél ugyanazt számolja) a
+ * társ a másik család kapujára kopogna („MÁSIK koinoé”). A család (a gyökere — a koino neve, a két fél ugyanazt számolja) a
  * só része; `null`: a régi só (a család nélküli hívó).
  *
  * @param {{titkosito: string}} egyik

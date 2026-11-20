@@ -61,7 +61,7 @@ körben (D97/2) rendszeresen találkozunk. A pont-szerzőket tehát nem kell a h
 
 ⚠️ **Amit ez a személyről elárul:** aki a saját láncáról felel, kimondja, hogy ő X készüléke. Ez nem új kitettség: a
 csere `RESZVETEL`-je ma is bemondja, hogy a készülék X azonosság-szeletét vállalja (és ezt X-en kívül alig vállalja
-valaki), a zárt koinó kapuja pedig a személyt ismeretlen társtól kifejezetten kéri (D93/3). Aki ezt nem akarja, hallgathat
+valaki), a zárt koino kapuja pedig a személyt ismeretlen társtól kifejezetten kéri (D93/3). Aki ezt nem akarja, hallgathat
 — a lánca nálam „nem ellenőrizhető” marad.
 
 ## 4. A kérdések — javaslattal (D-szintűek, Csabáéi)
@@ -89,7 +89,7 @@ valaki), a zárt koinó kapuja pedig a személyt ismeretlen társtól kifejezett
   az a szerző (vagy „mindent” módban a teljes láncát tartja), felel a napló-bizonyítékokkal és — ha kérték — a kiosztás-
   listával. A pont-szerzők a raj tagjai (lásd 3.), tehát a raj a körben eléri őket; új útvonal, DHT, keresés nem kell.
 - **(B) Függő kérelem a G-n át** (D92/1): a szerző azonosság-szeletének tartóitól (a raj, a DHT). Bárkitől kérdezhető, de a
-  szerző készülékének keresése nyilvános helyen (vakított téma) a személy és a cím összekötését a koinó minden tagja elé
+  szerző készülékének keresése nyilvános helyen (vakított téma) a személy és a cím összekötését a koino minden tagja elé
   teszi.
 - **(C) Az esemény hozza** (a D81 szellemében): minden K-adik pont-esemény a teljes listát egy darabként hozná, és minden
   esemény az előző eseményt kísérőként (a folytonosság így minden tartónál ellenőrizhető). Hallgatni nem lehet, de az

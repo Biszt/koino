@@ -20,7 +20,7 @@ const { proba, futtatas } = probaGyujtemeny('A tagság tiszta számítása (D93)
 const KOINO = 'tagsag';
 const LENYOMAT = (c) => c.repeat(43);
 
-/** Egy koinó: az alapító és a létrehozás (opcionálisan alapító-listával és profil-mezőkkel). */
+/** Egy koino: az alapító és a létrehozás (opcionálisan alapító-listával és profil-mezőkkel). */
 async function koino({ alapitok = [], profil } = {}) {
   const alapito = await ujEember(KOINO);
   const tarsak = [];
@@ -123,7 +123,7 @@ proba('⛔ az érvénytelen meghívás nem számít (más kulcsnak szól · önm
     && !horgonyTagsaga(tagsagiIndex(kor), b.horgony).igen && !horgonyTagsaga(tagsagiIndex(kor), c.horgony).igen;
 });
 
-proba('⭐ D93/5: ha a koinó profilt vár, a meghívás csak a profil lenyomatával érvényes, és a profilnak meg kell lennie', async () => {
+proba('⭐ D93/5: ha a koino profilt vár, a meghívás csak a profil lenyomatával érvényes, és a profilnak meg kell lennie', async () => {
   const k = await koino({ profil: ['nev', 'telepules'] });
   const b = await belepo();
   const profil = await b.ember.tesz('Profil', { lenyomat: LENYOMAT('P') }, undefined, { entitas: b.horgony });
@@ -169,11 +169,11 @@ proba('⛔ a hamis tagsági csomag elbukik: átírt belső esemény · idegen az
   return !e1.rendben && /nem hiteles/.test(e1.ok) && !e2.rendben && /saját/.test(e2.ok) && !e3.rendben && /nem ad tagságot/.test(e3.ok);
 });
 
-// ⛔⛔ D118/2 — A LELET (2026-10-24, `docs/koltozes_atvizsgalas.md` 3.): a szabad koinó-név mellett egy második, azonos
+// ⛔⛔ D118/2 — A LELET (2026-10-24, `docs/koltozes_atvizsgalas.md` 3.): a szabad koino-név mellett egy második, azonos
 // nevű születés a tagságban (a lista ELSŐ születése) az alapító helyére lépett, az állapotban (a rendezett sor UTOLSÓJA) a
-// koinó nevét és zártságát vette át. Itt hat támadó kulccsal (hogy valamelyik a valódi alapító elé, valamelyik mögé
-// rendeződjön), mindkét alakban: új alakú (másik koinó) és régi alakú, ami a K nevet mondja (a kapu ezt elvetné).
-proba('⛔⛔ D118/2 (a lelet): egy MÁSODIK születés — akármilyen kulccsal — nem veszi át az alapító helyét, se a koinó nevét',
+// koino nevét és zártságát vette át. Itt hat támadó kulccsal (hogy valamelyik a valódi alapító elé, valamelyik mögé
+// rendeződjön), mindkét alakban: új alakú (másik koino) és régi alakú, ami a K nevet mondja (a kapu ezt elvetné).
+proba('⛔⛔ D118/2 (a lelet): egy MÁSODIK születés — akármilyen kulccsal — nem veszi át az alapító helyét, se a koino nevét',
   async () => {
     const alapito = await ujEember('');
     const szuletes = await alapito.tesz('KoinoLetrehozas', { nev: 'Valódi', leiras: null, alapitok: [], zart: true });

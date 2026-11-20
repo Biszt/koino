@@ -12,7 +12,7 @@
 //   · a FOGADÁS: csak a kért szerzők csomagja és a lánc-típusú események — ugyanazon a kapun (3. szabály).
 //
 // ⭐ A tagság forrása a tár (a szerző saját eseményei a mutatóból — a horgonya és a csomagja —, és a láncának bejárása):
-// a terhe a szerző láncának mélységével arányos (logaritmikus — 63. mérés), nem a koinó méretével.
+// a terhe a szerző láncának mélységével arányos (logaritmikus — 63. mérés), nem a koino méretével.
 // ⚠️ A hiány nem vád (D19): akinek a tagsága nem derül ki, az „függőben” marad, és a következő cserén újra kérdezzük.
 //
 // Használják: koino.js (a csere beállításai, a kézi út kísérői, a B1 mintáinak tagsága), a próbák.
@@ -50,8 +50,8 @@ const szerzoAlaku = (x) => typeof x === 'string' && AZONOSITO_MINTA.test(x);
 // ===================================
 
 /**
- * Egy SZERZŐ tagsága a táramból: a horgonyai (a belépése, a koinó létrehozása, a csomagja szelete) a saját eseményeiből,
- * a láncuk bejárása (`tagsagiEsemenyekGyujtese`), a csomagja — és a koinó születése (a kívülről kapott, nem a csomagé).
+ * Egy SZERZŐ tagsága a táramból: a horgonyai (a belépése, a koino létrehozása, a csomagja szelete) a saját eseményeiből,
+ * a láncuk bejárása (`tagsagiEsemenyekGyujtese`), a csomagja — és a koino születése (a kívülről kapott, nem a csomagé).
  * @param {Object} tar
  * @param {string} koino
  * @param {string} szerzo
@@ -65,7 +65,7 @@ export async function szerzoTagsagaTarbol(tar, koino, szerzo, koinoSzuletes = nu
     if (HORGONY_TIPUSOK.has(e.tipus)) horgonyok.add(e.azonosito);   // ⭐ D118 (④a): a bekapcsolódás is
     if (e.tipus === TAGSAGI_CSOMAG && typeof e.entitas === 'string') horgonyok.add(e.entitas);
   }
-  // ⛔ A koinó születése (a MIÉNK) az első: egy hamis koinó-létrehozás egy csomagban így nem ad tagságot (mint a kapunál).
+  // ⛔ A koino születése (a MIÉNK) az első: egy hamis koino-létrehozás egy csomagban így nem ad tagságot (mint a kapunál).
   const lista = koinoSzuletes ? [koinoSzuletes] : [];
   for (const h of [...horgonyok].slice(0, HORGONY_KORLAT)) lista.push(...await tagsagiEsemenyekGyujtese(tar, koino, h));
   lista.push(...sajat.filter((e) => e.tipus === TAGSAGI_CSOMAG));
@@ -205,7 +205,7 @@ export function tagsagKerdo({ tar, koino, tarolo, koinoSzuletes = async () => nu
     },
 
     /**
-     * A társ válaszának átvétele: csak a KÉRT szerzők csomagja és a lánc-típusú események (a koinóé), ugyanazon a kapun.
+     * A társ válaszának átvétele: csak a KÉRT szerzők csomagja és a lánc-típusú események (a koinoé), ugyanazon a kapun.
      * Utána a kértek közül akinek a tagsága kiderült, kikerül a függők közül; a többi kérdezése számlálódik.
      * @returns {Promise<{uj: number, ujAzonositok: Array<string>, megtudott: number, fuggo: number}>}
      */

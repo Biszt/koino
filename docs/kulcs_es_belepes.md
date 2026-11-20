@@ -5,7 +5,7 @@ ki… nem zavar, ha nem kell bejelentkezni, de gondolom regisztrálni azért kel
 
 > **Miért van erről külön dokumentum?** Mert ez az a pont, ahol a Fázis 2 a leginkább
 > eltér attól, amit mindenki megszokott — és mert ha ezt nem lehet **egyszerűen**
-> elmagyarázni, akkor a koinóba nem fognak belépni az emberek. Ez a szöveg egyben a
+> elmagyarázni, akkor a koinoba nem fognak belépni az emberek. Ez a szöveg egyben a
 > [`megismeres/`](../megismeres/) mappa jövendő leírásának a magja is.
 
 ---
@@ -38,7 +38,7 @@ Gondoljuk végig, mire való a bejelentkezés: **elmondod a titkodat a szerverne
 megnézi, hogy stimmel-e, és utána *elhiszi*, hogy te vagy — egy ideig. Ehhez két dolog
 kell: egy szerver, és hogy **megbízz benne**.
 
-A koinóban nincs szerver, akinek elmondhatnád. De nem is kell:
+A koinoban nincs szerver, akinek elmondhatnád. De nem is kell:
 
 > **Nem „belépsz, és utána elhiszik, hogy te vagy" — hanem minden egyes tettedet külön
 > aláírod.** Minden gondolat, minden tudatpont, minden szavazat magában hordozza a
@@ -56,10 +56,10 @@ viszont minden egyes cselekvéshez kellene a kulcsod.
 | Ma | A Fázis 2-ben |
 |---|---|
 | Fiókot nyitsz **egy szolgáltatónál** (név, e-mail, jelszó) | **Létrehozod a kulcsodat** — a saját gépeden, engedély nélkül, egy pillanat alatt |
-| A szolgáltató **felvesz a listájára** | **Belépsz egy koinóba**, és **valaki tanúsít**, hogy valódi, külön ember vagy (D18) |
+| A szolgáltató **felvesz a listájára** | **Belépsz egy koinoba**, és **valaki tanúsít**, hogy valódi, külön ember vagy (D18) |
 
 **A kulcs a tiéd, és mindenhol ugyanaz** a belépő téren belül (D25) — a **tagság** viszont
-koinónként külön, és ott dől el, mennyire számítasz hitelesnek.
+koinonként külön, és ott dől el, mennyire számítasz hitelesnek.
 
 ### A mai regisztrációs űrlap sorsa
 
@@ -77,7 +77,7 @@ Profil   { koino, nev, lokacio }      → az adataid: „ezt mondom magamról"
 ```
 
 **A felületen ez nem látszik:** egy űrlap, egy „Belépés" gomb — a háttérben két aláírás.
-Hogy egy koino milyen adatokat vár el, az **az ő döntése** (Csaba első koinója: teljes név
+Hogy egy koino milyen adatokat vár el, az **az ő döntése** (Csaba első koinoja: teljes név
 + település).
 
 **És ki hitelesíti az adatot?** Nem a rendszer — hanem **aki behívott, és ismer** (D18).

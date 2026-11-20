@@ -191,7 +191,7 @@ export async function kodJegyzekOlvasasa(hivatkozas, olvas) {
 //
 // Csaba (2026-11-05): „a megjelenítési módozatok … szabadon lehet használni, költözés nélkül … ami meglévő számításokat is
 // módosítja, az már költözést igényel”. A program rétegei (`docs/program_retegek_atvizsgalas.md`): a MAG (R1) az, aminek egy
-// koinón belül mindenkinél azonosnak kell lennie — a koinó KÉPE és a KAPU. A többi réteg (a protokoll, a helyi viselkedés, a
+// koino-n belül mindenkinél azonosnak kell lennie — a koino KÉPE és a KAPU. A többi réteg (a protokoll, a helyi viselkedés, a
 // felület) szabadon változhat.
 //
 // ⭐ PR2 (A) — SZÁMÍTVA, nem kézi jegyzékkel: a mag a két belépő (`MAG_BELEPOK`) import-zárványa. Egy új fájl, amit a kép vagy a
@@ -201,13 +201,13 @@ export async function kodJegyzekOlvasasa(hivatkozas, olvas) {
 //
 // A MAG JEGYZÉKE: `{ fajta: 'koino-mag-1', belepok, fajlok: [[út, lenyomat, bájt], …], kulsok }` — a fájlok sorvég nélkül (mint a
 // kód-csomagban), a `kulsok` a beépített modulok neve (`node:crypto` …; a Node változatát nem köti — kimondott határ). A
-// lenyomata a MAG NEVE: ezt nevezi meg a koinó születése (PR1), és a lap ezzel veti össze a futó programot (PR3).
+// lenyomata a MAG NEVE: ezt nevezi meg a koino születése (PR1), és a lap ezzel veti össze a futó programot (PR3).
 // ⚠️ A jegyzék a fájlok BÁJTJAIT köti, a kommentjeiket is: egy csak kommentet érintő javítás a magban is „más számítás” — a 89.
 // mérés szerint ritka, és a mag a közösség életében amúgy is a legritkábban változó réteg.
 
 /** A mag jegyzékének jele. */
 export const MAG_FAJTA = 'koino-mag-1';
-/** ⭐ A mag belépői: a koinó képe (a három fázis) és a kapu (az esemény elfogadása). */
+/** ⭐ A mag belépői: a koino képe (a három fázis) és a kapu (az esemény elfogadása). */
 export const MAG_BELEPOK = Object.freeze(['js/allapot/ketReteg.js', 'js/tar/esemenyTar.js']);
 /** A mag legfeljebb ennyi fájl (ma 17 — tartalékkal). */
 export const MAG_FAJL_KORLAT = 512;
@@ -324,7 +324,7 @@ export function magJegyzekAlakja(x) {
 
 /**
  * ⭐ A mag a kód-csomagban: a mag minden fájlja ugyanazon az úton, ugyanazzal a lenyomattal szerepel-e a kód jegyzékében. Ezzel
- * ellenőrizhető, hogy egy kártya kódja a koinó magját hordozza-e (a kapu ezt nem látja: a jegyzék a törzs része — D19).
+ * ellenőrizhető, hogy egy kártya kódja a koino magját hordozza-e (a kapu ezt nem látja: a jegyzék a törzs része — D19).
  * @param {Object} magJegyzek
  * @param {Object} kodJegyzek
  * @returns {boolean}

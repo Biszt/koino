@@ -39,7 +39,7 @@ A felderítés szinte teljes egészében a meglévő gépre épül — **a felde
 
 `node meres/bejaroMeres.js --felderites` — a 74. mérés modellje (a fa, a tartók 30%-a közvetlenül elérhető, a többi
 a kopogtatás után ≤ 20 perc, körönként 70% eséllyel él), a felderítés = a legjobb-először sor első K csomópontja, és ha a
-törzs is kell, a K csomópont mindegyikéhez egy törzs-kérelem a saját tartóihoz. Egy FRISS készüléken (a koinóból semmit
+törzs is kell, a K csomópont mindegyikéhez egy törzs-kérelem a saját tartóihoz. Egy FRISS készüléken (a koinoból semmit
 nem tart), 1 / 5 perces őrjárat-körrel:
 
 - **A mai menet (G — a tartó maga jár be), „mindent” tartó nélkül:** a fejlécek K = 50-nél ~1 óra (1,3–2,2 MB), K = 200-nál
@@ -49,14 +49,14 @@ nem tart), 1 / 5 perces őrjárat-körrel:
 - **Egy „mindent” tartó a kötések közt (H):** K = 200 fejléce 8–40 perc, a törzse 3–15 perc; K = 1000: 33–200 + 15–75 perc.
   ⚠️ Itt a kiszolgálási keret szab határt (a szimuláció nem modellezi): a „mindent” tartó egy társnak óránként ≤ 750 kérést és
   ≤ 25 MB-ot ad (KK5) — egy 1000-es törzs-felderítés így legalább 80 perc.
-- ⭐ **A koinó méretétől nem függ** (20 000 és 200 000 entitásnál ugyanaz) — a 9. szabály rendben.
+- ⭐ **A koino méretétől nem függ** (20 000 és 200 000 entitásnál ugyanaz) — a 9. szabály rendben.
 
 ⛔ **A 74. mérés javítása (2026-10-18):** a mérés bejárója ugyanazt a csomópontot két úton is a kupacba tehette (a tartó saját
 bejárása és egy későbbi fejléc-válasz), és a „kiadott B” a másodpéldányokat is számolta — a G és a H változat így kevesebb
 valódi csomóponthoz mérte az időt (K = 50-nél ~24 különböző jött ki). A javítás után (a kiadás a már kiadottat átlépi): az
 A, a D és az F változat nem változott; a **G** egy oldala 29–34 helyett **38–40 perc**, a 200-as Struktúrája 94–116 helyett
 **153–168 perc**; a **H** 200-asa 1–3 helyett 6–8 perc, a 2000-ese 19–29 helyett 19–79 perc. ⭐ A sorrend nem változott — a
-D102 döntései (a tartó maga jár be, a kérelem-sorozat) állnak —, de egy friss készülék nagy koinóban, „mindent” tartó
+D102 döntései (a tartó maga jár be, a kérelem-sorozat) állnak —, de egy friss készülék nagy koinoban, „mindent” tartó
 nélkül lassabban tölt, mint ahogy a 74. mérés mondta.
 
 ## 4. Ami hiányzik alatta — a lelet
@@ -104,7 +104,7 @@ rögzítésnek ezekre is ki kell terjednie (különben a pillanatkép kártyái 
 - **(B) Kisebb alapértékek** (K = 50, 5 MB) — gyorsabb, de a pillanatkép sekély.
 
 **F5. Hol indul, hol látszik? (a felület)**
-- **(A) ⭐ A kártya menüjéből indul (a koinós többlet egy pontot fűz a prototípus menüjéhez — körülírva), a felderítések
+- **(A) ⭐ A kártya menüjéből indul (a koinos többlet egy pontot fűz a prototípus menüjéhez — körülírva), a felderítések
   listája (állás, újrafelderítés, törlés) a fő menüben — ezt javaslom;** a rögzített kártyán egy kis jel: „📷 pillanatkép,
   3 napja”. A parancssorban: `felderites <ág> [K] [törzs] [MB]`, `felderites` (a lista), `felderites torol <az>`.
 - **(B) Csak a fő menüből** (az ág a pakli aktív kártyája).
@@ -149,9 +149,9 @@ előbb), ezért a próba azt méri, hogy a törzs-kérelem LÉTREJÖTT, és a da
 eldönteni (a „nem kér” rontás nem bukott). Próbák: `felderitesProba.js` +1, a bekötés (négy rontással). Elágazás 179.
 
 ✅ **⑤ KÉSZ (2026-10-19) — a felület — A FELDERÍTÉS MEGÉPÜLT:** a kártya menüjében „📷 Felderítés…” (a beállító ablak), a fő
-menüben a „Felderítések” ablak (az állás, újra, törlés — magától frissül) és „Az egész koinó felderítése…”, a rögzített
+menüben a „Felderítések” ablak (az állás, újra, törlés — magától frissül) és „Az egész koino felderítése…”, a rögzített
 kártyán „📷” (pillanatkép, N napja). A program oldalán a felderítés útvonalai a kapun. A böngészőben két készülékkel
-végigjárva (egy ág és az egész koinó; a törlés). Két lelet a böngészőből: a kis pillanatkép „0 MB”-nak látszott (most KB), és
-az egész koinó felderítése a gyökér miatt soha nem lett volna kész (a tartó teljes gyökér-válasza most elég — rontással).
+végigjárva (egy ág és az egész koino; a törlés). Két lelet a böngészőből: a kis pillanatkép „0 MB”-nak látszott (most KB), és
+az egész koino felderítése a gyökér miatt soha nem lett volna kész (a tartó teljes gyökér-válasza most elég — rontással).
 Próbák: a ③ bekötés-próbája a felület útvonalaival (a lista, a kártya jele, a hibás beállítás, a törlés — két rontással),
 `pakliProba.js` +1 (a gyökér — rontással). Elágazás 180.

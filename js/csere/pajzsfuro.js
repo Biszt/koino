@@ -6,7 +6,7 @@
 // ⭐ A NÉV CSABÁTÓL VAN (2026-08-29): a szakirodalom „lyukfúrásnak" hívja, de ez félrevezet,
 // mert kívülről semmit nem törünk át. **BELÜLRŐL fúrunk**, mint a pajzsfúró gép: mindkét
 // oldal a saját routerén nyit rést, kifelé indulva — és a két rés találkozik a közepén.
-// Ezért a koinóban ez PAJZSFÚRÁS.
+// Ezért a koinoban ez PAJZSFÚRÁS.
 //
 // ⭐ MIÉRT KELL? (mérve 2026-08-29, Csaba laptopja + telefonja két hálózaton)
 // Mindkét router zárja a BEFELÉ jövő kapcsolatot — a laptopé a port-továbbítási szabály
@@ -38,7 +38,7 @@
 // a címed és a portod az, ami. Ehhez a találkozáshoz tehát SEMMILYEN szolgáltatás nem kell
 // — csak a másik címe, és azt már tudjuk (2. szabály).
 //
-// ⚠️ EZ A FÁJL SEMMIT NEM TUD A KOINÓRÓL. Nem ismer eseményt, tárat, szabályt — csak
+// ⚠️ EZ A FÁJL SEMMIT NEM TUD A KOINORÓL. Nem ismer eseményt, tárat, szabályt — csak
 // csomagokat küld és fogad. A `vonal.js` MELLÉ került, nem bele (1. szabály).
 //
 // Használják: koino.js (a `pajzsfuro` és a `kulsoport` parancs) és a csereProba.js.

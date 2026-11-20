@@ -1,6 +1,6 @@
 // meres/iroProba.js
 
-// Felelősség: bizonyítani, hogy AZ ÍRÓ (D70) azt teszi, amiért született — koinónként és
+// Felelősség: bizonyítani, hogy AZ ÍRÓ (D70) azt teszi, amiért született — koinonként és
 // készülékenként egyetlen folyamat fűz a tárhoz, és a saját láncunk nem ágazhat el két ablak miatt.
 //
 // ⭐ MIT KELL ITT BIZONYÍTANI:

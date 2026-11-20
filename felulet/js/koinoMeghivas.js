@@ -1,17 +1,17 @@
 // felulet/js/koinoMeghivas.js
 
-// Felelősség: ⭐⭐ D121, D122 — A MEGHÍVÁS A LAPON (koinós többlet a prototípus „Meghívóim” ablaka KÖRÉ): „egy bemásolás, és a
+// Felelősség: ⭐⭐ D121, D122 — A MEGHÍVÁS A LAPON (koinos többlet a prototípus „Meghívóim” ablaka KÖRÉ): „egy bemásolás, és a
 // következő csere után bent vagy”.
 //   · „✉️ Meghívóim” — a prototípus `MeghivoModal`-ja BÁJTRA VÁLTOZATLANUL (a meghívott teljes neve + a nyilatkozat → „Új meghívó
 //     létrehozása”; a saját meghívók listája: a 📋 a meghívottnak küldendő EGY sort másolja — a telepítő sort a meghívóval, a
 //     Termuxba —, a 💻 ugyanezt Windowsra (a PowerShellbe vagy a parancssorba — elágazás 232), a 🗑️ visszavon). A program a prototípus útvonalain felel (`/api/meghivo/sajat`, `/api/meghivo`, `/api/meghivo/:id/visszavonas`,
-//     `/api/meghivo/kotelezo`). A koinós többlet: a nyilatkozat szövege („Kijelentem…” — a koinóban a „tanúsítás” a 2. lépcső
+//     `/api/meghivo/kotelezo`). A koinos többlet: a nyilatkozat szövege („Kijelentem…” — a koinoban a „tanúsítás” a 2. lépcső
 //     neve), egy magyarázó sor, a lejárt meghívó felirata, és a 📋 az egész sort másolja (a listában a rövid kód látszik, mint a
 //     prototípusban — a program `kod`-ja a meghívó azonosítójából, a `szoveg` az egész sor).
 //   · a PROFIL-ŰRLAP (a regisztrációs űrlap kinézetével): teljes név (a meghívóból előtöltve, átírható), becenév, ország, régió,
-//     település — nem kötelező (ha a koinó nem várja); az első megnyitáskor magától, utána a fő menü „eember beállítások” pontja.
+//     település — nem kötelező (ha a koino nem várja); az első megnyitáskor magától, utána a fő menü „eember beállítások” pontja.
 //   · a belépő VÁRAKOZÁSA (`varakozasHtml` — a csatlakozás ablaka mutatja): a meghívó gépe a következő cserénél magától meghív.
-//   · az ELSŐ MEGNYITÁS (`elsoMegnyitas`): ha a készülék még egy koinót sem ismer, a csatlakozás ablaka („Meghívtak? illeszd be”);
+//   · az ELSŐ MEGNYITÁS (`elsoMegnyitas`): ha a készülék még egy koinot sem ismer, a csatlakozás ablaka („Meghívtak? illeszd be”);
 //     ha belépett, de még nincs profilja (és nem hagyta ki), a profil-űrlap.
 //
 // ⭐ A lap csak rajzol (7. szabály): a meghívót, a meghívást és a profilt a program végzi (`koino.js` `meghivoKiadasa`,
@@ -29,7 +29,7 @@ const KIHAGYVA = 'koino-profil-kihagyva:';
 const html = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // ===================================
-// ✉️ MEGHÍVÓIM — a prototípus ablaka, a koinós többlet köré írva
+// ✉️ MEGHÍVÓIM — a prototípus ablaka, a koinos többlet köré írva
 // ===================================
 
 /** A prototípus-metódus köré ír (a visszatérési értékét is átalakíthatja); kétszeri becsomagolás ellen őrzött. */
@@ -50,7 +50,7 @@ koruleIr('init', function (ertek) {
   const span = tanusitas?.parentElement?.querySelector('span');
   if (span) {
     span.innerHTML = 'Kijelentem, hogy a meghívott <strong>valódi személy</strong>, és tudomásom szerint <strong>még nem '
-      + 'csatlakozott</strong> ehhez a koinóhoz.';
+      + 'csatlakozott</strong> ehhez a koinohoz.';
   }
   const letrehozas = document.querySelector('.meghivo-modal__letrehozas');
   if (letrehozas && !letrehozas.querySelector('.koino-meghivo-magyarazat')) {
@@ -59,7 +59,7 @@ koruleIr('init', function (ertek) {
     p.textContent = 'A meghívó egy hónapig érvényes, és egyszer használható. A 📋 és a 💻 egy-egy sort másol (ugyanazzal a '
       + 'meghívóval) — küldd el a meghívottnak azt, amelyik neki kell: a 📋-t a telefonján a Termuxba, a 💻-t a Windowsos gépén a '
       + 'PowerShellbe vagy a parancssorba másolja (mindkettő telepít is); ha nála már fut a koino, a lapon is beillesztheti. A '
-      + 'következő csere után magától tag lesz (ehhez a te gépeden is futnia kell a koinónak).';
+      + 'következő csere után magától tag lesz (ehhez a te gépeden is futnia kell a koinonak).';
     letrehozas.appendChild(p);
   }
   return ertek;
@@ -89,7 +89,7 @@ koruleIr('_elemHtml', function (h, meghivo) {
   return ki;
 });
 
-/** ⭐ M8 / B5 (a): a meghívó sorának koinós többlete — a belépés állása (null, ha nincs mit mondani). */
+/** ⭐ M8 / B5 (a): a meghívó sorának koinos többlete — a belépés állása (null, ha nincs mit mondani). */
 function belepesAllasa(b) {
   if (!b) return null;
   if (b.allapot === 'igazolt') {
@@ -127,8 +127,8 @@ const PROFIL_MEZOK = [
 ];
 
 /**
- * A profil-űrlap: a meglévő profilom (ha van), különben az előtöltés (a meghívó által beírt név); a koinó kötelező mezői
- * csillaggal. Az első megnyitáskor „Most kihagyom” is (a lap ezt koinónként megjegyzi).
+ * A profil-űrlap: a meglévő profilom (ha van), különben az előtöltés (a meghívó által beírt név); a koino kötelező mezői
+ * csillaggal. Az első megnyitáskor „Most kihagyom” is (a lap ezt koinonként megjegyzi).
  * @param {{elso?: boolean, koino?: string|null}} [b]
  */
 export async function profilUrlapMegnyitasa({ elso = false, koino = null } = {}) {
@@ -142,16 +142,16 @@ export async function profilUrlapMegnyitasa({ elso = false, koino = null } = {})
 
   const tartalom = document.createElement('div');
   tartalom.innerHTML = '<p class="koino-profil__leiras">' + (elso
-    ? 'Üdv a koinóban! Ha szeretnéd, add meg az adataidat — a többiek ezekből ismernek fel. Nem kötelező, és később a fő menü '
+    ? 'Üdv a koinoban! Ha szeretnéd, add meg az adataidat — a többiek ezekből ismernek fel. Nem kötelező, és később a fő menü '
       + '„eember beállítások” pontjában is megadhatod.'
-    : 'Az adataid ebben a koinóban — a többiek ezekből ismernek fel.'
+    : 'Az adataid ebben a koinoban — a többiek ezekből ismernek fel.'
       + (!allapot.tag && allapot.meghivoval ? ' A meghívód a meghíváskor ezt tanúsítja.' : '')) + '</p>'
     + '<div class="regisztracio-form__altalanos-hiba" role="alert"></div>'
     + '<form class="regisztracio-form koino-profil" novalidate>'
     + PROFIL_MEZOK.map((m) => '<div class="form-mezo"><input class="form-mezo__bemenet" type="text" name="' + m.kulcs + '" '
       + 'placeholder="' + html(m.cimke + (kotelezo.has(m.kulcs) ? ' *' : '')) + '" aria-label="' + html(m.cimke) + '" autocomplete="'
       + m.autocomplete + '" maxlength="120" value="' + html(ertekek[m.kulcs] ?? '') + '"></div>').join('')
-    + (kotelezo.size ? '<p class="koino-profil__leiras">* a koinó ezeket kéri — a meghívásod ezek nélkül nem írható alá.</p>' : '')
+    + (kotelezo.size ? '<p class="koino-profil__leiras">* a koino ezeket kéri — a meghívásod ezek nélkül nem írható alá.</p>' : '')
     + '<button type="submit" class="btn-regisztracio">Mentés</button></form>';
 
   const modal = new Modal(MODAL_KONTENER, {
@@ -193,15 +193,15 @@ export async function profilUrlapMegnyitasa({ elso = false, koino = null } = {})
 
 /** ⭐ D122: a belépő várakozása — a meghívó gépe a következő cserénél magától meghív. @returns {string} HTML */
 export function varakozasHtml(t) {
-  if (!t?.horgony) return '<p class="koino-meghivas__leiras">Még nincs belépésed ebben a koinóban.</p>';
-  if (t.tag) return '<p class="koino-meghivas__tag">✅ Tag vagy ebben a koinóban — a meghívásod megérkezett.</p>';
+  if (!t?.horgony) return '<p class="koino-meghivas__leiras">Még nincs belépésed ebben a koinoban.</p>';
+  if (t.tag) return '<p class="koino-meghivas__tag">✅ Tag vagy ebben a koinoban — a meghívásod megérkezett.</p>';
   return '<p class="koino-meghivas__leiras">⏳ A meghívód gépe a következő cserénél magától meghív — ehhez az ő gépén is futnia '
-    + 'kell a koinónak. Ez az ablak magától frissül.</p>';
+    + 'kell a koinonak. Ez az ablak magától frissül.</p>';
 }
 
 /**
- * ⭐⭐ D122: AZ ELSŐ MEGNYITÁS — ha a készülék még egy koinót sem ismer: a csatlakozás ablaka („Meghívtak? illeszd be”); ha a
- * mostani koinóba beléptem, de még nincs profilom, és nem hagytam ki: a profil-űrlap. ⭐⭐ D128 (⑤ — a terep lelete): csak a kezelő
+ * ⭐⭐ D122: AZ ELSŐ MEGNYITÁS — ha a készülék még egy koinot sem ismer: a csatlakozás ablaka („Meghívtak? illeszd be”); ha a
+ * mostani koinoba beléptem, de még nincs profilom, és nem hagytam ki: a profil-űrlap. ⭐⭐ D128 (⑤ — a terep lelete): csak a kezelő
  * készülékemen (`kezelo`) — egy felvett készülék nem tudhatja biztosan, hogy a kezelőn van-e már profilom (a csere később hozza);
  * ott a menüből adható meg.
  * @param {{csatlakozas: Function}} b - a csatlakozás ablakának megnyitója (a `koinoCsatlakozas.js`-ből — körkörös import nélkül)

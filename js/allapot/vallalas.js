@@ -3,12 +3,12 @@
 // Felelősség: B/1 — A VÁLLALÁS (D75, D86, D90): mely szeleteket tartom TARTÓSAN.
 //
 // ⭐ A vállalás SZÁMÍTOTT, nem kimondott: a saját láncomból jön, tehát a terhe a saját tevékenységemmel nő,
-// nem a koinó méretével (a „végtelen” próbája):
+// nem a koino méretével (a „végtelen” próbája):
 //   · a TUDATPONTOS szeleteim — ahol a kiosztásomban (a saját pont-eseményeim szerint, ugyanazzal az
 //     ítélettel, amit a szabály-réteg használ: `pontEsemenyMerlege`) pozitív pont áll; D85 óta a javaslat
 //     és a töredék is ilyen, ha pontom van rajta;
 //   · a saját AZONOSSÁG-szeletem (D86) — a `Belepes` horgonyom (az alapítónál a `KoinoLetrehozas`);
-//   · a KOINÓ SZÜLETÉSE (D90/2) — egyetlen esemény, nélküle a program el sem indul a koinóval.
+//   · a KOINO SZÜLETÉSE (D90/2) — egyetlen esemény, nélküle a program el sem indul a koinoval.
 // ⛔ A GYÖKÉR (a legfelső szintű születések listája) NEM vállalás (D90/1): azt a G osztja szét.
 //
 // Erre épül: a két tár (B/2 — ami nem vállalt, az átmenetibe kerül), a „nem tartod” jelzés, később a
@@ -22,7 +22,7 @@
 // laptop levételéről soha nem értesült — a régi pontot látta, és az egyezmény nála életben maradt (a laptopon helyesen
 // eltűnt). ⭐ Az egyszeri utólagos lekérés (B) épp ezt nem javította volna (a lekérés pillanatában a laptop pontja még
 // állt); a kifutás bármelyik későbbi változást elhozza, amíg tart. Az idő a SAJÁT órám (a saját eseményem `ido`-ja) —
-// a vállalás helyi, semmit nem dönt el a koinóban; a terhe a saját tevékenységemmel arányos (egy nap levételei).
+// a vállalás helyi, semmit nem dönt el a koinoban; a terhe a saját tevékenységemmel arányos (egy nap levételei).
 //
 // Használják: koino.js (a `vallalas` parancs, a `hozd`, a jelzés), a próbák.
 
@@ -37,20 +37,20 @@ export const KIFUTAS = 24 * 3600 * 1000;
 /**
  * A vállalás a saját láncomból.
  *
- * @param {Array<Object>} sajatEsemenyek - a saját eseményeim EBBEN a koinóban (bármilyen sorrendben)
+ * @param {Array<Object>} sajatEsemenyek - a saját eseményeim EBBEN a koinoban (bármilyen sorrendben)
  * @param {Object} [beallitas]
- * @param {string|null} [beallitas.koinoSzuletes] - a koinó `KoinoLetrehozas` eseményének azonosítója
+ * @param {string|null} [beallitas.koinoSzuletes] - a koino `KoinoLetrehozas` eseményének azonosítója
  * @param {number} [beallitas.most] - a mostani idő (a kifutáshoz; alapból `Date.now()`)
  * @param {number} [beallitas.kifutas] - a kifutás hossza ms-ban (alapból `KIFUTAS`; 0: nincs kifutás)
- * @param {number} [beallitas.tudatpontKeret] - ⭐ D118/2: a koinó kerete (a születéséből; alapból a mai érték)
- * @param {string} [beallitas.koino] - ⭐ D118 (⑤a): a koinó neve — a más koinóé (az ős láncomból hozott) pont-esemény a
+ * @param {number} [beallitas.tudatpontKeret] - ⭐ D118/2: a koino kerete (a születéséből; alapból a mai érték)
+ * @param {string} [beallitas.koino] - ⭐ D118 (⑤a): a koino neve — a más koinoé (az ős láncomból hozott) pont-esemény a
  *        számított összeggel számít (`pontEsemenyMerlege` `hozott` — mint a szabály-rétegben)
  * @param {Function} [beallitas.szamit] - ⭐ D118 (⑤b): mely eseményeim számítanak (a jelen réteg — `lancNezete`); a többi a
  *        láncom része (a folytonossághoz), de nem vállalás
  * @param {Array<string>} [beallitas.azonossagHorgonyai] - ⭐⭐ D128 (⑤ — a terep lelete): az AZONOSSÁGOM horgonya(i), akkor is, ha egy
  *        MÁSIK készülékem írta (a laptop lépett be, a telefon felvett készülék): az azonosság szelete a telefoné is — különben a
  *        csere a szeletbe írt eseményeket (a keret átadását) nem hozza el neki
- * @param {boolean} [beallitas.kezikonyv] - ⭐⭐ D129 (MA4 (B)): a koinóban van-e kézikönyv (a születése viszi a szabályát) — ha
+ * @param {boolean} [beallitas.kezikonyv] - ⭐⭐ D129 (MA4 (B)): a koinoban van-e kézikönyv (a születése viszi a szabályát) — ha
  *        igen, a kézikönyv gyökerének szeletét MINDENKI tartja: a pont nélkül megmaradó módosítást is valakinek őriznie kell
  * @returns {{szeletek: Set<string>, pontok: Map<string, number>, azonossag: Array<string>,
  *            koinoSzuletes: string|null, kezikonyv: string|null, kifuto: Map<string, number>}} a `kifuto`: a pont nélkül, de még kifutásban
@@ -91,7 +91,7 @@ export function vallalasSzamitasa(sajatEsemenyek, beallitas = {}) {
   for (const a of azonossag) szeletek.add(a);
   const koinoSzuletes = typeof beallitas.koinoSzuletes === 'string' ? beallitas.koinoSzuletes : null;
   if (koinoSzuletes) szeletek.add(koinoSzuletes);
-  // ⭐⭐ D129 (MA4 (B)): a kézikönyv szelete mindenkié (mint a koinó születése)
+  // ⭐⭐ D129 (MA4 (B)): a kézikönyv szelete mindenkié (mint a koino születése)
   const kezikonyv = beallitas.kezikonyv === true ? KEZIKONYV_GYOKER_AZONOSITO : null;
   if (kezikonyv) szeletek.add(kezikonyv);
   // ⭐ D104: a kifutó szeletek — a pont levétele után még `kifutas` ideig.

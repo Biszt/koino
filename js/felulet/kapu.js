@@ -6,7 +6,7 @@
 //
 // ===== ⛔⛔ AMIT EZ A FÁJL SOHA NEM TUD =====
 //
-// **Semmit a koinóról.** Nincs benne esemény, állapot, szabály, tudatpont — egyetlen
+// **Semmit a koinoról.** Nincs benne esemény, állapot, szabály, tudatpont — egyetlen
 // domain-fogalom sem. Két dolgot csinál: kiszolgál egy mappát, és továbbad egy kérést.
 //
 // ⭐ EZ NEM ÍZLÉS, HANEM A 7. SZABÁLY MEGTARTÁSA. A `felulet_terv.md` 3. pontja két
@@ -15,7 +15,7 @@
 //   1. a program SOHA ne importálja a felületet;
 //   2. a parancssori út maradjon TELJES út, ne csökevény.
 //
-// Az elsőt ez a fájl teszi betarthatóvá: mivel a kapu semmit nem tud a koinóról, a
+// Az elsőt ez a fájl teszi betarthatóvá: mivel a kapu semmit nem tud a koinoról, a
 // nyíl mindig **felület → program** irányba mutat, soha visszafelé. Egy másik kliens
 // (terminál, natív) ugyanezen az illesztésen jön be. *Ugyanaz a fogás, mint az 1.
 // szabálynál: a `csere.js` azért cserélhető szállítású, mert sosem importált hálózati kódot.*
@@ -171,7 +171,7 @@ export function biztonsagosUt(mappa, utvonal) {
  * @param {string} beallitas.mappa - honnan szolgáljuk ki a fájlokat
  * @param {Function} [beallitas.kezelo] - async ({ modszer, utvonal, kereses, test }) →
  *        { allapot?, adat } | null · a `/api/…` kérések kezelője. ⭐ KÍVÜLRŐL JÖN: a kapu
- *        nem tud semmit a koinóról.
+ *        nem tud semmit a koinoról.
  * @param {number} [beallitas.port]
  * @param {string} [beallitas.jelszo] - a próbák adhatnak rögzítettet; egyébként generált
  * @param {Function} [beallitas.jelszoMentes] - (utvonal) → boolean. ⚠️ SZŰK KIVÉTEL: mely
@@ -375,7 +375,7 @@ async function kereskezeles(keres, valasz, { gyoker, kezelo, kulcs, port, testKo
     // ⭐⭐ NYERS BÁJTOK IS JÖHETNEK (5.7) — egy kép nem JSON. A kezelő `nyers` +
     // `tipus` párral kérheti, hogy ne alakítsuk át.
     //
-    // ⚠️ A kapu ettől sem tud többet a koinóról (7. szabály): nem ő dönti el, mi kép és
+    // ⚠️ A kapu ettől sem tud többet a koinoról (7. szabály): nem ő dönti el, mi kép és
     // mi nem — csak továbbítja, amit a kezelő adott.
     if (eredmeny.nyers) {
       return kuld(eredmeny.allapot ?? 200,

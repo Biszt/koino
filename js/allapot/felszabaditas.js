@@ -48,7 +48,7 @@
 // várakozás ingyen van: 2026-09-07 óta a kiosztott összeg a saját láncból számít, tehát a
 // koino az elakadt ponttal is hibátlanul működik.
 //
-// ⚠️ A feljegyzés **HELYI** — sosem terjed, és semmit nem dönt el a koinóban (3. szabály).
+// ⚠️ A feljegyzés **HELYI** — sosem terjed, és semmit nem dönt el a koinoban (3. szabály).
 // Ugyanaz a fajta, mint a `tarsak.js` `utoljara` mezője vagy a pakli horgonya.
 //
 // Használják: `koino.js` (őrjárat és a kézi parancs), és a felület.

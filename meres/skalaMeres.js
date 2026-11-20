@@ -424,7 +424,7 @@ async function egyMeret(darab, hely) {
 
   // ===== C. ⭐ A FŐ KÉRDÉS: EGY ELTÉRÉS ÁRA =====
   //
-  // A terv állítása: nagy koinóban a globális lenyomat SOHA nem egyezik, tehát minden kör
+  // A terv állítása: nagy koinoban a globális lenyomat SOHA nem egyezik, tehát minden kör
   // visszaesik a teljes ÁLLÁS-ra. Ezt úgy mérjük, hogy elveszünk EGY eseményt a másik fél
   // tudásából, és megnézzük, mibe kerül a kör.
   const szegenyebbSorok = gen.eredmeny.sorok.slice(0, -1);

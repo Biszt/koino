@@ -61,7 +61,7 @@ proba('⛔ a jövőbe dátumozott (egy napnál több) nem érvényes — a fél 
 });
 
 // ⛔ Rontás: az aláírt üzenet nem fedi a csomagot (vagy az időt) → a másik csomagra / más időre átvitt megújítás is jó → bukik.
-proba('⛔ a megújítás nem vihető át: más csomagra, más gondolatra, más koinóra vagy más időre nem érvényes', async () => {
+proba('⛔ a megújítás nem vihető át: más csomagra, más gondolatra, más koinora vagy más időre nem érvényes', async () => {
   const c = await csomag();
   const masik = await csomag();
   const m = megujitasKeszitese(await jwk(c.emberek[0]), c.emberek[0].szerzo, c.emberek[0].keszulek, { koino: KOINO, g: c.g, esemenyek: c.esemenyek });

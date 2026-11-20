@@ -49,14 +49,14 @@ export const TAGSAG_KELL = new Set(['TudatpontRendezes', 'Javaslat', 'Szavazat',
 // Mindenkinek UGYANANNYI tudatpontja van: nem elkölthető, csak szétosztható és bármikor
 // átrendezhető. Ez itt lakik, EGY példányban — a művelet-réteg és a felület is innen
 // veszi, hogy ne csúszhasson szét kétféle igazságra.
-// ⭐⭐ D118/2 (①b): ez a MAI érték — a koinó a születésében mást mondhat (`koinoSzabalyok.js`); a számítás onnan veszi.
+// ⭐⭐ D118/2 (①b): ez a MAI érték — a koino a születésében mást mondhat (`koinoSzabalyok.js`); a számítás onnan veszi.
 export const TUDATPONT_KERET = ALAP_SZABALYOK.tudatpontKeret;
 
 // ⭐ Hány kategóriába sorolható EGY gondolat? A prototípus is hármat engedett
 // (`Maximum 3 különböző kategória rendelhető egy gondolathoz`), és a korlát ott
-// Mongoose-validátorban élt. A P2P koinóban nincs szerver, ami visszautasítsa — ezért a
+// Mongoose-validátorban élt. A P2P koinoban nincs szerver, ami visszautasítsa — ezért a
 // korlát a SZÁMÍTÁSBAN van (2. szabály lent), és a felület nem tudja kijátszani.
-// ⭐ D118/2 (①b): a mai érték — a koinó születése mást mondhat.
+// ⭐ D118/2 (①b): a mai érték — a koino születése mást mondhat.
 export const KATEGORIA_KORLAT = ALAP_SZABALYOK.kategoriaKorlat;
 
 // A koino entitás-típusai (Gondolat · Kategoria · GondolatTipus). ⚠️ Ezek NEM külön
@@ -80,7 +80,7 @@ export const KATEGORIA_KORLAT = ALAP_SZABALYOK.kategoriaKorlat;
 // ⚠️⚠️ EGY MEZŐT SZÁNDÉKOSAN NEM VESZÜNK ÁT: az `entitasTipus`-t.
 //
 // A prototípusnak kellett, mert a Mongo-hivatkozás polimorf: a `refPath` abból tudja meg,
-// melyik kollekcióban keresse. ⭐ A koinóban viszont **a típus magában az entitásban van**
+// melyik kollekcióban keresse. ⭐ A koinoban viszont **a típus magában az entitásban van**
 // (`allapotSzamitas.js`) — ha az eseménybe is beírnánk, az egy MÁSODIK, aláírt, de
 // **hazudható** forrás lenne ugyanarról. *Ahol egy igazságnak két helye van, ott előbb-utóbb
 // két igazság lesz.* Ezt jelenti a „módosítsd, amit kell": a logikai kapcsolat átjön, a
@@ -132,7 +132,7 @@ export const ALLASOK = ['csatlakozik', 'tiltakozik', 'utkozik'];
 // és a keresés amúgy is elbukott — vagyis ott is a valódi típus döntött, csak kerülőúton.
 //
 // ⚠️ EGY LEKÉPEZÉS KELLETT HOZZÁ. A prototípus négy célt ismer: `Gondolat`, `Kategoria`,
-// `GondolatTipus`, `Egyezmeny`. A koinóban a szerkesztési egyezmény **ugyanaz az entitás**,
+// `GondolatTipus`, `Egyezmeny`. A koinoban a szerkesztési egyezmény **ugyanaz az entitás**,
 // mint a szerkesztési javaslat (azonos azonosító, más státusz — Csaba, 2026-09-07), tehát a
 // típusa `Javaslat`. Az „Egyezmeny" sort ezért a `Javaslat` viszi — és ez ⭐ **egy fokkal
 // többet is véd**: a szavazás alatt álló javaslat szövegét sem lehet átírni, pedig épp arról
@@ -161,7 +161,7 @@ const EGYESITHETO_TIPUSOK = ['Gondolat', 'Kategoria'];
 /**
  * A javaslat SZÁRMAZTATOTT fajtája — a prototípus `javaslatTipus` mezőjének megfelelője.
  *
- * ⚠️ A koinóban ez NEM tárolt mező, hanem **számítás**: az érintettek műveleteiből
+ * ⚠️ A koinoban ez NEM tárolt mező, hanem **számítás**: az érintettek műveleteiből
  * következik. A prototípusnak azért kellett külön oszlop, mert a Mongo szerint kellett
  * végrehajtót választani; itt viszont egy második, aláírt, de **hazudható** forrás lenne
  * ugyanarról — ugyanaz az érv, mint az `entitasTipus`-nál.
@@ -231,7 +231,7 @@ export function elsoErintett(adat) {
 // javaslatot (`javaslatService.js`, `toredekCsoportId` · `toredekSorszam` · `toredekDarab`), és
 // mindegyik a SAJÁT érintettje gyereke — így minden érintett gondolat alatt megjelenik.
 //
-// ⭐ A koinóban egy aláírt `Javaslat` esemény van (a döntés érintettenkénti RÉSZEI 2026-09-07 óta
+// ⭐ A koinoban egy aláírt `Javaslat` esemény van (a döntés érintettenkénti RÉSZEI 2026-09-07 óta
 // számítottak), és a töredék ENTITÁS is számított: esemény nélkül, LEVEZETETT azonosítóval — ahogy
 // a különvált ág is (`szerkesztesiVegrehajtas.js`). Erre kerül a pont, ez a kártya, ez lép
 // egyezmény-fázisba (D85/4).
@@ -374,7 +374,7 @@ export function pontEsemenyMerlege(e, allas, folytonos, keret = TUDATPONT_KERET,
   // ⭐⭐ EZ A D42 LÉNYEGE: EGYETLEN ESEMÉNYBŐL ELDŐL, a lánc többi része nélkül.
   // Szeletelt tárban ez az EGYETLEN mód a keret ellenőrzésére — teljes láncot soha
   // többé nem fogunk látni.
-  // ⭐ D118/2: a keret a koinóé (a születéséből — a hívó adja; ha nem tudja, a mai érték).
+  // ⭐ D118/2: a keret a koinoé (a születéséből — a hívó adja; ha nem tudja, a mai érték).
   if (kiosztva > keret) {
     return { elvetve: 'a bemondott összeg túllépi a keretet ('
       + kiosztva + ' / ' + keret + ')' };
@@ -430,7 +430,7 @@ export function pontEsemenyMerlege(e, allas, folytonos, keret = TUDATPONT_KERET,
     }
   }
 
-  // ⭐ D118/2: itt is a koinó kerete (a 15. mérés megismétlése találta meg, hogy ez az ág még a program állandóját nézte).
+  // ⭐ D118/2: itt is a koino kerete (a 15. mérés megismétlése találta meg, hogy ez az ág még a program állandóját nézte).
   if (ujOsszeg > keret) {
     return { jelzes, elvetve: 'túllépné a tudatpont-keretet (' + ujOsszeg + ' / '
       + keret + ')' };
@@ -443,7 +443,7 @@ export function pontEsemenyMerlege(e, allas, folytonos, keret = TUDATPONT_KERET,
 // ⭐⭐ D128 (9.9): A KERET ÁTVÉTELE ÉS A LÁNC EGY LÉPÉSE
 // ===================================
 //
-// Egy lánc (egy készülék) kerete egy eseményénél = az ALAPJA (a koinó kerete, ha ez a lánc írta az azonosság horgonyát; különben
+// Egy lánc (egy készülék) kerete egy eseményénél = az ALAPJA (a koino kerete, ha ez a lánc írta az azonosság horgonyát; különben
 // 0) + a KAPOTT (a többi készülékétől eddig átvett — a lánc-gyökér harmadik fája, adónként a halmozott összeg). Az átvétel
 // (`KeretAtvetel`) az adó aláírt átadását hozza; az ítélete EGY eseményből dől el, mint a pont-eseményé (D42, D81).
 // ⭐ EGY FORRÁS: a `lancLepese`-t hívja a szabály-réteg, a saját lánc-gyökér (`lancGyoker.js`) és a művelet (`sajatKiosztott`) —
@@ -574,7 +574,7 @@ function leszarmazottE(entitas, os, szulok) {
 }
 
 export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
-  // ⭐⭐ D118 (⑤b): a koinó képe adja — a láncok a lánc-ág szerint (a nem bekapcsolódó ős-eseménye külön ág), és a láncon ismert,
+  // ⭐⭐ D118 (⑤b): a koino képe adja — a láncok a lánc-ág szerint (a nem bekapcsolódó ős-eseménye külön ág), és a láncon ismert,
   // de a jelen rétegből kizárt sorszámok (a bekapcsolódó hozott tagsági csomagja, az ős születése, az elhagyott pontja) nem hézagok.
   // ⭐⭐ D128: alapból a lánc a készüléké (`lancKulcsa`) — a tagság marad szerzőnként (az azonosságé).
   const lancAga = typeof beallitas.lancAga === 'function' ? beallitas.lancAga : lancKulcsa;
@@ -586,11 +586,11 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
     for (let s = tol; s < ig; s++) if (!ism.has(s)) return false;
     return true;
   };
-  // ⭐⭐ D118/2 (①b): a koinó SZABÁLYAI a születéséből (a bemenetben van — a koinó születése mindenki vállalása, D90/2);
+  // ⭐⭐ D118/2 (①b): a koino SZABÁLYAI a születéséből (a bemenetben van — a koino születése mindenki vállalása, D90/2);
   // ha nincs meg, a mai értékek.
   const koinoSzul = koinoSzuleteseListabol(esemenyek);
   const koinoSzabalyok = koinoSzabalyai(koinoSzul);
-  // ⭐ D118 (④a): a koinó neve (a lenyomat-nevűé) — ami más koinóé a bemenetben, az az ősök hozott eseménye.
+  // ⭐ D118 (④a): a koino neve (a lenyomat-nevűé) — ami más koinoé a bemenetben, az az ősök hozott eseménye.
   const koinoNeve = koinoSzul && koinoSzul.koino === '' ? koinoSzul.azonosito : null;
   const kivetelek = [];
   const nemEllenorizhetok = [];
@@ -626,7 +626,7 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
     }
   }
   // ⭐⭐ D129: a KÉZIKÖNYV-entitásoknak nincs létrehozó eseményük — a típusuk és a szülőjük a NEVÜKBŐL (minden esemény
-  // `adat.rendszer`-éből és a felmenőikből — ugyanúgy, mint az állapotban), csak a kézikönyves koinóban.
+  // `adat.rendszer`-éből és a felmenőikből — ugyanúgy, mint az állapotban), csak a kézikönyves koinoban.
   if (kezikonyvesE(koinoSzabalyok)) {
     const latott = new Set();
     for (const e of esemenyek) {
@@ -727,7 +727,7 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
 
   for (const lanc of lancok.values()) {
     const rendezett = [...lanc].sort((a, b) => a.sorszam - b.sorszam);
-    // ⭐⭐ D128 (9.9): a lánc alapja (a koinó kerete, ha ez a lánc írta az azonosság horgonyát; különben 0) — a kerete az alap + a
+    // ⭐⭐ D128 (9.9): a lánc alapja (a koino kerete, ha ez a lánc írta az azonosság horgonyát; különben 0) — a kerete az alap + a
     // kapott (az átvételei), eseményenként (`lancLepese`).
     const alapok = rendezett.length ? azonossagAlapjai(tidx, rendezett[0].szerzo, koinoSzabalyok.tudatpontKeret)
       : { keret: koinoSzabalyok.tudatpontKeret, horgonyLanca: null };
@@ -767,7 +767,7 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
             + '. eseményétől az átadásai nem számítanak');
           continue;
         }
-        // ⭐ D118 (④a): az ős eseménye a gyermek jelenében HOZOTT (a koinó a születése neve — a jelen bemenetében egyedül az övé).
+        // ⭐ D118 (④a): az ős eseménye a gyermek jelenében HOZOTT (a koino a születése neve — a jelen bemenetében egyedül az övé).
         const hozott = koinoNeve !== null && esemenyKoinoja(e) !== koinoNeve;
         const merleg = lancLepese(lancAllas, e, folytonos, lancAlap, alapok, hozott);
         if (merleg.jelzes) nemEllenorizheto(e, merleg.jelzes);
@@ -780,7 +780,7 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
       // ⭐ MIÉRT ITT, ÉS NEM A FELÜLETEN? Mert *„amit a számítás nem ellenőriz, az nem
       // szabály, csak illemtan"* — a felület a másik gépen nem véd semmitől. A prototípus
       // ezt Mongoose-validátorral tartotta (`Maximum 3 különböző kategória`); a P2P
-      // koinóban nincs szerver, ami visszautasítsa, tehát a SZÁMÍTÁSNAK kell kihagynia.
+      // koinoban nincs szerver, ami visszautasítsa, tehát a SZÁMÍTÁSNAK kell kihagynia.
       //
       // ⚠️ A hivatkozott kategória/típus LÉTEZÉSÉT itt NEM nézzük: az a hiány esete
       // (D19) — lehet, hogy csak még nem érkezett meg hozzánk. Ilyenkor a besorolás

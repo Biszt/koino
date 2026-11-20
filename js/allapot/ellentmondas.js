@@ -52,7 +52,7 @@ const nem = (ok) => ({ rendben: false, ok });
 // AZ ÉPÍTŐKÖVEK
 // ===================================
 
-/** A szerző egy aláírt eseménye — ép-e, az övé-e (⭐⭐ D128: a készüléke tanúsított), ebből a koinóból-e? */
+/** A szerző egy aláírt eseménye — ép-e, az övé-e (⭐⭐ D128: a készüléke tanúsított), ebből a koinoból-e? */
 async function szerzoEsemenye(e, kit, koino, kereso) {
   if (!e || typeof e !== 'object' || e.szerzo !== kit || esemenyKoinoja(e) !== koino) return false;
   return (await esemenyEllenorzese(e, { tanusitvany: kereso })).rendben === true;
@@ -85,7 +85,7 @@ async function pontHatasa(e, elotte, bizonyitek, keret) {
   if (!b.rendben) return null;
   const regi = b.van ? b.osszegek[0] : 0;
   const osszeg = elotte.kiosztas.o[0];
-  // ⭐ D118/2: a koinó kerete (a hívó adja; ha nem, a mai érték) — ugyanaz, amivel a szerző a saját gyökerénél ítél.
+  // ⭐ D118/2: a koino kerete (a hívó adja; ha nem, a mai érték) — ugyanaz, amivel a szerző a saját gyökerénél ítél.
   // ⭐⭐ D128 (9.9): a hívó a lánc ALAPJÁT adja — a kerete az esemény előtt az alap + az aláírt előkép kapottja.
   const kapott = elotte.kapott?.o?.[0] ?? 0;
   return { regi, osszeg,
@@ -113,12 +113,12 @@ async function utanaKiosztas(e, elotte, bizonyitek, keret) {
  *
  * @param {Object} adat - { kit, fajta, vadpont, esemeny } · folytonosságnál + `kovetkezo` · negatív
  *   levélnél + `kulcs`, `bizonyitek` (a levél bizonyítéka az esemény kiosztás-gyökerében)
- * @param {string} koino - az `Ellentmondas` esemény koinója (a vádolt események is ebből valók)
+ * @param {string} koino - az `Ellentmondas` esemény koinoja (a vádolt események is ebből valók)
  * @returns {Promise<{rendben: boolean, ok?: string, vadpont?: number, vesztes?: string}>}
  *   elágazásnál `vesztes` (a kihagyandó ág azonosítója), a többinél `vadpont`
  */
 export async function ellentmondasEllenorzese(adat, koino, beallitas = {}) {
-  const keret = beallitas.tudatpontKeret;   // ⭐ D118/2: a koinó kerete (a születéséből — a hívó tudja)
+  const keret = beallitas.tudatpontKeret;   // ⭐ D118/2: a koino kerete (a születéséből — a hívó tudja)
   if (!adat || typeof adat !== 'object' || typeof adat.kit !== 'string') return nem('hiányzik a vádolt (kit)');
   const { kit, fajta } = adat;
   if (!ELLENTMONDAS_FAJTAK.includes(fajta)) return nem('ismeretlen fajta: ' + fajta);

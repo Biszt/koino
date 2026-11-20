@@ -5,7 +5,7 @@
 // rendezés, a Struktúra, a Síkidom alapja) hány KÉRELMET és hány PERCET kér
 //   · egy lapos oldalhoz (k = 20 kártya, a gyökértől),
 //   · és egy B = 200 / 500 / 2000 csomópontos Struktúrához (az ág legerősebb B csomópontja),
-// ha a készülék a koinóból semmit nem tart (egy friss tag, a szigorú (b) alatt), és mit veszít, ha a fejléc-kérdésnek
+// ha a készülék a koinoból semmit nem tart (egy friss tag, a szigorú (b) alatt), és mit veszít, ha a fejléc-kérdésnek
 // nincs FOLYTATÁSA (ma az 51. gyerek nem kérhető)?
 //
 // ⭐ A legjobb-először bejárás (az össz-pont lefelé nem nő): a sor elejéről mindig a legnagyobb ismert össz-pontú jön; a
@@ -32,7 +32,7 @@
 //   D — C + bővebb függő-korlát a bejárónak (C = 64)
 //   E — D + a tartó MÉLYEN felel: amit maga is tart X alatt, azt 4 szintig hozza (a gyerek tartója κ = 0,5 eséllyel a
 //       szülőé is — aki egy gyerekre pontot tesz, gyakran a felmenőire is)
-//   F — egy „mindent” tartó (D83/2) a kötések között — a kis, családi koinó esete: minden kérelem egy körben megjön
+//   F — egy „mindent” tartó (D83/2) a kötések között — a kis, családi koino esete: minden kérelem egy körben megjön
 //   G — D + a tartó MAGA jár be legjobb-először, amit tud: X alatt a legjobb 50 csomópont a saját tudásából (egy
 //       csomópont gyerekeit akkor ismeri, ha a szeletét tartja) — egy kérelemre több szint
 //   H — F + G: a „mindent” tartó maga jár be

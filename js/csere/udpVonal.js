@@ -146,7 +146,7 @@ const SZORAS_SULY = 0.25;      // β — az ingadozás súlya (1/4)
 // *érdemes-e még küzdeni ezzel a társsal*, csak a fájl-réteg tudja, mert ő ismeri, **hány
 // forrásból szerezhető be ugyanaz** (D68, Csaba 2. válasza). A számítás ezért ott van
 // (`fajlAtvitel.js`: `turelemForrasokbol`), és a vonal **paraméterként kapja**.
-// *Ugyanaz a szétválasztás, mint mindenhol: a vonal nem tud a koinóról (1. szabály).*
+// *Ugyanaz a szétválasztás, mint mindenhol: a vonal nem tud a koinoról (1. szabály).*
 //
 // ⚠️ Az alapérték a cseréé marad: ott **nincs „másik forrás"** ugyanarra a beszélgetésre.
 const FELADAS_ALAP = 30000;
@@ -264,7 +264,7 @@ const GYORS_KUSZOB = 3;
 // `csereVonalon` használ TCP-n — a hívó felülírhatja (`beallitas.varakozasiIdo`).
 const TETLENSEG_ALAP = 10000;
 
-// ⭐ D119 (③): az UTÓLAGOS kézfogás türelme (a családi munka következő koinójánál). Mérve: a két fél nem egyszerre ér a munka
+// ⭐ D119 (③): az UTÓLAGOS kézfogás türelme (a családi munka következő koinojánál). Mérve: a két fél nem egyszerre ér a munka
 // végére — a fájl-randevú kiszolgálója a társ utolsó kérése után még a tétlenségi óráig vár (a kezdő fél kétszereséig —
 // `kiszolgaloFazis`), a korábban végző fél kézfogása tehát ennyit is kivár, és még egy tétlenségi órát.
 export const UTOLAGOS_KEZFOGAS_IDO = 3 * TETLENSEG_ALAP;
@@ -430,7 +430,7 @@ async function vedettResre(halo, tarsCim, tarsPort, beallitas) {
  * ⭐ A KÉZFOGÁS HITELESÍTÉSE a csere nyitásában (`vonal.js` — az nem tud kriptográfiáról): a saját
  * aláírásunk (ha a hívó ad aláírót), és a társ tábla-kulcsának ellenőrzése az átiraton.
  * ⭐⭐ D93/3: ÉS A SZEMÉLY — a hívó adja a személyes aláírót (`szemelyesAlairo(atirat) → { sz, h, a }`: a szerző, a
- * horgony és az aláírás az átiratra, a koinóval együtt), a társét itt ellenőrizzük (`kiEllenoriz`).
+ * horgony és az aláírás az átiratra, a koinoval együtt), a társét itt ellenőrizzük (`kiEllenoriz`).
  */
 /**
  * ⭐ D109 (KK3): a kérő tábla-kulcsa a kérelemben — a nyilvános része és az aláírása a kézfogás átiratára (mint a nyitásban:
@@ -1455,7 +1455,7 @@ export async function fajlRandevu(nyersHalo, tarsCim, tarsPort, beallitas = {}) 
     }
     // ⭐⭐ D119 (③): A KÉRŐ KIMONDJA, HOGY VÉGZETT — mérve (a családi csere kézi próbáján): a kiszolgáló eddig a tétlenségi
     // óráig (a kezdőnél a kétszereséig) várta a következő kérést, a két fél így 10–20 mp különbséggel ért a munka végére — a
-    // családi munka következő koinójának kézfogása és a társ következő kérése („foglalt”) ezt várta ki. ⭐ A kiszolgáló épp akkor
+    // családi munka következő koinojának kézfogása és a társ következő kérése („foglalt”) ezt várta ki. ⭐ A kiszolgáló épp akkor
     // vár, ha nekem volt mit kérnem (az én kérhetőim az ő adhatói — a két fél ugyanarra jut). CSAK KÜLDŐ kapcsolaton
     // (`csakKuld`): a nyugtára vár (legfeljebb az utóhangig), de adatot nem fogad — egy fogadó a társ következő fázisának első
     // kérését a sajátjának olvasná (a sorszámok minden kapcsolatban 1-től indulnak); azt a társ megismétli, mire a mi
@@ -1606,7 +1606,7 @@ export async function szeletUdpResen(halo, tarsCim, tarsPort, tar, koino, entita
     kapcsolat.destroy(new Error('A másik fél nem válaszol (' + varakozasiIdo + ' ms)'));
   });
   try {
-    // ⭐ D93/3: a személyünk (a kézfogás átiratára aláírva) és a tagsági csomagunk — a zárt koinó kapujának. ⭐⭐ D122: és a
+    // ⭐ D93/3: a személyünk (a kézfogás átiratára aláírva) és a tagsági csomagunk — a zárt koino kapujának. ⭐⭐ D122: és a
     // meghívóm bizonyítéka (a jelentkezés — MH6 — egy szelet-kérelem: két hálózat között ez a belépő első munkája).
     const h = kezfogasHitelesitese(res, beallitas, koino);
     const eredmeny = await szeletKapcsolaton(tar, koino, kapcsolat, entitas, beallitas.tovabb ?? {},
@@ -1625,7 +1625,7 @@ export async function szeletUdpResen(halo, tarsCim, tarsPort, tar, koino, entita
 
 /**
  * ⭐ A ⑦ lelete (az ütközés — `vonal.js` `kerelemUtkozes`): ha a társ is kérelemmel nyitott, és az övé megy elöl, a hívó
- * (`beallitas.utkozesben`) szolgálja ki ugyanazon a kapcsolaton — a kézfogás hitelesítése a KÉRELEM koinójára szól (mint a
+ * (`beallitas.utkozesben`) szolgálja ki ugyanazon a kapcsolaton — a kézfogás hitelesítése a KÉRELEM koinojára szól (mint a
  * cserében a családi átadásnál). Kiszolgáló nélkül null (a kérő akkor `KESZ`-t mond).
  */
 function utkozesKiszolgalo(res, beallitas) {
@@ -1732,8 +1732,8 @@ export async function csereUdpResen(halo, tarsCim, tarsPort, tar, koino, beallit
   try {
     const eredmeny = await parbeszed(kapcsolat, tar, koino,
       { ...beallitas, kezfogas: kezfogasHitelesitese(res, beallitas, koino),
-        // ⭐⭐ D119 (③): a család másik koinójának szóló kérés átadásakor a kézfogás hitelesítése AZ a koinó (a személyes
-        // aláírás a koinóval együtt szól — a zárt kapu annak a koinónak a tagságát nézi).
+        // ⭐⭐ D119 (③): a család másik koinojának szóló kérés átadásakor a kézfogás hitelesítése AZ a koino (a személyes
+        // aláírás a koinoval együtt szól — a zárt kapu annak a koinonak a tagságát nézi).
         ...(typeof beallitas.atadas === 'function' ? { atadas: (u, x) => beallitas.atadas(u,
           { ...x, kezfogas: (k, b) => kezfogasHitelesitese(res, b, k) }) } : {}) });
 

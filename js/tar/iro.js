@@ -1,6 +1,6 @@
 // js/tar/iro.js
 
-// Felelősség: AZ ÍRÓ (D70, 2026-09-26) — koinónként és készülékenként EGYETLEN folyamat fűz a tárhoz.
+// Felelősség: AZ ÍRÓ (D70, 2026-09-26) — koinonként és készülékenként EGYETLEN folyamat fűz a tárhoz.
 //
 // ===== ⛔⛔ MIÉRT KELL =====
 //
@@ -40,7 +40,7 @@
 // ⚠️ AMIT NEM CSINÁL: nem olvas helyettünk (mindenki a saját mutatójából olvas, `frissit()`-tel),
 // és nem vonatkozik két készülékre ugyanazzal a kulccsal (D19 — az a hálózat dolga).
 //
-// Használja: koino.js (a fő tár és a felület koinónkénti tárai).
+// Használja: koino.js (a fő tár és a felület koinonkénti tárai).
 
 import { createServer, connect } from 'node:net';
 import { createHash, randomBytes } from 'node:crypto';
@@ -69,10 +69,10 @@ const KERES_KORLAT = 4 * 1024 * 1024;
 /**
  * A csatorna címe — a tár mappájából, determinisztikusan: minden folyamat ugyanazt számolja.
  *
- * ⚠️ Fájl-foglalatnál a rövid út számít (a rendszer ~100 bájtnál levágja), ezért nem a koinó
+ * ⚠️ Fájl-foglalatnál a rövid út számít (a rendszer ~100 bájtnál levágja), ezért nem a koino
  * mappájában él, hanem az ideiglenes mappában, a mappa lenyomatával.
  *
- * @param {string} mappa - a koinó tárának mappája
+ * @param {string} mappa - a koino tárának mappája
  * @returns {string}
  */
 export function csatornaCime(mappa) {
@@ -142,7 +142,7 @@ const varj = (ms) => new Promise((kesz) => setTimeout(kesz, ms));
  *
  * @param {Object} belso - a `fajlTar.esemenyTarNyitasa` tára
  * @param {Object} beallitas
- * @param {string} beallitas.mappa - a koinó tárának mappája (ebből lesz a csatorna címe)
+ * @param {string} beallitas.mappa - a koino tárának mappája (ebből lesz a csatorna címe)
  * @param {Function} [beallitas.jelez] - események a naplónak (D19)
  * @returns {Object} a tár, ugyanazzal a felülettel — plusz `iroE()` és `zar()`
  */
@@ -198,7 +198,7 @@ export function iroTarNyitasa(belso, { mappa, jelez = () => {} }) {
 
       if (ujSajat) {
         // ⭐ A SAJÁT ÚJ ESEMÉNY CSAK A LÁNC VÉGÉRE: ez zárja ki az elágazást.
-        // ⭐ D118 (⑤b): a koinóbeli láncom vége (a nem bekapcsolódó gyermekbeli lánca 1-ről indul; a bekapcsolódásé a lánc-pontja után).
+        // ⭐ D118 (⑤b): a koinobeli láncom vége (a nem bekapcsolódó gyermekbeli lánca 1-ről indul; a bekapcsolódásé a lánc-pontja után).
         const veg = await ujSajatHelye(belso, lancKulcsa(esemeny), esemenyKoinoja(esemeny), esemeny.tipus, esemeny.adat);
         if (esemeny.sorszam !== veg.sorszam || (esemeny.elozo ?? null) !== veg.elozo) {
           throw kodosHiba('ELAVULT', 'elavult lánc-vég (a ' + esemeny.sorszam

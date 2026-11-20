@@ -11,14 +11,14 @@
 #   https://github.com/Biszt/koino.git ~/koino; fi; } && sh ~/koino/termux/telepit.sh
 #
 # ⭐ 2026-11-06: a P2P koino saját tárban él (`Biszt/koino`, a program a tár gyökere), a telefonon a `~/koino` mappában. A régi
-# helyről (`~/koino_1.1/koino`) futó koinót is leállítja (a költözés), és a `koino` parancs ezután az új helyre mutat; a régi
+# helyről (`~/koino_1.1/koino`) futó koinot is leállítja (a költözés), és a `koino` parancs ezután az új helyre mutat; a régi
 # mappát nem bántja (ha már nem kell: rm -rf ~/koino_1.1).
 #
 # ⭐⭐ D123 (PR7): a sor a már telepített programot FRISSÍTI is (a git a program mappáját a legújabbra állítja — az adat a
 # `~/koino-adat`-ban, a mappán kívül: nem érinti), és ez a szkript már az új kód: ha egy másik Termux-ablakban még a régi koino fut,
 # leállítja (lent, „A FUTÓ KOINO LEÁLLÍTÁSA”). `KOINO_INDITAS=nem`: a telepítő nem indítja el a programot (a próbáknak).
-# ⚠️ A program magától nem frissül (csak ha a sort bemásolod): hogy melyik kódot futtatja egy koinó, az a közösség dolga (a
-# koino-verzió kártya, D119 — és ha a gépeden más a számítás magja, mint amivel a koinó született, a lap kimondja: D123).
+# ⚠️ A program magától nem frissül (csak ha a sort bemásolod): hogy melyik kódot futtatja egy koino, az a közösség dolga (a
+# koino-verzió kártya, D119 — és ha a gépeden más a számítás magja, mint amivel a koino született, a lap kimondja: D123).
 
 KONYVTAR=$(cd "$(dirname "$0")/.." && pwd)
 
@@ -50,7 +50,7 @@ futo_koino_leallitasa() {
       i=$((i + 1))
     done
     pkill -KILL -f "$1/koino.js" 2>/dev/null
-    echo "· A futó koinót leállítottam ($1) — az új programmal indul újra."
+    echo "· A futó koinot leállítottam ($1) — az új programmal indul újra."
   fi
 }
 if command -v pkill >/dev/null 2>&1; then

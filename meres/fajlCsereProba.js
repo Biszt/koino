@@ -3,7 +3,7 @@
 // Mit bizonyít ez a lap?
 //
 // ⛔⛔ A 4. SZABÁLYT: *„Legyen mindig kézi út… Ha egy funkció csak online tud működni, az
-// fojtópont."* A koinónak öt hálózati útja volt és egy sem kézi — itt azt mérjük, hogy
+// fojtópont."* A koinonak öt hálózati útja volt és egy sem kézi — itt azt mérjük, hogy
 // mostantól **hálózat nélkül is átvihető egy esemény**, és hogy az átvitel **ellenőrzött**.
 //
 // ⭐⭐ ÉS A LEGFONTOSABBAT: hogy a FÁJL SEM KAP ENGEDÉKENYEBB KAPUT (3. szabály). Egy

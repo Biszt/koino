@@ -28,7 +28,7 @@
 //     ha a régi lépés dátuma 30 napon belül jön — rétegenként, a nappal és a teendővel;
 //   · ⭐⭐ (az építés ⑤-e) A KIÍRT ALAKOK (`kiirtAlak.js` — PV5 (A)): a jegyzék szabálya (az élő változatok a dátumból, a
 //     legújabbtól; az irány; a kép); a mai tábla, meghívó-rekesz, DHT-témák, kiáltás és meghívó BÁJTRA a régi program alakja (a
-//     git-ből), a kitalált következő máshol van, és a régi olvasó nem olvassa (a kiáltását „másik koinónak”, a meghívóját „régi
+//     git-ből), a kitalált következő máshol van, és a régi olvasó nem olvassa (a kiáltását „másik koinonak”, a meghívóját „régi
 //     alakúnak” látná) — a mai megnevezi; és a kiáltás valódi foglalatokon (a kitalált [1,2] kiáltót a régi válaszoló is megtalálja).
 //     (A tábla, a témák és a meghívó rekesze az éles úton: a parancssor-próba két ⑤-ös próbája.)
 //
@@ -373,7 +373,7 @@ proba('⭐⭐⭐ a VALÓDI régi program (a PR6 előtti, a git-ből) a maival: c
   const ok = Object.values(jo).every(Boolean);
   if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([csA, csB, rk, mk, ketto].map((r) => r.ok ? 'rendben' : r.kod + ' ' + r.uzenet)) + ')\n');
   return ok;
-}, { ismertHiba: '⭐⭐ D128 (a kulcs: több készülék) ÚJ KOINÓ-CSALÁDOT indít: a git-ből vett régi program (a D128 előtti) a mai eseményt (a KÉSZÜLÉK írja alá) elveti, a mai kapu a régit (a szerző kulcsa írta alá, tanúsítvány nélkül) — a nyelvváltozat-próba az első D128 utáni régi programmal áll helyre (a REGI_PROGRAM átírásával)' });
+}, { ismertHiba: '⭐⭐ D128 (a kulcs: több készülék) ÚJ KOINO-CSALÁDOT indít: a git-ből vett régi program (a D128 előtti) a mai eseményt (a KÉSZÜLÉK írja alá) elveti, a mai kapu a régit (a szerző kulcsa írta alá, tanúsítvány nélkül) — a nyelvváltozat-próba az első D128 utáni régi programmal áll helyre (a REGI_PROGRAM átírásával)' });
 
 // ===== ⭐⭐ A SZÁLLÍTÁS JELE A KOPOGÁSBAN (az építés ②-e) =====
 
@@ -758,7 +758,7 @@ proba('⭐⭐⭐ a KITALÁLT 2-ES NYELV a csere résén: az [1,2] az 1-essel a r
 
 // Rontás: (a) a randevú kérője az első (jeles) választ nem fordítja → a 2-es kiszolgálótól nem jön a fájl → bukik; (b) a
 // kiszolgáló a választ nem a szélen küldi → bukik; (c) a kérelem kimenője (a MINTAKEREK) nem a szélen megy → bukik; (d) a
-// törzs fájlja a kérelem során nem fordítva jön → bukik. ⚠️ A szelet-kérő kimenője (a zárt koinó TAGSAG-ja) itt nem mérve.
+// törzs fájlja a kérelem során nem fordítva jön → bukik. ⚠️ A szelet-kérő kimenője (a zárt koino TAGSAG-ja) itt nem mérve.
 proba('⭐⭐ a KITALÁLT 2-ES NYELV a kérelem útjain (a szelet, a fejlécek, a törzs, a fájl a cserénél és a randevún, a válasz): az [1,2] kérő a 2-estől és az 1-estől is megkapja, és a 2-es kérő az [1,2]-től', async () => {
   const anna = await ujEember(KOINO);
   const g = await anna.tesz('GondolatLetrehozas', { cim: 'Egy szelet', meret: 10 });
@@ -867,7 +867,7 @@ proba('⭐⭐⭐ a VALÓDI régi program (a git-ből) és a KITALÁLT [1,2]: cse
   const ok = Object.values(jo).every(Boolean);
   if (!ok) process.stderr.write('    (' + JSON.stringify(jo) + ' | ' + JSON.stringify([csA, csB, rk, mk].map((r) => r.ok ? 'rendben' : r.kod + ' ' + r.uzenet)) + ')\n');
   return ok;
-}, { ismertHiba: '⭐⭐ D128 (a kulcs: több készülék) ÚJ KOINÓ-CSALÁDOT indít: a git-ből vett régi program (a D128 előtti) a mai eseményt (a KÉSZÜLÉK írja alá) elveti, a mai kapu a régit (a szerző kulcsa írta alá, tanúsítvány nélkül) — a nyelvváltozat-próba az első D128 utáni régi programmal áll helyre (a REGI_PROGRAM átírásával)' });
+}, { ismertHiba: '⭐⭐ D128 (a kulcs: több készülék) ÚJ KOINO-CSALÁDOT indít: a git-ből vett régi program (a D128 előtti) a mai eseményt (a KÉSZÜLÉK írja alá) elveti, a mai kapu a régit (a szerző kulcsa írta alá, tanúsítvány nélkül) — a nyelvváltozat-próba az első D128 utáni régi programmal áll helyre (a REGI_PROGRAM átírásával)' });
 
 // ===== ⭐⭐ A KÉZFOGÁS-VÁLASZTÓ (az építés ④-e) =====
 
@@ -1179,14 +1179,14 @@ proba('⭐⭐⭐ a mai TÁBLA és MEGHÍVÓ-REKESZ bájtra a régi (a git-ből e
 
 // Rontás: (a) a téma címkéje az 1-esnél más → a mai téma nem a régi → bukik; (b) a téma nem nézi a változatot → a hirdetés két
 // változata egy téma → bukik; (c) a kiáltás 1-es alakja is `v`-t visz → nem a régi szöveg → bukik; (d) a rejtett jel nem nézi a
-// változatot → a régi olvasó a 2-est is elfogadná → bukik; (e) a mai olvasó a más alakot „másik koinónak” veszi → bukik; (f) a
+// változatot → a régi olvasó a 2-est is elfogadná → bukik; (e) a mai olvasó a más alakot „másik koinonak” veszi → bukik; (f) a
 // meghívó-olvasó az újabbat is „régi alakúnak” mondja → bukik; (g) a meghívó készítése nem a változat előtagjával → bukik.
-proba('⭐⭐⭐ a mai DHT-TÉMÁK, KIÁLTÁS és MEGHÍVÓ bájtra a régi (a git-ből): a kitalált következő más témán, más rejtett jellel (és `v`-vel), más előtaggal — a régi olvasó a kiáltását „másik koinónak”, a meghívóját „régi alakúnak” látja; a mai MEGNEVEZI (újabb / régebbi alak)', async () => {
+proba('⭐⭐⭐ a mai DHT-TÉMÁK, KIÁLTÁS és MEGHÍVÓ bájtra a régi (a git-ből): a kitalált következő más témán, más rejtett jellel (és `v`-vel), más előtaggal — a régi olvasó a kiáltását „másik koinonak”, a meghívóját „régi alakúnak” látja; a mai MEGNEVEZI (újabb / régebbi alak)', async () => {
   const regi = await regiProgram();
   if (!regi) { process.stdout.write('    (a régi program (' + REGI_PROGRAM + ') nincs meg a git-történetben — kihagyva)\n'); return true; }
   const kulcs = await ujTablaKulcs();
   const AL = kulcs.alairoNyilvanos;
-  const K = (await ujTablaKulcs()).alairoNyilvanos;   // egy 43 jeles név (a meghívó koinója is ilyen)
+  const K = (await ujTablaKulcs()).alairoNyilvanos;   // egy 43 jeles név (a meghívó koinoja is ilyen)
   const rc = regi.cimjegyzek;
   // a témák
   const hb = { koino: K, alairo: AL, legfelsoDarab: 300, vallaltSzeletek: ['szelet-1'], szeletHirdetes: 1 };
@@ -1216,7 +1216,7 @@ proba('⭐⭐⭐ a mai DHT-TÉMÁK, KIÁLTÁS és MEGHÍVÓ bájtra a régi (a g
     azonos: u1 === regi.helyiFelfedezes.felfedezoUzenet('KOPOGOK', K, 7373, 'jel-1') && !('v' in JSON.parse(u1)),
     kettoMas: JSON.parse(u2).v === 2 && JSON.parse(u2).k !== JSON.parse(u1).k,
     regiEgyest: rk(u1).rendben === true,
-    regiKettot: rk(u2).ok === 'mas-koino',                 // ⛔ a régi olvasó csendben „másik koinónak” veszi
+    regiKettot: rk(u2).ok === 'mas-koino',                 // ⛔ a régi olvasó csendben „másik koinonak” veszi
     maiEgyesKettot: mk(u2, [1]).ok === 'ujabb-alak' && mk(u2, [1]).valtozat === 2,
     kettesEgyest: mk(u1, [2]).ok === 'regebbi-alak',
     atmenet: mk(u1, [2, 1]).valtozat === 1 && mk(u2, [2, 1]).valtozat === 2 && mk(u2, [2, 1]).rendben,
@@ -1276,7 +1276,7 @@ proba('⭐⭐⭐ a KIÁLTÁS valódi foglalatokon: a kitalált [1,2] kiáltót a
     regi2: await kor(regi.helyiFelfedezes, 8017, 8018, null, [2]),
     kettes1: await kor(mai, 8019, 8020, [2], [1])
   };
-  // két kiáltó egymásra: az 1-es a 2-es kiáltását hallja, és megnevezi (nem „másik koinó”)
+  // két kiáltó egymásra: az 1-es a 2-es kiáltását hallja, és megnevezi (nem „másik koino”)
   const hallott = [];
   const [x, y] = await Promise.all([
     helyiFelfedezes({ koino: K, sajatPort: 7373, figyeloPort: 8021, celok: ['127.0.0.1'], celPort: 8022, idokorlat: 1200,

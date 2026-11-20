@@ -20,7 +20,7 @@
 // elfelejteni valakit, akivel tegnap még beszéltünk.*
 //
 // ⚠️ HELYI MEGFIGYELÉS, NEM ESEMÉNY (3. szabály): a kötés-jegyzék sosem terjed, és semmit
-// nem dönt el a koinóban — csak azt, hogy kire kopogunk a bulin. Ha elveszik, a következő
+// nem dönt el a koinoban — csak azt, hogy kire kopogunk a bulin. Ha elveszik, a következő
 // bulikon újraépül.
 //
 // ⚠️ EZ A FÁJL NEM IMPORTÁL HÁLÓZATOT ÉS TÁRAT (1. szabály): tiszta függvények, a jegyzéket
@@ -270,7 +270,7 @@ export function tablanKeresendok(jegyzek, ablak, most = Date.now()) {
  * rendszeresség szerint (`kotesek()`). *Így a halott kötés kiürül, az élő új társ pedig
  * marad, amíg él.*
  *
- * ⚠️ Az ára kimondva: egy nyüzsgő koinóban, ahol ötnél több társsal érünk össze, a helyek
+ * ⚠️ Az ára kimondva: egy nyüzsgő koinoban, ahol ötnél több társsal érünk össze, a helyek
  * cserélődnek, és a `talalkozasok` nem tud felgyűlni. *Ez tudatos csere: egy friss,
  * elérhető cím többet ér, mint egy régi ismeretség halott címe.*
  */

@@ -3,8 +3,8 @@
 // Felelősség: A 66. MÉRÉS — MEKKORA EGY KÉSZÜLÉK TERHE A SZIGORÚ (b) ALATT? (a B/3 átvizsgálása)
 //
 // A szigorú (b) szerint egy készülék a VÁLLALT szeleteit cseréli és tartja (D75, D86): amire tudatpontot tett, a saját
-// azonosság-szeletét és a koinó születését. ⭐ A kérdés: mekkora ez egy átlagos és egy „rossz napos” készüléken, és
-// hogyan nő a koinó méretével — mert a vállalt szelet MINDEN eseményét tartja (a többi pont-tartóét is), és a
+// azonosság-szeletét és a koino születését. ⭐ A kérdés: mekkora ez egy átlagos és egy „rossz napos” készüléken, és
+// hogyan nő a koino méretével — mert a vállalt szelet MINDEN eseményét tartja (a többi pont-tartóét is), és a
 // szabály-réteg (D93/1) a szerzőik tagságát is kérdezi (tehát a tagsági bizonyítékuk is kell).
 //
 // A modell (szimuláció — darabszám, aláírás nélkül): N tag; mindenki k entitásra tesz pontot (k egyenletes 3..20);
@@ -47,7 +47,7 @@ function felepites(N, v) {
     for (let i = 0; i < k; i++) {
       let e;
       if (!urna.length || v() < P_UJ) {
-        // új vagy egyenletesen véletlen entitás (a felük új — a koinó gondolatai nőnek)
+        // új vagy egyenletesen véletlen entitás (a felük új — a koino gondolatai nőnek)
         if (!tartok.length || v() < 0.5) { e = tartok.length; tartok.push([]); }
         else e = Math.floor(v() * tartok.length);
       } else {
@@ -84,7 +84,7 @@ for (const N of [1000, 10000, 100000, 1000000]) {
   let nagyotTart = 0;
   for (let s = 0; s < minta; s++) {
     const tag = Math.floor(v() * N);
-    let db = 2, db2 = 2;                          // a saját azonosság-szelet + a koinó születése (legalább)
+    let db = 2, db2 = 2;                          // a saját azonosság-szelet + a koino születése (legalább)
     const erintett = [];
     let erintett2 = 0;
     let vanNagy = false;

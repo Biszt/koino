@@ -12,11 +12,11 @@
 #   else { & .\koino\windows\telepit.ps1 @args } }" koino-meghivo:2:…
 #
 # ⭐ 2026-11-06: a P2P koino saját tárban él (`Biszt/koino`, a program a tár gyökere) — a gépen `%USERPROFILE%\koino`. A régi helyről
-# (`%USERPROFILE%\koino_1.1\koino`) futó koinót is leállítja (a költözés); a régi mappát nem bántja.
+# (`%USERPROFILE%\koino_1.1\koino`) futó koinot is leállítja (a költözés); a régi mappát nem bántja.
 #
 # ⭐⭐ D123 (PR7): a sor a már telepített programot FRISSÍTI is — lent, „A FRISSÍTÉS”.
-# ⚠️ A program magától nem frissül (csak ha a sort bemásolod): hogy melyik kódot futtatja egy koinó, az a közösség dolga (a
-# koino-verzió kártya, D119 — és ha a gépeden más a számítás magja, mint amivel a koinó született, a lap kimondja: D123).
+# ⚠️ A program magától nem frissül (csak ha a sort bemásolod): hogy melyik kódot futtatja egy koino, az a közösség dolga (a
+# koino-verzió kártya, D119 — és ha a gépeden más a számítás magja, mint amivel a koino született, a lap kimondja: D123).
 # ⚠️ UTF-8 BOM-mal mentve: a Windows PowerShell 5.1 a BOM nélküli szkriptet ANSI-ként olvasná (a magyar betűk elromlanának) — a
 # meghívó-próba őrzi.
 
@@ -31,13 +31,13 @@ if ($env:OS -ne 'Windows_NT') {
 # ===== ⭐⭐ D123 (PR7): A FRISSÍTÉS — a sor az új változatot a régi MELLÉ tölti, ez a szkript cserél =====
 #
 # A windowsos sor minden bemásoláskor letölti a programot a `koino-uj` mappába, és ha a kicsomagolás sikerült, az ott lévő (ÚJ)
-# telepítőt hívja — ezt. Az új telepítő megnézi, hogy a csomag teljes-e; leállítja a régi mappából futó koinót (a node és az indító —
+# telepítőt hívja — ezt. Az új telepítő megnézi, hogy a csomag teljes-e; leállítja a régi mappából futó koinot (a node és az indító —
 # mérve: amíg egy folyamat munkakönyvtára a mappában áll, a mappa nem nevezhető át, és különben a régi kód futna tovább); a régit
 # `koino-regi`-nek nevezi (a következő frissítésig megmarad — ha valami a program mappájában volt, ott megtalálod); az újat a
 # helyére teszi; és a helyén lévő (új) telepítőt hívja. ⛔ Egy git-tárat (`koino\.git`) nem cserél le — azt git-tel frissítsd.
 # Ha a csere nem sikerül (egy másik program fogja a régi mappát), a régi marad, és a régi program indul — kimondva.
 # ⚠️ Az adat (`%USERPROFILE%\koino-adat`) a program mappáján kívül van: a csere nem érinti.
-# ⭐ Ha nem frissítés (a meglévő telepítő fut — pl. nincs hálózat), a futó koinót akkor is leállítja és újraindítja: a felület
+# ⭐ Ha nem frissítés (a meglévő telepítő fut — pl. nincs hálózat), a futó koinot akkor is leállítja és újraindítja: a felület
 # különben foglalt portot találna. `KOINO_INDITAS=nem`: a telepítő csak frissít és leállít, a programot nem indítja (a próbáknak).
 # ⭐ A KÖLTÖZÉS (2026-11-06): a régi tárból telepített program (`koino_1.1\koino`) folyamatait is leállítja — a régi mappát nem
 # nevezi át és nem törli (az a régi tár; ha már nem kell, kézzel törölhető). A régi sor LETÖLTÉSÉT (`koino_1.1-uj`) viszont
@@ -86,7 +86,7 @@ if ($UJBOL) {
     $baj = 'a ' + $helye + ' egy git-tár — azt nem cserélem le; frissítsd git-tel (git pull)'
   } else {
     $leallitva = FutoKoinokLeallitasa $helye
-    if ($leallitva) { Write-Host ('· A futó koinót leállítottam (' + $leallitva + ' folyamat) — az új programmal indul újra.') }
+    if ($leallitva) { Write-Host ('· A futó koinot leállítottam (' + $leallitva + ' folyamat) — az új programmal indul újra.') }
     $atnevezve = $false
     try {
       if (Test-Path -LiteralPath $helye) {
@@ -123,7 +123,7 @@ Remove-Item -LiteralPath (Join-Path (Split-Path -Parent $GYOKER) $UJ_NEV) -Recur
 Remove-Item -LiteralPath (Join-Path (Split-Path -Parent $GYOKER) $REGI_TAR_UJ_NEV) -Recurse -Force -ErrorAction SilentlyContinue
 # Ha egy korábbi ablakban fut a koino (innen vagy a régi tár helyéről), leállítjuk: a felület különben foglalt portot találna.
 $leallitva = FutoKoinokLeallitasa $GYOKER
-if ($leallitva) { Write-Host ('· A futó koinót leállítottam (' + $leallitva + ' folyamat) — most újraindul.') }
+if ($leallitva) { Write-Host ('· A futó koinot leállítottam (' + $leallitva + ' folyamat) — most újraindul.') }
 if ($env:KOINO_INDITAS -eq 'nem') {
   Write-Host ('✓ A program a helyén: ' + $GYOKER + ' (KOINO_INDITAS=nem — nem indítom el)')
   exit 0

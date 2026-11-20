@@ -5,7 +5,7 @@
 // ⛔⛔ EZ SOHA NEM AZ AZONOSSÁGOD (Csaba döntése, 2026-09-20, D6). A koino-kulcsod azt
 // mondja meg, KI vagy; ez a kulcs azt, hogy HOL érhető el ez a KÉSZÜLÉK. A kettő
 // szándékosan nincs összekötve: aki a táblát figyeli, ne tudja a címeidet a személyedhez
-// kötni. *Két kérdés, két kulcs — ugyanaz az elv, mint mindenhol a koinóban.*
+// kötni. *Két kérdés, két kulcs — ugyanaz az elv, mint mindenhol a koinoban.*
 //
 // ===== MIÉRT KELL, ÉS MIÉRT ÉPP EZ A KÉT KULCS =====
 //
@@ -27,7 +27,7 @@
 // ⚠️ NULLA FÜGGŐSÉG (6. szabály): mindkét kulcsfajta és az AES-GCM a beépített
 // WebCryptóból jön — megmérve, hogy létezik (2026-09-20).
 //
-// ⚠️ EZ A FÁJL SEMMIT NEM TUD A KOINÓRÓL: nem ismer eseményt, tárat, szabályt. A `vonal.js`
+// ⚠️ EZ A FÁJL SEMMIT NEM TUD A KOINORÓL: nem ismer eseményt, tárat, szabályt. A `vonal.js`
 // MELLÉ került, nem bele (1. szabály).
 //
 // Használják: koino.js (a tábla-ág), a kötés-jegyzék és a próbáik.

@@ -103,9 +103,9 @@ kutatás-fejlesztési feladat — részletes terve elkészült, a legfontosabb e
 - **A kód a közösségé:** az elfogadott kód-módosításokat a hálózat ellenőrzött,
   automatikus frissítéssel veszi át; a rendszer működtetéséhez rám többé nincs
   szükség. Ha pedig a közösség egy módosításban végül nem ért egyet, a hálózat több
-  ágra válhat: párhuzamos koinók jöhetnek létre, amelyek a közös múltat mind
+  ágra válhat: párhuzamos koinok jöhetnek létre, amelyek a közös múltat mind
   megőrzik, és a jövőjükről külön-külön döntenek. Ez nem hiba, hanem a végső
-  biztosíték arra, hogy a koinót senki — én sem — sajátíthatja ki.
+  biztosíték arra, hogy a koinot senki — én sem — sajátíthatja ki.
 
 A koino nem kriptovalutával kezdődik: először döntéshozatalt építünk és egyezményeket
 hozunk létre — de ha a közösség úgy dönt, létrejöhet az első olyan pénz, amelyet a
@@ -128,7 +128,7 @@ biszt5@gmail.com
 
 - **v2.1 (2026-07-17):** Csaba átszerkesztette a dokumentumot (az eredeti levelek
   legjobb részei vissza; a Fázis 1 leírás az eredeti részletes szöveggel; új indoklás
-  a kérésnél). Claude formai javítások + a párhuzamos koinók (fork) bekezdése a csupa
+  a kérésnél). Claude formai javítások + a párhuzamos koinok (fork) bekezdése a csupa
   nagybetűs jegyzet helyére.
 - **v2.2 (2026-07-17) — Claude 6 észrevételének sorsa (Csaba döntött):**
   (1) védő-mondatok visszaállítása — ELVETVE (Csaba: magától értetődik, a

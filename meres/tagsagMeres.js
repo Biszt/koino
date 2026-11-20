@@ -4,7 +4,7 @@
 // lánc, mekkora egy tagsági bizonyíték (a tag belépése és meghívása, ősönként, az alapítóig), és mennyi munkát spórol
 // a gyorsítótár (a már ellenőrzött tagok ősei közösek).
 //
-// A modell: a koinó meghívással nő (D56: egy meghívó elég). Három növekedési mód:
+// A modell: a koino meghívással nő (D56: egy meghívó elég). Három növekedési mód:
 //   · 'egyenletes'  — az új tagot egy véletlen meglévő tag hívja be (véletlen rekurzív fa);
 //   · 'aktiv'       — a hívók népszerűsége a meghívottjaik számával nő (néhány nagy meghívó — „preferenciális”);
 //   · 'friss'       — a legutóbb belépettek hívnak (lánc-szerű, a legmélyebb eset: családról családra).

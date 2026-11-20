@@ -55,7 +55,7 @@ egy oldalnyi, nem az egész (9. szabály).
   jöhet (D76: a folytonosság élménye nem fontos).
 - **(B) A felület maga kérdez** (saját kapuval) — gyorsabb, de két folyamat nyúlna a hálózathoz (port-ütközés), és a
   felület akkor is hálózatozna, ha az őrjárat nem fut.
-- **(C) Nem kérdez senki** — a lap csak a helyi tudást mutatja (a szigorú (b) alatt egy új koinóban szinte semmit).
+- **(C) Nem kérdez senki** — a lap csak a helyi tudást mutatja (a szigorú (b) alatt egy új koinoban szinte semmit).
 
 **H2. Mit mutasson a lap a nem tartott ágak össz-pontjáról?**
 

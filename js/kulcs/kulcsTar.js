@@ -2,13 +2,13 @@
 
 // Felelősség: a saját kulcspár létrehozása, tárolása, betöltése, kimentése és VISSZATÖLTÉSE.
 //
-// A KULCS A KOINÓBAN NEM JELSZÓ, HANEM SZEMÉLYAZONOSSÁG (D15): nem titkol, hanem
+// A KULCS A KOINOBAN NEM JELSZÓ, HANEM SZEMÉLYAZONOSSÁG (D15): nem titkol, hanem
 // HITELESÍT. A nyilvános fele a „neved" a hálózaton (32 bájt), a privát felével írod alá
 // a cselekedeteidet. Nincs fiók, nincs jelszó, nincs bejelentkezés — a kulcs maga vagy te.
 //
 // EGY KULCS AZ EGÉSZ BELÉPŐ TÉRBEN (D25, Csaba döntése 2026-08-26): ugyanaz a kulcs
-// azonosít a tér minden koinójában, mert csak így „jönnek át" a tanúsítások. A
-// megjelenített NÉV viszont koinónként külön lehet.
+// azonosít a tér minden koinojában, mert csak így „jönnek át" a tanúsítások. A
+// megjelenített NÉV viszont koinonként külön lehet.
 //
 // Ed25519-et használunk, a futtatókörnyezet saját WebCryptójából — mérve: a böngészőben
 // és a Node-ban IS elérhető, külső kriptográfiai könyvtár nélkül. Ez egy olyan programnál,
@@ -117,7 +117,7 @@ export async function kulcsparBetoltese(tarolo) {
   }
 
   // ⭐⭐ D128 (②a): a születés — ha a tárolóban van, és ehhez a kulcshoz tartozik (az első kulcs írta alá). ⚠️ A régi (születés
-  // nélküli) kulcsfájlnak a `kulcsparBiztositasa` ad születést — a név ezzel MEGVÁLTOZIK (új koinó-család).
+  // nélküli) kulcsfájlnak a `kulcsparBiztositasa` ad születést — a név ezzel MEGVÁLTOZIK (új koino-család).
   const kulcspar = await azonossagRaTetele(await kulcsparLeirasbol(leiras), leiras);
   console.log('kulcsparBetoltese - VÉGE (megvan)', { szuletes: !!kulcspar.szuletes });
   return kulcspar;
@@ -450,7 +450,7 @@ export function papirEl(kulcspar) {
 /**
  * Egy korábban kimentett kulcsfájl visszatöltése — és elmentése a tárolóba.
  *
- * ⛔⛔ EZ AZ EGYETLEN MŰVELET A KOINÓBAN, AMI ELDOB VALAMIT. Mindenütt máshol
+ * ⛔⛔ EZ AZ EGYETLEN MŰVELET A KOINOBAN, AMI ELDOB VALAMIT. Mindenütt máshol
  * hozzáfűzünk: az esemény-tár csak `hozzafuz`-t tud, eseményt soha nem módosítunk. Itt
  * viszont egy meglévő kulcs FELÜLÍRÓDNA — és a D15 szerint az nem „egy fájl", hanem az
  * e-ember maga: a régi kulcshoz tartozó lánc, tagság és tanúsítások mind elérhetetlenné

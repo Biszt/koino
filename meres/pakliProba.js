@@ -45,7 +45,7 @@ const KOINO = 'proba';
 async function ujKoino() {
   const mappa = await mkdtemp(join(tmpdir(), 'koino-pakli-'));
   const tar = await esemenyTarNyitasa(KOINO, mappa);
-  // ⭐ D93/1: anna TAG (a pontja csak így számít) — a koinó születése és a tagsági eseményei a tárban.
+  // ⭐ D93/1: anna TAG (a pontja csak így számít) — a koino születése és a tagsági eseményei a tárban.
   const anna = await ujTag(KOINO);
   for (const e of tagsagiEsemenyei(anna)) await esemenyMentese(tar, e);
   return { tar, anna };
@@ -81,7 +81,7 @@ async function vegiglapoz(tar, beallitas, kozben, frissNezet = false) {
     mind.push(...oldal.kartyak);
     kurzor = oldal.kovetkezoKurzor;
     oldalak++;
-    // ⭐ A próba itt tud „belepiszkálni" a koinóba két oldal között.
+    // ⭐ A próba itt tud „belepiszkálni" a koinoba két oldal között.
     if (kozben && oldalak === 1) await kozben();
     if (oldalak > 50) throw new Error('a lapozás nem ér véget — végtelen ciklus?');
   } while (kurzor);
@@ -554,7 +554,7 @@ proba('⭐ A kártya SAJÁT pontja a pakliban is ott van', async () => {
 // 8. ⭐ A BESOROLÁS — kategória és gondolattípus (5.4)
 // ===================================
 //
-// ⛔ 2026-09-06-ig ez a két entitástípus NEM LÉTEZETT a koinóban: a végpont-térkép találata
+// ⛔ 2026-09-06-ig ez a két entitástípus NEM LÉTEZETT a koinoban: a végpont-térkép találata
 // volt (tíz prototípus-végpont mögött nem volt esemény). Itt azt mérjük, hogy megvan — és
 // hogy a korlátot a SZÁMÍTÁS tartja, nem a felület.
 
@@ -879,7 +879,7 @@ proba('⭐⭐ D116: a FELDERÍTETLEN RÉSZ — a kártyán, a testvéreknél, a 
     // A (gyökér-szintű): 3 leszármazott ismert; a gyökér szintjén 4-ből csak ő ismert — 0 testvér, 3 hiányzik
     szamokA: kartya(gy, A)?.szamok?.leszarmazott === 3 && kartya(gy, A).szamok.testver === 0
       && kartya(gy, A).szamok.testverHiany === 3,
-    // ⭐ (2026-10-23) az alsó sáv: a koinóban (a gyökér tartója szerint) 30 entitás, ebből 4-et ismerek → 26 nem ismert
+    // ⭐ (2026-10-23) az alsó sáv: a koinoban (a gyökér tartója szerint) 30 entitás, ebből 4-et ismerek → 26 nem ismert
     alsoSav: st.ismeretlenSzama === 26 && st.ismeretlenLegalabb === false && st.gondolatokSzama === 4
   };
   if (!Object.values(ki).every(Boolean)) console.log('    (D116 — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ')');
@@ -959,7 +959,7 @@ proba('⭐ a feltöltött ikon képként jelenik meg (a relatív `/api/fajl/` c�
 // alakját várja — a lap fordít (`felulet/js/kartyaAdat.js`). A fordító tiszta függvények, node alatt is futnak: a valódi
 // `pakliHierarchia` válaszából a `Pakli.js` alakja (a kiválasztott a típusával, a mélység és a létrehozás a kártya legfelső
 // szintjén — a testvér-sorrend ebből rendez —, a forrás-jel), és az útvonalak (a fa-szelet, a lapos nézet; a program
-// saját lapos útja nem fordul). Rontás: a fordító a koinó szótárát adná tovább → a `Pakli.js` mezői hiányoznak.
+// saját lapos útja nem fordul). Rontás: a fordító a koino szótárát adná tovább → a `Pakli.js` mezői hiányoznak.
 proba('⭐ D100: a prototípus pakli-útvonalai és alakja — a lap fordít (a `Pakli.js` bájtra a prototípusé)', async () => {
   const { prototipusUtvonala, hierarchiaAdatta, rendezettAdatta, LAPOS_OLDAL } = await import('../felulet/js/kartyaAdat.js');
   const { tar, anna } = await ujKoino();
@@ -1277,7 +1277,7 @@ proba('⭐ Egy lapozás alatt EGYSZER számol állapotot, nem oldalanként', asy
 // ===================================
 //
 // Mit bizonyít ez a szakasz? Hogy a kártya UGYANABBÓL A KÉPBŐL felel, amiből a lista
-// készült — se nem mást mond, mint a lista, se nem számoltatja újra a koinót minden
+// készült — se nem mást mond, mint a lista, se nem számoltatja újra a koinot minden
 // kattintásra.
 //
 // ⛔⛔ ÉS MIÉRT NEM VAK. Mindkét ágat mérjük: horgonnyal **nem** látja a közben érkezett
@@ -1607,7 +1607,7 @@ proba('⭐ D102: ág-szűrve az ág maga a kiindulás; a még nem ismert ágat k
     && ismeretlen.biztos === 0 && ismeretlen.kerendo[0]?.kulcs === 'Q'.repeat(43);
 });
 
-// ⭐ 2026-10-23 (Csaba lelete: a telefon egy nyitva hagyott listával az egész koinót lehúzta, „felderítés nélkül”): a bejáró
+// ⭐ 2026-10-23 (Csaba lelete: a telefon egy nyitva hagyott listával az egész koinot lehúzta, „felderítés nélkül”): a bejáró
 // csak a SZÜKSÉGES helyekig kér — amit a nézet mutat. Egy hely biztosságát csak az előtte álló nem teljes csomópontok rontják,
 // tehát a szükséges helyeken túl nincs mit kérni. Rontás: a korlát kimarad → mindkét próba bukik.
 proba('⭐ a bejáró csak a SZÜKSÉGES helyekig kér (amit a nézet mutat) — az oldal végén túl nem', () => {
@@ -1717,9 +1717,9 @@ proba('⭐ D112 ③: a felderítés állása — a legjobb K az ágban, legfelje
     && keretes.latszik.join() === [f.A, f.A1].join() && keretes.ismert === 4;
 });
 
-// ⭐ D112 (a böngészős próba lelete): az egész koinó felderítésénél a tartó TELJES gyökér-válasza elég — a gyökér nem marad
+// ⭐ D112 (a böngészős próba lelete): az egész koino felderítésénél a tartó TELJES gyökér-válasza elég — a gyökér nem marad
 // kérendő (különben a felderítés soha nem lenne kész). Rontás: a gyökér-szűrés kimarad → a gyökér kérendő marad → bukik.
-proba('⭐ D112: az egész koinó felderítése — a tartó teljes gyökér-válasza után a gyökér nem marad kérendő', async () => {
+proba('⭐ D112: az egész koino felderítése — a tartó teljes gyökér-válasza után a gyökér nem marad kérendő', async () => {
   const f = await kisFa();
   const nezet = ujPakliNezet({ tartott: async () => new Set() });
   const gy = new Map([[f.A, { gy: 2 }], [f.A1, { gy: 1 }], [f.A2, { gy: 0 }], [f.A11, { gy: 0 }], [f.B, { gy: 0 }]]);

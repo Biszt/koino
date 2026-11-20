@@ -5,7 +5,7 @@
 > **Mi ez a dokumentum, és mi nem?**
 > A [`fejlesztesi_terv_fazis2.md`](fejlesztesi_terv_fazis2.md) a **döntések** helye (D1–D60),
 > az [`utiterv.md`](utiterv.md) a **sorrendé**, a [`skalazas_terv.md`](skalazas_terv.md) a
-> **szerkezeté**. Ez itt a Szakasz 4 **részlete**: hogyan lesz a koinónak olyan
+> **szerkezeté**. Ez itt a Szakasz 4 **részlete**: hogyan lesz a koinonak olyan
 > bizalmi hálója, ami az első naptól milliárdos.
 > ⚠️ **A koino kódja még nem változott.** Ez tervezés — az egyetlen megírt darab a
 > [`szigetMeres.js`](../meres/szigetMeres.js) **mérőeszköz** (gráf-kísérlet, nem
@@ -68,7 +68,7 @@
 > ⭐ Ezért a gépi segítség értéke **az ÉSZREVÉTELBEN** van, nem a döntésben.
 >
 > ✅ **CSABA LEZÁRTA A MÉRÉSEKET (2026-09-06):** *„eleget mértünk. Nekem ez így már
-> megfelel, első koinónak."*
+> megfelel, első koinonak."*
 >
 > ▶️ **A megépítés terve: a 9/c szakasz.** ⚠️ *A régi 9/b terv a `k` tanúsításra épült —
 > ⛔ elavult, és meg van jelölve.*
@@ -127,7 +127,7 @@ adni**: öt aláírt esemény, egymás után. Bárki ellenőrzi, offline, ugyana
 eredménnyel. Ez **bizonyíték-alakú**.
 
 Ha azt állítom, hogy *„elérem a tagok 80%-át"*, azt **nem tudom odaadni** — ahhoz a
-másiknak ismernie kellene az egész halmazt. Ez **lekérdezés-alakú**, tehát a koinóban
+másiknak ismernie kellene az egész halmazt. Ez **lekérdezés-alakú**, tehát a koinoban
 használhatatlan.
 
 > ### ✅ D43 (javasolt) — A BELÉPÉSI SZABÁLY ALSÓ KORLÁT, SOHA NEM LEFEDETTSÉG
@@ -314,7 +314,7 @@ A `k` egyszerre **belépési mérce** (hány tanú kell) és **növekedési fék
 
 ⭐ **Csaba korrekciója (2026-09-04):** *„személyes találkozókon nagyon sok tanúsítást lehet
 gyűjteni. Nem ezerszer 3, hanem akár 1000 × 50–100."* — **Igaza van, és ez megváltoztatja
-a hatás nagyságát.** Egy 1000 fős koinóban:
+a hatás nagyságát.** Egy 1000 fős koinoban:
 
 - **átlag 50 tanúsítás** (találkozós kultúra): `k = 5`-nél 45 000 egység → **9000
   felvétel**; `k = 6`-nál 44 000 egység, felvételenként 6 → **7333 felvétel**. Ez
@@ -404,7 +404,7 @@ szándékos kerülőúttá. Ez a legtöbb, amit tisztességesen tehetünk — é
 > és a település nem csak társas nyitottság, hanem **a tanúsítás harmadik felének az
 > egyetlen műszere.**
 
-A **D28** szerint a koino kérhet adatot a belépéskor; Csaba első koinója **teljes nevet és
+A **D28** szerint a koino kérhet adatot a belépéskor; Csaba első koinoja **teljes nevet és
 település szintű lokációt** kér, és ezek nyilvánosak. Ez az, ami a tanúsítást emberileg
 kezelhetővé teszi — **egy idegenről meg lehet kérdezni másokat.** Három fokozat, és
 mindhárom a tanú saját döntése:
@@ -621,7 +621,7 @@ amit bárki a láncból is kiszámolhat.
    mellett.** Csak a fenti tények, mindenkinél ugyanúgy megjelenítve.
 2. ⛔ **A jelzés tájékoztat, nem jogosít** (N9). Attól, hogy valakinek vékony a hálója,
    **semmilyen joga nem csökken** — nem esik ki, és nem lesz kevesebb a szavazata.
-3. ⛔ **Az összesített nézet a koinóról szóljon, ne emberekről.** *„Mennyire vagyunk
+3. ⛔ **Az összesített nézet a koinoról szóljon, ne emberekről.** *„Mennyire vagyunk
    kitéve"* — nem *„kik a gyanúsak"*.
 
 ### ⭐ És a kör bezárul — nem kell új mechanizmus
@@ -770,7 +770,7 @@ A feloldás abból jön, hogy **megnézzük, mire van szüksége egy sétának**
 > hanem **üzenet, ami ugrál**.
 
 ⭐ **Már van rá minta a programban:** a `js/csere/tarsak.js` társ-listája pontosan ilyen —
-*„helyi megfigyelés — sosem terjed, és semmit nem dönt el a koinóban."*
+*„helyi megfigyelés — sosem terjed, és semmit nem dönt el a koinoban."*
 
 **A séta a gyakorlatban:** küldök egy jelet az egyik ismerősömnek, ő továbbadja egy véletlen
 ismerősének, az is tovább; tíz ugrás után az utolsó visszaszól, hogy ide jutott.
@@ -853,7 +853,7 @@ koino a másodikat választja.
   tűnik el, mert nincs, aki valóban bemutatkozzon vele.
 
 ⚠️ **A D49/c 2. és 3. pontja ÁLL:** a jelzés **tájékoztat, nem jogosít** (semmilyen jog nem
-csökken tőle), és az összesített nézet továbbra is a koinóról szóljon.
+csökken tőle), és az összesített nézet továbbra is a koinoról szóljon.
 
 ⏳ **És egy kérdés, amit ez NYITVA HAGY:** a nyilvános bemutatkozás **nem ugyanaz**, mint a
 láncra tett bemutatkozás. Lehet *nyilvános, de helyi* (a személy készülékéről lekérhető),
@@ -928,7 +928,7 @@ támadás kifizetődik, és sehova máshova.*
 
 > ### ⭐⭐ D61 (Csaba, 2026-09-06) — A BULI MINT KÉZBESÍTÉSI IGAZOLÁS
 >
-> *Csaba két mondata hozta:* **„ne tervezzük a koinót lassúra"** — és: *„nem mondtam le
+> *Csaba két mondata hozta:* **„ne tervezzük a koinot lassúra"** — és: *„nem mondtam le
 > arról, hogy a buli alkalmával a közösség globálisan tudjon értékekben megegyezni, amit a
 > készülékek szabályként fogadnak el."*
 >
@@ -1166,16 +1166,16 @@ kanonikus alakot érinti, és **utólag drága**.
 > pontosan az a kérdés, amit a **3.2** tett skálázhatóvá.
 >
 > 🔍 **Egymilliárd e-embernél:** a kérdés *„ki tanúsított engem?"* — a válasz **egy szelet**,
-> néhány tucat esemény. Soha nem kell végigolvasni sem a koinót, sem a tanúk láncait.
+> néhány tucat esemény. Soha nem kell végigolvasni sem a koinot, sem a tanúk láncait.
 >
 > ⚠️ **Amit ez a szerkezettől kap ingyen:** a szelet a **belépési eseményhez** kötődik, az
-> pedig **koinónként külön** (D25: *az azonosság közös, a jogosultság helyi*) — vagyis
-> ugyanaz a kulcs két koinóban két külön szeletet gyűjt, külön `k`-val. Ez nem külön
+> pedig **koinonként külön** (D25: *az azonosság közös, a jogosultság helyi*) — vagyis
+> ugyanaz a kulcs két koinoban két külön szeletet gyűjt, külön `k`-val. Ez nem külön
 > mechanizmus, hanem a meglévő szeletelés következménye.
 
 **A három bemondott érték — a D42 mintája, háromszor:**
 
-- `kiadott` — **hányadik tanúsítás ez tőlem** ebben a koinóban. Ettől lesz a keret *adott*
+- `kiadott` — **hányadik tanúsítás ez tőlem** ebben a koinoban. Ettől lesz a keret *adott*
   fele **egyetlen eseményből** ellenőrizhető, teljes lánc nélkül. Aki hazudik, annak két
   saját aláírt eseménye mond ellent egymásnak → **átadható bizonyíték**, nem hiány.
 - `k` — **a belépési minimum, amit a tanú látott**. Ez fagyasztja be a D47-et: a számítás
@@ -1221,7 +1221,7 @@ lekérdező-függvényt. Három okból:
 
 **Mérés:** a 10. szakasz **1–3/b** pontja, mind a négy rontás-próbával. ⚠️ *A 3. és a 3/b
 csak együtt érvényes:* az egyik a támadót fogja meg (a kölcsönös gyűrű nulla keretet
-termel), a másik azt bizonyítja, hogy **közben nem fagyasztottuk be a koinót** (ötven
+termel), a másik azt bizonyítja, hogy **közben nem fagyasztottuk be a koinot** (ötven
 megállapodott tag tanúsít egy frisset → a kerete 50 legyen).
 
 ---
@@ -1265,7 +1265,7 @@ nevezi keménynek. **A kettő között a D53 választ** — és ez Csaba dönté
 
 ### 4.4 A TAGSÁG MINT SZÁMÍTÁS — és a bizonytalanra jelölés
 
-**Új darab:** `js/allapot/identitas.js` — *„ki e-ember ebben a koinóban?"*, tisztán a
+**Új darab:** `js/allapot/identitas.js` — *„ki e-ember ebben a koinoban?"*, tisztán a
 szeletekből számítva. ⚠️ **Nem esemény:** senki nem mondja ki, hogy valaki tag — ugyanúgy
 **számítás**, ahogy az egyezmény (D17).
 
@@ -1288,12 +1288,12 @@ két készülék, eltérő szeletekkel, **ugyanazt mondja arról, ki e-ember** �
 
 **Amit egy e-emberről mutatunk** (mind **tény**, a láncból bárki újraszámolja): hányan
 tanúsították · milyen **ütemben** (tizenkét tanúsítás egy órán belül, vagy egy év alatt négy
-városból) · mennyire **megállapodottak a tanúi**. **Amit a koinóról:** torlódás a tanúkon ·
+városból) · mennyire **megállapodottak a tanúi**. **Amit a koinoról:** torlódás a tanúkon ·
 az *„egy körből született"* arány · a legszűkebb átvágás.
 
 ⛔ **A három védőkorlát (D49/c) itt válik kóddá, nem jószándékká:** nincs személyre szóló
 pontszám, nincs rangsor, nincs piros jelzés · a jelzés **tájékoztat, nem jogosít** (N9) ·
-az **összesített nézet a koinóról szól**, nem emberekről.
+az **összesített nézet a koinoról szól**, nem emberekről.
 
 ⛔ **És egy jelzés, amit tilos beépíteni:** a *„kevés kapcsolata van, tehát gyanús"* —
 háromszor mérve **31 / 41 / 45%** becsületes tagot jelölne meg tévesen, épp a magányost és a
@@ -1308,7 +1308,7 @@ kódba, **ugyanazokkal a számokkal** — hogy a mérés és a program ne csúss
 
 **Új darab:** `js/bemutatkozas/lista.js` — és **a mintája adott**: a
 [`tarsak.js`](../js/csere/tarsak.js), amiről a saját kommentje mondja ki, hogy *„helyi
-megfigyelés — sosem terjed, és semmit nem dönt el a koinóban."*
+megfigyelés — sosem terjed, és semmit nem dönt el a koinoban."*
 
 - **nem esemény**, nem megy a láncra, nem megy át a cserén (D6, D14);
 - a `koino-adat/` mappában él, a `tarsak.json` mellett;
@@ -1335,7 +1335,7 @@ hálózati kódot, ezért a UDP-re állás a **logikát** nem érintette. Itt is
 - ⛔ **A séta nem hoz bizalmat** (3. szabály). Nem esemény, nem megy az `esemenyMentese`
   kapun — és semmi, ami a sétából jön, nem lehet bemenete egy döntésnek.
 - ⭐ **Elhagyható** (2. és 4. szabály): ha a séta nem fut le, **csak a jelzést nem látod**, és
-  semmi más nem áll meg. Ezt a próbának is bizonyítania kell — *futtassuk a koinót úgy, hogy
+  semmi más nem áll meg. Ezt a próbának is bizonyítania kell — *futtassuk a koinot úgy, hogy
   a séta ki van kapcsolva, és minden más menjen változatlanul.*
 
 ⭐ **És egy egybeesés, ami nem véletlen:** a séták akkor futnak végig, amikor mindenki
@@ -1671,7 +1671,7 @@ a pénz is.
    **nulla** keretet termeljen (D48).
 3/b. ⛔ **És a párja: a NÖVEKEDÉS is menjen.** Ötven megállapodott tag tanúsítson egy friss
    tagot — a kerete **legyen 50**. ⚠️ *Ez a két próba együtt érvényes csak: az egyik a
-   támadót fogja meg, a másik azt bizonyítja, hogy közben nem fagyasztottuk be a koinót.*
+   támadót fogja meg, a másik azt bizonyítja, hogy közben nem fagyasztottuk be a koinot.*
 4. ⛔ **A befagyasztás.** `k` emelése után a régi felvételek maradjanak érvényesek, az újak
    essenek az új mérce alá — mindkét irányban.
 5. ⛔ **Objektivitás.** Két készülék, eltérő szeletekkel, **ugyanazt** mondja egy felvételről
@@ -1792,7 +1792,7 @@ a D50). ⭐ Három meglévő döntés kapott ott jelzést a felülírásról: **
   ⚠️ **A tervezés közben három dolog derült ki, ami eddig nem látszott:**
   **(1)** a **AK14 kérdése rossz volt** — a *„mekkora méret fölött kapcsoljon be"* maga is
   globális szám, tehát ugyanazon a 9. szabályon bukna el, mint a Duniter-alak; helyette a
-  `k` legyen paraméter, `k = 0`-val a kis koinóban (**D51 javaslat**);
+  `k` legyen paraméter, `k = 0`-val a kis koinoban (**D51 javaslat**);
   **(2)** a keret *kapott* fele csak akkor korlátos lekérdezés, ha a tanúsítás **a
   tanúsított szeletébe** kerül, nem a tanúéba (**D52 javaslat**) — és ezzel a `szabalyok.js`
   **illesztése is változik**, mert ma egyetlen tömböt kap és szerzőnként csoportosít;
@@ -1818,12 +1818,12 @@ a D50). ⭐ Három meglévő döntés kapott ott jelzést a felülírásról: **
   **(4)** ⭐⭐⭐ **és a törvény:** a visszacsatolással a kár 880 → 120, és
   **kár = a támadó üteme × az ébredés ideje** — lineáris, tehát **a hurok mindig bezárul**.
   ⚠️ **Négy saját modell-hibát is elkövettem közben**, mind a jegyzőkönyvben: a korlátos
-  mérés befagyott koinót mutatott „tökéletes védelemként" · az ismétlődés-szűrőt olyan
+  mérés befagyott koinot mutatott „tökéletes védelemként" · az ismétlődés-szűrőt olyan
   világban mértem, amiben nincs ismétlődés · a felhatalmazást nem korlátoztam, ezért
   mindenki tanúsító lett · és a visszavonás-jelzést **rossz gráfon** kerestem.
   ⭐ *A tanulság mind a négyszer ugyanaz: a jó szám ugyanolyan gyanús, mint a rossz, amíg
   nem nézzük meg, mitől jó.*
-  ✅ **Csaba lezárása:** *„eleget mértünk. Nekem ez így már megfelel, első koinónak."*
+  ✅ **Csaba lezárása:** *„eleget mértünk. Nekem ez így már megfelel, első koinonak."*
   ▶️ Az érvényes megépítési terv: **9/c**. A régi 9/b ⛔ elavult, meg van jelölve.
 - **2026-09-06 (este)** — ⭐⭐⭐ **A 9/c MEGÉPÜLT, ÉS A SZAKASZ 4 KÓDDÁ VÁLT.** A 4.1–4.6
   kész (`js/allapot/identitas.js`, `js/allapot/jelzesek.js`, hat új művelet, **52 önpróba**),

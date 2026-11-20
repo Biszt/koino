@@ -158,7 +158,7 @@ export function bekezdesBlokkok(szoveg) {
  * A pakli képébe teszi a kézikönyvet (csak a MEGJELENÍTÉSHEZ — a mag állapota nem változik): az alap-tartalom meg nem érintett
  * bejegyzései virtuális entitásként (a koinon 1 pontjával — mint a mag kézikönyv-entitásain), a megérintettek (és a különvált ágak)
  * mezőnként a megjelenítendő szöveggel (`kezikonyvSzovege`). Így a pakli, a struktúra, a síkidom és a keresés minden további
- * kód nélkül mutatja — „A koinó kézikönyve” egy új koinó első témája.
+ * kód nélkül mutatja — „A koino kézikönyve” egy új koino első témája.
  *
  * Minden kézikönyv-entitás megkapja a `kezikonyv` jelet: `{ nev, forras: 'program'|'kozosseg', ismert }` (a lap kimondja, honnan
  * jön a szöveg). A sima szöveg a képben bekezdésenkénti blokkokként áll (`bekezdesBlokkok` — a kártya így tagolja); a közösség

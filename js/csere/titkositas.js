@@ -6,7 +6,7 @@
 //
 // ===== MIT VÉD, ÉS MIT NEM =====
 //
-// ⭐ Az úton ülő (szolgáltató, nyilvános wifi) elől rejti a cserét: az eseményeket, a koinó azonosítóját, és
+// ⭐ Az úton ülő (szolgáltató, nyilvános wifi) elől rejti a cserét: az eseményeket, a koino azonosítóját, és
 // a készülék tábla-kulcsát — ez utóbbi állandó, tehát nyíltan hálózatról hálózatra követni lehetett volna a
 // készüléket. ⚠️ Ami látszik: hogy két cím beszél, mikor, és nagyjából mennyit; és a kopogás (KOPOG/HALLAK,
 // véletlen azonosítóval, és a D124 ② óta a szállítás-nemzedék száma: `sz`). A tárolt adatot a lemezen nem titkosítja (az a készülék biztonsága).
@@ -20,8 +20,8 @@
 //      aláíró (Ed25519) aláírása a kézfogás ÁTIRATÁRA (`kezfogasAlairasa`). Ettől a tábla-kulcs nem bemondás:
 //      aki aláírta, az vett részt EBBEN a kézfogásban — egy közbeékelődő nem tud a társ nevében aláírni.
 //      ⚠️ Az első találkozásnál a kulcsot elfogadjuk és a kötés megjegyzi (mint az SSH).
-//   3. ⭐⭐ A SZEMÉLY (D93/3, az E3 — 2026-10-04): zárt koinóban, ha a társ még nem ismert, a SZEMÉLYES kulcsával
-//      (az azonosságával — `kulcs.json`) is aláírja az átiratot, a koinó azonosítójával együtt
+//   3. ⭐⭐ A SZEMÉLY (D93/3, az E3 — 2026-10-04): zárt koinoban, ha a társ még nem ismert, a SZEMÉLYES kulcsával
+//      (az azonosságával — `kulcs.json`) is aláírja az átiratot, a koino azonosítójával együtt
 //      (`szemelyesKezfogasAlairasa`), és megnevezi a horgonyát — ettől a „ki vagy” nem bemondás: más nem tudja a
 //      kulcsa nélkül kiadni magát egy tagnak. A tábla-kulcs és a személy kötését a hívó megjegyzi (a következő
 //      cserén már nem kell).
@@ -200,8 +200,8 @@ export function kezfogasAlairasa(tablaLeiras, atirat) {
 // ⭐⭐ A SZEMÉLY — a személyes kulcs aláírja a kézfogás átiratát (D93/3)
 // ===================================
 //
-// ⚠️ Más előtag, mint a tábla-kulcsé, ÉS a koinó azonosítója is benne van: egy aláírás így se másik szerepben
-// (tábla-kulcs, esemény), se másik koinóban nem használható fel újra.
+// ⚠️ Más előtag, mint a tábla-kulcsé, ÉS a koino azonosítója is benne van: egy aláírás így se másik szerepben
+// (tábla-kulcs, esemény), se másik koinoban nem használható fel újra.
 
 const SZEMELYES = (koino, atirat) => Buffer.concat([Buffer.from('koino-kezfogas-szemely-1|' + koino + '|'), atirat]);
 

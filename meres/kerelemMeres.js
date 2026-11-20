@@ -154,7 +154,7 @@ tabla('① A TARTÓK SZÁMA (T), a tartók bárhol (λ = 0):', ALAP, 'T', [1, 3,
 tabla('② A KÖZÖSSÉGI ÉRDEKLŐDÉS (λ: egy tartó ekkora eséllyel van a kérő 2 lépéses környékén), T = 3:',
   ALAP, 'lambda', [0, 0.1, 0.3, 0.6]);
 tabla('③ A FOGADÓKÉPESEK ARÁNYA (f), T = 3, λ = 0:', ALAP, 'f', [0, 0.05, 0.1, 0.25, 0.5]);
-tabla('④ A KOINÓ MÉRETE (N), T = 3, λ = 0 — a „végtelen” próbája:', ALAP, 'N', [50, 500, 5000, 20000, 100000]);
+tabla('④ A KOINO MÉRETE (N), T = 3, λ = 0 — a „végtelen” próbája:', ALAP, 'N', [50, 500, 5000, 20000, 100000]);
 tabla('⑤ A KÖTÉSEK SZÁMA (K), T = 3, λ = 0:', ALAP, 'K', [3, 4, 5]);
 
 {

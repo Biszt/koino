@@ -181,7 +181,7 @@ hatalommá**, mert a szavazat személyenként egy, vagyontól függetlenül.
 
 ### A léptékre: nincs egyetlen terem
 
-És a harmadik, amiről a legkevesebbet szoktunk beszélni. A koinóban **nincs
+És a harmadik, amiről a legkevesebbet szoktunk beszélni. A koinoban **nincs
 központi gyűlés**. Nincs az az egy padsor, amit ha valaki elfoglal, mindent
 eldöntött.
 

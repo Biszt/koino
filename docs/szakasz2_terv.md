@@ -10,7 +10,7 @@
 
 **Épít:** két készülék **megtalálja egymást és kicseréli az eseményeit**, majd mindkettő
 **ugyanazt az állapotot számolja**. A végén Csaba a laptopján és a telefonján ugyanazt a
-koinót látja — anélkül, hogy bármelyikük „a szerver" lenne.
+koinot látja — anélkül, hogy bármelyikük „a szerver" lenne.
 
 **Nem épít:**
 
@@ -234,7 +234,7 @@ hibát és nem ad 1-es kilépési kódot — a koino helyben ugyanúgy működik
 
 ⭐ **Ez 102-szeres különbség — és nem a hálózatot kíméli, hanem a mobilos e-ember
 számláját.** A D35 épp ezért nem optimalizálás: az 5 percenkénti csere egy 1000 fős
-koinónál 46 MB/nap volt, most ~4,5 MB — ennyi már belefér egy olcsó előfizetésbe is.
+koinonál 46 MB/nap volt, most ~4,5 MB — ennyi már belefér egy olcsó előfizetésbe is.
 
 **Két dolog, ami emiatt NEM változott meg — és próba őrzi mindkettőt:**
 
@@ -298,13 +298,13 @@ POSTALÁDA   (a kapu nyitva a 7575-es porton)
 
 ### ⚠️ CSABA KÉRDÉSE, AMI EGY HIBÁT HOZOTT ELŐ (2026-08-29)
 
-*Az első feljegyzésem így szólt: „a postaláda csak abban a koinóban postaláda, amelyikben
+*Az első feljegyzésem így szólt: „a postaláda csak abban a koinoban postaláda, amelyikben
 ő maga is benne van." Csaba rákérdezett: **„még akkor sem, ha a családinak is a tagja?"** —
 és a mérés kiderítette, hogy **rosszul fogalmaztam, és emellett egy valódi hiba is volt
 a kódban.***
 
 **A korlát nem a tagságról szól.** Az, hogy **egy `figyel` = egy koino**: a
-`KOINO_AZONOSITO` a folyamat indulásakor eldől. Aki két koinónak is tagja, két `figyel`-t
+`KOINO_AZONOSITO` a folyamat indulásakor eldől. Aki két koinonak is tagja, két `figyel`-t
 futtat, két porton — nem elvi akadály, csak kényelmetlenség.
 
 **A hiba viszont valódi volt.** Megmérve, mi történt, ha egy MÁSIK koino készüléke szólt be:
@@ -317,21 +317,21 @@ futtat, két porton — nem elvi akadály, csak kényelmetlenség.
 
 Két baj volt együtt: **(1)** az idegen koino eseményei bekerültek a mappába — az állapotot
 nem rontották el (a `koinoEsemenyei` szűr), de ott ültek, és egy hazug fél így korlátlanul
-tölthette volna a lemezt; **(2)** mivel az `ALLAS` mindig csak a saját koinóra készül, a
+tölthette volna a lemezt; **(2)** mivel az `ALLAS` mindig csak a saját koinora készül, a
 két lenyomat **sosem konvergált** — a csere a kör-korlátig pörgött, ugyanazt küldve újra.
 
 **A javítás két rétegű, szándékosan:**
 
-1. a `LENYOMAT` üzenet megmondja, **melyik koinóról** beszélünk — eltérésnél a csere
+1. a `LENYOMAT` üzenet megmondja, **melyik koinoról** beszélünk — eltérésnél a csere
    azonnal, tisztán véget ér. Ez az **őszinte tévedést** fogja meg (két idegen koino
    találkozása egy nyitott hálózaton teljesen rendes dolog);
-2. a **beolvasztás szűr** a koino szerint — ez a **hazugot** fogja meg, aki a mi koinónkat
+2. a **beolvasztás szűr** a koino szerint — ez a **hazugot** fogja meg, aki a mi koinonkat
    mondja be, és mást küld. Az `esemenyMentese` szándékosan nem tud erről: ő az aláírást
    és az azonosítót nézi, és jól teszi.
 
-⭐ **És amit ez megnyit:** mivel a protokoll mostantól **kimondja, melyik koinóról szól**,
-később egy `figyel` **több koinót is kiszolgálhat** — vagyis egy erős készülék tényleg
-tudna postaláda lenni egy kis családi koinónak. Ez volt Csaba kérdésének a valódi gondolata.
+⭐ **És amit ez megnyit:** mivel a protokoll mostantól **kimondja, melyik koinoról szól**,
+később egy `figyel` **több koinot is kiszolgálhat** — vagyis egy erős készülék tényleg
+tudna postaláda lenni egy kis családi koinonak. Ez volt Csaba kérdésének a valódi gondolata.
 **Felírva, nem megépítve** — előbb a D. lépés mutassa meg, mekkora a valódi hiány.
 
 ---
@@ -579,7 +579,7 @@ erre épült a közvetlen kapcsolat terve (D31). Két hálózatból **egyben** v
 Ha ez az arány általános, akkor előbb-utóbb kell az **IPv4-es út** is — ahol viszont a
 router átírja a portot, tehát **STUN kellene**, épp az, amit eddig elkerültünk.
 
-**A 4. lépés tehát továbbra is NYITOTT.** Nem a koinón és nem a pajzsfúrón múlt — olyan
+**A 4. lépés tehát továbbra is NYITOTT.** Nem a koino-n és nem a pajzsfúrón múlt — olyan
 második hálózat kell, ahol tényleg van IPv6.
 
 ---
@@ -636,7 +636,7 @@ Ezek nem kíváncsiságból kellenek — mindegyik **eldönt valamit**:
 | **mennyi idő alatt ér körbe egy esemény** | a józan **minimum döntési időt** (D4), és a 4. pont „óvatosság"-ának árát | **9 ms** a laptopon, **77 ms a telefonon** (kapcsolatnyitás + két kör, helyben). Az alsó korlát tehát a leglassabb készüléken is elhanyagolható — a valódi számot a hálózat adja majd (4. lépés). |
 | **összeér-e két készülék IPv6-on, STUN nélkül** | kell-e egyáltalán infrastruktúra | *(4. lépés)* — de a vonal `::1`-en már áll |
 | **hányszor NEM jön össze a közvetlen út** | kell-e **továbbító** — a P2P legdrágább része | *(4. lépés)* |
-| **az `ALLAS` üzenet mérete N e-embernél** | skálázódik-e a csere-protokoll, vagy szeletelni kell | **162 bájt/fő** (50 fő, 3-3 esemény). 10 000 fős koinónál ~1,6 MB — **ez már szeletelést kíván**, felírva. ⚠️ A B. lépés óta ez csak akkor megy el, ha a tudás TÉNYLEG eltér. |
+| **az `ALLAS` üzenet mérete N e-embernél** | skálázódik-e a csere-protokoll, vagy szeletelni kell | **162 bájt/fő** (50 fő, 3-3 esemény). 10 000 fős koinonál ~1,6 MB — **ez már szeletelést kíván**, felírva. ⚠️ A B. lépés óta ez csak akkor megy el, ha a tudás TÉNYLEG eltér. |
 | **mennyi adat megy át egy csere alatt** | mit jelent a napi működés egy mobil-előfizetésnek | ✅ **„nincs újdonság" csere: 190 bájt** oda-vissza, 50 e-embernél (a régi protokollban 16 158). Valódi hálózaton még mérendő (4. lépés). |
 
 ---
@@ -648,7 +648,7 @@ Ezek nem kíváncsiságból kellenek — mindegyik **eldönt valamit**:
 | Korlát | Következmény |
 |---|---|
 | **Nincs mobilnet** | de a telefon átvihető a **szomszédba**, ahol más hálózatra csatlakozik → **külön router, külön nyilvános cím** — ez épp a jó mérés |
-| **Nincs második laptop** | a szomszédban nincs kábeles port-forwarding → a telefonnak **magának** kell futtatnia a koinót |
+| **Nincs második laptop** | a szomszédban nincs kábeles port-forwarding → a telefonnak **magának** kell futtatnia a koinot |
 | **Nem akar Cloudflare-alagutat** | *„épp az érdekel, hogy két készülék külön IP-ről tud-e kapcsolódni szolgáltató nélkül"* → helyes: az alagút épp azt a kérdést kerülné meg |
 
 **Ebből következik:** a telefonon **natívan** fusson a koino (Android + Termux + Node) —
@@ -679,7 +679,7 @@ postás, nem szolgáltató — és a mérés érvényességét nem rontja, mert 
    események azonnal átfolynak? (Az utóbbi kell a gyors döntésekhez.) *Ma: a kapcsolat a
    csendes körig él, aztán lezárul — több kört fut, de nem marad nyitva.*
 6. ✅ **Az `ALLAS` ára** — **eldöntve: D35** (2026-08-29). Már nem optimalizálás, hanem
-   **befogadási feltétel**: 1000 fős koinónál 5 percenkénti cserével 46 MB/nap, ami egy
+   **befogadási feltétel**: 1000 fős koinonál 5 percenkénti cserével 46 MB/nap, ami egy
    mobilos e-embert a **számlája** miatt zárna ki. Megoldás: összesített ujjlenyomat előbb,
    részletes állás csak eltérésnél (1,6 MB → ~100 bájt). **Ez a B. lépés.**
 8. 🆕 **A SZÉTSZAKADÁS mérése.** A D33 óta nem az a kockázat, hogy „A nem éri el B-t",
@@ -711,7 +711,7 @@ postás, nem szolgáltató — és a mérés érvényességét nem rontja, mert 
 - **2026-08-29 (a fordulat)** — 🔀 **ROSSZ FELADATOT OLDOTTUNK MEG — D33–D35.**
   Négy estén át azon dolgoztunk, hogy a laptop **fogadni** tudjon kapcsolatot: kézi
   router-szabály, NAT-PMP, PCP, UPnP — mind megbukott. Aztán Csaba feltette a kérdést, ami
-  a feladatot írta át: *„a koinóban nem konkrét címzetthez kell eljuttatni valamit, hanem
+  a feladatot írta át: *„a koinoban nem konkrét címzetthez kell eljuttatni valamit, hanem
   mindenkinek… mindegy, hogy kivel sikerül kapcsolódni, az már tudja továbbítani máshova."*
 
   **A három döntés** (teljes leírás: [`fejlesztesi_terv_fazis2.md`](fejlesztesi_terv_fazis2.md)):
@@ -838,7 +838,7 @@ postás, nem szolgáltató — és a mérés érvényességét nem rontja, mert 
   adtam meg, holott százalékban vannak. A kód végig helyesen számolt.*
 
 - **2026-08-28 (a vonal)** — **AZ 1b LÉPÉS KÉSZ: a csere valódi TCP-n.** A szállítás
-  (`js/csere/vonal.js`) semmit nem tud a koinóról — csak a `csere.js` objektumait küldi
+  (`js/csere/vonal.js`) semmit nem tud a koinoról — csak a `csere.js` objektumait küldi
   soronként egy JSON-üzenetként, vagyis **a vonal alakja ugyanaz, mint a táré**. A menet
   szimmetrikus: egyetlen `parbeszed` fut mindkét oldalon, és **a csendes körnél állunk
   meg** (ha egy körben se nem adtunk, se nem kaptunk) — ezt mindkét fél ugyanúgy számolja
@@ -1198,7 +1198,7 @@ mert a szeletek rögzített méretűek és **sorrendben** jönnek. *Ugyanaz, min
 a tartalom az igazság, nem egy mellette vezetett napló.* ⛔ Több forrásnál ez a feltevés
 elesik: a 3. szelet megjöhet az 1. előtt.
 
-### ⭐ A javasolt irány — és amiért illik a koinóba
+### ⭐ A javasolt irány — és amiért illik a koinoba
 
 Ne vezessünk be **naplót**; tartsuk meg az elvet, hogy **a tartalom az állapot**:
 
@@ -1396,7 +1396,7 @@ kell kopogni.*
 - **a szűrés élettartama** (a leképezésé és a szűrésé két külön óra);
 - ⛔ **kiszámítható-e a port elévülés után**: a laptop ugyanazt a számot kapta vissza, a telefon
   **MÁSIKAT** (31602 → 31514, és 31562 → 29318) — *tehát nem, és erre nem szabad építeni*;
-- **hány társ elérhető** egy valódi koinóban (a bemutató ára ezen múlik).
+- **hány társ elérhető** egy valódi koinoban (a bemutató ára ezen múlik).
 
 #### A megoldás mércéje (9. szabály)
 
@@ -1592,7 +1592,7 @@ tesz**. ⭐ A cím-szám (K) ezen **nem segít**: K=0 és K=10 között nincs m�
 
 - **A mobil leképezés élettartama** (a szomszéd telefonján 6 perc: `udpLekepezesMeres.js`).
 - **Két mobil készülék egymás közt** (közös CGNAT → hairpinning).
-- **A régi adat csapdája** (32. mérés): a laptop `sajat` koinójában 2026-08-29-i, régi
+- **A régi adat csapdája** (32. mérés): a laptop `sajat` koinojában 2026-08-29-i, régi
   formátumú események vannak, és emiatt a szerző ÚJ eseményei is elbuknak (a kiosztási
   főkönyv ellentmond). ⚠️ *Méréshez tiszta adat-mappát használjunk.*
 - A fájl-bájtok kézi útja · `FAJL_KORLAT` · a maradék modálok (5.8) · a „kurbli".

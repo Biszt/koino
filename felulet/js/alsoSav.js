@@ -7,7 +7,7 @@
 //     vagy újabb programot, és mi a teendő (`_nyelvKiirasa`). A mondatokat a program adja; a sáv csak kiírja.
 // A metódusok a prototípus nevein és lépésein mennek; a menü a `foMenu.js`-é, a pakli a `koinoPakli.js`-é.
 //
-// ===== ⭐ A KOINÓS TÖBBLET: A CSERE =====
+// ===== ⭐ A KOINOS TÖBBLET: A CSERE =====
 //
 // A cserét nem a lap végzi, hanem az őrjárat (egy másik folyamat). A program egy helyi feljegyzésből mondja meg
 // (`/api/csere-allapot` — `csereAllapot.js`), mikor cserélt utoljára a készülék, hozott-e újat, és mikor jön a következő
@@ -16,7 +16,7 @@
 // az infók és a menü értesítés-számlálója. Nyitott modál alatt nem rajzolunk újra (a néző épp ír vagy olvas): a
 // frissítés megvárja, amíg bezárul. A feliratra kattintva azonnal frissül.
 //
-// ⚠️ A lap itt sem számol a koinóról: minden szám a programtól jön; ez a fájl kiírja, és időzít.
+// ⚠️ A lap itt sem számol a koinoról: minden szám a programtól jön; ez a fájl kiírja, és időzít.
 //
 // Használja: `index.html`.
 
@@ -25,7 +25,7 @@ import Modal from './components/modals/Modal.js';
 import { apiGet } from './utils/apiHelper.js';
 import { aktivEntitasMentese } from './utils/authHelper.js';
 
-/** Ilyen sűrűn kérdezzük a csere állapotát (egy kis fájl olvasása a programban — a koinó méretétől független). */
+/** Ilyen sűrűn kérdezzük a csere állapotát (egy kis fájl olvasása a programban — a koino méretétől független). */
 const CSERE_KERDEZES = 10 * 1000;
 
 /** Az infók azonosítói — a prototípus `foOldalForm.html`-jéé. */
@@ -38,7 +38,7 @@ const INFO_AZONOSITOK = [
   'info-gondolattipusok-szama',
   'info-javaslatok-szama',
   'info-egyezmenyek-szama',
-  // ⭐ A koinós többlet (2026-10-23): amit a készülék még nem ismer (a tartó szerint)
+  // ⭐ A koinos többlet (2026-10-23): amit a készülék még nem ismer (a tartó szerint)
   'info-ismeretlen'
 ];
 
@@ -124,7 +124,7 @@ export class AlsoSav {
     document.addEventListener('visibilitychange', () => { if (!document.hidden) this._csereKerdezese(); });
     this.ketyego = setInterval(() => this._csereKiirasa(), 1000);
     this._csereKerdezese();
-    // ⭐⭐ D119 (①b): a programverzió — egyszer (a futó program és a koinó születése futás közben nem változik)
+    // ⭐⭐ D119 (①b): a programverzió — egyszer (a futó program és a koino születése futás közben nem változik)
     this._programKerdezese();
 
     this.adatokBetoltese();
@@ -321,7 +321,7 @@ export class AlsoSav {
 
   /**
    * ⭐ (Csaba, 2026-10-23): a még nem ismert entitások — „🔭 N” (ha a tartó maga sem tudja pontosan: „N+”; ha nem tudom:
-   * „?”), a magyarázattal. A koinós többlet; a szám a programé (`helyiStatisztika` — D116).
+   * „?”), a magyarázattal. A koinos többlet; a szám a programé (`helyiStatisztika` — D116).
    */
   _ismeretlenFelirata() {
     const elem = document.getElementById('info-ismeretlen');
@@ -329,13 +329,13 @@ export class AlsoSav {
     elem.classList.remove('also-sav__info-elem--betoltes');
     if (this.ismeretlenSzama === null) {
       elem.textContent = '🔭 ?';
-      elem.title = 'Hogy mennyi entitás van még a koinóban, amit ez a készülék nem ismer, nem tudom — a gyökér szintjének '
+      elem.title = 'Hogy mennyi entitás van még a koinoban, amit ez a készülék nem ismer, nem tudom — a gyökér szintjének '
         + 'tartója még nem mondta meg.';
     } else {
       elem.textContent = '🔭 ' + this.ismeretlenSzama.toLocaleString() + (this.ismeretlenLegalabb ? '+' : '');
       elem.title = (this.ismeretlenSzama === 0 && !this.ismeretlenLegalabb
-        ? 'A koinó minden entitását ismeri ez a készülék (a tartója szerint).'
-        : (this.ismeretlenLegalabb ? 'Legalább ' : '') + this.ismeretlenSzama.toLocaleString() + ' entitás van még a koinóban '
+        ? 'A koino minden entitását ismeri ez a készülék (a tartója szerint).'
+        : (this.ismeretlenLegalabb ? 'Legalább ' : '') + this.ismeretlenSzama.toLocaleString() + ' entitás van még a koinoban '
           + '(a tartója szerint), amit ez a készülék nem ismer — böngészéssel vagy felderítéssel hozható el.');
     }
     elem.setAttribute('aria-label', elem.title);
@@ -460,8 +460,8 @@ export class AlsoSav {
   }
 
   /**
-   * ⭐⭐ D119 (①b), D123 (PR3): ha ezen a készüléken MÁS program fut, mint amivel a koinó született, a sáv kimondja — KÉT SZINTEN,
-   * és egyiket sem tiltja (CS3). A MAG (a számítás) eltérése figyelmeztetés: ebben a koinóban mást láthatsz, mint a többiek. Ha csak a
+   * ⭐⭐ D119 (①b), D123 (PR3): ha ezen a készüléken MÁS program fut, mint amivel a koino született, a sáv kimondja — KÉT SZINTEN,
+   * és egyiket sem tiltja (CS3). A MAG (a számítás) eltérése figyelmeztetés: ebben a koinoban mást láthatsz, mint a többiek. Ha csak a
    * teljes program tér el (a felület, a protokoll, a helyi viselkedés), az tájékoztatás. A magot és programot nem nevező
    * (régi) születésnél nincs jelzés.
    */
@@ -479,16 +479,16 @@ export class AlsoSav {
         elem.textContent = '⚠ más számítás';
         elem.classList.remove('also-sav__program--info');
         elem.title = p.mag?.koinoe
-          ? 'Ez a koinó ezzel a számítással (a program MAGJÁVAL) született: ' + rovid(p.mag.koinoe) + '. Ezen a készüléken más mag fut: '
-            + rovid(p.mag.sajat) + ' — ebben a koinóban itt mást láthatsz (más egyezményt, más pontszámot), mint a többiek. Nem '
-            + 'tiltjuk; a koinó magjával futó program a koino-verzió kártyáján ellenőrizhető.'
-          : 'Ez a koinó ezzel a kóddal született: ' + rovid(p.koinoe) + ' (a koino-verzió kártyáján ellenőrizhető). Ezen a készüléken '
+          ? 'Ez a koino ezzel a számítással (a program MAGJÁVAL) született: ' + rovid(p.mag.koinoe) + '. Ezen a készüléken más mag fut: '
+            + rovid(p.mag.sajat) + ' — ebben a koinoban itt mást láthatsz (más egyezményt, más pontszámot), mint a többiek. Nem '
+            + 'tiltjuk; a koino magjával futó program a koino-verzió kártyáján ellenőrizhető.'
+          : 'Ez a koino ezzel a kóddal született: ' + rovid(p.koinoe) + ' (a koino-verzió kártyáján ellenőrizhető). Ezen a készüléken '
             + 'más fut: ' + rovid(p.sajat) + '. Nem tiltjuk — de ha a két verzió szabálya eltér, a számításuk is eltérhet.';
       } else {
         elem.textContent = 'ℹ más felület';
         elem.classList.add('also-sav__program--info');
-        elem.title = 'A számítás (a program magja) ugyanaz, mint amivel ez a koinó született — a képe itt is ugyanaz. A program többi '
-          + 'része (a felület, a protokoll vagy a helyi viselkedés) más: a koinó kártyáján ' + rovid(p.koinoe) + ', ezen a '
+        elem.title = 'A számítás (a program magja) ugyanaz, mint amivel ez a koino született — a képe itt is ugyanaz. A program többi '
+          + 'része (a felület, a protokoll vagy a helyi viselkedés) más: a koino kártyáján ' + rovid(p.koinoe) + ', ezen a '
           + 'készüléken ' + rovid(p.sajat) + '.';
       }
       console.log('AlsoSav._programKerdezese - VÉGE', { szint: p.szint });
@@ -533,10 +533,10 @@ export class AlsoSav {
           + (o.utolsoKor.celok ? ' ' + o.utolsoKor.celok + ' címből' : '') + ', ' + o.utolsoKor.uj + ' új esemény.');
       }
     } else if (o.csaladbol) {
-      // ⭐ D119 (⑥): a koinó a családjáé — a család őrjárata fut, és a következő körében felveszi (újraindítás nélkül).
-      sorok.push('Ennek a koinónak a családjához fut őrjárat — a következő körében felveszi, és onnan magától cserél.');
+      // ⭐ D119 (⑥): a koino a családjáé — a család őrjárata fut, és a következő körében felveszi (újraindítás nélkül).
+      sorok.push('Ennek a koinonak a családjához fut őrjárat — a következő körében felveszi, és onnan magától cserél.');
     } else {
-      // ⭐ D119 (⑥): a parancs ennek a koinónak szól (a becenevével, egy szabad porttal — a tér kártyáján másolható).
+      // ⭐ D119 (⑥): a parancs ennek a koinonak szól (a becenevével, egy szabad porttal — a tér kártyáján másolható).
       sorok.push('Az őrjárat nem fut — a készülék most magától nem cserél (indítás egy külön ablakban: '
         + (o.inditas ?? 'node koino.js orjarat') + ').');
     }

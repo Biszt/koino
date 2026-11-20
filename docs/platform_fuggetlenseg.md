@@ -7,7 +7,7 @@ Android-készülékre telepített alkalmazás **azonosított, nála regisztrált
 származzon — a bolt nélküli telepítésre is.*
 
 > **A kérdés, ahogy Csaba feltette:** *„a technikai korlátozhatóságoknak nem szabad, hogy
-> hatni tudjanak a koinóra."*
+> hatni tudjanak a koinora."*
 
 ---
 
@@ -54,7 +54,7 @@ Az első válasz-kísérlet az volt, hogy **a böngésző a mentőöv**: azt nem
 fejlesztő-ellenőrzés, tud aláírni (WebCrypto), és tud kapcsolatot kezdeményezni.
 
 **Csaba kérdése ezt megbuktatta:** *„mi van, ha a Google meggyőzi a böngészők
-tulajdonosait, hogy ők is gáncsolják a koinót?"* — és igaza volt:
+tulajdonosait, hogy ők is gáncsolják a koinot?"* — és igaza volt:
 
 | Böngésző | Kié a motor |
 |---|---|
@@ -78,7 +78,7 @@ hálózatra kapcsolódjon — vagyis épp azt, amire szükségünk lenne.
 
 ## 3. A híd: a koino szállítási igénye nevetségesen kicsi
 
-Nem egy sáv a válasz, hanem az, hogy **a koinónak nem kell csatorna**.
+Nem egy sáv a válasz, hanem az, hogy **a koinonak nem kell csatorna**.
 
 Nem kell élő kapcsolat, protokoll, szerver, port, cím. Ami mozog, az **aláírt bájt** — és
 mindegy, hogyan és mikor ér oda. Egy esemény ~400 bájt; egy családi koino teljes élete pár
@@ -124,7 +124,7 @@ alkatrész.** Aki egy USB-s vagy QR-kódos átadást ír hozzá, az a `vonal.js`
 A legalsó sor a padló. Nem azért, mert kényelmes — hanem mert **nincs kire hatni.**
 
 Szerencsés arány: a kézi átadás pont ott a legpraktikusabb, ahol a legnagyobb szükség
-lenne rá — **kis közösségben**. Egy nagy koinóban körülményes lenne, de ott rengeteg
+lenne rá — **kis közösségben**. Egy nagy koinoban körülményes lenne, de ott rengeteg
 PC-s csomópont van, tehát nem is kell.
 
 ---
@@ -178,7 +178,7 @@ itt védelem.**
 
 Csaba szavaival: *„elfogadom, és tetszik is. Így a pc-sek segítségével ugyanúgy tud
 működni, és lehet, hogy ez lesz az első digi harc a koino életében, amit összefogással tud
-megvívni. […] Már az is elég nekem, hogy a pc-sek fent tudják tartani a koinót."*
+megvívni. […] Már az is elég nekem, hogy a pc-sek fent tudják tartani a koinot."*
 
 ⚠️ **Amit a mérce NEM ígér** *(Csaba helyesbítése: „nem érdem, csak legyen rá mód")*: a
 függés nem érték, hanem elfogadható ár. Nem szépítjük.
@@ -202,13 +202,13 @@ A társtól tehát **csak szállítást** kap, igazságot soha. Ez a D32.
 1. **A teljesen lezárt készülék.** Ha egy eszköz csak jóváhagyott kódot futtat, és a
    böngésző utat is elzárják, akkor **azon a készüléken nincs automatikus út.** Ezt
    semmilyen tervezés nem oldja meg — **szoftver nem tud szabaddá tenni egy lezárt
-   készüléket.** Amit a tervezés megold: hogy ez ne jelentsen kizárást a koinóból.
+   készüléket.** Amit a tervezés megold: hogy ez ne jelentsen kizárást a koinoból.
 2. **Ha senki nem érhető el a közeledben**, akkor el vagy szigetelve. Ez **elérhetőségi**,
    nem bizalmi probléma (D21) — de probléma.
 3. **Hálózati szintű blokkolás** (állam, szolgáltató). Más fenyegetés, más válaszokkal;
    most nem tárgyaljuk.
 4. **A pénz (6. pont).** Ha a koino valaha bolti alkalmazásként futna, **a pénz miatt
-   vennék ki, nem a terjesztés miatt.** A D11 kapuja marad; a pénz sose kösse a koinót
+   vennék ki, nem a terjesztés miatt.** A D11 kapuja marad; a pénz sose kösse a koinot
    bolthoz.
 5. **Az új belépő megtalálása**, ha a domain elvész. Enyhíti, hogy a belépés amúgy is
    **személyes meghívással** történik (D18, Szakasz 3) — nem weboldal-kereséssel.
@@ -282,13 +282,13 @@ telefonokon” — utánanéztem (a Google fejlesztői oldala, 2026-10-23-i áll
   felhasználónak a haladó út kell); „korlátozott terjesztési” fiók (legfeljebb 20 készülék, okmány és díj nélkül); és másodlagos
   források szerint az ADB-s telepítés is megmarad.
 
-**Mit jelent a koinónak:**
+**Mit jelent a koinonak:**
 1. ✅ **A Termux-út (D30 után) biztosabb, mint gondoltuk:** ha a Termux fejlesztői regisztrálnak, semmi nem változik; ha nem,
-   a felhasználó EGYSZER végigmegy a haladó úton (egy nap várakozással), és utána a Termux és vele a koinó fut. *(A Termux
+   a felhasználó EGYSZER végigmegy a haladó úton (egy nap várakozással), és utána a Termux és vele a koino fut. *(A Termux
    regisztrációjáról 2026-11-01-én nem találtam hírt — 2027-ben, a magyarországi indulásnál megnézendő.)*
 2. ⛔ **A D30 következtetése áll:** a kapcsoló a Google-é — ma a felháborodás miatt létezik, a fejlesztői beállítások mélyén, és
   a felületét és a működését a Google adja minden gyártó telefonjára; egy rendszerfrissítéssel szigorítható vagy elvehető. A
-  koinó tehát nem épülhet rá, de **egy újabb sáv a létrán** (4. szakasz) a Termux és a kézi út között: a koinó akkor is
+  koino tehát nem épülhet rá, de **egy újabb sáv a létrán** (4. szakasz) a Termux és a kézi út között: a koino akkor is
   telepíthető, ha a Termux (vagy egy későbbi saját alkalmazás) nincs regisztrálva.
 3. ⚠️ **A súrlódás valódi:** egy átlagos családtagnak a rejtett menü és a 24 óra akadály — ezért marad a fő út a Termux egy
   bemásolt sorral (elágazás 224), és a haladó út a tartalék.

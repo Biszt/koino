@@ -278,7 +278,7 @@ export async function ujEember(koino = 'proba', keszulek = null) {
     keszulek: kulcspar.keszulek,   // ⭐⭐ D128: a lánc kulcsa
 
     /**
-     * ⭐ D118/2: az új alakú koinó születése üres koinó-mezővel megy (`ujEember('')`), utána az alapító a koinó NEVÉN — a
+     * ⭐ D118/2: az új alakú koino születése üres koino-mezővel megy (`ujEember('')`), utána az alapító a koino NEVÉN — a
      * születés lenyomatán — folytatja a láncát.
      */
     koinotValt(uj) { koino = uj; },
@@ -346,7 +346,7 @@ export async function ujEember(koino = 'proba', keszulek = null) {
   };
   // ⭐ D93: a próba-segéd nyilvántartja az e-embereit (a `tagokkal` ezekkel írja alá a belépést).
   // ⭐⭐ D128 (9.9): egy azonosság ELSŐ készüléke marad a nyilvántartásban — a `tagokkal` vele íratja a belépést (a horgonyt), így a
-  // koinó kerete az övé (mint a valóságban: az a készülék lépett be); a második készülék kerete 0.
+  // koino kerete az övé (mint a valóságban: az a készülék lépett be); a második készülék kerete 0.
   if (!EMBEREK.has(szerzo)) EMBEREK.set(szerzo, ember);
   return ember;
 }
@@ -356,14 +356,14 @@ export async function ujEember(koino = 'proba', keszulek = null) {
 // ===================================
 //
 // A szabály-réteg óta (D93/1) a döntésben csak az ellenőrzött tag számít. A próbák szerzői ezért tagok kell legyenek —
-// valódi, aláírt eseményekkel, nem kivétellel: a `tagokkal(esemenyek)` hozzáteszi a koinó létrehozását (ha nincs benne;
+// valódi, aláírt eseményekkel, nem kivétellel: a `tagokkal(esemenyek)` hozzáteszi a koino létrehozását (ha nincs benne;
 // akkor egy próba-alapító hozza létre), és minden szerzőhöz a SAJÁT aláírású `Belepes`-ét és az alapító `Meghivas`-át
 // (gyorsítótárral: ugyanahhoz a szerzőhöz ugyanazokat). ⚠️ A belépés a szerző láncának VÉGÉRE kerül (a következő
 // sorszám) — a lánc-sorszámot mérő próbákban ezért a láncépítés UTÁN hívandó. A tagságot magát mérő próbák (az
 // `identitasProba`, a `tagsagProba`) a saját eseményeiket építik.
 
 const EMBEREK = new Map();        // szerző → e-ember
-const VILAGOK = new Map();        // koinó + létrehozás → { alapito, letrehozas, tagok: Map(szerző → [események]) }
+const VILAGOK = new Map();        // koino + létrehozás → { alapito, letrehozas, tagok: Map(szerző → [események]) }
 
 /**
  * Az eseménylista a szerzők tagsági eseményeivel (elöl). Ismeretlen kulcs (nem a segéddel készült) nem lesz tag.
@@ -380,10 +380,10 @@ export async function tagokkal(esemenyek) {
     let alapito;
     if (letrehozas) {
       alapito = EMBEREK.get(letrehozas.szerzo);
-      if (!alapito) throw new Error('tagokkal: a koinó létrehozója nem a próba-segéddel készült');
+      if (!alapito) throw new Error('tagokkal: a koino létrehozója nem a próba-segéddel készült');
     } else {
       alapito = await ujEember(koino);
-      letrehozas = await alapito.tesz('KoinoLetrehozas', { nev: 'Próba-koinó', leiras: null, alapitok: [], zart: true });
+      letrehozas = await alapito.tesz('KoinoLetrehozas', { nev: 'Próba-koino', leiras: null, alapitok: [], zart: true });
     }
     vilag = { alapito, letrehozas, tagok: new Map() };
     VILAGOK.set(kulcs, vilag);
@@ -411,7 +411,7 @@ export async function tagokkal(esemenyek) {
 }
 
 /**
- * Ugyanez egy TÁRRA: a koinó eseményei szerzőinek tagsági eseményei a tárba mentve (ugyanazon a kapun).
+ * Ugyanez egy TÁRRA: a koino eseményei szerzőinek tagsági eseményei a tárba mentve (ugyanazon a kapun).
  * @returns {Promise<number>} hány új esemény került a tárba
  */
 export async function tagokTarba(tar, koino) {
@@ -460,7 +460,7 @@ export async function ujTag(koino = 'proba', ido) {
   let vilag = VILAGOK.get(kulcs);
   if (!vilag) {
     const alapito = await ujEember(koino);
-    const letrehozas = await alapito.tesz('KoinoLetrehozas', { nev: 'Próba-koinó', leiras: null, alapitok: [], zart: true }, 1);
+    const letrehozas = await alapito.tesz('KoinoLetrehozas', { nev: 'Próba-koino', leiras: null, alapitok: [], zart: true }, 1);
     vilag = { alapito, letrehozas, tagok: new Map() };
     VILAGOK.set(kulcs, vilag);
   }
@@ -472,7 +472,7 @@ export async function ujTag(koino = 'proba', ido) {
 }
 
 /**
- * ⭐ D93/1: egy próba-segéd e-embert tesz taggá egy MŰVELETI alapító koinójában — a belépését ő írja alá, a meghívást
+ * ⭐ D93/1: egy próba-segéd e-embert tesz taggá egy MŰVELETI alapító koinojában — a belépését ő írja alá, a meghívást
  * az alapító (a `meghivas` művelettel); mindkettő az alapító tárába kerül (ugyanazon a kapun).
  * @returns {Promise<{belepes: Object, meghivas: Object}>}
  */
@@ -487,7 +487,7 @@ export async function emberTaggaTarban(alapito, ember) {
 }
 
 /**
- * Egy (az `ujTag`-gel vagy a `tagokkal`-lal taggá tett) e-ember tagsági eseményei: a koinó létrehozása, a belépése és
+ * Egy (az `ujTag`-gel vagy a `tagokkal`-lal taggá tett) e-ember tagsági eseményei: a koino létrehozása, a belépése és
  * a meghívása — egy tárba mentéshez. Ha nem tag, üres lista.
  */
 export function tagsagiEsemenyei(ember) {

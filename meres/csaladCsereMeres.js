@@ -1,11 +1,11 @@
 // meres/csaladCsereMeres.js — ⭐ A CSALÁDI CSERE ÁRA (85. mérés, D119 ③ — az átvizsgálás M1-e)
 //
-// Felelősség: megméri, mennyibe kerül, hogy egy csere a CSALÁDOT cseréli (a nyitás a család többi koinóját is megnevezi, a
-// közös koinók sorban jönnek, koinónként egy kézfogással). Két készülék (A és B) egy k koinós családban (a szülő és k − 1
+// Felelősség: megméri, mennyibe kerül, hogy egy csere a CSALÁDOT cseréli (a nyitás a család többi koinoját is megnevezi, a
+// közös koinok sorban jönnek, koinonként egy kézfogással). Két készülék (A és B) egy k koinos családban (a szülő és k − 1
 // gyermek — A hozza létre őket koino-verzió kártyával, B a kézi úton kapja meg mindet), A postaládát futtat a szülőre, B
 // kétszer cserél vele: az első hozza, ami hiányzik, a második a „nincs újdonság” családi csere (a mérce: a mai 1,2–1,7 KB
-// koinónként — 43. mérés). Kiírja koinónként a csere bájtjait (a résen, titkosítva, a kézfogás nélkül) és az időt, és a
-// nyitás `cs` jelének nyílt méretét k koinónál.
+// koinonként — 43. mérés). Kiírja koinonként a csere bájtjait (a résen, titkosítva, a kézfogás nélkül) és az időt, és a
+// nyitás `cs` jelének nyílt méretét k koinonál.
 //
 // Nem önpróba: számokat ad. Futtatás: node meres/csaladCsereMeres.js [k ...]   (alapból 1 2 3 5)
 // Használja: a 85. mérés (eredmenyek.md).
@@ -32,7 +32,7 @@ function fut(hely, ervek, kornyezet = {}) {
 const varj = (ms) => new Promise((t) => setTimeout(t, ms));
 const nev = (kimenet) => (kimenet.match(/[A-Za-z0-9_-]{43}/g) ?? []).at(-1) ?? null;
 
-/** A koinó neve a becenévből (a `becenevek.json`). */
+/** A koino neve a becenévből (a `becenevek.json`). */
 async function koinoNeve(hely, becenev = 'sajat') {
   try { return JSON.parse(await readFile(join(hely, 'becenevek.json'), 'utf8'))?.[becenev] ?? null; } catch { return null; }
 }
@@ -44,13 +44,13 @@ function bajtokbol(s) {
   return Math.round(Number(m[1]) * (m[2] === 'MB' ? 1048576 : m[2] === 'KB' ? 1024 : 1));
 }
 
-/** A csere kimenetéből: koinónként a csere bájtjai (a „csere a résen” sorok), az összeg és az idő. */
+/** A csere kimenetéből: koinonként a csere bájtjai (a „csere a résen” sorok), az összeg és az idő. */
 function cserebol(kimenet) {
   const koinonkent = [...kimenet.matchAll(/csere a résen [^\n]*\((\d+) kör, ([\d.]+ (?:KB|MB|B))\)/g)].map((m) => bajtokbol(m[2]));
   const vege = kimenet.match(/Csere kész — kaptam (\d+) új eseményt, küldtem (\d+) \((\d+) kör, (\d+) ms, ([\d.]+ (?:KB|MB|B))\)/);
   return { koinonkent, uj: vege ? Number(vege[1]) : null, kuldott: vege ? Number(vege[2]) : null,
     ms: vege ? Number(vege[4]) : null, osszes: vege ? bajtokbol(vege[5]) : null,
-    csalad: /a család közös koinói is/.test(kimenet) };
+    csalad: /a család közös koinoi is/.test(kimenet) };
 }
 
 // ===== EGY CSALÁD =====
@@ -80,7 +80,7 @@ async function csaladMerese(k) {
     await fut(a, ['kivisz', join(a, 'p.jsonl')]);
     await fut(b, ['behoz', join(a, 'p.jsonl')]);
     for (const g of gyermekek) await fut(b, ['bekapcsolodas', g.nev]);
-    // egy-egy új gondolat A-nál minden koinóban (az első csere ezt hozza)
+    // egy-egy új gondolat A-nál minden koinoban (az első csere ezt hozza)
     await fut(a, ['gondolat', 'Új a szülőben']);
     for (const g of gyermekek) await fut(a, ['gondolat', 'Új: ' + g.becenev], { KOINO_AZONOSITO: g.becenev });
 
@@ -119,7 +119,7 @@ const kk = process.argv.slice(2).map(Number).filter((n) => Number.isInteger(n) &
 const lista = kk.length ? kk : [1, 2, 3, 5];
 const kb = (n) => (n == null ? '?' : (n / 1024).toFixed(1) + ' KB');
 
-console.log('⭐ A CSALÁDI CSERE ÁRA (85. mérés) — két készülék, k koinós család, a postaláda a szülőre\n');
+console.log('⭐ A CSALÁDI CSERE ÁRA (85. mérés) — két készülék, k koinos család, a postaláda a szülőre\n');
 console.log('A nyitás „cs” jele (nyílt, a NYITAS-ban — mindkét irányban egyszer):');
 const nev43 = 'x'.repeat(43);
 for (const k of [1, 2, 5, 16, 64]) {
@@ -129,7 +129,7 @@ for (const k of [1, 2, 5, 16, 64]) {
 console.log('');
 for (const k of lista) {
   const r = await csaladMerese(k);
-  const sor = (x) => 'összesen ' + kb(x.osszes) + ' · koinónként ' + x.koinonkent.map(kb).join(' + ') + ' · '
+  const sor = (x) => 'összesen ' + kb(x.osszes) + ' · koinonként ' + x.koinonkent.map(kb).join(' + ') + ' · '
     + x.ms + ' ms' + (x.uj != null ? ' · kaptam ' + x.uj + ', küldtem ' + x.kuldott : '') + (k > 1 && !x.csalad ? ' ⚠ család nélkül' : '');
   console.log('k = ' + k + ':' + (r.megjott ? '' : ' ⚠ nem minden új gondolat jött meg'));
   console.log('  az első csere:              ' + sor(r.elso));

@@ -176,17 +176,17 @@ proba('⛔⛔ D77: a gondolat nem azonosító alakú SZULO-ját a kapu elutasít
   return (await esemenyEllenorzese(kategoria)).rendben === true;
 });
 
-// ===== ⭐⭐ D118/2: A KOINÓ NEVE A SZÜLETÉSE LENYOMATA =====
+// ===== ⭐⭐ D118/2: A KOINO NEVE A SZÜLETÉSE LENYOMATA =====
 //
-// A lelet (2026-10-24, `docs/koltozes_atvizsgalas.md` 3.): a szabad koinó-név mellett egy második, azonos nevű születés
-// átvette az alapító helyét. Az új alakban a születés koinó-mezője üres, és a koinó neve a születés azonosítója.
+// A lelet (2026-10-24, `docs/koltozes_atvizsgalas.md` 3.): a szabad koino-név mellett egy második, azonos nevű születés
+// átvette az alapító helyét. Az új alakban a születés koino-mezője üres, és a koino neve a születés azonosítója.
 
 const szuletesLeiras = {
   koino: '', tipus: 'KoinoLetrehozas', adat: { nev: 'Új alakú', leiras: null, alapitok: [], zart: true },
   elozo: null, sorszam: 1
 };
 
-proba('⭐⭐ D118/2: az új alakú születés koinója a SAJÁT lenyomata — minden más eseményé a koinó-mezője', async () => {
+proba('⭐⭐ D118/2: az új alakú születés koinoja a SAJÁT lenyomata — minden más eseményé a koino-mezője', async () => {
   const sz = await esemenyLetrehozasa(szuletesLeiras, kulcspar);
   const tovabb = await esemenyLetrehozasa({ ...alapLeiras, koino: sz.azonosito, elozo: sz.azonosito, sorszam: 2 }, kulcspar);
   const regi = await esemenyLetrehozasa({ ...szuletesLeiras, koino: 'regi-nev' }, kulcspar);
@@ -195,7 +195,7 @@ proba('⭐⭐ D118/2: az új alakú születés koinója a SAJÁT lenyomata — m
     && esemenyKoinoja(regi) === 'regi-nev' && esemenyKoinoja(null) === undefined;
 });
 
-proba('⛔⛔ D118/2: a kapu elutasítja a lenyomat-nevet mondó születést és az üres koinó-nevű nem-születést — a két jó alakot beengedi',
+proba('⛔⛔ D118/2: a kapu elutasítja a lenyomat-nevet mondó születést és az üres koino-nevű nem-születést — a két jó alakot beengedi',
   async () => {
     const sz = await esemenyLetrehozasa(szuletesLeiras, kulcspar);
     const hamis = await esemenyLetrehozasa({ ...szuletesLeiras, koino: sz.azonosito }, idegenKulcspar);
@@ -204,15 +204,15 @@ proba('⛔⛔ D118/2: a kapu elutasítja a lenyomat-nevet mondó születést és
     const u = await esemenyEllenorzese(uresGondolat);
     // ⚠️ A helyes alakokat beengedi (különben egy mindent elutasító kapu is átmenne): az új és a régi alakú születést.
     const regi = await esemenyLetrehozasa({ ...szuletesLeiras, koino: 'regi-nev' }, kulcspar);
-    return !h.rendben && /születés/.test(h.ok) && !u.rendben && /üres koinó-név/.test(u.ok)
+    return !h.rendben && /születés/.test(h.ok) && !u.rendben && /üres koino-név/.test(u.ok)
       && (await esemenyEllenorzese(sz)).rendben === true && (await esemenyEllenorzese(regi)).rendben === true;
   });
 
-proba('⭐⭐ D118/2: a koinó születése EGY szabállyal — lenyomat-nevű koinónál csak az, aminek az azonosítója maga a név',
+proba('⭐⭐ D118/2: a koino születése EGY szabállyal — lenyomat-nevű koinonál csak az, aminek az azonosítója maga a név',
   async () => {
     const valodi = await esemenyLetrehozasa(szuletesLeiras, kulcspar);
     const K = valodi.azonosito;
-    // Egy másik új alakú születés (másik koinó), és egy régi alakú, ami a K nevet mondja (a kapu elvetné — egy lista
+    // Egy másik új alakú születés (másik koino), és egy régi alakú, ami a K nevet mondja (a kapu elvetné — egy lista
     // mégis tartalmazhatja).
     const masik = await esemenyLetrehozasa({ ...szuletesLeiras, adat: { ...szuletesLeiras.adat, nev: 'Másik' } }, idegenKulcspar);
     const hamis = await esemenyLetrehozasa({ ...szuletesLeiras, koino: K, adat: { ...szuletesLeiras.adat, nev: 'Hamis' } },
@@ -226,11 +226,11 @@ proba('⭐⭐ D118/2: a koinó születése EGY szabállyal — lenyomat-nevű ko
     const r2 = await esemenyLetrehozasa({ ...szuletesLeiras, koino: 'regi' }, idegenKulcspar);
     const kisebb = r1.azonosito < r2.azonosito ? r1 : r2;
     return koinoSzuleteseListabol([r1, r2], 'regi') === kisebb && koinoSzuleteseListabol([r2, r1], 'regi') === kisebb
-      // Koinó nélkül az új alakú elöl; a lenyomat-nevet mondó (hamis) soha.
+      // Koino nélkül az új alakú elöl; a lenyomat-nevet mondó (hamis) soha.
       && koinoSzuleteseListabol([r1, valodi, r2]) === valodi && koinoSzuleteseListabol([hamis]) === null;
   });
 
-// ===== ⭐⭐ D118/2 (①b): A KOINÓ SZABÁLYAI A SZÜLETÉSBEN — a mező alakja a kapun =====
+// ===== ⭐⭐ D118/2 (①b): A KOINO SZABÁLYAI A SZÜLETÉSBEN — a mező alakja a kapun =====
 //
 // A születés `szabalyok` mezője az állapotot befolyásoló számokat hordozza (`koinoSzabalyok.js`). A kapu csak ismert
 // kulcsot enged, egész számot a határokon belül — különben egy hibás születés minden készüléken mást számolna (a
@@ -269,7 +269,7 @@ proba('⭐⭐ D118/2 (①b): a születés szabályai a kapun — a jó alakot be
     return (await esemenyEllenorzese(await esemenyLetrehozasa(szuletesLeiras, kulcspar))).rendben === true;
   });
 
-proba('⭐ D118/2 (①b): a koinó szabályai a születésből — ami nincs megadva, a mai érték; a hiányzó, a régi és a hibás születés a mai értékeket adja',
+proba('⭐ D118/2 (①b): a koino szabályai a születésből — ami nincs megadva, a mai érték; a hiányzó, a régi és a hibás születés a mai értékeket adja',
   async () => {
     const sz = await esemenyLetrehozasa({ ...szuletesLeiras, adat: { ...szuletesLeiras.adat,
       szabalyok: { tudatpontKeret: 500, alapKuszobok: { elfogadasiKuszob: 66 } } } }, kulcspar);

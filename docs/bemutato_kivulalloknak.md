@@ -2,9 +2,9 @@
 # koino — kívülállóknak
 
 *Bemutató-anyag. Dátum: 2026. 07. 21. — a `docs/bemutato_kormany.md` mellé,
-annak, aki kívülről, először találkozik a koinóval.*
+annak, aki kívülről, először találkozik a koinoval.*
 
-Ez a dokumentum a koinót annak mutatja be, aki **nem belülről** ismeri: nem
+Ez a dokumentum a koinot annak mutatja be, aki **nem belülről** ismeri: nem
 e-emberként, hanem kívülről, érdeklődő szemmel. A cél nem lelkesítés, hanem hogy
 egy gondolkodó ember **komolyan vehesse** — a víziót és a korlátait egyaránt.
 
@@ -19,7 +19,7 @@ gondolatokból javaslatok, a javaslatokból közös döntéssel egyezmények sz�
 ## 2. A probléma, amit megold — egy 2400 éves bug
 
 Az emberek mindig is tudtak együttműködni kultúrán és nyelven át. A görög
-**koinón** (városállamok önkormányzó szövetsége, pl. az Akháj Szövetség), a
+**koino-n** (városállamok önkormányzó szövetsége, pl. az Akháj Szövetség), a
 Kárpát-medencét közössé tevő **honfoglaló törzsszövetség** a maga
 vérszerződésével — mind ugyanazt akarták: közös élet egyetlen uralkodó nélkül,
 a tagok saját arcának megőrzésével.
@@ -28,11 +28,11 @@ a tagok saját arcának megőrzésével.
 sűrűsödött**, a hatalom kevesekhez folyt, a szövetség belülről bomlott. A görög
 szövetségi gyűlésre el kellett utazni, ott kellett lenni, ráérni — ezt a
 vagyonos elit engedhette meg, így a „közös" gyűlést belülről a magánérdek
-foglalta el. Ez a **koinós (közös) kontra idios (magán)** ősfeszültség: az
+foglalta el. Ez a **koinos (közös) kontra idios (magán)** ősfeszültség: az
 *idiótész* épp az, aki csak a magáéval törődik, a közösből kimarad.
 
 A modern világ sem oldotta meg — csak megfordította: ma az **idios nyelte el a
-koinóst** (atomizált egyén, elveszett közös). A rossz megoldások mindig az egyik
+koinost** (atomizált egyén, elveszett közös). A rossz megoldások mindig az egyik
 pólust áldozzák fel: a kollektivizmus eltörli az egyént, a radikális
 individualizmus eltörli a közöst.
 
@@ -116,7 +116,7 @@ pénz" — valójában a vízió erőssége: **korlátlanul teremtünk értéket
   alapja.
 - **Kultúra-megőrzés (a honfoglalás logikája):** a koino **nem homogenizál**. A
   közösségek maguk hozzák létre a kategóriáikat és gondolattípusaikat; ha egy csoport
-  másképp akar dönteni, ott a **fork joga** — párhuzamos koinók, amelyek a közös
+  másképp akar dönteni, ott a **fork joga** — párhuzamos koinok, amelyek a közös
   múltat megőrzik, de külön jövőt választanak. Ez a *sympoliteia* logikája: közös
   kötelék, megtartott saját arc. **Egység uniformitás nélkül.**
 
@@ -161,7 +161,7 @@ Nem azzal kezdődik. Előbb **közösségi döntéshozatalt** építünk; a pén
 
 **„Miben más ez, mint egy DAO?”**
 A legtöbb DAO **token-súlyozott**: aki több tokent birtokol, több szavazatot ér —
-ez plutokrácia. A koinóban **egy ember = egy szavazat**, vagyontól függetlenül. A
+ez plutokrácia. A koinoban **egy ember = egy szavazat**, vagyontól függetlenül. A
 vagyon és a hatalom szét van választva.
 
 **„Egy ember = egy szavazat — hogyan akadályozzátok meg a hamis regisztrációt?”**
@@ -170,7 +170,7 @@ Ez a rendszer legkritikusabb pontja, és nyíltan kezeljük. Erős **identitás-
 kifejezetten csak akkor indulhat, amikor ez az azonosítási réteg **élesben
 bizonyított** — különben minden hamis fiók pénznyomtató gép lenne.
 
-**„Ki irányítja a koinót? Mi van, ha az alapító rossz irányba viszi?”**
+**„Ki irányítja a koinot? Mi van, ha az alapító rossz irányba viszi?”**
 Senki nem sajátíthatja ki. Az alapító a rendszer indulása után **egy e-ember a
 sok közül**: javaslatot tehet, szavaz, vitázik — de az irányt a közösség többsége
 adja. Végső biztosíték a **fork joga**: bármely csoport kiválhat, megőrizve a közös

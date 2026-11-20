@@ -39,7 +39,7 @@ async function udpParos() {
 
 /**
  * A világ: az alapító gondolata (G), rajta B és C pontja; mindenki tag (az alapító hívta meg őket). A mindent tart (és ha
- * `csomaggal`, C tagsági csomagját is); B a koinó születését, G-t (C pontja nélkül, ha `bNalCPont` hamis) és a saját
+ * `csomaggal`, C tagsági csomagját is); B a koino születését, G-t (C pontja nélkül, ha `bNalCPont` hamis) és a saját
  * azonosság-szeletét — C (és X) belépését NEM. `bNalMind`: B a többit is tudja (G minden pontját és a meghívásokat — ezek az
  * alapító azonosság-szeletébe is bejelentődnek), csak a belépéseket nem: a szeletek így egyeznek.
  */
@@ -75,7 +75,7 @@ async function vilag({ csomaggal = true, bNalMind = false } = {}) {
     || e.azonosito === bPont.azonosito || bSajat.has(e.entitas ?? e.azonosito)
     || (bNalMind && (e.tipus === 'Meghivas' || e.azonosito === cPont.azonosito || e.azonosito === xPont.azonosito)));
   for (const e of bNal) await esemenyMentese(tarB, e);
-  // B a szigorú (b) alatt csak ezekben vesz részt (a koinó születése, G, a saját azonosság-szelete).
+  // B a szigorú (b) alatt csak ezekben vesz részt (a koino születése, G, a saját azonosság-szelete).
   const bReszvesz = new Set([letrehozas.azonosito, g.azonosito, horgonya(b)]);
   return { tarA, tarB, mappaB, g, cPont, xCsomag, cCsomag, c, x, letrehozas, bReszvesz, alapito };
 }

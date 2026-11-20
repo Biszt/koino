@@ -37,7 +37,7 @@
 // részfa-fa ezért három összeget visz levelenként: [pont, darab, gyerek] — a szerzői levél [pont, 0, 0], a gyerek-levél
 // [össz-pont, 1 + alatta, 1]; a gyökérben így az össz-pont, az alatta és a gyerekszám áll, és mind a hármat ugyanaz a fa köti.
 // ⭐ Ebből tudja a készülék, hogy egy csomópont alatt mennyi van, amit még nem ismer (a cím nélkül — a 9. szabály szerint a
-// koinó teljes szerkezetét senki nem tarthatja, a darabszámát irányonként igen). ⛔ A szúrópróba a darabra is kell: a DARAB
+// koino teljes szerkezetét senki nem tarthatja, a darabszámát irányonként igen). ⛔ A szúrópróba a darabra is kell: a DARAB
 // szerinti minta (a nagy ágra nagyobb eséllyel esik) a darabot hordozó szerzői levelet és a kitalált gyereket fogja meg, a
 // GYEREK szerinti (egyenletes a gyerekek közt) a gyerekszámot felfújó levelet — és az eltalált gyerek aláírt születése (a
 // szülője X) a válaszban jön. ⚠️ A határ ugyanaz, mint az össz-pontnál: egy valódi gyerek felfújt darabja bemondás — ott

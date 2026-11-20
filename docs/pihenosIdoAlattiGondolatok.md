@@ -69,7 +69,7 @@ Szóval a tíltó listával meg akadályozhatják, a telefonra telepítést? mé
 "
 ## 3. A híd: a koino szállítási igénye nevetségesen kicsi
 
-Nem egy sáv a válasz, hanem az, hogy **a koinónak nem kell csatorna**.
+Nem egy sáv a válasz, hanem az, hogy **a koinonak nem kell csatorna**.
 
 Nem kell élő kapcsolat, protokoll, szerver, port, cím. Ami mozog, az **aláírt bájt** — és
 mindegy, hogyan és mikor ér oda. Egy esemény ~400 bájt; egy családi koino teljes élete pár
@@ -110,7 +110,7 @@ itt védelem.**" percenként kell frissülnie, de bárki állíthatja a saját k
 
 
 "4. **A pénz (6. pont).** Ha a koino valaha bolti alkalmazásként futna, **a pénz miatt
-   vennék ki, nem a terjesztés miatt.** A D11 kapuja marad; a pénz sose kösse a koinót
+   vennék ki, nem a terjesztés miatt.** A D11 kapuja marad; a pénz sose kösse a koinot
    bolthoz." ezt nem értem. fejtsd ki. 
 
    "

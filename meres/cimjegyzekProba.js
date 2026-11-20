@@ -24,7 +24,7 @@ proba('a téma 20 bájt (a BEP 5 info_hash-e), és ugyanabból ugyanaz', () => {
   return Buffer.isBuffer(a) && a.length === 20 && a.equals(b);
 });
 
-proba('⭐ a koinó a só: más koinóban ugyanaz a szelet MÁS téma (kívülálló nem számolja ki)', () =>
+proba('⭐ a koino a só: más koinoban ugyanaz a szelet MÁS téma (kívülálló nem számolja ki)', () =>
   !cimjegyzekTema('k1', 'szelet', AZ(1)).equals(cimjegyzekTema('k2', 'szelet', AZ(1))));
 
 proba('a fajta és a kulcs is benne van; ismeretlen fajtát nem fogad el', () => {
@@ -62,9 +62,9 @@ proba('egy készülék darabjai: a kért szám, körbeérve, a darab-számnál n
     && sajatGyokerDarabjai('alairo-x', 0, 3).join() === '0';
 });
 
-// ===== A MÉLYSÉG („végtelen": egy darab mérete nem nő a koinóval) =====
+// ===== A MÉLYSÉG („végtelen": egy darab mérete nem nő a koinoval) =====
 
-proba('⭐ a mélység: kis koinóban 0, és KETTŐZÉSENKÉNT +1 (logaritmikus) — D106: a koinó saját határáig (144), nem 16-ig', () =>
+proba('⭐ a mélység: kis koinoban 0, és KETTŐZÉSENKÉNT +1 (logaritmikus) — D106: a koino saját határáig (144), nem 16-ig', () =>
   gyokerMelysege(0) === 0 && gyokerMelysege(GYOKER_DARAB_CEL) === 0
   && gyokerMelysege(GYOKER_DARAB_CEL + 1) === 1 && gyokerMelysege(2 * GYOKER_DARAB_CEL) === 1
   && gyokerMelysege(2 * GYOKER_DARAB_CEL + 1) === 2 && gyokerMelysege(4 * GYOKER_DARAB_CEL + 1) === 3
@@ -101,7 +101,7 @@ proba('a hibás beállítás (negatív, tört, szöveg) 0-nak számít', () =>
   [-1, 1.5, '3', null].every((b) => hirdetendoTemak({ koino: 'k1', alairo: 'a1', legfelsoDarab: 1,
     vallaltSzeletek: [AZ(1)], szeletHirdetes: b }).length === 1));
 
-proba('a gyökér-darab a koinó méretével mélyül (300 legfelső gondolat → 1 bit), és a készülék szerint oszlik', () => {
+proba('a gyökér-darab a koino méretével mélyül (300 legfelső gondolat → 1 bit), és a készülék szerint oszlik', () => {
   const t = hirdetendoTemak({ koino: 'k1', alairo: 'a1', legfelsoDarab: 300 });
   const [m, d] = t[0].kulcs.split(':').map(Number);
   const darabok = new Set();
@@ -116,7 +116,7 @@ proba('a hirdetés üteme a felejtésnél (30–60 perc, 58. mérés) gyorsabb',
 
 // ===== ⭐ D92/1 (b): A KOPOGTATÓ TÉMÁK =====
 
-proba('⭐ a kopogtató témák: koinónként és készülékenként mások, és egy hirdetett téma párja nem maga a téma', () => {
+proba('⭐ a kopogtató témák: koinonként és készülékenként mások, és egy hirdetett téma párja nem maga a téma', () => {
   const a = keszulekKopogtatoTemaja('k1', 'alairo-1');
   return a.length === 20 && !a.equals(keszulekKopogtatoTemaja('k2', 'alairo-1')) && !a.equals(keszulekKopogtatoTemaja('k1', 'alairo-2'))
     && !temaKopogtatoja('k1', 'gyoker', '0:0').equals(gyokerDarabTemaja('k1', 0, 0))

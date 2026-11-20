@@ -232,7 +232,7 @@ export async function onalloSzalak(tar, koino, horgony) {
  * (`adat.sajatBelepes`) MAGA írja az eseménybe — egy csaló ide egy HARMADIK ember horgonyát
  * is írhatná, és a „viszonozd" javaslat rávenne, hogy olyasvalakiről állítsak találkozást,
  * akivel sosem találkoztam. ⭐ Ezért csak az a horgony kerül a `radVarHorgonyok` közé, ami
- * ebben a koinóban **annak a belépése, aki a bemutatkozást aláírta**. Ami nem ilyen, az a
+ * ebben a koinoban **annak a belépése, aki a bemutatkozást aláírta**. Ami nem ilyen, az a
  * `radVar` számában benne van (a tény tény), de javaslat nem lesz belőle.
  *
  * @returns {Promise<{kolcsonos: number, egyoldalu: number, radVar: number,
@@ -276,7 +276,7 @@ export async function bemutatkozasok(tar, koino, horgony) {
   const radVar = felem.size - kolcsonos;
   const masikraVar = tolem.size - kolcsonos;
 
-  // ⛔⛔ A javasolható horgony: ebben a koinóban az ALÁÍRÓ SAJÁT belépése (lásd fent).
+  // ⛔⛔ A javasolható horgony: ebben a koinoban az ALÁÍRÓ SAJÁT belépése (lásd fent).
   const radVarHorgonyok = [];
   for (const [szerzo, horgonyai] of felem) {
     if (tolem.has(szerzo)) continue;

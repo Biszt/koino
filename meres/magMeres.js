@@ -1,12 +1,12 @@
 // meres/magMeres.js — ⭐ A SZÁMÍTÁS MAGJÁNAK STABILITÁSA (89. mérés, D123 — a program rétegei, PR1–PR3)
 //
-// Felelősség: a git-történeten végigmenve megméri, milyen gyakran változott a SZÁMÍTÁS MAGJA (a koinó képének és a kapunak az
+// Felelősség: a git-történeten végigmenve megméri, milyen gyakran változott a SZÁMÍTÁS MAGJA (a koino képének és a kapunak az
 // import-zárványa — `kodCsomag.js` `magJegyzeke`, ugyanaz a függvény, amit a program használ): commitonként a mag fájljai, a
 // mérete és a neve (a jegyzék lenyomata); és ahol a név változott, változásonként fájlonként megnézi, hogy CSAK KOMMENT és
 // szóköz változott-e (akkor a „más számítás” jelzés téves riasztás lenne), vagy kód. A kód-változásokat a commit tárgyával
 // listázza — a kép tényleges változását (egy esemény-halmaz más képet ad-e) ez nem futtatja: a felső becslés.
 //
-// A kezdet: az a commit, amelyik a `ketReteg.js`-t (a koinó képe egy helyen) bevezette — előtte a kép a `koino.js`-ben állt össze,
+// A kezdet: az a commit, amelyik a `ketReteg.js`-t (a koino képe egy helyen) bevezette — előtte a kép a `koino.js`-ben állt össze,
 // a mag-belépő nem létezett.
 //
 // Nem önpróba: számokat ad. Futtatás (a repó gyökeréből): node meres/magMeres.js [kezdő-commit]

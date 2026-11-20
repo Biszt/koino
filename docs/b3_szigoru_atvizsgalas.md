@@ -14,7 +14,7 @@
 - **D84/3:** nincs köztes állapot — a szigorú (b) a B végleges alakja.
 - **D85 T3:** a részvételbe a döntési csomag szabálya is beletartozik: azok a TÖREDÉK-szeletek, amelyek érintettjét
   vállalom, és amelyek saját része valamikor igent mondott.
-- **D90:** a gyökér (a legfelső szintű születések listája) nem vállalás, hanem a G osztja szét darabokban; a koinó
+- **D90:** a gyökér (a legfelső szintű születések listája) nem vállalás, hanem a G osztja szét darabokban; a koino
   születését mindenki tartja (kész).
 - **D93/1 (E1):** a döntésben csak az ellenőrzött tag számít — tehát a vállalt szeleteim SZERZŐINEK tagsága is kell.
 - **A skálázási terv 4.6 (SK8 — „van válasz”):** a tömeges entitásnál *a teljes halmazt csak aki vállalja*; a pont-tartó
@@ -24,7 +24,7 @@
 
 Kész: a vállalás számítása (`vallalas.js`), a két tár (`atmenetiTar.js`), az előléptetés, a `hozd` az átmenetibe, a
 raj (a csere `RESZVETEL`-je már mondja, mit vállalok), a kérelem (D92: szelet, fejlécek, törzs — a törzs csak a
-vállalótól), a döntési csomag (D85 T3), a zárt koinó kapuja (E3), a tagsági csomag (E2).
+vállalótól), a döntési csomag (D85 T3), a zárt koino kapuja (E3), a tagsági csomag (E2).
 
 **A mai módon fut** (D84/3 szerint ezt váltjuk le): a csere MINDEN szeletben részt vesz (a `parbeszed` `reszvesz`-ét a
 `koino.js` nem adja meg), és mindent a tartós tárba hoz; a fájl-randevú minden meglévő fájlt kiszolgál (a D84/1 korlátja
@@ -34,7 +34,7 @@ vállalás nem kerül át az átmenetibe; a gyökér egészében cserélődik.
 ## 3. A 66. mérés — egy készülék terhe a szigorú (b) alatt
 
 [`eredmenyek.md`](../meres/eredmenyek.md) 66. A szigorú (b) a tárolást drámaian csökkenti: egymillió tagnál a mai
-„mindent tárol” 7,1 GB, a szigorú (b) alatt a készülékek 95%-a ~20 MB-ot tart. ⛔ **De két dolog a koinó méretével nő:**
+„mindent tárol” 7,1 GB, a szigorú (b) alatt a készülékek 95%-a ~20 MB-ot tart. ⛔ **De két dolog a koino méretével nő:**
 
 - **A népszerű entitás.** Aki egy népszerű gondolatra tesz pontot, annak a szeletét egészében tartja (minden pont-tartó
   eseményét). A 95% tárolása ~√N szerint nő: 1 159 → 4 074 → 11 561 → 36 957 esemény 1 000 → 1 000 000 tagnál.
@@ -43,7 +43,7 @@ vállalás nem kerül át az átmenetibe; a gyökér egészében cserélődik.
 
 ⭐ **A két fokú vállalás** (a skálázási terv 4.6): ha egy szelet nagyobb egy küszöbnél (a mérésben 1000 esemény), a
 pont-tartó csak a születést, a saját eseményeit, a szelet összegző gyökerét és néhány mintát tart. Ez **konstans**: a
-koinó méretétől függetlenül ~2 300–2 800 esemény és ~2 300 szerző tagsága a 95%-nál, mert a nagy szeletnél a minták
+koino méretétől függetlenül ~2 300–2 800 esemény és ~2 300 szerző tagsága a 95%-nál, mert a nagy szeletnél a minták
 szerzőinek tagsága kell csak.
 
 ## 4. A kérdések — javaslattal (D-szintűek, Csabáéi)
@@ -61,7 +61,7 @@ szerzőinek tagsága kell csak.
   összegzésből.
 - **(B) Nem most — mindenki a teljes szeletet tartja**, a két fokú vállalás a ⑧-ban. Egyszerűbb, de a „végtelen” próbáján
   közben elbukik (a D84/3 köztes állapota volna).
-- **(C) Mindig összegző** (küszöb nélkül, a kis szeletnél is). Egy szabály, de a kis koinó elveszti a pontos, egyszerű
+- **(C) Mindig összegző** (küszöb nélkül, a kis szeletnél is). Egy szabály, de a kis koino elveszti a pontos, egyszerű
   ítéletet, és minden döntés mintákon áll.
 
 **B2. A szerzők tagsági bizonyítéka a szigorú (b) alatt — hogyan jut el?**
@@ -96,7 +96,7 @@ B3/A, B4/A).
 
 ## 5. Ami nem igényel döntést (a megépítés része)
 
-- **A részvétel** a vállalásból (a tudatpontos szeletek, az azonosság-szelet, a koinó születése) + a töredék-szeletek a
+- **A részvétel** a vállalásból (a tudatpontos szeletek, az azonosság-szelet, a koino születése) + a töredék-szeletek a
   D85 T3 szerint + a B3 csak küldő szeletei + a B4 darabjai.
 - **A törzs kiszolgálása** a D84/1 szerint a fájl-randevúban is (csak a vállalt entitások törzse), és a **„mindent”
   beállítás** (D83/2 — helyi, készülékenként).
@@ -167,21 +167,21 @@ mai mód), a szerző azonosság-szelete a rendes egyeztetéssel is megérkezik, 
 — a modul-próba ezért valódi cserét futtat korlátozott részvétellel, a parancssor-próba pedig a kézi utat méri.
 
 ✅ **A B3 MEGÉPÜLT (2026-10-05)** (a részletek: a fázis-2 terv D95, „MEGÉPÜLT — a B3”): a csak küldő út minden nem
-halmazként egyeztetett szeletre, a kézbesítés nyilvántartásával (`megvan`, `kezbesites.json`), a zárt koinó nem tagjának
+halmazként egyeztetett szeletre, a kézbesítés nyilvántartásával (`megvan`, `kezbesites.json`), a zárt koino nem tagjának
 a megengedett szeletekben.
 
 🔍 **ÚJ KÉRDÉS (B5) — a próbák írásakor derült ki:** az alapító horgonya maga a `KoinoLetrehozas`, tehát az alapító
-azonosság-szelete UGYANAZ, mint a koinó születésének szelete. A D93/6 óta az identitás-állítás a szerző azonosság-szeletébe
-is bejelentődik — így az alapító MINDEN meghívása, felhatalmazása és tanúsítása a koinó születésének szeletébe kerül, amit a
+azonosság-szelete UGYANAZ, mint a koino születésének szelete. A D93/6 óta az identitás-állítás a szerző azonosság-szeletébe
+is bejelentődik — így az alapító MINDEN meghívása, felhatalmazása és tanúsítása a koino születésének szeletébe kerül, amit a
 D90/2 szerint mindenki tart. Egy nagyon aktív alapító állításai így minden készüléken ott vannak (az alapító tevékenységével
 nő mindenki terhe — a „végtelen” próbáján ez egy ember tevékenységével korlátos, de mindenkire terhel).
 
-- **(A) ⭐ A koinó születését mindenki tartja — az ESEMÉNYT; a szeletét (a bejelentésekkel) csak aki az alapító azonosságát
+- **(A) ⭐ A koino születését mindenki tartja — az ESEMÉNYT; a szeletét (a bejelentésekkel) csak aki az alapító azonosságát
   vállalja** (az alapító maga, és aki a jelzést kéri — mint bárki más azonosság-szeleténél). Az esemény úgyis minden
-  tagsági láncban és csomagban benne van, és soha nem változik. Ha később koinó-szintű paraméter-események lesznek, azok
+  tagsági láncban és csomagban benne van, és soha nem változik. Ha később koino-szintű paraméter-események lesznek, azok
   külön szeletbe menjenek. A bekapcsolásnál (a részvétel a vállalásból) dől el, kódváltozás csak ott.
 - **(B) Az alapító is belép** (`belep alapitas` — a tagság a megnevezett alapítót ma is ismeri), és az állításai a saját
-  belépése szeletébe mennek; a koinó születése tiszta marad. Új koinóknál; a meglévő alapítóké vegyes marad.
+  belépése szeletébe mennek; a koino születése tiszta marad. Új koinoknál; a meglévő alapítóké vegyes marad.
 - **(C) Marad így** — az alapító egy ember, a terhe korlátos.
 
 ✅ **ELDŐLT — D96 (Csaba, 2026-10-06: „rendben, elfogadom a javaslatodat”):** az (A).
@@ -193,6 +193,6 @@ nyitó lenyomatban), csak a legsekélyebb közös eltérő darab egyeztetődik; 
 
 🔍 **A bekapcsolás átvizsgálása:** [`bekapcsolas_atvizsgalas.md`](bekapcsolas_atvizsgalas.md) (68. mérés, K1–K2).
 
-⏭️ **Hátra van: a bekapcsolás** — a részvétel a vállalásból (vele a D96: a koinó születésének szeletében csak az alapító),
+⏭️ **Hátra van: a bekapcsolás** — a részvétel a vállalásból (vele a D96: a koino születésének szeletében csak az alapító),
 a törzs korlátja a randevúban, a kérelem az átmenetiből (vele a kérelem kísérői), a visszavett vállalás és a tár
 tömörítése; és ekkor a B2–B4 parancssor-próbái a cserében.

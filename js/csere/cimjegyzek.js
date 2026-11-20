@@ -9,8 +9,8 @@
 // készülék-azonosítóját adják át, a szülő tartói a gyerekekét is — a böngészés a fa bejárása, a titkosított
 // cserén belül. ⭐ A HASH-ELHELYEZÉS CSAK KÉT HELYEN: a GYÖKÉR DARABJAI (D90 — a legfelső szintnek nincs
 // szülője) és a KÖZVETLEN KERESÉS azonosító alapján (gyorsító, elhagyható). A közege most a BitTorrent-DHT
-// (BEP 5) VAKÍTOTT témával: a téma a koinó azonosítójával sózott lenyomat — aki nem ismeri a koinót, nem tudja
-// kiszámolni, hol keresse (a Hyperswarm mintája; D89/2: a zárt koinó címjegyzéke nem olvasható ki).
+// (BEP 5) VAKÍTOTT témával: a téma a koino azonosítójával sózott lenyomat — aki nem ismeri a koinot, nem tudja
+// kiszámolni, hol keresse (a Hyperswarm mintája; D89/2: a zárt koino címjegyzéke nem olvasható ki).
 //
 // ⚠️ A cím NÉV NÉLKÜL (SK2, D6), bizalom nem jár vele (3. szabály — a hamis cím elérhetetlenséget okoz,
 // nem hamisítást), és CSAK a vállalt szeletet hirdetjük, a megnézettet soha (D75/3).
@@ -23,8 +23,8 @@ import { createHash } from 'node:crypto';
 export const TEMA_FAJTAK = ['szelet', 'gyoker', 'kopogtato', 'kereso'];
 
 /**
- * A VAKÍTOTT TÉMA — 20 bájt (a BEP 5 `info_hash` mérete): `H("koino-cimjegyzek-1" ‖ koinó ‖ fajta ‖ kulcs)`.
- * ⭐ A koinó azonosítója a só: kívülálló nem tudja kiszámolni (a zárt koinó a titkosított csere óta nem adja
+ * A VAKÍTOTT TÉMA — 20 bájt (a BEP 5 `info_hash` mérete): `H("koino-cimjegyzek-1" ‖ koino ‖ fajta ‖ kulcs)`.
+ * ⭐ A koino azonosítója a só: kívülálló nem tudja kiszámolni (a zárt koino a titkosított csere óta nem adja
  * ki), a DHT-gépek csak egy értelmezhetetlen lenyomatot látnak.
  *
  * ⭐⭐ D124 ⑤ (PV5 (A)): A TÉMA HORDOZZA A VÁLTOZATÁT — a címke száma a témák változata (`n`; a mai az 1-es, bájtra
@@ -46,21 +46,21 @@ export function cimjegyzekTema(koino, fajta, kulcs, n = 1) {
 }
 
 // ===================================
-// ⭐⭐ D106 (Csaba, 2026-10-15): A DARAB-SZÁM SZÉLESSÉGE — a koinó saját határáig
+// ⭐⭐ D106 (Csaba, 2026-10-15): A DARAB-SZÁM SZÉLESSÉGE — a koino saját határáig
 // ===================================
 //
-// A „végtelen” mércéje (D106): egy méret-korlát se legyen szűkebb, mint a koinó SAJÁT határa — az azonosító-tér (egy
-// entitás neve a 256 bites lenyomata; ~2^128 entitás fölött két név véletlenül egybeeshet, ennél többet a koinó semmilyen
+// A „végtelen” mércéje (D106): egy méret-korlát se legyen szűkebb, mint a koino SAJÁT határa — az azonosító-tér (egy
+// entitás neve a 256 bites lenyomata; ~2^128 entitás fölött két név véletlenül egybeeshet, ennél többet a koino semmilyen
 // formában nem tud megkülönböztetni). A darab-szám ezért nem 16 bites (az ~16,8 millió legfelső szintű gondolatnál
-// megállt volna, és onnan a darab a koinóval nőtt volna), hanem a lenyomat annyi bitje, amennyi a mélységhez kell —
-// legfeljebb `GYOKER_MAX_MELYSEG`, amennyi a 43 jeles kulcsba fér. A koinó határához ~120 bit kell, a kereső-réteg
+// megállt volna, és onnan a darab a koinoval nőtt volna), hanem a lenyomat annyi bitje, amennyi a mélységhez kell —
+// legfeljebb `GYOKER_MAX_MELYSEG`, amennyi a 43 jeles kulcsba fér. A koino határához ~120 bit kell, a kereső-réteg
 // indexéhez (ami ezt a mintát veszi át, D105) ~124. ⚠️ A darab száma ezért `BigInt`: a JS-szám 2^53 fölött pontatlan.
 //
 // ⭐ D105 (2026-10-16): a darab-számítás KÖZÖS — a gyökér darabjai (`g`) és a kereső-réteg régiói (`k` — `keresoReteg.js`)
 // ugyanazt a lenyomat-teret, kulcs-alakot és mélység-becslést használják, más „sóval” (a felhasználás nevével). Egy helyen,
 // hogy a kettő ne térhessen el egymástól; a gyökér függvényei vékony burkolók (bájtra ugyanazt adják, mint előtte).
 
-/** ⭐ D106: a legnagyobb mélység — 144 bit: amennyi a kulcsba fér (36 hexa jegy), a koinó saját határán túl. */
+/** ⭐ D106: a legnagyobb mélység — 144 bit: amennyi a kulcsba fér (36 hexa jegy), a koino saját határán túl. */
 export const GYOKER_MAX_MELYSEG = 144;
 /** ⭐ D105: ugyanaz a szélesség minden darab-számításnak (a gyökér és a kereső-réteg). */
 export const DARAB_MAX_MELYSEG = GYOKER_MAX_MELYSEG;
@@ -168,7 +168,7 @@ export function sajatGyokerDarabjai(alairo, bitek, darab = 1) {
 const KULCS_HOSSZ = 43;
 /**
  * A darab-kulcsok jele: `g` — a gyökér darabja (D95/4), `k` — a kereső-réteg régiója (D105), `n` — a koinon darabja (D130).
- * ⛔ Nem lehet hexa jegy (a nullák és a mélység közt állna), és nem lehet `s` (a koinó születésének kulcsa — `szeletEgyeztetes.js`).
+ * ⛔ Nem lehet hexa jegy (a nullák és a mélység közt állna), és nem lehet `s` (a koino születésének kulcsa — `szeletEgyeztetes.js`).
  */
 export const DARAB_JELEK = ['g', 'k', 'n'];
 const DARAB_MINTA = /^(0+)([gkn])([0-9a-f]{2})([0-9a-f]{4,36})00$/;
@@ -268,7 +268,7 @@ export function melysegBecslese(lenyomatok, sajat, cel) {
 
 /**
  * ⭐ A DARAB-MÉLYSÉG (közös) az elemek számából: annyi bit, hogy egy darabba ~`cel` jusson — kis halmaznál 0, és
- * logaritmikusan nő (a „végtelen”: egy darab mérete nem nő a koinóval — D106: `DARAB_MAX_MELYSEG`-ig).
+ * logaritmikusan nő (a „végtelen”: egy darab mérete nem nő a koinoval — D106: `DARAB_MAX_MELYSEG`-ig).
  * @param {number} elemek
  * @param {number} cel
  * @returns {number} 0..`DARAB_MAX_MELYSEG`
@@ -356,7 +356,7 @@ export function gyokerJelOlvasasa(szoveg) {
 //   viszi (a gyökéré a ±1 szintet).
 
 const KOINON_SO = 'koino-koinon-darab-1';
-/** ⭐ KO4: a koinon példányszáma (egy darab ennyi tartója) — alapból 20 (a koinó születése mondja ki: ③f). */
+/** ⭐ KO4: a koinon példányszáma (egy darab ennyi tartója) — alapból 20 (a koino születése mondja ki: ③f). */
 export const KOINON_PELDANY = 20;
 
 /**
@@ -471,8 +471,8 @@ export const GYOKER_DARAB_CEL = 256;
 
 /**
  * ⭐ A GYÖKÉR-DARAB MÉLYSÉGE a legfelső szintű gondolatok számából: annyi bit, hogy egy darabba ~`GYOKER_DARAB_CEL`
- * jusson. Kis koinóban 0 („az egész gyökér egy darab”), és logaritmikusan nő (a „végtelen”: egy darab mérete nem
- * nő a koinóval — ⭐ D106: a koinó saját határáig, `GYOKER_MAX_MELYSEG`-ig; a D106 előtt 16-nál megállt). ⚠️ A kereső
+ * jusson. Kis koinoban 0 („az egész gyökér egy darab”), és logaritmikusan nő (a „végtelen”: egy darab mérete nem
+ * nő a koinoval — ⭐ D106: a koino saját határáig, `GYOKER_MAX_MELYSEG`-ig; a D106 előtt 16-nál megállt). ⚠️ A kereső
  * ugyanabból az adatból ugyanazt számolja; ha nem talál, a szomszédos mélységet próbálja (a becslés két gépen eltérhet).
  * @param {number} legfelsoDarab
  * @returns {number} 0..`GYOKER_MAX_MELYSEG`
@@ -536,7 +536,7 @@ export function temaValtozatokkal(fajta, kulcs, kepzo, valtozatok = [1]) {
 //     egy szeletet) valaki hirdeti — a DHT puszta címet ad, azonosítót nem. ⭐ Így egy új készülék is elér egy
 //     gyökér-darab tartót, anélkül hogy tudná, ki az.
 // A tartó a saját készülék-témáján és minden hirdetett témájának párján néz körül (~3 KB témánként, a hirdetés
-// ütemében). ⚠️ A cím név nélküli, bizalom nem jár vele (3. szabály); aki ismeri a koinót és a témát, az látja, hány
+// ütemében). ⚠️ A cím név nélküli, bizalom nem jár vele (3. szabály); aki ismeri a koinot és a témát, az látja, hány
 // cím kopogtat (azt nem, mit kér — D92/1).
 
 /** Egy készülék kopogtató témája (a tábla-aláírójából — a készülék neve, nem az azonosság, D6; `n`: a témák változata). */

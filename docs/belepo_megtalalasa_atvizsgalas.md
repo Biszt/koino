@@ -23,10 +23,10 @@ legalább egy gép eltárolta a bejelentést (`koino.js` — a `bejelentve` a t�
 1. **A meghívó** (a szöveg, amit a meghívó elküld) hordozza a meghívó készülék címeit (a belső és a kifelé látszó) és a
    készülék-nevét (tábla-aláíró). A belépő tehát tudja, hol a meghívó — a meghívó semmit nem tud a belépőről.
 2. **A belépő** a meghívó elfogadásakor (`meghivoElfogadasa`) a címeket induló címnek veszi, és felvesz egy **jelentkezés-kérelmet**
-   (cél nélküli függő kérelem — MH6), aminek a kopogtató témája a meghívó **készülék-témája** (a koinó nevéből és a meghívó
+   (cél nélküli függő kérelem — MH6), aminek a kopogtató témája a meghívó **készülék-témája** (a koino nevéből és a meghívó
    készülék-nevéből számolt rekesz). ⚠️ Mint minden függő kérelem, ez is **két óra után lejár**.
 3. **A belépő őrjárata** az új függő kérelemnél azonnal, aztán ~20 percenként a **BitTorrent DHT-n** (a világ torrent-programjainak
-   közös, gazdátlan hálója — nem koinós gépek) bejelenti a címét ezen a rekeszen: a DHT ismert belépőin (`router.bittorrent.com`
+   közös, gazdátlan hálója — nem koinos gépek) bejelenti a címét ezen a rekeszen: a DHT ismert belépőin (`router.bittorrent.com`
    stb. — csak indítás; utána a megismert gépekből) a rekesz számához „legközelebbi” ~8 géphez jut, és azok eltárolják: „ezen a
    rekeszen ez a cím” (az IP a csomagból, a port a saját, kívülről látszó portja — STUN). A rekesz száma vakított: csak az tudja,
    melyiket nézze, akinél ott a meghívó.
@@ -84,14 +84,14 @@ legalább egy gép eltárolta a bejelentést (`koino.js` — a `bejelentve` a t�
   2. *„📡 Bejelentkeztem a hálózaton, hogy a meghívód készüléke rám találjon — utoljára 21:04-kor (3 helyen), legközelebb 21:24-kor.”*
   3. *„🚪 Kopogok a meghívód készülékére: 17 próbálkozás, az utolsó 21:18-kor — még nem válaszolt.”* (percenként frissül)
   4. *„🤝 Megvan a kapcsolat (21:19) — a meghívód készüléke most fogad be…”*
-  5. *„✅ Bent vagy a koinóban (21:21) — jönnek a gondolatok.”* (néhány perc múlva eltűnik)
+  5. *„✅ Bent vagy a koinoban (21:21) — jönnek a gondolatok.”* (néhány perc múlva eltűnik)
 
-  Ha sokáig nincs kapcsolat (pl. 30 perc), egy segítő mondat: *„Akkor tud rád találni, ha a meghívód készülékén fut a koinó. Ha
+  Ha sokáig nincs kapcsolat (pl. 30 perc), egy segítő mondat: *„Akkor tud rád találni, ha a meghívód készülékén fut a koino. Ha
   ugyanazon a wifin vagytok, azonnal megy. A meghívód december 4-ig érvényes.”* **Az adat forrása:** a belépés lépéseit az őrjárat
   jegyzi (a csere-állapot mellé — `csere.json`, amit a lap úgyis 10 mp-enként kérdez); címet a lap nem mutat (csak a „részletek”
   alatt, a hibakereséshez). ⏸️ **B5:** (a) ⭐ **a meghívó oldalán is:** a „Meghívóim” ablak a „aktív” helyett kimondja, hogy *„jelentkezett —
   kopogok rá (5 próbálkozás)”*, aztán *„igazolta — befogadom”*, *„felhasznált”* (este a te oldaladon sem látszott semmi); (b) és a
-  készülék saját értesítése (D103), amikor a belépés sikerült — mindkét oldalon (*„Bent vagy a koinóban”* / *„Csikós Alex belépett”*),
+  készülék saját értesítése (D103), amikor a belépés sikerült — mindkét oldalon (*„Bent vagy a koinoban”* / *„Csikós Alex belépett”*),
   mert a lapot közben bezárhatják; (c) csak a belépő lapján.
 
 ⛔ **Amit nem javaslok:** központi segítő (jelzőpont, közvetítő szerver — a 2. szabály); a meghívott a saját címét a meghívóba
@@ -158,7 +158,7 @@ megerősítés a terepi próbán (Csabának nincs mobilnetes készüléke).
 
 - ✅ **M5 — az ütközés útja:** a belépő útja (a belépés elkérése, az automatikus meghívás) egy függvény (`belepoUtjaFuttatasa`),
   amit a munka és a kiszolgálás közös útja (`kerelemAtvetele` — a családi átadás és az ütközés) is hív; a munka a kiszolgált
-  kérelem után is (nyílt koinóban a nem tag kérelmét kiszolgáljuk — MH7). Próba (parancssor): A-nak függő törzs-kérelme van F felé,
+  kérelem után is (nyílt koinoban a nem tag kérelmét kiszolgáljuk — MH7). Próba (parancssor): A-nak függő törzs-kérelme van F felé,
   F szelet-kérelemmel jön, F kérelme megy elöl, A enged, kiszolgál — és ugyanabban a munkában meghív (a meghívó felhasznált).
   Rontás: a `kerelemAtvetele` hívása nélkül a meghívó „igazolt — a belépése még nem jött meg” marad (pontosan a terepi állapot).
 - ✅ **M6 — igaz felirat:** „N témán jelentkeztem” (az őrjárat és a `kerelem` parancs; eddig „tartónál” / „helyen”). A „kérő vár
@@ -171,7 +171,7 @@ megerősítés a terepi próbán (Csabának nincs mobilnetes készüléke).
   háztartás, egyszer); a kép (`belepesKepe`) a legelőrébb tartó lépés, a „bent vagy” 5 percig látszik, fél óra kapcsolat nélkül
   segítő mondat. A lap: `felulet/js/koinoBelepes.js` — a sáv a lap tetején (a lépések listája; ha az őrjárat nem fut, kimondja;
   10 perccel a kapcsolat után tagság nélkül: „a meghívód nézze meg a Meghívóim ablakát”). ⭐ B5 (b) a belépő oldalán: a tagsággal a
-  készülék értesít („Bent vagy a koinóban”) — csak akkor nem, ha a készülék értesítését kifejezetten kikapcsolták (egy friss belépőnek
+  készülék értesít („Bent vagy a koinoban”) — csak akkor nem, ha a készülék értesítését kifejezetten kikapcsolták (egy friss belépőnek
   még nincs beállítása). Próbák: két modul-próba (a lépések sorrendje, a szélek) és egy parancssor-próba (A őrjárata előbb áll: F
   „kopog” → A elindul: „kapcsolat” → „tag” + értesítés; G a kérelem útján) — hét rontással; böngészőben végigjárva (asztali és
   telefon-szélességen). ⚠️ A „Meghívóim” igazi állapota (B5 (a): „jelentkezett — kopogok rá”) az M8-cal jön: a meghívó rekeszéből
@@ -199,7 +199,7 @@ megerősítés a terepi próbán (Csabának nincs mobilnetes készüléke).
   rövidebbre nem, legfeljebb 31 nap, egy újabb felvétel kitolhatja); a meghívó elfogadása a meghívó lejáratát adja, a tagsággal
   (`belepesKovetese`) a jelentkezés lezárul. Próbák: egy modul-próba (három rontás) és az M7 parancssor-próbájában a belépő lemeze
   (két rontással).
-- ⏭️ **Hátra:** a terepi próba (egy mobilnetes telefon — a 87. két készülékes része is), és a koinó többi BEP 5 útjának átvizsgálása.
+- ⏭️ **Hátra:** a terepi próba (egy mobilnetes telefon — a 87. két készülékes része is), és a koino többi BEP 5 útjának átvizsgálása.
 
 ## 9. ✅ A terep (2026-11-05 este) — mobilnet és otthoni wifi, cím beírása nélkül
 
@@ -210,7 +210,7 @@ sort bemásolta a Termuxba; a telepítés (`pkg`, Node, a program) a mobilneten 
 - **17:28** (az ő órája) a belépése; **17:30:08** a telefonja kiírta a címeit a meghívó rekeszébe (BEP 44).
 - **17:32:20** a laptop a háztartásában megtalálta: *„📮 Schubert Zoltán jelentkezett a meghívóm rekeszében — kopogok rá
   (151.0.83.29:42957, 10.40.217.106:7373, 100.113.152.100:7373)”* — az M8 a valódi DHT-n működik, az M2 kétperces üteme elkapta.
-- **17:33:00** a rés az első próbára megnyílt (50 ms); Zoltán első kérelmét a laptop még nem szolgálta ki (*„zárt koinó, nem tag”*),
+- **17:33:00** a rés az első próbára megnyílt (50 ms); Zoltán első kérelmét a laptop még nem szolgálta ki (*„zárt koino, nem tag”*),
   a saját függő kérelmével elhozta a belépését.
 - **17:33:07** *„✉️ meghívtam: Schubert Zoltán — a meghívómmal lépett be”* (D122) — a csere ugyanabban a percben.
 - **17:34** Zoltán lapja fejléceket kért; amit a laptop nem tartott, azt továbbadásra átvette. **17:35** megjött a „Teszt” gondolata.
@@ -245,5 +245,5 @@ tehát a visszatérés után legfeljebb ~64 perc. Közben a két halott telefont
 a javítás a terepen is áll.
 
 ⚠️ **Egy mellékes jel:** 19:46:30-kor egy próba-készülék (127.0.0.1:7701 — a futó csoport-próbák egyike) a helyi felfedezéssel
-bekopogott a terep-őrjáratra, és a laptop a függő kérelmét próbálta rajta (más koinó — semmi nem ment át). Ezért kell a próbasor előtt
+bekopogott a terep-őrjáratra, és a laptop a függő kérelmét próbálta rajta (más koino — semmi nem ment át). Ezért kell a próbasor előtt
 a kézi folyamatokat leállítani: nem csak a portjuk ütközhet, a próba készülékei meg is találják őket.

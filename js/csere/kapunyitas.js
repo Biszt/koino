@@ -13,7 +13,7 @@
 //   NAT-PMP (RFC 6886)  — a régebbi, EGYSZERŰ, de CSAK IPv4
 //   PCP     (RFC 6887)  — az utódja, és EZ TUD IPv6 tűzfal-rést nyitni
 //
-// A koinónak a PCP kell: a szolgáltatói NAT (CGNAT) miatt az IPv4 amúgy is használhatatlan
+// A koinonak a PCP kell: a szolgáltatói NAT (CGNAT) miatt az IPv4 amúgy is használhatatlan
 // befelé, tehát minden az IPv6-on múlik.
 //
 // ⚠️ EZ SEGÉDESZKÖZ, NEM ELŐFELTÉTEL (a platform-függetlenség 2. szabálya). Ha a router

@@ -5,7 +5,7 @@
 // ⭐ MIÉRT KELL EZ? (D33, 2026-08-29 — a harmadik fordulat)
 // Négy estén át azon dolgoztunk, hogy ez a laptop FOGADNI tudjon kapcsolatot. Mind a három
 // szabvány (NAT-PMP, PCP, UPnP) megbukott a routeren. Aztán kiderült, hogy rossz feladatot
-// oldottunk meg: a koinóban nem egy konkrét címzetthez kell eljuttatni valamit, hanem
+// oldottunk meg: a koinoban nem egy konkrét címzetthez kell eljuttatni valamit, hanem
 // mindenkinek — és mindegy, kivel sikerül kapcsolódni, az már továbbadja.
 //
 // A régi kérdés („el tud-e érni A a B-hez?") N² kapcsolatot követelne. Az új
@@ -24,7 +24,7 @@
 //
 // ⚠️ NINCS BENNE ÓRA-FÜGGÉS SEM, ami számítana. A `utoljara` és a `sikertelen` mező HELYI
 // MEGFIGYELÉS: soha nem megy át a hálózaton, soha nem kerül eseménybe, és soha nem dönt el
-// semmit a koinóban. Csak a próbálkozás sorrendjét adja. (Ez pontosan az a fajta adat,
+// semmit a koinoban. Csak a próbálkozás sorrendjét adja. (Ez pontosan az a fajta adat,
 // amiről a terv 3. iránya kimondta: a „mikor kaptam meg" sehol nincs rögzítve, tehát
 // konszenzusra alkalmatlan — itt viszont épp ezért ártalmatlan.)
 //

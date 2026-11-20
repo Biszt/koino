@@ -2,7 +2,7 @@
 
 // Felelősség: a CSERE PÁRBESZÉDE — ugyanaz a protokoll, egy kapcsolaton.
 //
-// ⭐ MIT CSINÁL, ÉS MIT NEM. Ez a fájl SEMMIT nem tud a koinóról: nem ismer eseményt,
+// ⭐ MIT CSINÁL, ÉS MIT NEM. Ez a fájl SEMMIT nem tud a koinoról: nem ismer eseményt,
 // szabályt, tudatpontot. Csak annyit tesz, hogy a csere lépéseit — a
 // [`tartomany.js`](tartomany.js) üzeneteit, a [`szeletEgyeztetes.js`](szeletEgyeztetes.js)
 // listáit és az eseményeket — oda-vissza küldi egy foglalat-szerű kapcsolaton. Ha itt hiba
@@ -20,7 +20,7 @@
 // hálózati séma, amit külön karban kellene tartani, és a forgalom emberi szemmel is
 // olvasható — egy `nc`-vel bele lehet nézni.
 //
-//   {"uzenet":"NYITAS","koino":"…","lenyomat":"…"}  — melyik koinóról, és a szeleteim lenyomata
+//   {"uzenet":"NYITAS","koino":"…","lenyomat":"…"}  — melyik koinoról, és a szeleteim lenyomata
 //   {"uzenet":"SZELETEK","lepes":[…]}   — az első szint: melyik szelet tér el?
 //   {"uzenet":"ELTERO",…} · {"uzenet":"RESZVETEL",…}  — az eltérő szeletek, és ki melyikben van
 //   {"uzenet":"TARTOMANYOK","lepesek":{…}} — a második szint: a szeleteken belüli eltérés
@@ -98,12 +98,12 @@ import { keresesValaszAlakja } from './kereses.js';
 // a 8 MB tehát bőven elég, de egy végtelen sor már nem fér bele.
 const SOR_KORLAT = 8 * 1024 * 1024;
 
-// ⭐⭐ D119 (③): A CSALÁD A NYITÁSBAN — a nyitott koinón kívül a család többi koinója (amivel ez a munka cserélni tud), legfeljebb
-// ennyi. Egy koinós családnál üres lista (`"cs":[]` — ~8 bájt csereként); a régi program nem küldi (akkor nincs családi kör).
+// ⭐⭐ D119 (③): A CSALÁD A NYITÁSBAN — a nyitott koino-n kívül a család többi koinoja (amivel ez a munka cserélni tud), legfeljebb
+// ennyi. Egy koinos családnál üres lista (`"cs":[]` — ~8 bájt csereként); a régi program nem küldi (akkor nincs családi kör).
 export const CSALAD_KORLAT = 64;
 
 /**
- * ⭐⭐ D119 (③): a társ családja a nyitásából — a nyitott koinója és a `cs` lista (korlátosan, szövegek). Null, ha nem mondta (régi
+ * ⭐⭐ D119 (③): a társ családja a nyitásából — a nyitott koinoja és a `cs` lista (korlátosan, szövegek). Null, ha nem mondta (régi
  * program) vagy hibás: akkor nincs családi kör.
  * @param {Object} nyitas
  * @returns {Array<string>|null}
@@ -142,7 +142,7 @@ const LEPES_KORLAT = 64;
 
 // ⛔ Egy szelet-kulcs lista (ELTERO, RESZVETEL) legfeljebb ennyi elemű (9. szabály). ⚠️ Az első
 // találkozás (egy üres készülék) az összes szeletet egy listában kapja — a sor-korlát (8 MB)
-// ~180 000 kulcsot enged; ennél nagyobb koinónál az első találkozást részletekben kell (⏸️).
+// ~180 000 kulcsot enged; ennél nagyobb koinonál az első találkozást részletekben kell (⏸️).
 const KULCS_KORLAT = 180000;
 
 // Egy beszélgetésben legfeljebb ennyi (friss UDP-)címet fogadunk el. Nem szigor, hanem
@@ -311,9 +311,9 @@ export function uzenetSor(kapcsolat) {
  *   tábla-kulcs is), a koinon-darabom egyeztetődik a társéval (a NYITÁS `knd` jele)
  * @param {Function} [beallitas.reszvetelHalmaz] - ⭐ D97/1: async () → a részvételi halmazom (Set), vagy null („minden”)
  * @param {Object} [beallitas.halmazTar] - ⭐ D97/1: { sajatNaplo(kulcsok), tarsOlvas(aláíró), tarsIr(aláíró, ismert) }
- * @param {Array<Object>} [beallitas.koinoSzuletesLanc] - ⭐ D118 (②a): a koinó születéseinek lánca a gyökértől (az utolsó a
- *        `koinoSzuletes`) — a születés-szelet ezt hordozza; ha nincs, csak a koinó születését
- * @param {Object} [beallitas.koinoSzuletes] - ⭐ D96: a koinó `KoinoLetrehozas` eseménye (ha ismert) — mindenki részt vesz
+ * @param {Array<Object>} [beallitas.koinoSzuletesLanc] - ⭐ D118 (②a): a koino születéseinek lánca a gyökértől (az utolsó a
+ *        `koinoSzuletes`) — a születés-szelet ezt hordozza; ha nincs, csak a koino születését
+ * @param {Object} [beallitas.koinoSzuletes] - ⭐ D96: a koino `KoinoLetrehozas` eseménye (ha ismert) — mindenki részt vesz
  *   benne, a halmaza egyedül ez az esemény
  * @returns {Promise<Object>} { korok, uj, kuldott, masKoino, kivulrolIgyLatszom, … ,
  *   elteroSzeletek, egyeztetoUzenetek }
@@ -378,19 +378,19 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   const sajatKoinonSet = new Set(sajatKoinonKulcsok);
 
   // A gyökér-darabban a saját darabjaim döntenek; a teljes gyökér pedig, ha darabonként megy, egészében nem cserélődik.
-  // ⭐ D96: a koinó születésének (esemény-)kulcsában mindenki részt vesz. ⭐ D107 L2: a kereső-régióban a saját régióim.
+  // ⭐ D96: a koino születésének (esemény-)kulcsában mindenki részt vesz. ⭐ D107 L2: a kereső-régióban a saját régióim.
   // ⭐⭐ D130 (③c): a koinon-darabban a saját darabom és a két fele; a koinon kulcsában soha.
   const reszvesz = (k) => (k === KOINO_SZULETES_KULCS ? true : keresoRegioBol(k) ? sajatRegioSet.has(k)
     : k === KOINON_KULCS ? false : koinonDarabBol(k) ? sajatKoinonSet.has(k)
     : gyokerDarabBol(k) ? sajatDarabSet.has(k)
     : (k === GYOKER_KULCS && sajatDarabSet.size ? false : hivoReszvesz(k)));
 
-  // ===== ⭐ D96: A KOINÓ SZÜLETÉSE MINT ESEMÉNY — a párok közt mindig, a halmaza egyedül az esemény =====
+  // ===== ⭐ D96: A KOINO SZÜLETÉSE MINT ESEMÉNY — a párok közt mindig, a halmaza egyedül az esemény =====
   const szuletesEsemeny = beallitas.koinoSzuletes && typeof beallitas.koinoSzuletes === 'object'
     && koinoSzuleteseE(beallitas.koinoSzuletes, koino)
     && ervenyesKulcs(beallitas.koinoSzuletes.azonosito) ? beallitas.koinoSzuletes : null;
-  // ⭐⭐ D118 (②a): a születés-szelet a koinó születéseinek TELJES LÁNCÁT hordozza (a gyökértől a koinóig — a hívó adja,
-  // `koinoSzuletesLanc`; az utolsó maga a koinó születése) — a gyermek kapuja a szülőjét csak így ellenőrizheti.
+  // ⭐⭐ D118 (②a): a születés-szelet a koino születéseinek TELJES LÁNCÁT hordozza (a gyökértől a koinoig — a hívó adja,
+  // `koinoSzuletesLanc`; az utolsó maga a koino születése) — a gyermek kapuja a szülőjét csak így ellenőrizheti.
   const szuletesLanca = !szuletesEsemeny ? []
     : Array.isArray(beallitas.koinoSzuletesLanc) && beallitas.koinoSzuletesLanc.length
       && beallitas.koinoSzuletesLanc[beallitas.koinoSzuletesLanc.length - 1]?.azonosito === szuletesEsemeny.azonosito
@@ -402,7 +402,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ⭐⭐ D124 ④: a szelet-párok számítása a KÖZÖS nyelv szerint — a nyitásig a legújabbé (lent, a nyelv-készletből), utána a
   // fordító-szél adja (a régi nyelvek jegyzékéből, ha a közös nyelven más volt).
   let szeletParokSzamitasa = szeletParok;
-  /** A résztvevő szeletek párjai (a szűrő szerint) + a koinó születésének párja (ha ismerem). */
+  /** A résztvevő szeletek párjai (a szűrő szerint) + a koino születésének párja (ha ismerem). */
   const parokSzamitasa = async (szuro) => {
     const p = await szeletParokSzamitasa(tar, koino, szuro);
     return szuletesPar ? rendezettHalmaz([...p, szuletesPar]) : p;
@@ -445,12 +445,12 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   let uj = 0, kuldott = 0, masKoino = null;
   let kivulrolIgyLatszom = null, kapottUdpCimek = [];
   let kapottTablaKulcs = null;      // a társ tábla-kulcsa — a KÖTÉS azonosítója
-  let oveKoinoLista = null;         // ⭐⭐ D128 (③d): a társ CIMEK-je a koinó-listával (a bizonyítás után dolgozzuk fel)
+  let oveKoinoLista = null;         // ⭐⭐ D128 (③d): a társ CIMEK-je a koino-listával (a bizonyítás után dolgozzuk fel)
   let kapottDhtGepek = [];          // néhány DHT-gép, amit ő ismer (nem bizalom, csak cím)
   let elteroSzeletek = 0, egyeztetoUzenetek = 0;
   let ujAzonositok = [];            // ⭐ D82: a most beérkezett események (az észlelőnek)
   let kapottRaj = { vallal: [], tippek: {} };   // ⭐ D91: a társ vállalása és a raj tippjei (a hívóé)
-  let tarsKorlatozva = false;       // ⭐ D93/3: a zárt koinó kapuja a társat nem engedte be (csak a megengedett szeletek)
+  let tarsKorlatozva = false;       // ⭐ D93/3: a zárt koino kapuja a társat nem engedte be (csak a megengedett szeletek)
   let tarsAzonossaga = null;        // ⭐ D93/3: a társ személye, ha EBBEN a kézfogásban bizonyította ({ sz, h })
   let osszegzesEredmeny = null;     // ⭐ D95/1: a nagy szeletek összegzésének eredménye (a hívóé)
   let tagsagEredmeny = null;        // ⭐ D95/2: a tagsági kísérők köre (a hívóé)
@@ -458,7 +458,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   let lancEredmeny = null;          // ⭐ D98/2–3: a lánc-kör eredménye (a hívóé)
   let ujBejegyzesek = 0, kuldottBejegyzesek = 0;   // ⭐ D107 L2: a kereső-régió bejegyzései (felvett · elküldött)
   let tarsMelysegei = null;         // ⭐ D110: a társ bemondott mélységei a NYITÁS jeleiből (a hívó tanul belőlük)
-  let tarsCsalad = null;            // ⭐ D119 (③): a társ családja a nyitásából (a hívó ebből számolja a közös koinókat)
+  let tarsCsalad = null;            // ⭐ D119 (③): a társ családja a nyitásából (a hívó ebből számolja a közös koinokat)
 
   // ⭐⭐ D124: a saját nyelvem (a próbák a `beallitas.nyelv`-vel mást mondhatnak), és a közös — a társ első üzenetéből.
   // ⭐ D124 ④: a nyelv-készlet (a régi nyelvek lépései) — a fordító-szél ebből fordít.
@@ -476,12 +476,12 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     ...(tarsCsalad ? { tarsCsalad } : {})
   });
 
-  // ===== ⭐⭐ D93/3: A ZÁRT KOINÓ KAPUJA — a hívóé (`beallitas.zartKapu`), a vonal semmit nem tud a tagságról =====
+  // ===== ⭐⭐ D93/3: A ZÁRT KOINO KAPUJA — a hívóé (`beallitas.zartKapu`), a vonal semmit nem tud a tagságról =====
   //
   // A kapu egy ítéletet ad: { szabad } — vagy { szabad: false, kell, szeletek }: a társ nem (ellenőrzött) tag, tehát csak a
-  // megengedett szeleteket (a koinó születése, az ő és a mi azonosság-szeletünk) egyeztetjük vele, fájlt nem adunk, és
+  // megengedett szeleteket (a koino születése, az ő és a mi azonosság-szeletünk) egyeztetjük vele, fájlt nem adunk, és
   // idegen címet sem. A `kell` azt mondja: kérjük a bizonyítását (a személyes aláírást és a tagsági csomagot). ⛔ Ha a
-  // kapu maga hibázik, ZÁRVA marad (a hiba nem nyithat ki egy zárt koinót).
+  // kapu maga hibázik, ZÁRVA marad (a hiba nem nyithat ki egy zárt koinot).
   const zartKapu = typeof beallitas.zartKapu === 'function' ? beallitas.zartKapu : null;
   const kezfogas = beallitas.kezfogas ?? null;
   const kapuItelete = async (adatok) => {
@@ -490,7 +490,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
       const v = await zartKapu(adatok);
       return v && typeof v === 'object' ? v : { szabad: false, kell: false, szeletek: [] };
     } catch (hiba) {
-      console.warn('parbeszed - a zárt koinó kapuja hibázott (zárva marad)', { ok: hiba.message });
+      console.warn('parbeszed - a zárt koino kapuja hibázott (zárva marad)', { ok: hiba.message });
       return { szabad: false, kell: false, szeletek: [] };
     }
   };
@@ -501,8 +501,8 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   const bizonyitottSzemely = (ki) => (ki && typeof ki === 'object' && typeof kezfogas?.kiEllenoriz === 'function'
     && kezfogas.kiEllenoriz(ki) ? { sz: ki.sz, h: typeof ki.h === 'string' ? ki.h : null, k: ki.k, t: ki.t } : null);
   /**
-   * ⭐⭐ D128 (③d — 9.12): A KOINÓ-LISTÁM — csak a SAJÁT készülékemnek: a hívó dönti el a társ tábla-aláírójából (a kapu kötése szerint
-   * az én nevem és egy másik készülékem), és ha igen, a lista (mely koinókban vagyok, és ott hol tart a láncom). Másnak soha (D6: a
+   * ⭐⭐ D128 (③d — 9.12): A KOINO-LISTÁM — csak a SAJÁT készülékemnek: a hívó dönti el a társ tábla-aláírójából (a kapu kötése szerint
+   * az én nevem és egy másik készülékem), és ha igen, a lista (mely koinokban vagyok, és ott hol tart a láncom). Másnak soha (D6: a
    * láncra sem). Elhagyható mező: a régi program nem küldi, és nem is olvassa.
    */
   const koinoListaMezo = async () => {
@@ -511,15 +511,15 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     try {
       return alairo && (await beallitas.sajatKeszulekE(alairo)) ? { kl: await beallitas.koinoLista() } : {};
     } catch (hiba) {
-      console.warn('parbeszed - a koinó-lista nem küldhető', { ok: hiba.message });
+      console.warn('parbeszed - a koino-lista nem küldhető', { ok: hiba.message });
       return {};
     }
   };
-  /** ⭐⭐ D128 (③d): a társ koinó-listája a hívóhoz — az is csak a saját készülékemtől fogadja el (ugyanaz a kötés). */
+  /** ⭐⭐ D128 (③d): a társ koino-listája a hívóhoz — az is csak a saját készülékemtől fogadja el (ugyanaz a kötés). */
   const koinoListaFogadasa = async (ove) => {
     if (!Array.isArray(ove?.kl) || typeof beallitas.koinoListaFogadasa !== 'function' || !kapottTablaKulcs?.alairo) return;
     try { await beallitas.koinoListaFogadasa(kapottTablaKulcs.alairo, ove.kl); }
-    catch (hiba) { console.warn('parbeszed - a koinó-lista nem fogadható', { ok: hiba.message }); }
+    catch (hiba) { console.warn('parbeszed - a koino-lista nem fogadható', { ok: hiba.message }); }
   };
   /** Amit a bizonyításunkhoz küldünk: a személyes aláírás és a tagsági csomag (ha van) — ⭐ D122: és a meghívóm bizonyítéka. */
   const sajatBizonyitek = async () => {
@@ -551,7 +551,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ⭐ A TÜKÖR (2026-08-29, Csaba nyomán): megmondjuk a másiknak, MILYEN CÍMRŐL LÁTJUK. ⚠️ Ebből
   // semmilyen bizalom nem következik (3. szabály) — megfigyelés, nem igazság.
   // ⭐⭐ D89/1, D93/3: A TÁBLA-KULCS A KÉZFOGÁS ALÁÍRÁSÁVAL (`aa`) — 2026-10-04 óta a NYITÁSBAN (korábban a
-  // CIMEK-ben): a zárt koinó kapuja ebből tudja meg, ismeri-e már a társat, és ha nem, a CIMEK-ben kéri a
+  // CIMEK-ben): a zárt koino kapuja ebből tudja meg, ismeri-e már a társat, és ha nem, a CIMEK-ben kéri a
   // bizonyítását. Ettől a tábla-kulcs nem bemondás: aki aláírta, az vett részt EBBEN a kézfogásban.
   const tablaKulcs = tablaKulcsElore;
   // ⭐ D95/4: a darabjaim rövid lenyomata (11 jel = 66 bit; az üres darabé üres) a mélységgel, EGY szövegben
@@ -601,13 +601,13 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
       sajatNaplo = null;
     }
   }
-  // ⭐ D119 (③): ha az első üzenetet egy másik koinó cseréje már elolvasta és átadta, a nyitást is az küldte el — itt nincs újabb.
+  // ⭐ D119 (③): ha az első üzenetet egy másik koino cseréje már elolvasta és átadta, a nyitást is az küldte el — itt nincs újabb.
   if (!beallitas.elsoUzenet) kuld({
     // ⭐ 2026-09-27: a LENYOMAT → NYITAS váltást még maga az üzenet neve jelezte (külön mező nélkül — „az minden cserén
     // utazna”). ⭐⭐ D124 (2026-11-06): a nyelvváltozat mégis mező (`ny`) — a 90. mérés szerint +10 bájt (a „nincs újdonság”
     // csere < 1%-a), és nélküle az újabb program csak annyit tudna meg a régiről, hogy „nem válaszol”.
     uzenet: 'NYITAS', koino, lenyomat: sajatLenyomat, ...nyelvJel(sajatNy),
-    // ⭐⭐ D119 (③): a családom többi koinója (amivel ez a munka cserélni tud) — a két fél ebből számolja a közöseket.
+    // ⭐⭐ D119 (③): a családom többi koinoja (amivel ez a munka cserélni tud) — a két fél ebből számolja a közöseket.
     ...(Array.isArray(beallitas.csalad) ? { cs: beallitas.csalad.slice(0, CSALAD_KORLAT) } : {}),
     ...(tablaKulcs ? { tabla: tablaKulcs } : {}),
     ...(tablaKulcs && typeof kezfogas?.alairas === 'string' ? { aa: kezfogas.alairas } : {}),
@@ -636,7 +636,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ⏸️ 2026-09-26 ÓTA ÉLESBEN SENKI NEM KEZD ÍGY (a TCP-s több forrás kikerült, D69/2); az ág
   // viszont szállítás-független, és a UDP-s több forrás erre épülhet. A `csereProba.js` méri.
   if (elsoUzenet.uzenet === 'FAJLKEREK' && beallitas.fajlOlvas) {
-    // ⛔ D93/3: ez az ág nem hoz személyt — zárt koinóban nem szolgál ki.
+    // ⛔ D93/3: ez az ág nem hoz személyt — zárt koinoban nem szolgál ki.
     if (!(await kapuItelete({})).szabad) {
       kuld({ uzenet: 'KESZ', tiltva: 'zart' });
       return { ...eredmeny(), fajlokNala: [], tarsKorlatozva: true };
@@ -646,16 +646,16 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     return { ...eredmeny(), fajlokNala: [] };
   }
 
-  // ===== ⭐⭐ D119 (③): A CSALÁD MÁSIK KOINÓJÁNAK SZÓLÓ KÉRÉS — a hívó a koinó példányának adja át =====
+  // ===== ⭐⭐ D119 (③): A CSALÁD MÁSIK KOINOJÁNAK SZÓLÓ KÉRÉS — a hívó a koino példányának adja át =====
   //
-  // A kérés (a kérelem, egy továbbadott kérelem válasza) megnevezi a koinóját. Ha az a családom egy másik koinója, a hívó
+  // A kérés (a kérelem, egy továbbadott kérelem válasza) megnevezi a koinoját. Ha az a családom egy másik koinoja, a hívó
   // (`beallitas.atadas`) annak a példányával szolgálja ki, ugyanezen a kapcsolaton (az első üzenettel és az üzenetsorral) —
-  // különben a nyitott koinó tárából felelnénk egy másik koinó kérdésére. Ha a hívó nem ismeri a koinót, a régi út marad.
+  // különben a nyitott koino tárából felelnénk egy másik koino kérdésére. Ha a hívó nem ismeri a koinot, a régi út marad.
   if ((elsoUzenet.uzenet === 'KERELEM' || elsoUzenet.uzenet === 'VALASZ') && typeof elsoUzenet.koino === 'string'
       && elsoUzenet.koino !== koino && typeof beallitas.atadas === 'function') {
     const atadott = await beallitas.atadas(elsoUzenet, { kapcsolat, sor });
     if (atadott) {
-      console.log('parbeszed - VÉGE (a család másik koinójának átadva)', { koino: elsoUzenet.koino });
+      console.log('parbeszed - VÉGE (a család másik koinojának átadva)', { koino: elsoUzenet.koino });
       return atadott;
     }
   }
@@ -664,12 +664,12 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   //
   // Három alapkérdés: SZELET (bárkitől — D84/1), FEJLÉCEK (gyökér + minták, két menetben) és TÖRZS (a fájlok —
   // csak a vállalótól). ⭐ A tartalmat a hívó adja (`beallitas.kerelemKiszolgalo`): a vonal semmit nem tud a
-  // koinóról. ⚠️ A bizalom itt sem más: amit így kapnak, ugyanazon az `esemenyMentese` kapun megy be (3. szabály).
+  // koinoról. ⚠️ A bizalom itt sem más: amit így kapnak, ugyanazon az `esemenyMentese` kapun megy be (3. szabály).
   if (elsoUzenet.uzenet === 'KERELEM') {
     const kiszolgalo = beallitas.kerelemKiszolgalo ?? null;
-    // ⛔⛔ D93/3: ZÁRT KOINÓBAN CSAK TAGNAK. A kérő a kérelemben hozza a személyes aláírását (a kézfogás átiratára) és a
+    // ⛔⛔ D93/3: ZÁRT KOINOBAN CSAK TAGNAK. A kérő a kérelemben hozza a személyes aláírását (a kézfogás átiratára) és a
     // horgonyát; ha nálunk nem ellenőrzött, egy körben elkérjük a tagsági csomagját (`KELL` → `TAGSAG`). A nem tag a
-    // megengedett szeleteket kérheti (a koinó születése, a saját és a mi azonosság-szeletünk) — mást nem. ⭐ D102 (J3): az
+    // megengedett szeleteket kérheti (a koino születése, a saját és a mi azonosság-szeletünk) — mást nem. ⭐ D102 (J3): az
     // ítélet EGYSZER születik, az első kérelemnél — a sorozat ugyanattól a társtól, ugyanazon a védett résen jön.
     let kapuV = { szabad: true };
     // ⭐⭐ D109 (KK3): KI KÉR? — a személy (ha bizonyított), és a tábla-kulcsa, ha a kézfogás átiratára tett aláírásával
@@ -747,7 +747,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
           const ad = kiseroAdo(tar);   // ⭐⭐ D128
           for (const esemeny of kertek) kuld({ uzenet: 'ESEMENY', esemeny: await ad(esemeny) });
           // ⭐ D95/2: a döntési események szerzőinek tagsági kísérői is (a kérő a szerzők azonosság-szeletét nem tartja) —
-          // ⛔ a nem tagnak (zárt koinó) nem: az harmadik felek láncát mutatná meg.
+          // ⛔ a nem tagnak (zárt koino) nem: az harmadik felek láncát mutatná meg.
           const kiserok = kertek.length && !tarsKorlatozva && kiszolgalo?.kiserok ? (await kiszolgalo.kiserok(kertek)) ?? [] : [];
           const vanMar = new Set(kertek.map((e) => e.azonosito));
           let kiseroDb = 0;
@@ -814,7 +814,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
 
     const elso = await egyKerelem(elsoUzenet);
     if (elso.tiltva) {
-      console.log('parbeszed - VÉGE (kérelem: zárt koinó, nem tag)', { fajta: elso.k?.fajta ?? null });
+      console.log('parbeszed - VÉGE (kérelem: zárt koino, nem tag)', { fajta: elso.k?.fajta ?? null });
       return { ...eredmeny(), kerelem: true, tarsKorlatozva: true, kerelemKiszolgalva: null, szeletKiszolgalva: null,
         kerelemTiltva: true };
     }
@@ -842,7 +842,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   //
   // Aki egy kérelmet átvett, a választ annak hozza vissza, akitől kapta — ő vagy maga a kérdező, vagy egy újabb
   // továbbító (nem tudni, melyik). A tartalmat a hívó dolgozza fel (`beallitas.valaszFogado`): a vonal nem tud a
-  // koinóról, és a kapu (3. szabály) itt sem engedékenyebb.
+  // koinoról, és a kapu (3. szabály) itt sem engedékenyebb.
   if (elsoUzenet.uzenet === 'VALASZ') {
     const v = valaszAlakja(elsoUzenet);
     let fogadva = false;
@@ -867,8 +867,8 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   }
   const oveNyitas = elsoUzenet;
   if (oveNyitas.latlak?.cim) kivulrolIgyLatszom = oveNyitas.latlak;
-  // ⭐⭐ D119 (③): a társ családja (a nyitott koinója és a `cs` lista) — a MÁSIK koinós nyitásnál is: a hívó ebből tudja, mely
-  // koinóink közösek (a családi kör sorban cseréli őket).
+  // ⭐⭐ D119 (③): a társ családja (a nyitott koinoja és a `cs` lista) — a MÁSIK koinos nyitásnál is: a hívó ebből tudja, mely
+  // koinoink közösek (a családi kör sorban cseréli őket).
   tarsCsalad = csaladNyitasbol(oveNyitas);
 
   // ----- MÁSIK KOINO? Akkor nincs miről beszélni -----
@@ -876,7 +876,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ⚠️ MÉRVE, 2026-08-29: e nélkül két KÜLÖNBÖZŐ koino készüléke is „cserélt" — az eseményeik
   // átkerültek egymás mappájába. Mindkét fél ugyanitt ismeri fel, tehát egyszerre lépnek ki.
   if (oveNyitas.koino !== koino) {
-    console.warn('parbeszed - a másik fél MÁSIK koinóé', { sajat: koino, ove: oveNyitas.koino });
+    console.warn('parbeszed - a másik fél MÁSIK koinoé', { sajat: koino, ove: oveNyitas.koino });
     masKoino = oveNyitas.koino ?? '(ismeretlen)';
     return eredmeny();
   }
@@ -897,7 +897,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     }
   }
 
-  // ----- ⭐⭐ D93/3: A TÁRS TÁBLA-KULCSA (a nyitásból) ÉS A ZÁRT KOINÓ KAPUJÁNAK ELSŐ ÍTÉLETE -----
+  // ----- ⭐⭐ D93/3: A TÁRS TÁBLA-KULCSA (a nyitásból) ÉS A ZÁRT KOINO KAPUJÁNAK ELSŐ ÍTÉLETE -----
   //
   // ⛔ D89/1: a társ tábla-kulcsa CSAK a kézfogásra tett érvényes aláírásával számít — aláírás vagy kézfogás nélkül
   // (régi program, közbeékelődő) nincs kötés belőle. A kapu ebből (a tábla-kulcshoz megjegyzett személyből) dönt
@@ -913,7 +913,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   //
   // A csere is kiszolgálás: amit a társnak hiányzónak találok, azt küldöm. A KÖTÉSEM (a tábla-kulcsa a kötés-jegyzékemben —
   // a saját cserém) nem kerül a keret alá; egy idegen igen — különben egy új tábla-kulccsal érkező „mindent kérő” újra és
-  // újra lehúzhatná egy „mindent” tartótól a koinót. Ha a keret nem enged, a CIMEK helyett `KESOBB` megy, és itt vége (a
+  // újra lehúzhatná egy „mindent” tartótól a koinot. Ha a keret nem enged, a CIMEK helyett `KESOBB` megy, és itt vége (a
   // társ a `varj`-ban tisztán kilép); ha enged, az átadás legfeljebb a maradék bájtig küld (a többit a következő csere —
   // a tartomány-egyeztetés onnan folytatja).
   let kuldesKeret = Infinity;
@@ -945,7 +945,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ----- ⭐ D95/4: A KÖZÖS GYÖKÉR-DARABOK KÖZÜL AZ ELTÉRŐK (mindkét fél ugyanazt számolja: a két nyitásból) -----
   const elteroDarabok = [];
   {
-    // ⭐ D106: a mélység a koinó saját határáig (`GYOKER_MAX_MELYSEG`) — a jel olvasása egy helyen (`cimjegyzek.js`).
+    // ⭐ D106: a mélység a koino saját határáig (`GYOKER_MAX_MELYSEG`) — a jel olvasása egy helyen (`cimjegyzek.js`).
     const g = gyokerJelOlvasasa(oveNyitas.gyd);
     if (sajatGyd && typeof kapottTablaKulcs?.alairo === 'string' && g) {
       const oveKulcsok = gyokerDarabKulcsai(kapottTablaKulcs.alairo, g.melyseg);
@@ -990,7 +990,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   //
   // A CÍMEK egy jelet visz (`kz` = állapot : amit a társ halmazából ismerek : a közös lenyomat eleje): `k` — a metszetet
   // ki tudom számolni, és a kapu enged; `s` — a társ mostani halmazát nem ismerem (csere kell); `x` — ebben a cserében
-  // nincs közös halmaz (a zárt koinó kapuja korlátoz). Aki nem küld jelet, annál a régi menet fut — a társnál is.
+  // nincs közös halmaz (a zárt koino kapuja korlátoz). Aki nem küld jelet, annál a régi menet fut — a társnál is.
   const ovePv = ervenyesValtozat(oveNyitas.pv) ? oveNyitas.pv : null;
   const kozosMod = !!(sajatNaplo || ovePv) && !!beallitas.halmazTar && typeof tablaKulcsElore?.alairo === 'string'
     && typeof kapottTablaKulcs?.alairo === 'string';
@@ -1018,7 +1018,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ⭐⭐ D95/1, D95/3: a két fokú vállalás és a csak küldő részvétel listái (a CIMEK-ben mennek, csak ismert tagnak)
   let sajatOsz = [], sajatKul = [], oveOsz = [], oveKul = [];
   const lista = (x, korlat) => (Array.isArray(x) ? x.filter((e) => e && typeof e === 'object' && ervenyesKulcs(e.k)).slice(0, korlat) : []);
-  // ⭐ D95/3: a csak küldő felajánlás a nem tagnak (zárt koinó) is megy — de csak a neki megengedett szeletekben (a saját
+  // ⭐ D95/3: a csak küldő felajánlás a nem tagnak (zárt koino) is megy — de csak a neki megengedett szeletekben (a saját
   // azonosság-szeletében: így jut el hozzá a meghívása); az összegző lista csak tagnak.
   const sajatListak = async () => {
     const szabadKulcs = (k) => kapu.szabad || (Array.isArray(kapu.szeletek) && kapu.szeletek.includes(k));
@@ -1055,8 +1055,8 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
       ? beallitas.sajatUdpCim() : (beallitas.sajatUdpCim ?? null);
     const idegenUdp = udpCimek.filter((c) => !(sajatUdp
       && c.hoszt === sajatUdp.hoszt && c.port === sajatUdp.port));
-    // ⭐ ÉS NÉHÁNY MEGISMERT DHT-GÉP (Csaba döntése, 2026-09-20). ⛔ D93/3: a zárt koinó nem szabad társának
-    // egyiket sem (csak a saját címünket) — a koinó hálózata is a koinó tartalma.
+    // ⭐ ÉS NÉHÁNY MEGISMERT DHT-GÉP (Csaba döntése, 2026-09-20). ⛔ D93/3: a zárt koino nem szabad társának
+    // egyiket sem (csak a saját címünket) — a koino hálózata is a koino tartalma.
     const dhtForras = typeof beallitas.dhtGepek === 'function'
       ? beallitas.dhtGepek() : beallitas.dhtGepek;
     const dhtGepek = kapu.szabad && Array.isArray(dhtForras) ? dhtForras : [];
@@ -1066,7 +1066,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     }
 
     // ⭐ D95/1: az összegezve tartott szeleteim (a legutóbb ellenőrzött gyökérrel és időponttal), és D95/3: a csak küldő
-    // szeleteimben a saját eseményeim azonosítói — csak ismert tagnak (a nagy szeletek neve is a koinó tartalma).
+    // szeleteimben a saját eseményeim azonosítói — csak ismert tagnak (a nagy szeletek neve is a koino tartalma).
     // ⚠️ Ha a kapu még nem döntött (első találkozás), a bővebb lista a bizonyítás utáni pótlásban megy.
     await sajatListak();
     sajatKz = await kzSzoveg();
@@ -1078,7 +1078,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
       ...(sajatKul.length ? { kul: sajatKul } : {}),
       // ⭐ D93/3: kérjük a társ bizonyítását (a személyes aláírás és a tagsági csomag a következő körben jön).
       ...(kapu.kell ? { kell: 1 } : {}),
-      // ⭐⭐ D128 (③d): a koinó-listám — ha a társ már ismert saját készülékem
+      // ⭐⭐ D128 (③d): a koino-listám — ha a társ már ismert saját készülékem
       ...(await koinoListaMezo()),
       udp: [
         ...(sajatUdp ? [{ hoszt: sajatUdp.hoszt, port: sajatUdp.port, kor: 0 }] : []),
@@ -1098,7 +1098,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ----- ⭐⭐ D93/3: A BIZONYÍTÁS — ha bármelyik fél kérte, egy kör -----
   //
   // Mindkét fél tudja, lesz-e (a két CIMEK-ből). Aki kérte, megkapja a társ személyes aláírását (a kézfogás átiratára,
-  // a koinóval együtt) és horgonyát, és ha van, a tagsági csomagját — ebből a kapu végleg dönt. ⭐ A kapu a tábla-kulcs
+  // a koinoval együtt) és horgonyát, és ha van, a tagsági csomagját — ebből a kapu végleg dönt. ⭐ A kapu a tábla-kulcs
   // és a személy kötését megjegyzi, így a következő cserén már nem kér (a hétköznapi csere nem drágul).
   if (kapu.kell || oKerte) {
     kuld({ uzenet: 'TAGSAG', ...(oKerte ? await sajatBizonyitek() : {}) });
@@ -1133,7 +1133,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
     }
   }
 
-  // ⭐⭐ D128 (③d): a társ koinó-listája — a bizonyítás UTÁN: első találkozáskor épp a bizonyítás köti meg, hogy a társ a saját
+  // ⭐⭐ D128 (③d): a társ koino-listája — a bizonyítás UTÁN: első találkozáskor épp a bizonyítás köti meg, hogy a társ a saját
   // készülékem (az első CIMEK-ben jött listája így is elfogadható). A hívó csak a saját készülékemtől fogadja el.
   await koinoListaFogadasa(oveKoinoLista);
 
@@ -1190,7 +1190,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // tartom: akinek a tagságát nem tudom, annak a csomagját a társtól kérem (TAGSAGKEREK — mindkét fél egyszerre), és a
   // társ a kért szerzők csomagját (vagy ha nincs, a tagsági láncát) küldi (TAGSAGCSOMAGOK); ha egyik fél sem kérdez, a
   // második üzenet elmarad. A kapott események UGYANAZON a kapun mennek be (a hívó `tagsagFogadas`-a). ⭐ A vonal semmit
-  // nem tud a tagságról (`tagsagKisero.js`). ⛔ A nem szabad társnak (zárt koinó) nem adunk semmit.
+  // nem tud a tagságról (`tagsagKisero.js`). ⛔ A nem szabad társnak (zárt koino) nem adunk semmit.
   const tagsagKor = async (ujak) => {
     const hivas = async (nev, ...ervek) => {
       if (typeof beallitas[nev] !== 'function') return null;
@@ -1226,7 +1226,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // láncáról. Aki a láncot tartja, felel (LANCVALASZ); a válasz önmagát igazolja (a szerző aláírt gyökereihez — a
   // `lancEllenorzes.js` dönt), a vonal semmit nem tud a láncról. Ha egyik fél sem kérdez, a második üzenet elmarad (a
   // „nincs újdonság” csere — ami a nyitásnál véget ér — nem drágul).
-  // ⛔ A nem szabad társnak (zárt koinó) nem felelünk.
+  // ⛔ A nem szabad társnak (zárt koino) nem felelünk.
   const lancKor = async (ujak) => {
     const hivas = async (nev, ...ervek) => {
       if (typeof beallitas[nev] !== 'function') return null;
@@ -1257,8 +1257,8 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // Mindkét fél tudja, lesz-e (a két CIMEK-ből). 1. kör (OSSZEGZESEK): a társ összegző szeleteire a válaszom (ha a szeletet
   // teljesen tartom: az új gyökér és az azóta lezárt döntések összegzései), és a társ felajánlott saját eseményeiből amit
   // kérek. 2. kör (OSSZEGZESMINTAKEREK): a kapott gyökerekre és összegzésekre a minta-helyeim (ÉN sorsolom, a gyökér UTÁN),
-  // és a kért saját eseményeim; aztán a minták (OSSZEGZESMINTAK). ⭐ A vonal semmit nem tud a koinóról: a tartalom a
-  // hívóé (`osszegzoTartas.js`). ⛔ A nem szabad társnak (zárt koinó) nem adunk semmit.
+  // és a kért saját eseményeim; aztán a minták (OSSZEGZESMINTAK). ⭐ A vonal semmit nem tud a koinoról: a tartalom a
+  // hívóé (`osszegzoTartas.js`). ⛔ A nem szabad társnak (zárt koino) nem adunk semmit.
   if (sajatOsz.length || sajatKul.length || oveOsz.length || oveKul.length) {
     const hivas = async (nev, ...ervek) => {
       if (typeof beallitas[nev] !== 'function') return null;
@@ -1306,7 +1306,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ugyanúgy lát — itt a két képesség-jelzés együtt (mérve, 2026-09-13).
   if (oveNyitas.fajlCsere && !!beallitas.fajlValasz) {
     try {
-      // ⛔ D93/3: a zárt koinó nem szabad társának fájlt nem adunk (a kérdés ettől még elhangzik — szimmetria).
+      // ⛔ D93/3: a zárt koino nem szabad társának fájlt nem adunk (a kérdés ettől még elhangzik — szimmetria).
       const van = korlat ? [] : await beallitas.fajlValasz(oveNyitas.fajlKerek ?? []);
       kuld({ uzenet: 'FAJLOK', van });
     } catch (hiba) {
@@ -1325,7 +1325,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
 
   // ----- ⭐⭐ D98/1 (F): A TÁRSANKÉNTI EMLÉKEZET — a feljegyzés a csere végén (`tarsEmlekezet.js`) -----
   //
-  // A társ tábla-aláírója alatt a tárom mostani állása és a maradék (a csere végén is eltérő szeletek). ⛔ A zárt koinó
+  // A társ tábla-aláírója alatt a tárom mostani állása és a maradék (a csere végén is eltérő szeletek). ⛔ A zárt koino
   // korlátozott útján nem (ott nem a teljes közös halmazon egyeztettünk).
   const emlekezetTar = beallitas.emlekezetTar && typeof beallitas.emlekezetTar.olvas === 'function'
     && typeof kapottTablaKulcs?.alairo === 'string' && !korlat ? beallitas.emlekezetTar : null;
@@ -1431,7 +1431,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ⭐ D95/4: a közös, eltérő gyökér-darabok — mindkét fél ugyanazokat adja hozzá (a korlátozott társnál a részvételi
   // lépés kimondja, hogy kimaradnak, így a két fél nem csúszik el).
   for (const k of elteroDarabok) mindketten.add(k);
-  // ⭐ D107 L2: a közös, eltérő kereső-régió is (a korlátozott társnál — zárt koinó, nem tag — a részvétel kimondja, hogy
+  // ⭐ D107 L2: a közös, eltérő kereső-régió is (a korlátozott társnál — zárt koino, nem tag — a részvétel kimondja, hogy
   // kimarad: a kereső-index tartalma sem jár a nem tagnak).
   for (const k of elteroRegiok) mindketten.add(k);
   // ⭐⭐ D130 (③c): a közös, eltérő koinon-darab is (a korlátozott társnál a részvétel kimondja, hogy kimarad).
@@ -1441,7 +1441,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
 
   // ===== 3. A RÉSZVÉTEL — ki melyik eltérő szeletből marad ki =====
   const mind = new Set([...mindketten, ...csakNalam, ...csakNala]);
-  // ⭐ Korlátozásnál (zárt koinó) a megengedett szeletekben a saját vállalásomtól függetlenül részt veszek (mint a
+  // ⭐ Korlátozásnál (zárt koino) a megengedett szeletekben a saját vállalásomtól függetlenül részt veszek (mint a
   // párok számolásánál), máshol a részvételem dönt.
   const kimaradok = [...mind].filter((k) => (korlat ? !korlatonBelul(k) : !reszvesz(k))).sort();
   // ⭐⭐ D91: A RAJ — az eltérő szeletek közül melyiket VÁLLALOM (a megnézettet soha — D75/3), és néhány ismert
@@ -1591,9 +1591,9 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   // ⛔ Csak a közös vagy általunk várt szeletekből vesszük át (a (b)-ben ez tartja távol a mások
   // érdeklődését a tárunktól); a koino-szűrés és az ellenőrzés a `beolvasztas` dolga.
   const megengedett = new Set([...egyeztetendo, ...vartSzeletek]);
-  // ⭐ D96: a koinó születésének kulcsán csak EZ a koinó létrehozása jöhet — ⭐ D118/2: lenyomat-nevű koinónál csak az az
+  // ⭐ D96: a koino születésének kulcsán csak EZ a koino létrehozása jöhet — ⭐ D118/2: lenyomat-nevű koinonál csak az az
   // esemény, amelyiknek az azonosítója maga a név (egy második, azonos nevű születés így nem jut át — a lelet).
-  // ⭐⭐ D118 (②a): és az új alakú ős-születések — hogy a koinó láncán vannak-e, azt a `beolvasztas` dönti el (a lánc a
+  // ⭐⭐ D118 (②a): és az új alakú ős-születések — hogy a koino láncán vannak-e, azt a `beolvasztas` dönti el (a lánc a
   // kapott születésekből és a tárból együtt követhető; ami nincs rajta, az idegen).
   const atveheto = erkezett.filter((e) => e && typeof e === 'object' && (szeletbeTartozik(e, megengedett)
     || (megengedett.has(KOINO_SZULETES_KULCS) && (koinoSzuleteseE(e, koino) || ujAlakuSzuletesE(e)))));
@@ -1605,7 +1605,7 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
   await tagsagKor(beolvasztva.ujAzonositok);
 
   // ===== 7. ⭐⭐ D98/2–3: A LÁNC-KÖR — minden cserében, ami nem ért véget a nyitásnál =====
-  // ⛔ A feltétel SZIMMETRIKUS kell legyen: az eltérő szeletek száma a zárt koinó korlátozott útján a két félnél eltérhet (a
+  // ⛔ A feltétel SZIMMETRIKUS kell legyen: az eltérő szeletek száma a zárt koino korlátozott útján a két félnél eltérhet (a
   // korlát csak az egyik félé) — egy első változat ezen akadt el (a teljes próbasor mérte). A nyitásnál véget nem ért csere
   // viszont mindkét félnél ugyanaz (a két nyitó lenyomat és a gyökér-darabok jele mindkettőnél megvan).
   await lancKor(beolvasztva.ujAzonositok);
@@ -2013,7 +2013,7 @@ export async function szeletKapcsolaton(tar, koino, kapcsolat, entitas, tovabb =
   // ⭐⭐ D124: a nyelvem — a jel a kérelemben, és a társé az ő első üzenetéből (a NYITAS-ából, vagy ütközésnél a kérelméből).
   const keszlet = nyelvKeszlet(azonossag);
   const sajatNy = sajatNyelv(azonossag);
-  // ⭐ D93/3: a személyünk (`azonossag.ki` — a rés-réteg írja alá a kézfogás átiratára) — a zárt koinó kapujának.
+  // ⭐ D93/3: a személyünk (`azonossag.ki` — a rés-réteg írja alá a kézfogás átiratára) — a zárt koino kapujának.
   const sajatKerelem = { uzenet: 'KERELEM', koino, fajta: 'szelet', kulcs: entitas,
     ...(tovabb.az ? { az: tovabb.az, htl: tovabb.htl } : {}),
     ...(azonossag.ki ? { ki: azonossag.ki } : {}),
@@ -2198,7 +2198,7 @@ export async function kerelemKapcsolaton(kapcsolat, koino, kerelem, beallitas = 
 
 /**
  * ⭐⭐ D102 (J3): EGY KÉRELEM-SOROZAT EGY KAPCSOLATON — a fejléc- és törzs-kérelmek egymás után (legfeljebb
- * `SOROZAT_KORLAT`), a végén `VEGE`. Ha a tartó egyet tilt (zárt koinó, nem tag), a sorozat ott megáll (a többit úgysem
+ * `SOROZAT_KORLAT`), a végén `VEGE`. Ha a tartó egyet tilt (zárt koino, nem tag), a sorozat ott megáll (a többit úgysem
  * adná ki). A tartó a `sorozat` jelből tudja, hogy az első után is várjon.
  * @returns {Promise<Array<Object>>} kérelmenként a `kerelemKapcsolaton` eredménye (a meg sem kérdezettek nélkül)
  */
@@ -2224,15 +2224,15 @@ export async function kerelemSorozatKapcsolaton(kapcsolat, koino, kerelmek, beal
 
 /**
  * ⭐⭐ AZ ÜTKÖZÉS (a ⑦ terepi próba lelete, 2026-11-01): a társ is KÉRELEMMEL nyitott — egy munkában mindketten egymástól
- * kérünk (két „alap” készülék, mindkettő a másiknál lévőt kéri; a családi munkában a közös koinó helyén a két fél egyszerre
+ * kérünk (két „alap” készülék, mindkettő a másiknál lévőt kéri; a családi munkában a közös koino helyén a két fél egyszerre
  * lép). A kérő a társ kérelmét eddig átlépte, mint a NYITAS-t, és mindkét fél a tétlenségi óráig várt — mérve a terepen: fél
  * órán át kétpercenként „a másik fél nem válaszol”, a két kérelem egyike sem ment le.
  *
  * ⭐ A két fél UGYANAZT a két üzenetet látja (a sajátját és a társét — a JSON-alakjuk a vonalon oda-vissza ugyanaz), tehát
  * ugyanúgy dönt: a KISEBBIK (a függő kérelem véletlen azonosítója miatt gyakorlatilag pénzfeldobás) megy elöl — annak a kérője
  * tovább vár —, a nagyobbik kérő a társ kérelmét kiszolgálja ugyanazon a kapcsolaton (`utkozesben` — a hívó adja: a kérelem
- * koinójának példányával, ugyanaz az út, mint a családi átadásé), és a sajátja függőben marad (a következő munkában megy). Ha
- * nem tud kiszolgálni (nincs kiszolgálója, ismeretlen koinó, vagy a két kérelem bájtra egyforma), `KESZ`-t mond, hogy a társ ne
+ * koinojának példányával, ugyanaz az út, mint a családi átadásé), és a sajátja függőben marad (a következő munkában megy). Ha
+ * nem tud kiszolgálni (nincs kiszolgálója, ismeretlen koino, vagy a két kérelem bájtra egyforma), `KESZ`-t mond, hogy a társ ne
  * várjon a tétlenségi óráig.
  * @returns {Promise<'elol'|'atengedtem'>}
  */

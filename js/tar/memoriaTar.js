@@ -2,7 +2,7 @@
 
 // Felelősség: ⭐⭐ D128 (②e2 — 17. pont, 9.13): A MEMÓRIABELI TÁR és a RÖGZÍTŐ TÁR — a helyreállítás bizonyítékához.
 //
-// A helyreállítás (a segítők jóváhagyása) egy koinóban (A) történik, de MINDEN koinóban érvényes (Csaba: „rendben”): a bizonyítéka
+// A helyreállítás (a segítők jóváhagyása) egy koinoban (A) történik, de MINDEN koinoban érvényes (Csaba: „rendben”): a bizonyítéka
 // magával viszi azokat az eseményeket, amikből a szerepek kiszámolhatók (a D93/2 tagsági csomag mintája). Ehhez két dolog kell:
 //   · a RÖGZÍTŐ TÁR (\`rogzitoTar\`) — egy valódi tár köré tett burok, ami feljegyzi, mit olvasott ki belőle a szerep-ellenőrzés
 //     (\`allapot/helyreallitas.js\` \`helyreallitasokAllapota\`): ami kellett a döntéshez, az a bizonyíték;

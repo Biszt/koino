@@ -16,7 +16,7 @@
 //     vagy `egy` (csak a hurok-cím);
 //   · IRÁNYOK: a B órája eltolható (`csúszás`). Két valódi készülék körei soha nem esnek
 //     pontosan egybe (óra-eltérés, késés), egy gépen viszont igen — ezért a csúszást kívülről
-//     adjuk. ⚠️ Az eltolás a B folyamatában a `Date.now`-t tolja el (`--import`), a koinóhoz nem
+//     adjuk. ⚠️ Az eltolás a B folyamatában a `Date.now`-t tolja el (`--import`), a koinohoz nem
 //     nyúl: az ablak a fal órájához igazodik, és a B „fala" így máshol áll.
 //
 // ⭐ HOGY KÉT SOR UGYANAZ A CSERE-E: minden csere mindkét oldalon fut (a `parbeszed`

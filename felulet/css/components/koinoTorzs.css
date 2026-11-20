@@ -1,7 +1,7 @@
 /* felulet/css/components/koinoTorzs.css */
 
 /* Felelősség: ⭐⭐ D120 — a törzs-határ a lapon: a törzs mérete a kártya tudatpont-sorában, és a határ fölötti elem (kép, a
-   kártya kódja) helyén a kérés gombja (koinós többlet, a prototípusban nincs ilyen). Használja: `felulet/js/koinoTorzs.js`. */
+   kártya kódja) helyén a kérés gombja (koinos többlet, a prototípusban nincs ilyen). Használja: `felulet/js/koinoTorzs.js`. */
 
 .pakli-kartya__koino-torzs {
   opacity: 0.75;

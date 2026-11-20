@@ -76,7 +76,7 @@ function magvasVeletlen(mag) {
  */
 function lejatszas({ n, tarsak, ablak, ebredesKoz, hossz, igazitva, ismetelt, sodrodas, veletlen }) {
   // ----- A HÁLÓZAT -----
-  // ⚠️ A társ-viszony a koinóban nem kölcsönös, a CSERE viszont igen (aki hív, az is ad) —
+  // ⚠️ A társ-viszony a koinoban nem kölcsönös, a CSERE viszont igen (aki hív, az is ad) —
   // ezért az élt kölcsönösnek vesszük, ahogy a `felszabaditasMeres.js` is.
   const elek = [];
   const szomszedok = Array.from({ length: n }, () => new Set());

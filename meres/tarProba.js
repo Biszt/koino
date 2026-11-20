@@ -116,7 +116,7 @@ proba('A lánc-ellenőrzés is megtalálja az elágazást', async () => {
 
 // ===== ELKÜLÖNÍTÉS =====
 
-proba('A koinók elkülönülnek egymástól', async () => {
+proba('A koinok elkülönülnek egymástól', async () => {
   const enyeim = await koinoEsemenyei(tar, KOINO);
   const masike = await koinoEsemenyei(tar, 'nem-letezo-koino');
   return enyeim.length >= 3 && masike.length === 0;

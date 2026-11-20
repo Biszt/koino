@@ -28,14 +28,14 @@
 // AMI HIÁNYZIK — és ez tudatos
 // ===================================
 //
-// A kártyák olyan mezőket is olvasnak, amiknek a koinóban **nincs megfelelője**. Ezeket
+// A kártyák olyan mezőket is olvasnak, amiknek a koinoban **nincs megfelelője**. Ezeket
 // nem találjuk ki, hanem üresen hagyjuk — a kártya elbírja (a prototípusban is lehet üres),
 // és így a hiány LÁTSZIK, nem tűnik el egy kitalált érték mögött:
 //
 //   · `gondolatTipus`, `kategoriak` → a két entitástípus nem létezik (végpont-térkép 2.)
 //   · `olvasatlanErtesitesek`       → ⭐ D101 ⑥: a program mondja (a postafiók ős-láncaiból); ha nem mondja, 0
 //   · `kulonvalasok`                → a prototípus különválás-fogalma
-//   · `modositva`, `szuloModositva` → a prototípus szerkesztés-követése; a koinóban az
+//   · `modositva`, `szuloModositva` → a prototípus szerkesztés-követése; a koinoban az
 //                                     egyezmény MAGA a nyoma a változásnak
 //   · `szovegMezo`                  → a blokk-alapú szöveg (5.7); a koino ma sima szöveget
 //                                     tárol — ⭐ és a `SzovegMezoMegjelenito` ezt **kezeli**
@@ -79,7 +79,7 @@ export function kartyaAdatta(k) {
   return {
     entitasId: k.azonosito,
     // ⭐⭐ D119 (①b): a koino-verzió kártyát a lap a GONDOLAT kártyájával rajzolja (a prototípusban nincs ilyen típus) — a
-    // koinós többlet (`koinoVerzio.js`) a `koinoVerzio` mezőből ismeri fel, és teszi hozzá a jelet és a „Kód” fület.
+    // koinos többlet (`koinoVerzio.js`) a `koinoVerzio` mezőből ismeri fel, és teszi hozzá a jelet és a „Kód” fület.
     // ⭐⭐ D126 (PR4): a nézet-kártyát is — a `koinoNezet.js` a `koinoNezet` jelből ismeri fel (🧩 jel, „Kód” fül, bekapcsolás).
     entitasTipus: k.tipus === 'KoinoVerzio' || k.tipus === 'Nezet' ? 'Gondolat' : k.tipus,
     ...(k.koinoVerzio ? { koinoVerzio: k.koinoVerzio } : {}),
@@ -126,7 +126,7 @@ export function kartyaAdatta(k) {
 
       // ⭐⭐ A BESOROLÁS-KÁRTYÁK `nev`-et olvasnak, nem `cim`-et (5.4).
       //
-      // ⚠️ A koinóban MINDEN entitásnak `cim`-e van — a kategóriának is az a neve. Ez
+      // ⚠️ A koinoban MINDEN entitásnak `cim`-e van — a kategóriának is az a neve. Ez
       // szándékos: így az állapot-számítás, a rendezés és az egyezmény-végrehajtás
       // változtatás nélkül működik rajtuk, nincs párhuzamos `nev` mező. A prototípus
       // kártyái más szót használnak, tehát **itt fordítunk** — ez a fájl dolga.

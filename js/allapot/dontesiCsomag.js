@@ -241,7 +241,7 @@ export async function dontesiCsomagEllenorzese(e, alap = null) {
     if (!x || typeof x !== 'object' || Array.isArray(x)) return hiba('egy belső eleme nem esemény');
     if (latott.has(x.azonosito)) return hiba('egy eseményt kétszer hoz');
     latott.add(x.azonosito);
-    if (esemenyKoinoja(x) !== esemenyKoinoja(e)) return hiba('más koinó eseményét hozza');
+    if (esemenyKoinoja(x) !== esemenyKoinoja(e)) return hiba('más koino eseményét hozza');
     if (TAGSAGI_TIPUSOK.has(x.tipus)) {
       if (!lancokon.has(x.azonosito)) return hiba('olyan tagsági eseményt hoz, ami egyik résztvevő láncán sincs');
       const v = await esemenyEllenorzese(x, { tanusitvany: kereso });

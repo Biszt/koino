@@ -77,7 +77,7 @@ A **D14** teszi véglegessé: amit senki nem tart, az elfelejtődik.
 
 **2. A METAADAT (cím, típus, szülő, számértékek).** **Szétdarabolva** él, és **az ablakban áll
 össze**. Kicsi és sűrűn változik (a számai), ezért kell külön kezelni a törzstől.
-*(Számolva: ~250 B/entitás; egymilliárdos koinóban 25 példánnyal ~62 KB/készülék.)*
+*(Számolva: ~250 B/entitás; egymilliárdos koinoban 25 példánnyal ~62 KB/készülék.)*
 
 **3. A LÁNC (a hitelesítés).** **Mindenkinél**, összenyomva — rekurzív Merkle-lenyomattal egy
 ember egész élete **~80 bájt**, akárhány eseménye van (4.9).
@@ -125,7 +125,7 @@ minél kisebb"* elv sérül. ⭐ Az elsőt javaslom, mert a két dolognak **más
 
 *„a magban, ami mindig összeáll egy buli alkalmával"* — **mi áll össze pontosan?**
 
-- **(a) Minden készülék megkapja az ÖSSZES metaadatot** az ablakban. ⚠️ Egymilliós koinóban
+- **(a) Minden készülék megkapja az ÖSSZES metaadatot** az ablakban. ⚠️ Egymilliós koinoban
   ez ~2,5 GB — nem fér el.
 - **(b) A szeletek szinkronizálnak egymással**, és mindenki azt húzza le, ami neki kell.
   ⭐ Ez fér el, és egybevág Csaba jegyzetével: *„a számértékei frissülnek a magból."*
@@ -161,7 +161,7 @@ minél kisebb"* elv sérül. ⭐ Az elsőt javaslom, mert a két dolognak **más
 **Az 1. változat: replikáció.** Mindenki tárolja, ami érdekli, és 5 percenként egyeztet.
 **Csaba buktatta le:** *„az 5 percenkénti egyeztetés nem jó, mivel böngészés közben az összes
 entitásnak elérhetőnek kell lennie."* — A döntéshozatalra terveztem, ami tűri a késleltetést;
-közben a koinóban az ember **nézelődik**, és az nem tűri. Hiába ér körbe minden esemény öt
+közben a koinoban az ember **nézelődik**, és az nem tűri. Hiába ér körbe minden esemény öt
 perc alatt, ha egy nem tárolt entitást akarok megnyitni.
 
 **A 2. változat: mindenki tartsa az ágai mutatóját.** Kiszámoltam, hogy a mutató ~100 000
@@ -220,14 +220,14 @@ Szakasz 1 alapköve — nem tartható. Ez a terv legdrágább pontja, ezért ny�
 | `koino-adat/<koino>/esemenyek.jsonl` — **egy fájl mindenre** | **entitásonként külön tár** + a saját láncom külön |
 | `koinoEsemenyei()` mindent betölt | entitásonként tölt |
 | `allapotSzamitasa()` a teljes halmazon fut | **entitásonként** fut |
-| `ujjlenyomat` = az egész koinóra | **entitásonként** (a globális csak kicsiben marad értelmes) |
+| `ujjlenyomat` = az egész koinora | **entitásonként** (a globális csak kicsiben marad értelmes) |
 | ÁLLÁS: szerzőnként egy sor (**162 B/fő, mérve**) | **entitásonként egy sor** |
 
 **Amit megnyer:** a csere ára nem a koino létszámával nő, hanem **a közös szeletek számával**.
 Két készülék, ami 3 entitáson osztozik, 3 sort egyeztet — akkor is, ha a koino milliós.
 
 ⚠️ **És egy fal, amit ez old meg** *(számítás, S1-ben mérendő)*: a D35 megtakarítása mérettel
-elpárolog. Milliós koinóban két csere közt mindig történik valami → a **globális** lenyomat
+elpárolog. Milliós koinoban két csere közt mindig történik valami → a **globális** lenyomat
 soha nem egyezik → minden kör visszaesik a teljes ÁLLÁS-ra. **A megtakarítás pont akkor
 szűnne meg, amikor a legnagyobb szükség lenne rá.** Entitás-szintű lenyomattal nem.
 
@@ -347,7 +347,7 @@ tartalmaz. Egy mező most **percek**; tízezer esemény után migráció vagy k�
 Csaba feltétele így szólt: *„legalább az egyik tudatpont-tulajdonosnak elérhetőnek kell
 lennie."* **A szó szerinti ígéret nem tartható** — mérve tudjuk (D40/D41), hogy a készülékek
 nagy része **nem fogadóképes** *(a folyamatos üzemben; lásd a fenti pontosítást)*. Egy három-tulajdonosos, alvó entitás elérhetetlen. Ha
-megígérjük, hazudunk; ha kikényszerítjük, fogadóképes „szerverek" kellenek, és **a koinónak
+megígérjük, hazudunk; ha kikényszerítjük, fogadóképes „szerverek" kellenek, és **a koinonak
 megint lesz teteje** (D12 bukása).
 
 **A válasz: tágítsuk a kört.**
@@ -408,7 +408,7 @@ is, hogy **„a végösszeg tényleg ennyi"**.
 Korábban ide az volt írva, hogy ha kötegeléssel oldjuk meg a tömeges entitást, akkor **a
 D17 táblázata módosul**, mert a globális egyetértés halmaza bővül. **Ez téves volt.** A
 tömeges entitás összesítése **entitás-helyi**: E rajának eseményeiből számítódik, nem az
-egész koinóéból. **Nagy, de helyi.** → **A D17 táblázata érintetlen:** globális egyetértés
+egész koinoéból. **Nagy, de helyi.** → **A D17 táblázata érintetlen:** globális egyetértés
 továbbra is csak az **azonossághoz** és a **pénzhez** kell.
 
 ### Ami nyitva marad
@@ -477,7 +477,7 @@ a **tartós mag** (D21), a **tömeges entitás** (4.6), és most a **tudatpont-k
 ugyanarról a pontról, és külön mutathatja őket. Mindkét ág önmagában hibátlan. Az egyetlen
 védelem az, hogy **a két ág valahol találkozik** — és akkor a két aláírás **együtt a
 bizonyíték**, bíró nélkül (ezt az `elagazasE`/`esemenyMentese` ma is elkapja). Ez tehát
-**terjesztési kérdés, nem konszenzus** — ugyanaz a határ, mint mindenhol a koinóban.
+**terjesztési kérdés, nem konszenzus** — ugyanaz a határ, mint mindenhol a koinoban.
 
 ⭐ **És itt fizet a buli:** minél többen cserélnek egyszerre és minél szélesebben, annál
 hamarabb találkozik a két ág. **Az összehangolt ablak közvetlenül erősíti a kettős-cselekvés
@@ -779,8 +779,8 @@ példány (4.5). ⚠️ **Ezért a küszöb ÚJ SZABÁLY lenne, nem a meglévő 
 > ⭐⭐ **ÉS EGY FAL, AMI NEM VOLT A TERVBEN — ez jön el ELSŐNEK:** az `esemenyMentese` minden
 > mentésnél végigolvassa az egész fájlt (`tar.betolt()`), a `lancVege` még egyszer. **Nincs
 > gyorsítótár.** Egy mentés ára: 1k-nál 6,4 ms · 10k-nál 42 ms · **100k-nál 495 ms**. Vagyis
-> **fél másodperc EGY esemény elmentése egy 100 000 eseményes koinóban** — és egy csere több
-> eseményt hoz. Ez **jóval a 43,5 GB-os tárolási fal előtt** teszi használhatatlanná a koinót.
+> **fél másodperc EGY esemény elmentése egy 100 000 eseményes koinoban** — és egy csere több
+> eseményt hoz. Ez **jóval a 43,5 GB-os tárolási fal előtt** teszi használhatatlanná a koinot.
 >
 > ⚠️ **És 100 000 esemény nem sok:** 500 e-ember, 200 esemény fejenként — ez egy **falu vagy
 > egy iskola.** A fal nem „valahol a milliárd felé" van, hanem **belátható közelségben**.
@@ -907,7 +907,7 @@ indexelni.
 
 Egy hasítótábla, aminek a rekeszei nem a memóriában, hanem **külön gépeken** vannak.
 
-1. **Közös számtér:** a kulcsot ÉS a csomópontot is számmá hasítjuk. *(A koinóban a
+1. **Közös számtér:** a kulcsot ÉS a csomópontot is számmá hasítjuk. *(A koinoban a
    csomópont száma természetesen adódna: az e-ember kulcsából.)*
 2. **Felelősségi szabály:** egy kulcsért az a csomópont felel, amelyik száma a **legközelebb**
    van hozzá — kiosztás és nyilvántartás nélkül, **kiszámítva**.
@@ -967,7 +967,7 @@ klienst ellenőrizni a teljes lánc nélkül.)*
 
 ### DAG (irányított körmentes gráf)
 
-**A probléma:** honnan tudjuk, mi történt előbb, **ha nincs közös óra**? (A koinóban az `ido`
+**A probléma:** honnan tudjuk, mi történt előbb, **ha nincs közös óra**? (A koinoban az `ido`
 a szerző órája, tehát hazudható.)
 
 **Az alkatrész — a koino már használja:** az esemény neve **a gondolatának lenyomata**, és

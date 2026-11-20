@@ -421,7 +421,7 @@ proba('⭐⭐ BEP 5 A HAMIS DHT-N: bejelentjük a témát az egyik belépőn át
     const forgalom = b.forgalom();
     b.bezar();
     return be.tarolta >= 6 && k.tarsak.some((t) => t.cim === '127.0.0.1' && t.port === 7373)
-      && masik.tarsak.length === 0                      // ⭐ más koinó (más só) → más téma, nem találja
+      && masik.tarsak.length === 0                      // ⭐ más koino (más só) → más téma, nem találja
       && forgalom.ki > 0 && forgalom.be > 0;
   } finally { h.bezar(); }
 });

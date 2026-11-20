@@ -5,7 +5,7 @@
 # (a PR7 előtti) telepítője nem tudna cserélni, és ez a visszafordítás sem volna benne (D125 — az építés pontosítása).
 #
 # A MENET:
-#   1. vár egy kicsit (a hívó felület még válaszol a lapnak), és leállítja a program mappájából futó koinót (a node és az
+#   1. vár egy kicsit (a hívó felület még válaszol a lapnak), és leállítja a program mappájából futó koinot (a node és az
 #      indító — mint a `telepit.ps1`: amíg egy folyamat munkakönyvtára a mappában áll, a mappa nem nevezhető át);
 #   2. CSERÉL: telepítésnél a régi a `-regi`-be (az előző generáció ilyenkor törlődik — mint a PR7-nél), az új (`-uj`) a helyére;
 #      visszaútnál (`-Vissza`) a mostani és a `-regi` helyet cserél (így előre is vissza lehet lépni);
@@ -100,7 +100,7 @@ function Felel([int]$mp) {
 Start-Sleep -Seconds 4
 Naplo ('A csere kezdete (' + $(if ($Vissza) { 'vissza az előző programra' } else { 'telepítés: ' + $Uj }) + ')')
 $leallitva = FutoKoinoLeallitasa $Helye
-Naplo ('· a futó koinó leállítva (' + $leallitva + ' folyamat)')
+Naplo ('· a futó koino leállítva (' + $leallitva + ' folyamat)')
 
 # ===== 2. a csere =====
 try {

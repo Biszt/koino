@@ -1,7 +1,7 @@
 // js/allapot/osszegzoTartas.js
 
 // Felelősség: D95/1, D95/3 — a két fokú vállalás és a csak küldő részvétel SZEREPEI a cserében. A vonal (`vonal.js`) a
-// beállításain át hívja őket, és semmit nem tud a koinóról; ez a modul sem nyit hálózatot (1. szabály).
+// beállításain át hívja őket, és semmit nem tud a koinoról; ez a modul sem nyit hálózatot (1. szabály).
 //
 //   · az ÖSSZEGZŐ tartó (a nagy szeletet csak összegezve tartja): megnevezi a szeleteit a legutóbb ellenőrzött gyökérrel és
 //     időponttal, a kapott gyökérre és lezárási összegzésekre MAGA sorsol mintát, ellenőriz, és tárol (`osszegzoKerdo`);
@@ -97,7 +97,7 @@ export function osszegzoKerdo({ tarolo, szeletek, tagE = async () => null, eseme
             continue;
           }
           const e = await lezarasiOsszegzesEllenorzese({ osszegzes: l.esemeny.adat, javaslatEsemeny: j, helyek: lh,
-            mintak: mintak?.lezaras?.[l.esemeny.azonosito], tagE, alapKuszobok });   // ⭐ D118/2: a koinó alapértékei
+            mintak: mintak?.lezaras?.[l.esemeny.azonosito], tagE, alapKuszobok });   // ⭐ D118/2: a koino alapértékei
           if (!e.rendben) { eredmeny.elvetve.push({ k: v.k, mi: 'lezaras', ok: e.ok }); continue; }
           t.lezarasok[j.azonosito + '|' + v.k] = { esemeny: l.esemeny.azonosito, osszegzes: l.esemeny.adat, allas: e.allas,
             ellenorizve: Date.now() };

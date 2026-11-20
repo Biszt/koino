@@ -5,12 +5,12 @@
 // ===== MIÉRT NEM A KULCS A NÉV =====
 //
 // A D128 előtt (és az ①-ben) az azonosság neve a nyilvános kulcsa volt. A csere-kulcs (a következő kezelő kulcs, előre lekötve)
-// így csak egy aláírt állítás lehetne — és aki a kulcsot ellopja, aláírhatna egy MÁSIK lekötést, és egy új koinóban azt mutathatná
+// így csak egy aláírt állítás lehetne — és aki a kulcsot ellopja, aláírhatna egy MÁSIK lekötést, és egy új koinoban azt mutathatná
 // be (az idő önbevallás, a „ki látta előbb” a hálózaté). ⭐ A KERI megoldása: a NÉV A SZÜLETÉS LENYOMATA („önmagát címző
 // azonosító”). A születés EGYÜTT köti:
 //   · az első kezelő kulcsot (`kulcs` — ez írja alá a készülék-tanúsítványokat, amíg kulcscsere nincs — ②b);
 //   · a csere-kulcs nyilvános részének lenyomatát (`csere` — maga a kulcs csak a mentésben van, egyik készüléken sem: KC3 (A));
-//   · a fizetési kulcs nyilvános részét (`fizetes` — KU4 (A): a pénz bevezetése így nem kíván új koinó-családot);
+//   · a fizetési kulcs nyilvános részét (`fizetes` — KU4 (A): a pénz bevezetése így nem kíván új koino-családot);
 // és a név ebből jön: ugyanarra a névre más lekötés NEM LÉTEZHET. A név a kulcscsere után is marad (KU3 (A)).
 //
 // ===== AZ ALAK =====

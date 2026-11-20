@@ -1,17 +1,17 @@
 // felulet/js/koinoNezet.js
 
-// Felelősség: ⭐⭐ A KÖZÖSSÉG FELTÖLTÖTT NÉZETEI A LAPON (D126 — a D123 PR4-e) — koinós többlet, a prototípusban nincs ilyen:
+// Felelősség: ⭐⭐ A KÖZÖSSÉG FELTÖLTÖTT NÉZETEI A LAPON (D126 — a D123 PR4-e) — koinos többlet, a prototípusban nincs ilyen:
 //   · A KÁRTYA: a nézet-kártyát a lap a gondolat-kártyával rajzolja (a `kartyaAdat.js` fordít), és itt kap a fejlécébe egy „🧩 nézet”
 //     jelet, a törzsébe egy „🧩 Kód” fület — a kód (a HTML) olvashatóan, ki tette fel, és az állása ezen a készüléken (be / ki / a
 //     kódja azóta változott), a bekapcsolás és a megnyitás gombjával. A pont a közösség jelzése (NZ1);
 //   · A BEKAPCSOLÁS (NZ1–NZ3): előtte egy ablak mondja ki, ki tette fel, hány pont van rajta, mit lát a nézet és mit nem, és hogy a
-//     rajza nem bizonyíték. A bekapcsolás a te készülékedé, koinónként, a kód lenyomatához kötve (ha egy egyezmény új kódot hoz, a
+//     rajza nem bizonyíték. A bekapcsolás a te készülékedé, koinonként, a kód lenyomatához kötve (ha egy egyezmény új kódot hoz, a
 //     nézet kikapcsol, és a lap megmondja);
-//   · A FŐ MENÜ: „🧩 Nézetek…” (a koinó nézet-kártyái pont szerint, a bekapcsoltak elöl — a megnyitás a pakli helyén, NZ5) és
+//   · A FŐ MENÜ: „🧩 Nézetek…” (a koino nézet-kártyái pont szerint, a bekapcsoltak elöl — a megnyitás a pakli helyén, NZ5) és
 //     „🧩 Új nézet…” (egy HTML-fájl, egy cím, egy leírás és a pont — D14: pont nélkül nincs).
 //
 // ⭐ A lap csak rajzol (7. szabály): a feltöltést, a kártyát, a pontot és a bekapcsolást a program végzi (`koino.js` — ugyanaz, mint a
-// `nezet` parancsé); a nézet futtatása a `koinoNezetKeret.js`-é. A prototípus kártyája bájtra változatlan: a koinós rész a metódusai
+// `nezet` parancsé); a nézet futtatása a `koinoNezetKeret.js`-é. A prototípus kártyája bájtra változatlan: a koinos rész a metódusai
 // KÖRÉ kerül, a modul betöltésekor (mint a `koinoVerzio.js`-ben).
 //
 // Használja: `index.html` (egyszer betölti), `foMenu.js` (a két menüpont).
@@ -204,7 +204,7 @@ export async function nezetBekapcsolasMegnyitasa({ kartya, utana = null }) {
   }
   const rajzol = (folyamatban = false, kesz = false) => {
     if (kesz) {
-      tartalom.innerHTML = '<p class="koino-nezet__siker">✅ Bekapcsolva ezen a készüléken, ebben a koinóban.</p>'
+      tartalom.innerHTML = '<p class="koino-nezet__siker">✅ Bekapcsolva ezen a készüléken, ebben a koinoban.</p>'
         + '<p class="koino-nezet__leiras">A fő menü „🧩 Nézetek…” pontjából is megnyithatod. Ha egy egyezmény új kódot hoz a kártyára, '
         + 'a nézet kikapcsol — az új kódot újra meg kell nézned.</p><div class="koino-nezet__gombok"><button type="button" '
         + 'class="koino-nezet__gomb koino-nezet__gomb--fo" data-muvelet="megnyit">▶ Megnyitás most</button></div>';
@@ -249,13 +249,13 @@ export async function nezetBekapcsolasMegnyitasa({ kartya, utana = null }) {
 // A FŐ MENÜ — „🧩 Nézetek…”
 // ===================================
 
-/** A koinó nézetei: pont szerint, a bekapcsoltak elöl — megnyitás, bekapcsolás, kikapcsolás, a kártya a pakliban. */
+/** A koino nézetei: pont szerint, a bekapcsoltak elöl — megnyitás, bekapcsolás, kikapcsolás, a kártya a pakliban. */
 export async function nezetekMegnyitasa() {
   console.log('nezetekMegnyitasa - KEZDÉS');
   const tartalom = document.createElement('div');
   tartalom.className = 'koino-nezet-ablak';
   const modal = new Modal(MODAL_KONTENER, {
-    cim: '🧩 A koinó nézetei',
+    cim: '🧩 A koino nézetei',
     meret: 'alap',
     tartalom,
     gombok: [{ felirat: 'Bezárás', tipus: 'masodlagos', akcio: () => modal.bezaras() }]
@@ -272,7 +272,7 @@ export async function nezetekMegnyitasa() {
       return;
     }
     const lista = v.kartyak ?? [];
-    tartalom.innerHTML = '<p class="koino-nezet__leiras">A közösség feltöltött nézetei ebben a koinóban — egy nézet a koinó közös képét '
+    tartalom.innerHTML = '<p class="koino-nezet__leiras">A közösség feltöltött nézetei ebben a koinoban — egy nézet a koino közös képét '
       + 'rajzolja, olvas, nem ír. A saját készülékeden kapcsolod be.</p>'
       + (lista.length ? '<ul class="koino-nezet__lista">' + lista.map((n) => '<li class="koino-nezet__elem"><div><strong>🧩 '
         + html(n.cim) + '</strong> · ' + n.pont + ' pont' + (n.kod ? ' · ' + html(n.kod.nev) : ' · nincs kódja')
@@ -286,7 +286,7 @@ export async function nezetekMegnyitasa() {
           + '">Kikapcsolás</button>' : '')
         + '<button type="button" class="koino-nezet__gomb" data-muvelet="kartya" data-kartya="' + html(n.azonosito) + '">A kártya</button>'
         + '</div></li>').join('') + '</ul>'
-        : '<p class="koino-megjegyzes">Ebben a koinóban még nincs nézet-kártya.</p>')
+        : '<p class="koino-megjegyzes">Ebben a koinoban még nincs nézet-kártya.</p>')
       + '<div class="koino-nezet__gombok"><button type="button" class="koino-nezet__gomb" data-muvelet="uj">＋ Új nézet…</button></div>';
   };
   tartalom.addEventListener('click', async (e) => {
@@ -352,8 +352,8 @@ export async function ujNezetMegnyitasa() {
       return;
     }
     const ki = folyamatban || megerosites ? ' disabled' : '';
-    tartalom.innerHTML = '<p class="koino-nezet__leiras">Egy nézet egy HTML-fájl (a szkript és a stílus benne), ami a koinó közös képét '
-      + 'rajzolja. A kártyája a koinóban mindenkihez eljut; a kódja a „🧩 Kód” fülön olvasható, és csak egyezménnyel változhat. Futni '
+    tartalom.innerHTML = '<p class="koino-nezet__leiras">Egy nézet egy HTML-fájl (a szkript és a stílus benne), ami a koino közös képét '
+      + 'rajzolja. A kártyája a koinoban mindenkihez eljut; a kódja a „🧩 Kód” fülön olvasható, és csak egyezménnyel változhat. Futni '
       + 'csak annál fut, aki a saját készülékén bekapcsolja — elszigetelten: olvas, nem ír, kifelé nem szólhat.</p>'
       + '<label class="koino-nezet__mezo">A HTML-fájl <input type="file" data-mezo="fajl" accept=".html,.htm,text/html"' + ki + '></label>'
       + (ertekek.fajl ? '<p class="koino-nezet__leiras">' + html(ertekek.fajl.name) + ' · ' + kb(ertekek.fajl.size) + '</p>' : '')

@@ -2,7 +2,7 @@
 
 // ⭐⭐ D128 (②e1 — 17. pont, 9.13): A HELYREÁLLÍTÁS A SEGÍTŐKKEL — a jóváhagyások, a megállítás és a szerepek szabálya.
 //
-// ⭐ Amit ez a lap bizonyít (egy koinóban, a tárból — `allapot/helyreallitas.js`):
+// ⭐ Amit ez a lap bizonyít (egy koinoban, a tárból — `allapot/helyreallitas.js`):
 //   1. az ISMERŐS út: a meghívó (régi ismerős) és két élő tanúsító kezd → elindul (7 nap); ha mindhárom véglegesít → teljes;
 //   2. a három ember KÜLÖNBÖZŐ: a meghívó, aki maga is tanúsító, nem tölt be két helyet; ismerős nélkül (három idegen tanúsítóval)
 //      nem indul; a saját jóváhagyás nem számít;
@@ -305,7 +305,7 @@ proba('⭐⭐ A BIZONYÍTÉK (②e2) — a teljes helyreállításból összeál
   const hamisEsemenyek = [...b.esemenyek.filter((_, i) => i !== egyVeglegesites),
     { ...kezdese, azonosito: 'H'.repeat(43), adat: { ...kezdese.adat, fazis: 'veglegesites' }, entitasSorszam: kezdese.entitasSorszam + 100 }];
   const hamis = await helyreallitasBizonyitekEllenorzese({ ...b, esemenyek: hamisEsemenyek }, bejegyzes);
-  // Egy MÁSIK koinó eseménye a bizonyítékban — kimondottan elutasítva.
+  // Egy MÁSIK koino eseménye a bizonyítékban — kimondottan elutasítva.
   const idegenKoinobol = await (await ujEember('masik')).tesz('Belepes', {});
   const idegenKoino = await helyreallitasBizonyitekEllenorzese({ ...b, esemenyek: [...b.esemenyek, idegenKoinobol] }, bejegyzes);
   // Más bejegyzés (más kulccsal) — a jel nem illik.
@@ -313,7 +313,7 @@ proba('⭐⭐ A BIZONYÍTÉK (②e2) — a teljes helyreállításból összeál
   // Egy másik azonosság nevében.
   const idegen = await helyreallitasBizonyitekEllenorzese(b, { ...bejegyzes, azonossag: j.kulcs });
   const r = { jo: jo.rendben, csonka: !csonka.rendben, hamis: !hamis.rendben, masik: !masik.rendben, idegen: !idegen.rendben,
-    idegenKoino: !idegenKoino.rendben && /másik koinóé/.test(idegenKoino.ok ?? ''),
+    idegenKoino: !idegenKoino.rendben && /másik koinoé/.test(idegenKoino.ok ?? ''),
     reszleges: /még nem teljes/.test(reszleges) };
   if (Object.values(r).some((v) => !v)) process.stderr.write('    (' + JSON.stringify({ r, jo, csonka, hamis }) + ')\n');
   return Object.values(r).every(Boolean);
@@ -371,7 +371,7 @@ proba('⭐⭐ A HELYREÁLLÍTÁS A LÁNCBAN (②e2) — csak ismert bizonyíték
   return Object.values(r).every(Boolean);
 });
 
-proba('⭐⭐ A KAPU ÉS A MÁSIK KOINÓ (②e2) — a helyreállítás Kulcscsere eseménye a bizonyítékával egy MÁSIK koinóba is bejut; bizonyíték nélkül és csonka bizonyítékkal nem; utána az új kulccsal felvett készülék eseménye bejut, a régi (nem felsorolt) készüléké kiesik', async () => {
+proba('⭐⭐ A KAPU ÉS A MÁSIK KOINO (②e2) — a helyreállítás Kulcscsere eseménye a bizonyítékával egy MÁSIK koinoba is bejut; bizonyíték nélkül és csonka bizonyítékkal nem; utána az új kulccsal felvett készülék eseménye bejut, a régi (nem felsorolt) készüléké kiesik', async () => {
   const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
   const UJ = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
   const { tar, x, j, jel } = await teljesHelyreallitas({ kulcs: await pub(UJ) });
@@ -379,7 +379,7 @@ proba('⭐⭐ A KAPU ÉS A MÁSIK KOINÓ (②e2) — a helyreállítás Kulcscse
   const szuletes = x.eember.kulcspar.azonossagKulcspar.szuletes;
   const h = await helyreallitasBejegyzese(nev, j);
   const b = await helyreallitasBizonyiteka(tar, KOINO, x.horgony, jel);
-  // A MÁSIK koinó (B): X ott is tag (egy másik, régi készülékével), és van ott egy gondolata.
+  // A MÁSIK koino (B): X ott is tag (egy másik, régi készülékével), és van ott egy gondolata.
   const B = 'masik';
   const tarB = await esemenyTarNyitasa(B, await mkdtemp(join(tmpdir(), 'koino-helyreallitas-b-')));
   const xB = await ujEember(B, await tesztKeszulek('regi', x.eember.kulcspar.azonossagKulcspar));
@@ -527,15 +527,15 @@ proba('⭐⭐ A KÉRELEM ÉS A BEFEJEZÉS (②f) — a kérelem szövege oda-vis
   return Object.values(ok).every(Boolean);
 });
 
-// ===== ⭐⭐ ③b: A HELYREÁLLÍTÁS A BIZONYÍTÉKAIVAL A TÖBBI KOINÓBA =====
+// ===== ⭐⭐ ③b: A HELYREÁLLÍTÁS A BIZONYÍTÉKAIVAL A TÖBBI KOINOBA =====
 
-proba('⭐⭐ (③b) A HELYREÁLLÍTÁS A MÁSIK KOINÓBA IS — a kezelés-jegyzék a tárból a bizonyítékkal veszi fel; a visszakapott azonosság új készüléke a B koinóba beviszi (a bizonyítékkal — ott is hiteles); bizonyíték nélkül nem viszi be, és kimondja', async () => {
+proba('⭐⭐ (③b) A HELYREÁLLÍTÁS A MÁSIK KOINOBA IS — a kezelés-jegyzék a tárból a bizonyítékkal veszi fel; a visszakapott azonosság új készüléke a B koinoba beviszi (a bizonyítékkal — ott is hiteles); bizonyíték nélkül nem viszi be, és kimondja', async () => {
   const pub = async (k) => bajtokBase64Url(new Uint8Array(await crypto.subtle.exportKey('raw', k.publicKey)));
   const UJ = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
   const { tar, kor, x } = await alap();
   const X = x.eember.szerzo;
   const szuletes = x.eember.kulcspar.azonossagKulcspar.szuletes;
-  // A B koinót a régi készülék hozta létre (az azonosság horgonya ott a születés).
+  // A B koinot a régi készülék hozta létre (az azonosság horgonya ott a születés).
   const KB = 'proba-b';
   const xB = await ujEember(KB, x.eember.kulcspar);
   const tarB = await esemenyTarNyitasa(KB, await mkdtemp(join(tmpdir(), 'koino-helyreallitas-b-')));

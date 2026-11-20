@@ -25,7 +25,7 @@ export const FELDERITES_ELEVULES = 30 * 24 * 3600 * 1000;
 export const FELDERITES_ELAKADAS = 2 * 3600 * 1000;
 /** A jegyzék legfeljebb ennyi felderítést tart (a lezártakat is — a legrégebbi lezárt esik ki). */
 export const FELDERITES_JEGYZEK_KORLAT = 64;
-/** Az egész koinó felderítése (az ág helyén). */
+/** Az egész koino felderítése (az ág helyén). */
 export const GYOKER_AG = 'gyoker';
 
 const MB = 1024 * 1024;

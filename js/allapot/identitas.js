@@ -23,7 +23,7 @@
 //
 // ===== A HORGONY: MI BIZONYÍTJA A HELYZETET? =====
 //
-// Mindenkinek van egy „horgonya" ebben a koinóban — egy esemény, ami a helyzetét hordozza:
+// Mindenkinek van egy „horgonya" ebben a koinoban — egy esemény, ami a helyzetét hordozza:
 //
 //   · a koino LÉTREHOZÓJÁNAK a `KoinoLetrehozas` eseménye  → ⭐ a rekurzió ALAPESETE;
 //   · mindenki másnak a saját `Belepes` eseménye           → ez nyitja meg az ő SZELETÉT.
@@ -57,7 +57,7 @@
 //
 // ⏸️ A **szabály-réteg** továbbra sem kérdez tagságot, és ez NYITOTT DÖNTÉS (Csaba, 2026-09-12).
 // ⛔ Ha egyszer kérdezni fog, a válasz nem lehet „kidobom": P2P-n a *„nem tag"* és a *„még nem
-// láttam a bizonyítékát"* ugyanaz — a koinónak van erre szava (`nemEllenorizhetok`, D19).
+// láttam a bizonyítékát"* ugyanaz — a koinonak van erre szava (`nemEllenorizhetok`, D19).
 
 import { esemenyKoinoja, koinoSzuleteseE, azonositoAlaku } from '../esemeny/esemeny.js';
 import { ALAP_SZABALYOK, koinoSzabalyai } from '../esemeny/koinoSzabalyok.js';
@@ -79,7 +79,7 @@ import { randomInt } from 'node:crypto';
 export const MEGHIVO_KELL = 1;
 
 // Hány tanúsítás kell a 2. LÉPCSŐHÖZ (a pénztárcához)?
-export const TANUSITAS_KELL = ALAP_SZABALYOK.tanusitasKell;   // ⭐ D118/2: a mai érték — a koinó születése mást mondhat
+export const TANUSITAS_KELL = ALAP_SZABALYOK.tanusitasKell;   // ⭐ D118/2: a mai érték — a koino születése mást mondhat
 
 // ⭐ `N`: hány felhatalmazás kell ahhoz, hogy valaki TANÚSÍTHASSON?
 //
@@ -95,7 +95,7 @@ export const FELHATALMAZAS_KELL = ALAP_SZABALYOK.felhatalmazasKell;   // ⭐ D11
 // ⭐⭐ D94 (Csaba, 2026-10-04 — a 65. mérés után): A 2. LÉPCSŐ IGAZOLÁSA SZÚRÓPRÓBÁVAL.
 //
 // A teljes bizonyíték (minden tanúsítás és felhatalmazás az alapítókig) közel LINEÁRISAN nő: egymillió 2. lépcsősnél
-// ~290 MB. Ezért: ha a teljes ellenőrzés belefér a KERETBE (ennyi esemény-olvasás — helyi mennyiség, nem a koinó
+// ~290 MB. Ezért: ha a teljes ellenőrzés belefér a KERETBE (ennyi esemény-olvasás — helyi mennyiség, nem a koino
 // mérete), az fut, és az ítélet pontos; ha nem, a SZÚRÓPRÓBA (`lepcso2Szuroproba`): a helyi rész teljesen, és
 // `SZUROPROBA_SETAK` véletlen út az alapító körig — logaritmikus (~0,9–2,2 MB egymillió 2. lépcsősnél).
 export const LEPCSO_KERET = 1000;
@@ -122,8 +122,8 @@ export const LEPCSO_BEMONDAS = 'LepcsoBemondas';
  * @param {Object} [beallitas] - a küszöbök felülírása (a közösségi értékek bekötéséhez)
  */
 /**
- * ⭐⭐ D118/2 (①b): a nézet küszöbei (a tanúsítás-szám, a felhatalmazás alapértéke) a koinó SZÜLETÉSÉBŐL — egyszer
- * nézetenként, és csak ami a hívó nem mondott ki. Lenyomat-nevű koinónál a születés azonosítója maga a koinó neve (egy
+ * ⭐⭐ D118/2 (①b): a nézet küszöbei (a tanúsítás-szám, a felhatalmazás alapértéke) a koino SZÜLETÉSÉBŐL — egyszer
+ * nézetenként, és csak ami a hívó nem mondott ki. Lenyomat-nevű koinonál a születés azonosítója maga a koino neve (egy
  * tár-kérdés); ha nincs meg (vagy a régi alak), a mai értékek. ⚠️ A meghívó-szám nem a születésé: a tagság egy meghívás
  * és a legrövidebb lánc (`tagsag.js`; a 11–12. mérés: a több meghívó nem véd).
  */
@@ -140,7 +140,7 @@ export function ujIdentitasNezet(beallitas = {}) {
     meghivoKell: beallitas.meghivoKell ?? MEGHIVO_KELL,
     tanusitasKell: beallitas.tanusitasKell ?? TANUSITAS_KELL,
     felhatalmazasKell: beallitas.felhatalmazasKell ?? FELHATALMAZAS_KELL,
-    // ⭐ D118/2: amit a hívó nem mondott ki, azt a koinó születése adja (`nezetSzabalyai` — egyszer nézetenként).
+    // ⭐ D118/2: amit a hívó nem mondott ki, azt a koino születése adja (`nezetSzabalyai` — egyszer nézetenként).
     kifejezett: { tanusitasKell: beallitas.tanusitasKell !== undefined, felhatalmazasKell: beallitas.felhatalmazasKell !== undefined },
     szabalyokBetoltve: false,
 
@@ -294,7 +294,7 @@ const KERDES_NEVE = { tag: 'tagE', tanusithat: 'tanusithatE', lepcso2: 'lepcso2E
 // 4.6; a D25 kivétele: születéskor örökölhet, utána soha). A gyermekben szerzett tanúsítások ezen felül számítanak.
 // ⛔ És az alapító kör a gyermekben nem kap hatalmat (4.2): a létrehozó maga is örökölt tag, nem a fa gyökere.
 
-/** Az örökölt állapot forrása: a szülő koinó és a szülőbeli horgony — vagy null. */
+/** Az örökölt állapot forrása: a szülő koino és a szülőbeli horgony — vagy null. */
 function oroklesForrasa(e) {
   if (!e || typeof e !== 'object') return null;
   const gyermekSzuletes = e.tipus === 'KoinoLetrehozas' && typeof e.adat?.szulo === 'string';
@@ -357,7 +357,7 @@ async function kerdes(kulcs, tar, koino, horgony, nezet, vizsgalat) {
       return vege({ igen: false, ok: 'nem ellenőrizhető: hiányzik a horgony-esemény', ellenorizheto: false });
     }
     if (esemenyKoinoja(esemeny) !== koino) {
-      return vege({ igen: false, ok: 'a horgony egy MÁSIK koinóhoz tartozik', ellenorizheto: true });
+      return vege({ igen: false, ok: 'a horgony egy MÁSIK koinohoz tartozik', ellenorizheto: true });
     }
 
     // ----- ⭐⭐ D118 (④c): AZ ÖRÖKÖLT ÁLLAPOT — a szülőben, a vágáskor -----
@@ -407,7 +407,7 @@ async function kerdes(kulcs, tar, koino, horgony, nezet, vizsgalat) {
 /**
  * Alapító-e? Kétféleképpen lehet valaki az:
  *
- *   · ő hozta létre a koinót — a horgonya maga a `KoinoLetrehozas`;
+ *   · ő hozta létre a koinot — a horgonya maga a `KoinoLetrehozas`;
  *   · a létrehozó MEGNEVEZTE őt az alapítók közt, és a `Belepes`-e erre hivatkozik.
  *
  * ⚠️⚠️ MIÉRT KELL TÖBB ALAPÍTÓ? Mert **egyetlen alapítóval a 2. lépcső el sem tudna
@@ -420,7 +420,7 @@ async function kerdes(kulcs, tar, koino, horgony, nezet, vizsgalat) {
  * koino-létrehozásoknál a lista üres: csak a létrehozó alapító. Visszafelé kompatibilis.)*
  */
 async function alapitoE(tar, koino, horgony, esemeny, nezet) {
-  // Ő maga hozta létre a koinót. ⭐ D118/2: és ez a koinó születése (lenyomat-nevű koinónál csak az az esemény, amelyiknek
+  // Ő maga hozta létre a koinot. ⭐ D118/2: és ez a koino születése (lenyomat-nevű koinonál csak az az esemény, amelyiknek
   // az azonosítója maga a név — egy második, azonos nevű születés nem alapító).
   // ⛔ D118 (④c, 4.2): a GYERMEK létrehozója nem alapító kör — a szülőbeli állapotát hozza (`oroklesForrasa`).
   if (esemeny.tipus === 'KoinoLetrehozas') return koinoSzuleteseE(esemeny, koino) && typeof esemeny.adat?.szulo !== 'string';
@@ -471,7 +471,7 @@ export async function tagE(tar, koino, horgony, nezet = ujIdentitasNezet()) {
 
 /**
  * A tagsági lánc eseményeinek összegyűjtése a tárból: a horgony, a szeletéből a meghívások, a profilok és a tagsági
- * csomagok, a meghívók horgonyai (és így tovább, `MELYSEG_KORLAT`-ig), és az alapítás koinó-létrehozása.
+ * csomagok, a meghívók horgonyai (és így tovább, `MELYSEG_KORLAT`-ig), és az alapítás koino-létrehozása.
  */
 export async function tagsagiEsemenyekGyujtese(tar, koino, horgony, nezet = ujIdentitasNezet()) {
   const ki = [];
@@ -560,10 +560,10 @@ export function tanusithatE(tar, koino, horgony, nezet = ujIdentitasNezet()) {
  * mindkettőt megkérdezheti.
  */
 export async function lepcso2E(tar, koino, horgony, nezet = ujIdentitasNezet()) {
-  await nezetSzabalyai(tar, koino, nezet);   // ⭐ D118/2: a koinó tanúsítás-száma
+  await nezetSzabalyai(tar, koino, nezet);   // ⭐ D118/2: a koino tanúsítás-száma
   // ⭐⭐ D94: A KERET. A legfelső hívás megnyitja (ennyi olvasás fér bele a teljes ellenőrzésbe); a belső, rekurzív
   // hívások ugyanabban a keretben futnak. Ha kifut, a szúrópróba dönt. ⚠️ A keret helyi mennyiség (mennyit olvastam),
-  // nem a koinó mérete: a kis koinó ugyanazt a kódot futtatja, csak belefér.
+  // nem a koino mérete: a kis koino ugyanazt a kódot futtatja, csak belefér.
   if (nezet.keretVege !== undefined) return lepcso2Teljes(tar, koino, horgony, nezet);
   nezet.keretVege = nezet.olvasasok + nezet.keret;
   try {
@@ -868,7 +868,7 @@ async function setaCsomopont(tar, koino, horgony, nezet, teljes) {
   const e = await esemenyLekerese(tar, horgony);
   nezet.olvasasok++;
   if (!e) return { hianyzik: true, ok: 'hiányzik egy horgony-esemény' };
-  if (esemenyKoinoja(e) !== koino) return { bukott: true, ok: 'egy horgony más koinóé' };
+  if (esemenyKoinoja(e) !== koino) return { bukott: true, ok: 'egy horgony más koinoé' };
   if (await alapitoE(tar, koino, horgony, e, nezet)) return { cel: true, ok: 'alapító kör' };
   // ⭐ D118 (④c): az örökölt horgonynál a séta a szülőben folytatódik (a vágáskori állapot).
   const orokles = oroklesForrasa(e);
@@ -959,7 +959,7 @@ export async function lepcso2Szuroproba(tar, koino, horgony, nezet = ujIdentitas
     ellenorizheto: true, szuroproba: true });
 }
 
-/** ⭐ D94: alapító-e a horgony gazdája (a 2. lépcsője a koinó létrehozásából következik — bemondás nem kell). */
+/** ⭐ D94: alapító-e a horgony gazdája (a 2. lépcsője a koino létrehozásából következik — bemondás nem kell). */
 export async function alapitoHorgony(tar, koino, horgony) {
   const e = await esemenyLekerese(tar, horgony);
   return !!e && esemenyKoinoja(e) === koino && alapitoE(tar, koino, horgony, e, ujIdentitasNezet());

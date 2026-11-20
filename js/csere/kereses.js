@@ -75,7 +75,7 @@ export function osztottMinta(s, veletlen = Math.random) {
  * ⭐ A TARTÓ válasza egy helyre: az INDEXELT bejegyzések közül a kérdésre illők (a teljes kérdésre szűrve), a legfrissebbek
  * elöl, legfeljebb `n`; a hely mérete (az indexeltek száma), és ha a cél fölött van, az osztódás mélysége.
  * @param {Array<Object>} bejegyzesek - a tartó indexelt bejegyzései ezen a helyen
- * @param {{kerdes: string, n?: number, koino: string, most?: number, osok?: Set<string>}} b - ⭐ D118 (⑤a): `osok` — a koinó
+ * @param {{kerdes: string, n?: number, koino: string, most?: number, osok?: Set<string>}} b - ⭐ D118 (⑤a): `osok` — a koino
  *        őseinek nevei (a hozott entitás bejegyzése az ős eseményeit hordozza)
  */
 export function helyTalalatai(bejegyzesek, { kerdes, n = KERESES_TALALAT_KORLAT, koino, most = Date.now(), osok = null }) {

@@ -6,14 +6,14 @@
 ## 1. Röviden
 
 A felület szinte minden része mellé egy ⓘ jel kerül; rákattintva egy buborék magyaráz (MA1 (A), MA2 (B)). A magyarázatok
-tartalma a **kézikönyv**: rendszer-entitások, amiket a program hoz (az alap-tartalom), a pakliban „A koinó kézikönyve” alatt
+tartalma a **kézikönyv**: rendszer-entitások, amiket a program hoz (az alap-tartalom), a pakliban „A koino kézikönyve” alatt
 látszanak (MA6 (A)), és a közösség javaslattal módosítja őket (MA7 (A): módosítás és áthelyezés a kézikönyvön belül; MA8 (B):
 óvatosabb alap-küszöb). A D14 alól kivételek (MA4 (B)), és az új programverzió a nem módosítottakat magától frissíti (MA5 (A)).
 
 ## 2. A legfontosabb megkötés: a SZÁMÍTÁS MAGJA nem kapja meg az alap-tartalmat
 
 A számítás magja (`kodCsomag.js` `sajatMag` — a `ketReteg.js` és az `esemenyTar.js` import-zárványa, ma 25 fájl) nevezi meg, mit
-számol egy koinó; ha a mag változik, az „más számítás” (D123 — a számítás köt, és a változása költözéssel jár). ⛔ Ha a kézikönyv
+számol egy koino; ha a mag változik, az „más számítás” (D123 — a számítás köt, és a változása költözéssel jár). ⛔ Ha a kézikönyv
 szövegei vagy akár csak a NEVEINEK listája a magba kerülne, minden új ⓘ (egy új menüpont magyarázata) „más számítás” lenne — és
 az MA5 (A) épp azt mondja, hogy ez magától, költözés nélkül lépjen be.
 
@@ -29,23 +29,23 @@ az MA5 (A) épp azt mondja, hogy ez magától, költözés nélkül lépjen be.
 
 1. **A név és az azonosító** (`js/esemeny/rendszerEntitas.js` — a mag része, kicsi és állandó): a név útvonal (`kezikonyv` a gyökér;
    szakaszai kisbetű, szám, kötőjel; legfeljebb 8 szint, 160 jel); az azonosító a névből (lenyomat — mindenkinél ugyanaz, MINDEN
-   koinóban ugyanaz: így a gyermek koinó a szülő kézikönyvét folytatja, ahogy a gondolatokét is); a szülő neve az útvonalból.
-2. **A koinó szabálya** (`koinoSzabalyok.js`): a születés `kezikonyv` szabálya — a kézikönyv alap-küszöbe (MA8 (B): legalább 3 nap
+   koinoban ugyanaz: így a gyermek koino a szülő kézikönyvét folytatja, ahogy a gondolatokét is); a szülő neve az útvonalból.
+2. **A koino szabálya** (`koinoSzabalyok.js`): a születés `kezikonyv` szabálya — a kézikönyv alap-küszöbe (MA8 (B): legalább 3 nap
    = 259 200 mp a legkisebb döntési idő). ⛔ Az `ALAP_SZABALYOK` NEM kapja meg (a régi, mező nélküli születés így kézikönyv nélküli
    marad — a „mai értékek soha nem változnak”); az új születésbe a `teljesSzabalyok` írja.
 3. **A kapu** (`esemeny.js` `alakiHiba`): az `adat.rendszer` — legfeljebb 8 név, mind érvényes útvonal.
-4. **Az állapot** (`allapotSzamitas.js`): ha a koinónak van kézikönyv-szabálya, minden esemény `adat.rendszer` nevei — és
+4. **Az állapot** (`allapotSzamitas.js`): ha a koinonak van kézikönyv-szabálya, minden esemény `adat.rendszer` nevei — és
    a felmenőik — entitásként létrejönnek (`rendszer: <név>`, szerző és születés nélkül); MA4 (B): ⭐ a koinon 1 passzív pontjával
    (eredetileg a D14 kivételeként — lásd a naplót).
-5. **A küszöb** (`javaslatSzamitas.js`): a kézikönyv-entitás alap-küszöbe a koinó kézikönyv-szabályáé (ha a tulajdonosai érték
+5. **A küszöb** (`javaslatSzamitas.js`): a kézikönyv-entitás alap-küszöbe a koino kézikönyv-szabályáé (ha a tulajdonosai érték
    javaslattal mást nem mondanak).
 6. **A bejelentés** (`esemeny.js` `bejelentesHelyei`): a kézikönyv-entitásra mutató esemény a kézikönyv GYÖKERÉNEK szeletébe is
    bejelentődik — így EGY szelet hordja az egész kézikönyvet.
-7. **A vállalás** (`vallalas.js` — nem mag): a kézikönyves koinóban mindenki tartja a kézikönyv gyökerének szeletét (MA4 (B)
-   következménye: a pont nélkül megmaradó módosítást is valakinek őriznie kell — mint a koinó születését).
+7. **A vállalás** (`vallalas.js` — nem mag): a kézikönyves koinoban mindenki tartja a kézikönyv gyökerének szeletét (MA4 (B)
+   következménye: a pont nélkül megmaradó módosítást is valakinek őriznie kell — mint a koino születését).
 
-⚠️ **Amit ez kimond:** a régi program az ismeretlen szabályú (kézikönyves) születést elutasítja — kézikönyves koinóhoz csak a
-frissített program csatlakozhat. A régi (teszt) koinókban nincs kézikönyv. A mag változik → az új koinók új családot kezdenek
+⚠️ **Amit ez kimond:** a régi program az ismeretlen szabályú (kézikönyves) születést elutasítja — kézikönyves koinohoz csak a
+frissített program csatlakozhat. A régi (teszt) koinokban nincs kézikönyv. A mag változik → az új koinok új családot kezdenek
 (mint a D128-nál).
 
 ⚠️ **Egy határ:** a mag bármely érvényes útvonalat elfogad (nem tudja, melyik nevet ismeri a program) — egy e-ember tehát
@@ -121,8 +121,8 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   ⛔ **Lelet (a második teljes sor — szeszélyes, ~minden hatodik futás):** a nézet-próba (D126) a nézet-felület alap rendezésével
   (`hierarchikus`, növekvő — az ágak az azonosítók szerint) kérte az első 20 entitást, és az elsőt választotta: a kézikönyv ága
   (a gyökere állandó azonosítójával) a véletlen azonosítójú gondolat elé kerülhetett, és kitolta a lapról. A program helyes (a nézet a
-  koinó egész fáját látja, abban a kézikönyvet is); a két nézet-próba most pont szerint kér, és név szerint választ — a kézikönyv
-  méretétől függetlenül. A bukás kiírása a nézet válaszait és a koinó eseményeit is mondja (eddig nem látszott, melyik kérdés ment
+  koino egész fáját látja, abban a kézikönyvet is); a két nézet-próba most pont szerint kér, és név szerint választ — a kézikönyv
+  méretétől függetlenül. A bukás kiírása a nézet válaszait és a koino eseményeit is mondja (eddig nem látszott, melyik kérdés ment
   félre).
   ⛔ **Lelet (a harmadik teljes sor — az FL1 próba):** a pakli alapból „a legerősebb gyökérrel” nyílik, holtversenyben az azonosító
   dönt — egy még ismeretlen pontú (0) közösségi gondolat és a kézikönyv 0 pontos gyökere közül így néha a kézikönyv nyílt meg. Egy
@@ -130,13 +130,13 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   entitás típusú kártyákat is, mint az többit”** — a külön szabály kikerült: a kézikönyv kártyáira ugyanaz a sorrend vonatkozik (pont
   szerint, holtversenyben az azonosító). Az FL1 próba most a mért gondolatot nevezve kéri (nem a holtversenyre hagyatkozik).
 - **2026-11-19** — ⭐⭐ **A KOINON** (Csaba: „hozzunk létre, egy koinon-t … minden entitást, 1 tudatpontal hozza létre” — „rendben.
-  jöhet az 1-es, aztán mehetsz tovább a 2-essel”): a D14 kivétele helyett minden kézikönyv-entitáson 1 passzív pont a koinóné
+  jöhet az 1-es, aztán mehetsz tovább a 2-essel”): a D14 kivétele helyett minden kézikönyv-entitáson 1 passzív pont a koinoné
   (`rendszerEntitas.js` `KOINON`, `KOINON_PONT`; az állapotban és a pakli virtuális bejegyzésein ugyanúgy). Kikerült: a D14
   kivétele és a bejáró külön szabálya (a 0 pontos kézikönyv-bejegyzés helye) — a kézikönyvre is ugyanaz a szabály vonatkozik, mint
   bármely kártyára. A koinon nem szavaz, nem javasol, a részvétel nevezőjébe nem számít (a döntés a pont-eseményekből számol — a
   koinonnak nincs ilyen); az ágak össz-pontjában esemény nélküli levél (mint az egyezmény által átvitt pont); a különválásnál a
   koinon mindig marad (a főág nem ürül ki). A buborék és a `kezikonyv` parancs a közösség pontjait mondja (a koinon 1-e nélkül).
-  Következmény: egy friss koinóban a kézikönyv gyökere (a bejegyzései koinon-pontjaival) a legerősebb gyökér lehet — a pakli azzal
+  Következmény: egy friss koinoban a kézikönyv gyökere (a bejegyzései koinon-pontjaival) a legerősebb gyökér lehet — a pakli azzal
   nyílik, amíg a közösség gondolatai nem erősebbek. ⏭️ D130: a koinon az általános egyezményekhez, a darabokra osztott, replikált
   őrzéssel.
 - **2026-11-19** — ✅ **a ④a kész: a menü és a fejléc.** Az ⓘ a fő menü minden pontján (22) és a panel tetején (a menü egészéről),
@@ -156,7 +156,7 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
 - **2026-11-19** — ✅ **a ④b kész: a kártyák és a pakli.** Minden kártyán EGY ⓘ a számsor elején („A kártyák” — a részei a
   buborékból: a számok, a második sor (típus, kategóriák, a javaslat és az egyezmény mutatói, a döntési idő), a fülek, a szavazás és a
   különválás, a pakli (a lánc és a testvér-jelzők), a kártya menüje); külön ⓘ a fülsávon, a „Szavazás” fülön és a különválás
-  kérdésénél; a kártya menüjének tetején és minden pontján (15 — a koinó saját „📷 Felderítés…” pontja is). Az alap-tartalom +23
+  kérdésénél; a kártya menüjének tetején és minden pontján (15 — a koino saját „📷 Felderítés…” pontja is). Az alap-tartalom +23
   bejegyzés (most 79); minden állítás a kódból (a kártya-osztályok, a modálok, a `pakli.js`, a `javaslatSzamitas.js`, a
   `szerkesztesiVegrehajtas.js`) — pl. a döntési idő a minimum és a maximum között a bizonyossági mutatóval rövidül; a küszöb a
   tulajdonosok érték javaslatainak mediánja; a kártya menüjének mely pontjaihoz kell saját tudatpont. ⭐ **A szöveg a kártya
@@ -174,7 +174,7 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   ⛔ **Lelet (a teljes sor — a parancssor D101 ④ síkidom-próbája):** a kézikönyv gyökere bejegyzésenként a koinon 1 pontját
   hordozza (az ágában), és a 79 bejegyzéssel (79 pont) erősebb lett a próba legerősebb gyökerénél (60) — a próba rögzített 60-at
   várt a „legerősebb gyökér pontjának”. A program helyes (Csaba: a kézikönyvre ugyanaz a sorrend); a próba most a kettő közül az
-  erősebbet várja. ⚠️ A kézikönyv növekedtével egy friss koinóban a kézikönyv a legerősebb gyökér — a pakli azzal nyílik, a síkidom
+  erősebbet várja. ⚠️ A kézikönyv növekedtével egy friss koinoban a kézikönyv a legerősebb gyökér — a pakli azzal nyílik, a síkidom
   hozzá méretez, amíg a közösség gondolatai el nem hagyják.
 - **2026-11-20** — ⭐ **A próbák rendje a ④ további részeinél** (Csaba: „minden rész után lefuttatod a teljes próbasórt, ami
   kb.1 óra?” — a javaslatra „rendben”): a szöveget és felületi helyet hozó al-részek után a kézikönyv próbái és a parancssor D129
@@ -182,20 +182,20 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
 - **2026-11-20** — ✅ **a ④c első csoportja: a nézetek ablakai.** Az ablak CÍME mellett ⓘ (Keresés, Struktúra, Rendezés, a három
   nézet-ablak; a Síkidom a címét elrejti — ott a súgó-sor elején). Ahol a menüpont ⓘ-je már elmondja az ablakot, az ablaké ugyanarra a
   bejegyzésre mutat (egy magyarázat egy dologról — a közösség egy helyen javítja); az örökölt ablakot a tartalma jelöli
-  (`.modal-panel:has(.kereses-modal) .modal-cim` — a kártyáról nyitott, ágra szűkített változat is), a koinósat a címe. ⛔
+  (`.modal-panel:has(.kereses-modal) .modal-cim` — a kártyáról nyitott, ágra szűkített változat is), a koinosat a címe. ⛔
   **Leletek (a kód újraolvasása — a ④a három szövege nem stimmelt):** ① a Keresés javaslatot és egyezményt NEM talál (a kereső
   típusai: gondolat, kategória, gondolattípus — `pakli.js` `KERESES_TIPUSOK`), és nem „a szavak elejére” keres, hanem a beírt
-  szöveget egészében (a címben benne van-e); a hálózati kérdés minden kérdésnél fut, nem csak „ha a koinó nagyobb”. ② A Síkidomban
+  szöveget egészében (a címben benne van-e); a hálózati kérdés minden kérdésnél fut, nem csak „ha a koino nagyobb”. ② A Síkidomban
   egy koppintás az alakzatra FÓKUSZÁL, a dupla koppintás a paklit oda viszi (a ④a ezt tévesen kivette; az örökölt súgó-sor
   „koppintás: adatlap”-ja elavult — a fájl bájtra azonos, nem írjuk át). ③ A Struktúra nem behúzásos lista, hanem rajzolt fa
   (csomópontok, élek; a nagyítással egyre több részlet), és a kerete 5000 csomópont. Mindhárom szöveg kijavítva.
 - **2026-11-20** — ⭐⭐ **MA9 — a küszöb-mezők alapértéke az új gondolat, kategória és gondolattípus ablakában** (Csaba: „rendben,
   legyen a (B)”). ⛔ A lelet (a ④c kódolvasása): az ablak a négy küszöb-mezőt a PROTOTÍPUS alapértékeivel töltötte ki (51 %, 51 %,
   0 mp, 1 év — `kuszobErtekMezok.js`), és a program ezeket mindig a létrehozó érték javaslataként mentette: a felületről írt gondolat
-  így nem a koinó születési szabályát (`alapKuszobok`: 51 %, 0 %, 1 mp, 7 nap) követte. ⭐ (B): az ablak a koinó alapértékeit
+  így nem a koino születési szabályát (`alapKuszobok`: 51 %, 0 %, 1 mp, 7 nap) követte. ⭐ (B): az ablak a koino alapértékeit
   mutatja (`/api/koino/alapkuszobok` → `koinoModalok.js` — az örökölt ablakok érintetlenek; ha a létrehozó már írt a mezőkbe, nem
   írjuk felül), és a program CSAK akkor ment érték javaslatot, ha a létrehozó változtatott (`koino.js` `letrehozoKuszobJavaslata` —
-  a koinó-példány része: ⛔ elsőre a gyáron kívüli névként hívtuk, „is not defined” lett — a kezelő a belépett koinó nevein fut).
+  a koino-példány része: ⛔ elsőre a gyáron kívüli névként hívtuk, „is not defined” lett — a kezelő a belépett koino nevein fut).
   Próba: +1 parancssor (az alapérték-útvonal; változatlanul nincs érték javaslat, változtatva van; a kategóriánál ugyanígy); 2 rontás
   mind bukik. Böngészőben: mindhárom ablak 51 % / 0 % / 1 mp / 7 nap.
 - **2026-11-20** — ✅ **a ④c második csoportja: a létrehozás és a döntés ablakai.** A címnél ⓘ (az új gondolat, kategória,
@@ -213,12 +213,12 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   adataid — a címnél ⓘ, a menüpont bejegyzésével; a kártyáról nyitott, ágra szűkített változatnál is). ⛔ **A ④a öt szövege a kód
   szerint újraírva:** ① az értesítés CSAK a tartott részekről jön (`ertesites.js`: két pillanatkép különbsége, a részvételi
   szeletekből; az első számolás alapvonal) — a „vagy amire értesítést kértél” többet ígért; ② a készülék saját értesítése VALÓDI
-  (D103: felugró értesítés az operációs rendszeren át, rögtön vagy 1–168 óránként összefoglalva; zárt lapnál is, amíg a koinó fut),
+  (D103: felugró értesítés az operációs rendszeren át, rögtön vagy 1–168 óránként összefoglalva; zárt lapnál is, amíg a koino fut),
   és a „Csak ahol tudatpontom van” szűrő; ③ a meghívó KÉT telepítő sort ad (📋 Termux, 💻 PowerShell / parancssor), és ha a
   meghívottnál már fut a koino, a lapon is beillesztheti; ④ a Tudatpontok listája a LEGUTÓBB RENDEZETTEL kezdődik (nem a
   legtöbbel — `sajatHozzarendelesek`), és a nem ismert kártyán lévő pont is látszik; ⑤ az adatoknál a „beceneved áll az alsó
   sávban” nem igazolható — kivéve; a kötelező mezőket csillag jelöli, és a meghívó viszi. Böngészőben mind az öt ablak ⓘ-je a helyén.
-- **2026-11-20** — ✅ **a ④c negyedik csoportja: a koinó ablakai** (a címükről — mind koinós): a Csatlakozás és a Társak (a tér
+- **2026-11-20** — ✅ **a ④c negyedik csoportja: a koino ablakai** (a címükről — mind koinos): a Csatlakozás és a Társak (a tér
   sávjának bejegyzései), a Bekapcsolódás, az Új koino-verzió, a program ezen a készüléken, a Felderítések, és két új bejegyzés: a
   „⬇ Telepítés a kártyáról” előnézete (ki tette fel, a pontja, a fájljai, rétegenként mi változik, hol futnál más számítással — a kód a
   kulcsaiddal fut; a régi mellé, az új egy új fülön, ha nem felel, a régi fut újra) és a felderítés beállítása (egy ágé és az egészé
@@ -227,9 +227,9 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   futó program és a magja lenyomatát, és az utolsó telepítés eredményét. Böngészőben hét ablak ⓘ-je a helyén (a telepítés
   előnézete koino-verzió kártya nélkül nem nyitható — ugyanaz a cím-alapú hely, mint a többié). Az alap-tartalom 92 bejegyzés.
 - **2026-11-20** — ✅ **a ④d: a fogalomtár.** 23 fogalom, mindegyik saját bejegyzés a „Fogalomtár” fejezet alatt (a buborék
-  „Részei” között koppintható): az e-ember, a koinó, a tudatpont, a gondolat, a kategória, a gondolattípus, a javaslat, az érték
+  „Részei” között koppintható): az e-ember, a koino, a tudatpont, a gondolat, a kategória, a gondolattípus, a javaslat, az érték
   javaslat (KÜLÖN fogalom), az egyezmény, a küszöb, a bizonyossági mutató, a különválás, a pakli, a készülék, a kezelő, a papír, a
-  társ, a csere, az őrjárat, a szelet és a tartó, a koinon, a számítás magja, a gyermek-koinó. Röviden (2–4 mondat) — a részleteket
+  társ, a csere, az őrjárat, a szelet és a tartó, a koinon, a számítás magja, a gyermek-koino. Röviden (2–4 mondat) — a részleteket
   a kézikönyv többi, a kódból ellenőrzött bejegyzése mondja; a fogalmak a projekt kötelező terminológiája szerint. A koinonnál a mai
   állapot (a kézikönyv pontja) és külön a terv (a közös egyezmények darabos őrzése — a D130). Az alap-tartalom 115 bejegyzés.
 - **2026-11-20** — ✅ **a belső kódok a látható szövegekből** (a ③-ban feljegyzett „D128 17. pont”): nyolc felületi szöveg
@@ -245,7 +245,7 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
 - **2026-11-20** — ✅ **az ⑤ kész: a felület próbája** (MA10 (C), Csaba: „ma10: (c)”) — `meres/magyarazatProba.js` (a `felulet` csoportban,
   +2 próba): ① a FÁJLOKBAN — minden ⓘ-hely címének darabjai (az osztály- és azonosító-nevek, a választó értékei, a felismerő
   feliratok) ott vannak a felület programjában (a `koinoMagyarazat.js` és a stíluslapok nélkül — különben minden név „megvan”); ②
-  a VALÓDI LAPON, fej nélküli Chrome-mal (a nézet-próba eszközével, csomag nélkül): egy friss koinón az alsó sáv, az állapot-sor, a
+  a VALÓDI LAPON, fej nélküli Chrome-mal (a nézet-próba eszközével, csomag nélkül): egy friss koino-n az alsó sáv, az állapot-sor, a
   kártya, a fő menü és a kártya menüje ⓘ-i kikerülnek (a két menü nem keveredik), a Keresés ablakának címe ⓘ-t kap, a buborék a
   program szövegével nyílik, az ⓘ a menüpontot nem indítja el, és minden kikerült név az alap-tartalomban van. Ha nincs Chrome, kimarad.
   6 rontás mind bukik (elírt hely-osztály és ablak-cím — a fájlokban; a menü választója, a továbbmenő kattintás, a rossz buborék-út, a

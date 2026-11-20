@@ -3,7 +3,7 @@
 // Felelősség: ⭐⭐ A TANULT MÉLYSÉG (D110 — a K10 (A2), Csaba, 2026-10-18: „rendben. elfogadom a javaslatodat”, a medián
 // szabállyal): a gyökér-darab (`g`) és a kereső-régió (`k`) mélységét a készülék a SAJÁT darabjából becsüli
 // (`melysegBecslese`) — egy új, vagy hosszan offline készülék darabja viszont üres vagy elavult, a becslése sekély, és egy
-// nagy koinó mély tartóival nincs közös kulcsa: a cserében soha nem egyeztetnek. Ezért a társak bemondott mélységét (a
+// nagy koino mély tartóival nincs közös kulcsa: a cserében soha nem egyeztetnek. Ezért a társak bemondott mélységét (a
 // NYITÁS `gyd` / `kd` jelének első tagja — a vonalon semmi nem drágul) feljegyezzük, és a mélységünk legalább a friss
 // társak mélységének MEDIÁNJA − 1.
 //
@@ -18,10 +18,10 @@
 //
 // ⛔ Az elvetett feltétel (a K10 (A) eredeti szövege: „csak amíg a saját darabja kevés”): egy régen jól szinkronban lévő,
 // aztán hónapokig offline készülék darabja „teli” (a régi, sekély mélység szerint), tehát nem tanulna — és a megnőtt
-// koinó mély tartóival soha többé nem egyeztetne. A medián a hazug társ ellen ezt a feltételt kiváltja.
+// koino mély tartóival soha többé nem egyeztetne. A medián a hazug társ ellen ezt a feltételt kiváltja.
 //
 // ⚠️ Helyi feljegyzés, nem esemény, és nem terjed (3. szabály): a társ szava csak a SAJÁT terhemet hangolja, semmit nem
-// dönt el a koinóban. Korlátos: fajtánként `TANULT_TARS_KORLAT` társ (a legrégebbi esik ki).
+// dönt el a koinoban. Korlátos: fajtánként `TANULT_TARS_KORLAT` társ (a legrégebbi esik ki).
 //
 // Használják: koino.js (`gyokerMelysegem`, `keresoRegioim`, a csere után a feljegyzés), a próbák (`melysegTanulasProba.js`).
 

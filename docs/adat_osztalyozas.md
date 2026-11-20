@@ -102,7 +102,7 @@ tudatpont-replikált, de **kriptográfiai bizonyítékon kívül semmi nem kerü
 láncra**, és a törlésének kezelhetőnek kell maradnia.
 
 > ⚠️ **A legérzékenyebb mező az egész adatbázisban a `meghivo.meghivottNev`** — mert olyan
-> emberről tárol nevet, aki **még nem is tagja a koinónak**, tehát nem is egyezett bele.
+> emberről tárol nevet, aki **még nem is tagja a koinonak**, tehát nem is egyezett bele.
 > (A séma kommentje ezt már ma tudja: *„a rendszer nem tárol adatot a még nem regisztrált
 > személyről"* — a `meghivottNev` viszont pontosan ezt teszi. Lásd a határeseteket.)
 
@@ -226,11 +226,11 @@ egyszeriséget** őrzi (D14) — azt, hogy „ez a személy már regisztrált". 
 lehet-e ugyanaz a **beceneve**, az ettől független kérdés, és **nem éri meg globális
 konszenzust** (D17: mindenre, ami nem csalás-kritikus, van olcsóbb megoldás).
 
-**Következmény, amit ki kell mondani:** a P2P koinóban a becenév-egyediség vagy megszűnik
+**Következmény, amit ki kell mondani:** a P2P koinoban a becenév-egyediség vagy megszűnik
 (a kulcs azonosít, a név csak címke), vagy külön mechanizmust kap. **Ez a Fázis 2 A/C
 szakaszának eldöntendő kérdése** — most csak megnevezzük.
 
-### 3. A `meghivottNev`: adat olyanról, aki nem tagja a koinónak
+### 3. A `meghivottNev`: adat olyanról, aki nem tagja a koinonak
 
 A meghívó sémája azt írja magáról, hogy *„a rendszer nem tárol adatot a még nem regisztrált
 személyről"* — a `meghivottNev` viszont **pontosan ezt teszi**, méghozzá jó okból (a

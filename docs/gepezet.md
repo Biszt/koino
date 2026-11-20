@@ -16,7 +16,7 @@ egy infografikus dokumentációt."*
 > rendereli, a nyers szöveg pedig olvasható marad — nulla függőség (6. szabály).
 >
 > ⭐ **A testvére (2026-11-04):** a [`folyamatabra.md`](folyamatabra.md) a PROGRAM egészét rajzolja
-> (a készülék, a csere, a társkeresés, az e-ember útja, a koinó családja) — és a tervezéshez azt,
+> (a készülék, a csere, a társkeresés, az e-ember útja, a koino családja) — és a tervezéshez azt,
 > hogy mi kész, mi nyitott, mi nincs még.
 
 ---
@@ -53,7 +53,7 @@ az egyezmény megszületett — a gondolat címe mégis a régi maradt, mert a 3
 ## 2. A TÖREDÉK-MODELL — egy javaslat, N döntés, ÉS
 
 Egy javaslat **több entitást is érinthet**, és ilyenkor **nem egy szavazás van**. A
-prototípus töredékekre bontja; a koinóban ugyanez **számítás** (`reszekSzamitasa`).
+prototípus töredékekre bontja; a koinoban ugyanez **számítás** (`reszekSzamitasa`).
 
 ```mermaid
 flowchart TD
@@ -279,7 +279,7 @@ kulonvalasok: [{ testverId, testverTipus, testverCim, agSzerep, kulonvalasIdeje 
 ```
 
 - **`agSzerep: 'foag'`** — *„a főág tartotta meg az eredeti azonosítót"* (a prototípus saját
-  kommentje). ⭐ A koinóban ez a mező mostantól **azt jelenti, hogy ez az ág viseli az
+  kommentje). ⭐ A koinoban ez a mező mostantól **azt jelenti, hogy ez az ág viseli az
   eredeti azonosítót** — így a Csaba-féle leszármazottankénti szabállyal is helyes marad,
   akkor is, ha az eredetit nem a „győztes" oldal kapja.
 - A fül **két mondat közül** választ: *„Ez a gondolat kettévált: egy részük külön ágon
@@ -418,7 +418,7 @@ ezért írjuk le, ne csússzon be észrevétlenül.*
 
 ### A) A KÉT GÉPEZET — és miért nem lehet egy
 
-A koinóban mostantól **kétféle igazság** van, és a különbség nem árnyalat:
+A koinoban mostantól **kétféle igazság** van, és a különbség nem árnyalat:
 
 | | **Szerkesztési javaslat** | **Alkotmány** |
 |---|---|---|
@@ -429,7 +429,7 @@ A koinóban mostantól **kétféle igazság** van, és a különbség nem árnya
 | A hallgatás | nem korlátoz | ⛔ **NEM-et jelent** |
 | Elfogadás után | végrehajtódik, és kész | **él**: a státusz bármikor visszafordulhat |
 
-⭐⭐ **És ettől nem lesz idegen test a koinóban, mert van már pontosan ilyen gépezet: a
+⭐⭐ **És ettől nem lesz idegen test a koinoban, mert van már pontosan ilyen gépezet: a
 TUDATPONT.** „Emberenként az utolsó nyer, az állapot a mostani összeg, nincs határidő, mindig
 ideiglenes." **Az alkotmány ugyanez, egy 2/3-os próbával a tetején** — nem új gépezet, hanem
 egy meglévő új szerepben. *(Ugyanaz a minta, mint amikor a hierarchikus tudatpont

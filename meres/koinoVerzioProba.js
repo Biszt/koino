@@ -5,7 +5,7 @@
 // és a fájl-tárba és vissza ugyanaz; a kívülről jött jegyzéket csak az egy alakjában fogadjuk el; (2) a futó program
 // kód-csomagja a program fájljait viszi, a sorvég nélküli tartalmukkal; (3) a koino-verzió a kapun: a beágyazott gyermek-
 // születés a szülő születésével ellenőrizve (a hiányzó szülő nem végleges elutasítás), és a kapu elveti az átírt születést, a
-// más szerzőjét, a nem tagét, a más koinó gyermekéét, a kódjától eltérő programot és a nem legfelső szintűt; a születés
+// más szerzőjét, a nem tagét, a más koino gyermekéét, a kódjától eltérő programot és a nem legfelső szintűt; a születés
 // `program`-ja csak új alakban és hivatkozás alakban; (4) a képben a koino-verzió entitás, a gyermekével és a kódjával;
 // (5) ⭐ Csaba döntése („(A) Nem költözik”): a kártyára tett pont a szülő ügye — a gyermek születése elhagyja (`elhagy`),
 // és a gyermek képében a testvér kártyája nem él (szellemként sem), a létrehozó többi hozott pontja igen; (6) ⭐ ①b: a kártya
@@ -214,7 +214,7 @@ proba('⭐⭐ D119 (①a): a koino-verzió a kapun — a szülő születésével
   return !nincsSzulo.mentve && nincsSzulo.hianyzik === true && jo.mentve === true && alakiHiba(s.kv) === null;
 });
 
-proba('⛔ D119 (①a): a kapu elveti a hamis koino-verziót — átírt születés, más szerzője, nem tagé, más koinó gyermeke, más kód, nem legfelső szintű',
+proba('⛔ D119 (①a): a kapu elveti a hamis koino-verziót — átírt születés, más szerzője, nem tagé, más koino gyermeke, más kód, nem legfelső szintű',
   async () => {
     const s = await verzio();
     const tar = await ujTar(s.P.azonosito);
@@ -234,7 +234,7 @@ proba('⛔ D119 (①a): a kapu elveti a hamis koino-verziót — átírt szület
       szuloTagsag: { horgony: nBe.azonosito, lanc: [] }, szabalyok: teljesSzabalyok(), program: { ...KOD } }, VAGAS);
     N.koinotValt(s.P.azonosito);
     const c = await N.tesz('GondolatLetrehozas', s.kvAdat(nK), VAGAS + 40);
-    // (d) más koinó gyermeke: a kártya egy másik koinóban
+    // (d) más koino gyermeke: a kártya egy másik koinoban
     const M = await ujEember('');
     const mP = await M.tesz('KoinoLetrehozas', { nev: 'Másik', leiras: null, alapitok: [], zart: true, szabalyok: teljesSzabalyok() }, T0);
     s.A.koinotValt(mP.azonosito);
@@ -456,7 +456,7 @@ proba('⛔ D123 (PR2): a mag a dinamikus importot és a hiányzó fájlt kimondj
 
 // ⛔ PR2: a hívó által BEADOTT függvény az import-zárványban nem látszik — ezért a mag fájljaiban minden ilyen (amit a kód
 // függvényként vizsgál, dokumentál vagy a beállításból hív) egy kimondott listán áll, az okával. Egy új beadott függvény a magban
-// (ami a koinó képét a hívó kedve szerint dönthetné el) így nem jöhet be észrevétlenül: a próba bukik, és a listára írás egy
+// (ami a koino képét a hívó kedve szerint dönthetné el) így nem jöhet be észrevétlenül: a próba bukik, és a listára írás egy
 // kimondott döntés.
 const BEADOTT_MINTAK = [/typeof\s+(?:beallitas|b|opciok)\??\.(\w+)\s*===\s*'function'/g,
   /@param\s*\{Function\}\s*\[?(?:\w+\.)?(\w+)/g, /\bbeallitas\??\.(\w+)\??\.?\(/g];

@@ -424,7 +424,7 @@ function valodiakFelvetele(vilag, valtozat, kor) {
   let felvettek = 0;
   for (let i = 0; i < b.valodiEmberek; i++) {
     if (vilag.tag[i]) continue;
-    // ⚠️ A V1-nél sincs „mindenki azonnal tag": a koinóról tudnia kell valakitől.
+    // ⚠️ A V1-nél sincs „mindenki azonnal tag": a koinoról tudnia kell valakitől.
     // Enélkül a nyílt változat 1500 tagot adna az első körben, és semmit nem tanulnánk.
     if (vilag.bemutatkozas[i].size === 0) continue;
     if (vilag.meghivo[i].size < valtozat.kellMeghivo) continue;
@@ -707,7 +707,7 @@ function hidMerese(vilag) {
  *
  * Két alakban mérjük, mert a kettő nem ugyanaz:
  *   · KOINO-SZINTŰ (D49/c-vel megfér): a bemutatkozások hányad része koncentrálódik a
- *     `hany` legtöbbet bemutatkozó emberre? Ez a koinóról szól, nem emberekről.
+ *     `hany` legtöbbet bemutatkozó emberre? Ez a koinoról szól, nem emberekről.
  *   · SZEMÉLYES (⚠️ D49/c-vel ÜTKÖZIK): hány „zsákutca-ismerőse" van valakinek — olyan,
  *     akinek rajta kívül nincs más ismerőse. Ezt csak azért mérjük, hogy lássuk, ELVÁLNA-E
  *     egyáltalán; a beépítése külön döntés, mert ez már személyre szóló jelzés.

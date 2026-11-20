@@ -5,10 +5,10 @@
 //
 // ===== A SZABÁLY =====
 //
-// A kizárás-tanúsítványt (`kulcs/keszulek.js` — az azonosság kulcsa írja alá) egy `Kizaras` esemény hozza a koinóba: a
-// felsorolt koinókba az örökös írja, és BÁRKI beviheti, akihez eljutott (a tartalma önmagát igazolja — mint az ellentmondás
+// A kizárás-tanúsítványt (`kulcs/keszulek.js` — az azonosság kulcsa írja alá) egy `Kizaras` esemény hozza a koinoba: a
+// felsorolt koinokba az örökös írja, és BÁRKI beviheti, akihez eljutott (a tartalma önmagát igazolja — mint az ellentmondás
 // bizonyítéka, D80). Ahol megvan, ott a KIZÁRT kulccsal aláírt események a vágás UTÁN nem számítanak — a fel nem sorolt
-// koinóban egyik sem (a vágás 0). ⭐ Nem elágazások és nem vádak: egyszerűen nem a te eseményeid (8.2 — nem a szabály
+// koinoban egyik sem (a vágás 0). ⭐ Nem elágazások és nem vádak: egyszerűen nem a te eseményeid (8.2 — nem a szabály
 // szigorítása, D47, hanem annak kimondása, hogy nem tőled jöttek). A vágás után a láncot az örökös folytatja (`lanc` mező —
 // `esemeny.js`): az ő eseményeit az ő kulcsa írja alá, ezek számítanak.
 //
@@ -76,7 +76,7 @@ export function kizarasokEsemenyekbol(esemenyek, kulcscserek = null) {
 }
 
 /**
- * Kizárt-e az esemény: a készüléke (az aláírója) ki van zárva az azonosságától, és az esemény a koinóbeli vágás után van.
+ * Kizárt-e az esemény: a készüléke (az aláírója) ki van zárva az azonosságától, és az esemény a koinobeli vágás után van.
  * @param {Object} e
  * @param {Map<string, Object>} kizarasok - `kizarasokEsemenyekbol`
  * @returns {boolean}
@@ -93,7 +93,7 @@ export function kizartE(e, kizarasok) {
 // ===================================
 //
 // A kulcscsere felsorolja a MEGMARADÓ készülékeket; minden más készülék, amit egy RÉGEBBI korszak kulcsa tanúsított (a tolvaj
-// által a régi kulccsal felvett is), érvénytelen — az eseményei nem számítanak (mint a kizárt készüléké a fel nem sorolt koinóban:
+// által a régi kulccsal felvett is), érvénytelen — az eseményei nem számítanak (mint a kizárt készüléké a fel nem sorolt koinoban:
 // nem a szabály szigorítása, hanem annak kimondása, hogy nem tőled jöttek). A csere UTÁN, az új kulccsal tanúsított készülék
 // korszaka a hozott cserék száma — az nem esik ki. ⚠️ Ha egy készülék korszaka nem ismert (a lánca első eseménye — a tanúsítvánnyal
 // — nincs a bemenetben), az eseménye számít: a hiány nem vád (D19); a kapu az ilyen készülék ÚJ eseményeit a tárban lévő

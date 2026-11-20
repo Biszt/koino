@@ -14,10 +14,10 @@
 A költözés átvizsgálása (`koltozes_atvizsgalas.md` 4.1, KZ1, KZ4) a változások négy fajtáját különíti el:
 
 - **a felület, a szállítás, egy eredményt nem érintő javítás** → egyszerű programfrissítés, költözés nélkül (ilyen az M5–M8);
-- **a számítás változása** — és minden hibajavítás, ami egy eredményt megváltoztat (KZ4 (A)) — → költözés egy gyermek koinóba (különben
+- **a számítás változása** — és minden hibajavítás, ami egy eredményt megváltoztat (KZ4 (A)) — → költözés egy gyermek koinoba (különben
   a régi és az új program ugyanabból más állapotot számol: a 15. mérés néma kettéhasadása);
-- **egy szabály-paraméter** (a tudatpont-keret, a küszöbök alapértéke…) → új koinó, ugyanaz a program (a szabályok a születésben, D118/2);
-- **a protokoll-törés** → ugyanaz a koinó, de átmeneti szabály kell rá (KZ5 — nyitva hagytuk).
+- **egy szabály-paraméter** (a tudatpont-keret, a küszöbök alapértéke…) → új koino, ugyanaz a program (a szabályok a születésben, D118/2);
+- **a protokoll-törés** → ugyanaz a koino, de átmeneti szabály kell rá (KZ5 — nyitva hagytuk).
 
 A gond tehát nem az elv, hanem hogy **a program ma nem rétegzett**: egyetlen csomagként van megnevezve, telepítve és összevetve.
 
@@ -27,7 +27,7 @@ A gond tehát nem az elv, hanem hogy **a program ma nem rétegzett**: egyetlen c
   felület 162 fájl, a próbák (`meres/`) 113, a telepítő szkriptek (`termux/`, `windows/`) és a README is. A gyermek születése ezt nevezi
   meg (`program`), és a lap ezzel veti össze a futó programot (`programVerzioja`). Ezért írta ki a lap októberben, hogy „más
   programverzió”, amikor csak a felület különbözött — és ma egy próba-javítás is ezt váltaná ki.
-- **A számítás magja kicsi.** Ha a magot úgy határozzuk meg, mint annak a két belépőnek az import-zárványát, ami a koinó képét
+- **A számítás magja kicsi.** Ha a magot úgy határozzuk meg, mint annak a két belépőnek az import-zárványát, ami a koino képét
   (`ketReteg.js` `koinoKepe`) és a kaput (`esemenyTar.js` `esemenyMentese`) adja, az **17 fájl, 383 KB** (~5,5%):
   `allapotSzamitas`, `dontesiCsomag`, `ellentmondas`, `javaslatSzamitas`, `ketReteg`, `koinoLanc`, `lancGyoker`, `lezarasiOsszegzes`,
   `szabalyok`, `szerkesztesiVegrehajtas`, `tagsag` (allapot/), `esemeny`, `kanonikusAlak`, `koinoSzabalyok`, `osszegzoFa`,
@@ -44,7 +44,7 @@ A gond tehát nem az elv, hanem hogy **a program ma nem rétegzett**: egyetlen c
 
 ## 3. A rétegek — javaslat
 
-- **R1 — a számítás magja:** a koinó képe és a kapu (a fenti 17 fájl). Egy koinón belül **mindenkinél azonos** kell legyen →
+- **R1 — a számítás magja:** a koino képe és a kapu (a fenti 17 fájl). Egy koino-n belül **mindenkinél azonos** kell legyen →
   a változása költözés (D118). Ezt nevezze meg a gyermek születése.
 - **R2 — a protokoll:** amit két készülék egymásnak mond (a vonal üzenetei, a kérelem, a titkosítás, a DHT-témák és -rekeszek
   alakja). Nem kell azonosnak lennie, de **érteniük kell egymást** → a változása átmenetet kíván (KZ5), költözést nem.
@@ -56,17 +56,17 @@ A gond tehát nem az elv, hanem hogy **a program ma nem rétegzett**: egyetlen c
 
 ## 4. A kérdések (⏸️ Csabáé)
 
-- **PR1 — Mit nevezzen meg a gyermek születése?** (A) ⭐ **a mag jegyzékének lenyomatát** (R1) — a többi réteg a koinón belül
+- **PR1 — Mit nevezzen meg a gyermek születése?** (A) ⭐ **a mag jegyzékének lenyomatát** (R1) — a többi réteg a koino-n belül
   szabadon változhat, és a „más programverzió” csak akkor szól, ha a számítás más; (B) marad a teljes program (ma) — minden felületi
   javítás „más verziónak” látszik, és a pontos verzió-egyezés egy élő közösségben soha nem teljesülne; (C) a mag + egy
   protokoll-verziószám.
 - **PR2 — Hogyan legyen meghatározva a mag?** (A) ⭐ **számítva**: a két belépő import-zárványa (nem lehet elfelejteni egy új fájlt
   beírni; egy próba őrzi, hogy a kapu és a kép nem kap kívülről döntő függvényt — a hívó által beadott függvények az import-zárványban
   nem látszanak); (B) kézi jegyzék (egyszerű, de egy kimaradt fájl némán kettéhasíthat — a 15. mérés mintája).
-- **PR3 — Mit mondjon a lap az eltérésről?** (A) ⭐ **két szint:** a mag eltérése piros („más számítás — ebben a koinóban mást
+- **PR3 — Mit mondjon a lap az eltérésről?** (A) ⭐ **két szint:** a mag eltérése piros („más számítás — ebben a koinoban mást
   látnál, mint a többiek”), a többi réteg eltérése csak tájékoztatás („újabb felület érhető el”); (B) csak a mag eltérését mondja.
 - **PR4 — A közösség feltöltött nézetei (felület-bővítmények).** Egy nézet a te kulcsoddal futna: a lap a helyi kapun át pontot
-  tehet, javaslatot írhat, szavazhat a nevedben. A koinót nem veszélyezteti (a számítás nem változik), téged igen. (A) nincs ilyen,
+  tehet, javaslatot írhat, szavazhat a nevedben. A koinot nem veszélyezteti (a számítás nem változik), téged igen. (A) nincs ilyen,
   a felület a programmal jön (ma); (B) ⭐ **olvasó nézetek elsőként:** egy nézet egy kártya (mint a koino-verzió kártya — a kódja
   rajta, a pont rá a közösség jelzése), a lap elszigetelten futtatja (külön keretben, a kapu csak olvasó végpontokat ad neki), és te
   kapcsolod be a saját készülékeden; (C) cselekvő nézetek is, műveletenkénti megerősítéssel (egy nézet „kér”, a lap a saját
@@ -82,7 +82,7 @@ A gond tehát nem az elv, hanem hogy **a program ma nem rétegzett**: egyetlen c
   mérés; ⏸️ PV1–PV6 Csabánál.)* (A) ⭐ **verziózott protokoll:** a NYITÁS kimondja a protokoll-verziót, és az új program egy
   ideig a régit is beszéli (a régi felé a régi alakot küldi); a régit egy kimondott dátumig tartjuk; (B) tiszta törés + mindenki
   frissít (ma — fejlesztés közben elfogadható, egy élő közösségben kettévágja a hálót); (C) a protokoll is a magba (költözés) —
-  nem javaslom: a hálózat alakja nem a koinó döntése, és két koinó ugyanazon a protokollon beszél (a családi csere).
+  nem javaslom: a hálózat alakja nem a koino döntése, és két koino ugyanazon a protokollon beszél (a családi csere).
 - **PR7 — A telepítő sor frissítsen is?** (A) ⭐ **igen:** a Termux-sor `git pull`-lal, a Windowsos sor a zipet a régi mappa mellé
   tölti, és csak a sikeres kicsomagolás után cserél (a futó program leállítása után); (B) külön `koino frissit` parancs (egy sorral
   kevesebb tudnivaló, de még egy dolog, amit el kell mondani).
@@ -91,7 +91,7 @@ A gond tehát nem az elv, hanem hogy **a program ma nem rétegzett**: egyetlen c
 
 ① **PR1–PR3 (a mag)** — a koino-verzió kártya és a költözés ma a teljes programra épül; a mag nélkül minden további réteg
 „más verziót” jelezne. Mérés előtte: a mag stabilitása (melyik commit változtatta egy esemény KÉPÉT — nem csak érintette a fájlt; a
-fenti 2 / 27 felső becslés). → ② **PR7** (olcsó, és a terepi próbák óta hiányzik) → ③ **PR6** (KZ5 — mielőtt a koinónak élő,
+fenti 2 / 27 felső becslés). → ② **PR7** (olcsó, és a terepi próbák óta hiányzik) → ③ **PR6** (KZ5 — mielőtt a koinonak élő,
 frissíteni nem tudó tagjai lesznek) → ④ **PR5** (telepítés a kártyáról) → ⑤ **PR4** (a feltöltött nézetek — az engedély-réteg a
 kapun).
 
@@ -148,11 +148,11 @@ különben a meglévőt. ⭐ A meghívó a záró idézőjel után a parancshoz 
 `windowsSorHibaja` változatlan; mérve: cmd-ben és PowerShellben is egy argumentum).
 
 **A windowsos telepítő** (`windows/telepit.ps1` — „A FRISSÍTÉS”): ha a letöltött helyről fut (`…\koino_1.1-uj\koino_1.1-main`),
-megnézi, hogy a csomag teljes-e (öt lényeges fájl), leállítja a régi mappából futó koinót (a node — `…\koino\koino.js` — és az
+megnézi, hogy a csomag teljes-e (öt lényeges fájl), leállítja a régi mappából futó koinot (a node — `…\koino\koino.js` — és az
 indító — `…\koino\windows\indit.ps1` —, a parancssoruk szerint, magát kivéve), a régit `koino_1.1-regi`-nek nevezi (a következő
 frissítésig megmarad; az előző generáció ilyenkor törlődik), az újat a helyére teszi, és a helyén lévő (már új) telepítőt hívja a
 meghívóval. ⛔ Egy git-tárat (`koino_1.1\.git`) nem cserél le. Ha a csere nem sikerül, a régi visszakerül a helyére, és a régi
-program indul — kimondva. A meglévő telepítő is leállítja a futó koinót, mielőtt indít (a felület különben foglalt portot találna);
+program indul — kimondva. A meglévő telepítő is leállítja a futó koinot, mielőtt indít (a felület különben foglalt portot találna);
 `KOINO_INDITAS=nem`: csak frissít és leállít.
 
 **A Termux-telepítő** (`termux/telepit.sh`): a sor már frissített, ez a szkript az új kód — ha egy másik Termux-ablakban a régi koino
@@ -163,7 +163,7 @@ mp után is fut, azt erővel; `pkill` nélkül a felület induláskor kimondja, 
 
 ⛔ **A mérés, ami a sorrendet adta:** egy mappa nem nevezhető át, amíg egy folyamat munkakönyvtára benne áll (Windows, EBUSY) — ezért a
 leállítás a csere ELŐTT jön. A rontás-próba meg is mutatta, hogy a próba eleinte ezt nem mérte: a csere utáni második kör a régi
-folyamatot amúgy is leállította (a parancssora a régi utat mondja, ami a csere után az új mappa) — most a próba „régi koinója” a
+folyamatot amúgy is leállította (a parancssora a régi utat mondja, ami a csere után az új mappa) — most a próba „régi koinoja” a
 saját mappájában áll.
 
 **A próbák** (`meghivoProba.js`, +4): a windowsos sor a cmd-ben és a PowerShellben, három esetben (friss gépen és frissítéskor az új
@@ -172,8 +172,8 @@ valódi telepítő cseréje (a régi „koino” leáll, a másik mappáé nem; 
 a git-tár (a régi marad, a régi telepítő folytat a meghívóval) · a Termux-sor egy helyi forrás-tárral (git; hálózat nélkül kimondja és a
 meglévő indul; a nem követett adat marad) · a Termux-telepítő leállítása (csak ahol van `pkill` — a telefonon). 12 rontás, mind bukik.
 
-**Kimondott határok:** a frissítés a GitHub `main`-jére áll (a terjesztés útja — D30); hogy egy koinóban melyik kód fut, továbbra is a
-közösség dolga — ha a frissített program magja más, mint amivel a koinó született, a lap kimondja (① — „⚠ más számítás”) · a Termuxon
+**Kimondott határok:** a frissítés a GitHub `main`-jére áll (a terjesztés útja — D30); hogy egy koinoban melyik kód fut, továbbra is a
+közösség dolga — ha a frissített program magja más, mint amivel a koino született, a lap kimondja (① — „⚠ más számítás”) · a Termuxon
 a csere a futó régi koino mellett történik (a git a fájlokat a leállítás előtt cseréli — másodpercek; a régi folyamat a betöltött
 kóddal fut tovább, amíg a telepítő le nem állítja) · a Termux-leállítás próbája Windowson nem fut (nincs `pkill`) — a telefonon igen.
 

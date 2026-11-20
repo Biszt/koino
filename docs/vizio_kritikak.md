@@ -714,10 +714,10 @@ de a Fázis 2 szempontjából kritikus.)*
 
 > **Utóirat (2026-08-25): a TERVEZÉS szintje is lezárult — N5 ✅.** A fenti státusz azt
 > mondta, hogy a tervezés szintjén a kérdés „félig" áll (N5/N8/N9 kidolgozás hátra). Az
-> N5 azóta megoldódott: **D12** (a három szint — a verzió-entitás a koinón BELÜL él, ezért
-> nincs végtelen regresszus; a koinók sokasága fölött pedig NINCS kormányzat, mert ott
+> N5 azóta megoldódott: **D12** (a három szint — a verzió-entitás a koino-n BELÜL él, ezért
+> nincs végtelen regresszus; a koinok sokasága fölött pedig NINCS kormányzat, mert ott
 > nincs mit eldönteni) és **D13** (a koino eszköz, nem közösség — a fork NORMÁL ÜZEMMÓD,
-> nem vésznyílás; bárki indíthat koinót; az egység az adatbázis). Teljes levezetés:
+> nem vésznyílás; bárki indíthat koinot; az egység az adatbázis). Teljes levezetés:
 > [`kormanyzas.md`](kormanyzas.md).
 >
 > **Két dolog írja felül a fenti szöveget:** (1) a 3. válaszban a fork „vésznyílás"-ként

@@ -10,7 +10,7 @@
 //
 // ===== AZ ALAK =====
 //
-// `m = { szerzo, ido, alairas }` — nem esemény (a szerző láncát nem növeli; a tábla-bejegyzés mintája). Az aláírás a koinóra,
+// `m = { szerzo, ido, alairas }` — nem esemény (a szerző láncát nem növeli; a tábla-bejegyzés mintája). Az aláírás a koinora,
 // a gondolatra és a csomag eseményeinek azonosítóira szól az idővel — a fiók és az osztódás NÉLKÜL: egy aláírás a gondolat
 // minden fiók-bejegyzését megújítja (egy cím ≤ 32 kulcs). Az aláíró a csomag egyik TULAJDONOSA (egy pont-esemény szerzője), a
 // SZEMÉLYES kulcsával (`kulcsTar.js` — a kulcs a személyazonosság). ⛔ A tartó elveti: a nem tulajdonos aláírását, a hamisat,

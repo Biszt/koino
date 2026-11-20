@@ -23,9 +23,9 @@ import { szabalyokAlakiHibaja } from './koinoSzabalyok.js';
 import { lenyomat, base64UrlBajtok, bajtokBase64Url } from './kanonikusAlak.js';
 // ⭐ D81: a lánc-gyökér két összegzés — az alakjukat itt nézzük (a fa egy forrás).
 import { osszegzesAlakja } from './osszegzoFa.js';
-// ⭐ D119 (①a): a koinó programja és a koino-verzió kódja egy darab-hivatkozás (a kód-csomag jegyzéke — `tar/kodCsomag.js`).
+// ⭐ D119 (①a): a koino programja és a koino-verzió kódja egy darab-hivatkozás (a kód-csomag jegyzéke — `tar/kodCsomag.js`).
 import { szovegHivatkozasE } from './szovegDarab.js';
-// ⭐⭐ D128: a készülék-tanúsítvány (az azonosság kulcsa írja alá — koinók fölött).
+// ⭐⭐ D128: a készülék-tanúsítvány (az azonosság kulcsa írja alá — koinok fölött).
 import { tanusitvanyAlakiHibaja, tanusitvanyEllenorzese, kizarasAlakiHibaja } from '../kulcs/keszulek.js';
 import { szuletesAlakiHibaja, lancBejegyzesAlakiHibaja, KULCSCSERE_KORLAT, helyreallitasJavaslatAlakiHibaja, HELYREALLITAS_BEJEGYZES }
   from '../kulcs/azonossag.js';
@@ -299,7 +299,7 @@ function tartalomResz(esemeny) {
  * Létrehoz egy aláírt eseményt.
  *
  * @param {Object} leiras
- * @param {string} leiras.koino - melyik koinóhoz tartozik (D25: több koino egy készüléken)
+ * @param {string} leiras.koino - melyik koinohoz tartozik (D25: több koino egy készüléken)
  * @param {string} leiras.tipus - pl. 'GondolatLetrehozas'
  * @param {Object} leiras.adat - a művelet gondolata (típusfüggő)
  * @param {string|null} leiras.elozo - az előző SAJÁT eseményem azonosítója (az első: null)
@@ -525,26 +525,26 @@ export const AZONOSITO_MINTA = /^[A-Za-z0-9_-]{43}$/;
 export const azonositoAlaku = (x) => typeof x === 'string' && AZONOSITO_MINTA.test(x);
 
 // ===================================
-// ⭐⭐ D118/2: MELYIK KOINÓÉ EGY ESEMÉNY — A KOINÓ NEVE A SZÜLETÉSE LENYOMATA
+// ⭐⭐ D118/2: MELYIK KOINOÉ EGY ESEMÉNY — A KOINO NEVE A SZÜLETÉSE LENYOMATA
 // ===================================
 //
-// ⛔ A LELET (2026-10-24, mérve — `docs/koltozes_atvizsgalas.md` 3.): a koinó neve szabad szöveg volt, és a születését
+// ⛔ A LELET (2026-10-24, mérve — `docs/koltozes_atvizsgalas.md` 3.): a koino neve szabad szöveg volt, és a születését
 // három hely háromféleképp választotta (az állapot az utolsót, a tagság az elsőt, a kapu a saját láncból) — egy kívülálló
 // egyetlen, azonos nevű `KoinoLetrehozas`-szal az alapító (és így minden tag) döntéseit „nem ellenőrizhetővé” tette.
 //
-// ⭐ Az új alak: a születés koinó-mezője ÜRES (önmagát nem nevezheti meg — a lenyomata a tartalmából jön), és a koinó
-// neve a születés AZONOSÍTÓJA; minden más esemény ezt a nevet viszi. Egy második születés így MÁSIK koinó — nincs mit
-// választani. ⚠️ A régi alak (szabad név, a születés koinó-mezője maga a név) csak a próbák kedvéért él: lenyomat-alakú
-// névre soha nem vonatkozik, és a program új koinót csak az új alakban hoz létre.
+// ⭐ Az új alak: a születés koino-mezője ÜRES (önmagát nem nevezheti meg — a lenyomata a tartalmából jön), és a koino
+// neve a születés AZONOSÍTÓJA; minden más esemény ezt a nevet viszi. Egy második születés így MÁSIK koino — nincs mit
+// választani. ⚠️ A régi alak (szabad név, a születés koino-mezője maga a név) csak a próbák kedvéért él: lenyomat-alakú
+// névre soha nem vonatkozik, és a program új koinot csak az új alakban hoz létre.
 
-/** Melyik koinóé az esemény? Az új alakú születésé a saját azonosítója, mindenki másé a koinó-mezője. */
+/** Melyik koinoé az esemény? Az új alakú születésé a saját azonosítója, mindenki másé a koino-mezője. */
 export function esemenyKoinoja(e) {
   if (!e || typeof e !== 'object') return undefined;
   if (e.koino === '' && e.tipus === 'KoinoLetrehozas') return e.azonosito;
   return e.koino;
 }
 
-/** A koinó születése-e ez az esemény? Lenyomat-nevű koinónál CSAK az, amelyiknek az azonosítója maga a név. */
+/** A koino születése-e ez az esemény? Lenyomat-nevű koinonál CSAK az, amelyiknek az azonosítója maga a név. */
 export function koinoSzuleteseE(e, koino) {
   if (!e || typeof e !== 'object' || e.tipus !== 'KoinoLetrehozas') return false;
   if (azonositoAlaku(koino)) return e.koino === '' && e.azonosito === koino;
@@ -571,8 +571,8 @@ export function koinoVerzioE(e) {
 }
 
 /**
- * A koinó születése egy eseménylistából — EGY szabály minden helyen (az állapot, a tagság, a kapu, a belépő tér).
- * Koinó nélkül: az első új alakú születésé, ha van ilyen, különben a régi alaké. ⚠️ A régi alaknál több is lehet
+ * A koino születése egy eseménylistából — EGY szabály minden helyen (az állapot, a tagság, a kapu, a belépő tér).
+ * Koino nélkül: az első új alakú születésé, ha van ilyen, különben a régi alaké. ⚠️ A régi alaknál több is lehet
  * (ezért volt a lelet): ott a legkisebb azonosító — determinisztikus, de hamisítható; az új alaknál egy lehet.
  * @param {Array<Object>} esemenyek
  * @param {string|null} [koino]
@@ -647,7 +647,7 @@ export function alakiHiba(esemeny) {
   if (!azonositoAlaku(esemeny.szerzo) || !azonositoAlaku(esemeny.keszulek)) return 'a szerző és a készülék egy-egy nyilvános kulcs';
   if (esemeny.keszulek === esemeny.szerzo) return 'a készülék kulcsa nem lehet az azonosság kulcsa (D128)';
   // ⭐⭐ D128 (①d, 9.10): a folytatott lánc egy MÁSIK készülék kulcsa (a kizárté) — hogy a kizárás valóban ide engedi-e (az
-  // örökös, a vágás után), azt a kapu nézi a koinó kizárásával.
+  // örökös, a vágás után), azt a kapu nézi a koino kizárásával.
   if (esemeny.lanc !== undefined && (!azonositoAlaku(esemeny.lanc) || esemeny.lanc === esemeny.keszulek
       || esemeny.lanc === esemeny.szerzo)) {
     return 'a folytatott lánc egy MÁSIK készülék kulcsa';
@@ -664,15 +664,15 @@ export function alakiHiba(esemeny) {
     return 'tanúsítványt csak a lánc első eseménye hoz';
   }
 
-  // ----- ⭐⭐ D118/2: A KOINÓ NEVE -----
-  // Az üres koinó-név csak az új alakú születésé (annak a neve a saját lenyomata); és születés nem nevezhet meg
-  // lenyomat-alakú koinót — az egy létező koinó második, hamis születése lenne (a lelet).
+  // ----- ⭐⭐ D118/2: A KOINO NEVE -----
+  // Az üres koino-név csak az új alakú születésé (annak a neve a saját lenyomata); és születés nem nevezhet meg
+  // lenyomat-alakú koinot — az egy létező koino második, hamis születése lenne (a lelet).
   if (typeof esemeny.koino !== 'string') return 'a koino csak szöveg lehet';
-  if (esemeny.koino === '' && esemeny.tipus !== 'KoinoLetrehozas') return 'üres koinó-név csak a koinó születésén állhat';
+  if (esemeny.koino === '' && esemeny.tipus !== 'KoinoLetrehozas') return 'üres koino-név csak a koino születésén állhat';
   if (esemeny.tipus === 'KoinoLetrehozas' && azonositoAlaku(esemeny.koino)) {
-    return 'a koinó születése nem nevezhet meg koinót: a koinó neve a születés saját lenyomata';
+    return 'a koino születése nem nevezhet meg koinot: a koino neve a születés saját lenyomata';
   }
-  // ⭐⭐ D118/2 (①b): a koinó SZABÁLYAI a születésben — csak ismert kulcsok, a határokon belül (`koinoSzabalyok.js`).
+  // ⭐⭐ D118/2 (①b): a koino SZABÁLYAI a születésben — csak ismert kulcsok, a határokon belül (`koinoSzabalyok.js`).
   if (esemeny.tipus === 'KoinoLetrehozas') {
     const hiba = szabalyokAlakiHibaja(esemeny.adat?.szabalyok);
     if (hiba) return hiba;
@@ -697,21 +697,21 @@ export function alakiHiba(esemeny) {
     } else if (esemeny.adat?.elhagy !== undefined) {
       return 'elhagyott pont csak a gyermek születésén állhat (a létrehozó a születésével bekapcsolódik)';
     }
-    // ⭐⭐ D119 (①a): a koinó PROGRAMJA — a kód-csomag jegyzékének hivatkozása (a kód neve); csak új alakban.
+    // ⭐⭐ D119 (①a): a koino PROGRAMJA — a kód-csomag jegyzékének hivatkozása (a kód neve); csak új alakban.
     const pr = esemeny.adat?.program;
     if (pr !== undefined && (esemeny.koino !== '' || !szovegHivatkozasE(pr))) {
-      return 'a koinó programja a kód-csomag hivatkozása ({ lenyomat, bajt }) — csak új alakú születésen';
+      return 'a koino programja a kód-csomag hivatkozása ({ lenyomat, bajt }) — csak új alakú születésen';
     }
-    // ⭐⭐ D123 (PR1): a koinó MAGJA — a számítás magjának (a kép és a kapu import-zárványa, `tar/kodCsomag.js` `magJegyzeke`)
-    // hivatkozása: ennek kell egy koinón belül mindenkinél azonosnak lennie; a többi réteg szabadon változhat.
+    // ⭐⭐ D123 (PR1): a koino MAGJA — a számítás magjának (a kép és a kapu import-zárványa, `tar/kodCsomag.js` `magJegyzeke`)
+    // hivatkozása: ennek kell egy koino-n belül mindenkinél azonosnak lennie; a többi réteg szabadon változhat.
     const mg = esemeny.adat?.mag;
     if (mg !== undefined && (esemeny.koino !== '' || !szovegHivatkozasE(mg) || mg.torzs !== undefined)) {
-      return 'a koinó magja a mag-jegyzék hivatkozása ({ lenyomat, bajt }) — csak új alakú születésen';
+      return 'a koino magja a mag-jegyzék hivatkozása ({ lenyomat, bajt }) — csak új alakú születésen';
     }
   }
   // ⭐⭐ D118 (a költözés alakja) → ⭐⭐ D127 (a bekapcsolódás: a szülőben megmaradsz): EGY esemény, a gyermekben — az alakja (a
-  // bizonyítékot a kapu nézi, a koinó és a szülő születésével). A szülőben nem írunk semmit (D127/KÖ4 (A)): a bekapcsolódó ott marad
-  // a teljes súlyával, és tovább dolgozhat — a két koinó párhuzamos.
+  // bizonyítékot a kapu nézi, a koino és a szülő születésével). A szülőben nem írunk semmit (D127/KÖ4 (A)): a bekapcsolódó ott marad
+  // a teljes súlyával, és tovább dolgozhat — a két koino párhuzamos.
   if (esemeny.tipus === 'Bekapcsolodas') {
     const a = esemeny.adat ?? {};
     if (esemeny.entitas !== null) return 'a bekapcsolódás a saját szeletét nyitja (ez a horgonyom a gyermekben)';
@@ -754,10 +754,10 @@ export function alakiHiba(esemeny) {
   // A gyerek-bejelentés (a C 7. pontja) a születést a SZÜLŐ körében is kimondja (`szuleteseSzuloje`):
   // a szülő tehát ugyanúgy kulcs a vonalon, mint az `entitas`. Hiányzó vagy `null` szülő: legfelső
   // szintű gondolat.
-  // ⭐ D89/2: a koinó zártsága csak igaz/hamis lehet (hiányozhat — a régi koinó: zárt).
+  // ⭐ D89/2: a koino zártsága csak igaz/hamis lehet (hiányozhat — a régi koino: zárt).
   if (esemeny.tipus === 'KoinoLetrehozas' && esemeny.adat?.zart !== undefined
       && typeof esemeny.adat.zart !== 'boolean') {
-    return 'a koinó zart mezője csak igaz vagy hamis lehet';
+    return 'a koino zart mezője csak igaz vagy hamis lehet';
   }
   if (esemeny.tipus === 'GondolatLetrehozas') {
     const szulo = esemeny.adat?.szulo;
@@ -782,7 +782,7 @@ export function alakiHiba(esemeny) {
     if (!azonositoAlaku(a.gyermek) || !szovegHivatkozasE(a.kod)) return 'a koino-verzió a gyermek nevét és a kódját nevezi meg';
     if (!sz || typeof sz !== 'object' || Array.isArray(sz) || sz.tipus !== 'KoinoLetrehozas' || sz.koino !== ''
         || sz.azonosito !== a.gyermek || sz.adat?.szulo !== esemeny.koino || sz.szerzo !== esemeny.szerzo) {
-      return 'a koino-verzió a gyermek születését hozza (ennek a koinónak a gyermeke, a feltöltő hozta létre)';
+      return 'a koino-verzió a gyermek születését hozza (ennek a koinonak a gyermeke, a feltöltő hozta létre)';
     }
     const pr = sz.adat.program;
     if (!szovegHivatkozasE(pr) || pr.lenyomat !== a.kod.lenyomat || pr.bajt !== a.kod.bajt || pr.torzs !== a.kod.torzs) {
@@ -792,11 +792,11 @@ export function alakiHiba(esemeny) {
     const h = alakiHiba(sz);
     if (h) return 'a koino-verzió születése: ' + h;
   }
-  // ----- ⭐ D93/5: A PROFIL — a koinó kötelező mezői, a Profil esemény, a meghívás tanúsítása -----
+  // ----- ⭐ D93/5: A PROFIL — a koino kötelező mezői, a Profil esemény, a meghívás tanúsítása -----
   if (esemeny.tipus === 'KoinoLetrehozas' && esemeny.adat?.profil !== undefined) {
     const p = esemeny.adat.profil;
     if (!Array.isArray(p) || p.length > 8 || !p.every((m) => typeof m === 'string' && /^[a-z]{1,32}$/.test(m))) {
-      return 'a koinó profil-mezői: legfeljebb 8 kisbetűs név';
+      return 'a koino profil-mezői: legfeljebb 8 kisbetűs név';
     }
   }
   if (esemeny.tipus === 'Profil' && (!azonositoAlaku(esemeny.adat?.lenyomat) || !azonositoAlaku(esemeny.entitas))) {
@@ -818,7 +818,7 @@ export function alakiHiba(esemeny) {
     }
   }
   // ⭐⭐ D128 (9.9): a KERET ÁTVÉTELE — az azonosság egy másik készülékének EZ a készülék szóló átadását hozza (ugyanebből a
-  // koinóból), a lánc-gyökérrel (a kapott-fa bizonyítékával).
+  // koinoból), a lánc-gyökérrel (a kapott-fa bizonyítékával).
   if (esemeny.tipus === 'KeretAtvetel') {
     const at = esemeny.adat?.atadas;
     if (!at || typeof at !== 'object' || Array.isArray(at) || at.tipus !== 'KeretAtadas' || at.szerzo !== esemeny.szerzo

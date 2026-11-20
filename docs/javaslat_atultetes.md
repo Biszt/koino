@@ -5,7 +5,7 @@ a részeket módosítani, amiket kell, de a **logikai kapcsolatoknak pontosan á
 legyenek ültetve**."*
 
 > **Mi ez a dokumentum?** Egy **leltár**: mit tud a prototípus javaslat–egyezmény
-> gépezete, és ebből mi van már át a P2P koinóban. Nem terv és nem döntés — a hiányok
+> gépezete, és ebből mi van már át a P2P koinoban. Nem terv és nem döntés — a hiányok
 > listája, hogy ne találgatásból épüljön tovább.
 >
 > ⚠️ **A forrás mindig a prototípus kódja**, nem az emlékezet: minden sorhoz oda van írva,
@@ -19,7 +19,7 @@ legyenek ültetve**."*
 > *(„ha ez alatt azt érted, hogy azonos id-jük lesz, csak más státusszal, akkor rendben van.")*
 
 ⚠️ **Ez ELTÉR a prototípustól, és ez rendben van.** Ott az `Egyezmeny` **külön dokumentum**,
-saját `_id`-vel és `javaslatId` hivatkozással (`backend/models/egyezmeny.js`). A koinóban
+saját `_id`-vel és `javaslatId` hivatkozással (`backend/models/egyezmeny.js`). A koinoban
 viszont az egyezmény **számítás** (D17) — nem születik esemény, ami új azonosítót adhatna.
 Az azonos azonosító tehát nem kényelmi rövidítés, hanem az egyetlen mód, hogy a **D17 és a
 D27/5 („az egyezmény teljes értékű entitás") egyszerre álljon**.
@@ -31,7 +31,7 @@ az egyezmény **NEM ott jön létre, ahol a javaslat áll**.
 
 ## 1. ✅ AMI MÁR HELYESEN ÁT VAN ÜLTETVE
 
-| Logikai kapcsolat | A prototípus forrása | A koinóban |
+| Logikai kapcsolat | A prototípus forrása | A koinoban |
 |---|---|---|
 | **A javaslat az érintett entitás GYEREKE** | `javaslat.js`: *„A javaslat MINDIG az érintett entitás gyereke… ezért kötelező"* | ✅ `allapotSzamitas.js`: `szulo = adat.erintett` (2026-09-06) |
 | **A javaslat entitás** — tudatpont, küszöb, gyerekek | `javaslat.js` séma + a pakli kártyái | ✅ 2026-09-06 |
@@ -55,7 +55,7 @@ az egyezmény **NEM ott jön létre, ahol a javaslat áll**.
 ### 2.1 ⛔⛔ KÜLÖNVÁLÁS — az ellenzők külön ágra léphetnek
 
 **A legnagyobb hiány, és tegnap tévesen elintéztem** („a `kulonvalasIgeny` a prototípus
-fogalma — a koinóban nincs megfelelője"). Valójában **teljes, kidolgozott mechanizmus**:
+fogalma — a koinoban nincs megfelelője"). Valójában **teljes, kidolgozott mechanizmus**:
 `megismeres/18-kulonvalas.md` + a végrehajtásban külön szakasz
 (`javaslatVegrehajtasiService.js`: *„KÜLÖNVÁLÁS: AZ ELLENZŐK KÜLÖN ÁGRA LÉPHETNEK"*, 3.A–3.E).
 
@@ -78,14 +78,14 @@ fogalma — a koinóban nincs megfelelője"). Valójában **teljes, kidolgozott 
 - A kártyán **„Másik ág" fül**, és a két ág később **újra egyesíthető**.
 
 🔍 *Ez a D14-gyel és a tudatpont-modellel tökéletesen összefér — nem új mechanizmus, hanem a
-meglévők átrendezése. De egyetlen sora sincs meg a koinóban.*
+meglévők átrendezése. De egyetlen sora sincs meg a koinoban.*
 
 ### ✅ 2.1/b MEGÉPÍTVE: a MÓDOSÍTÁSI különválás (2026-09-08)
 
 A prototípus `_kulonvalasokVegrehajtasa` + `kulonvalasService` első köre átjött — a **hatóköre
 is ugyanaz**: `Modositas`, elfogadott javaslat, az **ellenzők** viszik a **régi** változatot.
 
-| Lépés | A koinóban |
+| Lépés | A koinoban |
 |---|---|
 | **Ki válik külön** | aki `Ellenez`-t szavazott **ÉS** kért külön ágat (`kulonvalasIgeny`) |
 | **Tartózkodó** | ⛔ SOHA — a művelet hamisra állítja, **és a számítás is ellenőrzi** |
@@ -157,7 +157,7 @@ lépnek ki, akik a módosítást akarták.
 
 *„Az érték javaslatok is mennek — ezért térhetnek el a két ág küszöbei."* A prototípus a
 pont-átvitel **után** viszi őket, mert érték javaslatot csak az adhat, akinek van tudatpontja
-az entitáson. A koinóban ugyanez **számítás**: az új ág küszöbei a **különválók** érték
+az entitáson. A koinoban ugyanez **számítás**: az új ág küszöbei a **különválók** érték
 javaslatainak mediánja, a főágé pedig **újraszámolódik nélkülük**.
 
 ⚠️ Ha a különválóknak nincs saját érték javaslata, az új ág a **forrás küszöbeit örökli** —
@@ -197,7 +197,7 @@ csak levezetés**. Ez Csaba 2026-09-07-i kimondása: *minden azonosító aláír
 számítható; a lenyomat ennek a különleges esete.*
 
 ⚠️ **Az ára: a harmadik fázis ASZINKRON lett**, mert a `lenyomat` a WebCryptót hívja. A másik
-út (kézzel összefűzött név) elkerülte volna ezt, de akkor a koinóban **kétféle
+út (kézzel összefűzött név) elkerülte volna ezt, de akkor a koinoban **kétféle
 azonosító-alak** lenne. A hívók amúgy is aszinkronok voltak, tehát az ár kicsi
 (`kepetKerni`, `kepetKeszit`, a próbák `kep()`-je), a nyereség pedig **egységes
 azonosító-modell**.
@@ -258,7 +258,7 @@ mutatna ugyanarról.
 `javaslat.js`: *„Egy vagy több entitás, amelyekre a javaslat vonatkozik"*, típusonként
 `['Gondolat','Kategoria','GondolatTipus','Egyezmeny']`.
 
-Eddig a koinóban **egy** `erintett` string volt. ⚠️ Az **egyesítéshez** legalább kettő kell
+Eddig a koinoban **egy** `erintett` string volt. ⚠️ Az **egyesítéshez** legalább kettő kell
 (a két forrás), és a **D27/5** szerint egy **egyezmény is lehet érintett**.
 
 ⭐ **Amit a prototípus alakja megmondott, és amit ebből átvettünk:**
@@ -278,7 +278,7 @@ Eddig a koinóban **egy** `erintett` string volt. ⚠️ Az **egyesítéshez** l
   próbák nagy része továbbra is a régi alakot használja — vagyis a visszafelé-olvasás **mérve
   van**, nem ígéret.
 - ⚠️ **Az `entitasTipus` mezőt szándékosan NEM vettük át**: a prototípusnak a polimorf
-  Mongo-hivatkozás miatt kellett; a koinóban a típus **magában az entitásban** van. Egy második,
+  Mongo-hivatkozás miatt kellett; a koinoban a típus **magában az entitásban** van. Egy második,
   aláírt, de **hazudható** forrás ugyanarról nem érték, hanem kockázat.
 - ⭐ **Az ismeretlen műveletet a szabály-réteg NEM dobja el.** Először megírtam (a prototípusban
   Mongoose-enum őrizte), de rossz: az ismeretlen művelet legvalószínűbben **egy újabb
@@ -316,7 +316,7 @@ listával, `javaslatService.js:494`) — a **döntés** entitásonként dől el,
 össze. *Aki a gondolatot tartja, az dönt a sorsáról — akkor is, ha a javaslat egy másikat is
 érint.*
 
-⚠️ **Amit át kellett alakítani:** a koinóban nincs N tárolt töredék, mert **egy aláírt
+⚠️ **Amit át kellett alakítani:** a koinoban nincs N tárolt töredék, mert **egy aláírt
 `Javaslat` esemény** van. A töredék a Mongo tárolási kényszere volt; a logikai kapcsolat
 viszont átjön: **N tárolt rekord helyett N SZÁMÍTOTT RÉSZ** (`reszekSzamitasa`). Ugyanaz a
 minta, mint a D17-nél — ami ott adatbázis-sor, az itt számítás. A szavazat is egy esemény: a
@@ -352,7 +352,7 @@ a `toredekCsoportId` / `toredekSorszam` / `toredekDarab` mezőkkel. Egy összete
 **töredékekre bomlik**, amik együtt élnek és együtt dőlnek el
 (`vegrehajtok/csomagVegrehajto.js`, 10 KB).
 
-A koinóban nincs — sem típus, sem töredék-fogalom.
+A koinoban nincs — sem típus, sem töredék-fogalom.
 
 ### 2.5 ✅ `Hiba` státusz — NEM hiány (megmérve)
 
@@ -386,7 +386,7 @@ lépést tesz: `tudatpontokVisszaosztasa` — mindenki visszakapja a pontjait az
 (`szerkesztesiVegrehajtas.js`: `torles`), a `torol` paranccsal együtt.
 
 ⚠️⚠️ **ÉS EGY VALÓDI ELTÉRÉS, amit ki kell mondani.** A prototípus szervere **mások nevében**
-állította nullára a pontokat. A koinóban más nem írhat alá helyettem (D15). Ezért az entitás
+állította nullára a pontokat. A koinoban más nem írhat alá helyettem (D15). Ezért az entitás
 **megszűnik létezni** — ez a prototípus eredménye, és ez a lényeg —, a pontok viszont a
 gazdájuk keretében maradnak, amíg vissza nem veszi őket.
 
@@ -460,7 +460,7 @@ placeholder-tárhelyét az új entitásra oldja fel. A hely alapból a források
 ⭐⭐ **CSABA DÖNTÉSE (2026-09-07): nem születik új azonosító — az ELSŐ érintett olvasztja be
 a többit.**
 
-A kérdés az volt, hogy az új entitás honnan kapjon azonosítót: a koinóban **minden azonosító
+A kérdés az volt, hogy az új entitás honnan kapjon azonosítót: a koinoban **minden azonosító
 egy aláírt esemény lenyomata**, és ezen áll az egész ellenőrizhetőség. Az egyesítettnek nem
 tartozna eseménye (a javaslaté már foglalt — az az egyezményé), tehát egy **második
 származtatott azonosítót** kellett volna bevezetni, amit senki nem írt alá.

@@ -1,4 +1,4 @@
-# koino — Forráskód-kormányzás és a koinók sokasága
+# koino — Forráskód-kormányzás és a koinok sokasága
 
 *Létrehozva: 2026-08-25, Csaba és Claude beszélgetéséből. Ez a dokumentum egy helyre
 hozza azt, ami eddig négyfelé volt szétszórva ([vizio_kritikak.md](vizio_kritikak.md)
@@ -9,8 +9,8 @@ lezárja az **N5** nyitott kérdést: hogyan hat a közösség közvetlenül a f
 > semmi nem fut. Amit a Fázis 1 ebből már tud, azt a záró szakasz sorolja fel.
 
 > ⚠️ **2026-09-12 óta (D66) és 2026-10-24 óta (D118) a 4. lépcső helyén a KÖLTÖZÉS áll**, nem a D9 önfrissítése: nem
-> írjuk felül azt, ahol a közösség van — az e-ember a saját utasítására költözik egy új koinóba, ami a szülőjére épül
-> (*a múlt közös, a jelenlét személyes*), és a szabályok a koinó születésében vannak, nem a programban. A kódról szóló
+> írjuk felül azt, ahol a közösség van — az e-ember a saját utasítására költözik egy új koinoba, ami a szülőjére épül
+> (*a múlt közös, a jelenlét személyes*), és a szabályok a koino születésében vannak, nem a programban. A kódról szóló
 > szavazás ezzel jelzés lett, a valódi döntés az, hogy ki költözik. Az alább leírt D9-es bevezetés és az alkotmány-vonal
 > (D64) **nem épül meg**; a többi (a három szint, a térkép, a fork mint normál üzemmód) érvényes. A részletek:
 > [`koltozes_atvizsgalas.md`](koltozes_atvizsgalas.md).
@@ -76,13 +76,13 @@ Ahhoz, hogy a 4. lépcső megoldódjon, szét kell választani három dolgot, am
 |---|---|---|---|
 | **1. Gondolat** | egy gondolatot | a koino közössége | ✅ tudatpont + küszöb + szavazás |
 | **2. Koino-verzió** | magát a programot | **ugyanaz a közösség, ugyanazzal a gépezettel** | ✅ ugyanaz |
-| **3. A koinók sokasága** | — | **senki** | ❌ **nincs mit eldönteni** |
+| **3. A koinok sokasága** | — | **senki** | ❌ **nincs mit eldönteni** |
 
 A dokumentum további része ezt a táblázatot vezeti le.
 
 ## 1–2. szint: önalkalmazás, nem torony
 
-**A koino-verzió entitás a fában él, a gyökér-entitások felett — de azon a koinón
+**A koino-verzió entitás a fában él, a gyökér-entitások felett — de azon a koino-n
 belül, amit leír.**
 
 Ebből következik, hogy a teljes meglévő gépezet magától vonatkozik rá: van tudatpontja,
@@ -115,17 +115,17 @@ mert a módosítási eljárás magának az alkotmánynak a része.
 
 ## 3. szint: térkép, nem kormányzat
 
-A regresszus ott kezdődne, ahol a koinók *együttes megjelenítése* van — a lista vagy
-térkép arról, milyen koinók léteznek. Ha **ott** lenne tudatpont, szavazás és küszöb,
+A regresszus ott kezdődne, ahol a koinok *együttes megjelenítése* van — a lista vagy
+térkép arról, milyen koinok léteznek. Ha **ott** lenne tudatpont, szavazás és küszöb,
 akkor azt is verziózni kellene, annak is kellene fölöttes döntéshozó, és a torony
 tényleg elindulna.
 
 A megoldás egyetlen megkülönböztetésen múlik:
 
-> **A regresszus addig folytatódik, amíg minden szinten van MIT ELDÖNTENI. A koinók
+> **A regresszus addig folytatódik, amíg minden szinten van MIT ELDÖNTENI. A koinok
 > listájánál nincs mit eldönteni — ezért ott megáll.**
 
-Mert mi is az a lista? Koinók, amik léteznek és jelzik magukat. Ehhez nem kell döntés:
+Mert mi is az a lista? Koinok, amik léteznek és jelzik magukat. Ehhez nem kell döntés:
 egy koino vagy létezik, vagy nem — ez **tény, nem határozat**. Bárki összeírhatja
 azokat, amikről tud. Két embernek lehet két különböző listája, és egyik sem hibás.
 
@@ -138,7 +138,7 @@ Az „nincs mit eldönteni" állítást ellenőrizni kell. Három helyen próbá
 visszaszivárogni a kollektív döntés:
 
 **1. „Ki kerül fel a listára?"** → Aki jelzi magát. Nincs felvételi eljárás. A
-rosszindulatú vagy érdektelen koinókat **minden néző maga szűri** a saját kliensében —
+rosszindulatú vagy érdektelen koinokat **minden néző maga szűri** a saját kliensében —
 ez egyéni döntés, nem közös. A regresszushoz *kollektív* döntés kellene.
 
 **2. „Milyen formátumban jelzi magát?"** → Ez tényleg közös, de **nem szavazással dől el,
@@ -154,7 +154,7 @@ hanem a kompatibilitás.** Az pedig nem kormányzati aktus, hanem tény.
 
 ## Miért ez a garancia
 
-Ha a legfelső szinten lenne kormányzat, akkor a koinónak **lenne teteje**. Aminek pedig
+Ha a legfelső szinten lenne kormányzat, akkor a koinonak **lenne teteje**. Aminek pedig
 teteje van, azt el lehet foglalni — egyetlen ponton, és onnantól minden koino fölött ül
 valaki.
 
@@ -168,9 +168,9 @@ A vízió-vitában a **fork vésznyílás** volt: kilépési jog, védelem az el
 aminek „az ereje a létezése, nem a gyakorlása". Ritka és drága esemény.
 
 **Ez megváltozott.** A szétválás normál működés, és nem csak a szétválás: **bárki
-indíthat teljesen új koinót** — egy család, egy osztály, egy munkahely, egy párt, bárki.
+indíthat teljesen új koinot** — egy család, egy osztály, egy munkahely, egy párt, bárki.
 
-> „A koinót nem kizárólag egy közösségnek építem, hanem egy eszközt szeretnék adni,
+> „A koinot nem kizárólag egy közösségnek építem, hanem egy eszközt szeretnék adni,
 > amivel bárkik csinálhatnak közösséget." — Csaba
 
 Ez nem bővítés, hanem **átdefiniálás**:
@@ -187,7 +187,7 @@ A vita 4. kérdése az volt: mikor és milyen lépcsőkben adja át Csaba a kód
 döntést a közösségnek? A válasz eddig **ígéret** volt („ezt nem tudom garantálni, csak
 ígérni") — ezért került be a H7 kormányzási ígéret dokumentum.
 
-De ha bárki indíthat koinót, akkor **nincs „a koino"**, amit át kellene adni. A koino.hu
+De ha bárki indíthat koinot, akkor **nincs „a koino"**, amit át kellene adni. A koino.hu
 **egy** koino lesz: az első, talán a legnagyobb, de nem kiváltságos.
 
 > A többlet-jog nem azért szűnik meg, mert valaki lemond róla, hanem mert **megszűnik az
@@ -197,16 +197,16 @@ A H7 ettől nem lesz fölösleges — az **átmenetre** továbbra is kell (amíg
 egyetlen valódi koino, addig a gyakorlatban mégis van súlypont) —, de a *végállapotot*
 már nem az ígéret garantálja, hanem a szerkezet.
 
-### Következmény: az identitás koinónként külön van
+### Következmény: az identitás koinonként külön van
 
-Ha valaki a családi és a munkahelyi koinójában is e-ember, **nem szükségszerűen ugyanaz
+Ha valaki a családi és a munkahelyi koinojában is e-ember, **nem szükségszerűen ugyanaz
 az e-ember**. Nincs összekötve, nincs mit kiszivárogtatni. Ez azt jelenti, hogy az „egy
-ember = egy e-ember" szabály **koinón belüli**, nem világszintű — ami a D1 identitás-terv
+ember = egy e-ember" szabály **koino-n belüli**, nem világszintű — ami a D1 identitás-terv
 hatókörét pontosítja.
 
 ## Koino-születés: két mód, egy egység
 
-*(Csaba válasza arra a kérdésre, mennyi legyen közös a koinók között — 2026-08-25)*
+*(Csaba válasza arra a kérdésre, mennyi legyen közös a koinok között — 2026-08-25)*
 
 **Az értelmezési egység az ADATBÁZIS.** Egy koino = egy adatbázis. Két módon
 keletkezhet:
@@ -228,7 +228,7 @@ nincs külön „próba" üzemmód, a mechanizmus ugyanaz.
 > lehet félbevágni. Az e-ember tehát kezdetben **mindkét ágon létezik** (ez egybevág a
 > vita 9. pontjának fork-leírásával).
 
-A koinók közti kapcsolat **választható**: lehetnek teljesen szigetek, és lehetnek
+A koinok közti kapcsolat **választható**: lehetnek teljesen szigetek, és lehetnek
 összekapcsolódva. Ez nem központi döntés — minden koino magáról dönti el.
 
 ## A skálázás nem opcionális
@@ -312,7 +312,7 @@ gondolatoknál sem cenzúrával véd, hanem éberséggel és kilépéssel. Egy s
 > meg helyette.**
 
 **Amit ki kell mondani:** a „koino" **szó elvehető**. Valaki futtathat valamit, ami
-koinónak nevezi magát, és elárulja. Ez pontosan az az alku, amit minden emberi intézmény
+koinonak nevezi magát, és elárulja. Ez pontosan az az alku, amit minden emberi intézmény
 megköt: a „demokrácia" szót is használják diktatúrák. **A szó nem védhető; a gyakorlat
 látható** — az AGPL ezt garantálja.
 
@@ -322,7 +322,7 @@ látható** — az AGPL ezt garantálja.
 > használják majd fel mások." — Csaba
 
 A **védjegy** lett volna az egyetlen aszimmetria, amit legitim módon meg lehetett volna
-tartani — de hatóságot igényelne, aki eldönti, mi nevezheti magát koinónak, és ezzel
+tartani — de hatóságot igényelne, aki eldönti, mi nevezheti magát koinonak, és ezzel
 **visszahozná a tetőt**, amit a D12 megszüntetett. Az eszközt tehát nem vesszük fel.
 
 **A fennmaradó aggály és a válasza:** *mi van, ha MÁS védeti le a „koino" szót?*
@@ -330,7 +330,7 @@ tartani — de hatóságot igényelne, aki eldönti, mi nevezheti magát koinón
 - **A védjegy nem a szoftvert korlátozza, hanem a NÉVHASZNÁLATOT** (jellemzően kereskedelmi
   körben). Attól, hogy valaki levédeti a nevet, a koino **futtatását, másolását,
   módosítását és terjesztését nem tudja megtiltani** — azt az AGPL rendezi, és a szerzői
-  jog erősebb ezen a terepen. Egy P2P-ben futó koinót *senki nem tud engedélyhez kötni.*
+  jog erősebb ezen a terepen. Egy P2P-ben futó koinot *senki nem tud engedélyhez kötni.*
 - **A legjobb védekezés ingyenes, és épp most készül: a nyilvános, dátumozott előzmény.**
   A korábbi használat és a bizonyítható közzététel a legtöbb jogrendben védelmet ad, és
   a rosszhiszemű bejegyzés megtámadható. A **nyilvános repó** (dátumozott commitok), az
@@ -390,7 +390,7 @@ Hogy a fenti tervből ne látsszon több késznek, mint amennyi:
 | Koino-verzió mint entitás | ❌ nincs |
 | Konszenzuális önfrissítés (D9) | ❌ nincs |
 | Elismerés-entitás (N9) | ❌ nincs *(már a Fázis 1-ben megépíthető lenne)* |
-| Koinók közti felfedezés | ❌ nincs |
+| Koinok közti felfedezés | ❌ nincs |
 | A forrás bárki számára elérhető és forkolható | ✅ **nyilvános repó**, 2026-08-25 — minden klón teljes mentés a történettel |
 | Ellenőrizhető, hogy a koino.hu a közzétett kódot futtatja | ❌ nincs *(nincs verzió-végpont — → H8)* |
 | Kód-terjesztés független a GitHubtól | ❌ nincs tükör *(→ H8)* |

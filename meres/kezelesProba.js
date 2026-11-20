@@ -1,14 +1,14 @@
 // meres/kezelesProba.js
 
-// Felelősség: ⭐⭐ D128 (③b — 9.12): AZ AZONOSSÁG KEZELÉSE MINDEN KOINÓMBA, HELYBEN — bizonyítani, hogy a kezelés-jegyzék
+// Felelősség: ⭐⭐ D128 (③b — 9.12): AZ AZONOSSÁG KEZELÉSE MINDEN KOINOMBA, HELYBEN — bizonyítani, hogy a kezelés-jegyzék
 // (`allapot/kezelesTerjesztes.js`) és a gondozása (`muveletek.js` `kezelesGondozasa`) azt teszi, amiért született:
 //   1. a JEGYZÉK: az erősebb kulcscsere-lánc felváltja a mostanit, a gyengébb (és ugyanaz) nem; a kizárás egyszer kerül bele, egy
 //      MÁSIK azonosságé nem; a sérült, idegen vagy régi fájlból üres jegyzék lesz;
-//   2. a TERJESZTÉS: amit az A koinóban lát (a kizárást, a kulcscserét), azt a B koinóba is beviszi — ott a telefon eseménye kiesik;
+//   2. a TERJESZTÉS: amit az A koinoban lát (a kizárást, a kulcscserét), azt a B koinoba is beviszi — ott a telefon eseménye kiesik;
 //      másodszor semmit; ahol az azonosságomnak nincs szelete, oda semmit;
 //   3. az ELVETÉS: amit a kapu nem fogadott, azt feljegyzi, és egy napig nem próbálja újra (utána igen);
-//   4. ⭐ (③c) a SAJÁT KÉSZÜLÉK A CSERÉBEN: a laptop a határig ad (a koinó keretének 20%-a — KH1), a függő átadás a telefon részéhez
-//      számít; a telefon a nekem szóló átadást egyszer veszi át; egy idegen, egy kizárt és egy másik koinóbeli készüléknek semmi.
+//   4. ⭐ (③c) a SAJÁT KÉSZÜLÉK A CSERÉBEN: a laptop a határig ad (a koino keretének 20%-a — KH1), a függő átadás a telefon részéhez
+//      számít; a telefon a nekem szóló átadást egyszer veszi át; egy idegen, egy kizárt és egy másik koinobeli készüléknek semmi.
 //
 // Futtatás: node meres/mind.js csak kezelesProba
 
@@ -28,7 +28,7 @@ import { ujKezelesJegyzek, kezelesJegyzekBetoltese, jegyzekbe, tarKezelese, KEZE
   from '../js/allapot/kezelesTerjesztes.js';
 import { bajtokBase64Url } from '../js/esemeny/kanonikusAlak.js';
 
-const { proba, futtatas } = probaGyujtemeny('A kezelés minden koinómba (D128 ③b)');
+const { proba, futtatas } = probaGyujtemeny('A kezelés minden koinomba (D128 ③b)');
 
 const KA = 'kezeles-a';
 const KB = 'kezeles-b';
@@ -49,8 +49,8 @@ async function ment(tar, ...esemenyek) {
 }
 
 /**
- * Az alapállás: egy azonosság (a csere-kulcsával) két készülékkel — a LAPTOP hozza létre az A és a B koinót (az azonosság horgonya
- * így a születés), a TELEFON mindkettőben ír egy gondolatot. A C koinót egy idegen hozza létre (ott az azonosságnak nincs szelete).
+ * Az alapállás: egy azonosság (a csere-kulcsával) két készülékkel — a LAPTOP hozza létre az A és a B koinot (az azonosság horgonya
+ * így a születés), a TELEFON mindkettőben ír egy gondolatot. A C koinot egy idegen hozza létre (ott az azonosságnak nincs szelete).
  */
 async function alap() {
   const a = await ujAzonossag();
@@ -74,7 +74,7 @@ async function alap() {
   return { a, laptopK, telefonK, tarak, telefonja, kornyezete };
 }
 
-/** A koinó állapotából kiesett események azonosítói. */
+/** A koino állapotából kiesett események azonosítói. */
 async function kiesettek(tar, koino) {
   return new Set(allapotSzamitasa(await koinoEsemenyei(tar, koino)).kizartak.map((e) => e.azonosito));
 }
@@ -130,9 +130,9 @@ proba('⭐⭐ A KEZELÉS-JEGYZÉK (③b) — az erősebb lánc felváltja a most
 // 2. A TERJESZTÉS
 // ===================================
 
-proba('⭐⭐ A KEZELÉS MINDEN KOINÓMBA (③b) — a kizárás és a kulcscsere, amit az A koinóban lát, a B-be is bekerül (a jegyzéken át): ott a telefon eseménye kiesik; másodszor semmi; ahol nincs szeletem, oda semmi', async () => {
+proba('⭐⭐ A KEZELÉS MINDEN KOINOMBA (③b) — a kizárás és a kulcscsere, amit az A koinoban lát, a B-be is bekerül (a jegyzéken át): ott a telefon eseménye kiesik; másodszor semmi; ahol nincs szeletem, oda semmi', async () => {
   const { a, laptopK, telefonK, tarak, telefonja, kornyezete } = await alap();
-  // A laptop az A koinóban kizárja a telefont (a vágás: a telefon gondolata — az a lopás előtti).
+  // A laptop az A koinoban kizárja a telefont (a vágás: a telefon gondolata — az a lopás előtti).
   await keszulekKizarasa(kornyezete(KA), a.kulcspar, telefonK.keszulek,
     [{ koino: KA, vagas: telefonja[KA].sorszam, orokos: laptopK.keszulek }]);
   const bElotte = await kiesettek(tarak[KB], KB);
@@ -184,7 +184,7 @@ proba('⛔ AMIT A KAPU ELVETETT, EGY NAPIG NEM PRÓBÁLJA ÚJRA (③b) — a jeg
   const g1 = await kezelesGondozasa(kornyezete(KB), j, { most });
   const g2 = await kezelesGondozasa(kornyezete(KB), g1.jegyzek, { most: most + 3600 * 1000 });
   const g3 = await kezelesGondozasa(kornyezete(KB), g1.jegyzek, { most: most + ELVETVE_SZUNET + 1000 });
-  // Egy MÁSIK koinóban (A) az elvetés nem számít — ott megpróbálja.
+  // Egy MÁSIK koinoban (A) az elvetés nem számít — ott megpróbálja.
   const gA = await kezelesGondozasa(kornyezete(KA), g1.jegyzek, { most: most + 3600 * 1000 });
   const bent = (await tarKezelese(tarak[KB], a.nev)).kizarasok.length;
   const ok = {
@@ -200,7 +200,7 @@ proba('⛔ AMIT A KAPU ELVETETT, EGY NAPIG NEM PRÓBÁLJA ÚJRA (③b) — a jeg
 // 4. ⭐ (③c) A SAJÁT KÉSZÜLÉK A CSERÉBEN
 // ===================================
 
-proba('⭐⭐ A SAJÁT KÉSZÜLÉK A CSERÉBEN (③c — KH1) — a laptop a határig ad (10 000-ből 2000, nem a különbség felét); másodszor semmit (a függő átadás számít); a telefon egyszer veszi át; egy magasabb határnál a különbség fele a határig; idegennek, kizártnak, másik koinóban semmi', async () => {
+proba('⭐⭐ A SAJÁT KÉSZÜLÉK A CSERÉBEN (③c — KH1) — a laptop a határig ad (10 000-ből 2000, nem a különbség felét); másodszor semmit (a függő átadás számít); a telefon egyszer veszi át; egy magasabb határnál a különbség fele a határig; idegennek, kizártnak, másik koinoban semmi', async () => {
   const { a, laptopK, telefonK, tarak, kornyezete } = await alap();
   const kL = kornyezete(KA);
   const kT = { koino: KA, kulcspar: telefonK, szerzo: a.nev, tar: tarak[KA] };
@@ -212,7 +212,7 @@ proba('⭐⭐ A SAJÁT KÉSZÜLÉK A CSERÉBEN (③c — KH1) — a laptop a hat
   const s3 = await sajatKeszulekTalalkozasa(kL, telefonK.keszulek);
   // Egy magasabb (személyes) határ: a laptop szabadja 8000, a telefoné 2000 → a fele 3000, de a telefon része 3000-ig nőhet → 1000.
   const s4 = await sajatKeszulekTalalkozasa(kL, telefonK.keszulek, { hatar: 3000 });
-  // Egy idegen készülék (más azonosság); a másik koinóban (B — a telefon ott is tag, de itt nem vagyok adó: a horgonyt én írtam, ott
+  // Egy idegen készülék (más azonosság); a másik koinoban (B — a telefon ott is tag, de itt nem vagyok adó: a horgonyt én írtam, ott
   // is a teljes keret az enyém — a próba: a C, ahol nincs szeletem).
   const idegen = await tesztKeszulek('idegen');
   await tarak[KA].tanusitvanyFelvetele(idegen.tanusitvany);   // a tanúsítványa nálam van — de egy MÁSIK azonosságé

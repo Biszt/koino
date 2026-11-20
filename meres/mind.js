@@ -35,7 +35,7 @@ import fajlCsere from './fajlCsereProba.js';
 import tarsak from './tarsakProba.js';
 import identitas from './identitasProba.js';
 import helyreallitas from './helyreallitasProba.js';   // ⭐⭐ D128 (②e): a helyreállítás a segítőkkel
-import kezeles from './kezelesProba.js';   // ⭐⭐ D128 (③b): a kezelés minden koinómba
+import kezeles from './kezelesProba.js';   // ⭐⭐ D128 (③b): a kezelés minden koinomba
 import kezikonyv from './kezikonyvProba.js';
 import magyarazat from './magyarazatProba.js';
 import koinoncsomag from './koinonCsomagProba.js';   // ⭐⭐ D130 (②): az egyezmény tömör alakja   // ⭐⭐ D129 (⑤, MA10 (C)): az ⓘ jelek a felületen — a fájlokban és a valódi lapon   // ⭐⭐ D129 (①): a kézikönyv magja (a rendszer-entitás)
@@ -60,7 +60,7 @@ import kotes from './kotesProba.js';
 import tabla from './tablaProba.js';
 // ⭐ Az állandó UDP-kapu (D69/3, 2026-09-25) — hamis munkával, a kapu szabályai egymagukban.
 import udpKapu from './udpKapuProba.js';
-// ⭐ Az író (D70, 2026-09-26) — koinónként és készülékenként egy folyamat fűz a tárhoz.
+// ⭐ Az író (D70, 2026-09-26) — koinonként és készülékenként egy folyamat fűz a tárhoz.
 import iro from './iroProba.js';
 import szovegDarab from './szovegDarabProba.js';
 // ⭐ A tartomány-egyeztetés (S4, D74, 2026-09-27) — hálózat nélkül. (2026-10-01-ig „egyeztetes”
@@ -76,7 +76,7 @@ import ellentmondas from './ellentmondasProba.js';
 import eszlelo from './eszleloProba.js';
 // ⭐⭐ D118 (a bekapcsolódás ②a): a gyermek születése és a születések lánca
 import koinoLanc from './koinoLancProba.js';
-// ⭐⭐ D118 (a bekapcsolódás ③): a koinó képe két rétegben
+// ⭐⭐ D118 (a bekapcsolódás ③): a koino képe két rétegben
 import ketReteg from './ketRetegProba.js';
 // ⭐⭐ D118 (a bekapcsolódás ④a): a bekapcsolódás
 import bekapcsolodas from './bekapcsolodasProba.js';

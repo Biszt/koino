@@ -3,15 +3,15 @@
 // Felelősség: ⭐⭐ D121, D122 — A MEGHÍVÓ SZÖVEGE ÉS A BIZONYÍTÉK (a meghívás a lapon: „egy bemásolás, és a következő csere után
 // bent vagy” — docs/meghivas_atvizsgalas.md). Tiszta számítás, hálózat nélkül (1. szabály).
 //
-// ⭐ A MEGHÍVÓ (D122): egy sor — `koino-meghivo:2:<base64url(JSON)>` —, benne a koinó neve (`k`), a meghívó készülékének
+// ⭐ A MEGHÍVÓ (D122): egy sor — `koino-meghivo:2:<base64url(JSON)>` —, benne a koino neve (`k`), a meghívó készülékének
 // tábla-aláírója (`t` — a kopogtatáshoz, MH6, és hogy a belépő tudja, KIT keres: D71), a címei (`c`: [[hoszt, port], …]), a meghívó
 // AZONOSÍTÓJA (`i`) és TITKA (`s`), a meghívott neve (`m` — amit a meghívó beírt: a belépő profil-űrlapjának előtöltése), a lejárat
-// (`l`) és a koinó kötelező profil-mezői (`p`, ha vannak). ⚠️ A titok miatt a meghívó KULCS: aki elsőként használja, az jut be —
+// (`l`) és a koino kötelező profil-mezői (`p`, ha vannak). ⚠️ A titok miatt a meghívó KULCS: aki elsőként használja, az jut be —
 // ezért egyszer használható, egy hónapig él, és a meghívó felhasználás előtt visszavonhatja (D122). A szöveg base64url-be
 // csomagolt, nem titkosított: a meghívott neve olvasható benne.
 //
 // ⭐ A BIZONYÍTÉK (D122): a belépő az első cserében (a kapu személy-körében) megmutatja, hogy nála a titok: a meghívó azonosítója
-// és egy HMAC a titokkal — a koinóra, a SZEMÉLYES kulcsára és a horgonyára kötve (másra nem másolható át; és a titok maga nem
+// és egy HMAC a titokkal — a koinora, a SZEMÉLYES kulcsára és a horgonyára kötve (másra nem másolható át; és a titok maga nem
 // utazik). A meghívó készüléke (aki a titkot kiadta) ellenőrzi, és magától aláírja a meghívást. Eseménybe nem kerül.
 //
 // ⛔ A BEOLVASÁS a kívülről jött szöveget úgy kezeli, mint a kapu az eseményt: alak, hossz, a nevek alakja, a címek határai —
@@ -48,10 +48,10 @@ export const MEGHIVO_ELETTARTAM = 30 * 24 * 3600 * 1000;
  * e-emberek egymásnak).
  * ⭐⭐ D123 (PR7): a sor a már telepített programot FRISSÍTI is — a `git fetch` + `git reset --hard` a program mappáját a legújabbra
  * állítja (az adat a `~/koino-adat`-ban, a mappán kívül: nem érinti; a nem követett fájlokat a reset nem törli); ha a frissítés
- * nem sikerül (nincs hálózat), kimondja, és a meglévő indul. A futó régi koinót a `termux/telepit.sh` állítja le (`pkill` — ezért a
+ * nem sikerül (nincs hálózat), kimondja, és a meglévő indul. A futó régi koinot a `termux/telepit.sh` állítja le (`pkill` — ezért a
  * `procps`). ⛔ Idézőjel nincs benne: egy üzenetküldő a „kacskaringósra” cserélhetné.
  * ⭐ 2026-11-06: a P2P koino saját tárban él (`Biszt/koino` — a program a tár gyökere), a telefonon a `~/koino` mappában; a régi
- * (`~/koino_1.1`) helyről futó koinót is a `termux/telepit.sh` állítja le (a program helye is költözött).
+ * (`~/koino_1.1`) helyről futó koinot is a `termux/telepit.sh` állítja le (a program helye is költözött).
  */
 export const TELEPITO_SOR = 'yes | pkg upgrade && pkg install -y nodejs git procps && { if [ -d ~/koino ]; then '
   + 'git -C ~/koino fetch --depth 1 origin main && git -C ~/koino reset --hard FETCH_HEAD '
@@ -120,7 +120,7 @@ export function ujMeghivoJelei() {
 // ===== A MEGHÍVÓ KÉSZÍTÉSE =====
 
 /**
- * A meghívó szöveg — a koinó nevével, a meghívó készülékének tábla-aláírójával, a címeivel (a rossz alakú és az ismételt
+ * A meghívó szöveg — a koino nevével, a meghívó készülékének tábla-aláírójával, a címeivel (a rossz alakú és az ismételt
  * kimarad, legfeljebb `MEGHIVO_CIM_KORLAT`), az azonosítóval és a titokkal, a meghívott nevével, a lejárattal és a kötelező
  * profil-mezőkkel.
  * @param {{koino: string, alairo: string, cimek?: Array, azonosito: string, titok: string, meghivottNev: string, lejarat: number,
@@ -129,7 +129,7 @@ export function ujMeghivoJelei() {
  */
 export function meghivoKeszitese({ koino, alairo, cimek = [], azonosito, titok, meghivottNev, lejarat, profilMezok = [],
   valtozat = eloAlakok('meghivo')[0] }) {
-  if (!azonositoAlaku(koino)) throw new Error('A meghívó koinója egy 43 jeles név.');
+  if (!azonositoAlaku(koino)) throw new Error('A meghívó koinoja egy 43 jeles név.');
   if (!azonositoAlaku(alairo)) throw new Error('A meghívó készülékének tábla-aláírója egy 43 jeles kulcs.');
   if (typeof azonosito !== 'string' || !AZ_MINTA.test(azonosito)) throw new Error('A meghívó azonosítója nem ép.');
   if (typeof titok !== 'string' || !JEL_MINTA.test(titok)) throw new Error('A meghívó titka nem ép.');
@@ -191,7 +191,7 @@ export function windowsSorHibaja(sor) {
 // ===== A MEGHÍVÓ BEOLVASÁSA =====
 
 /**
- * Van-e a szövegben meghívó (az előtagja)? — a lap ebből tudja, hogy nem egy puszta koinó-nevet illesztettek be. ⭐ D124 ⑤:
+ * Van-e a szövegben meghívó (az előtagja)? — a lap ebből tudja, hogy nem egy puszta koino-nevet illesztettek be. ⭐ D124 ⑤:
  * BÁRMELYIK változaté — egy régebbi vagy újabb meghívó is meghívó (a beolvasás az iránnyal mondja ki, miért nem olvassuk).
  */
 export function meghivoE(szoveg) {
@@ -203,7 +203,7 @@ function torzsOlvasasa(torzs) {
   let j;
   try { j = JSON.parse(Buffer.from(torzs, 'base64url').toString('utf8')); } catch { return { hiba: 'a meghívó nem ép (a tartalma)' }; }
   if (!j || typeof j !== 'object' || Array.isArray(j)) return { hiba: 'a meghívó nem ép (a tartalma)' };
-  if (!azonositoAlaku(j.k)) return { hiba: 'a meghívó koinója nem egy 43 jeles név' };
+  if (!azonositoAlaku(j.k)) return { hiba: 'a meghívó koinoja nem egy 43 jeles név' };
   if (!azonositoAlaku(j.t)) return { hiba: 'a meghívó készülékének kulcsa nem ép' };
   if (!Array.isArray(j.c) || j.c.length > MEGHIVO_CIM_KORLAT) return { hiba: 'a meghívó címei nem épek' };
   const cimek = [];
@@ -272,7 +272,7 @@ function bizonyitekBajtjai(titok, { koino, szemely, horgony }) {
 }
 
 /**
- * ⭐ D122: a belépő bizonyítéka — a titokkal készült HMAC a koinóra, a személyes kulcsra és a horgonyra kötve (másra nem
+ * ⭐ D122: a belépő bizonyítéka — a titokkal készült HMAC a koinora, a személyes kulcsra és a horgonyra kötve (másra nem
  * másolható át). @returns {string} base64url
  */
 export function meghivoBizonyitek(titok, kotes) {

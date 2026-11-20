@@ -8,8 +8,8 @@
 
 A szigorú (b) alatt egy készülék csak a saját szeleteit ismeri (amit tart, és amit egy kérelem elhozott). A helyi kereső
 ezért azt találja meg, amit a készülék már ismer — egy friss tag szinte semmit. A hálózati megtalálás azt a kérdést
-válaszolja meg, hogy *„melyik gondolat címében van ez a szó — bárhol a koinóban?”*, úgy, hogy egy készülék terhe ne a
-koinó méretétől függjön (a „végtelen” próbája).
+válaszolja meg, hogy *„melyik gondolat címében van ez a szó — bárhol a koinoban?”*, úgy, hogy egy készülék terhe ne a
+koino méretétől függjön (a „végtelen” próbája).
 
 Három dolgot a korábbi döntések már rögzítettek. ⭐ **Cím szerinti keresés elég** (Csaba, 2026-08-31 — skálázási terv
 5.1): nincs címke, nincs értelmezés, a bejegyzés **számított**, nem kimondott — aki ismeri az entitást, ugyanazt a
@@ -29,7 +29,7 @@ működik**, csak más kulccsal:
 - A kereső-réteg darabja a **cím egy szavának lenyomata** szerint osztana: az index-darab a „szót tartalmazó születések”
   halmaza. ⭐ **A bejegyzés maga a létrehozó esemény** (aláírt, a címmel — `GondolatLetrehozas` `adat.cim`): nem kell új
   eseményfajta, és nem lehet hamisítani — a kérdező az aláírást és a címet maga ellenőrzi. Ez pontosan a skálázási terv
-  „számított bejegyzése”, csak a koinó meglévő eszközeivel.
+  „számított bejegyzése”, csak a koino meglévő eszközeivel.
 
 Ami még ráépíthető: a **DHT** (D91, 58. mérés — egy hirdetett téma ~0,65 MB/nap, egy keresés ~3 KB), a **kopogtatás és a
 kérelem** (D92 — randevú a tartó témáján, lyukfúrás, `KERELEM`, sorozat — D102/J3), és a **csak küldő út** (D95/3; a ⑥
@@ -67,7 +67,7 @@ eltűnik.
 
 Egy készülék terhe: **+1 DHT-téma** (~0,65 MB/nap, mint a gyökér-darabé); az index-darab tárolása ≈ (entitások × szavak ×
 tartók darabonként) / készülékek — fejenként 10 entitással, 5 szóval, darabonként 10 tartóval ~500 bejegyzés, egyenként
-~0,4–0,8 KB → **~0,2–0,4 MB, a koinó méretétől függetlenül** (a „végtelen” próbája ✓). A felajánlás: egy új entitás ~5
+~0,4–0,8 KB → **~0,2–0,4 MB, a koino méretétől függetlenül** (a „végtelen” próbája ✓). A felajánlás: egy új entitás ~5
 szó × a darab tartói közül néhány (nem mind — a tartók egymás közt a csere útján egyeztetik a darabot) → néhány tíz KB.
 A kérdés: ~3 KB DHT + egy kérelem (a válasz méretével). ⚠️ **A késés** a fő ár: egy friss kérdésre a NAT-os tartóhoz a
 kopogtatás percekig tart (74. mérés) — a kereső-réteg ezért nem lesz „gépelés közbeni” kereső, hanem *„kérd, és jön”*
@@ -125,12 +125,12 @@ kérdés (`KERELEM` a darabra, több tartó, egyesítés) → ⑥ a halványulá
 > D-szintű, Csabáé.
 
 **K7. A gyakori szavak — egy szó darabja nem osztható tovább (⛔ itt a „végtelen” próbája NEM áll).** A 4. szakasz
-becslése (~0,2–0,4 MB készülékenként, „a koinó méretétől függetlenül”) átlag: egyenletes szóeloszlást feltételez. A cím
+becslése (~0,2–0,4 MB készülékenként, „a koino méretétől függetlenül”) átlag: egyenletes szóeloszlást feltételez. A cím
 szavai viszont, mint minden nyelvben, erősen egyenlőtlenek (Zipf): a 3 jelnél hosszabb szavak közt is van néhány, ami a
 címek nagy részében áll (a magyarban pl. „egy”, „hogy”, „nem”, „kell”, „van”). Mivel a darab a szó lenyomatának
 bitjeiből jön, **egy szó minden bejegyzése mindig ugyanabba a darabba esik, akármilyen mély a darabolás**: ha egy szó a
-címek 10%-ában szerepel, a darabja a koinó gondolatainak 10%-át tartja — a tartóinak terhe (a tárolás, a beérkező
-felajánlások, a kérdések) a koinóval lineárisan nő. Ebből két baj lesz: (1) a 9. szabály szerint ez a darab nincs kész;
+címek 10%-ában szerepel, a darabja a koino gondolatainak 10%-át tartja — a tartóinak terhe (a tárolás, a beérkező
+felajánlások, a kérdések) a koinoval lineárisan nő. Ebből két baj lesz: (1) a 9. szabály szerint ez a darab nincs kész;
 (2) a mélység-becslés (a gyökér-darab mintája: a saját darab mérete × 2^mélység — `gyokerMelysegBecslese`) a gyakori szót
 tartó készüléken elszáll, a többin nem, így a két gép mélysége nem ±1-en belül tér el, és a kérdés elkerülheti a tartót.
 - **(A) ⭐ A szó darabja az entitás lenyomatával tovább osztódik — ezt javaslom.** Két szintű kulcs: a szó, alatta az
@@ -158,7 +158,7 @@ jegynyi mélység + NÉGY hexa jegynyi darab + `00`) a `gyokerDarabBol`-ban a 16
 meg a tömörítés (`koino.js` `tomoritesSzabalya`) is 16 bittel számol. A célméret (`GYOKER_DARAB_CEL` = 256) mellett ez
 2^16 × 256 ≈ **16,8 millió** legfelső szintű gondolatig tartja a darabot állandó méreten; fölötte a darab lineárisan nő
 (100 millió → ~1500, egymilliárd → ~15 000 darabonként) — a `gyokerMelysege` kommentje szerint pedig *„egy darab mérete
-nem nő a koinóval”*. A 9. szabály szerint a szerkezetet most olcsó kitágítani (a kulcsban 34 nulla jegy a tartalék), később
+nem nő a koinoval”*. A 9. szabály szerint a szerkezetet most olcsó kitágítani (a kulcsban 34 nulla jegy a tartalék), később
 protokoll-törés.
 - **(A) ⭐ A korlát kitágítása a ⑦ ② lépésével együtt — ezt javaslom** (a kereső index-darabja ugyanezt a mintát venné
   át), a telefon terepi frissítése előtt, egy tiszta törésben.
@@ -178,7 +178,7 @@ A K1–K7 a javaslat szerint — az átbeszélés két új szempontjával:
   A kérdés a szóeleje-fiókot (az őrző a címekben a kérdezett szóelejére szűr) és a pontos alak fiókját kérdezi. ⭐ Az ok: a
   magyar toldalékol — az egész szó szerinti index a „park”-ra a „parkban”-t nem találná, a helyi keresés (szórészlet) igen.
   Szótár és nyelvtani értelmezés nincs (5.1), a tőváltozás („tér” → „terek”) kimarad. Az index puha állapot (K5): a
-  kulcs-séma később egy átmeneti időszakkal váltható, a koinó magja nélkül.
+  kulcs-séma később egy átmeneti időszakkal váltható, a koino magja nélkül.
 - **K3 (A)** 🆕 — a két tulajdonos ellenőrzött TAG; és a nem tag szerző születése a küszöbtől függetlenül sem kerül az
   indexbe (a kulcs ingyen van, a tudatpont-keret csak a tagot köti — D93/1). A tagság a tagsági csomagból, szerzőnként
   gyorsítótárazva (a tagsági kísérő gépe — D95/2).
@@ -190,13 +190,13 @@ A K1–K7 a javaslat szerint — az átbeszélés két új szempontjával:
 > Csaba (2026-10-15): *„A (C)-t választom: az (A) a szabály, a drága helyen kimondott (B)-kivétel. Mehet a K8 és a 75.
 > mérés.”* — A K8 ezzel: a darab-szám legfeljebb 144 bit (megépült — a fázis-2 terv D106-a).
 
-A „végtelen” ellenőrizhető alakja (CLAUDE.md, 2026-09-26) a NÖVEKEDÉSRŐL szól: egy készülék terhe ne függjön a koinó
+A „végtelen” ellenőrizhető alakja (CLAUDE.md, 2026-09-26) a NÖVEKEDÉSRŐL szól: egy készülék terhe ne függjön a koino
 méretétől. A „gyakorlatilag végtelen” két külön állítást mosott össze: *nincs korlát*, és *van, de olyan magasan, hogy a
 valóságban nem érjük el* — az utóbbi egy feltevésen áll a valóságról.
 
 **Kétféle korlát van a kódban.** A *teher-korlát* egy készülék munkáját fogja meg (K = 3 kötés, ≤ 3 cím, 8 raj-tartó,
-20 MB átmeneti tár, a bizonyítékok hossza): ezek a „végtelen” eszközei — ettől NEM nő a teher a koinóval. A *méret-korlát*
-egy szám, ami a koinóval nőne, de rögzített szélességű: ha a koinó kinövi, vagy a teher kezd nőni, vagy a szám nem
+20 MB átmeneti tár, a bizonyítékok hossza): ezek a „végtelen” eszközei — ettől NEM nő a teher a koinoval. A *méret-korlát*
+egy szám, ami a koinoval nőne, de rögzített szélességű: ha a koino kinövi, vagy a teher kezd nőni, vagy a szám nem
 ábrázolható. Ma három ilyen van:
 - a gyökér-darab **16 bites** száma (K8) — a gyökérnél ~16,8 millió legfelső szintű gondolatig, a kereső-indexnél
   ~3,4 (a K2 (C)-vel ~1,7) millió gondolatig tartana;
@@ -208,12 +208,12 @@ egy szám, ami a koinóval nőne, de rögzített szélességű: ha a koinó kin�
   ~900 milliárd e-embernél lépné át.
 
 **A mérce — három lehetőség:**
-- **(A) A belső mérce:** egy méret-korlát se legyen szűkebb, mint a koinó SAJÁT határa — az azonosító-tér: egy entitás
-  neve a 256 bites lenyomata, és ~2^128 entitás fölött két név véletlenül egybeeshet; ennél többet a koinó semmilyen
+- **(A) A belső mérce:** egy méret-korlát se legyen szűkebb, mint a koino SAJÁT határa — az azonosító-tér: egy entitás
+  neve a 256 bites lenyomata, és ~2^128 entitás fölött két név véletlenül egybeeshet; ennél többet a koino semmilyen
   formában nem tud megkülönböztetni. Feltevés nélküli. Ára: a darab-szám ~124 bit (a kulcsba 144 fér — olcsó), a
   lánc-korlát 64 → ~128 (olcsó), de a 2^53-as egész-határ helyett nagy egészek kellenének a kanonikus alakban (a
   „legveszélyesebb részlet” — drága, formátum-szintű).
-- **(B) A levezetett mérce, kimondott tartalékkal:** a korlát akkor elég, ha a koinó saját szabályaiból levezetett
+- **(B) A levezetett mérce, kimondott tartalékkal:** a korlát akkor elég, ha a koino saját szabályaiból levezetett
   legnagyobb méret fölött van, rögzített tartalékkal. A szabályok: az e-ember élő, külön ember (D18/1) → legfeljebb az
   emberiség (~10^10); élő entitás csak ponttal (D14), fejenként 10 000 pont → legfeljebb ~10^14 élő entitás. ×10
   tartalékkal: a darab-számnak ~46 bit kell (a 48 elég), a 64-es lánc-korlát is (~24 lépés), és a 2^53 is (az utóbbi ~87×
@@ -232,7 +232,7 @@ egy szám, ami a koinóval nőne, de rögzített szélességű: ha a koinó kin�
 
 - **K7:** a legnagyobb fiók (a „nem”) a címek ~5%-a (prózai aránnyal ~10%) MINDEN méretnél — osztódás nélkül egymillió
   gondolatnál egy készüléken ~53 ezer bejegyzés (~31 MB, az átlag 61-szerese); osztódással (B = 256) ~2400 (~1,4 MB,
-  2,8×), és nem nő a koinóval. ✅ A K7 kell, és működik.
+  2,8×), és nem nő a koinoval. ✅ A K7 kell, és működik.
 - **K2:** a tőre keresve („park”) a „legalább 10 találat vagy mind” (A) 47–72%, **(C) 91–96%** — a magyar toldalékolás
   miatt az egész szavas kulcs a találatok több mint felét elveszíti. ✅ A (C) megéri a kétszeres tárolást.
 - **Két szavas kérdés:** 96–100%-ban a ritkább szó fiókja kicsi — egy helyről teljes válasz.
@@ -293,7 +293,7 @@ halványulás) és a raj együtt egy rést nyit: ha a tartók egymásnak adják 
 tartótól visszajöhet — a „temető” (5.7) a hátsó ajtón.
 
 **L1. Hol élnek a bejegyzések a tartónál?**
-- **(A) ⭐ Külön KERESŐ-TÁRBAN — ezt javaslom.** Puha állapot: a koinó állapotába nem számít bele (a csomag pont-eseményei nem
+- **(A) ⭐ Külön KERESŐ-TÁRBAN — ezt javaslom.** Puha állapot: a koino állapotába nem számít bele (a csomag pont-eseményei nem
   torzítják a saját számításomat), korlátos és eldobható (mint az átmeneti tár — B/2), és UGYANAZON A KAPUN át íródik
   (`esemenyMentese` a tár három műveletével — 3. szabály). A lejárat helyi feljegyzés mellette.
 - **(B) A tartós tárban, megtartási szabállyal** (mint a gyökér-darab születései): a csere bekötése egyszerűbb, de a
@@ -352,7 +352,7 @@ pont-események erre a gondolatra szólnak, pozitívak, különböző szerzőkt�
 gépével (gyorsítótárral — 75. mérés: 4096 szerző).
 
 **A kereső-tár (L1 (A)):** `<koino>/kereso/` — a bejegyzések hozzáfűzhető fájlban, tömörítéssel; korlátos és eldobható
-(ami kívül esik a régióimon — a mélység változott —, és a ⑥-tól a lejárt); a koinó állapotába NEM számít (a csomag
+(ami kívül esik a régióimon — a mélység változott —, és a ⑥-tól a lejárt); a koino állapotába NEM számít (a csomag
 pont-eseményei nem torzítják a saját számításomat).
 
 **A hirdetés és a társak:** a saját régióm témája (`keresoRegioTemaja`) a hirdetett témák közé (a kopogtató párja
@@ -364,7 +364,7 @@ magától); a régióm témáján a DHT-n talált címek a kör céljai közé, 
 
 **A sorrend:** ③a a kereső-tár, a kézi út és a parancs → ③b a régió a cserében → ③c a hirdetés és a raj.
 
-✅ **③a KÉSZ (2026-10-17):** `js/tar/keresoTar.js` (a bejegyzés alakja, azonosítója, tartalma, az építő, a tár — korlátos, tömöríthető, más folyamat írását a `frissit` olvassa), a `koino.js` `kereso` parancsa (`felajanl` — a gondolataim bejegyzései a főkönyv nyertes pont-eseményeivel, a mai címmel —, `behoz`, `kivisz`). Próbák: `keresoTarProba.js` (11, mind rontással) és a kézi út parancssor-próbája (négy készüléken: felajánlás → behozatal → továbbadás → behozatal, a hamis fájl a kapun bukik, a kereső-tár a koinó állapotába nem számít — három rontással). Elágazás 166.
+✅ **③a KÉSZ (2026-10-17):** `js/tar/keresoTar.js` (a bejegyzés alakja, azonosítója, tartalma, az építő, a tár — korlátos, tömöríthető, más folyamat írását a `frissit` olvassa), a `koino.js` `kereso` parancsa (`felajanl` — a gondolataim bejegyzései a főkönyv nyertes pont-eseményeivel, a mai címmel —, `behoz`, `kivisz`). Próbák: `keresoTarProba.js` (11, mind rontással) és a kézi út parancssor-próbája (négy készüléken: felajánlás → behozatal → továbbadás → behozatal, a hamis fájl a kapun bukik, a kereső-tár a koino állapotába nem számít — három rontással). Elágazás 166.
 
 ✅ **③b KÉSZ (2026-10-17) — a régió a cserében:** a NYITÁS `kd` jele, a legsekélyebb közös eltérő régió, a halmaz a
 bejegyzés-azonosítókon, a `BEJEGYZES` átadás, a fogadó a helyet maga számolja és a kapun vesz fel (`vonal.js`); a `koino.js`
@@ -388,9 +388,9 @@ K10 döntése (az új készülék mélysége), mert a felajánló a mély témá
 
 **A rés.** A mélységet (a gyökér-darabét és a kereső-régióét is) a készülék a SAJÁT darabjából becsüli: a darabjában ismert
 elemek × 2^mélység (`melysegBecslese`). Egy új (vagy „alap”, kevés vállalású) készülék darabja üres → a becslése 0 → a
-régiói a 0. és az 1. szinten vannak. Egy nagy koinó tartói viszont mélyen (m ~ 10): közös kulcsuk nincs, tehát a cserében
+régiói a 0. és az 1. szinten vannak. Egy nagy koino tartói viszont mélyen (m ~ 10): közös kulcsuk nincs, tehát a cserében
 SOHA nem egyeztetnek — az új készülék a régióját nem tölti fel, a felajánló a mély témán nem találja meg. ⚠️ A gyökér-darabnál
-ugyanez a rés áll (D95/4): egy kis koinóban (m ≤ 1) nem látszik, a próbák ott futnak; egy nagyban egy új „alap” készülék a
+ugyanez a rés áll (D95/4): egy kis koinoban (m ≤ 1) nem látszik, a próbák ott futnak; egy nagyban egy új „alap” készülék a
 gyökér-darabját a cserében nem kapja meg (a kérelem és a bejáró hozza, de az átmeneti tárba). A 9. szabály kérdése: *ez mit
 csinál egymilliárd e-embernél?* — a darab-elosztás nem indul el.
 
@@ -402,7 +402,7 @@ csinál egymilliárd e-embernél?* — a darab-elosztás nem indul el.
   kereső-régióra (egy helyen). Ára: néhány bájt helyi feljegyzés, a vonalon semmi (a jel már ott van).
 - **(B) A DHT-ből keres:** a készülék a saját helyének témáit több mélységen megkérdezi, és a legmélyebbet veszi, ahol van
   hirdető. Független a társaktól, de mélységenként egy DHT-keresés (~3 KB), és a hirdetők számából nem következik a mélység.
-- **(C) Marad a mai** (a saját darabból): a rés áll, és a nagy koinóban a darab-elosztás egy új készüléken nem indul el.
+- **(C) Marad a mai** (a saját darabból): a rés áll, és a nagy koinoban a darab-elosztás egy új készüléken nem indul el.
 
 ## 13. A ④ építésének alakja (2026-10-18) — a megújítás, a tagság, a felajánlás
 

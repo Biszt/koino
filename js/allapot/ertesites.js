@@ -9,7 +9,7 @@
 // a felmenőkön öröklődve, a legközelebbi nyer; ha sehol nincs, a globális). ⭐ Itt nincs szerver, ami írna: a készülék
 // SZÁMOLJA a saját postafiókját — és nem eseményenként, hanem két PILLANATKÉP különbségéből (a tartott entitások saját és
 // ágazati pontja, gyerekei, küszöbei; a javaslatok állapota, határideje, szavazói). Ettől:
-//   · a terhe a készülék saját szeleteitől függ (amit tart), nem a koinó méretétől (a „végtelen” próbája);
+//   · a terhe a készülék saját szeleteitől függ (amit tart), nem a koino méretétől (a „végtelen” próbája);
 //   · nem számít, hogyan jött meg a változás (csere, kérelem, kézi út) — a kép a kép;
 //   · és ami közben megváltozott, azt a következő számolás egyszerre látja (nincs elveszett esemény, nincs dupla).
 // ⛔ A szigorú (b) alatt CSAK a részvételi szeletekből (M3/A): egy nem tartott entitás gyerekeit, pontjait nem ismerem —
@@ -63,7 +63,7 @@ export function normalizaltKuszobok(k) {
 
 const tipusLista = (x) => (Array.isArray(x) ? [...new Set(x.filter((t) => ERTESITES_TIPUSOK.includes(t)))] : []);
 
-/** A globális (fő menüs) alapbeállítás alakja — a prototípus mezőivel (az e-mail mezők is: a koinóban nincs hatásuk). */
+/** A globális (fő menüs) alapbeállítás alakja — a prototípus mezőivel (az e-mail mezők is: a koinoban nincs hatásuk). */
 function globalisAlakja(g) {
   const orakoz = Math.round(Number(g?.emailOrakoz));
   return {
@@ -380,9 +380,9 @@ export function olvasatlanTerkep(postafiok) {
 // ⭐ D103: A KÉSZÜLÉK SAJÁT ÉRTESÍTÉSE — mit kell most jeleznie (tiszta számítás)
 // ===================================
 //
-// A prototípus a postafiók tételeit kérésre levélben is kézbesítette (azonnal, vagy N óránként összefoglalva); a koinóban
+// A prototípus a postafiók tételeit kérésre levélben is kézbesítette (azonnal, vagy N óránként összefoglalva); a koinoban
 // a levél helyett a készülék saját értesítése jön (D103 — az operációs rendszer felé, `eszkozErtesites.js`). A kapcsoló és
-// az ütem a prototípus mezői (`emailErtesites`, `emailMod`, `emailOrakoz`) — a koinóban ezt jelentik.
+// az ütem a prototípus mezői (`emailErtesites`, `emailMod`, `emailOrakoz`) — a koinoban ezt jelentik.
 
 /** Azonnali módban egy számolásból legfeljebb ennyi értesítés megy ki; a többiről egy összegző („és még N”). */
 export const KESZULEK_AZONNAL_KORLAT = 5;

@@ -12,7 +12,7 @@
 // ✅ A PROTOTÍPUSSAL AZONOS (Szakasz 5.4 óta).
 //
 // ⏸️ Az 5.3-ban a `KategoriaKartya` és a `GondolatTipusKartya` még kimaradt, mert **a
-// koinóban ez a két entitástípus nem létezett** — a végpont-térkép 2. találata. Az 5.4-ben
+// koinoban ez a két entitástípus nem létezett** — a végpont-térkép 2. találata. Az 5.4-ben
 // megszülettek (`muveletek.js`: `kategoriaLetrehozasa`, `gondolatTipusLetrehozasa`), ezért
 // a leképezés visszakerült. *A jóslat bevált: tényleg két sor volt.*
 

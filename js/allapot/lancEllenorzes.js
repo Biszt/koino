@@ -40,7 +40,7 @@ import { NAPLO_FAJTA, KIOSZTAS_FAJTA, KIOSZTAS_HOSSZ, lancAllapotaLancbol, lancA
 import { alapokAlapja } from './tagsag.js';
 import { esemenyEllenorzese, AZONOSITO_MINTA, esemenyKoinoja, lancKulcsa } from '../esemeny/esemeny.js';
 import { ellentmondasEllenorzese } from './ellentmondas.js';
-import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a bekapcsolódó hozott előtagjával)
+import { lancNezete } from './koinoLanc.js';   // ⭐ D118 (⑤b): a szerző lánca a koinoban (a bekapcsolódó hozott előtagjával)
 
 // ===================================
 // A PARAMÉTEREK — ⚠️ egyik sem állapot-befolyásoló (D66): csak azt szabják meg, mennyit kérdezünk
@@ -69,9 +69,9 @@ function naploGyokere(e) {
   return n && osszegzesAlakja(n, 0) && n.d === e.sorszam - 1 ? n : null;
 }
 
-/** Egy LÁNC nálam lévő eseményei (a koinóból) és a feje. ⭐⭐ D128: az `sz` a lánc kulcsa (a készülék kulcsa). */
+/** Egy LÁNC nálam lévő eseményei (a koinoból) és a feje. ⭐⭐ D128: az `sz` a lánc kulcsa (a készülék kulcsa). */
 async function szerzoNalam(tar, koino, sz) {
-  // ⭐ D118 (⑤b): a koinóbeli lánca — a bekapcsolódóé a hozott előtaggal (a fej napló-gyökere azt is elköti).
+  // ⭐ D118 (⑤b): a koinobeli lánca — a bekapcsolódóé a hozott előtaggal (a fej napló-gyökere azt is elköti).
   const nezet = await lancNezete(tar, koino, sz);
   const lanc = (await tar.lancEsemenyei(sz)).filter((e) => e && nezet.tagja(e) && Number.isSafeInteger(e.sorszam));
   let fej = null;
@@ -156,7 +156,7 @@ export async function lancValaszokFeldolgozasa({ tar, koino, tarolo }, kerdesek,
   const leletek = [];
   let igazolt = 0, fuggo = 0;
   const jegyzek = lancJegyzekVagasa(await tarolo.olvas());
-  // ⭐ D118/2: a koinó kerete — ⭐⭐ D128 (9.9): a vádolt LÁNCÁÉ (az alap); a készülék-tanúsítványok a tárból.
+  // ⭐ D118/2: a koino kerete — ⭐⭐ D128 (9.9): a vádolt LÁNCÁÉ (az alap); a készülék-tanúsítványok a tárból.
   const tanusitvany = (k) => tar.tanusitvany?.(k) ?? null;
   const vadRendben = async (adat) => (await ellentmondasEllenorzese(adat, koino,
     { tudatpontKeret: await lancAlapKerete(tar, koino, lancKulcsa(adat.esemeny), adat.kit), tanusitvany })).rendben;
@@ -266,7 +266,7 @@ export function lancKiszolgalo({ tar, koino }) {
    * @returns {Promise<{lanc: Array<Object>, fejNalam: boolean}|null>}
    */
   async function lancFejtol(sz, d, fejAz) {
-    // ⭐ D118 (⑤b): a koinóbeli lánca (a bekapcsolódóé a hozott előtaggal) — és a kiosztás a lánc nézete szerint (a `k` lista).
+    // ⭐ D118 (⑤b): a koinobeli lánca (a bekapcsolódóé a hozott előtaggal) — és a kiosztás a lánc nézete szerint (a `k` lista).
     const nezet = await lancNezete(tar, koino, sz);
     const fej = await tar.esemeny(fejAz);
     if (fej && lancKulcsa(fej) === sz && nezet.tagja(fej) && fej.sorszam === d + 1) {
@@ -329,7 +329,7 @@ export function lancKiszolgalo({ tar, koino }) {
         }
         if (q.r) v.c = (await naploKovetkezetesseg(NAPLO_FAJTA, levelek, q.r, 0, memo)).ut;
         if (q.k === 1) {
-          // ⭐ D118/2: a koinó kerete — ⭐⭐ D128 (9.9): a láncé · ⭐ (⑤b): a kiosztás a lánc nézete szerint (a bekapcsolódóé a
+          // ⭐ D118/2: a koino kerete — ⭐⭐ D128 (9.9): a láncé · ⭐ (⑤b): a kiosztás a lánc nézete szerint (a bekapcsolódóé a
           // hozott pontokkal)
           const alapjai = await lancAlapjai(tar, koino, l.lanc[0]?.szerzo ?? null);   // ⭐⭐ D128 (9.9): az alap + a kapott
           const a = await lancAllapotaLancbol(l.lanc.slice(0, q.d), alapokAlapja(alapjai, q.sz), l.nezet, alapjai);

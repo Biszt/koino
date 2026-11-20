@@ -5,7 +5,7 @@
 // ===== ⚠️ EZ A FÁJL NEM MÁSOLAT, HANEM CSERE — és ennek oka van =====
 //
 // A prototípus `authHelper.js`-e **a bejelentkezésről** szólt: JWT token mentése,
-// lekérése, törlése, „be van-e jelentkezve". ⛔ **A koinóban ebből semmi nincs (D15):**
+// lekérése, törlése, „be van-e jelentkezve". ⛔ **A koinoban ebből semmi nincs (D15):**
 // nincs jelszó, nincs bejelentkezés, nincs token — *a kulcs maga vagy te*, és a kulcs a
 // készüléken van, nem a lapon.
 //
@@ -42,12 +42,12 @@ export function tokenLekerese() {
  * tároljuk — ha eltárolnánk, épp azt a tulajdonságát veszítené el, ami véd.
  */
 export function tokenMentese() {
-  console.warn('authHelper.tokenMentese - a koinóban nincs token, amit menteni kellene (D15)');
+  console.warn('authHelper.tokenMentese - a koinoban nincs token, amit menteni kellene (D15)');
 }
 
 /** ⛔ Ugyanezért nincs mit törölni sem. */
 export function tokenTorlese() {
-  console.warn('authHelper.tokenTorlese - a koinóban nincs token (D15)');
+  console.warn('authHelper.tokenTorlese - a koinoban nincs token (D15)');
 }
 
 // ===================================
@@ -71,7 +71,7 @@ export function eemberLekerese() {
 }
 
 /**
- * ⭐ A koinóban ez MINDIG igaz, amíg a lap el tudja érni a programot: a kulcs ott van a
+ * ⭐ A koinoban ez MINDIG igaz, amíg a lap el tudja érni a programot: a kulcs ott van a
  * gépen. Nincs „kijelentkezve" állapot.
  */
 export function beVanJelentkezve() {
@@ -82,7 +82,7 @@ export function beVanJelentkezve() {
 // AZ AKTÍV ENTITÁS — hova navigáljon vissza a pakli
 // ===================================
 //
-// ⭐ Ez a rész VÁLTOZATLANUL értelmes a koinóban is: ha egy menüpontból elnavigálunk,
+// ⭐ Ez a rész VÁLTOZATLANUL értelmes a koinoban is: ha egy menüpontból elnavigálunk,
 // jegyezzük meg, melyik kártyánál álltunk. Helyi kényelem, semmi több — nem esemény, nem
 // terjed, semmit nem dönt el (3. szabály).
 

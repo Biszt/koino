@@ -6,14 +6,14 @@
 // A D108 szerint a valódi védelem a KISZOLGÁLÓNÁL van: amit a kiszolgáló nem ellenőriz, az csak illemtan — egy mohó vagy
 // átírt program a kérő oldali korlátot nem tartja be. Ez a modul a mérő:
 //   · KÉT MÉRCE (KK2): a kimenő bájt és a kérések száma, CSÚSZÓ ÓRÁS ablakban (percenkénti vödrökben);
-//   · A TÁRS (KK3): a személy (zárt koinóban a `ki`), a tábla-kulcs (a kérelem is hozza), végső esetben a cím (az IP — a
+//   · A TÁRS (KK3): a személy (zárt koinoban a `ki`), a tábla-kulcs (a kérelem is hozza), végső esetben a cím (az IP — a
 //     mobil NAT a portot váltja);
 //   · AZ ELSŐBBSÉG (D108): a KÖTÉS (a saját cserém) soha nem kerül a keret alá — csak könyvelődik; egy TÁRS legfeljebb a
 //     keret negyedét viheti; az IDEGENEK együtt legfeljebb a felét (így az ismerősöknek mindig marad hely);
 //   · A SZÁMOK (KK5): „alap” készülék óránként 20 MB és 600 kérés, „mindent” készülék 100 MB és 3000 — kiindulás, a
 //     beállítás felülírja.
 // ⭐ A „végtelen” próbája: minden számláló időablakra szól, a jegyzék korlátos (a társak száma, a vödrök száma) — a terhe nem
-// nő a koinó méretével. A tábla-kulcs ingyen van: a sok új kulccsal érkező kérőt a KÖZÖS keret fogja (az idegenek fele).
+// nő a koino méretével. A tábla-kulcs ingyen van: a sok új kulccsal érkező kérőt a KÖZÖS keret fogja (az idegenek fele).
 //
 // ⛔ Helyi feljegyzés, nem esemény: a memóriában él (a folyamat újraindítása nullázza — egy kérő a MI folyamatunkat nem tudja
 // újraindítani). Hálózatot nem importál. Használja: `koino.js` (a kiszolgálás — a kérelem, a továbbadás, az idegen csere).

@@ -56,7 +56,7 @@
 // ⚠️ A kopogás nem hitelesített (a UDP feladócíme hamisítható): egy hamis „nincs közös” egy kört elvehet — mint ma egy hamis
 // FOGLALT. Egy valódi `HALLAK` a közös jellel ugyanúgy munkát indít.
 //
-// ⚠️ AMIT NEM CSINÁL: nem tud a koinóról, nem cserél, nem ír táblára. A munkát a hívó adja
+// ⚠️ AMIT NEM CSINÁL: nem tud a koinoról, nem cserél, nem ír táblára. A munkát a hívó adja
 // (`munka(halo, tars)`), ez a fájl csak azt dönti el, KIVEL és MIKOR indulhat.
 //
 // Használja: koino.js (az őrjárat).
@@ -84,7 +84,7 @@ const ELFELEJTES = 10 * 60 * 1000;
 // KISZORÍTHATÓ bejegyzés esik ki (lásd `kiszorithato`); ha nincs ilyen, az idegen új feladót
 // nem vesszük fel. A saját céljaink mindig bekerülnek — azok számát a hívó korlátozza.
 // ⚠️ A szám nem a hálózat méretéből jön, hanem a készülékéből: egy bejegyzés ~200 bájt, tehát
-// ezer is elhanyagolható — a plafon az elárasztás ellen véd, egy valódi koinóban el sem érjük
+// ezer is elhanyagolható — a plafon az elárasztás ellen véd, egy valódi koinoban el sem érjük
 // (a kötések és a társlista a tucatnyi nagyságrendben mozognak).
 const JEGYZEK_KORLAT = 1000;
 
@@ -596,7 +596,7 @@ export async function udpKapuNyitasa(beallitas) {
       const e = await a.igeret;
       // ⭐ PONTOS CÍMEN IS: ha a munka MÁS aláírót hozott, mint akit a cél várt, az „más felelt"
       // (a cím azóta másé — pl. a router kiosztotta). ⚠️ Ha a munka nem hozott aláírót (pl. MÁSIK
-      // koinóé volt, és a csere a lenyomatnál véget ért), azt nem tudjuk cáfolni: marad, ami volt.
+      // koinoé volt, és a csere a lenyomatnál véget ért), azt nem tudjuk cáfolni: marad, ami volt.
       const mas = a.alairo && e.ok && e.eredmeny?.alairo && e.eredmeny.alairo !== a.alairo;
       if (mas) jelez({ mi: 'MAS-FELELT', cim: a.tars?.cim ?? a.cim, port: a.tars?.port ?? a.port });
       eredmenyek.push({ cim: a.tars?.cim ?? a.cim, port: a.tars?.port ?? a.port, cel, ...e,

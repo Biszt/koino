@@ -1,10 +1,10 @@
-// meres/ketRetegProba.js — ⭐⭐ D118 (a bekapcsolódás ③): a koinó képe két rétegben
+// meres/ketRetegProba.js — ⭐⭐ D118 (a bekapcsolódás ③): a koino képe két rétegben
 //
-// Azt bizonyítja, hogy egy szülőre épülő koinó a szülő múltját a SZÜLŐ szabályaival, a vágás pillanatára számolja, és a
+// Azt bizonyítja, hogy egy szülőre épülő koino a szülő múltját a SZÜLŐ szabályaival, a vágás pillanatára számolja, és a
 // lezárt döntések rögzítve jönnek át (D118/3 — a gyermek szigorúbb küszöbe sem fordítja meg őket); hogy a jelenben a
 // szerkezet mindenkié, a súly csak a bekapcsolódóké (D118/1 — a nem bekapcsolódó pontja és szavazata nem számít, a D14 itt ítél);
 // hogy a nem bekapcsolódó nyitott javaslata nem folytatódik, a bekapcsolódóé a gyermek küszöbeivel igen (KZ6 (A)); és hogy a szülő
-// nélküli koinó képe ugyanaz, mint eddig.
+// nélküli koino képe ugyanaz, mint eddig.
 
 import { probaGyujtemeny, ujEember } from './probaFuttato.js';
 import { koinoKepe } from '../js/allapot/ketReteg.js';
@@ -22,7 +22,7 @@ import { esemenyMentese, koinoBemenete } from '../js/tar/esemenyTar.js';
 import { tudatpontRendezese } from '../js/muveletek.js';
 import { pakliOldal, ujPakliNezet } from '../js/allapot/pakli.js';
 
-const { proba, futtatas } = probaGyujtemeny('A koinó képe két rétegben (D118 ③)');
+const { proba, futtatas } = probaGyujtemeny('A koino képe két rétegben (D118 ③)');
 
 const NAP = 86400 * 1000;
 const ORA = 3600 * 1000;
@@ -120,10 +120,10 @@ async function haromFazis(esemenyek, most) {
 }
 
 // ===================================
-// 1. A SZÜLŐ NÉLKÜLI KOINÓ: ugyanaz, mint eddig
+// 1. A SZÜLŐ NÉLKÜLI KOINO: ugyanaz, mint eddig
 // ===================================
 
-proba('⭐ D118 (③): a szülő nélküli koinó képe UGYANAZ, mint a három fázis eddig (az ujjlenyomat bájtra)', async () => {
+proba('⭐ D118 (③): a szülő nélküli koino képe UGYANAZ, mint a három fázis eddig (az ujjlenyomat bájtra)', async () => {
   const { p, P } = await szuloEsGyermek();
   const most = VAGAS + 30 * NAP;
   const regi = await haromFazis(p, most);
@@ -280,7 +280,7 @@ proba('⭐ D118 (③): a súly NEMZEDÉKENKÉNT — a nagyszülőből a szülőb
 // ===================================
 //
 // ⛔ A létrehozó a gyermekben új pontot tesz: a bemondott összegnek (`kiosztva`) a HOZOTT pontjait is tartalmaznia kell —
-// ugyanazt, amit a koinó képe a jelen rétegében lát. Ha a művelet csak a gyermek eseményeit nézné, a bemondás ellentmondana
+// ugyanazt, amit a koino képe a jelen rétegében lát. Ha a művelet csak a gyermek eseményeit nézné, a bemondás ellentmondana
 // a láncának (rontás-próba: a régi szűrővel a szabály-réteg jelzést ad, és a bemondott összeg elmarad a láncából).
 proba('⛔⛔ D118 (③): a létrehozó új pontja a gyermekben a HOZOTT pontjaival együtt mondja be az összegét — a művelet és a kép egy szabályból',
   async () => {

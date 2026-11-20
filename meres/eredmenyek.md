@@ -114,9 +114,9 @@ a tár méretével nő** — és N esemény beírása **négyzetes**:
 | 10 000 | 42 ms | 3,5 perc |
 | 100 000 | **495 ms** | **~6,9 óra** |
 
-> ⚠️ **Fél másodperc EGY esemény elmentése egy 100 000 eseményes koinóban** — és egy csere
+> ⚠️ **Fél másodperc EGY esemény elmentése egy 100 000 eseményes koinoban** — és egy csere
 > több eseményt hoz. Ez **jóval a 43,5 GB-os tárolási fal ELŐTT** teszi használhatatlanná a
-> koinót. **A terv rossz falat nevezett meg elsőnek.**
+> koinot. **A terv rossz falat nevezett meg elsőnek.**
 
 ### 3. ⭐ ÚJ LELET: az `allapotSzamitasa` is négyzetes — de ez KÜLÖNÁLLÓ, JAVÍTHATÓ hiba
 
@@ -143,7 +143,7 @@ megcsinálva.**
 
 > ⛔ **ELŐBB EGY KORLÁT, AMI A MÉRÉS ÉRTELMEZÉSÉRE VONATKOZIK** (Csaba, 2026-08-31).
 > A mérés után kézenfekvőnek látszott a következtetés: *„javítsuk a két rövidítést, indítsuk
-> az első koinót a mai szerkezettel, és cseréljük később."* **Ez nem járható** — a D21/D22
+> az első koinot a mai szerkezettel, és cseréljük később."* **Ez nem járható** — a D21/D22
 > már kizárta: *„az első kiadás is milliárdra képes program, csak kevesebb emberrel"*, és
 > *„a szeletelés nem »később, ha a méret kikényszeríti«"*.
 > ⭐ **Tehát az alábbi javítások KARBANTARTÁSOK, nem mérföldkövek.** Részletek:
@@ -157,7 +157,7 @@ megcsinálva.**
 2. **A 100 000 esemény nem sok.** 500 e-ember, 200 esemény fejenként — ez egy **falu vagy egy
    iskola**, nem egy ország. A fal tehát nem „valamikor a milliárd felé", hanem **belátható
    közelségben** van.
-3. **A 2. és 3. lelet külön kezelendő:** a 3. egy mai hiba, ami a mai koinóban is javítható,
+3. **A 2. és 3. lelet külön kezelendő:** a 3. egy mai hiba, ami a mai koinoban is javítható,
    a szeletelés kivárása nélkül.
 
 ---
@@ -332,7 +332,7 @@ akikért a befogadás-gondolat szól** (D49/c).
 
 **Mind a 880 hamis azonosságnál pontosan 4 a független körök száma**, míg a valódiaknál
 1-től 5+-ig szóródik. **880 egyforma érték nem természetes eloszlás** — a valódi emberek
-szórnak, a gyár bélyegez. ⭐ És ez a koinóról szóló **összesített** jelzés, nem egy
+szórnak, a gyár bélyegez. ⭐ És ez a koinoról szóló **összesített** jelzés, nem egy
 emberről: épp az, amit a D49/c harmadik védőkorlátja kér.
 
 ## ⚠️ Amit ez NEM bizonyít
@@ -749,7 +749,7 @@ bukik, törékeny — több küszöbbel kell mérni.*
 
 **A koino-szintű alak nem működik.** A „8 legtöbb bemutatkozású ember részesedése"
 támadóval **1–3%**, támadó nélkül **1%** — vagyis **nincs jelzés**. Ez az az alak, ami a
-**D49/c 3. védőkorlátjával** megférne (*„az összesített nézet a koinóról szóljon, ne
+**D49/c 3. védőkorlátjával** megférne (*„az összesített nézet a koinoról szóljon, ne
 emberekről"*).
 
 ⛔ **Ami működik, az személyre szóló** — és ráadásul **egy becsületes emberre** mutat: arra a
@@ -875,7 +875,7 @@ jelzés lenni.
 
 > ✅ **A válasz Csaba mércéjére: MEGÉRI a bonyolítás — de nem úgy, ahogy vártuk.** Nem a
 > lebukási esélyt növeli (az marad 89–100%), hanem **a hamis riasztást csökkenti a
-> tizedére**. A koinóban ez fontosabb: a téves jelölés a magányost és a frissen érkezettet
+> tizedére**. A koinoban ez fontosabb: a téves jelölés a magányost és a frissen érkezettet
 > érinti.
 
 ⚠️ **Amit nem tudunk:** miért marad 11% a szigetből észrevétlen az „ÉS" olvasatnál — ezek
@@ -1276,7 +1276,7 @@ viszi magával a saját döntési keretét — úgy, hogy **mindenki alapból 67
 egyenként felül lehet írni saját érték javaslattal.
 
 ⭐⭐ **A mérés ettől nem lesz kevesebb — ez a mérés a FUNDAMENTUMA:** a 14. mérés azt mondja
-ki, hogy **a koinóban ma SEHOL nincs olyan mechanizmus, hogy egy hallgató ember „tart" egy
+ki, hogy **a koinoban ma SEHOL nincs olyan mechanizmus, hogy egy hallgató ember „tart" egy
 alapértéket**. Tehát a szűk változat is ugyanezt a kódrészt kívánja (`kuszobokItt`), csak
 **javaslat-fajtára kapuzva** — nem repó-szinten.
 
@@ -1302,7 +1302,7 @@ tényleg bead egy másik értéket.** *A menekülőút pontosan olyan nehéz, mi
   (amit a számítás ellenőrizni tud) **és** kötött **döntési keretet** (a 67/67). Ma a keret
   mindig a CÉL entitásból jön; itt a **sablonból** jönne. Új tengely, de kicsi.
 - ⏸️ **És az évek óta néma tulajdonos**: ha az alapérték súlyt kap, az is szavaz, aki rég
-  elhagyta a koinót. A néma készülék problémáját egyszer már megoldottuk
+  elhagyta a koinot. A néma készülék problémáját egyszer már megoldottuk
   (`allapot.lancVegek`, 13. mérés).
 
 ⚠️ *Csaba kimondta, hogy ez még nem kiforrott: „most még nincs kiforrva a fejemben a legjobb
@@ -1368,23 +1368,23 @@ bejelentésen túl. *Az külön döntés — a koino bejelent, nem bíráskodik 
 `node meres/verzioMeres.js ir` → az `ALAP_SZABALYOK.tudatpontKeret` átírása 5000-re (`koinoSzabalyok.js`, `.bak`
 másolattal) → `… olvas`
 
-Az ①b óta a koinó szabályai a **születésében** állnak, és a program az új születésbe **mindet** kiírja (`teljesSzabalyok`).
-A mérés ugyanazt a láncot két koinóban gyártja le — a szerző az alapító (ő tag, a D93/1 szerint is számít; a régi mérés
+Az ①b óta a koino szabályai a **születésében** állnak, és a program az új születésbe **mindet** kiírja (`teljesSzabalyok`).
+A mérés ugyanazt a láncot két koinoban gyártja le — a szerző az alapító (ő tag, a D93/1 szerint is számít; a régi mérés
 születés és tagság nélkül ma semmit nem számolna): egy **régi alakúban** (a születésnek nincs `szabalyok` mezője) és egy
 **új alakúban** (minden szabály a születésben). 9 esemény mindkettőben, bájtra ugyanaz a két olvasásnál.
 
-- **A régi alakú koinó** kettéhasad, mint 2026-09-11-én: a 10 000-es program 4 entitást és 8000 pontot lát
+- **A régi alakú koino** kettéhasad, mint 2026-09-11-én: a 10 000-es program 4 entitást és 8000 pontot lát
   (`aG7q5KVL…pOPF7q0`), az 5000-es 2 entitást, 4000 pontot és 2 kivételt (`cR8XvHFi…zXszxo`).
-- **Az új alakú koinó** NEM hasad: mindkét program a születés 10 000-es keretével számol, 4 entitás, 8000 pont, 0 kivétel,
+- **Az új alakú koino** NEM hasad: mindkét program a születés 10 000-es keretével számol, 4 entitás, 8000 pont, 0 kivétel,
   és az ujjlenyomat **bájtra ugyanaz** (`hBcJaJ-u…Vc2Y5fQ`).
-- ⛔ **A mérés egy hibát is talált:** az első megismétléskor az új alakú koinó is kettéhasadt (2 entitás, „túllépné a
+- ⛔ **A mérés egy hibát is talált:** az első megismétléskor az új alakú koino is kettéhasadt (2 entitás, „túllépné a
   tudatpont-keretet (6000 / 5000)”) — a `pontEsemenyMerlege` MÁSODIK keret-vizsgálata (a számított összegre) még a program
-  állandóját nézte; az első (a bemondott összegre) már a koinóét. Javítva, és a próbája hézagos lánccal méri ezt az ágat
+  állandóját nézte; az első (a bemondott összegre) már a koinoét. Javítva, és a próbája hézagos lánccal méri ezt az ágat
   (`szabalyProba.js` — a rontás, a régi feltétel, bukik).
 
-⭐ **Amit bizonyít:** a szabály a koinóhoz kötött, a program-állandó csak a régi alakú (és a még meg nem érkezett)
-születésnél dönt. ⛔ Ezért az `ALAP_SZABALYOK` soha nem változhat: egy régi alakú koinót különben két program két
-állapotra számolna — egy új szabály új koinó (a költözés, KZ4). A szabályok ára a születésben **+206 bájt** (427 → 633), egyszer koinónként.
+⭐ **Amit bizonyít:** a szabály a koinohoz kötött, a program-állandó csak a régi alakú (és a még meg nem érkezett)
+születésnél dönt. ⛔ Ezért az `ALAP_SZABALYOK` soha nem változhat: egy régi alakú koinot különben két program két
+állapotra számolna — egy új szabály új koino (a költözés, KZ4). A szabályok ára a születésben **+206 bájt** (427 → 633), egyszer koinonként.
 
 ---
 
@@ -2396,7 +2396,7 @@ társ-váltás.*
 A számítás a **fájl-rétegben** él (`fajlAtvitel.js`: `turelemForrasokbol`), a vonal pedig
 **paraméterként kapja** (`beallitas.feladasIdo`). ⛔ A vonal csak csomagokat lát — azt, hogy
 *érdemes-e még küzdeni ezzel a társsal*, csak az tudja, aki a birtoklás-jegyzetet ismeri.
-*Ugyanaz a szétválasztás, mint mindenhol: a vonal nem tud a koinóról (1. szabály).*
+*Ugyanaz a szétválasztás, mint mindenhol: a vonal nem tud a koinoról (1. szabály).*
 
 ⚠️ **A randevúnál (átfúrt rés) marad a teljes türelem** — ott **nincs másik forrás**: a
 pajzsfúrás egyetlen társsal nyitott rést, oda nem lehet „átváltani".
@@ -2823,7 +2823,7 @@ mp-enként kérdez (ha az is mozdul, a vonal változott, nem a csend okozta).
 - ⭐ **Célfüggetlen**: három tükör (google ×2, cloudflare) ugyanazt a portot látta (9954).
 - ⭐ **A router átír, de kiszámíthatóan**: a helyi 7380 → 9954, 7381 → 9867 **mindkét futásnál,
   percek különbséggel** is. *Ebből az is következik, hogy a „port ugyanaz maradt" itt jelentheti
-  azt is, hogy a leképezés lejárt, és ugyanazt a számot kapta vissza — a koinónak a kettő
+  azt is, hogy a leképezés lejárt, és ugyanazt a számot kapta vissza — a koinonak a kettő
   egyenértékű: a bemondott szám igaz.*
 
 ### ⛔ Egy vak lépést a saját mérőmben az első futás mutatott meg
@@ -2880,10 +2880,10 @@ A telefon ugyanarról a helyi portról **futásonként más külső portot** kap
 ### ⚠️ ÉS AMI 0 ESEMÉNYT HOZOTT — a kapu jól működött
 
 A laptop 45 eseményt küldött, a telefon **0 újat vett át**. ⭐ Az ok nem a rés: helyben, két
-folyamattal megismételve **ugyanez jött ki**. A laptop `sajat` koinójában **9 esemény** áll
+folyamattal megismételve **ugyanez jött ki**. A laptop `sajat` koinojában **9 esemény** áll
 **2026-08-29-ből**, vagyis a Szakasz 3 (2026-09-03) kanonikus alakja ELŐTTI formátumban —
 hiányzik belőlük az `entitas` mező, ezért az `esemenyMentese` **minden készüléken elutasítja**
-(„hiányzó mező: entitas"). *A régi adat nem törik be a mai koinóba — ez a 3. szabály
+(„hiányzó mező: entitas"). *A régi adat nem törik be a mai koinoba — ez a 3. szabály
 gyakorlatban.*
 
 ⏸️ **Egy kisebb pazarlás, feljegyezve:** a telefon **körönként újra kérte ugyanazt a 9
@@ -3033,9 +3033,9 @@ készülékenként, és ilyenkor **minden kötés elvész**. A mentés a követk
   99% egy darabban, a visszaállás mediánja **5 perc** (egy ablak). ⭐ Az 1% maga a szerkezeti
   alsó határ: napi 4 váltás × 5 perc ≈ 20 perc/nap. Ha minden második olvasás bukik: 2–3%, a
   95%-os visszaállás 25 perc.
-- ⛔ **A NYITOTT AJTÓ A NAGY KOINÓBAN ELÉG, A KICSIBEN NEM:** 1000 készüléknél már 5% horgony is
+- ⛔ **A NYITOTT AJTÓ A NAGY KOINOBAN ELÉG, A KICSIBEN NEM:** 1000 készüléknél már 5% horgony is
   ~1%-ot ad, **10 készüléknél** viszont 5% mellett **58% leszakadva** (a futások ~60%-ában
-  egyetlen horgony sincs), 20% mellett 10%. *A nyitott ajtó szerencse kérdése — a kis koinó
+  egyetlen horgony sincs), 20% mellett 10%. *A nyitott ajtó szerencse kérdése — a kis koino
   (D22) épp ezen bukik el.*
 - Napi 8 váltásnál ugyanez a kép: a tábla 2–5%, mentés nélkül 97%.
 
@@ -3058,7 +3058,7 @@ távoli társ készülékenként ugyanoda hozza, mint a teljesen véletlen hál�
 
 **Csak-mobilos közösségben a kötések ÖNMAGUKBAN nem tartják egyben a hálót — a mentés nem
 kényelem, hanem feltétel.** A mentések közül pedig **csak a hirdetőtábla nem függ a mérettől és a
-szerencsétől**: a nyitott ajtó a nagy koinóban bőven elég, a családi koinóban nem.
+szerencsétől**: a nyitott ajtó a nagy koinoban bőven elég, a családi koinoban nem.
 
 ### ⚠️ AMIT EZ A MODELL NEM MOND MEG
 
@@ -3066,7 +3066,7 @@ szerencsétől**: a nyitott ajtó a nagy koinóban bőven elég, a családi koin
   ezt mérni kell; az (e) sor csak a félig bukó olvasást mutatja.
 - **A horgony terhelése korlátlan** — kedvező feltevés.
 - **Nincs benne az alvó/kikapcsolt telefon, az otthoni wifi** (helyi felfedezés — a családi
-  koinót ez segítené) **és a kézi kurbli.**
+  koinot ez segítené) **és a kézi kurbli.**
 - **Nincs benne az akkumulátor** — az életjel gyakorisága a router órájából jön (31. mérés), és a
   mobil óra **még nincs megmérve**.
 
@@ -3954,7 +3954,7 @@ mint a „két sorrend tükörképe": ami két helyen „ugyanaz", annak egy for
 `szabalyProba.js`-ben: a VALÓDI művelet a VALÓDI táron, egy kézzel aláírt régi alakú esemény után
 (a próba-segéd saját összegzése egy harmadik másolat lett volna). ⚠️ Rontás-próba: a régi
 `muveletek.js`-szel bukik. ⚠️ *A két terepi gondolat már így marad (az esemény nem írható át) — de
-ezen a koinón a következő pont-esemény már számít.*
+ezen a koino-n a következő pont-esemény már számít.*
 
 ### ⚠️ MELLÉKLELETEK
 
@@ -4307,7 +4307,7 @@ esemény  | megnyitás | betölt+számítás | ÁLLÁS/fő | ÁLLÁS összeáll�
 eltér — minden kör a teljes, szerzőnkénti ÁLLÁS-ra esik vissza, és egy hasznos bájtra 100 000
 eseménynél **286 bájt forgalom** jut. ⚠️ **Két szám, ami a tervet érinti:** (1) az ÁLLÁS-t **minden
 csere újra összeállítja az ÖSSZES eseményből** (239 ms 100 000-nél) — nem csak a bájt, a számítás
-is a koinóval nő; (2) **egy esemény ma átlag 611 B** (a 08-31-i 476 helyett — az új mezők), tehát a
+is a koinoval nő; (2) **egy esemény ma átlag 611 B** (a 08-31-i 476 helyett — az új mezők), tehát a
 tárolási becslések ~30%-kal nőnek. ✅ A mentés lapos (1 ms) — az S2/a óta.
 
 ⭐ **A „végtelen" próbája (Csaba, 2026-09-26) ezen a táblán:** a csere ára, az ÁLLÁS összeállítása,
@@ -4371,8 +4371,8 @@ nincs eltérés                           |  58 B · 1 üzenet      |  58 B · 1
 egy szelet, 1 eltérés (medián / legn.)  |  164 B / 1,3 KB (28)  |  164 B / 1,2 KB (60)  |
 ```
 
-⭐ **A lelet:** a forgalom tízszeres koinóra 3,0 → 4,0 KB — **logaritmikusan nő** (a felosztások
-száma, log16), nem a koinóval; 100 000 eseménynél **40-szer kevesebb**, mint a mai csere. És a
+⭐ **A lelet:** a forgalom tízszeres koinora 3,0 → 4,0 KB — **logaritmikusan nő** (a felosztások
+száma, log16), nem a koinoval; 100 000 eseménynél **40-szer kevesebb**, mint a mai csere. És a
 leggyakoribb eset, a „nincs újdonság", egyetlen 58 bájtos üzenet.
 
 ⚠️ **Amit a szám nem tartalmaz:** (1) az üzenetek keretét a vonalon (a UDP-darabolás, a nyugták —
@@ -4651,9 +4651,9 @@ KOPOGTATÁS (T = 3):  lyuk 0,3 → 59,4% · 0,5 → 75,8% · 0,8 → 92,9%   (k�
   + elárasztás h = 2: ugyanannyi (λ = 0); λ = 0,3 mellett 75,8 → 83,2%
 ```
 
-⭐ **A lelet:** ⛔ az elárasztás a kötés-hálón nagy koinóban **szinte semmit nem ad** (K = 3, 70% élő: a kérelem alig
+⭐ **A lelet:** ⛔ az elárasztás a kötés-hálón nagy koinoban **szinte semmit nem ad** (K = 3, 70% élő: a kérelem alig
 terjed — 5 ugrás ~38 üzenet; K = 5-nél 442 üzenet, ugyanannyi siker); csak közösségi érdeklődésnél (λ) és kis
-koinóban segít, ott is **2 ugrásig**. A közvetlen elérés a fogadóképesek arányán áll (f = 0-nál 0,1%). ⭐⭐ **A döntő
+koinoban segít, ott is **2 ugrásig**. A közvetlen elérés a fogadóképesek arányán áll (f = 0-nál 0,1%). ⭐⭐ **A döntő
 a rés nyitása a tartóhoz**: a kopogtatással (a tartó tudja, hogy kérnek tőle, és a buliban ő is kopog) T = 3-nál
 20% → 76% (fele fúrható pár), fogadóképes gép nélkül is 72%. ⚠️ **A határa:** a valódi fúrható arány terepmérés (az
 otthon ↔ mobil rés megy, a mobil ↔ mobil — 🅱️ — mérve még nincs); a kötés-háló véletlen gráf (a valódi
@@ -4688,7 +4688,7 @@ már megvolt pont-eseményt nem kéri el újra.
 
 ## 63. ⭐ A TAGSÁGI LÁNC A SZELETELT VILÁGBAN — a meghívási fa mélysége és a bizonyíték mérete (az E átvizsgálása, 2026-10-03)
 
-*`tagsagMeres.js`: a koinó meghívással nő (D56: egy meghívó elég); három növekedési mód — `egyenletes` (véletlen
+*`tagsagMeres.js`: a koino meghívással nő (D56: egy meghívó elég); három növekedési mód — `egyenletes` (véletlen
 meglévő tag hív), `aktiv` (preferenciális: aki sokat hívott, többet hív), `friss` (mindig a legutóbbi 20 belépett
 közül hív valaki — lánc-szerű). Egy lépés a bizonyítékban: a tag `Belepes`-e + a `Meghivas` (valódi aláírt események,
 a lánc-gyökérrel): 521 + 716 = **1237 B**. A gyorsítótár: M véletlen tag ellenőrzése, a közös ősök egyszer.*
@@ -4714,7 +4714,7 @@ mélység-korlátja (`D`) felülről korlátossá teszi a bizonyítékot — a m
 ⚠️ *(2026-10-19, a 78. mérés:)* a 64-es korlátot innen az ÁTLAGGAL mértük („~10^29–10^30 tagnál éri el”); a korlát viszont
 a LEGMÉLYEBB tagnál dönt — a 64-et a legmélyebb tag már ~1,3·10^11 tagnál eléri. → **D113**: 256.
 
-## 64. ⭐ A ZÁRT KOINÓ KAPUJA A DRÓTON — a személy és a tagsági csomag a kézfogásban (D93/3, 2026-10-04, a laptopon)
+## 64. ⭐ A ZÁRT KOINO KAPUJA A DRÓTON — a személy és a tagsági csomag a kézfogásban (D93/3, 2026-10-04, a laptopon)
 
 *`zartKapuMeres.js`: egy „nincs újdonság” csere a gépen belüli UDP-résen, titkosítva, tábla-kulccsal (ahogy az
 őrjárat), és a dróton ténylegesen utazó bájtok (a nyugtákkal együtt). A tagsági csomag valódi: aláírt belépések és
@@ -4802,7 +4802,7 @@ KÉT FOKÚ vállalás (1000 esemény fölött összegző), tárolt esemény · s
 ⛔ **de a farok a népszerű entitások miatt ~√N szerint nő** (a 95% 1 159 → 36 957 esemény három nagyságrend alatt), és a
 D93/1 miatt a vállalt szeletek szerzőinek tagsági bizonyítéka is kell — ez a 95%-nál ~570 MB (a láncok megosztásával
 kevesebb, de ugyanígy nő). A teljes vállalás tehát a „végtelen” próbáján elbukik. ⭐ A **két fokú vállalás** (a nagy szelet
-pont-tartója a gyökeret, a saját eseményeit és mintákat tart; a teljes halmazt az önkéntes) **konstans**: a koinó méretétől
+pont-tartója a gyökeret, a saját eseményeit és mintákat tart; a teljes halmazt az önkéntes) **konstans**: a koino méretétől
 függetlenül ~2 300–2 800 esemény és ~2 300 szerző tagsága a 95%-nál. → [`b3_szigoru_atvizsgalas.md`](../../docs/b3_szigoru_atvizsgalas.md).
 
 ## 67. ⭐ A LEZÁRÁSI ÖSSZEGZÉS ÁRA — a nagy szeletű érintett döntése az összegző tartónak (D95/1, 2026-10-05, a laptopon)
@@ -4934,15 +4934,15 @@ szerzői kulcs) üres kérdéssel. ⭐ A szerző oldala a részfa-gyorsítótár
 8 bizonyíték 5000-nél 1,9 s (O(n) a bizonyítékonként); az első kérdés ideje a lánc visszafelé bejárása (a testek
 betöltése), ami folyamatonként egyszeri.
 
-## 72. ⭐⭐ TEREPEN A VÉGLEGES SOR UTÁN: LAPTOP OTTHON, TELEFON A SZOMSZÉD WIFIJÉN — zárt koinó, szigorú (b) (2026-10-09, 20:13–20:50)
+## 72. ⭐⭐ TEREPEN A VÉGLEGES SOR UTÁN: LAPTOP OTTHON, TELEFON A SZOMSZÉD WIFIJÉN — zárt koino, szigorú (b) (2026-10-09, 20:13–20:50)
 
 *A program: `ae4e0ae` (1042 önpróba; a telefonon a frissítés után az `alap` és a `fa` csoport — 142 próba — zöld). Új,
-ZÁRT koinó (`KOINO_AZONOSITO=terep`, a laptop az alapító), mindkét gép a régi adat-mappájával (a 13 napos, még a `sajat`
-koinóban kötött kötés és a tábla-kulcsok), mindkettő `orjarat 1`, „alap” módban (a szigorú (b)). A laptop oldalát Claude
+ZÁRT koino (`KOINO_AZONOSITO=terep`, a laptop az alapító), mindkét gép a régi adat-mappájával (a 13 napos, még a `sajat`
+koinoban kötött kötés és a tábla-kulcsok), mindkettő `orjarat 1`, „alap” módban (a szigorú (b)). A laptop oldalát Claude
 futtatta (napló fájlba; 20:39-től `KOINO_UZENETMERES=1` — a saját kiküldött üzenetek nyílt bájtjai típusonként), a telefont
 Csaba (Termux, `tee ~/orjarat-T.log`; a napló bemásolva).*
 
-### ✅ A TÁBLÁN ÁT, OTTHONI ISMERKEDÉS NÉLKÜL — a régi kötés másik koinóban is talál
+### ✅ A TÁBLÁN ÁT, OTTHONI ISMERKEDÉS NÉLKÜL — a régi kötés másik koinoban is talál
 
 ```
 L:  20:13:53 1 címre kopogtam, egyik rés sem nyílt meg           (a telefon régi helyi címe)
@@ -4955,12 +4955,12 @@ T:  20:26:59 rés nyílt: 31.46.251.79:40967 (58575 ms)
 
 ⭐ Mindkét gép címe megváltozott a 43. mérés óta (a laptopé ugyanazon a gépen 31.46.251.115 → .79, a szomszédé
 5.187.184.117 → 84.2.81.146), a telefon a szomszéd routerén megtartotta a 7373-at. A kötés a tábla-kulcshoz kötött, nem a
-koinóhoz: az új koinóban is talált. ⚠️ Ugyanaz, mint a 43.-ban: a telefon egy percig kopogott hiába (58575 ms), amíg a
+koinohoz: az új koinoban is talált. ⚠️ Ugyanaz, mint a 43.-ban: a telefon egy percig kopogott hiába (58575 ms), amíg a
 laptop ki nem olvasta az ÚJ címét a tábláról — az otthoni router cím-függően szűr, a tábla itt az egyetlen út.
 
-### ✅ A ZÁRT KOINÓ KAPUJA TEREPEN (D93/3)
+### ✅ A ZÁRT KOINO KAPUJA TEREPEN (D93/3)
 
-A nem tag telefon csak a koinó születését kapta meg, a laptop csak a belépését vette át (20:27:00: „1 új esemény, küldtem
+A nem tag telefon csak a koino születését kapta meg, a laptop csak a belépését vette át (20:27:00: „1 új esemény, küldtem
 1”). 20:34:00-kor a laptopról meghívtam (`meghiv`), a meghívás átment, 20:34:32-kor a telefon kiadta a tagsági csomagját; a
 `tagsag` a telefonon: „✔ tag — tag hívta be (1. szint)”. ✅ A lánc-kör (D98/2) a laptopon a telefon láncát (a belépését)
 ellenőrizte (`lancellenorzes.json`).
@@ -4968,7 +4968,7 @@ ellenőrizte (`lancellenorzes.json`).
 ### ⛔ 1. LELET — A HOSSZAN FUTÓ VENDÉG 10 PERCIG NEM VETTE ÉSZRE A MEGKAPOTT SZÜLETÉST (javítva)
 
 20:27–20:33 között a laptop minden körben „küldtem 1”-et írt (5,4–5,9 KB körönként a ~2 helyett). Az ok: a telefon
-őrjárata a „nem ismerem a koinó születését” választ 10 percig megjegyezte (`koinoSzuletese`) — a cserében megkapott
+őrjárata a „nem ismerem a koino születését” választ 10 percig megjegyezte (`koinoSzuletese`) — a cserében megkapott
 születést addig nem tette a párjai közé, és a laptop újraküldte. Helyben nem jött elő, mert ott a vendég minden cserét új
 folyamatban futtatott. ✅ Javítva: a „nincs” emlék a tár változásakor elévül; parancssor-próba (a vendég `figyel`-je egy
 folyamat, a második cserén a gazda nem küld semmit — a régi kóddal „küldtem 1”).
@@ -5024,7 +5024,7 @@ látja, pontot tesz rá, és a következő cserén mindkét irányban átjön a 
 
 ## 73. ✅⭐ TEREPEN A D99-CEL: EGY CSERE PERCENKÉNT, ÜTKÖZÉS NÉLKÜL — és a fordított irány (2026-10-10, 17:46–21:35)
 
-*Ugyanaz a felállás, mint a 72.-ben (laptop otthon, telefon a szomszéd wifijén, a zárt `terep` koinó, „alap” mód), a
+*Ugyanaz a felállás, mint a 72.-ben (laptop otthon, telefon a szomszéd wifijén, a zárt `terep` koino, „alap” mód), a
 program: `d11e7eb` (a D99 — mindkét gépen). A laptop naplója fájlban (`KOINO_UZENETMERES=1`), a telefoné képernyőképen.*
 
 - **A D99 terepen:** 114 percben pontosan EGY csere percenként, egyetlen percben kettő (21:22 — a telefon új gondolata
@@ -5040,7 +5040,7 @@ program: `d11e7eb` (a D99 — mindkét gépen). A laptop naplója fájlban (`KOI
 - **A hazaút:** a telefon 21:20 körül az otthoni hálózatra váltott; a laptop 21:23–21:24-ben hiába kopogott, 21:25:01-kor a
   helyi címén (`192.168.1.124`) újra összeért — két perc kiesés, beavatkozás nélkül (mint a 72.-ben).
 
-⭐ **A lelet:** két külön router mögött (PC és mobil) a koino a szigorú (b) alatt, zárt koinóban, mindkét irányban
+⭐ **A lelet:** két külön router mögött (PC és mobil) a koino a szigorú (b) alatt, zárt koinoban, mindkét irányban
 működik: a táblán át találnak egymásra (a változó címek ellenére), a csak születéséből ismert gondolat látszik, a szövege
 már vállalás előtt átjön, a vállalás után a szelet a változott szelet útján (a társankénti emlékezettel) mozdul, a
 lánc-ellenőrzés lefut, és a „nincs újdonság” forgalom a D99-cel percenként egy csere (~2,4 KB). ⏸️ A két mobilnetes
@@ -5050,7 +5050,7 @@ telefon közötti rés (két cél-függő NAT) még méretlen — Csaba a közel
 
 *`node meres/bejaroMeres.js [N ...]` — magvas véletlen, 3 ismétlés átlaga. A kérdés: a D101 közös bejárója (az
 „ágazati pont szerint csökkenő” sor a fejléc-kérdéssel — a lapos ágazati rendezés, a Struktúra, a Síkidom alapja) hány
-kérelmet és hány percet kér egy FRISS készüléken (a koinóból semmit nem tart), egy 20 kártyás oldalhoz és egy B = 200 /
+kérelmet és hány percet kér egy FRISS készüléken (a koinoból semmit nem tart), egy 20 kártyás oldalhoz és egy B = 200 /
 500 / 2000 csomópontos Struktúrához? A modell a program mai menete: az őrjárat T percenként köröz, egy körben minden célhoz
 egy munka, egy munka EGY függő kérelmet visz (`tarshozIllo`), a függők legfeljebb 16-an; a tartó 30% eséllyel közvetlenül
 elérhető, különben a kopogtató témáján (≤ 20 perc) látja a kérelmet; körönként 70% eséllyel él; egy entitás tartói 1 +
@@ -5070,7 +5070,7 @@ körrel a „ma” és a G nagyjából másfélszeres, a H ötszörös — a kö
 - **⭐ G — D + a tartó MAGA jár be legjobb-először, amit tud** (X alatt a legjobb 50 a saját tudásából — egy csomópont
   gyerekeit akkor ismeri, ha a szeletét tartja): oldal **29–34 perc, 44–54 kérelem** (az A harmada), Struktúra-200 94–116
   perc.
-- **F — egy „mindent” tartó (D83/2) a kötések között** (a kis, családi koinó): oldal 6–8 perc — a késés 1 kör, de a
+- **F — egy „mindent” tartó (D83/2) a kötések között** (a kis, családi koino): oldal 6–8 perc — a késés 1 kör, de a
   sorrend szintjei így is egymás után jönnek.
 - **⭐ H — F + G:** oldal **1 kör** (1 / 5 perc), Struktúra-200 1–3 kör, Struktúra-2000 19–29 perc.
 
@@ -5080,18 +5080,18 @@ körrel a „ma” és a G nagyjából másfélszeres, a H ötszörös — a kö
 ⭐ **A lelet:** a bejáró idejét a KÉRÉSENKÉNTI KÉSÉS (a NAT mögötti tartó kopogtatása) szorozva a sorrend SZINTJEIVEL
 dönti el — nem a kapcsolatonkénti kérelemszám. Két dolog segít igazán: (1) ha egy kérelemre több szint jön — a tartó maga
 jár be, amit tud (G: az idő és a kérelemszám harmada); (2) ha a közelben van egy jól ellátott („mindent”) tartó — akkor egy
-oldal egyetlen körben megjön (H). ⭐ Egy oldal ideje és kérelemszáma NEM függ a koinó méretétől (N = 2000-től 200 000-ig
-ugyanaz) — a 9. szabály rendben. ⚠️ Egy friss készülék nagy koinóban, jól ellátott tartó nélkül, G-vel is fél óra alatt
+oldal egyetlen körben megjön (H). ⭐ Egy oldal ideje és kérelemszáma NEM függ a koino méretétől (N = 2000-től 200 000-ig
+ugyanaz) — a 9. szabály rendben. ⚠️ Egy friss készülék nagy koinoban, jól ellátott tartó nélkül, G-vel is fél óra alatt
 kap meg egy oldalt, egy 200-as Struktúrát másfél óra alatt — a lap tehát fokozatosan tölt (a ház csendes újrakérdezése),
 és a „mindent” tartók (D83/2, önkéntesek) értéke a felületen ezzel lesz mérhető. ⚠️ Az ára: egy oldal ~0,7–1,4 MB (a G-vel —
 a válaszonkénti 50 fejléc és a minták); egy kisebb `n` a bejárónál ezt csökkentené.
 
 **⚠️ PÓTLÁS (2026-10-11, a D102 után — a J3 próbája ott, ahol számíthat):** a „B — több kérelem egy kapcsolaton” változatot
 csak véletlen tartókkal mértem; ott valóban nem számít (G és „G1 — G, kapcsolatonként 1 kérelem” ugyanaz). ⛔ De ha
-EGYETLEN jól ellátott tartó kapja a kérelmeket (a kis, családi koinó — H), a kapcsolatonkénti 1 kérelem („H1”) mindent
+EGYETLEN jól ellátott tartó kapja a kérelmeket (a kis, családi koino — H), a kapcsolatonkénti 1 kérelem („H1”) mindent
 sorba állít: egy oldal 1 kör helyett 6, egy 200-as Struktúra 2–3 perc helyett 46–85 perc (1 perces körrel; 5 percessel
 10–15 helyett 230–425 perc), egy 2000-es 19–29 helyett 176–447 perc. ⭐ A J3 („nem kell”) tehát a nagy, szétszórt
-koinóra igaz, a kicsire nem — a döntés újra Csabáé.
+koinora igaz, a kicsire nem — a döntés újra Csabáé.
 
 
 **⛔ JAVÍTÁS (2026-10-18, a 77. mérés lelete):** a szimuláció bejárója ugyanazt a csomópontot két úton is a kupacba tehette
@@ -5103,7 +5103,7 @@ perc** (29–34 helyett), a 200-as Struktúrája **153–168 perc** (94–116 he
 1 perc (változatlan), a 200-asa **6–8 perc** (1–3 helyett), a 2000-ese 19–79 perc (19–29 helyett); a **H1** egy oldala 16–19
 perc, a 200-asa 91–191 perc (46–85 helyett). ⭐ **A sorrend nem változott** — a G harmada–fele az A-nak, a „mindent” tartó a
 döntő, és a kapcsolatonkénti 1 kérelem (H1) egy jól ellátott tartónál továbbra is sokszoros lassulás —, tehát a **D102
-döntései (J1, J2, J3 (A), J4) állnak**; az abszolút idők viszont rosszabbak: egy friss készülék nagy koinóban, „mindent”
+döntései (J1, J2, J3 (A), J4) állnak**; az abszolút idők viszont rosszabbak: egy friss készülék nagy koinoban, „mindent”
 tartó nélkül egy oldalt ~40 perc alatt, egy 200-as Struktúrát ~2,5 óra alatt kap meg (5 perces körrel ~45–50 perc / ~4,3–4,9 óra).
 ## 75. ⭐⭐ A KERESŐ-RÉTEG ÁRA — szimuláció (D105, K6: „előbb mérés”, 2026-10-16)
 
@@ -5122,10 +5122,10 @@ kopogtató témáján).*
 gondolatnál (A) 1,18 millió · (C) 1,22 millió.
 
 **⛔ K7 — A GYAKORI SZAVAK, MÉRVE:** a legnagyobb fiók (a „nem”) a címek **5,1–5,2%-a** minden méretnél (prózai aránnyal
-10,2–10,5%) — vagyis a koinóval LINEÁRISAN nő; a legnagyobb négybetűs szóeleje-fiók ~3%. Osztódás nélkül egy készülék
+10,2–10,5%) — vagyis a koinoval LINEÁRISAN nő; a legnagyobb négybetűs szóeleje-fiók ~3%. Osztódás nélkül egy készülék
 LEGNAGYOBB terhe (C): 943 · 5603 · **53 299 bejegyzés (~31 MB)** — az átlag 1,7 · 8 · **61-szerese**; prózai aránnyal
 egymilliónál 102 915 (~60 MB). ⭐ Osztódással (B = 256): 863 · 1452 · **2443 (~1,4 MB)** — az átlag 1,6 · 2,1 · 2,8-szerese
-(prózai aránnyal 3,1); a 99% 837 · 1239 · 1656. ⭐ **A K7 kell, és működik:** a teher nem nő a koinóval. A maradék szórás a
+(prózai aránnyal 3,1); a 99% 837 · 1239 · 1656. ⭐ **A K7 kell, és működik:** a teher nem nő a koinoval. A maradék szórás a
 darabok „rögeiből” jön (egy darab 128–256 bejegyzés, egy régió ~860): a legtöbbet tartó készülék aránya csak az extrém érték
 módjára, lassan nő (a régiók számával, logaritmikusan). A darab mérete paraméter: B = 128-cal a legtöbb 2,2×, 64-gyel 1,9×
 — de a teljesség romlik (a tőre keresésnél „legalább 10 találat” 91% → 88% → 86%, a két szavas teljes válasz 96% → 93% →
@@ -5135,7 +5135,7 @@ módjára, lassan nő (a régiók számával, logaritmikusan). A darab mérete p
 31%** jön meg, (C) **95% · 79% · 55%** (egy darabot kérdezve egy osztódott fiókból; kettővel 95 · 86 · 63%). „Legalább 10
 találat, vagy mind”: (A) 47 · 58 · 72%, **(C) 96 · 94 · 91%** (kettővel 96 · 95 · 94%). A háromjeles tő (a kérdések ~8%-a)
 mindkettőnél csak a pontos alakot kapja. ⭐ A magyar toldalékolás miatt az egész szavas kulcs a találatok több mint felét
-elveszíti; a (C) megéri a kétszeres tárolást. A „teljes” válasz a gyakori tőnél nagy koinóban minta (a K7 szerint) — a
+elveszíti; a (C) megéri a kétszeres tárolást. A „teljes” válasz a gyakori tőnél nagy koinoban minta (a K7 szerint) — a
 felületnek ezt ki kell mondania.
 
 **Két szavas kérdés** (egy valódi cím két tartalmi szava): a ritkább szó fiókja 100 · 99,5 · **95,8%-ban** ≤ 256 — a
@@ -5149,7 +5149,7 @@ legtöbb kérdésre egy körön belül jön válasz (a régió ~10 tartója köz
 **A felajánlás (K4):** gondolatonként ~7 régió, ~7 bejegyzés → ~90 KB (felső becslés: DHT-keresés + kopogtatás
 régiónként; a közvetlenül elérhető tartónál a kopogtatás elmarad).
 
-**K3 — a tagság a tartónál:** a tartó a RÉGIÓJA bejegyzéseinek tulajdonosait látja, nem az egész koinóét: ~860 bejegyzés,
+**K3 — a tagság a tartónál:** a tartó a RÉGIÓJA bejegyzéseinek tulajdonosait látja, nem az egész koinoét: ~860 bejegyzés,
 ~1240 különböző szerző egymilliónál. ⛔ A gyorsítótárnak ennél nagyobbnak kell lennie: 1024 szerzővel egymilliónál 30
 naponként a 64%-uk újra bizonyítékot kíván (~490 KB/nap), **4096-tal 5,4%** (~41 KB/nap; 100 ezernél 4,3%, 10 ezernél
 1,9%). Az új tartó ELSŐ kitöltése: 454 · 851 · 1241 szerző — ~3,5 · 8,8 · 16,1 MB, ha minden lánc külön jön; ⭐ a közös
@@ -5161,9 +5161,9 @@ nem egyszerre.
 tartó oldalán beérkező (bejegyzések + az új szerzők bizonyítéka) 16 · 35 · 59 KB/nap; ehhez jön a régió hirdetése a DHT-n
 (**~650 KB/nap** — 58. mérés) — **ez a kereső-réteg legnagyobb állandó tétele**, ugyanannyi, mint a gyökér-darabé.
 
-⭐ **A lelet:** a D105 alakja kiállja a próbát. A K7 (az osztódó fiók) nélkül a gyakori szó fiókja a koinóval lineárisan nő
+⭐ **A lelet:** a D105 alakja kiállja a próbát. A K7 (az osztódó fiók) nélkül a gyakori szó fiókja a koinoval lineárisan nő
 (egymilliónál ~31 MB egy készüléken) — vele egy készülék terhe ~0,5 MB átlagosan, ~1,4 MB a legtöbbet tartónál, és nem
-függ a koinó méretétől (a „végtelen” rendben). A K2 (C) a magyar toldalékolás miatt kétszer annyi találatot hoz, mint az
+függ a koino méretétől (a „végtelen” rendben). A K2 (C) a magyar toldalékolás miatt kétszer annyi találatot hoz, mint az
 egész szó. Két paraméter a mérésből: a darab B = 256, és a tartó tagság-gyorsítótára a régiója szerzőinél nagyobb (4096).
 ⚠️ A határai: a szóeloszlás szintetikus (a gyakori szavak arányát a koino_1.1 magyar szövegéből mérve, a tövek és a
 toldalékok modellből — a tőváltozás, a hangrend kimarad); a „tő-találat” a tő minden toldalékos alakja (a véletlen tövek
@@ -5172,7 +5172,7 @@ cseréje (a raj) nincs külön mérve.
 
 ## 76. ⭐⭐ MENNYIBE KERÜL EGY KÉRÉS KISZOLGÁLÁSA? (D108 — a kiszolgálási keret előtt, 2026-10-17, a laptopon)
 
-*`kiszolgalasMeres.js` — egy szintetikus koinó a memóriában (120 tag-szerző, a gondolatok egy fában, mindegyiken a szerzője
+*`kiszolgalasMeres.js` — egy szintetikus koino a memóriában (120 tag-szerző, a gondolatok egy fában, mindegyiken a szerzője
 pontja és fele eséllyel egy másiké), a kiszolgáló valódi függvényeivel; a beolvasás nincs benne (49. mérés: 100 000 esemény
 ~0,4 s). A kérdés: a kiszolgálási keret (D108) mekkora legyen — mennyibe kerül egy-egy kéréstípus, és mennyit kér a
 becsületes használat.*
@@ -5199,8 +5199,8 @@ terheli legjobban, nem a bájtokkal. ⭐ A becsületes használat ehhez képest 
 ~50–100 KB (képek nélkül), egy felderítés (3 szint × legjobb 10) ~0,5 MB a szövegekkel. A döntési kérdések (KK1–KK6):
 [`kiszolgalasi_keret_atvizsgalas.md`](../../docs/kiszolgalasi_keret_atvizsgalas.md).
 
-⚠️ A határai: a koinó szintetikus (egyenletes szerzők, egy-két pont gondolatonként, javaslatok nélkül — a döntés-számítás
-itt olcsó); a beolvasás és a vonal (titkosítás, UDP) nincs benne; a képek mérete a koinótól függ.
+⚠️ A határai: a koino szintetikus (egyenletes szerzők, egy-két pont gondolatonként, javaslatok nélkül — a döntés-számítás
+itt olcsó); a beolvasás és a vonal (titkosítás, UDP) nincs benne; a képek mérete a koinotól függ.
 
 ⭐⭐ **A KK1 UTÁN (D109 ①, 2026-10-17 — ugyanaz a mérés, a kiszolgáló képével):** a kiszolgáló a képét (az állapot, a
 fejléc-kép: az össz-pontok, a gyerek-jegyzék, a csomópontonként lustán rendezett gyereklisták) a tár állása szerint
@@ -5241,7 +5241,7 @@ H („mindent” tartó a kötések közt)
 ```
 
 ⭐ **A lelet:** (1) a felderítés fejléc-fázisa ugyanaz, mint egy K-s Struktúra — a mai menettel egy friss készüléken K = 200
-**2,5–4,3 óra**, K = 1000 **11–20 óra**; ⭐ a koinó méretétől nem függ (20 000 és 200 000 entitásnál ugyanaz). (2) **A törzs
+**2,5–4,3 óra**, K = 1000 **11–20 óra**; ⭐ a koino méretétől nem függ (20 000 és 200 000 entitásnál ugyanaz). (2) **A törzs
 nem a szűk keresztmetszet:** a törzs-kérelmek egymástól függetlenek (nem szintenként jönnek), ezért K = 200-nál csak ~1–1,5
 órát tesznek hozzá, pedig ~145 különböző készüléket érintenek — a fele 15–28 perc alatt megjön. (3) Egy „mindent” tartóval
 minden percekre rövidül; ⚠️ ott a KISZOLGÁLÁSI KERET szab határt (a szimuláció nem modellezi): egy társnak óránként ≤ 750
@@ -5265,10 +5265,10 @@ a szimuláció (átlag / 95% / 99,99% / a legmélyebb):
   aktív       10^6:  7,5 / 12 / 19 / 21   10^7:  9,1 / 14 / 21 / 26
 a farok (egyenletes, 10^7 tag; a tagok hányada L-nél mélyebben — pontosan / Hwang / egy szimulált fa):
   L = 25: 0,922% / 0,884% / 0,399%    L = 30: 0,032% / 0,031% / 5,3e-5    L = 35: 4,9e-6 / 4,9e-6 / 1,0e-7
-a legmélyebb tag:   10^10 (az emberiség)   10^11 (×10)   2^128 (a koinó saját határa)
+a legmélyebb tag:   10^10 (az emberiség)   10^11 (×10)   2^128 (a koino saját határa)
   egyenletes                ~57               ~63           ~234   (átlag ~88)
   aktív                     ~38               ~43           ~156
-a korlátok — hol éri el a legmélyebb tag · a koinó határán a tagok hányada a korlátnál mélyebben (egyenletes):
+a korlátok — hol éri el a legmélyebb tag · a koino határán a tagok hányada a korlátnál mélyebben (egyenletes):
   L =  64   egyenletes ~1,3·10^11, aktív ~1,6·10^16   ·   98,9%
   L = 128   egyenletes ~3,0·10^21, aktív ~4,7·10^31   ·   2,7·10^-5 (~9·10^33 tag)
   L = 256   egyenletes ~1,2·10^42, aktív ~4,3·10^62   ·   ~10^-48 (senki)
@@ -5282,10 +5282,10 @@ a 2. lépcső szúrópróbájának útja (a 65. mérés, helyi növekedés; átl
 mondta), de az átlag ott éri el a korlátot, ahol a tagok FELE már túl van rajta. A korlát a LEGMÉLYEBB tagnál dönt (aki
 mélyebben ül, nem tag, amíg egy közelebbi tag be nem hívja): véletlen meghívónál a fa magassága ~e·ln n (az átlag ~2,7-
 szerese), és a 64-et a legmélyebb tag már **~1,3·10^11** tagnál eléri — az emberiség ~13-szorosánál, a D106 (B) tízszeres
-tartalékán épp csak túl; a koinó saját határán a tagok ~99%-a mélyebben ülne. A 128-at ~3·10^21-nél (ott a tagok
-~0,003%-ának kellene rövidítenie), a **256-ot a koinó határáig sem** (~234; aktív meghívóknál ~156). A 2. lépcső
+tartalékán épp csak túl; a koino saját határán a tagok ~99%-a mélyebben ülne. A 128-at ~3·10^21-nél (ott a tagok
+~0,003%-ának kellene rövidítenie), a **256-ot a koino határáig sem** (~234; aktív meghívóknál ~156). A 2. lépcső
 szúrópróbájának útja ugyanezt a korlátot használja, és a helyi növekedésnél évtizedenként ~4–6 lépéssel nő (kivetítve a
-koinó határán ~150 / ~210). ⭐ Az ára a természetes tagnál nem változik (13–30 lépés, 16–37 KB); a korlátnál ülőé ~240 KB
+koino határán ~150 / ~210). ⭐ Az ára a természetes tagnál nem változik (13–30 lépés, 16–37 KB); a korlátnál ülőé ~240 KB
 (a dróton ~280 KB, társanként egyszer) — 32 ilyen egy tagsági válaszban (~7–11 MB, a profillal több) a vonal 8 MB-os
 sor-korlátjába nem fér biztosan, ezért a válasz bájt-korlátot kap. ⚠️ Egy szimulált fa farka erősen ingadozik (egyetlen futás
 ~2×; az átlagos mélység szórása ~0,6) — a farkat ezért a pontos eloszlás méri. → **D113** (Csaba, 2026-10-19: „(A) 256”).
@@ -5321,7 +5321,7 @@ haszna a mai kóddal is áll (×1,6–2,0, ha a forrás a szűk). → a UDP-s t�
 ## 80. ⭐⭐ A KOPOGÁS ÜTEME — hány percforduló marad ki egy valódi őrjárat körében? (41., 45. — „a kopogás saját üteme”, 2026-10-19, a laptopon)
 
 *`node meres/korUtemMeres.js [perc] [port] [--friss]` — egy valódi őrjárat (`orjarat 1`, 8 perc) a VALÓDI DHT-n:
-egy friss készülék egy koinóval, két néma kötéssel (valódi tábla-kulcs, halott cím) és három halott induló címmel;
+egy friss készülék egy koinoval, két néma kötéssel (valódi tábla-kulcs, halott cím) és három halott induló címmel;
 `--friss`: az egyik kötés két perce hallgatott el (mint egy hálózatváltás után — a tábláról minden ablakban keresi). A kör
 kezdetét a `csere.json` adja; egy percforduló kimaradt, ha utána 5 mp-en belül nem indult kör. A régi kód a `079d115`
 változata (`KOINO_UTEM_JS`).*
@@ -5446,8 +5446,8 @@ csere-kulcshoz, hogy egy tolvaj a kulccsal se köthessen le mást ugyanarra a n�
 - **(f) Az őrzők** (modell): 7/3, egy őrző egy év múlva 50%-ban elérhető → újraosztás nélkül 77%, havi újraosztással 99,99%.
 
 ⭐ **A lelet:** a keret és a csalás bizonyítéka ma EGY láncra épül — a közös keret (ET-3/3 (A)) a D42 lényegét (*„egyetlen eseményből
-eldől”*) venné el; a készülékenként osztott keret megtartja. A készülék felvétele a koinók fölött kell érvényes legyen (egy koinótól
-független tanúsítvány, koinónként egyszer — nem eseményenként). A hálózati darabolt mentés nem mag, és a kriptográfiája saját
+eldől”*) venné el; a készülékenként osztott keret megtartja. A készülék felvétele a koinok fölött kell érvényes legyen (egy koinotól
+független tanúsítvány, koinonként egyszer — nem eseményenként). A hálózati darabolt mentés nem mag, és a kriptográfiája saját
 számolást kíván.
 
 **Kiegészítés (2026-11-13, (g) — a tervező ág javaslatára: a keret magától átfolyik a készülékek között, a több szabad ponttal
@@ -5467,7 +5467,7 @@ találkozáskor a különbség fele megy át.
 
 ## 92. ⭐ A FELTÖLTÖTT NÉZET — hordozza-e a mai program, és elszigeteli-e a böngésző? (D123 ⑤, PR4 — a közösség feltöltött nézetei, 2026-11-08, a laptopon)
 
-*`nezetMeres.js` (a terv: `docs/nezetek_atvizsgalas.md` 2.). (a) Egy nézet-kártya három alakban a mai kapun, a koinó képén, a mai
+*`nezetMeres.js` (a terv: `docs/nezetek_atvizsgalas.md` 2.). (a) Egy nézet-kártya három alakban a mai kapun, a koino képén, a mai
 pakliban és a fájl-igényben. (b) Egy „rosszindulatú” nézet 30 úttal egy `sandbox="allow-scripts"` srcdoc-keretben, négy
 beállításban (K0 csak sandbox · K1 + a nézet CSP-je · K2 + `webrtc 'block'` · K3 + egy őr-szkript), a valódi kapu mögött, a lap
 három változatában (CSP nélkül · `frame-src 'none'` · `'self'`) — fej nélküli Chrome 156-tal (üres profil); a külvilág egy második
@@ -5571,9 +5571,9 @@ kódból olvasva).
 
 ---
 
-## 89. ⭐ A SZÁMÍTÁS MAGJÁNAK STABILITÁSA — milyen gyakran változik az, ami egy koinóban mindenkinél azonos kell legyen? (D123, a program rétegei, 2026-11-06, a laptopon)
+## 89. ⭐ A SZÁMÍTÁS MAGJÁNAK STABILITÁSA — milyen gyakran változik az, ami egy koinoban mindenkinél azonos kell legyen? (D123, a program rétegei, 2026-11-06, a laptopon)
 
-*`magMeres.js` (a terv: `docs/program_retegek_atvizsgalas.md` 5. szakasz — „mérés előtte: a mag stabilitása”). A mag a koinó képének
+*`magMeres.js` (a terv: `docs/program_retegek_atvizsgalas.md` 5. szakasz — „mérés előtte: a mag stabilitása”). A mag a koino képének
 (`ketReteg.js`) és a kapunak (`esemenyTar.js`) az import-zárványa — a mérés a program SAJÁT függvényével számolja
 (`kodCsomag.js` `magJegyzeke`), commitonként a git-ből. Ahol a mag neve változott, fájlonként megnézi, hogy csak komment és szóköz
 változott-e (egy mérési, nem teljes JS-elemzővel — a kétes eset kód). A 88. szám a BEP 5 mérésnek fenntartva
@@ -5586,7 +5586,7 @@ A MAG STABILITÁSA — 36 commit a koino/ alatt, ff60542 óta (a ketReteg.js bev
   a mag fájljait érintő commit: 4 · a mag neve változott: 4 (ebből csak komment / szóköz: 0)
 
   KÓD    2026-10-24 fd8475d A költözés ④a: a ki- és a beköltözés eseménye, a tagság öröklése (D118/3, /6, KZ3)
-  KÓD    2026-10-25 47795ee A költözés ⑤b: a szerző LÁNCA a koinóban
+  KÓD    2026-10-25 47795ee A költözés ⑤b: a szerző LÁNCA a koinoban
   KÓD    2026-10-25 6d079c3 D119 ①a: a koino-verzió kártya a program oldalán — és D119/A
   KÓD    2026-10-29 18bf1c4 D120: a törzs-határ — a nagy törzs elemenként, kérésre
 ```
@@ -5596,7 +5596,7 @@ kommentet érintő változás egy sem; 10-29 óta (egy hét, ~20 commit) egyszer
 ugyanaz). → **D123 ①:** a mag neve a fájlok BÁJTJAIT köti (a kommentet is) — a téves „más számítás” riasztás ritka lesz, a kommentet
 szűrő lenyomat pedig egy elemzőn múlna, és egy téves szűrés a kimaradó változás felé (a veszélyes irányba) billentene. ⚠️ A felső
 becslés: a mérés azt nézi, változott-e a mag KÓDJA, azt nem, hogy egy esemény-halmaz KÉPE változott-e (a négyből kettő az esemény
-alakját bővítette — egy régi koinó képét nem érintette volna).
+alakját bővítette — egy régi koino képét nem érintette volna).
 
 ---
 
@@ -5637,7 +5637,7 @@ meghívó titkából); a kereső két friss klienssel, sorban keres. ⏸️ A k�
   címre szűrő ellenpróba ritkán találja el ugyanazt; a kudarc-számláló (M3 (a)) a járható út.
 - Az ellenőrző keresés (a kiíró látja-e a saját cetlijét) működik — de BEP 5-nél a „látom” nem jelenti, hogy más is látja.
 
-→ A belépő cetlije BEP 44-re költözzön (a meghívó titkából származó kulcspárral — „a meghívó rekesze”); ⚠️ és a koinó többi BEP 5
+→ A belépő cetlije BEP 44-re költözzön (a meghívó titkából származó kulcspárral — „a meghívó rekesze”); ⚠️ és a koino többi BEP 5
 útja (a címjegyzék — D91: a gyökér-darab hirdetése, a kopogtatók, a kereső-régió társai) ugyanettől szenved — külön átvizsgálás.
 
 
@@ -5670,21 +5670,21 @@ jön, az adat minden nap utazik.
 
 ## 85. ⭐ A CSALÁDI CSERE ÁRA — mennyibe kerül, hogy egy csere a családot cseréli? (D119 ③, M1, 2026-10-26, a laptopon)
 
-`node meres/csaladCsereMeres.js [k ...]` — a megépült kódon: két készülék, egy k koinós család (a szülő és k − 1 gyermek,
+`node meres/csaladCsereMeres.js [k ...]` — a megépült kódon: két készülék, egy k koinos család (a szülő és k − 1 gyermek,
 koino-verzió kártyával), B a szülő tagja és minden gyermekbe beköltözött; A postaládát futtat a SZÜLŐRE, B a szülőre nyitva
 cserél, amíg egy csere semmit nem hoz. A bájtok a résen, titkosítva, a kézfogás nélkül (a kimenet „csere a résen” sorai).
 
 - **A nyitás `cs` jele** (nyílt, a `NYITAS`-ban, irányonként egyszer): k = 1: 8 B · 2: 53 B · 5: 191 B · 16: 697 B · 64: 2,9 KB —
-  koinónként +46 B (a koinó neve).
+  koinonként +46 B (a koino neve).
 - **A „nincs újdonság” családi csere:** k = 1: **2,3 KB** (1,0 s) · k = 2: **4,4 KB** (2,5 + 1,9; 1,05 s) · k = 3: **6,7 KB**
-  (1,35 s) · k = 5: **11,8 KB** (2,9 + 4 × 2,2; 1,8 s). ⭐ Koinónként ~2,2 KB és ~200 ms — lineáris, ugyanaz, mintha minden
-  koinó külön cserélne (a mérce: egy koinó cseréje), csak egy kopogással és egy munkában.
-- **Az első csere** (A minden koinóba írt egy gondolatot): k = 5: 63 KB, 2,3 s — minden új gondolat megjött.
+  (1,35 s) · k = 5: **11,8 KB** (2,9 + 4 × 2,2; 1,8 s). ⭐ Koinonként ~2,2 KB és ~200 ms — lineáris, ugyanaz, mintha minden
+  koino külön cserélne (a mérce: egy koino cseréje), csak egy kopogással és egy munkában.
+- **Az első csere** (A minden koinoba írt egy gondolatot): k = 5: 63 KB, 2,3 s — minden új gondolat megjött.
 - ⚠️ **A kártyák kódja:** a nem vállaló B a kártyák kódját is elhozta (6,5 MB, 9 cserében — randevúnként ≤ 50 fájl); alapból a
   kiszolgálási keret (társanként ~150 kérés / óra) a harmadik csere után „később”-t mond — ezért a mérés a postaládának nagy
   keretet ad (`KOINO_KERET`). Lásd lent (Csabánál).
 
-⭐ **Amit mutat:** a családi kör nem drágítja a cserét: a teher a közös koinók számával lineárisan nő (a készülék maga
+⭐ **Amit mutat:** a családi kör nem drágítja a cserét: a teher a közös koinok számával lineárisan nő (a készülék maga
 választotta őket — 9. szabály), a nyitás jele elhanyagolható. ⏸️ **Csabánál:** a kártya kódját a fájl-igény MINDEN látott
 entitásra kéri (a ①b óta — a 84. mérés leírása szerint csak a „Kód” fület megnyitónak és a költözőnek utazna).
 
@@ -5745,7 +5745,7 @@ készült el.)*
 - **Egy szelet örökölt múltja** a vonalon és a lemezen ugyanannyi, mint a szülőben volt (az események átírás nélkül jönnek —
   D118/1); a költöző első kitöltése a vállalt szeletei múltja.
 
-⭐ **Amit mutat:** a költözés ára a költöző saját láncával arányos (a 9. szabály szerint — nem a koinó méretével), a születések
+⭐ **Amit mutat:** a költözés ára a költöző saját láncával arányos (a 9. szabály szerint — nem a koino méretével), a születések
 lánca a nemzedékek számával — mind egyszeri. A legnagyobb tétel a mély tag beköltözése (~14 KB 1 millió tagnál) — egy
 rövidebb lánc (egy közelebbi meghívó) kisebb; a mező a tagsági csomag mintáját követi (D113: ≤ 1024 esemény).
 

@@ -8,7 +8,7 @@
 
 ## 1. A rövid válasz
 
-**A kártya a mag változása nélkül megy.** A mai kapu egy új fajta kártyát átenged, és a koinó képe megőrzi a típusát (92. (a)).
+**A kártya a mag változása nélkül megy.** A mai kapu egy új fajta kártyát átenged, és a koino képe megőrzi a típusát (92. (a)).
 Egy új MEZŐT viszont a kép eldob, és a mai szállítás sem visz. Ha tehát a nézet kódja a kártya **szövegében egy csatolt
 HTML-fájl**, akkor a mai program mindent hordoz:
 - a kapu átengedi, a kép megőrzi;
@@ -26,11 +26,11 @@ Költözés nem kell (D118).
 A négy réteggel a mért utak mind zárva. Kiderült az is, hogy a kulcs a nézethez nem jut el.
 
 ⚠️ **Ami nem zárható biztosan:** amit nem ismerünk. Ezért a második védvonal a **hatókör** (NZ2, NZ3). A nézet csak azt
-látja, amit abban a koinóban minden tag lát — és a szerzője is tag. Amit kiszivárogtathatna, azt a szerzője amúgy is látja.
+látja, amit abban a koinoban minden tag lát — és a szerzője is tag. Amit kiszivárogtathatna, azt a szerzője amúgy is látja.
 
 ## 2. A 92. mérés
 
-**(a) A nézet-kártya a mai programon** — egy koinóban három alakban, ponttal, a mai kapun át (`ujEember` aláírt eseményeivel):
+**(a) A nézet-kártya a mai programon** — egy koinoban három alakban, ponttal, a mai kapun át (`ujEember` aláírt eseményeivel):
 - **saját típus (`Nezet`) + egy `nezet` mező:**
   - a kapu beengedi;
   - a képben a típus megmarad, de a `nezet` mező **elvész**;
@@ -111,13 +111,13 @@ koino-verzió kártyánál.
    jelzése.
 3. **A bekapcsolás a saját készüléken:** „🧩 Bekapcsolom ezen a készüléken”. Előtte egy ablak mondja ki:
    - ki tette fel, és hány pont van rajta;
-   - mit lát a nézet: a koinó közös képét (NZ3);
+   - mit lát a nézet: a koino közös képét (NZ3);
    - mit nem: a kulcsodat nem kapja, írni nem tud, kifelé nem szólhat (a mért utak);
    - és *„egy feltöltött nézet hamis rajzot is adhat — a döntés a lap saját kártyáin van”*.
 
-   A bekapcsolás **koinónként** és **a kód lenyomatához kötve** kerül az adat-mappába (`<adat>/nezetek.json`). Ha egy egyezmény
+   A bekapcsolás **koinonként** és **a kód lenyomatához kötve** kerül az adat-mappába (`<adat>/nezetek.json`). Ha egy egyezmény
    új kódot hoz (a szöveg módosítása), a nézet kikapcsol, és a lap megmondja, mi változott.
-4. **A futtatás:** a fő menü „🧩 Nézetek…” — a koinó nézet-kártyái pont szerint, a bekapcsoltak elöl. A nézet a pakli helyén fut
+4. **A futtatás:** a fő menü „🧩 Nézetek…” — a koino nézet-kártyái pont szerint, a bekapcsoltak elöl. A nézet a pakli helyén fut
    (NZ5), egy felirattal (*„🧩 <cím> — feltöltött nézet: olvas, nem ír”*) és egy bezáró gombbal.
 5. **A nézet-felület** — a nézet és a lap közötti beszéd, `postMessage`-en. A lap csak a saját keretének üzenetére felel
    (`e.source`), és csak ezekre a kérdésekre:
@@ -136,7 +136,7 @@ koino-verzió kártyánál.
    - a lap CSP-je `frame-src 'none'` (a kapu fejléce vagy a lap `<meta>`-ja);
    - a kód a lapé: a lap kéri a fájlt a kaputól, és srcdoc-ként adja a keretnek. A keret semmit nem tölt be.
 
-   ⛔ Az örökölt felület-fájlokhoz (`frontend/js` bájtra) nem kell nyúlni — minden a koinós többletben épül
+   ⛔ Az örökölt felület-fájlokhoz (`frontend/js` bájtra) nem kell nyúlni — minden a koinos többletben épül
    (`felulet/js/koinoNezet*.js`).
 
 ## 5. A kérdések (⏸️ Csabáé)
@@ -149,12 +149,12 @@ koino-verzió kártyánál.
     a képben nem őrzi meg (92. (a)), a szállítás új igény-forrást kíván, és a régi társak nem viszik.
   - (C) a mag bővítése (a kép is ismerje a mezőt) — költözés, elvetendő.
 - **NZ2 — Hol futhat egy nézet?**
-  - (A) ⭐ **csak abban a koinóban, ahol a kártyája van.** A szerzője ott tag: amit a nézet lát, azt ő is látja. Egy másik
-    koinóban egy másik kártya kell (ugyanaz a fájl feltölthető, és ugyanazzal a lenyomattal jelenik meg).
-  - (B) minden koinódban, ahol bekapcsolod. Kényelmesebb, de így egy zárt koinó tartalma egy kívülálló szerző kódja elé
+  - (A) ⭐ **csak abban a koinoban, ahol a kártyája van.** A szerzője ott tag: amit a nézet lát, azt ő is látja. Egy másik
+    koinoban egy másik kártya kell (ugyanaz a fájl feltölthető, és ugyanazzal a lenyomattal jelenik meg).
+  - (B) minden koinodban, ahol bekapcsolod. Kényelmesebb, de így egy zárt koino tartalma egy kívülálló szerző kódja elé
     kerül — egy ismeretlen szivárgási út tétje megnő.
 - **NZ3 — Mit lásson a nézet?**
-  - (A) ⭐ **a koinó közös képét, és hogy melyik az én kulcsom, a pontjaimmal.** Mint a pakli: a „saját pontod” ma is ott
+  - (A) ⭐ **a koino közös képét, és hogy melyik az én kulcsom, a pontjaimmal.** Mint a pakli: a „saját pontod” ma is ott
     van. A pontok alá vannak írva, a kulcsok a közös képben amúgy is látszanak.
   - (B) csak a közös képet — a nézet nem tudja, ki nézi; a „saját pontjaim” nézet nem építhető.
 - **NZ4 — Milyen felületen beszéljen a nézet a lappal?**
@@ -182,14 +182,14 @@ koino-verzió kártyánál.
 - **A rajz igazságát.** A nézet hamis számokat is mutathat (egy javaslatot nyertesnek rajzolhat). Ez ellen a felirat véd
   (*„feltöltött nézet”*), és hogy a döntés a lap saját kártyáin van — a lenyomat itt is csak azt bizonyítja, hogy ez az a kód
   (mint a PR5-nél).
-- **A teljesítményt.** Egy nagy koinó képe `postMessage`-en — nem mérve; az építéskor mérendő.
+- **A teljesítményt.** Egy nagy koino képe `postMessage`-en — nem mérve; az építéskor mérendő.
 - **A parancssort.** A nézet egy rajzoló (7. szabály: a böngésző cserélhető rajzoló). A parancssor a feltöltést, a „Kód”-ot és
   a be/kikapcsolást tudja, a rajzot nem.
 
 ## 7. Az építés sorrendje (ha a kérdések eldőlnek)
 
 ① **a kártya:** a feltöltés, a „Kód” fül, a `nezet` parancs → ② **a keret és a négy réteg** (a lap CSP-je, a sandbox, a nézet
-CSP-je és az őr), és **a nézet-felület 1** → ③ **a bekapcsolás** (`nezetek.json`, a lenyomat, koinónként) és a fő menü →
+CSP-je és az őr), és **a nézet-felület 1** → ③ **a bekapcsolás** (`nezetek.json`, a lenyomat, koinonként) és a fő menü →
 ④ **a próbák:** a 92. mérés (b) részéből önpróba, fej nélküli Chrome-mal. Ha nincs Chrome a gépen, kimarad — mint a `sh`-t
 kívánó próbák. → ⑤ **terepi próba** (a telefon böngészője).
 
@@ -199,8 +199,8 @@ kívánó próbák. → ⑤ **terepi próba** (a telefon böngészője).
 (`nezetKartya.js` `nezetSzovegBlokkjai`). A kód a szöveg ELSŐ fájl-blokkja (`nezetKodja`) — így egy egyezmény, ami a szöveget módosítja,
 a kódot is cserélheti. A törzs mérete (D120) a kódot is mondja, a tárolási vállalás (D26) is.
 
-**A bekapcsolás:** `<adat>/nezetek.json` — koinónként (NZ2), kártyánként a kód lenyomatával (NZ1); legfeljebb 64 nézet egy koinóban, 256
-koinó. Az állás: `be` (a mostani kód az, amit bekapcsoltál), `valtozott` (más a kódja — kikapcsolva, újra meg kell nézni), `ki`. A lap a
+**A bekapcsolás:** `<adat>/nezetek.json` — koinonként (NZ2), kártyánként a kód lenyomatával (NZ1); legfeljebb 64 nézet egy koinoban, 256
+koino. Az állás: `be` (a mostani kód az, amit bekapcsoltál), `valtozott` (más a kódja — kikapcsolva, újra meg kell nézni), `ki`. A lap a
 lenyomatot, amit az e-ember látott, maga küldi (ha közben más kód jött, nem kapcsol be).
 
 **A futtatás:** a lap a programtól kéri a keret tartalmát (`/api/nezet/keret` — csak bekapcsolva, ugyanazzal a kóddal): a nézet CSP-je és az

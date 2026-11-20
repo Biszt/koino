@@ -46,7 +46,7 @@
 //   A valódi megvalósításban minden tanúsítás aláírt esemény lesz.
 // · A „találkozó" itt annyi, hogy egy csoport tagjai kölcsönösen tanúsítják egymást.
 // · A diszjunkt utakat MOHÓN számoljuk (alsó korlát) — ⭐ és ez szándékos: a valódi
-//   koinóban is a JELENTKEZŐ mutat fel `k` utat, nem a maximumot keresi valaki (D43).
+//   koinoban is a JELENTKEZŐ mutat fel `k` utat, nem a maximumot keresi valaki (D43).
 
 import { kiir } from './naplo.js';
 
@@ -256,7 +256,7 @@ function tanusit(vilag, szabaly, tanu, kit) {
 // egy találkozón mindenki ismer mindenkit, tehát EGY találkozó csak EGYET ér.
 //
 // ⚠️ A független halmazt MOHÓN számoljuk: alsó korlát. Ez szándékos (D43) — és a valódi
-// koinóban is a jelentkező mutatja fel a független tanúit, nem a maximumot keresi.
+// koinoban is a jelentkező mutatja fel a független tanúit, nem a maximumot keresi.
 
 /**
  * Hány EGYMÁST NEM ISMERŐ ember van a listában? (mohó, tehát alsó korlát — D43)
@@ -294,7 +294,7 @@ function fuggetlenHorgonyTanuk(vilag, i) {
 // rosszabb a semminél — hozzászoknak, és megszűnik jelzés lenni.
 
 /**
- * ⭐ TORLÓDÁS — összesített jelzés a koinóról, NEM emberekről (D49/c, 3. védőkorlát).
+ * ⭐ TORLÓDÁS — összesített jelzés a koinoról, NEM emberekről (D49/c, 3. védőkorlát).
  *
  * „Hány felvétel vezethető vissza ugyanarra a néhány tanúra?" Egy egészséges közösségben
  * a tanúsítás sok ezer ember között oszlik el; egy szigetnél viszont ugyanaz a néhány
@@ -833,7 +833,7 @@ function jelzesekKiirasa(mag) {
   // képest méri a távolságot.
   kiir(`  horgonyok: ${e.horgonyok} valódi  ·  ⛔ ${e.hamisHorgony} HAMIS`);
   kiir('');
-  // ⭐ Összesített jelzés a koinóról (D49/c): a nyolc legtöbbet tanúsító ember
+  // ⭐ Összesített jelzés a koinoról (D49/c): a nyolc legtöbbet tanúsító ember
   // részesedése az összes tanúsításból — támadóval és nélküle.
   const tiszta = futtatas(szabaly, 0, mag);
   kiir(`  TORLÓDÁS (a 8 legtöbbet tanúsító ember részesedése):  ` +
@@ -1053,7 +1053,7 @@ function main() {
   kiir('='.repeat(74));
   kiir('');
   kiir('MIT KELL NÉZNI:');
-  kiir('  · „valódi tag" — NŐ-E a közösség? Ha ez megáll, a szabály befagyasztotta a koinót,');
+  kiir('  · „valódi tag" — NŐ-E a közösség? Ha ez megáll, a szabály befagyasztotta a koinot,');
   kiir('    akkor is, ha közben tökéletesen véd.');
   kiir('  · „HAMIS BENT" — hány hamis azonosság jutott be. A 0 megtévesztettnél mindig 0');
   kiir('    kell legyen; ha nem az, a szimulátor a hibás.');

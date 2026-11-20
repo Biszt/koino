@@ -486,7 +486,7 @@ proba('⛔ GONDOLATTÍPUST NEM LEHET EGYESÍTENI (se áthelyezni)', async () => 
 
 proba('⛔⛔ A SZERKESZTÉSI JAVASLAT/EGYEZMÉNY SZÖVEGÉT NEM LEHET ÁTÍRNI (csak mozgatni)', async () => {
   // A prototípus: „Egyezményre csak áthelyezési vagy törlési javaslat indítható."
-  // ⭐ A koinóban a szerkesztési egyezmény UGYANAZ az entitás, mint a szerkesztési
+  // ⭐ A koinoban a szerkesztési egyezmény UGYANAZ az entitás, mint a szerkesztési
   // javaslat (azonos azonosító, más státusz) — a típusa `Javaslat`. Így a szabály egy
   // fokkal többet is véd: a szavazás alatt álló javaslat szövege sem írható át.
   const kezdet = Date.UTC(2026, 0, 1);
@@ -730,7 +730,7 @@ proba('⭐⭐ D93/1: a NEM TAG pontja nem számít — függőben (nem vád), é
   const nelkule = allapotSzamitasa([t, p]);
   const vele = await tagokkal([t, p]);
   const tagkent = allapotSzamitasa(vele);
-  // Csak a tagsági csomag (a koinó születése és a meghívás külön esemény nélkül — a csomag hozza őket):
+  // Csak a tagsági csomag (a koino születése és a meghívás külön esemény nélkül — a csomag hozza őket):
   const { tagsagiIndex, tagsagiLanc, TAGSAGI_CSOMAG } = await import('../js/allapot/tagsag.js');
   const belepes = vele.find((e) => e.tipus === 'Belepes' && e.szerzo === anna.szerzo);
   const lanc = tagsagiLanc(tagsagiIndex(vele), belepes.azonosito);
@@ -743,19 +743,19 @@ proba('⭐⭐ D93/1: a NEM TAG pontja nem számít — függőben (nem vád), é
 });
 
 // ===================================
-// ⭐⭐ D118/2 (①b): A KOINÓ SZABÁLYAI A SZÜLETÉSBEN
+// ⭐⭐ D118/2 (①b): A KOINO SZABÁLYAI A SZÜLETÉSBEN
 // ===================================
 //
-// Ugyanazok az események két koinóban: az egyik születése kisebb keretet és kategória-korlátot mond. ⭐ A szabály-réteg a
+// Ugyanazok az események két koinoban: az egyik születése kisebb keretet és kategória-korlátot mond. ⭐ A szabály-réteg a
 // születésből ítél — a programban nincs más szám. ⚠️ Rontás: ha a `szabalyokErvenyesitese` a mai állandót veszi, bukik.
 
-/** Egy próba-koinó születése a megadott szabályokkal (a régi alakban — a `tagokkal` ehhez építi a tagságot). */
+/** Egy próba-koino születése a megadott szabályokkal (a régi alakban — a `tagokkal` ehhez építi a tagságot). */
 async function koinoSzabalyokkal(szabalyok) {
   const alapito = await ujEember();
-  return alapito.tesz('KoinoLetrehozas', { nev: 'Szabályos koinó', leiras: null, alapitok: [], zart: true, szabalyok });
+  return alapito.tesz('KoinoLetrehozas', { nev: 'Szabályos koino', leiras: null, alapitok: [], zart: true, szabalyok });
 }
 
-proba('⭐⭐ D118/2 (①b): a koinó KERETE a születéséből — 500-as keretnél a 600 pont nem számít, a 450 igen; ugyanez a mai koinóban számít',
+proba('⭐⭐ D118/2 (①b): a koino KERETE a születéséből — 500-as keretnél a 600 pont nem számít, a 450 igen; ugyanez a mai koinoban számít',
   async () => {
     const szuletes = await koinoSzabalyokkal({ tudatpontKeret: 500 });
     const anna = await ujEember();
@@ -770,13 +770,13 @@ proba('⭐⭐ D118/2 (①b): a koinó KERETE a születéséből — 500-as keret
       && kicsiben.kivetelek.some((k) => k.azonosito === sok.azonosito && /600 \/ 500/.test(k.ok))
       && utana.entitasok.get(t.azonosito)?.osszesPont === 450
       && maiban.kivetelek.length === 0 && maiban.entitasok.get(t.azonosito)?.osszesPont === 600
-      // ⭐ Az állapot kimondja a koinó szabályait (a felület és a parancssor innen veszi).
+      // ⭐ Az állapot kimondja a koino szabályait (a felület és a parancssor innen veszi).
       && kicsiben.koino?.szabalyok?.tudatpontKeret === 500 && maiban.koino?.szabalyok?.tudatpontKeret === TUDATPONT_KERET;
   });
 
 // ⭐ A MÁSIK ÁG: a bemondás a kereten belül van, de hézag után a SZÁMÍTOTT összeg túllépi. A 15. mérés megismétlése találta
-// meg, hogy ez az ág még a program állandóját nézte (a mai, 10 000-es koinóban ugyanez az esemény számít — jelzéssel).
-proba('⭐ D118/2 (①b): hézagos láncnál a SZÁMÍTOTT összeg is a koinó keretéhez mérődik — 500-asban a 700 nem számít, a maiban igen',
+// meg, hogy ez az ág még a program állandóját nézte (a mai, 10 000-es koinoban ugyanez az esemény számít — jelzéssel).
+proba('⭐ D118/2 (①b): hézagos láncnál a SZÁMÍTOTT összeg is a koino keretéhez mérődik — 500-asban a 700 nem számít, a maiban igen',
   async () => {
     const szuletes = await koinoSzabalyokkal({ tudatpontKeret: 500 });
     const anna = await ujEember();
@@ -793,7 +793,7 @@ proba('⭐ D118/2 (①b): hézagos láncnál a SZÁMÍTOTT összeg is a koinó k
       && !maiban.kivetelek.some((k) => k.azonosito === px.azonosito) && maiban.entitasok.get(x.azonosito)?.osszesPont === 400;
   });
 
-proba('⭐ D118/2 (①b): a koinó KATEGÓRIA-KORLÁTJA a születéséből — 1-es korlátnál a két kategóriás gondolat nem számít, a mai koinóban igen',
+proba('⭐ D118/2 (①b): a koino KATEGÓRIA-KORLÁTJA a születéséből — 1-es korlátnál a két kategóriás gondolat nem számít, a mai koinoban igen',
   async () => {
     const szuletes = await koinoSzabalyokkal({ kategoriaKorlat: 1 });
     const anna = await ujEember();

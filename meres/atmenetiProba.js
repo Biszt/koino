@@ -168,7 +168,7 @@ proba('⭐⭐ D75/4: a csak az átmenetiből ismert, pont nélkül látott entit
 // 3. A VÁLLALÁS (B/1)
 // ===================================
 
-proba('⭐⭐ B/1: a vállalás a saját láncból — a pozitív pontú szeletek (a töredék is), az azonosságom, a koinó születése', async () => {
+proba('⭐⭐ B/1: a vállalás a saját láncból — a pozitív pontú szeletek (a töredék is), az azonosságom, a koino születése', async () => {
   const anna = await ujEember(KOINO);
   const g1 = await anna.tesz('GondolatLetrehozas', { cim: 'G1', meret: 10 });
   const g2 = await anna.tesz('GondolatLetrehozas', { cim: 'G2', meret: 10 });

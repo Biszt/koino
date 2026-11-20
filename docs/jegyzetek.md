@@ -87,7 +87,7 @@ NEM akarunk azonnal megcsinálni, de elveszíteni sem.
   entitás tulajdonosaitól? **(2)** 67% RÉSZVÉTEL egymilliárdnál 670 millió szavazó — a
   „nehéz" és a „lehetetlen" két különböző terv; a válasz valószínűleg a saját globális
   passzív/aktív ötlete.
-  ⚠️ Megmérve (14. mérés): **ma a koinóban sehol nincs olyan mechanizmus, hogy egy hallgató
+  ⚠️ Megmérve (14. mérés): **ma a koinoban sehol nincs olyan mechanizmus, hogy egy hallgató
   ember „tart" egy alapértéket** — az `ALAP_KUSZOBOK` csak tartalék. A szűk változat is
   ugyanazt a kódrészt kívánja (`kuszobokItt`), csak **javaslat-fajtára kapuzva**.
   → Felírva, **nem elvégezve**. *(Csaba: „csak ötletelek.")*

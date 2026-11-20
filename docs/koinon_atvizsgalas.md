@@ -36,7 +36,7 @@ mivel kicsi, mindenki tartja. Ez a dokumentum a 2. lépés: **a koinon az által
 2. **Az őrzés — a koinon darabjai:** egy egyezmény az azonosítója szerint egy darabba esik. Minden készülék a kulcsa szerinti darabot
    vállalja egy olyan mélységen, hogy minden darabnak ~`r` tartója legyen (a készülékek számából becsülve), és a szomszéd szintet is
    (átfedés — ha egy darab tartói megfogynak, a durvább szint tartói még őrzik). Egy készülék terhe így ~`egyezmények × r / készülékek`
-   — a koinó növekedésével nem nő egy készülékre.
+   — a koino növekedésével nem nő egy készülékre.
 3. **Mit őriznek:** az egyezmény tényét és a hatályát — a javaslatot, a döntés tömör bizonyítékát (a lezárási összegzést), és az
    állásfoglalásokat (csatlakozik / tiltakozik / ütközik — e-emberenként az utolsó, tehát a tagok számával korlátos). A nyers szavazatok
    nem kellenek (a lezárási összegzés bizonyít helyettük); kis döntésnél a teljes esemény-készlet is lehet.
@@ -53,9 +53,9 @@ mivel kicsi, mindenki tartja. Ez a dokumentum a 2. lépés: **a koinon az által
   pontot tartanak) — nem garantált, ha ők is elmennek.
 - **KO3 — mit őriznek?** (A) a tényt és a hatályt tömören: a javaslat, a lezárási összegzés, az állásfoglalások ⭐; (B) a döntés minden
   eseményét (a szavazatokkal együtt — nagy döntésnél százezres).
-- **KO4 — mennyi a példányszám (`r`)?** A skálázási terv szerint közösségi paraméter (D13/c — a koinó születésében, mint a többi
+- **KO4 — mennyi a példányszám (`r`)?** A skálázási terv szerint közösségi paraméter (D13/c — a koino születésében, mint a többi
   szabály), az alapértéke mérésből: ha egy készülék az idő 30%-ában elérhető, 10 példánynál 97% az esély, hogy legalább egy válaszol,
-  20-nál 99,9%. ⭐ Javaslat: alapból 20, a koinó születése mondja ki.
+  20-nál 99,9%. ⭐ Javaslat: alapból 20, a koino születése mondja ki.
 - **KO5 — a kézikönyv?** Most mindenki tartja (kicsi). (A) maradjon így ⭐ — ha egyszer nagy lesz, ugyanide költözhet; (B) már most a
   koinon darabjaiba.
 
@@ -119,7 +119,7 @@ program átenged és tárol, csak nem érti — nem törés.
   eltűnik, sosem készül el.
 - **KO9 — a kézikönyv a darabokban — a következmény most látszik:** a közösség módosításait az a készülék, amelyik a bejegyzés darabját
   nem tartja, csak KÉRÉSRE látja (mint bármely nem tartott kártyát — a program szövege mindenkinél ott van, a módosítás egy kérésnyire,
-  a buborék kéri). (A) ⭐ így rendben (a KO5 (B) szerint — a kézikönyv a koinóval nőhet); (B) a kézikönyv maradjon mindenkinél (a KO5
+  a buborék kéri). (A) ⭐ így rendben (a KO5 (B) szerint — a kézikönyv a koinoval nőhet); (B) a kézikönyv maradjon mindenkinél (a KO5
   visszavonása — kicsi, és az ⓘ így mindig azonnal a közösség szövegét mondja).
 
 ## 8. A ③d terve — a tartó döntése (2026-11-20, kód előtt)
@@ -170,7 +170,7 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
   első két fázis ÚJRA fut a halmazzal, így az egyezmény a helyén marad a gyerekeivel (a sorrend csapdája — 5. szakasz). A koinon nem
   szavaz, a nevezőbe nem számít; a lezárt döntés nem változik. Próba: +2 (`egyezmenyProba.js` — a lezárás után, csak az elfogadott
   általános; a pont nélküli megmarad a helyén és a gyerekével, az elvetett elfelejtődik), 6 rontás mind bukik; az `allapot` csoport
-  389/389, a D123 mag-próbái 6/6. ⚠️ A mag változott (D123: más számítás — a mostani teszt koinókban a lap kimondja). ⏭️ ② a tömör alak.
+  389/389, a D123 mag-próbái 6/6. ⚠️ A mag változott (D123: más számítás — a mostani teszt koinokban a lap kimondja). ⏭️ ② a tömör alak.
 - **2026-11-20** — ✅ **a ② kész: az egyezmény tömör alakja** (`js/allapot/koinonCsomag.js` — NEM a mag része): a javaslat, érintettenként
   a lezárási összegzés és a mintái, az állásfoglalások (e-emberenként az utolsó — ugyanaz a szabály, mint a hatálynál). ⭐ A minta
   helyei az összegzés SAJÁT lenyomatából (`lezarasiOsszegzes.js` `onalloMintaHelyek` — UGYANAZ a sorsoló, csak a véletlen forrása a
@@ -192,7 +192,7 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
   `koinonOsszegzesKiadasa`; `esemeny.js` `bejelentesHelyei` (az érintettjeinél is hír, mint a `LezarasiOsszegzes`, legfeljebb 64);
   `koinoLanc.js` (a múlt rétegéé — a gyermek jelenébe nem jön át). A kapu átengedi (az ismeretlen típust nem tiltja, méret-korlátja
   nincs). Próba: +1 (`koinonCsomagProba.js`), 3 rontás mind bukik.
-- **2026-11-20** — ✅ **a ③b kész: ki és mikor adja ki** (KO8 (A)). `koino.js` `koinonOsszegzesekKiadasa` (a koinó-példány része, a
+- **2026-11-20** — ✅ **a ③b kész: ki és mikor adja ki** (KO8 (A)). `koino.js` `koinonOsszegzesekKiadasa` (a koino-példány része, a
   lezárási összegzés kiadásának mintájára): a jelen réteg elfogadott általános egyezményei közül ott, ahol a javaslat szeletét és
   minden érintettjéét EGÉSZÉBEN tartom (a vállalásomban, nem összegezve — ⛔ egy hiányzó szavazattal hamis összegzés születne);
   kihagyja, ahol már én kiadtam, vagy ahol a javaslat szeletében már van érvényes (bárkitől); a kiadás előtt a saját csomagját is
@@ -227,9 +227,9 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
   a tár eseményszáma szerint gyorsítótárazva; `r` = 20 a ③f-ig), a csere beállítása, a tömörítés megtartja a darabom eseményeit, a
   csak küldő út a saját koinon-eseményemet az egyezménye darabja alatt is felajánlja, és a `vallalas` kimondja (a mélység, az ismert
   tagok, a darab egyezményei és eseményei). ⚠️ A `vallalas.js` nem változott: a darab — mint a gyökéré — a csere, a tömörítés és a
-  csak küldő út szintjén él. ⛔ A zárt koinó nem tagja nem kap belőle (a vonal korlátja, mint a gyökérnél) — a parancssori próba
-  első futása ezen bukott (a vendég egy alapból zárt koinóba csak csatlakozott, nem lépett be): a kód helyes volt, a próba nyílt
-  koinóval fut. Próba: +11 (`koinonDarabProba.js`, a `csere` csoportban), 12 rontás mind bukik; +1 parancssor (a szigorú vendég az
+  csak küldő út szintjén él. ⛔ A zárt koino nem tagja nem kap belőle (a vonal korlátja, mint a gyökérnél) — a parancssori próba
+  első futása ezen bukott (a vendég egy alapból zárt koinoba csak csatlakozott, nem lépett be): a kód helyes volt, a próba nyílt
+  koinoval fut. Próba: +11 (`koinonDarabProba.js`, a `csere` csoportban), 12 rontás mind bukik; +1 parancssor (a szigorú vendég az
   egyezmény szelete nélkül megkapja a tömör alakot és az állásfoglalást, a `vallalas` kimondja, a tömörítés után is megvan), 2 rontás
   bukik; a `csere` csoport 488/488 + 2 ismert (a fél-jel előtt); ⭐ a TELJES sor (a mag és a csere változott): 1556/1556 + 2 ismert
   (a D124 két „valódi régi program” próbája). ⚠️ Próba nélkül: a `koino.js` csak küldő ágának koinon-kulcsa (a

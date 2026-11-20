@@ -4,7 +4,7 @@
 parancssora már az első szónál, a `yes`-nél megállt. A Windowsnak ezért saját sora van, ugyanazzal a meghívóval. A párja a
 telefonos leírás: [`telepites_telefon.md`](telepites_telefon.md), „A legegyszerűbb út”. Elágazás 232.*
 
-⭐ **2026-11-06: a koino saját tárba költözött** (`github.com/Biszt/koino`, a gépen a `koino` mappa). Ha a régi helyről (`koino_1.1`) futtattad, elég egyszer bemásolni az új sort: a régi helyről futó koinót leállítja, és az újjal indít; az adatod (`koino-adat`) marad. A régi `koino_1.1` mappa ezután törölhető. (Ha a régi sort másolod be, az is ide költözik; a régi sor letöltését — a `koino_1.1-uj` mappát — a telepítő maga eltakarítja.)
+⭐ **2026-11-06: a koino saját tárba költözött** (`github.com/Biszt/koino`, a gépen a `koino` mappa). Ha a régi helyről (`koino_1.1`) futtattad, elég egyszer bemásolni az új sort: a régi helyről futó koinot leállítja, és az újjal indít; az adatod (`koino-adat`) marad. A régi `koino_1.1` mappa ezután törölhető. (Ha a régi sort másolod be, az is ide költözik; a régi sor letöltését — a `koino_1.1-uj` mappát — a telepítő maga eltakarítja.)
 
 ## Ha meghívót kaptál
 
@@ -22,13 +22,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "cd ~; Remove-Item -Recur
    **Igen**-nel.
 4. Amikor az őrjárat elindul, a Windows tűzfala megkérdezi, hogy a Node.js kommunikálhat-e. Nyomd meg az **Engedélyezés**
    gombot; a „Magánhálózatok” pipa elég.
-5. A böngészőben megnyílik a lap, már a koinóban. Az első megnyitáskor az adataidat kéri (nem kötelező). A következő
-   cserénél a meghívód gépe magától tagnak hív meg; ehhez az ő gépén is futnia kell a koinónak.
+5. A böngészőben megnyílik a lap, már a koinoban. Az első megnyitáskor az adataidat kéri (nem kötelező). A következő
+   cserénél a meghívód gépe magától tagnak hív meg; ehhez az ő gépén is futnia kell a koinonak.
 
 **Az ablakot hagyd nyitva**, ebben fut a koino. Leállítás: Ctrl+C vagy az ablak bezárása.
 
 ⭐ **Ha a koino már fent van, ugyanez a sor FRISSÍTI** (2026-11-06, D123): letölti az újat a régi mellé, leállítja a futó régi
-koinót, kicseréli, és az újjal indít. Az adatod marad. Frissíteni meghívó nélkül is lehet: ugyanez a sor a `koino-meghivo:…` rész
+koinot, kicseréli, és az újjal indít. Az adatod marad. Frissíteni meghívó nélkül is lehet: ugyanez a sor a `koino-meghivo:…` rész
 nélkül.
 
 ## Ezután
@@ -51,7 +51,7 @@ megmutatja, ki tette fel, mi változik, és hogy a kód a kulcsaiddal fog futni.
 - **A letöltés:** az otthoni mappádba (`C:\Users\<név>`) a GitHubról letölti a zip-et (~4,6 MB, a `curl.exe` a Windows része),
   és a meglévő program MELLÉ csomagolja ki, a `koino-uj` mappába (egy korábbi, félbemaradt letöltés maradékát előbb
   eltávolítja). Git nem kell. Ha a kicsomagolás sikerült, az ÚJ telepítő folytat; ha nem (például nincs hálózat), a meglévő.
-- **A csere** (2026-11-06, D123): az új telepítő leállítja a régi mappából futó koinót (különben a mappa nem nevezhető át, és a
+- **A csere** (2026-11-06, D123): az új telepítő leállítja a régi mappából futó koinot (különben a mappa nem nevezhető át, és a
   régi kód futna tovább), a régit `koino-regi`-nek nevezi, az újat `koino`-ra, és onnan folytat. Egy git-tárat (ha a
   `koino`-ban `.git` mappa van) nem cserél le. Ha a csere nem sikerül (például egy parancsablak áll a régi
   mappában), kiírja, és a régi program indul.
@@ -59,7 +59,7 @@ megmutatja, ki tette fel, mi változik, és hogy a kód a kulcsaiddal fog futni.
   Megvizsgálja, hogy a Node tud-e Ed25519-et, mert a koino minden műveletet aláír. Az asztalra teszi a „koino” ikont, és
   átadja a meghívót az indítónak.
 - **Az [`indit.ps1`](../windows/indit.ps1):** a meghívóval csatlakozik és belép, elindítja a felületet és (ha már van
-  koinó) az őrjáratot, ugyanabban az ablakban, és megnyitja a lapot. Ez a `termux/indit.sh` párja.
+  koino) az őrjáratot, ugyanabban az ablakban, és megnyitja a lapot. Ez a `termux/indit.sh` párja.
 
 ## Hol mi van
 
@@ -76,7 +76,7 @@ megmutatja, ki tette fel, mi változik, és hogy a kód a kulcsaiddal fog futni.
 - **„A Node.js nincs a gépen, és most nem sikerült telepíteni”:** nincs `winget` (régebbi Windows 10). Telepítsd a Node.js
   LTS-t a https://nodejs.org oldalról, aztán másold be újra ugyanazt a sort.
 - **„A felület nem indult el (fut már egy koino?)”:** egy korábbi ablak még fut (az asztali ikonról indítva; a telepítő sor
-  a futó koinót magától leállítja). Elég a böngészőben a régi lap, vagy zárd be a régi ablakot.
+  a futó koinot magától leállítja). Elég a böngészőben a régi lap, vagy zárd be a régi ablakot.
 - **„A program most nem frissült: a csere nem sikerült”:** egy program fogja a `koino` mappát (például egy parancsablak,
   ami abban a mappában áll). Zárd be, és másold be újra a sort.
 - **Elalszik a gép:** alvás közben a koino sem fut. Amíg a meghívód gépe nem cserélt veled, maradjon ébren.

@@ -1,13 +1,13 @@
 // felulet/js/koinoPakli.js
 
-// Felelősség: az örökölt `Pakli.js` a koinóban — és CSAK az, amit a prototípus nem tudhatott (D100, a ház).
+// Felelősség: az örökölt `Pakli.js` a koinoban — és CSAK az, amit a prototípus nem tudhatott (D100, a ház).
 //
 // ===== ⭐ MIÉRT ALOSZTÁLY =====
 //
 // A `components/Pakli.js` a prototípusból **bájtra változatlanul** jött át (H3/A), mint a kártyák az 5.3-ban: a
 // láncos-testvéres nézet (felmenők, a kiválasztott, a bogár, a testvérek a kacsacsőrökkel), a lapos rendezés, a
 // húzás, a görgetés — mind az övé. Az útvonalai a lapon fordulnak a program útvonalaira (`kartyaAdat.js`,
-// `apiHelper.js`). Amit a koinó TÖBBET mond, mint a prototípus szervere, az ide kerül, a meglévő metódusok KÖRÉ
+// `apiHelper.js`). Amit a koino TÖBBET mond, mint a prototípus szervere, az ide kerül, a meglévő metódusok KÖRÉ
 // (előtte/utána), nem beléjük:
 //
 //   1. ⭐ **A BETÖLTÉS (H1/A):** a szigorú (b) alatt a készülék nem tud mindent; amit a pakli nem ismer, azt a program
@@ -108,7 +108,7 @@ export class KoinoPakli extends Pakli {
 
   /**
    * Minden betöltés ide fut be (a `Pakli.js` és a kártyák is ezt hívják) — az újrakérdezés innen indul újra.
-   * ⚠️ Ha a mentett kártya nincs meg, és a koinó üres, a `Pakli.js` hamisat ad (a FoOldal dolga volt újrapróbálni
+   * ⚠️ Ha a mentett kártya nincs meg, és a koino üres, a `Pakli.js` hamisat ad (a FoOldal dolga volt újrapróbálni
    * a gyökértől): itt tesszük meg.
    */
   async init(entitasId = null, entitasTipus = null) {
@@ -137,7 +137,7 @@ export class KoinoPakli extends Pakli {
   }
 
   /**
-   * Koinó-váltás (a tér): a fa-szeletek és a mentett kártya a RÉGI koinóé — egy idegen azonosítóra a program
+   * Koino-váltás (a tér): a fa-szeletek és a mentett kártya a RÉGI koinoé — egy idegen azonosítóra a program
    * kérelmet írna be. Tiszta lappal, a legerősebb gyökértől.
    */
   async ujKoino() {
@@ -220,7 +220,7 @@ export class KoinoPakli extends Pakli {
     testverHianyEltavolitasa();
     this.megjelenitettKulcs = null;
     this._allapotSor();
-    // ⭐ Az üres koinó is lehet „még nem jött meg” (egy friss tag a szigorú (b) alatt) — várjunk rá.
+    // ⭐ Az üres koino is lehet „még nem jött meg” (egy friss tag a szigorú (b) alatt) — várjunk rá.
     this._ujrakerdezesUtemezese();
   }
 
@@ -392,7 +392,7 @@ export class KoinoPakli extends Pakli {
         return;
       }
 
-      // ----- Az üres koinó: ha közben megjött valami, a gyökértől -----
+      // ----- Az üres koino: ha közben megjött valami, a gyökértől -----
       if (!v.kulcs) {
         await this.pakliLekerese(null, null, true);
         if (this.feljegyzesek.get('')?.kivalasztott) { await this.init(); return; }
@@ -540,7 +540,7 @@ export class KoinoPakli extends Pakli {
     const f = this.feljegyzesek.get(this.megjelenitettKulcs ?? '') ?? v.feljegyzes;
     let szoveg = this.megjelenitettKulcs && f
       ? f.pakli + ' kártya a láncban · ' + f.testverek + ' testvér'
-      : 'Ebben a koinóban még nem ismerek gondolatot';
+      : 'Ebben a koinoban még nem ismerek gondolatot';
     if (v.fajta === 'kert') szoveg += ' · a keresett gondolat még nincs meg nálam';
     // ⭐ Ha van kitől kérni, az őrjárat elhozza; ha nincs (se társ, se ismert tartó), a kérelem csak a címjegyzékben
     // kopogtat — ezt mondjuk ki, nem egy soha meg nem érkező „betöltést”.
@@ -548,7 +548,7 @@ export class KoinoPakli extends Pakli {
       szoveg += v.feljegyzes.kitolKerni > 0 ? ' · ⏳ betöltés: a hiányzó részeket az őrjárat hozza el'
         : ' · 🔎 a hiányzó részek tartóit még keresem (nincs ismert társ, aki tartaná őket)'
           // ⭐⭐ D121 (⑤): egy friss készüléken (se gondolat, se társ) a meghívó útja
-          + (this.megjelenitettKulcs ? '' : ' — meghívót kaptál? Fő menü → „🌐 A tér” → „🔗 Csatlakozás egy koinóhoz…”');
+          + (this.megjelenitettKulcs ? '' : ' — meghívót kaptál? Fő menü → „🌐 A tér” → „🔗 Csatlakozás egy koinohoz…”');
     }
     this._allapot(szoveg, v.feljegyzes?.betoltes ? 'betoltes' : '');
   }

@@ -1,6 +1,6 @@
 // meres/zartKapuMeres.js
 
-// Felelősség: A 64. MÉRÉS — MIBE KERÜL A ZÁRT KOINÓ KAPUJA A DRÓTON? (D93/3, az E3)
+// Felelősség: A 64. MÉRÉS — MIBE KERÜL A ZÁRT KOINO KAPUJA A DRÓTON? (D93/3, az E3)
 //
 // Egy „nincs újdonság” csere a gépen belüli UDP-résen (titkosítva, tábla-kulccsal — ahogy az őrjárat), és a dróton
 // ténylegesen utazó bájtok és csomagok (a foglalat `send`-jénél, a nyugtákkal együtt), öt helyzetben:
@@ -73,7 +73,7 @@ async function lancCsomaggal(melyseg) {
   return { szuletes, csomag, tag: utolso, horgony: utolsoB.azonosito };
 }
 
-/** Egy tár a koinó születésével (mindkét félnél ugyanaz — „nincs újdonság”). */
+/** Egy tár a koino születésével (mindkét félnél ugyanaz — „nincs újdonság”). */
 async function tarSzuletessel(szuletes) {
   const tar = await esemenyTarNyitasa(KOINO, await mkdtemp(join(tmpdir(), 'koino-zartkapu-')));
   await esemenyMentese(tar, szuletes);
@@ -105,7 +105,7 @@ async function csere(szuletes, a, b) {
 
 // ===== A MÉRÉS =====
 
-kiir('A 64. MÉRÉS — a zárt koinó kapuja a dróton (egy „nincs újdonság” csere, titkosítva, tábla-kulccsal)');
+kiir('A 64. MÉRÉS — a zárt koino kapuja a dróton (egy „nincs újdonság” csere, titkosítva, tábla-kulccsal)');
 kiir('');
 const alap = await lancCsomaggal(1);
 const tagAlairo = await alairo(alap.tag, alap.horgony);
@@ -124,7 +124,7 @@ for (const k of [1, 5, 13, 30, 64, 256]) {
 }
 {
   const l1 = await lancCsomaggal(13);
-  // A másik fél egy másik 13 mélységű ágon (ugyanabban a koinóban — itt elég, hogy mindkettő küld egy csomagot).
+  // A másik fél egy másik 13 mélységű ágon (ugyanabban a koinoban — itt elég, hogy mindkettő küld egy csomagot).
   const l2 = await lancCsomaggal(13);
   const m = await csere(l1.szuletes,
     { zartKapu: kapu(false), szemelyesAlairo: await alairo(l1.tag, l1.horgony), tagsagiCsomag: async () => l1.csomag },

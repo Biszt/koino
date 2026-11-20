@@ -7,7 +7,7 @@
 // tudják módosítani. ezek lennének az első témák.”
 //
 // ⭐ A rendszer-entitásnak NINCS születési eseménye: a program hozza (az alap-tartalom — a mag NEM olvassa, lásd lent). Az
-// azonosítója a NEVÉBŐL számolódik — mindenkinél, minden koinóban ugyanaz (a gyermek koinó így a szülő kézikönyvét folytatja,
+// azonosítója a NEVÉBŐL számolódik — mindenkinél, minden koinoban ugyanaz (a gyermek koino így a szülő kézikönyvét folytatja,
 // ahogy a gondolatokét is) —, így bárki tehet rá tudatpontot és javaslatot, mint egy e-ember gondolatára.
 //
 // ⭐ A NÉV ÚTVONAL: `kezikonyv` a gyökér, alatta `/`-rel elválasztott szakaszok (kisbetű, szám, kötőjel) — pl.
@@ -97,8 +97,8 @@ export const KEZIKONYV_GYOKER_AZONOSITO = rendszerAzonosito(KEZIKONYV_GYOKER);
 //
 // Csaba (2026-11-19): „hozzunk létre, egy koinon-t ami maga a program azon tárhelye, amit darabokban, replikálva, őriz meg, és neki,
 // mondjuk végtelen tudatpontja lenne, és minden entitást, 1 tudatpontal hozza létre.” (A görög koinón: a közösség, a közös ügy — ebből
-// a „koino” is.) A kézikönyv-entitás így NEM kivétel a D14 alól (amire senki nem rak tudatpontot, azt a koinó elfelejti): 1 pontja
-// mindig van — a koinóné. A közösség módosítása ezért pont nélkül is megmarad (MA4 (B)).
+// a „koino” is.) A kézikönyv-entitás így NEM kivétel a D14 alól (amire senki nem rak tudatpontot, azt a koino elfelejti): 1 pontja
+// mindig van — a koinoné. A közösség módosítása ezért pont nélkül is megmarad (MA4 (B)).
 //
 // ⛔ A koinon NEM e-ember: nem szavaz, nem javasol, nem ad érték javaslatot; a pontja PASSZÍV (a részvétel nevezőjébe nem számít), nem
 // a tudatpont-keretből jön, és senki nem írja alá — minden készülék ugyanúgy számolja (a kézikönyvnél a nevekből). A szerző-kulcsok

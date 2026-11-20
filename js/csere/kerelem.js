@@ -302,7 +302,7 @@ export async function fejlecekValasza({ allapot, kulcs, n, m = false, utan = nul
 
   // ⭐ D109 (KK1): LUSTA ÖSSZEFÉSÜLÉS — csomópontonként csak a következő legjobb gyerek ül a kupacban (a rendezett listájából;
   // amikor kikerül, a testvére lép a helyére). A sorrend bájtra ugyanaz, mint amikor minden gyerek bekerült, de egy kérés ára
-  // a lista hosszával arányos, nem a csomópont gyerekszámával (a lapos gyökér egy nagy koinóban akár mindent).
+  // a lista hosszával arányos, nem a csomópont gyerekszámával (a lapos gyökér egy nagy koinoban akár mindent).
   const kupac = sorrendKupac();
   const sorba = (k) => {
     const rendezett = k0.rendezett(k);

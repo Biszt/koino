@@ -1,7 +1,7 @@
 // felulet/js/koinoBekapcsolodas.js
 
-// Felelősség: ⭐⭐ A BEKAPCSOLÓDÁS A FELÜLETEN (D118 ⑥) — koinós többlet, a prototípusban nincs ilyen: a fő menü „🌿 Bekapcsolódás…”
-// pontja ezt az ablakot nyitja. A mostani koinó ismert gyermekei (ezen a készüléken), mindegyiknél: bekapcsolódhatok-e (ha nem,
+// Felelősség: ⭐⭐ A BEKAPCSOLÓDÁS A FELÜLETEN (D118 ⑥) — koinos többlet, a prototípusban nincs ilyen: a fő menü „🌿 Bekapcsolódás…”
+// pontja ezt az ablakot nyitja. A mostani koino ismert gyermekei (ezen a készüléken), mindegyiknél: bekapcsolódhatok-e (ha nem,
 // miért — a program mondja ki), a gyermek kerete, a hozott pontjaim; ha nem férnek a kerethez (KZ3), az elhagyandók
 // kiválasztása; és a megerősítés után a bekapcsolódás (egy esemény a gyermekben — itt semmi nem íródik: megmaradsz, D127).
 //
@@ -28,7 +28,7 @@ export async function bekapcsolodasMegnyitasa({ terMegnyitasa = null } = {}) {
   const tartalom = document.createElement('div');
   tartalom.className = 'koino-bekapcsolodas';
   const modal = new Modal(MODAL_KONTENER, {
-    cim: '🌿 Bekapcsolódás egy gyermek-koinóba',
+    cim: '🌿 Bekapcsolódás egy gyermek-koinoba',
     meret: 'alap',
     tartalom,
     gombok: [{ felirat: 'Bezárás', tipus: 'masodlagos', akcio: () => modal.bezaras() }]
@@ -70,7 +70,7 @@ export async function bekapcsolodasMegnyitasa({ terMegnyitasa = null } = {}) {
     if (megerosites === g.azonosito) {
       resz += '<p class="koino-bekapcsolodas-sor__figyelem">Biztos? A bekapcsolódás a gyermekben aláírt esemény — '
         + 'nem vonható vissza. A gyermekbe a születése előtti pontjaid jönnek (az elhagyottak nélkül) és a vágáskori tagságod; '
-        + 'a születése utáni tevékenységed itt marad. Ebben a koinóban a pontjaid megmaradnak — a két koinóban külön kereted van.</p>'
+        + 'a születése utáni tevékenységed itt marad. Ebben a koinoban a pontjaid megmaradnak — a két koinoban külön kereted van.</p>'
         + '<div class="koino-bekapcsolodas-sor__gombok">'
         + '<button type="button" class="koino-bekapcsolodas-sor__gomb" data-muvelet="megse"' + (folyamatban ? ' disabled' : '') + '>Mégse</button>'
         + '<button type="button" class="koino-bekapcsolodas-sor__gomb koino-bekapcsolodas-sor__gomb--fo" data-muvelet="bekapcsolodom"'
@@ -94,12 +94,12 @@ export async function bekapcsolodasMegnyitasa({ terMegnyitasa = null } = {}) {
       return;
     }
     const gyermekek = elonezet?.gyermekek ?? [];
-    tartalom.innerHTML = '<p class="koino-bekapcsolodas__leiras">A bekapcsolódással egy gyermekébe is belépsz — ebben a koinóban megmaradsz, a '
+    tartalom.innerHTML = '<p class="koino-bekapcsolodas__leiras">A bekapcsolódással egy gyermekébe is belépsz — ebben a koinoban megmaradsz, a '
       + 'teljes súlyoddal (a kettő párhuzamos). A gyermek a szülőre épül (a múlt közös), és ott a súlyt a bekapcsolódó hozza. '
       + 'Csak a készüléken ismert gyermekek látszanak.</p>'
       + (elonezet?.megjegyzes ? '<p class="koino-megjegyzes">' + html(elonezet.megjegyzes) + '</p>' : '')
       + (gyermekek.length ? gyermekek.map(gyermekSora).join('')
-        : '<p class="koino-megjegyzes">Ennek a koinónak nincs ismert gyermeke ezen a készüléken. Gyermeket a '
+        : '<p class="koino-megjegyzes">Ennek a koinonak nincs ismert gyermeke ezen a készüléken. Gyermeket a '
           + '<code>koino "&lt;név&gt;" szulo=…</code> paranccsal lehet létrehozni, vagy a csere (egy fájl) hozza el a születését.</p>');
   };
 

@@ -196,7 +196,7 @@ proba('⭐⭐⭐ EGY FÁJL, HÁROM FORRÁS — ha mindhárom társnál megvan (D
 });
 
 proba('⛔ …de a fájlonkénti forrásszám FELÜLRŐL KORLÁTOS (9. szabály)', async () => {
-  // *Egy nagy koinóban egyetlen fájlért nem nyithatunk száz kapcsolatot.*
+  // *Egy nagy koinoban egyetlen fájlért nem nyithatunk száz kapcsolatot.*
   const sok = [];
   for (let i = 0; i < 12; i++) sok.push('t' + i + ':1');
   const terv = atvitelTerv([{ lenyomat: L(1) }], jegyzettel([[L(1), sok]]),

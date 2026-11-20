@@ -14,8 +14,8 @@
 //
 // ===== ⭐⭐ A MEGISMÉTELT MÉRÉS (D118/2 ①b, 2026-10-24) =====
 //
-// Az ①b óta a szabályok a koinó SZÜLETÉSÉBEN állnak (`koinoSzabalyok.js`), és a program az új születésbe MINDET kiírja.
-// A mérés ugyanazt a láncot KÉT koinóban gyártja le: egy régi alakúban (a születésnek nincs `szabalyok` mezője — ott a
+// Az ①b óta a szabályok a koino SZÜLETÉSÉBEN állnak (`koinoSzabalyok.js`), és a program az új születésbe MINDET kiírja.
+// A mérés ugyanazt a láncot KÉT koinoban gyártja le: egy régi alakúban (a születésnek nincs `szabalyok` mezője — ott a
 // program mai értéke dönt) és egy új alakúban (minden szabály a születésben). ⭐ A várt eredmény: a program-állandó
 // átírása a régi alakút kettéhasítja (ezért nem változhat soha a mai érték), az új alakút nem.
 // *(A régi mérés születés és tagság nélküli eseményeket gyártott — a D93/1 óta abból semmi nem számítana.)*
@@ -57,7 +57,7 @@ const kiir = (szoveg) => process.stdout.write(szoveg + '\n');
  * esemény-halmazt** tart érvényesnek, ugyanabból a láncból.
  *
  * ⭐ Az alapító maga a szerző (ő az egyetlen tag — a pontjai a D93/1 szerint is számítanak).
- * @param {boolean} ujAlak - új alakú születés (a koinó neve a lenyomata, minden szabály benne), vagy régi (mező nélkül)
+ * @param {boolean} ujAlak - új alakú születés (a koino neve a lenyomata, minden szabály benne), vagy régi (mező nélkül)
  */
 async function koinoLanca(ujAlak) {
   const gazda = await ujEember(ujAlak ? '' : 'verzio-regi');
@@ -81,14 +81,14 @@ async function koinoLanca(ujAlak) {
 async function esemenyekIrasa() {
   const lancok = { regi: await koinoLanca(false), uj: await koinoLanca(true) };
   writeFileSync(FAJL, JSON.stringify(lancok, null, 1), 'utf-8');
-  kiir('\nLegyártva két koinóban (régi és új alakú születés): 4 gondolat, egyenként 2000 tudatpont (összesen 8000).');
+  kiir('\nLegyártva két koinoban (régi és új alakú születés): 4 gondolat, egyenként 2000 tudatpont (összesen 8000).');
   kiir('A fájl: ' + FAJL.pathname);
   kiir('A gyártó program mai kerete: ' + TUDATPONT_KERET);
   kiir('\nMost írd át a `koinoSzabalyok.js`-ben az ALAP_SZABALYOK.tudatpontKeret-et (pl. 5000-re), és futtasd:');
   kiir('  node meres/verzioMeres.js olvas\n');
 }
 
-/** Ugyanaz a lánc, EZZEL a programmal elolvasva — mindkét koinóban. */
+/** Ugyanaz a lánc, EZZEL a programmal elolvasva — mindkét koinoban. */
 async function esemenyekOlvasasa() {
   const lancok = JSON.parse(readFileSync(FAJL, 'utf-8'));
   kiir('\nEZ A PROGRAM (mai kerete: ' + TUDATPONT_KERET + ') EZT SZÁMOLJA UGYANABBÓL A LÁNCBÓL:');
@@ -101,7 +101,7 @@ async function esemenyekOlvasasa() {
     let osszPont = 0;
     for (const e of allapot.entitasok.values()) osszPont += e.osszesPont;
 
-    kiir('\n  ' + (nev === 'uj' ? 'AZ ÚJ ALAKÚ KOINÓ (minden szabály a születésben)' : 'A RÉGI ALAKÚ KOINÓ (a születésben nincs szabály)')
+    kiir('\n  ' + (nev === 'uj' ? 'AZ ÚJ ALAKÚ KOINO (minden szabály a születésben)' : 'A RÉGI ALAKÚ KOINO (a születésben nincs szabály)')
       + ' — ' + esemenyek.length + ' esemény');
     kiir('    a keret, amivel számol: ' + allapot.koino?.szabalyok?.tudatpontKeret);
     kiir('    létező entitás:        ' + allapot.entitasok.size);

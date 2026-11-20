@@ -52,7 +52,7 @@ function nap(ms, toldalek = false) {
 export function belepesSavHtml(b, { orjaratFut = true, most = Date.now() } = {}) {
   if (!b) return null;
   if (b.allapot === 'tag') {
-    return '<p class="koino-belepes__cim">✅ Bent vagy a koinóban (' + html(ora(b.tag)) + ') — jönnek a gondolatok.</p>'
+    return '<p class="koino-belepes__cim">✅ Bent vagy a koinoban (' + html(ora(b.tag)) + ') — jönnek a gondolatok.</p>'
       + '<button type="button" class="koino-belepes__bezar" aria-label="Bezárás" title="Bezárás">×</button>';
   }
   if (b.allapot === 'lejart') {
@@ -91,11 +91,11 @@ export function belepesSavHtml(b, { orjaratFut = true, most = Date.now() } = {})
     : '⏸ A meghívód készülékét még nem keresem.';
   let tobb = '';
   if (!orjaratFut) {
-    tobb += '<p class="koino-belepes__figyelem">⏸ Most nem keresem: a készülékeden nem fut a koinó őrjárata (az alsó sáv mutatja,'
+    tobb += '<p class="koino-belepes__figyelem">⏸ Most nem keresem: a készülékeden nem fut a koino őrjárata (az alsó sáv mutatja,'
       + ' hogyan indíthatod el).</p>';
   }
   if (b.segitseg) {
-    tobb += '<p class="koino-belepes__segitseg">💡 Akkor tud rád találni, ha a meghívód készülékén is fut a koinó. Ha ugyanazon a'
+    tobb += '<p class="koino-belepes__segitseg">💡 Akkor tud rád találni, ha a meghívód készülékén is fut a koino. Ha ugyanazon a'
       + ' wifin vagytok, azonnal megy; két hálózat között néhány percbe telhet.'
       + (b.lejar ? ' A meghívód ' + html(nap(b.lejar, true)) + '-ig érvényes.' : '') + '</p>';
   }

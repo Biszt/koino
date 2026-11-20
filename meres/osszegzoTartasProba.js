@@ -146,7 +146,7 @@ proba('⛔⛔ a HAZUG teljes tartó összegzését (felfújt szám) az összegz�
 /**
  * A meghívás világa: F az alapító, A tag (F hívta meg), és A meghívja B-t és C-t — a meghívás a MEGHÍVOTT szeletébe
  * kerül (és A saját azonosság-szeletébe bejelentődik), amit B nem vállal; A a meghívottak szeletét nem egyezteti
- * halmazként, B a sajátját vállalja. ⚠️ A ne az alapító legyen: az alapító azonosság-szelete maga a koinó születése, amit
+ * halmazként, B a sajátját vállalja. ⚠️ A ne az alapító legyen: az alapító azonosság-szelete maga a koino születése, amit
  * mindenki egyeztet — az ő meghívásai a bejelentéssel úgyis mindenkihez eljutnak. `regi`: a meghívás 15 napos.
  */
 async function meghivasVilaga({ bNalMar = false, regi = false } = {}) {
@@ -165,7 +165,7 @@ async function meghivasVilaga({ bNalMar = false, regi = false } = {}) {
   const meghivasC = await a.tesz('Meghivas', { kit: c.szerzo, sajatBelepes: belepesA.azonosito }, ido, { entitas: belepesC.azonosito });
   const tarA = await esemenyTarNyitasa(KOINO, await ujMappa());
   for (const e of [letrehozas, belepesA, meghivasA, belepesB, belepesC, meghivasB, meghivasC]) await esemenyMentese(tarA, e);
-  // B a koinó születésének szeletét A-val egyezően tudja (F meghívása oda is bejelentődik), és a saját belépését.
+  // B a koino születésének szeletét A-val egyezően tudja (F meghívása oda is bejelentődik), és a saját belépését.
   const tarB = await esemenyTarNyitasa(KOINO, await ujMappa());
   for (const e of [letrehozas, meghivasA, belepesB, ...(bNalMar ? [meghivasB] : [])]) {
     await esemenyMentese(tarB, e, { tanusitvanyok: probaTanusitvanyok([e]) });   // ⭐⭐ D128: a tanúsítvánnyal
@@ -173,7 +173,7 @@ async function meghivasVilaga({ bNalMar = false, regi = false } = {}) {
   return { a, b, tarA, tarB, letrehozas, belepesA, belepesB, belepesC, meghivasB, meghivasC };
 }
 
-/** A csere: A a koinó születését és a saját azonosság-szeletét egyezteti halmazként (a meghívottakét nem), B a sajátját. */
+/** A csere: A a koino születését és a saját azonosság-szeletét egyezteti halmazként (a meghívottakét nem), B a sajátját. */
 async function kuldoCsere(v, { kezbesitett = new Set(), zart = false, bMindent = false } = {}) {
   const aVallal = new Set([v.letrehozas.azonosito, v.belepesA.azonosito]);
   const kuldo = sajatKuldo({ tar: v.tarA, koino: KOINO, szerzo: v.a.szerzo,
@@ -186,7 +186,7 @@ async function kuldoCsere(v, { kezbesitett = new Set(), zart = false, bMindent =
       csereUdpResen(p.egyik, '127.0.0.1', p.masikPort, v.tarA, KOINO, {
         reszvesz: (k) => aVallal.has(k),
         kuldoSzeletek: (szabad) => kuldo.lista(szabad),
-        // ⛔ zárt koinó: B nem tag — csak a koinó születése és a két azonosság-szelet jár neki (C-é nem).
+        // ⛔ zárt koino: B nem tag — csak a koino születése és a két azonosság-szelet jár neki (C-é nem).
         ...(zart ? { zartKapu: async () => ({ szabad: false, kell: false, ok: 'próba',
           szeletek: [v.letrehozas.azonosito, v.belepesB.azonosito] }) } : {}) }),
       csereUdpResen(p.masik, '127.0.0.1', p.egyikPort, v.tarB, KOINO, {
@@ -226,7 +226,7 @@ proba('⭐ a RÉGI (15 napos) saját eseményt nem ajánlja fel — a kérelem �
   return !(await v.tarB.esemeny(v.meghivasB.azonosito)) && a.kezbesitve.length === 0;
 });
 
-proba('⛔ zárt koinóban a NEM TAGNAK is felajánlja a saját szeletébe tett meghívást — de más szeletbe tettet nem', async () => {
+proba('⛔ zárt koinoban a NEM TAGNAK is felajánlja a saját szeletébe tett meghívást — de más szeletbe tettet nem', async () => {
   const v = await meghivasVilaga();
   const { a } = await kuldoCsere(v, { zart: true, bMindent: true });   // B mindent átvenne, ha felajánlanák
   return a.tarsKorlatozva && !!(await v.tarB.esemeny(v.meghivasB.azonosito)) && !(await v.tarB.esemeny(v.meghivasC.azonosito));

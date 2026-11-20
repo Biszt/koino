@@ -91,7 +91,7 @@ async function csereLatoEsemenyek(tar, koino) {
 // gép némán elhinné, hogy egyetért. Az ujjlenyomat a teljes láncot fedi, tehát nem.
 
 /**
- * Összeállítja a saját állásunkat egy koinóról.
+ * Összeállítja a saját állásunkat egy koinoról.
  *
  * @param {Object} tar - a tároló (betolt/hozzafuz)
  * @param {string} koino
@@ -129,7 +129,7 @@ export async function allasOsszeallitasa(tar, koino) {
  * ⭐ AZ ÁLLÁS EGYETLEN LENYOMATBAN — 43 karakter (D35, Szakasz 2 / B. lépés).
  *
  * ⭐ MIÉRT KELL EZ? Mert az ÁLLÁS ára a létszámmal nő: **162 bájt/e-ember** (mérve, 50
- * fővel). Egy 10 000 fős koinónál ez ~1,6 MB — és a csere KÉTIRÁNYÚ, tehát mindkét fél
+ * fővel). Egy 10 000 fős koinonál ez ~1,6 MB — és a csere KÉTIRÁNYÚ, tehát mindkét fél
  * elküldi. Öt percenkénti cserével ez napi több száz megabájt.
  *
  * ⚠️ ÉS EZ NEM A HÁLÓZATOT TERHELNÉ MEG, HANEM A MOBILOS E-EMBER SZÁMLÁJÁT — vagyis épp
@@ -155,7 +155,7 @@ export async function allasLenyomata(allas) {
  * Egy szerző láncának állása.
  *
  * ⚠️ A hézag és az elágazás fogalma UGYANAZ, mint a tár-réteg `lancEllenorzese`-ében —
- * csak itt egy már betöltött eseménylistán számoljuk, és a koinóra szűkítve.
+ * csak itt egy már betöltött eseménylistán számoljuk, és a koinora szűkítve.
  *
  * @param {string} lanc - a lánc kulcsa (a készüléké)
  * @param {Array<Object>} esemenyek - ennek a szerzőnek az eseményei (rendezetlenül is jó)
@@ -315,7 +315,7 @@ export async function valaszOsszeallitasa(tar, kerelem) {
  * Ez a szakasz jóslatának a lényege: mivel az azonosító a gondolat lenyomata, a
  * duplikátum MAGÁTÓL elnyelődik, és az összefésüléshez nem kell ütközés-feloldó logika.
  *
- * ⚠️ A KOINO-SZŰRÉS (2026-08-29, mérés után). A tár koinónként külön mappa, de az
+ * ⚠️ A KOINO-SZŰRÉS (2026-08-29, mérés után). A tár koinonként külön mappa, de az
  * `esemenyMentese` nem tudja, MELYIK mappában áll — ő az aláírást és az azonosítót nézi,
  * és jól teszi. Ezért a koino-egyezést ITT kell ellenőrizni.
  *
@@ -327,7 +327,7 @@ export async function valaszOsszeallitasa(tar, kerelem) {
  *
  * @param {Object} tar
  * @param {Array<Object>} esemenyek
- * @param {string} [koino] - ha megadott, CSAK ennek a koinónak az eseményeit vesszük be
+ * @param {string} [koino] - ha megadott, CSAK ennek a koinonak az eseményeit vesszük be
  * @returns {Promise<{uj: number, marMegvolt: number, idegen: number, elutasitva: Array<{azonosito: string, ok: string}>, elagazasok: Array<{szerzo: string, sorszam: number}>}>}
  */
 export async function beolvasztas(tar, esemenyek, koino) {
@@ -339,10 +339,10 @@ export async function beolvasztas(tar, esemenyek, koino) {
   // ⭐ D82: a MOST bekerült események azonosítói — az észlelő ezek körül keres (a hívóé).
   const ujAzonositok = [];
 
-  // ----- ⭐⭐ D118 (②a–b): A KOINÓ-SZABÁLY — a koinó őseinek születése és vágás előtti eseményei is a koinóé -----
-  // A lánc a koinó születésétől a `szulo` mutatókon a gyökérig, a tárból és a most kapottakból együtt (`koinoNezete`); a
-  // lánc születései (más koinó-névvel) ELŐRE kerülnek, a gyökértől — a kapu a gyermek születését csak a szülőével
-  // ellenőrizheti. Ami nem tartozik a koinóba (`tartozik`), az idegen.
+  // ----- ⭐⭐ D118 (②a–b): A KOINO-SZABÁLY — a koino őseinek születése és vágás előtti eseményei is a koinoé -----
+  // A lánc a koino születésétől a `szulo` mutatókon a gyökérig, a tárból és a most kapottakból együtt (`koinoNezete`); a
+  // lánc születései (más koino-névvel) ELŐRE kerülnek, a gyökértől — a kapu a gyermek születését csak a szülőével
+  // ellenőrizheti. Ami nem tartozik a koinoba (`tartozik`), az idegen.
   let tartozik = (e) => esemenyKoinoja(e) === koino;
   let sorban = esemenyek;
   if (koino !== undefined && azonositoAlaku(koino)) {

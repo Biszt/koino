@@ -11,7 +11,7 @@
 //
 // A `javaslatSzamitas.js` kiszámolta az egyezményt és megőrizte benne a `valtozas`-t — de
 // az `allapotSzamitas.js` **soha nem olvasta**. A prototípusban ez külön réteg volt
-// (`javaslatVegrehajtasiService` + négy végrehajtó); a P2P koinóban nem volt megépítve.
+// (`javaslatVegrehajtasiService` + négy végrehajtó); a P2P koinoban nem volt megépítve.
 //
 // ⭐ ÉS AMIÉRT ITT VAN A HELYE, NEM A FELÜLETEN: a kártya a címet mutatja. Ha a felület
 // „javítaná ki", akkor **két igazság** lenne — egy a számításban, egy a rajzolásban —, és a
@@ -56,7 +56,7 @@ import { ervenyesSzovegErtek, azonosSzoveg } from '../esemeny/szovegDarab.js';
 //
 // ⚠️ EZÉRT LETT A HARMADIK FÁZIS ASZINKRON: a `lenyomat` a WebCryptót hívja, ami
 // aszinkron. A másik út (kézzel gyártott, összefűzött név) elkerülte volna ezt, de akkor
-// a koinóban kétféle azonosító-alak lenne — a hívók viszont amúgy is aszinkronok, tehát
+// a koinoban kétféle azonosító-alak lenne — a hívók viszont amúgy is aszinkronok, tehát
 // az ár kicsi, a nyereség pedig egységes azonosító-modell.
 //
 // ⚠️ A `kulonvalas` címke azért van benne, hogy a levezetés **ne ütközhessen** más,
@@ -463,7 +463,7 @@ async function kulonvalas(entitas, regi, kulonvalok, egyezmeny, allapot) {
  * mechanizmus, hanem a felejtés kiváltása.*
  *
  * ⚠️⚠️ ÉS ITT EGY VALÓDI ELTÉRÉS, AMIT KI KELL MONDANI. A prototípus szervere **mások
- * nevében** állította nullára a pontokat. A koinóban ez **lehetetlen és nem is szabad**: a
+ * nevében** állította nullára a pontokat. A koinoban ez **lehetetlen és nem is szabad**: a
  * tudatpont-rendezés ALÁÍRT esemény, és senki nem írhat alá helyettem (D15). Ezért:
  *
  *   · az entitás **megszűnik létezni** — ez a prototípus eredménye, és ez a fontos;
@@ -582,7 +582,7 @@ function legkozelebbiKozosOs(entitasok, forrasAzonositok) {
  * ⚠️⚠️ EGY DOLGOT VÁLTOZTATTUNK, ÉS EZ CSABA DÖNTÉSE (2026-09-07): **nem születik új
  * azonosító — az ELSŐ érintett olvasztja be a többit.**
  *
- * Miért: a koinóban **minden azonosító egy aláírt esemény lenyomata**, és ezen áll az egész
+ * Miért: a koinoban **minden azonosító egy aláírt esemény lenyomata**, és ezen áll az egész
  * ellenőrizhetőség. Egy „új" entitáshoz nem tartozna esemény (a javaslaté már foglalt — az
  * az egyezményé), tehát egy **második származtatott azonosítót** kellene bevezetni, amit
  * senki nem írt alá. ⭐ Az elnyelés ezt elkerüli, és ráadásul **több logikai kapcsolatot

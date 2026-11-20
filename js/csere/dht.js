@@ -690,7 +690,7 @@ export async function dhtKliens(beallitas = {}) {
 
   /**
    * ⭐ D91: BEJELENT egy témát (BEP 5 `announce_peer`) — „ezen a címen tartom". A téma egy 20 bájtos
-   * lenyomat (`cimjegyzek.js`: a koinó azonosítójával sózva), a port KIFEJEZETTEN megadva (a kapu külső
+   * lenyomat (`cimjegyzek.js`: a koino azonosítójával sózva), a port KIFEJEZETTEN megadva (a kapu külső
    * portja — a kliens a saját foglalatáról kérdez, tehát a forrásport nem az).
    */
   async function bejelent(tema, port) {

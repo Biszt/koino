@@ -16,7 +16,7 @@ mérés számaival, a nyitott kérdések javaslattal, és a következő mérése
 2. **A válasz az átmeneti tárba** (D75, B/2) — ugyanazon a kapun (3. szabály).
 3. **Nem élő kapcsolat** (D76/3, 5. szabály): a válasz akár percek múlva jön; a frissesség törekvés, nem ígéret.
 4. **Továbbadható** (D76/4): ugrás-korlát (kiinduló 3), azonosító (nincs kétszeres továbbadás), darabkorlát — senki
-   terhe ne a koinó méretétől függjön.
+   terhe ne a koino méretétől függjön.
 5. **A kérdező védelme** (D87, SK13): a kérelem nem hordozza a kérdező címét és nevét; a válasz lépésenként megy
    vissza; az ugrás-számláló kezdőértéke véletlen. Aki közvetlenül egy vállalótól kér, annak a vállaló a válaszoló,
    nem közvetítő — ő megtudhatja (D87/3).
@@ -45,11 +45,11 @@ tartója van, λ eséllyel a kérő 2 lépéses környékén (közösségi érde
 
 ⭐ **A közvetlen elérés a fogadóképesektől függ.** Ha a kérő mindegyik tartó címét ismeri (a G legjobb esete), de csak
 a kötéseit és a fogadóképes gépeket éri el, T = 3 tartónál 20% a siker (10% fogadóképesnél), és **fogadóképes gép
-nélkül 0,1%**. A koinó méretétől nem függ (50 és 100 000 között ugyanannyi).
+nélkül 0,1%**. A koino méretétől nem függ (50 és 100 000 között ugyanannyi).
 
-⛔ **Az elárasztás a kötés-hálón nagy koinóban szinte semmit nem ad hozzá.** K = 3 kötésnél, 70% élő mellett a
+⛔ **Az elárasztás a kötés-hálón nagy koinoban szinte semmit nem ad hozzá.** K = 3 kötésnél, 70% élő mellett a
 kérelem alig terjed (5 ugrás alatt ~38 üzenet), és véletlenül szórt tartóknál a siker 20,5% → 20,6%. K = 5-nél 442
-üzenet, ugyanannyi siker. ⭐ **Ahol számít:** közösségi érdeklődésnél (λ = 0,3: 34% → 52%) és kis koinóban (N = 50:
+üzenet, ugyanannyi siker. ⭐ **Ahol számít:** közösségi érdeklődésnél (λ = 0,3: 34% → 52%) és kis koinoban (N = 50:
 27% → 72%) — de **2 ugrás után semmi többet**. A véletlen séta kevesebb üzenetből valamivel kevesebbet ér el.
 
 ⭐⭐ **A döntő a RÉS NYITÁSA a tartóhoz, nem a továbbadás.** Ha a tartó tudja, hogy valaki kér tőle, és a következő
@@ -63,14 +63,14 @@ otthon ↔ mobil rés megy, a két mobil közötti (a 🅱️ változat) még ni
 
 **K1. Az út.** ⭐ Javaslat — három út, ebben a sorrendben, egyszerre indítva:
 (a) **közvetlenül** a G-ből ismert tartóhoz, ha a kötésem vagy fogadóképes (mint a mai `hozd`);
-(b) ⭐ **kopogtatás**: a kérő a BEP 5-tel bejelenti a címét a tartó kopogtató témáján — `H(koinó ‖ „kopogtató” ‖ a
+(b) ⭐ **kopogtatás**: a kérő a BEP 5-tel bejelenti a címét a tartó kopogtató témáján — `H(koino ‖ „kopogtató” ‖ a
 tartó tábla-aláírója)`, vakítva, mint a D91 témái; minden készülék ~20 percenként ránéz a sajátjára (~3 KB, ~0,2
 MB/nap — a gyökér-darab hirdetése mellé), és a következő buliban a kérők felé is kopog; a rés után a kérés
 közvetlen (a tartó a válaszoló — D87/3);
-(c) **továbbadás a kötés-hálón**, 2–3 ugrásig (a közösségi és a kis koinókban — D76/4, D87).
+(c) **továbbadás a kötés-hálón**, 2–3 ugrásig (a közösségi és a kis koinokban — D76/4, D87).
 ⚠️ Ez a D76/4 és a D87 hangsúlyát megfordítja: a továbbadás kiegészítő út, nem a fő út. ⚠️ A kopogtatás határai: csak
 olyan tartóhoz megy, akinek a tábla-aláíróját ismerem (a raj-jegyzék, nem a DHT puszta címe — annál a közvetlen
-kopogás marad); és aki ismeri a koinót és a tartó aláíróját, az látja, hány cím kopogtat nála (azt nem, hogy mit
+kopogás marad); és aki ismeri a koinot és a tartó aláíróját, az látja, hány cím kopogtat nála (azt nem, hogy mit
 kér).
 
 **K2. A közvetítő átmeneti tartása.** A továbbítónak a kérelmet a következő találkozásig meg kell őriznie, a választ

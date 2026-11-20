@@ -18,9 +18,9 @@
 // címével jelzi). Ha a társ frissített, és ő kopog be, a bejegyzés így azonnal eltűnik — a mi szünetünk őt nem zárja ki: a kapu a
 // kopogására mindig felel.
 //
-// ⛔ Helyi feljegyzés, nem esemény: nem terjed, semmit nem dönt el a koinóban (3. szabály) — csak azt, kire kopogunk. Korlátos
+// ⛔ Helyi feljegyzés, nem esemény: nem terjed, semmit nem dönt el a koinoban (3. szabály) — csak azt, kire kopogunk. Korlátos
 // (`NEM_ERTJUK_KORLAT`), és a rég nem látott bejegyzés elévül (`NEM_ERTJUK_LATSZIK`). Készülék-szintű: a nyelv a programé, nem a
-// koinóé (a család minden koinója ugyanazon a kapun beszél).
+// koinoé (a család minden koinoja ugyanazon a kapun beszél).
 //
 // ===== ⭐⭐ D124 ④ (⑦): AKIVEL MÉG A RÉGIN BESZÉLÜNK =====
 //

@@ -4,7 +4,7 @@
 // a változatok, a napló és a változás pontosan számol (a hamis vagy elcsúszott változást elveti); és a valódi cserén
 // (UDP-rés, titkosítva) — ha a két fél mást vállal — az első találkozás után a „nincs újdonság” csere a közös halmazon
 // olcsó marad (a 68. mérés több tíz KB-ja helyett), a közös szelet változása átjön, a nem közösé nem, a halmaz
-// bővülése csak a változással utazik, a „minden” részvételű fél a társ halmazának szeleteit megkapja, és a zárt koinó
+// bővülése csak a változással utazik, a „minden” részvételű fél a társ halmazának szeleteit megkapja, és a zárt koino
 // kapuja mellett a régi menet fut.
 //
 // Futtatás: node meres/mind.js kozoshalmaz
@@ -181,7 +181,7 @@ proba('⭐ a FÁJL-alapú halmaz-tár (a koino.js-é) ugyanígy: a második cser
   return masodik.uzenetek === 0 && masodik.bajt < 1500 && Object.keys(lemez.tarsak).length === 1 && lemez.naplo?.v;
 });
 
-proba('⛔ zárt koinó (a kapu korlátoz): a régi menet fut, a nem tag NEM tudja meg a tag halmazát, és a csere nem csúszik el', async () => {
+proba('⛔ zárt koino (a kapu korlátoz): a régi menet fut, a nem tag NEM tudja meg a tag halmazát, és a csere nem csúszik el', async () => {
   const v = await vilag(20, 10);
   const r = await csere(v, { a: { zartKapu: async () => ({ szabad: false, kell: false, ok: 'próba', szeletek: [] }) } });
   return r.a.tarsKorlatozva === true && r.b.uj === 0 && v.hB.tarsak.size === 0 && v.hA.tarsak.size === 0;

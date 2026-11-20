@@ -4,7 +4,7 @@
 //
 // ⭐ Miért külön tár (L1): a bejegyzés egy MÁSIK gondolatról szól (a szó régiójában, nem a vállalásomban), és a csomagja
 // pont-eseményeket is hoz (K3 — két tag-tulajdonos). Ha ezek a tartós tárba kerülnének, a saját állapotom egy NEM tartott
-// gondolatra részleges össz-pontot számolna. Itt a koinó állapotába NEM számítanak; a tár korlátos és eldobható (mint az
+// gondolatra részleges össz-pontot számolna. Itt a koino állapotába NEM számítanak; a tár korlátos és eldobható (mint az
 // átmeneti — B/2), és ⭐ UGYANAZON A KAPUN át íródik: a csomag minden eseménye az `esemenyMentese`-n megy át a kereső-tár
 // három műveletével (`esemeny`, `sorszamSzerint`, `hozzafuz` — 3. szabály).
 //
@@ -149,7 +149,7 @@ function javasoltCim(e, g) {
 
 /**
  * ⭐ A bejegyzés TARTALMA (az aláírásokat a kapu ellenőrzi — ez a jelentést): a születés ez a gondolat (kereshető típus, ebben
- * a koinóban); legfeljebb egy címadó javaslat (K9 — ha van, az ő címe számít); a pont-események erre a gondolatra szólnak,
+ * a koinoban); legfeljebb egy címadó javaslat (K9 — ha van, az ő címe számít); a pont-események erre a gondolatra szólnak,
  * pozitívak, és legalább `BEJEGYZES_TULAJDONOS_MIN` különböző szerzőtől (K3); más esemény nincs benne; és a fiók kulcsa a
  * cím egyik kulcsa (a tartó maga számolja — K1: hamisítani nem lehet, csak elhallgatni).
  * ⭐ D107 L3 (④a): a megújítás érvényes (a csomag egyik tulajdonosa írta alá erre a gondolatra és csomagra, nem jövőbeli), és
@@ -158,13 +158,13 @@ function javasoltCim(e, g) {
  * @param {Object} b - `bejegyzesAlakja` kimenete
  * @param {string} koino
  * @param {number} [most] - a tartó órája
- * @param {Set<string>} [osok] - ⭐ D118 (⑤a): a koinó őseinek nevei — a hozott entitás bejegyzése az ős eseményeit hordozza
+ * @param {Set<string>} [osok] - ⭐ D118 (⑤a): a koino őseinek nevei — a hozott entitás bejegyzése az ős eseményeit hordozza
  *        (a születését, a bekapcsolódók hozott pontjait); a szerzők tagságát a tartó külön nézi (④b — a nem bekapcsolódó nem tag)
  * @returns {{rendben: boolean, ok?: string, cim?: string, hely?: bigint, frissesseg?: number}}
  */
 export function bejegyzesTartalma(b, koino, most = Date.now(), osok = null) {
   if (!b.esemenyek.every((e) => esemenyKoinoja(e) === koino || osok?.has(esemenyKoinoja(e)))) {
-    return { rendben: false, ok: 'más koinó eseménye' };
+    return { rendben: false, ok: 'más koino eseménye' };
   }
   const szuletes = b.esemenyek.find((e) => e.azonosito === b.g);
   if (!szuletes || szuletes.tipus !== 'GondolatLetrehozas' || typeof szuletes.adat?.cim !== 'string'
@@ -234,7 +234,7 @@ export function bejegyzesekEpitese({ szuletes, javaslat = null, pontEsemenyek, m
 /**
  * A kereső-tár megnyitása.
  * @param {string} koino
- * @param {string} mappa - a koinó mappája (`<adat>/<koino>`) — a kereső-tár ennek `kereso/` almappája
+ * @param {string} mappa - a koino mappája (`<adat>/<koino>`) — a kereső-tár ennek `kereso/` almappája
  * @param {{korlat?: number, most?: () => number, tagE?: (szerzo: string) => Promise<boolean|null>}} [beallitas] — a `tagE`
  *   nélkül nincs tagság-ellenőrzés (minden bejegyzés az indexbe kerül — a modul-próbáknak)
  */
@@ -247,7 +247,7 @@ export async function keresoTarNyitasa(koino, mappa, beallitas = {}) {
   const korlat = beallitas.korlat ?? KERESO_KORLAT;
   const most = beallitas.most ?? (() => Date.now());
   const tagE = typeof beallitas.tagE === 'function' ? beallitas.tagE : null;
-  // ⭐ D118 (⑤a): a koinó őseinek nevei (függvény — a lánc később is megjöhet)
+  // ⭐ D118 (⑤a): a koino őseinek nevei (függvény — a lánc később is megjöhet)
   const osok = () => (typeof beallitas.osok === 'function' ? beallitas.osok() : beallitas.osok) ?? null;
   /** ⭐ ④b: minden szerzője ellenőrzött tag-e? (mindet megkérdezzük — a nem tudottak így mind a függő kérdések közé kerülnek) */
   const mindTag = async (b) => {

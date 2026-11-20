@@ -1,9 +1,9 @@
 // felulet/js/koinoTelepites.js
 
-// Felelősség: ⭐⭐ D125 (D123 PR5) — A TELEPÍTÉS A KÁRTYÁRÓL A LAPON — koinós többlet, a prototípusban nincs ilyen:
+// Felelősség: ⭐⭐ D125 (D123 PR5) — A TELEPÍTÉS A KÁRTYÁRÓL A LAPON — koinos többlet, a prototípusban nincs ilyen:
 //   · AZ ELŐNÉZET (TK2–TK4): egy koino-verzió kártya „Kód” fülének „⬇ Telepítés erre a készülékre…” gombja nyitja — ki tette fel,
 //     hány pont van rajta, megvan-e minden fájlja (ha nem, a kód kérése — TK4), rétegenként mi változik a futó programhoz képest,
-//     ⚠️ melyik koinóidban futnál más számítással (TK3 — kimondva, nem tiltva), és a figyelmeztetés: a kód a kulcsaiddal fut;
+//     ⚠️ melyik koinoidban futnál más számítással (TK3 — kimondva, nem tiltva), és a figyelmeztetés: a kód a kulcsaiddal fut;
 //   · A TELEPÍTÉS (TK1): a program kiírja a kártya kódját a régi mellé, és elindítja a cserét — a futó program leáll, az új egy
 //     ÚJ lapon nyílik meg (a lap kulcsa indításonként új: ez a fül utána csak figyel — a kezdőlapot kérdezi, ami kulcs nélkül is
 //     válaszol —, és kimondja, ha a program újraindult);
@@ -131,9 +131,9 @@ export async function telepitesMegnyitasa({ kartya = null } = {}) {
         + retegHtml('A felület', el.retegek.felulet) + retegHtml('A többi (a protokoll, a helyi viselkedés)', el.retegek.tobbi)
         + '</ul><p class="koino-telepites__megjegyzes">' + el.retegek.ugyanaz + ' fájl változatlan. A fájlokat a „🧬 Kód” fülön olvashatod.</p>';
     }
-    // ⭐ TK3: a más mag koinónként
+    // ⭐ TK3: a más mag koinonként
     if (el.mas?.length) {
-      h += '<p class="koino-kod__mas">⚠ Ezekben a koinóidban MÁS SZÁMÍTÁSSAL futnál (más maggal születtek — ott a koinó képe eltérhet a '
+      h += '<p class="koino-kod__mas">⚠ Ezekben a koinoidban MÁS SZÁMÍTÁSSAL futnál (más maggal születtek — ott a koino képe eltérhet a '
         + 'többiekétől; ha ott maradsz, a régit futtasd): ' + el.mas.map((x) => '<strong>' + html(x.nev ?? rovid(x.koino)) + '</strong>').join(', ')
         + '</p>';
     }

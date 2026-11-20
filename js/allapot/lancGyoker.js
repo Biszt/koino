@@ -53,7 +53,7 @@ import { AZONOSITO_MINTA, azonositoAlaku, esemenyKoinoja, koinoSzuleteseE, lancK
 import { alapHorgony, alapokAlapja, HORGONY_TIPUSOK } from './tagsag.js';   // ⭐⭐ D128 (9.9): a lánc alapja
 import { koinoSzabalyai, ALAP_SZABALYOK } from '../esemeny/koinoSzabalyok.js';
 import { lancNezete } from './koinoLanc.js';
-import { kizartE, tarKizarasai } from './kizaras.js';   // ⭐⭐ D128 (①d): a kizárt készülék eseményei nem a lánc részei   // ⭐ D118 (⑤b): a szerző lánca a koinóban (a bekapcsolódó hozott előtagjával)
+import { kizartE, tarKizarasai } from './kizaras.js';   // ⭐⭐ D128 (①d): a kizárt készülék eseményei nem a lánc részei   // ⭐ D118 (⑤b): a szerző lánca a koinoban (a bekapcsolódó hozott előtagjával)
 
 export const NAPLO_FAJTA = 'naplo';
 export const KIOSZTAS_FAJTA = 'kiosztas';
@@ -171,7 +171,7 @@ export async function hozottBizonyitekokOnbizonyitasa(e) {
 /**
  * Egy saját esemény hatása az állásra — a szabály ítéletével (`szabalyok.js` `lancLepese` — a szabály-réteg UGYANEZT hívja).
  * ⚠️ A saját láncot itt mindig hézagtalanul ismerjük (különben a lánc-gyökér null), tehát folytonos.
- * ⭐ D118/2: a keret a koinóé — ⭐⭐ D128 (9.9): a láncé (az alap + a kapott). ⭐ D118 (⑤b): a hozott (az ős láncából jött)
+ * ⭐ D118/2: a keret a koinoé — ⭐⭐ D128 (9.9): a láncé (az alap + a kapott). ⭐ D118 (⑤b): a hozott (az ős láncából jött)
  * pont-esemény a számított összeggel — mint a szabály-rétegben.
  * @returns {'pont'|'kapott'|null} melyik fa változott (ami nem számít, az a régi értéket hagyja érvényben)
  */
@@ -205,9 +205,9 @@ async function kapottFaja(kapott) {
  * bizonyítékot (a ③ lépés: a kiosztás egy entitásának bizonyítéka, a napló egy eseményéé).
  *
  * @param {Array<Object>} elozmenyek - a szerző eseményei, sorszám szerint 1-től, hézag nélkül
- * @param {number} [alap] - ⭐⭐ D128 (9.9): a lánc alapja (a koinó kerete vagy 0) — a kerete az alap + a kapott
- * @param {Object} [nezet] - ⭐ D118 (⑤b): a szerző lánca a koinóban (`koinoLanc.js` `lancNezete`) — a kiosztásba csak a
- *        jelen réteg eseményei számítanak, a hozottak a számított összeggel; nélküle minden esemény a saját koinóé
+ * @param {number} [alap] - ⭐⭐ D128 (9.9): a lánc alapja (a koino kerete vagy 0) — a kerete az alap + a kapott
+ * @param {Object} [nezet] - ⭐ D118 (⑤b): a szerző lánca a koinoban (`koinoLanc.js` `lancNezete`) — a kiosztásba csak a
+ *        jelen réteg eseményei számítanak, a hozottak a számított összeggel; nélküle minden esemény a saját koinoé
  * @param {Object} [alapok] - ⭐⭐ D128 (9.9): az azonosság láncainak alapjai (`lancAlapjai` — az átvételek ítéletéhez); nélküle
  *        mindegyiké az `alap`
  * @returns {Promise<Object|null>} null, ha a lánc nem ép
@@ -244,7 +244,7 @@ export async function lancGyokerLancbol(elozmenyek, alap, nezet = null, alapok =
 }
 
 /**
- * ⭐ D118/2 (①b): a koinó tudatpont-kerete a tárból — lenyomat-nevű koinónál a születés azonosítója maga a koinó neve
+ * ⭐ D118/2 (①b): a koino tudatpont-kerete a tárból — lenyomat-nevű koinonál a születés azonosítója maga a koino neve
  * (egy kérdés); ha nincs meg (vagy a régi alak), a mai érték.
  */
 export async function koinoKerete(tar, koino) {
@@ -253,9 +253,9 @@ export async function koinoKerete(tar, koino) {
 }
 
 /**
- * ⭐⭐ D128 (9.9): egy azonosság LÁNCAINAK ALAPJA a tárból — lánc → a koinó kerete, ha ez a lánc írta az azonosság alap-horgonyát
+ * ⭐⭐ D128 (9.9): egy azonosság LÁNCAINAK ALAPJA a tárból — lánc → a koino kerete, ha ez a lánc írta az azonosság alap-horgonyát
  * (`tagsag.js` `alapHorgony` — ugyanaz a szabály, mint a szabály-rétegben), 0, ha egy másik lánca; ha a horgony nincs meg nálunk,
- * mindegyiké a koinó kerete. ⛔ D123 PR2: ADAT, nem függvény (`tagsag.js` `alapokAlapja` számol belőle); a `kulcs`-a a kerete és a
+ * mindegyiké a koino kerete. ⛔ D123 PR2: ADAT, nem függvény (`tagsag.js` `alapokAlapja` számol belőle); a `kulcs`-a a kerete és a
  * horgony lánca (a gyorsítótár ehhez köti a képét).
  * @param {Object} tar
  * @param {string} koino
@@ -385,8 +385,8 @@ async function allapotIg(tar, koino, lanc, meddig, tarolo) {
   // ⭐⭐ D128 (①d, 9.10): a kizárt készülék vágás utáni eseményei nem a lánc részei (az örökös folytatja).
   const kizarasok = await tarKizarasai(tar, szerzo);
   const lancon = (e) => nezet.tagja(e) && !kizartE(e, kizarasok);
-  // ⭐⭐ D118 (⑤b): a szerző LÁNCA a koinóban — a bekapcsolódóé a hozott előtaggal (a napló a teljes láncot fedi), a kiosztás a
-  // jelen réteg szerint (a hozott pontok a számított összeggel, az elhagyottak nélkül). Eddig a koinó nevére szűrt: a
+  // ⭐⭐ D118 (⑤b): a szerző LÁNCA a koinoban — a bekapcsolódóé a hozott előtaggal (a napló a teljes láncot fedi), a kiosztás a
+  // jelen réteg szerint (a hozott pontok a számított összeggel, az elhagyottak nélkül). Eddig a koino nevére szűrt: a
   // bekapcsolódó lánca az 1. sorszámon „nem ép” volt, és a gyermekbeli eseményei lánc-gyökér nélkül születtek.
   const nezet = await lancNezete(tar, koino, lanc);
   let tarbeli = memoria.get(tar);
@@ -397,7 +397,7 @@ async function allapotIg(tar, koino, lanc, meddig, tarolo) {
   // ⚠️ A fájl hibája nem hiba: a gyorsítótár elhagyható, a lánc pótolja.
   const fajlbol = tarolo ? await fajlbolAllapot(await tarolo.olvas().catch(() => null), lanc) : null;
   for (const jelolt of [tarbeli.get(lanc), fajlbol]) {
-    // ⭐ D118/2: a kép a koinó keretével készült — ha azóta megjött a születés (más kerettel), a lánc újraszámolja.
+    // ⭐ D118/2: a kép a koino keretével készült — ha azóta megjött a születés (más kerettel), a lánc újraszámolja.
     // ⭐ D118 (⑤b): és a lánc nézetével (ha azóta bekapcsolódtam, más a lánc és a kiosztás).
     if (jelolt && jelolt.sorszam <= meddig && jelolt.keret === keret && (jelolt.nezet ?? '') === nezet.kulcs
         && jelolt.alapKulcs === alapjai.kulcs && await illikALanchoz(tar, nezet, jelolt)) {

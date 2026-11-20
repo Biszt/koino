@@ -9,7 +9,7 @@
 // (egy hiányzó szavazat, egy másképp számolt küszöb, egy más sorrend).
 //
 // Ez a Szakasz 2 VIZSGÁJA, futtatható alakban: cserélj, aztán hasonlítsd össze a két
-// ujjlenyomatot. Ha egyeznek, a két gép ugyanazt a koinót látja.
+// ujjlenyomatot. Ha egyeznek, a két gép ugyanazt a koinot látja.
 //
 // ⚠️ AZ IDŐ BEMENET, NEM ÁLLAPOT. A javaslatok státusza az idő múlásával változik (egy
 // döntés lezárul). Két készülék ujjlenyomata tehát csak AZONOS IDŐPONTRA számolva

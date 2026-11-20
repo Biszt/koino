@@ -19,7 +19,7 @@
 // ⛔ minden kérés ~400 bájttal növelné a tartós adatot, holott a kérés **egyszeri**.
 //
 // ⭐ Amit a válaszból megtanulunk (*kinél van meg*), az **helyi feljegyzés** (3. szabály):
-// sosem terjed, két készüléken mást jelent, és semmit nem dönt el a koinóban — ugyanaz a
+// sosem terjed, két készüléken mást jelent, és semmit nem dönt el a koinoban — ugyanaz a
 // fajta, mint a `tarsak.js` `utoljara` mezője.
 //
 // ===== ⭐⭐ ÉS A LEGFONTOSABB SZERKEZETI ÉSZREVÉTEL =====
@@ -100,7 +100,7 @@ export async function valaszOsszeallitasa(kertek, megvanE, korlat = KERELEM_KORL
  * Beolvasztja a választ a helyi jegyzetbe: „ennél a társnál megvan ez a fájl".
  *
  * ⚠️ **HELYI FELJEGYZÉS, NEM ESEMÉNY** (3. szabály): sosem terjed, és semmit nem dönt el a
- * koinóban — csak azt, hogy **kitől érdemes kérni**. Ha elveszik, a következő buli
+ * koinoban — csak azt, hogy **kitől érdemes kérni**. Ha elveszik, a következő buli
  * újratanulja.
  *
  * ⭐ AZ IDŐVEL EGYÜTT JEGYEZZÜK, mert egy régi hír **nem hazugság, hanem elavult**: a társ

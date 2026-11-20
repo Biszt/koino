@@ -18,7 +18,7 @@
 // A lap ebből rajzolja a sávját (`belepesKepe`); a szöveg a laptól függetlenül igaz — a lépéseket a program jegyzi.
 //
 // ⛔ Helyi feljegyzés, nem esemény: nem terjed, semmit nem dönt el (3. szabály); ha elvész vagy sérült, a lap annyit mond,
-// hogy nem tudja. A mérete állandó (egy kör, egy csere, egy belépés) — a koinó méretétől nem függ (9. szabály).
+// hogy nem tudja. A mérete állandó (egy kör, egy csere, egy belépés) — a koino méretétől nem függ (9. szabály).
 //
 // Hálózatot nem importál. Használja: `koino.js` (az őrjárat köre, a munka, a felület `/api/csere-allapot` útvonala).
 

@@ -11,11 +11,11 @@
 //
 // ⭐ Amit viszont ÖRÖKÖL: a **stílusváltozókat** (`base/variables.css`) és a pakli logikáját
 // — rendezés + irány a sávban, egy lista alatta. *A tér ugyanúgy néz ki, mint a pakli, csak
-// a kártyákon koinók állnak (Csaba, 2026-08-27).*
+// a kártyákon koinok állnak (Csaba, 2026-08-27).*
 //
 // ===== ⛔⛔ AMIT A LAPNAK KI KELL MONDANIA =====
 //
-// A tér **nem a világ összes koinója**, csak amit ez a készülék ismer — idegen koinók
+// A tér **nem a világ összes koinoja**, csak amit ez a készülék ismer — idegen koinok
 // böngészéséhez a kereső-réteg kell, ami szándékosan elhagyható és nincs megépítve.
 // A program ezt a `csakAmitIsmerunk` mezőben megmondja, és a lap **kiírja**. *A hallgatás
 // itt teljességet ígérne, amit nem tudunk tartani (D19).*
@@ -29,7 +29,7 @@ export class TerNezet {
   /**
    * @param {HTMLElement} kontener - ide kerülnek a koino-kártyák
    * @param {Object} elemek - { allapotElem, rendezesValaszto, iranyValaszto }
-   * @param {Function} belepesUtan - ezt hívjuk, ha az e-ember belépett egy koinóba
+   * @param {Function} belepesUtan - ezt hívjuk, ha az e-ember belépett egy koinoba
    */
   constructor(kontener, elemek = {}, belepesUtan = null) {
     console.log('TerNezet.constructor - KEZDÉS');
@@ -40,7 +40,7 @@ export class TerNezet {
 
     this.rendezes = 'letrehozva';
     this.irany = 'csokkeno';
-    this.aktiv = null;              // melyik koinóban állunk éppen
+    this.aktiv = null;              // melyik koinoban állunk éppen
     masoloGombok(this.kontener);    // ⭐ D119 (⑥): az indító parancsok másolása
 
     console.log('TerNezet.constructor - VÉGE');
@@ -71,8 +71,8 @@ export class TerNezet {
       const ures = document.createElement('p');
       ures.className = 'koino-megjegyzes';
       // ⭐⭐ D121 (⑤): a meghívó — egy beillesztés, a többi magától
-      ures.textContent = 'Ez a készülék még egy koinót sem ismer. Ha meghívtak: a meghívót (egy „koino-meghivo:1:…” szöveget) illeszd '
-        + 'be a „🔗 Csatlakozás egy koinóhoz…” ablakban — a tér sávján; a többi magától megy.';
+      ures.textContent = 'Ez a készülék még egy koinot sem ismer. Ha meghívtak: a meghívót (egy „koino-meghivo:1:…” szöveget) illeszd '
+        + 'be a „🔗 Csatlakozás egy koinohoz…” ablakban — a tér sávján; a többi magától megy.';
       this.kontener.appendChild(ures);
     }
 
@@ -130,7 +130,7 @@ export class TerNezet {
         'a meghívási lánc egy része még nem érkezett meg — hiány, nem vád'));
     }
     szamok.appendChild(this._szam(koino.belepok, 'belépő', 'aki megnyitotta a saját szeletét'));
-    szamok.appendChild(this._szam(koino.esemenyek, 'esemény', 'amennyi ebből a koinóból megvan'));
+    szamok.appendChild(this._szam(koino.esemenyek, 'esemény', 'amennyi ebből a koinoból megvan'));
     elem.appendChild(szamok);
 
     // ----- AZ IDŐ -----
@@ -164,8 +164,8 @@ export class TerNezet {
 
     // ----- A BELÉPÉS -----
     //
-    // ⚠️ A „belépés" itt NEM bejelentkezés (D15: nincs ilyen a koinóban) — csak annyi,
-    // hogy melyik koinót nézi ez a lap. Semmi nem terjed tőle.
+    // ⚠️ A „belépés" itt NEM bejelentkezés (D15: nincs ilyen a koinoban) — csak annyi,
+    // hogy melyik koinot nézi ez a lap. Semmi nem terjed tőle.
     const sav = document.createElement('div');
     sav.className = 'koino-kartya__sav';
 
@@ -273,7 +273,7 @@ export class TerNezet {
   }
 
   // ===================================
-  // BELÉPÉS EGY KOINÓBA
+  // BELÉPÉS EGY KOINOBA
   // ===================================
 
   async _belepes(azonosito) {

@@ -11,7 +11,7 @@ két hálózat, szolgáltató nélkül.*
 
 ## Mit csinálunk, és miért
 
-A koinónak **két külön készüléken, két külön hálózaton** kell megtalálnia egymást, hogy
+A koinonak **két külön készüléken, két külön hálózaton** kell megtalálnia egymást, hogy
 kiderüljön: működik-e szolgáltató nélkül. Ehhez a telefonra fel kell tenni ugyanazt a
 programot, ami a laptopon fut.
 
@@ -30,7 +30,7 @@ fogjuk, hogy a hálózat miatt — nem a program miatt.
 
 ## ⭐ A LEGEGYSZERŰBB ÚT (2026-11-01) — egy bemásolt sor
 
-⭐ **2026-11-06: a koino saját tárba költözött** (`github.com/Biszt/koino`, a gépen a `koino` mappa). Ha a régi helyről (`koino_1.1`) futtattad, elég egyszer bemásolni az új sort: a régi helyről futó koinót leállítja, és az újjal indít; az adatod (`koino-adat`) marad. A régi mappa ezután törölhető.
+⭐ **2026-11-06: a koino saját tárba költözött** (`github.com/Biszt/koino`, a gépen a `koino` mappa). Ha a régi helyről (`koino_1.1`) futtattad, elég egyszer bemásolni az új sort: a régi helyről futó koinot leállítja, és az újjal indít; az adatod (`koino-adat`) marad. A régi mappa ezután törölhető.
 
 *Csaba: „a d30-as szabályt ne rugjuk fel. maradjon a termux. megtudjuk oldani, hogy 1 parancs csomag bemásolássával a termuxban
 elég legyen?” — igen. A Termux marad (a D30 szerint saját koino-alkalmazás nem lesz: azt egy névvel regisztrált fejlesztőn
@@ -43,7 +43,7 @@ keresztül egyetlen ponton le lehetne tiltani), de a parancssorból csak ez az e
 yes | pkg upgrade && pkg install -y nodejs git procps && { if [ -d ~/koino ]; then git -C ~/koino fetch --depth 1 origin main && git -C ~/koino reset --hard FETCH_HEAD || echo ⚠ a program most nem frissült — a meglévő indul; else git clone --depth 1 https://github.com/Biszt/koino.git ~/koino; fi; } && sh ~/koino/termux/telepit.sh
 ```
 
-   Ez frissíti a Termuxot, telepíti a Node-ot és a gitet, letölti a koinót, megvizsgálja, hogy a telefon tud-e aláírni
+   Ez frissíti a Termuxot, telepíti a Node-ot és a gitet, letölti a koinot, megvizsgálja, hogy a telefon tud-e aláírni
    (Ed25519), felveszi a `koino` parancsot, és **elindítja**: a böngészőben megnyílik a lap. ⏱ Az első alkalommal
    néhány perc, sok szöveg gördül — ez normális.
    ⭐ **Ha a koino már fent van, ugyanez a sor FRISSÍTI** (2026-11-06, D123): a program mappáját a legújabbra állítja (az
@@ -83,15 +83,15 @@ vagy a parancssorba kell beilleszteni: a Termux-sor ott már az első szónál m
 [`telepites_windows.md`](telepites_windows.md).
 
 *Az adat a `~/koino-adat` mappában él (más: `KOINO_ADAT=<mappa> koino`); a naplók ugyanott: `orjarat.log`, `felulet.log`.
-A program magától nem frissül, csak ha a sort újra bemásolod — hogy egy koinó melyik kódot futtatja, az a közösség dolga (a
-koino-verzió kártya; ha a gépeden más a számítás magja, mint amivel a koinó született, a lap kimondja: „⚠ más számítás”).*
+A program magától nem frissül, csak ha a sort újra bemásolod — hogy egy koino melyik kódot futtatja, az a közösség dolga (a
+koino-verzió kártya; ha a gépeden más a számítás magja, mint amivel a koino született, a lap kimondja: „⚠ más számítás”).*
 
 ---
 
 ## 🔄 HA MÁR FENT VAN A KOINO: frissítés
 
 ⭐ **2026-11-06 óta a legegyszerűbb frissítés: a fenti egy sor** (a „legegyszerűbb út” 2. pontja — meghívó nélkül is):
-frissít, a futó régi koinót leállítja, és az újjal indít. Az alábbi sor a fejlesztéshez kell, mert az önpróbákat is lefuttatja.
+frissít, a futó régi koinot leállítja, és az újjal indít. Az alábbi sor a fejlesztéshez kell, mert az önpróbákat is lefuttatja.
 
 ⬇ **Egy koino-verzió kártyáról is** (D125): a kártya „🧬 Kód” fülén „⬇ Telepítés erre a készülékre…” — a régi a `~/koino-regi`-ben
 marad (vissza: a fő menü „🧬 A program ezen a készüléken…”). ⚠️ A telefonon az új program a HÁTTÉRBEN indul: a régi Termux-ablakban a
@@ -202,7 +202,7 @@ fájlokról kérdez, arra is elég az Enter.
 pkg install nodejs git
 ```
 
-Ez telepíti a **Node**-ot (ami a koinót futtatja) és a **git**-et (amivel letöltjük).
+Ez telepíti a **Node**-ot (ami a koinot futtatja) és a **git**-et (amivel letöltjük).
 Ha kérdez, Enter.
 
 ✅ **Ha sikerült:** ellenőrizd ezzel:
@@ -258,7 +258,7 @@ source ~/.bashrc
 k kulcs
 ```
 
-Ki kell írnia egy hosszú betűsort (ez lesz a telefon azonossága a koinóban) és azt, hogy
+Ki kell írnia egy hosszú betűsort (ez lesz a telefon azonossága a koinoban) és azt, hogy
 hol tárolja.
 
 ## 9. lépés — ⭐⭐ a telefon vizsgája (ez a legértékesebb mérés az egészben)
@@ -332,8 +332,8 @@ készülékek között.)*
 
 ## 12. lépés — a telefon csatlakozik
 
-⭐ **2026-10-24 óta (D118/2) a koinó neve a születésének lenyomata** — egy 43 jeles név. A telefonnak előbb meg kell
-mondani, melyik koinóhoz csatlakozik. **A laptopon** kiírja a nevét:
+⭐ **2026-10-24 óta (D118/2) a koino neve a születésének lenyomata** — egy 43 jeles név. A telefonnak előbb meg kell
+mondani, melyik koinohoz csatlakozik. **A laptopon** kiírja a nevét:
 
 ```bash
 node koino.js koino
@@ -342,10 +342,10 @@ node koino.js koino
 **A telefonon** (a nevet a laptopról másold át — a Termuxban hosszan nyomva beilleszthető):
 
 ```bash
-k csatlakoz <a koinó neve>
+k csatlakoz <a koino neve>
 ```
 
-*(A telefonon a koinó becenéve ezután is `sajat` marad — a `becenevek.json` jegyzi, melyik koinóé.)* Utána **a
+*(A telefonon a koino becenéve ezután is `sajat` marad — a `becenevek.json` jegyzi, melyik koinoé.)* Utána **a
 telefonon**, a saját címeddel a `192.168.1.134` helyén:
 
 ```bash
@@ -369,7 +369,7 @@ node koino.js ujjlenyomat
 
 ✅ **Ha sikerült:** a **TUDÁS** alatti hosszú betűsor a két készüléken **betűre azonos**.
 
-Ez a vizsga, szemmel elvégezve: ha a két sor egyezik, a két készülék ugyanazt a koinót
+Ez a vizsga, szemmel elvégezve: ha a két sor egyezik, a két készülék ugyanazt a koinot
 látja.
 
 ---
@@ -499,7 +499,7 @@ A Szakasz 2 terv 8. pontja írja le Csaba korlátait, és mindegyikből követke
 | Korlát | Következmény |
 |---|---|
 | nincs mobilnet | a telefon **átvihető a szomszédba** → külön router, külön nyilvános cím |
-| nincs második laptop | a szomszédban nincs kábel és port-továbbítás → **a telefon futtatja a koinót** |
+| nincs második laptop | a szomszédban nincs kábel és port-továbbítás → **a telefon futtatja a koinot** |
 | nem akarunk alagutat | épp azt a kérdést kerülné meg, amit mérni akarunk |
 
 ## Mit dönt el a mérés?
@@ -534,7 +534,7 @@ A **ms-szám** a terv 7. pontjának legfontosabb mérendő értéke: ebből jön
    kérésre.)*
 
 1. **Van-e a telefonnak globális IPv6 a szomszédban?** (16. lépés — ha nincs, ott az ISP
-   nem ad IPv6-ot; a mérés nem a koinóról szól)
+   nem ad IPv6-ot; a mérés nem a koinoról szól)
 2. **Windows tűzfal:** engedi-e a Node bejövő kapcsolatait, **IPv6-ra is**?
 3. **A saját routered:** a legtöbb otthoni router alapból **tiltja a bejövő IPv6-ot**.
    Ez az a beállítás, amit engedni kell.
@@ -581,7 +581,7 @@ programot oszthatna. A választható válaszok (a döntés még nincs meg):
 | **Aláírt kiadás** | a letöltött csomag ujjlenyomata ellenőrizhető — pontosan az a minta, amit a koino az eseményeknél is használ |
 | **A forrás nyilvános** (AGPL-3.0) | bárki újraépítheti és összevetheti |
 | **Több forrás** | F-Droid, GitHub-kiadás, koino.hu — ne egyetlen ponton múljon |
-| **A koinón belüli verzió-entitás** (D12) | a közösség maga dönthessen róla, melyik verziót futtatja |
+| **A koino-n belüli verzió-entitás** (D12) | a közösség maga dönthessen róla, melyik verziót futtatja |
 
 **Ami technikailag hátravan:** Androidon a webről telepítés **APK**-t jelent (nem Play
 Áruházat), és az APK-nak vinnie kell magával egy Node-futtatót — ezt ma a Termux adja, egy

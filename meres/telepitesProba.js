@@ -180,7 +180,7 @@ async function telepitesEredmenye(adat, ms) {
 
 /**
  * Két program egy készüléken: A (ez a program) a `<otthon>/koino`-ban, B egy másolat más felülettel (és ha `bTorzs`, más
- * `koino.js`-szel) a `<masik>/koino`-ban; B alapít egy koinót és feltölt egy koino-verzió kártyát (a kódja B-é).
+ * `koino.js`-szel) a `<masik>/koino`-ban; B alapít egy koinot és feltölt egy koino-verzió kártyát (a kódja B-é).
  */
 async function ketProgram({ bValtozas = null } = {}) {
   const otthon = await ujMappa('koino-tel-otthon-');
@@ -253,7 +253,7 @@ proba('⭐⭐ a LAP útjai (`/api/telepites`): az előnézet a kártyára (a ré
   const f = await felulete(k.A, k.adat, 8067);
   try {
     const { allapot } = await f.hiv('/api/pakli').catch(() => ({ allapot: 0 }));
-    // a kártya teljes azonosítója (a lap ezt adja) — a koinó esemény-fájljából
+    // a kártya teljes azonosítója (a lap ezt adja) — a koino esemény-fájljából
     const { readdir } = await import('node:fs/promises');
     let teljes = null;
     for (const m of await readdir(k.adat)) {

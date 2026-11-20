@@ -188,8 +188,8 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
   }
   // ----- ⭐⭐ D128 (①d, 9.10): A KIZÁRÁS ÉS A FOLYTATOTT LÁNC -----
   // A kizárás tanúsítványát az azonosság kulcsa írta alá — önmagát igazolja, ezért bárki beviheti (mint az ellentmondás
-  // bizonyítékát, D80). A folytatott láncon (`lanc` mező) csak az ÖRÖKÖS írhat, csak a VÁGÁS UTÁN, és csak ha a koinóban az azonosság
-  // kizárása ezt mondja (a felsorolt koinókba az örökös maga hozza, a folytatás előtt).
+  // bizonyítékát, D80). A folytatott láncon (`lanc` mező) csak az ÖRÖKÖS írhat, csak a VÁGÁS UTÁN, és csak ha a koinoban az azonosság
+  // kizárása ezt mondja (a felsorolt koinokba az örökös maga hozza, a folytatás előtt).
   if (esemeny.tipus === KIZARAS_ESEMENY) {
     const kv = await kizarasEllenorzese(esemeny.adat.kizaras);
     if (!kv.rendben) {
@@ -307,7 +307,7 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
     }
   }
 
-  // ----- 1/a4b. ⭐⭐ D119 (①a): A KOINO-VERZIÓ — a beágyazott gyermek-születés a koinó (a szülő) születésével -----
+  // ----- 1/a4b. ⭐⭐ D119 (①a): A KOINO-VERZIÓ — a beágyazott gyermek-születés a koino (a szülő) születésével -----
   // Ugyanaz a próba, mint a gyermek saját kapuján: egy hamis vagy nem tagtól jött születés nem lesz a szülőben „gyermek”.
   if (koinoVerzioE(esemeny)) {
     const kv = await koinoVerzioEllenorzese(esemeny, (await tar.esemeny(esemenyKoinoja(esemeny))) ?? null, tar);
@@ -317,7 +317,7 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
     }
   }
 
-  // ----- 1/a5. ⭐⭐ D118 (④a): A BEKAPCSOLÓDÁS — a koinó és a szülő születésével, a vágáskori tagsági bizonyítékkal -----
+  // ----- 1/a5. ⭐⭐ D118 (④a): A BEKAPCSOLÓDÁS — a koino és a szülő születésével, a vágáskori tagsági bizonyítékkal -----
   if (bekapcsolodasE(esemeny)) {
     const bk = await bekapcsolodasEllenorzese(esemeny, (await tar.esemeny(esemenyKoinoja(esemeny))) ?? null,
       (await tar.esemeny(esemeny.adat.szulo)) ?? null, tar);
@@ -332,7 +332,7 @@ async function esemenyMenteseEgy(tar, esemeny, beallitas = {}) {
   // szabály-réteg ennek alapján hagyja ki a pontjait (D79). ⛔ Ezért a tartalmát is itt ellenőrizzük,
   // az egyetlen kapun (3. szabály): hamis vád nem kerül a tárba, és a szabály a tárban lévőt hiszi el.
   if (esemeny.tipus === 'Ellentmondas') {
-    // ⭐ D118/2: a koinó kerete a tárból (a születés azonosítója maga a koinó neve); ha nincs meg, a mai érték.
+    // ⭐ D118/2: a koino kerete a tárból (a születés azonosítója maga a koino neve); ha nincs meg, a mai érték.
     const vad = await ellentmondasEllenorzese(esemeny.adat, esemeny.koino,
       // ⭐⭐ D128 (9.9): a vádolt LÁNCÁNAK kerete (az alap — a horgony lánca kapja).
       { tudatpontKeret: await lancAlapKerete(tar, esemeny.koino, lancKulcsa(esemeny.adat?.esemeny), esemeny.adat?.kit),
@@ -503,7 +503,7 @@ export async function azonossagEsemenyei(tar, szerzo) {
  * Egy koino ÖSSZES eseménye (az állapotszámításhoz).
  *
  * ⚠️ **EZ AZ EGYETLEN MŰVELET, AMI NEM SKÁLÁZIK — és ez tudatos.** Az `allapotSzamitasa`
- * tiszta függvény: azt számolja ki, amit kap. Kis koinóban ez a teljes halmaz, és úgy is
+ * tiszta függvény: azt számolja ki, amit kap. Kis koinoban ez a teljes halmaz, és úgy is
  * kell; nagyban viszont a hívó **szeletet** ad neki (`entitasEsemenyei`), és akkor ez a
  * függvény nem szerepel az útban.
  *
@@ -514,8 +514,8 @@ export async function azonossagEsemenyei(tar, szerzo) {
  * @returns {Promise<Array<Object>>}
  */
 /**
- * ⭐⭐ D118 (③): a koinó BEMENETE a koinó-szabály szerint (`koinoLanc.js` — ②b) — a saját eseményei, a születések lánca
- * és az ősök vágás előtti eseményei. A koinó képe ebből számol (`ketReteg.js`); szülő nélküli koinónál ugyanaz, mint a
+ * ⭐⭐ D118 (③): a koino BEMENETE a koino-szabály szerint (`koinoLanc.js` — ②b) — a saját eseményei, a születések lánca
+ * és az ősök vágás előtti eseményei. A koino képe ebből számol (`ketReteg.js`); szülő nélküli koinonál ugyanaz, mint a
  * `koinoEsemenyei`. ⚠️ Ugyanaz a végigolvasás, mint ott (lásd a fejlécét).
  * @returns {Promise<Array<Object>>}
  */
@@ -559,7 +559,7 @@ export async function koinoEsemenyei(tar, koino) {
 export async function entitasEsemenyei(tar, koino, entitas) {
   // ⭐ 3.2: célzott kérdés — a tároló szelet szerint tartja nyilván az eseményeket, tehát
   // ez már NEM olvassa végig a tárat. A koino-szűrés csak biztonsági öv (a fájl amúgy is
-  // koinónként külön van).
+  // koinonként külön van).
   return (await tar.szeletEsemenyei(entitas)).filter((e) => esemenyKoinoja(e) === koino);
 }
 
@@ -629,10 +629,10 @@ export async function horgonyok(tar, koino, entitas, sajatSzerzo, darab = 1) {
 // ===================================
 
 /**
- * ⭐⭐ D118 (⑤b): HOVA KERÜL a szerző új saját eseménye egy koinóban — a koinóbeli LÁNCA végére (`koinoLanc.js`
- * `lancNezete`: a koinó saját eseményei, és ha bekapcsolódott, a hozott előtag); a bekapcsolódásé a saját adatából (a szülőbeli
+ * ⭐⭐ D118 (⑤b): HOVA KERÜL a szerző új saját eseménye egy koinoban — a koinobeli LÁNCA végére (`koinoLanc.js`
+ * `lancNezete`: a koino saját eseményei, és ha bekapcsolódott, a hozott előtag); a bekapcsolódásé a saját adatából (a szülőbeli
  * lánc-pontja után — a láncom ott még nem a gyermeké, a kapu ellenőrizte). ⛔ A nem bekapcsolódó szülőbeli múltja nem a
- * gyermekbeli lánca: az ott 1-ről indul (különben a tár legnagyobb sorszáma után folytatná, akármelyik koinóé — és ha a
+ * gyermekbeli lánca: az ott 1-ről indul (különben a tár legnagyobb sorszáma után folytatná, akármelyik koinoé — és ha a
  * múltja később érkezik, a két lánc azonos sorszámai elágazásnak látszanának). A művelet és az író (az ELAVULT) ezt hívja.
  * @param {Object} tar
  * @param {string} lancKulcs - ⭐⭐ D128: a saját lánc kulcsa (a készülékem kulcsa — `lancKulcsa`)
@@ -645,9 +645,9 @@ export async function ujSajatHelye(tar, lancKulcs, koino, tipus = null, adat = n
   if (tipus === 'Bekapcsolodas' && typeof adat?.lanc?.azonosito === 'string' && Number.isSafeInteger(adat.lanc.sorszam)) {
     return { elozo: adat.lanc.azonosito, sorszam: adat.lanc.sorszam + 1 };
   }
-  // ⭐ A koinó SZÜLETÉSE (új alakban a koinó-mezője üres — a koinó még nincs): a helyét a hívó adja a tárral — a gyermekéé a
+  // ⭐ A koino SZÜLETÉSE (új alakban a koino-mezője üres — a koino még nincs): a helyét a hívó adja a tárral — a gyermekéé a
   // létrehozó szülőbeli láncának vége után (`koino.js` `ujKoinoSzuletese` az ideiglenes tárba csak azt teszi), a szülő
-  // nélkülié 1. ⛔ A koinó láncán keresve semmit nem találna (mérve: a gyermek születése 1-es sorszámot kapott, és a
+  // nélkülié 1. ⛔ A koino láncán keresve semmit nem találna (mérve: a gyermek születése 1-es sorszámot kapott, és a
   // létrehozó hozott múltja nem jutott át a kapun).
   if (tipus === 'KoinoLetrehozas') return lancVege(tar, lancKulcs);
   const nezet = await lancNezete(tar, koino, lancKulcs);

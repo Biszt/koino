@@ -7,8 +7,8 @@
 // eseménye nincs vele (más szeleté), csak a tanúsítványa (D81: a bizonyíték az eseménnyel utazik). Ami így jött, azt a kapu
 // ide jegyzi fel, és a tár ezután ebből is felel (`tanusitvany(keszulek)`).
 //
-// ⭐ KOINÓTÓL FÜGGETLEN (KU2 (A)): a tanúsítvány az azonosság minden koinójában érvényes — ezért a jegyzék a készülék mappájában
-// van (a koinók mappái fölött), egy fájlban (`tanusitvanyok.jsonl`, soronként egy). Csak hozzáfűzés; két folyamat írhatja (a
+// ⭐ KOINOTÓL FÜGGETLEN (KU2 (A)): a tanúsítvány az azonosság minden koinojában érvényes — ezért a jegyzék a készülék mappájában
+// van (a koinok mappái fölött), egy fájlban (`tanusitvanyok.jsonl`, soronként egy). Csak hozzáfűzés; két folyamat írhatja (a
 // kettőzött sor ártalmatlan). ⛔ Egy gyorsítótárban sem bízunk vakon: beolvasáskor minden tanúsítványt újra ellenőrzünk.
 // ⛔ Egy készüléket csak egy azonosság tanúsíthat: ami egy már ismert készüléket egy MÁSIK azonossághoz kötne, azt elvetjük.
 //
@@ -20,7 +20,7 @@ import { tanusitvanyEllenorzese } from '../kulcs/keszulek.js';
 
 /**
  * A jegyzék egy mappában.
- * @param {string} mappa - a készülék mappája (a koinók mappái fölött)
+ * @param {string} mappa - a készülék mappája (a koinok mappái fölött)
  * @returns {{fajl: string, keres: Function, felvesz: Function}}
  */
 export function tanusitvanyJegyzek(mappa) {

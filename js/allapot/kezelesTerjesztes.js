@@ -1,20 +1,20 @@
 // js/allapot/kezelesTerjesztes.js
 
-// Felelősség: ⭐⭐ D128 (③b — 9.12): AZ AZONOSSÁG KEZELÉSE MINDEN KOINÓMBA — HELYBEN.
+// Felelősség: ⭐⭐ D128 (③b — 9.12): AZ AZONOSSÁG KEZELÉSE MINDEN KOINOMBA — HELYBEN.
 //
 // ===== MIÉRT =====
 //
-// A kizárás és a kulcscsere egy-egy koinóba bevitt ESEMÉNY (`Kizaras`, `Kulcscsere`): egy másik koinó csak akkor tud róla, ha ott is
-// bekerül. ⛔ A ③ előtt egy kulcscsere csak abba a koinóba jutott, ahol a parancsot kiadták — a többiben a tolvaj által felvett
-// készülék tovább számított, egy kizárást pedig kézzel kellett volna koinónként bevinni.
+// A kizárás és a kulcscsere egy-egy koinoba bevitt ESEMÉNY (`Kizaras`, `Kulcscsere`): egy másik koino csak akkor tud róla, ha ott is
+// bekerül. ⛔ A ③ előtt egy kulcscsere csak abba a koinoba jutott, ahol a parancsot kiadták — a többiben a tolvaj által felvett
+// készülék tovább számított, egy kizárást pedig kézzel kellett volna koinonként bevinni.
 //
 // ===== A KEZELÉS-JEGYZÉK =====
 //
 // A készülék egy HELYI feljegyzésben (`kezeles.json` — nem esemény, nem terjed; mint a társ-lista) gyűjti, amit az azonossága
 // kezeléséről BÁRHOL lát: a legerősebb kulcscsere-láncot (a születésével és a benne álló helyreállítások bizonyítékaival) és a
-// kizárásokat. Minden koinójában, ahol az azonosságnak szelete van, beviszi, ami onnan hiányzik — a parancsok elején és az őrjárat
-// minden körében (az éppen futó koinóba), a kezelő parancsok után (a kulcscsere, a kizárás, a papír visszavonása, a helyreállítás
-// befejezése) minden koinójába. Két koinó így a készüléken át ér egyet: amit az egyikben lát, azt a másikba is beviszi.
+// kizárásokat. Minden koinojában, ahol az azonosságnak szelete van, beviszi, ami onnan hiányzik — a parancsok elején és az őrjárat
+// minden körében (az éppen futó koinoba), a kezelő parancsok után (a kulcscsere, a kizárás, a papír visszavonása, a helyreállítás
+// befejezése) minden koinojába. Két koino így a készüléken át ér egyet: amit az egyikben lát, azt a másikba is beviszi.
 //
 // ⭐ A jegyzék csak GYORSÍTÓTÁR: a kapu minden bevitt eseményt újra ellenőriz (a lánc aláírásait, a bizonyítékokat, a kizárás
 // aláírását) — egy átírt jegyzék nem visz be hamisat, legfeljebb a kapu elveti. Egy sérült vagy idegen fájlból üres jegyzék lesz
@@ -24,8 +24,8 @@
 // ezeket írja alá újra az új kulccsal. ⛔ A más készülékről gyűjtötteket nem — egy tolvaj régi kulccsal aláírt kizárása így nem lesz
 // érvényes.
 //
-// ⭐ Amit a kapu elvetett (pl. ezt a készüléket a kulcscsere nem sorolta fel — az eseményét a koinó már nem fogadja), azt egy napig
-// nem próbáljuk újra abban a koinóban (`elvetve`): különben minden parancs elején ugyanaz a hiba szólna.
+// ⭐ Amit a kapu elvetett (pl. ezt a készüléket a kulcscsere nem sorolta fel — az eseményét a koino már nem fogadja), azt egy napig
+// nem próbáljuk újra abban a koinoban (`elvetve`): különben minden parancs elején ugyanaz a hiba szólna.
 //
 // Használják: muveletek.js (`kezelesGondozasa`), koino.js (a parancsok eleje, az őrjárat köre, a kezelő parancsok), a próbák.
 
@@ -39,7 +39,7 @@ export const KEZELES_JEGYZEK = 'koino-kezeles';
 /** Egy jegyzék legfeljebb ennyi kizárást őriz (egy ember készülékei — a legrégebbi esik ki). */
 export const JEGYZEK_KIZARAS_KORLAT = 64;
 
-/** Ennyi ideig nem próbáljuk újra, amit egy koinó kapuja elvetett. */
+/** Ennyi ideig nem próbáljuk újra, amit egy koino kapuja elvetett. */
 export const ELVETVE_SZUNET = 24 * 3600 * 1000;
 
 /** Ennyi idő után az elvetés feljegyzése elévül (a jegyzék nem nő a végtelenig). */
@@ -174,7 +174,7 @@ export function lancJele(lanc) {
   return bejegyzesJele(lanc.cserek[lanc.cserek.length - 1]);
 }
 
-/** Elvetette-e a koinó kapuja nemrég (az `ELVETVE_SZUNET`-en belül)? */
+/** Elvetette-e a koino kapuja nemrég (az `ELVETVE_SZUNET`-en belül)? */
 function nemregElvetve(jegyzek, koino, jel, most) {
   const ido = jegyzek.elvetve?.[koino]?.[jel];
   return Number.isSafeInteger(ido) && most - ido < ELVETVE_SZUNET;
@@ -182,7 +182,7 @@ function nemregElvetve(jegyzek, koino, jel, most) {
 
 /**
  * Ami a jegyzékből EBBŐL A TÁRBÓL HIÁNYZIK: a lánc, ha erősebb a tárban lévőnél (és minden helyreállításához van bizonyíték — anélkül a
- * kapu nem ellenőrizhetné), és a kizárások, amelyek nincsenek a tárban. Amit a koinó kapuja nemrég elvetett, az nem hiányzik.
+ * kapu nem ellenőrizhetné), és a kizárások, amelyek nincsenek a tárban. Amit a koino kapuja nemrég elvetett, az nem hiányzik.
  * @param {{lanc: Object|null, kizarasok: Array<Object>}} tarnal - `tarKezelese`
  * @param {Object} jegyzek
  * @param {string} koino
@@ -203,7 +203,7 @@ export function kezelesHianyai(tarnal, jegyzek, koino, most = Date.now()) {
 }
 
 /**
- * Az elvetés feljegyzése (a koinó kapuja nem fogadta) — és a régi feljegyzések elévülése. Tiszta függvény.
+ * Az elvetés feljegyzése (a koino kapuja nem fogadta) — és a régi feljegyzések elévülése. Tiszta függvény.
  * @returns {Object} jegyzék
  */
 export function elvetesFeljegyzese(jegyzek, koino, jelek, most = Date.now()) {

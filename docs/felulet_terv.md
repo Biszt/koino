@@ -28,10 +28,10 @@ prototípusból, csak az alatta lévő réteg cserélődik (szerver helyett alá
 ## A BELÉPŐ TÉR NÉZETE (Csaba, 2026-08-27)
 
 A **D25** belépő tere kap egy saját nézetet — **ugyanazzal a stílussal és logikával, mint
-a pakli**, de a kártyákon nem gondolatok, hanem **koinók** állnak.
+a pakli**, de a kártyákon nem gondolatok, hanem **koinok** állnak.
 
 > „A belépő tér is követné ugyanazt a stílust meg logikát, mint a pakli nézet, annyi
-> különbséggel, hogy itt a kártyákon a **koinók** (közösségek saját adatbázissal) kapnak
+> különbséggel, hogy itt a kártyákon a **koinok** (közösségek saját adatbázissal) kapnak
 > helyet." — Csaba
 
 ### Rendezés
@@ -67,11 +67,11 @@ a pakli**, de a kártyákon nem gondolatok, hanem **koinók** állnak.
 >
 > Itt eredetileg ez állt: *„az emberek valódiságát a **téri mag** igazolja — tehát a rangsor
 > ellenőrizhető."* **Ez már nem igaz: nincs téri mag.** Csaba 2026-08-31-én úgy döntött, hogy
-> **a tanúsítások nem jönnek át koinók között** — a belépő tér csak **böngészésre** közös —,
+> **a tanúsítások nem jönnek át koinok között** — a belépő tér csak **böngészésre** közös —,
 > mert különben egy laza koino **tanúsítás-gyárrá** válhatna. Ezzel a **tartós mag
 > koino-helyi** lett.
 >
-> **Amit ez a nézetre jelent:** egy koino létszáma **abból a koinóból** ellenőrizhető, nem a
+> **Amit ez a nézetre jelent:** egy koino létszáma **abból a koinoból** ellenőrizhető, nem a
 > térből. A téren átnézve a szám **a koino állítása**, amit onnan nem lehet igazolni.
 > ⚠️ **Ezt a felületnek meg kell mondania** (D19: bejelent, nem bíráskodik) — különben a
 > rangsor pontosan olyan hamisítható toplistává válna, amilyet a tanúsító-rangsornál
@@ -84,11 +84,11 @@ a pakli**, de a kártyákon nem gondolatok, hanem **koinók** állnak.
 
 | Hol | Mit tartalmaz |
 |---|---|
-| **A kártyán** (hamburger) | az **adott koinóhoz** tartozó opciók — **és itt kap helyet a bejelentkezés is** |
+| **A kártyán** (hamburger) | az **adott koinohoz** tartozó opciók — **és itt kap helyet a bejelentkezés is** |
 | **Az alsó sávban** | a **térre** vonatkozó opciók |
 
 Ez tükrözi a D25 szerkezetét: a koino a saját ügyeit intézi (belépés, szabályok), a tér
-pedig az, ami közös (az azonosságod, a koinók listája, új koino indítása).
+pedig az, ami közös (az azonosságod, a koinok listája, új koino indítása).
 
 ---
 
@@ -161,21 +161,21 @@ fájl**, nem 94.
 
 #### ⛔⛔ A KÉT SZABÁLY, AMITŐL A BÖNGÉSZŐ CSERÉLHETŐ MARAD
 
-*Ez a szakasz Csaba kérdésére született: „böngésző-függővé kell tennünk a koinót? Ha a
+*Ez a szakasz Csaba kérdésére született: „böngésző-függővé kell tennünk a koinot? Ha a
 böngésző tiltólistájára kerül, nem fog működni?" — **Nem.** De csak akkor nem, ha ez a kettő
 igaz marad, ezért ellenőrizhető szabályként van leírva. ⭐ Ugyanaz a fogás, mint az 1.
 szabálynál: a szállítás azért cserélhető, mert a `csere.js` sosem importált hálózati kódot.*
 
 1. ⛔ **A program SOHA ne importálja a felületet.** A felület beszél a programhoz a helyi
    illesztésen át; a program nem tud róla semmit. Így a böngésző **egy illesztés MÖGÖTT van,
-   nem a programban** — kicserélni annyi, mint másik klienst írni, nem a koinót átírni.
+   nem a programban** — kicserélni annyi, mint másik klienst írni, nem a koinot átírni.
 2. ⛔ **A parancssori út marad TELJES út, nem csökevény.** A **4. szabály** a felületre
    alkalmazva: amit a pakli tud, azt a parancssor is tudja. ⚠️ *Ha ez egyszer megbicsaklik, a
    böngésző csendben előfeltétellé válik — pontosan az, amit a 7. szabály tilt.*
 
 ⭐ **Ezért a böngésző abba a rekeszbe kerül, ahol a `kapunyitas.js`, a `helyiFelfedezes.js` és
 a STUN van: kényelem, nem előfeltétel.** Ha egyszer elérhetetlen lesz, **az örökölt paklit**
-veszítjük el (az HTML/CSS/JS, más nem futtatja), nem a koinót — és mivel a felület egy
+veszítjük el (az HTML/CSS/JS, más nem futtatja), nem a koinot — és mivel a felület egy
 illesztés mögött ül, olcsón jöhet **második kliens** (terminál vagy natív). *A mai CLI már
 ennek a kezdetleges változata.*
 
@@ -251,11 +251,11 @@ alakban (9. szabály), nem „add ide mindet".
   (kérdezhető illesztés, 9. szabály), és ez az első, amit meg kell tervezni.
 - ⏸️ **A helyi kapu védelme** — origin-ellenőrzés + indításkor generált jelszó.
 - **Mit jelent pontosan a „bejelentkezés" a kártya-menüben?** A D15 szerint nincs jelszó —
-  a kulcs hitelesít. Valószínűleg **belépés az adott koinóba** (csatlakozás), nem
+  a kulcs hitelesít. Valószínűleg **belépés az adott koinoba** (csatlakozás), nem
   jelszavas bejelentkezés. *Tisztázandó.* ⭐ *A Szakasz 4 óta van rá pontos válasz-jelölt: a
   `Belepes` esemény + egy meghívás — vagyis a „bejelentkezés" valójában **csatlakozás**.*
 - **Mik legyenek az alsó sáv (tér-szintű) opciói?** Jelöltek: új koino indítása, a saját
-  azonosságod és kulcsod, keresés a koinók között, a tér ujjlenyomata.
+  azonosságod és kulcsod, keresés a koinok között, a tér ujjlenyomata.
 - ✅ **Mikor emeljük át a pakli-felületet?** — *megválaszolva:* a Szakasz 2 utánra tervezett
   átemelés a **Szakasz 5** lett, és a modell azóta megállapodott (Szakasz 3 + 4 kész).
 

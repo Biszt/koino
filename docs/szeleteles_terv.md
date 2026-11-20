@@ -13,13 +13,13 @@ A „végtelen" próbája (a 9. szabály élesítése a `CLAUDE.md`-ben): **egy 
 tárol, amit naponta küld, ahány cserét csinál, amennyit számol — ne a koino méretétől függjön,
 hanem attól, amivel ő maga foglalkozik.** A 48. mérés szerint ma ennek egyik sem felel meg:
 
-- a csere ára egyetlen eltérésért a koinóval nő (2,7 KB → 17 KB → 160 KB, 1k → 10k → 100k esemény),
+- a csere ára egyetlen eltérésért a koinoval nő (2,7 KB → 17 KB → 160 KB, 1k → 10k → 100k esemény),
   és 100 000 eseménynél egy hasznos bájtra **286 bájt forgalom** jut;
 - az ÁLLÁS-t **minden csere az összes eseményből** állítja össze (239 ms 100 000-nél);
-- a tár megnyitása végigolvassa az egész fájlt (813 ms), az állapot-számítás az egész koinón fut.
+- a tár megnyitása végigolvassa az egész fájlt (813 ms), az állapot-számítás az egész koino-n fut.
 
 ⭐ **És a D71 (iii) is ezen áll:** a „van-e mit mondanom a társnak" kérdés ma a koino-szintű
-lenyomatból felelne, ami nagy koinóban soha nem egyezik (skálázási terv 4.1). Entitás-szintű
+lenyomatból felelne, ami nagy koinoban soha nem egyezik (skálázási terv 4.1). Entitás-szintű
 lenyomattal viszont pontosan azt kérdezi, amit kell: *a közös entitásainkban van-e újdonság?*
 
 ## 1. A cél egy mondatban
@@ -32,7 +32,7 @@ lenyomattal viszont pontosan azt kérdezi, amit kell: *a közös entitásainkban
 
 - **Az esemény alakja.** A kanonikus alak már hordozza, ami kell: `entitas` (a szelet-kulcs),
   `entitasSorszam` (a hézag az entitáson belül újra jel — 4.3), `latott`, és a lefoglalt
-  `lancGyoker` (D63). ⭐ **Tehát nincs szükség új koinóra (D66): a tárolás és a szállítás változik,
+  `lancGyoker` (D63). ⭐ **Tehát nincs szükség új koinora (D66): a tárolás és a szállítás változik,
   az esemény nem.**
 - **Az egyetlen kapu** (`esemenyMentese`, 3. szabály) és **az író** (D70).
 - **A szabály-réteg és a számítás logikája.** A számítás bemenete a HELYI események halmaza —
@@ -42,7 +42,7 @@ lenyomattal viszont pontosan azt kérdezi, amit kell: *a közös entitásainkban
 
 ## 3. S3 — AZ ENTITÁSONKÉNTI TÁR
 
-**A tárolás egysége a szelet.** Ma egyetlen `esemenyek.jsonl` van koinónként, és a megnyitás
+**A tárolás egysége a szelet.** Ma egyetlen `esemenyek.jsonl` van koinonként, és a megnyitás
 végigolvassa.
 
 > ⚠️ **ÁTÍRVA A 49. MÉRÉS UTÁN (D73, 2026-09-27, Csaba döntése).** Az eredeti terv szeletenként egy
@@ -112,7 +112,7 @@ osztoztunk a legutóbb, és azoknak mi volt a lenyomata. Így:
 
 - **Első találkozáskor** (vagy ha valamelyikünk érdeklődése változott) a két fél elküldi az
   érdeklődési halmazát — szeletenként egy rövid lenyomatot (~8 bájt; 200 szeletre ~1,6 KB). Ez a
-  készülék saját érdeklődésével arányos, a koinóval nem.
+  készülék saját érdeklődésével arányos, a koinoval nem.
 - **Utána** a csere egy lenyomattal kezdődik — nem a koino, hanem **a közös szeletek (és a saját
   érdeklődési halmazunk) lenyomatával**. Ha egyezik, kész (a mai „csendes kör" ára).
 - ⭐ **És itt kap otthont a D71 (iii) V2-je:** *„van-e mit mondanom neki?"* = változott-e valamelyik

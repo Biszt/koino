@@ -2,16 +2,16 @@
 
 > A költözés (D118) kézi próbájának (2026-10-25, a [`koltozes_atvizsgalas.md`](koltozes_atvizsgalas.md) 13. szakasza) két
 > tervezési lelete és Csaba döntése nyomán. ⭐ **Csaba:** a 2. leletre *„(A)+(B) mindkettő”*, a 3.-ra *„(B) Egy őrjárat minden
-> koinónak … de csak az azonos felmenőből származtatott koinók legyenek így. Lehessen teljesen külön koinót is létrehozni.”*
+> koinonak … de csak az azonos felmenőből származtatott koinok legyenek így. Lehessen teljesen külön koinot is létrehozni.”*
 
 ## 1. A kérdés
 
-A költözés után egy készüléken (és egy e-embernél) TÖBB koinó él: a szülő és a gyermek (és ha tovább költözik, az unoka).
-Ma minden koinónak külön őrjárat és külön UDP-port kell („egy figyel = egy koinó”), és ebből a próbán három baj lett:
+A költözés után egy készüléken (és egy e-embernél) TÖBB koino él: a szülő és a gyermek (és ha tovább költözik, az unoka).
+Ma minden koinonak külön őrjárat és külön UDP-port kell („egy figyel = egy koino”), és ebből a próbán három baj lett:
 
 - **A gyermek magától nem cserél** (3. lelet). A két őrjárat a KÉSZÜLÉK kulcsával dolgozik, a kopogás a TÁRSAT keresi: a
-  másik koinó portján éri el elsőként, ott „MÁSIK koinóé, nem cseréltünk” lesz, és a társ többi címét nem próbálja. Ugyanez
-  két FÜGGETLEN koinó között is előjön, ha két készülék mindkettőben együtt van.
+  másik koino portján éri el elsőként, ott „MÁSIK koinoé, nem cseréltünk” lesz, és a társ többi címét nem próbálja. Ugyanez
+  két FÜGGETLEN koino között is előjön, ha két készülék mindkettőben együtt van.
 - **A gyermek nem fedezhető fel** (2. lelet): a nevét be kell gépelni (`csatlakoz`), a portját kézzel felvenni (`tars`);
   a csatlakozás, a társ felvétele és a kézi csere csak parancs.
 - **Egy társsal két munka** (1. lelet iránya): a kapu a „társanként egyszerre egy munka” szabályt CÍM szerint tartja — két
@@ -20,75 +20,75 @@ Ma minden koinónak külön őrjárat és külön UDP-port kell („egy figyel =
 ## 2. Ami ma megvan
 
 - **Készülék-szintű** (az adat-mappa gyökerében): a kulcs, a tábla-kulcs, a kötések (`kotesek.json` — a tábla-kulcs
-  szerint, ≤ 3 cím), az induló címek, a raj (`szeletcimek.json`), a DHT-gépek, a tér-jegyzék. **Koinó-szintű** (`<koino>/`):
+  szerint, ≤ 3 cím), az induló címek, a raj (`szeletcimek.json`), a DHT-gépek, a tér-jegyzék. **Koino-szintű** (`<koino>/`):
   a tár, az átmeneti tár, a kereső-tár, a vállalás, a kiszolgálás, a csere-állapot és minden gyorsítótár.
-- **A program egy koinós folyamat:** a `koino.js` (9197 sor) a koinót induláskor rögzíti (`KOINO`, 248 hivatkozás), a tár, a
-  művelet-környezet, az átmeneti és a kereső-tár modul-szintű. ⭐ A felület már tud több koinót NÉZNI (`aktivAllapot` — a
-  tér „Belépek” gombja koinónként nyit tárat és környezetet), de csak a sajátjában dolgozik (költözés, felderítés).
-- **A vonal** a nyitásban (`NYITAS`) EGY koinó nevét mondja, eltérésnél tisztán kilép (`masKoino`). Hálózatot a koinóról
+- **A program egy koinos folyamat:** a `koino.js` (9197 sor) a koinot induláskor rögzíti (`KOINO`, 248 hivatkozás), a tár, a
+  művelet-környezet, az átmeneti és a kereső-tár modul-szintű. ⭐ A felület már tud több koinot NÉZNI (`aktivAllapot` — a
+  tér „Belépek” gombja koinonként nyit tárat és környezetet), de csak a sajátjában dolgozik (költözés, felderítés).
+- **A vonal** a nyitásban (`NYITAS`) EGY koino nevét mondja, eltérésnél tisztán kilép (`masKoino`). Hálózatot a koinoról
   semmit nem tud — a munkát a `koino.js` adja (`resMunka`).
 - **A kapu** (`udpKapu.js`) egy foglalat a futásra, a társ-jegyzéke cím:port szerint; a kötésből jött célokat a tábla-kulcs
   szerint csoportosítja (az egyik címen elért társ többi címét kihagyja).
 
 ## 3. A javasolt alak
 
-**A család** = a közös gyökerű koinók: a születések lánca (`szuletesLanc`) legfelső eleme a család NEVE. Egy készüléken egy
+**A család** = a közös gyökerű koinok: a születések lánca (`szuletesLanc`) legfelső eleme a család NEVE. Egy készüléken egy
 családnak EGY őrjárata és EGY portja van; a független családok külön őrjáratot kapnak (Csaba).
 
-**① A koinó-példány.** A `koino.js` koinó-szintű része egy gyárba kerül (`koinoPeldany(K)` — a tár, az átmeneti és a
+**① A koino-példány.** A `koino.js` koino-szintű része egy gyárba kerül (`koinoPeldany(K)` — a tár, az átmeneti és a
 kereső-tár, a környezet, a gyorsítótárak, a munka — a mai kód, a `KOINO` bezárt változó). Gépies átalakítás, a teljes
 próbasor a háló; a parancsok egy példánnyal futnak, mint ma.
 
-**② A családi csere.** A nyitás a CSALÁDOT nevezi meg és a koinóimat a családban (a nevük; korlátosan); a közös koinókra a
+**② A családi csere.** A nyitás a CSALÁDOT nevezi meg és a koinoimat a családban (a nevük; korlátosan); a közös koinokra a
 mai csere fut SORBAN ugyanazon a védett résen (a társsal egy munka — a kapu szabálya áll); a nem közösekről a „hír” (③).
-A régi alakú társ (egy koinós nyitás) ugyanúgy megy, ha az a koinó közös.
+A régi alakú társ (egy koinos nyitás) ugyanúgy megy, ha az a koino közös.
 
-**③ A gyermekek híre (2. (B)).** Kétféleképpen lehet: (a) a nyitás sorolja a családom koinóit, és a társ, amelyiket nem
+**③ A gyermekek híre (2. (B)).** Kétféleképpen lehet: (a) a nyitás sorolja a családom koinoit, és a társ, amelyiket nem
 ismeri, annak a születését kéri (élő út) · (b) ⭐ a gyermek születése a SZÜLŐBEN is bejelentett (a gyermek-jegyzék egy
 szelet a szülőben, mint egy gondolat gyerekei — `bejelentesHelyei`), tehát a szülő rendes cseréje és a KÉZI ÚT (`kivisz`
 / `behoz`) is viszi (4. szabály); nagy gyermekszámnál darabolható, mint a gyökér. A tér a gyermeket ismertnek mutatja, a
 „Költözés…” ablak felkínálja — gépelés nélkül.
 
-**④ A kör.** A család minden koinójának céljai egy körben, a TÁBLA-KULCS szerint összevonva (egy társ egyszer, a közös
-koinóival) — ez zárja a 3. leletet a családon belül; és a kapu a társat a kézfogás után a tábla-kulcsa szerint is ismeri:
+**④ A kör.** A család minden koinojának céljai egy körben, a TÁBLA-KULCS szerint összevonva (egy társ egyszer, a közös
+koinoival) — ez zárja a 3. leletet a családon belül; és a kapu a társat a kézfogás után a tábla-kulcsa szerint is ismeri:
 ha vele már fut munka (egy másik címén), az új tisztán véget ér (az 1. lelet iránya).
 
 **⑤ A független családok.** Külön őrjárat, külön port (Csaba); a kötés a társ címeit CSALÁDONKÉNT jegyzi, és a „MÁSIK
 család” válasz nem számít elértnek (a kör a társ többi címével próbálkozik).
 
-**⑥ A lap (2. (A)).** A téren „Csatlakozás egy koinóhoz…” (a név beillesztése) és „Társ felvétele…” (cím, port); a
+**⑥ A lap (2. (A)).** A téren „Csatlakozás egy koinohoz…” (a név beillesztése) és „Társ felvétele…” (cím, port); a
 gyermek ③ után magától jelenik meg.
 
 ## 4. A döntési pontok (Csabánál)
 
-- **CS1 — a család határa:** a közös gyökér (a születések lánca legfelső eleme) — egy családba tartozik minden koinó, ami a
+- **CS1 — a család határa:** a közös gyökér (a születések lánca legfelső eleme) — egy családba tartozik minden koino, ami a
   készüléken ebből a gyökérből ered (a testvérek is: két gyermek ugyanabból a szülőből). ⭐ Javaslat: így.
-- **CS2 — a családi csere alakja:** (A) ⭐ egy munka egy társsal, a közös koinók SORBAN ugyanazon a résen · (B) koinónként
+- **CS2 — a családi csere alakja:** (A) ⭐ egy munka egy társsal, a közös koinok SORBAN ugyanazon a résen · (B) koinonként
   külön munka ugyanazzal a társsal, egymás után (több kézfogás, több kopogás — egyszerűbb, drágább).
 - **CS3 — a gyermekek híre:** (a) a nyitásban (élő út) · (b) ⭐ a szülőben bejelentett születés (szelet — a csere és a kézi
   út is viszi, darabolható).
 - **CS4 — a folyamat:** (A) ⭐ az őrjárat egy családé (a független család másik folyamat, másik port — ma is így indul
   kézzel) · (B) egy folyamat a készülék minden családjának, családonként külön porttal (a felület is ebben futna).
-- **CS5 — a lap és az őrjárat:** (A) ⭐ marad két külön indítás (`orjarat`, `felulet`), a lap kimondja, ha egy koinónak
+- **CS5 — a lap és az őrjárat:** (A) ⭐ marad két külön indítás (`orjarat`, `felulet`), a lap kimondja, ha egy koinonak
   nincs futó őrjárata · (B) a felület indítja az őrjáratokat (egy indítás a telefonon).
 
 ## 5. Mérések az építés előtt
 
-- **M1 — a családi nyitás ára:** a nyitás mérete k közös koinóval, és egy „nincs újdonság” családi csere bájtban (a mai
-  1,2–1,7 KB koinónként a mérce).
+- **M1 — a családi nyitás ára:** a nyitás mérete k közös koinoval, és egy „nincs újdonság” családi csere bájtban (a mai
+  1,2–1,7 KB koinonként a mérce).
 - **M2 — a gyermek-jegyzék szelete:** egy gyermek születése a szülőben (~0,8 KB nemzedékenként a 82. mérés szerint); a
   jegyzék mérete sok gyermeknél (a gyökér-darab mintája).
 
 ## 6. Az építési sor (a döntések után)
 
-① a koinó-példány (gépies, a teljes sor a háló) → ② a családi csere a vonalon → ③ a kör a családra, a tábla-kulcs szerinti
+① a koino-példány (gépies, a teljes sor a háló) → ② a családi csere a vonalon → ③ a kör a családra, a tábla-kulcs szerinti
 összevonás és a kapu egy-munka szabálya → ④ a gyermekek híre és a tér → ⑤ a független családok címei → ⑥ a lap
 (csatlakozás, társ) → ⑦ terepi próba (laptop + telefon: költözés, majd a gyermek magától cserél).
 
 ## 7. ✅ D119 — a döntések (Csaba, 2026-10-25)
 
-- **CS1:** a család a közös gyökérből eredő koinók (a testvérek is).
-- **CS2 (A):** egy társsal egy munka — a közös koinók cseréje sorban, ugyanazon a résen.
+- **CS1:** a család a közös gyökérből eredő koinok (a testvérek is).
+- **CS2 (A):** egy társsal egy munka — a közös koinok cseréje sorban, ugyanazon a résen.
 - **CS3 — Csaba ötlete, a javaslatok helyett:** *„A gyermek születésének is egy entitásnak kéne lennie, amit a „feltöltő”
   hoz létre, űrlap kitöltése után, amit a főmenüből nyitott meg. Tudatpontot kell hogy rendeljen hozzá. Ezen a programverzió
   típusú kártyán, az egyik fülben ott kéne hogy legyen a teljes kód, hogy mindenki le tudja ellenőrizni.”* A pontosítások
@@ -98,7 +98,7 @@ gyermek ③ után magától jelenik meg.
   programja); és **a kód köti a gyermeket** (a teljes program tartalom-címzett fájlokként a kártya fülén; a gyermek
   születése megnevezi a kód lenyomatát; a lap kimondja, ha a készülék más verziót futtat — nem tiltja, jelzi).
 - **CS4 (A):** családonként egy őrjárat (a független család másik őrjárat, másik port).
-- **CS5 (A):** két külön indítás marad (`orjarat`, `felulet`); a lap kimondja, ha egy koinónak nincs futó őrjárata.
+- **CS5 (A):** két külön indítás marad (`orjarat`, `felulet`); a lap kimondja, ha egy koinonak nincs futó őrjárata.
 
 ## 8. A koino-verzió kártya (a CS3 alakja — az építés előtt pontosítandó)
 
@@ -112,7 +112,7 @@ gyermek ③ után magától jelenik meg.
   a fájl lenyomata) és a fájlokkal, tartalom-címzetten a fájl-tárban (D72, 5.7 — a törzs útja, a vállalóktól); a jegyzék
   lenyomata a kód neve. A kártya „Kód” füle a jegyzéket és a fájlokat mutatja (a lap csak rajzol).
 - **A kötés:** a gyermek születése (a `szabalyok` mellett) a kód lenyomatát is mondja (`program`); a futó program a saját
-  jegyzékét kiszámolja, és ha a koinóé más, a lap kimondja („ez a koinó a … verziót futtatja, te a …-t”).
+  jegyzékét kiszámolja, és ha a koinoé más, a lap kimondja („ez a koino a … verziót futtatja, te a …-t”).
 - **Az űrlap:** a fő menüben „Új koino-verzió (gyermek)…”: a név, a leírás, a szabályok (a szülőé az alap), a kezdő pont; a
   kód a feltöltő FUTÓ programja (aki új verziót javasol, az azt telepíti, és onnan hozza létre). Egy lépésben: a kód-csomag,
   a gyermek születése (a létrehozó költözik vele — ma is így), a koino-verzió entitás a szülőben, a pont. ⭐ Ezzel a lap
@@ -125,10 +125,10 @@ gyermek ③ után magától jelenik meg.
 ## 9. Az építési sor (D119 után)
 
 ① **a koino-verzió kártya** (előbb az M2' mérés; a kód-csomag, a születés `program` mezője, az entitás, az űrlap, a „Kód” fül,
-a tér és a „Költözés…” a kártyákból) → ② **a koinó-példány** (a `koino.js` koinó-szintű része egy gyárba — gépies, a teljes
-sor a háló) → ③ **a családi csere** (a nyitás a családot nevezi meg, a közös koinók sorban; az M1 mérés előtte) → ④ **a kör a
+a tér és a „Költözés…” a kártyákból) → ② **a koino-példány** (a `koino.js` koino-szintű része egy gyárba — gépies, a teljes
+sor a háló) → ③ **a családi csere** (a nyitás a családot nevezi meg, a közös koinok sorban; az M1 mérés előtte) → ④ **a kör a
 családra**, a tábla-kulcs szerinti összevonás, és a kapu egy munkája társanként (az 1. lelet) → ⑤ **a független családok**
-címei („MÁSIK család” nem elérés) → ⑥ **a lap** (csatlakozás egy koinóhoz, társ felvétele — 2. (A)) → ⑦ **terepi próba**
+címei („MÁSIK család” nem elérés) → ⑥ **a lap** (csatlakozás egy koinohoz, társ felvétele — 2. (A)) → ⑦ **terepi próba**
 (laptop + telefon: koino-verzió a lapról, költözés, a gyermek magától cserél).
 
 ## 10. ✅ Az ①a — a koino-verzió a program oldalán (2026-10-25)
@@ -139,28 +139,28 @@ címei („MÁSIK család” nem elérés) → ⑥ **a lap** (csatlakozás egy k
   szabály mércéje): különben ugyanaz a verzió a Windows-munkakönyvtárban és a telefonon két nevet kapna. A program fájljai:
   amit a git követ (a mérések kimenete és a helyi adat nem a program); git nélkül a mappa bejárva, az adat-mappák nélkül. A
   kívülről jött jegyzéket csak az egy alakjában fogadjuk el (rendezett, ismétlés nélkül, relatív utak, a fájl-korláton belül).
-- **A születés `program`-ja:** a gyermek születése a kód-csomag hivatkozását is mondja (csak új alakban). ⚠️ A gyökér-koinó
-  születése nem nevez meg programot: nincs kártyája, ahol a kód lakna (a kód a gyermekekkel jön), és minden új koinó ~6,4 MB-ot
+- **A születés `program`-ja:** a gyermek születése a kód-csomag hivatkozását is mondja (csak új alakban). ⚠️ A gyökér-koino
+  születése nem nevez meg programot: nincs kártyája, ahol a kód lakna (a kód a gyermekekkel jön), és minden új koino ~6,4 MB-ot
   írna a fájl-tárba.
 - **A koino-verzió entitás** (`esemeny.js` `KOINO_VERZIO`, `koinoVerzioE`; a kapu: `koinoLanc.js` `koinoVerzioEllenorzese`):
   `GondolatLetrehozas`, `tipus: 'KoinoVerzio'`, legfelső szintű; a címe a gyermek neve, a szövege a leírás (darab), a `gyermek`,
   a `szuletes` (a gyermek ALÁÍRT születése, beágyazva) és a `kod` (= a születés programja). Az alak: a születés ennek a
-  koinónak a gyermeke, a feltöltő hozta létre (a kártya szerzője), a kód a programja, a cím a neve. A kapu a beágyazott
+  koinonak a gyermeke, a feltöltő hozta létre (a kártya szerzője), a kód a programja, a cím a neve. A kapu a beágyazott
   születést hitelesnek és a szülő születésével érvényes gyermek-születésnek látja (KZ2, D118/5 — ugyanaz a próba, mint a
   gyermek saját kapuján; a hiányzó szülő nem végleges elutasítás). A képben a `koinoVerzio: { gyermek, kod }` (a különválás
-  is viszi). A kártya ~1–2 KB (a beágyazott születés a létrehozó tagsági láncával) — koinó-verziónként egyszer.
+  is viszi). A kártya ~1–2 KB (a beágyazott születés a létrehozó tagsági láncával) — koino-verziónként egyszer.
 - ⭐ **A sorrend: előbb a gyermek születése, aztán a kártya.** A kártya magába ágyazza a születést, tehát a születés nem
   folytathatja a kártyát (kör lenne) — mindkettő a létrehozó vágás előtti utolsó szülőbeli eseményét folytatja (a születés a
   gyermekben, a kártya a szülőben: a lánc két ága, ahogy eddig is a születés utáni első szülőbeli esemény). A kártya így a
-  szülő JELENE: a gyermek tárába nem kerül (a koinó-szabály — a létrehozóé a lánc-pont).
+  szülő JELENE: a gyermek tárába nem kerül (a koino-szabály — a létrehozóé a lánc-pont).
 - **A pont** (D14): a feltöltő pontja a kártyán (alapból 100 — `pont=N`). ⛔ A szabad pontot ELŐRE nézzük
   (`szabadTudatpontjaim`), mert a gyermek születése után már nem volna mit visszacsinálni (a rontás mérte: a gyermek
   megszületett, a pont bukott).
 - **A parancs:** `koinoverzio "<név>" [leírás] [nyilt] [szabályok…] [pont=N] [becenev=…]` a szülőben (a `koino … szulo=`
   ugyanezt hívja): a kód-csomag a szülő fájl-tárába, a gyermek születése a programmal, a kártya és a pont. A `koino` kimondja
-  a koinó programját, és ha a készüléken más fut („⚠ ezen a készüléken MÁS verzió fut” — nem tilt, jelez).
+  a koino programját, és ha a készüléken más fut („⚠ ezen a készüléken MÁS verzió fut” — nem tilt, jelez).
 - ⭐ **A gyermek a kártyából** (a kézi próba 2. lelete): a „Költözés…” előnézete a gyermekeket a szülő élő koino-verzió
-  kártyáiból is látja (a legtöbb pontú 64-et — a terhe a koinó ÉLŐ gyermekeivel nő, nem a történetével), és a költözés a
+  kártyáiból is látja (a legtöbb pontú 64-et — a terhe a koino ÉLŐ gyermekeivel nő, nem a történetével), és a költözés a
   gyermek tára nélkül is megy: a tárát a kártyából nyitja meg (a születések lánca a gyökértől és a gyermek születése, a
   gyermek kapuján). ⛔ A tárat CSAK a költözés nyitja meg, nem minden kártya: különben minden készülék minden gyermek tárát
   tartaná, és a családi őrjárat (③–④) mindegyiket cserélné.
@@ -199,60 +199,60 @@ címei („MÁSIK család” nem elérés) → ⑥ **a lap** (csatlakozás egy k
 - **A kapu új útvonalai:** `GET /api/koinoverzio` (az űrlap kiindulása: a szülő szabályai és zártsága, a szabad pont, a futó
   program, és hogy létrehozhatok-e — ha nem, miért), `POST /api/koinoverzio` (ugyanaz a függvény, mint a parancsé —
   `koinoVerzioKeszitese`), `GET /api/kod?kartya=` (a jegyzék, hány fájl van meg, egyezik-e a futó programmal), `GET
-  /api/program` (a koinó születésének programja és a futóé); a tér a kártyákról ismert gyermekeket is mutatja (`ter.js`
+  /api/program` (a koino születésének programja és a futóé); a tér a kártyákról ismert gyermekeket is mutatja (`ter.js`
   `kartyaGyermekek` — a tára még nincs a készüléken: „a koino-verzió kártyájáról”).
 - **A lap** (`felulet/js/koinoVerzio.js`, `css/components/koinoVerzio.css` — a prototípus fájljai bájtra változatlanok): a
   kártyát a lap a gondolat-kártyával rajzolja (`kartyaAdat.js` fordít — a prototípusban nincs ilyen típus), a fejlécben
   „🧬 koino-verzió” jel, a törzsben „Leírás” és „🧬 Kód” fül (a jegyzék, az állás, egy fájlra kattintva a tartalma — a meglévő
   `/api/fajl/…` úton); a fő menüben „🧬 Új koino-verzió (gyermek)…” (név, leírás, pont, nyíltság, a szabályok — a szülőé az
   alap, csak a megváltoztatott megy —, megerősítés); az alsó sávon „⚠ más programverzió”, ha a készüléken más fut, mint
-  amivel a koinó született (csak akkor látszik). Böngészőben végigjárva (asztali és telefon-szélesség): a kártya, a „Kód” fül,
+  amivel a koino született (csak akkor látszik). Böngészőben végigjárva (asztali és telefon-szélesség): a kártya, a „Kód” fül,
   egy fájl, az űrlap (egy gyermek a lapról, 5000-es kerettel), a tér családfája, a jelzés; két lelet javítva (a piros jelzés
   a zöld sávon olvashatatlan volt; a hosszú útvonal telefonon kilógott).
 - **A próbák:** `koinoVerzioProba.js` (+2: a kód igény, a törzs > 64), `kerelemProba.js` (+1: az elvárás-őr egy hamis tartóval),
   a parancssor (+1: az előnézet, a lapról született gyermek, a „Kód” fül, a program, a takarítás túlélése, a tér a kártyáról,
   a törzs-kérelem a teljes kóddal); 13 rontás, mind bukott.
-- ⭐ **Az ① KÉSZ.** ⏭️ **②: a koinó-példány** (a `koino.js` koinó-szintű része egy gyárba — gépies, a teljes sor a háló), utána
+- ⭐ **Az ① KÉSZ.** ⏭️ **②: a koino-példány** (a `koino.js` koino-szintű része egy gyárba — gépies, a teljes sor a háló), utána
   ③ a családi csere.
 
-## 12. ✅ A ② — a koinó-példány (2026-10-25)
+## 12. ✅ A ② — a koino-példány (2026-10-25)
 
-- **A gyár:** a `koino.js` koinó-szintű része (~4600 sor: a tár, az átmeneti és a kereső-tár, a művelet-környezet, a
+- **A gyár:** a `koino.js` koino-szintű része (~4600 sor: a tár, az átmeneti és a kereső-tár, a művelet-környezet, a
   gyorsítótárak, a csere munkája, a kiszolgálás, a felderítés, a postafiók) egy `async function koinoPeldany(KOINO)` törzse —
-  a `KOINO` a gyár paramétere, minden más a mai kód, változatlanul. A parancsok egy példánnyal futnak (a becenév koinójával): a
+  a `KOINO` a gyár paramétere, minden más a mai kód, változatlanul. A parancsok egy példánnyal futnak (a becenév koinojával): a
   gyár a nevükön adja vissza, amit használnak (132 név), és a parancsok előtt egy sor veszi át őket. Gépies átalakítás — az
   elemzés (a scratchpad `peldany_elemzes.py`) mérte: a parancsok a 132 név egyikét sem írják át, és egyik sem `let` (a
   visszaadott értékek tehát nem avulhatnak el); a gyárban két felső szintű utasítás volt (az ősök betöltése — maradt; az „új
   kulcs” kiírása — készülék-szintű, kikerült). ⚠️ A törzs nincs behúzva (a 4600 sor diffje így olvasható; egy megjegyzés
   mondja ki).
-- **Készülék-szintre került:** `koinoTaraNyitasa` és `koinoTaraEgyszer` (egy koinó tára folyamatonként egyszer — a példány, a
-  felület aktív koinója és a költözés gyermeke ugyanazt kapja; eddig a saját koinó különeset volt).
+- **Készülék-szintre került:** `koinoTaraNyitasa` és `koinoTaraEgyszer` (egy koino tára folyamatonként egyszer — a példány, a
+  felület aktív koinoja és a költözés gyermeke ugyanazt kapja; eddig a saját koino különeset volt).
 - ⏭️ **A ④-re (a kör a családra) — ami ma példányonkénti, de a családban közösnek kell lennie:** a kiszolgálási keret
-  (`kiszolgalasiKeretPeldany` — a készülék munkája MÁSOKNAK: családonként egy keret, különben a koinók száma szorozná), a
+  (`kiszolgalasiKeretPeldany` — a készülék munkája MÁSOKNAK: családonként egy keret, különben a koinok száma szorozná), a
   fájl-munkák közös jegyzéke (`fajlMunkak` — a lenyomat a családban is egy), a „később”-t mondó társak (`kesobbTarsak`), a
   társankénti utolsó csere (`utolsoCsereTarssal`); és a kapu munka-készítője (`resMunkaKeszito`) a családi nyitás szerint
   választ példányt (③).
 
 ## 13. ✅ A ③ — a családi csere (2026-10-26)
 
-- **A nyitás a családot mondja:** a `NYITAS` `cs` jele a család TÖBBI koinója ezen a készüléken (`vonal.js` `CSALAD_KORLAT` =
-  64; a megnyitott példányok — `koino.js` `csaladTobbiKoinoja`); a társé a nyitásából (`csaladNyitasbol` — a nyitott koinója
-  és a lista; a régi program nem küldi, akkor nincs családi kör). Egy koinós családnál `"cs":[]` (8 B), koinónként +46 B.
-- **A közös koinók egy munkában:** a kapu munkája a családi munka-készítő (`csaladMunkaKeszito` — a kézi csere, a postaláda és
-  az őrjárat is): egy kézfogás, a fő példány munkája (a nyitásban a családommal), aztán a társsal KÖZÖS többi koinó munkája
-  sorban — mindkét fél ugyanazt a listát számolja (a rendezett metszet; ha a két nyitott koinó egyezett, az nélkül). Koinónként
+- **A nyitás a családot mondja:** a `NYITAS` `cs` jele a család TÖBBI koinoja ezen a készüléken (`vonal.js` `CSALAD_KORLAT` =
+  64; a megnyitott példányok — `koino.js` `csaladTobbiKoinoja`); a társé a nyitásából (`csaladNyitasbol` — a nyitott koinoja
+  és a lista; a régi program nem küldi, akkor nincs családi kör). Egy koinos családnál `"cs":[]` (8 B), koinonként +46 B.
+- **A közös koinok egy munkában:** a kapu munkája a családi munka-készítő (`csaladMunkaKeszito` — a kézi csere, a postaláda és
+  az őrjárat is): egy kézfogás, a fő példány munkája (a nyitásban a családommal), aztán a társsal KÖZÖS többi koino munkája
+  sorban — mindkét fél ugyanazt a listát számolja (a rendezett metszet; ha a két nyitott koino egyezett, az nélkül). Koinonként
   ÚJ kézfogás: mérve, egy védett résen az egymást követő kapcsolatok a következő első darabját elveszítették (az előző nyitott
   vagy utóhangban figyelő példány nyugtázta), a más kulcsú csomagot viszont a régi rés eldobja. A korábban végző fél kivár
-  (`udpVonal.js` `UTOLAGOS_KEZFOGAS_IDO` = 3 × a tétlenségi óra). Egy közös koinó bukása nem dönti el a már lementet (kimondja:
-  „a család … koinójának cseréje elmaradt”).
-- **A „MÁSIK koinó”-ra nyitott csere is a családot cseréli:** ha a két nyitott koinó más, de a család közös, a közös koinók
-  mind lemennek, és az eredmény elérés (`csaladEredmenye` — nem „MÁSIK koinó”) — a kézi próba 3. leletének (a másik koinó
+  (`udpVonal.js` `UTOLAGOS_KEZFOGAS_IDO` = 3 × a tétlenségi óra). Egy közös koino bukása nem dönti el a már lementet (kimondja:
+  „a család … koinojának cseréje elmaradt”).
+- **A „MÁSIK koino”-ra nyitott csere is a családot cseréli:** ha a két nyitott koino más, de a család közös, a közös koinok
+  mind lemennek, és az eredmény elérés (`csaladEredmenye` — nem „MÁSIK koino”) — a kézi próba 3. leletének (a másik koino
   portján megálló őrjárat) a csere-oldali fele; a kör-oldali (a célok a családra) a ④.
-- **A más koinónak szóló kérés átadása:** a kérelem és a továbbadott kérelem válasza megnevezi a koinóját — ha az a családom
-  egy másik koinója, a nyitott példány az első üzenettel és az üzenetsorral annak a példányának adja át (`parbeszed`
-  `beallitas.atadas` → `kerelemAtadasa` → `kerelemAtvetele`; a kézfogás hitelesítése arra a koinóra — a zárt kapu annak a
-  tagságát nézi). Eddig a nyitott koinó tárából feleltünk volna egy másik koinó kérdésére.
-- **A postaláda és az őrjárat a családot szolgálja:** `csaladMegnyitasa` — a készüléken ismert koinók közül a közös gyökerűek
+- **A más koinonak szóló kérés átadása:** a kérelem és a továbbadott kérelem válasza megnevezi a koinoját — ha az a családom
+  egy másik koinoja, a nyitott példány az első üzenettel és az üzenetsorral annak a példányának adja át (`parbeszed`
+  `beallitas.atadas` → `kerelemAtadasa` → `kerelemAtvetele`; a kézfogás hitelesítése arra a koinora — a zárt kapu annak a
+  tagságát nézi). Eddig a nyitott koino tárából feleltünk volna egy másik koino kérdésére.
+- **A postaláda és az őrjárat a családot szolgálja:** `csaladMegnyitasa` — a készüléken ismert koinok közül a közös gyökerűek
   (CS1; a független családok külön — CS4), példányként (≤ 16), a hosszan futó folyamat ezeknek is az írója.
 - ⭐ **A randevú vége kimondva (`FAJLVEGE`, elágazás 210):** a kérő a kérései végén szól, a kiszolgáló azonnal zár (eddig a
   tétlenségi óráig — a kezdőnél a kétszereséig — várt). A kódot hozó csere 11,4 s helyett 1,3 s, és a társ következő kérése nem
@@ -260,61 +260,61 @@ címei („MÁSIK család” nem elérés) → ⑥ **a lap** (csatlakozás egy k
 - ⛔ **Két rejtett szállítási hiba (elágazás 211):** (a) a `parbeszed` üzenetsora az első `await` után kötődött a kapcsolatra —
   a társ nyitása ~6 futásból egyszer elveszett; (b) a nyitott `udpKapcsolat` bármit nyugtázott a sorszáma alatt — most csak a
   `k`-t vivő, bájtra azonos ismétlést (az utóhang szabálya).
-- **A 85. mérés** (`csaladCsereMeres.js` — két készülék, k koinós család, a postaláda a szülőre, B minden gyermekbe költözött):
-  a „nincs újdonság” családi csere koinónként ~2,2 KB és ~200 ms (k = 1: 2,3 KB · 2: 4,4 · 3: 6,7 · 5: 11,8 KB) — lineáris, a
-  mérce (egy koinó cseréje) szerint.
+- **A 85. mérés** (`csaladCsereMeres.js` — két készülék, k koinos család, a postaláda a szülőre, B minden gyermekbe költözött):
+  a „nincs újdonság” családi csere koinonként ~2,2 KB és ~200 ms (k = 1: 2,3 KB · 2: 4,4 · 3: 6,7 · 5: 11,8 KB) — lineáris, a
+  mérce (egy koino cseréje) szerint.
 - **A próbák:** `csereProba.js` (+3: a nyitás az első `await` közben; a `FAJLVEGE`; a nyitás családja), a parancssor (+1: egy
   csere a szülőre a gyermeket is hozza; a gyermekre nyitott csere a szülő postaládájánál a családot cseréli; a gyermeknek
   szóló kérelem a gyermek példányához kerül). Rontások: az üzenetsor a régi helyén, a `FAJLVEGE` nélkül, a családi kör nélkül,
-  a nyitott koinó nélkül a családban, az átadás nélkül — mind bukott.
+  a nyitott koino nélkül a családban, az átadás nélkül — mind bukott.
 - ⏸️ **Két megfigyelés (Csabánál):** (1) ⚠️ a koino-verzió kártya KÓDJÁT (~6,4 MB) minden készülék elhozza, amelyik a kártyát
   látja — a ①b óta a kód a fájl-igényben él, mint egy gondolat képei, és a fájl-igény MINDEN látott entitás fájljait kéri (a
   kiszolgáló csak a vállaltat adja ki); a mérésben a nem vállaló B 9 cserében 6,5 MB-ot hozott (alapból a kiszolgálási keret
   óránként ~150 kérésnél megállítja). A 84. mérés leírása szerint a kód „csak annak utazik, aki a Kód fület megnyitja vagy
   költözik” — a kettő ellentmond. (2) Aki a gyermekbe nem költözött be (csak a kézi úton kapta meg), az ott semmit nem vállal,
   és a gyermek cseréje nála üres — a gyermek tagjai a költözők (a mai részvételi szabály, a ③-tól független).
-- ⏭️ **A ④: a kör a családra** — a kör céljai a család minden koinójából, a tábla-kulcs szerint összefésülve, egy munka
+- ⏭️ **A ④: a kör a családra** — a kör céljai a család minden koinojából, a tábla-kulcs szerint összefésülve, egy munka
   társanként (a kézi próba 1. lelete); és a családban közös: a kiszolgálási keret, a fájl-munkák, a „később”, a társankénti
   utolsó csere.
 
 ## 14. ✅ A ④ — a kör a családra (2026-10-29)
 
-A ③ után a családi munka a társsal közös koinókat egy munkában cseréli — de a KÖR (kire kopogunk, és a háttér-munkák) még a fő
-koinóé volt: a gyermek saját tartói (a raj, a befejezetlen fájlok forrásai), a függő kérelmei, a kopogtatói és a háztartása (a
+A ③ után a családi munka a társsal közös koinokat egy munkában cseréli — de a KÖR (kire kopogunk, és a háttér-munkák) még a fő
+koinoé volt: a gyermek saját tartói (a raj, a befejezetlen fájlok forrásai), a függő kérelmei, a kopogtatói és a háztartása (a
 címjegyzék-kör, a felszabadítás, a csomagok, a tömörítés, a felderítés, a postafiók) a családi őrjáratban nem futottak. A kézi
 próba 3. lelete ennek a fele: a gyermek magától nem cserélt.
 
 - **④a a közös állapot:** ami a KÉSZÜLÉK munkája, az a családban egy — a kiszolgálási keret (a keret a készülék munkája másoknak:
-  koinónként külön a koinók száma szorozná; `koino.js` `kiszolgalasiKeretPeldany`) és a „később”-t mondó társak (`kesobbTarsak` —
+  koinonként külön a koinok száma szorozná; `koino.js` `kiszolgalasiKeretPeldany`) és a „később”-t mondó társak (`kesobbTarsak` —
   a társ kerete a készülékre szól), a gyár előtt, modul-szinten. ⛔ **Mért hiba (elágazás 215):** a közös keret HATÁRA eleinte
-  annak a családtagnak a beállításából jött, amelyik épp kérdezett (`kiszolgalas.json` koinónként él) — a gyermek kiinduló kerete
+  annak a családtagnak a beállításából jött, amelyik épp kérdezett (`kiszolgalas.json` koinonként él) — a gyermek kiinduló kerete
   a szülőre beállított szűk keretet a gyermek első kérésénél felülírta volna. ⭐ Most a határ és a feljegyzés (`keret.json`) a
-  FŐ koinóé (`csaladFo` — a készülék kiszolgálója az ő nevén fut, a `kiszolgalas keret` is azt állítja, és a `kiszolgalas` az ő
-  feljegyzését olvassa). Ami koinónként más, az marad: a fájl-munkák jegyzéke (a fájl-tár koinónként külön mappa — a részleges
-  fájl nem keveredhet), az utolsó csere ideje (koinónként). **A D99 a családra** (`csaladCsereKihagyhato`): a társ akkor hagyható
-  ki, ha a VELE KÖZÖS koinók mindegyikében nincs mondanivalóm (a közös koinókat a legutóbbi családi munka jegyzi —
-  `csaladKozosTarssal`; ha még nem cseréltünk, a fő koinó).
+  FŐ koinoé (`csaladFo` — a készülék kiszolgálója az ő nevén fut, a `kiszolgalas keret` is azt állítja, és a `kiszolgalas` az ő
+  feljegyzését olvassa). Ami koinonként más, az marad: a fájl-munkák jegyzéke (a fájl-tár koinonként külön mappa — a részleges
+  fájl nem keveredhet), az utolsó csere ideje (koinonként). **A D99 a családra** (`csaladCsereKihagyhato`): a társ akkor hagyható
+  ki, ha a VELE KÖZÖS koinok mindegyikében nincs mondanivalóm (a közös koinokat a legutóbbi családi munka jegyzi —
+  `csaladKozosTarssal`; ha még nem cseréltünk, a fő koino).
 - **④b a kör céljai a családból:** a kötések, a friss UDP-címek és az induló címek készülék-szintűek (egyszer); a raj, a
-  befejezetlen fájlok forrásai, a függő kérelmek céljai, a továbbítások és a kopogtatók koinónként (`korCeljaim` — egy
+  befejezetlen fájlok forrásai, a függő kérelmek céljai, a továbbítások és a kopogtatók koinonként (`korCeljaim` — egy
   példány-függvény), a család minden példányából összegyűjtve, címre és tábla-kulcsra összefésülve (egy társnak egy munka). Minden
   példány a saját munka-állapotával dolgozik (`csaladAllapota` — a kopogtatói, a raj-köre, a már próbált kérelmei; a
   készülék-szintű tudást — a friss címek, a saját külső cím — a fő állapotból veszi át).
-- **④c a függő kérelem a családban:** ⭐ külön út nem kell — a közös koinó munkája (a családi munka sorában) a saját állapotával
+- **④c a függő kérelem a családban:** ⭐ külön út nem kell — a közös koino munkája (a családi munka sorában) a saját állapotával
   fut, és a munka eleje ott is megnézi, van-e függő kérelme ehhez a társhoz (`fuggoKerelemValasztasa` — a `resMunka` elejéből
   kiemelve). Az első alakban a munka ELŐTT is megkérdeztük a család többi példányát; a rontása (a választás nélkül) a próbát nem
-  buktatta, mert a kérelmet a közös koinó munkája úgyis elvitte — fölösleges volt, kivettük (elágazás 216).
-- **④d a háztartás koinónként:** a háttér-munka a tábla (készülék-szintű) után a család minden példányára sorban lefuttatja a
-  koinó háztartását (`orjaratHazimunkaja` — a címjegyzék-kör a saját hirdetés-idejével, a felszabadítás, az előléptetés, a
-  csomagok, a tömörítés, a kereső-tár, a felderítés, a fájl-tár, a postafiók); a gyermek sorai a naplóban a koinó jelével
+  buktatta, mert a kérelmet a közös koino munkája úgyis elvitte — fölösleges volt, kivettük (elágazás 216).
+- **④d a háztartás koinonként:** a háttér-munka a tábla (készülék-szintű) után a család minden példányára sorban lefuttatja a
+  koino háztartását (`orjaratHazimunkaja` — a címjegyzék-kör a saját hirdetés-idejével, a felszabadítás, az előléptetés, a
+  csomagok, a tömörítés, a kereső-tár, a felderítés, a fájl-tár, a postafiók); a gyermek sorai a naplóban a koino jelével
   (`[a név eleje]`).
 - **A próbák** (a parancssor, +3): (1) a gyermek függő kérelmének egyetlen célja egy csak a gyermekben ismert társ — a szülőre
-  indított őrjárat kopog rá, a kérelem lemegy, és a gyermek háztartása fut (rontás: a célok csak a fő koinóból → a kérelem nem
-  megy le; a háztartás csak a fő koinóé → nincs a gyermek sora); (2) a D99 a családra — két őrjárat 30 mp-es körrel, egymáshoz
+  indított őrjárat kopog rá, a kérelem lemegy, és a gyermek háztartása fut (rontás: a célok csak a fő koinoból → a kérelem nem
+  megy le; a háztartás csak a fő koinoé → nincs a gyermek sora); (2) a D99 a családra — két őrjárat 30 mp-es körrel, egymáshoz
   10 mp-cel eltolva: újdonság nélkül a társ kimarad, a gyermekben született gondolat miatt a következő kör hívja, és a gondolat a
-  társ következő köre előtt a lemezén van (rontás: csak a fő koinót nézve → kihagyja, nem jut át; a családi kihagyás nélkül → nincs
+  társ következő köre előtt a lemezén van (rontás: csak a fő koinot nézve → kihagyja, nem jut át; a családi kihagyás nélkül → nincs
   kihagyás); (3) a keret a családban egy — a szülőre beállított szűk keretből egy idegen két szülőbeli kérése után a gyermeknek
-  szóló kérése „később” (rontás: koinónként külön keret, és a határ a kérdező családtagé — mindkettő bukik).
-- ⏭️ **Az ⑤: a független családok** — a nem közös gyökerű koinók külön őrjáratban (CS4); köztük a „MÁSIK koinó” megállás a
+  szóló kérése „később” (rontás: koinonként külön keret, és a határ a kérdező családtagé — mindkettő bukik).
+- ⏭️ **Az ⑤: a független családok** — a nem közös gyökerű koinok külön őrjáratban (CS4); köztük a „MÁSIK koino” megállás a
   gyors javítással zárva.
 
 ## 15. ✅ Az ⑤ — a független családok (2026-10-30 → 10-31)
@@ -323,10 +323,10 @@ Két FÜGGETLEN család (nem közös a gyökerük) egy készüléken: CS4 (A) sz
 készülék-szintű (`kotesek.json` — a tábla-kulcs szerint, ≤ 3 cím), tehát egy társ kötése mindkét családja portját jegyzi.
 
 - ✅ **⑤a a másik család kapuja nem elérés (a költözés kézi próbájának 3. lelete):** a kör a társ címeit egy csoportként hívja, és
-  amint egy címen „elérte”, a többit kihagyja — a másik család portján kapott „MÁSIK koinóé” válasz viszont SIKERES munkának
-  számított, tehát a jó portot a kör soha nem hívta. ⭐ Most a családi munka kimondja, ha a társ egy másik koinón felelt, és közös
-  koinónk sincs vele (`masutt` — `csaladMunkaKeszito`), a kapu ezt nem veszi elértnek, és a csoport következő címe jön
-  (`udpKapu.js` `munkatFigyel`; a portváltás-feltevésnél is: `dont`). A kapu a koinóról továbbra sem tud semmit — egy semleges jel.
+  amint egy címen „elérte”, a többit kihagyja — a másik család portján kapott „MÁSIK koinoé” válasz viszont SIKERES munkának
+  számított, tehát a jó portot a kör soha nem hívta. ⭐ Most a családi munka kimondja, ha a társ egy másik koino-n felelt, és közös
+  koinonk sincs vele (`masutt` — `csaladMunkaKeszito`), a kapu ezt nem veszi elértnek, és a csoport következő címe jön
+  (`udpKapu.js` `munkatFigyel`; a portváltás-feltevésnél is: `dont`). A kapu a koinoról továbbra sem tud semmit — egy semleges jel.
 - ⛔ **⑤b a tábla-kulcs versenye (mérve, az ⑤a próbáján):** két egyszerre induló folyamat egy friss készüléken (a két család
   postaládája) mindkettő „nincs még” választ kapott a tábla-kulcsra, mindkettő újat írt, és a készülék a társainak KÉT társnak
   látszott (két kötés, két külön csoport — a próba így a hiba nélkül is átment volna). ⭐ Most a létrehozás kizárólagos
@@ -338,10 +338,10 @@ készülék-szintű (`kotesek.json` — a tábla-kulcs szerint, ≤ 3 cím), teh
   függvényeivel): ha mindkét családban 3-3 rendszeres társ van, körönként egy kiesik és visszakerül, és senki nem jut 1 találkozásnál
   tovább — így egyikük sem lesz „rendszeres” (a kiszolgálási keret kötés-osztálya is ebből dönt); 2 + 2 társnál a jegyzék elfér, de
   a „legrendszeresebb három” közül az egyik család csak egyet kap. A lehetőségek: (A) ⭐ családonként külön jegyzék · (B) közös, a
-  korlát a családok számával szorozva · (C) marad a közös 3/5 (a „nyüzsgő koinó” kimondott ára). Az indok: a kötés a csere társa, és
+  korlát a családok számával szorozva · (C) marad a közös 3/5 (a „nyüzsgő koino” kimondott ára). Az indok: a kötés a csere társa, és
   egy család társa a másik család adatát nem viszi; a terhe a készülék saját családjaival nő, amiket ő választott (9. szabály).
-  ⭐ **Az építés:** a jegyzék `kotesek/<a család gyökere>.json` (`fajlTar.js` `kotesTarolo(hely, csalad)`; a gyökér a koinó neve,
-  régi alakú koinónál maga a koinó — `koino.js` `csaladomKulcsa`, végleges, ha a koinó születése a készüléken van; a jegyzék minden
+  ⭐ **Az építés:** a jegyzék `kotesek/<a család gyökere>.json` (`fajlTar.js` `kotesTarolo(hely, csalad)`; a gyökér a koino neve,
+  régi alakú koinonál maga a koino — `koino.js` `csaladomKulcsa`, végleges, ha a koino születése a készüléken van; a jegyzék minden
   műveletnél a család kulcsát kérdezi — `kotesTaram` —, így egy hosszan futó őrjárat a születés megérkezése után a végleges helyre
   ír). A család példányai (a szülő és a gyermek) ugyanazt a jegyzéket írják; a kiszolgálási keret kötés-osztálya a családé. ⛔
   **Külön fájl, nem egy fájl jelölt sorokkal:** a két család őrjárata két folyamat, és a körük a fal órájához igazodik — egy közös
@@ -351,9 +351,9 @@ készülék-szintű (`kotesek.json` — a tábla-kulcs szerint, ≤ 3 cím), teh
   `kotesek.json` — a régi program és a próbák kézi útja): amíg a családé nincs meg, abból indulunk, és az első írás után
   `kotesek-regi.json` lesz — az átvevő családé a tartalma (a másik család a következő bulikon építi újra a sajátját). ⚠️ **Ami
   készülék-szintű maradt:** a friss UDP-címek (`udpcimek.json`, névtelenek, percek alatt elévülnek) és az induló címek
-  (`indulocimek.json`) — egy friss cím a másik család portján egy „MÁSIK koinóé” nyitás ára (~1–2 KB), és az ⑤a szerint nem
+  (`indulocimek.json`) — egy friss cím a másik család portján egy „MÁSIK koinoé” nyitás ára (~1–2 KB), és az ⑤a szerint nem
   számít elérésnek; a terepen mérendő, kell-e több.
-- **A próbák** (a parancssor, +3; a tábla, +1): (1) a független családok — B két független koinó postaládáját futtatja két
+- **A próbák** (a parancssor, +3; a tábla, +1): (1) a független családok — B két független koino postaládáját futtatja két
   porton; A kézi cseréi után a P-beli kötés a P családjának jegyzékében van (csak a P-porttal), a Q-beli a Q-éban (csak a
   Q-porttal), régi jegyzék nem marad (⑤c); aztán egy régi programtól örökölt közös jegyzék B-t mindkét portjával jegyzi (a Q-é a
   frissebb), a P-re indított kör előbb a másik család kapuját éri el, aztán a jót, és a gondolat átér (⑤a). Rontás: a
@@ -372,37 +372,37 @@ készülék-szintű (`kotesek.json` — a tábla-kulcs szerint, ≤ 3 cím), teh
   háztartásának sorát nem látta. Mérve: a sor a címjegyzék-kör VÉGÉN jön (a háttérben — D115; DHT nélkül a munkamenet a saját
   idejéig próbálkozik), a kérelem után 1,5–2,1 mp-cel; a próba viszont rögzített 1 mp-et várt — a HEAD-en (a ⑤c nélkül) is 6
   futásból kétszer bukott. A program helyes volt. ⭐ A próba most a sorra vár (legfeljebb 20 mp), és a bukás kimondja, mennyit
-  várt: 9/9 zöld, a rontás (a háztartás csak a fő koinóé) 20 mp után bukik.
+  várt: 9/9 zöld, a rontás (a háztartás csak a fő koinoé) 20 mp után bukik.
 - ⭐ **Az ⑤ kész** (a 3. szakasz terve: *„a kötés a társ címeit CSALÁDONKÉNT jegyzi, és a »MÁSIK család« válasz nem számít
-  elértnek”*). ⏭️ **Az ⑥: a lap** — a téren „Csatlakozás egy koinóhoz…” és „Társ felvétele…” (2. (A)).
+  elértnek”*). ⏭️ **Az ⑥: a lap** — a téren „Csatlakozás egy koinohoz…” és „Társ felvétele…” (2. (A)).
 
 ## 16. ✅ Az ⑥ — a lap (2026-10-31)
 
 A kézi próba 2. lelete (Csaba: 2. (A) — *„a lap tudja a csatlakozást és a társ felvételét”*). A ③–④ óta a gyermek nevét nem
 kell begépelni (a koino-verzió kártyáról jön), és a gyermek portja is fölösleges (családonként egy őrjárat, egy port). Ami
-maradt: az első csatlakozás egy koinóhoz (a friss készülék), a társ felvétele — és a ⑦ útja: ⛔ **mérve, a futó őrjárat a
+maradt: az első csatlakozás egy koinohoz (a friss készülék), a társ felvétele — és a ⑦ útja: ⛔ **mérve, a futó őrjárat a
 családját csak INDULÁSKOR nyitotta meg** — a lapról létrehozott gyermek, a lapon végzett költözés vagy egy csatlakozás után a
 gyermek az őrjárat újraindításáig nem cserélt (a ③–④ próbái mind a gyermek születése után indították az őrjáratot).
 
-- ✅ **⑥a a futó őrjárat felveszi a családja új koinóit** (`koino.js` `csaladUjKoinoi` — az őrjárat minden körének elején, a
+- ✅ **⑥a a futó őrjárat felveszi a családja új koinoit** (`koino.js` `csaladUjKoinoi` — az őrjárat minden körének elején, a
   postaláda percenként): ami közben született, beköltözött vagy csatlakozott (a születése a készüléken van, és a gyökere a
-  családé), az újraindítás nélkül a családba kerül, és a napló kimondja (*„a családból új koinó: … — mostantól ez az őrjárat
-  cseréli”*). A terhe a készülék koinóival nő, amiket ő választott (9. szabály).
-- ✅ **⑥b a lap kimondja, melyik koinónak fut őrjárata** (CS5 (A)): az őrjárat a köre feljegyzését a család MINDEN koinójába
-  írja (`csaladKorFeljegyzese` — eddig csak a fő koinóéba), és a tér koinónként mondja: fut (a porttal) · a családjáé fut (a
+  családé), az újraindítás nélkül a családba kerül, és a napló kimondja (*„a családból új koino: … — mostantól ez az őrjárat
+  cseréli”*). A terhe a készülék koinoival nő, amiket ő választott (9. szabály).
+- ✅ **⑥b a lap kimondja, melyik koinonak fut őrjárata** (CS5 (A)): az őrjárat a köre feljegyzését a család MINDEN koinojába
+  írja (`csaladKorFeljegyzese` — eddig csak a fő koinoéba), és a tér koinonként mondja: fut (a porttal) · a családjáé fut (a
   következő körében felveszi) · nem fut — akkor az indító parancs (`koinokOrjaratai`, `orjaratInditoParancsa`: CS4 (A) szerint
-  a családnak EGY parancs — a fő koinóé, ha a családban van, különben a gyökéré —, a becenévvel (a `sajat` elhagyva), az
+  a családnak EGY parancs — a fő koinoé, ha a családban van, különben a gyökéré —, a becenévvel (a `sajat` elhagyva), az
   adat-mappával (ha nem az alap), a készülék héjának alakjában (PowerShell vagy sh), egy szabad porttal a 7373-tól kettesével).
   A lapon a parancs a másoló gombbal, az alsó sáv súgójában is; a parancssoron a `ter` mondja.
-- ✅ **⑥c a csatlakozás egy koinóhoz** (`koino.js` `koinoCsatlakozas` — a `csatlakoz` parancs és a lap ugyanazt hívja): a koinó
-  tára megnyílik (egy üres esemény-fájllal — a téren „a születése még nem jött meg”), a becenév (ha van) az övé, és ha a koinó
-  egy koino-verzió kártyáról ismert gyermek (a mostani koinóban), a születése a kártyából a tárába kerül (`gyermekMegnyitasa`)
+- ✅ **⑥c a csatlakozás egy koinohoz** (`koino.js` `koinoCsatlakozas` — a `csatlakoz` parancs és a lap ugyanazt hívja): a koino
+  tára megnyílik (egy üres esemény-fájllal — a téren „a születése még nem jött meg”), a becenév (ha van) az övé, és ha a koino
+  egy koino-verzió kártyáról ismert gyermek (a mostani koinoban), a születése a kártyából a tárába kerül (`gyermekMegnyitasa`)
   — a család őrjárata felveszi, külön őrjárat nem kell. Esemény nem születik. ⭐ **A lapon:** a tér sávján „🔗 Csatlakozás egy
-  koinóhoz…” (a név beillesztése, egy nem kötelező becenév) — egy FRISS készüléken a lap a felület saját becenevét kínálja
+  koinohoz…” (a név beillesztése, egy nem kötelező becenév) — egy FRISS készüléken a lap a felület saját becenevét kínálja
   (`GET /api/csatlakozas`: szabad, ha nem jegyzett és nincs mögötte esemény): akkor az újraindított felület és a sima `orjarat`
-  is ezt a koinót nyitja, és a válasz újraindítást kér (a régi őrjárat portjával); a kártyáról ismert gyermeknél a tér
+  is ezt a koinot nyitja, és a válasz újraindítást kér (a régi őrjárat portjával); a kártyáról ismert gyermeknél a tér
   kártyáján „Csatlakozom…”. ⭐ **A parancson:** `csatlakoz <név> becenev=<b>` — a lap alakja (a mostani becenév a mostani
-  koinóé marad; a kártyát a mostani koinóban keresi); `becenev=` nélkül a régi viselkedés (a mostani becenév átjegyzése).
+  koinoé marad; a kártyát a mostani koinoban keresi); `becenev=` nélkül a régi viselkedés (a mostani becenév átjegyzése).
 - ✅ **⑥d a társak** (`tarsFelvetele`, `tarsLevetele` — a `tars` parancs is ezt hívja; `GET`/`POST /api/tarsak`, `POST
   /api/tarsak/torol`): a tér sávján „🤝 Társak…” — az induló címek (a helyi megfigyelésükkel: mikor felelt utoljára, hányszor
   nem), a felvétel (cím, port, név) és a levétel; a saját címet nem tiltjuk, csak kimondjuk (mint a parancs). A futó őrjárat az
@@ -411,7 +411,7 @@ gyermek az őrjárat újraindításáig nem cserélt (a ③–④ próbái mind 
   aki a szülőben tag volt ÉS beköltözött, vagy akit a gyermekben meghívtak. Egy zárt gyermek a tartalmát csak tagnak adja ki: a
   csatlakozott nem költöző a zárt gyermekből a születés-láncán kívül semmit nem kap, a nyíltból igen (a kapu helyesen ítél). A
   lap ezt kimondja, és a „🧳 Költözés…”-re mutat (ha a szülőben tag voltál a születésekor, a költözés beköltöztet).
-- **A próbák** (a parancssor, +2): (1) a futó őrjárat felveszi a család új koinóját — B a zárt szülő tagja, a gyermeket csak a
+- **A próbák** (a parancssor, +2): (1) a futó őrjárat felveszi a család új koinoját — B a zárt szülő tagja, a gyermeket csak a
   kártyáról ismeri; az őrjárata a szülőre fut, az első csere után B beköltözik (`koltozes` — a lapon ugyanez), és a FUTÓ
   őrjárat a következő körében a gyermeket is cseréli: A gyermekbeli gondolata B lemezére ér, a gyermek feljegyzésében a család
   köre, és a `ter` a gyermeknél „fut”-at mond. (2) a lap egy friss készüléken, végig futó felülettel — üres tér, a felület
@@ -419,42 +419,42 @@ gyermek az őrjárat újraindításáig nem cserélt (a ③–④ próbái mind 
   sima `orjarat`), a társ a lapon, az őrjárat — a szülő gondolata megérkezik, és a FUTÓ felület tere „fut”-at mond a porttal;
   a felület újraindítása után a tér a gyermeket a kártyáról mutatja, a lapon csatlakozunk hozzá (a válasz szerint a családja
   őrjárata fut), és a gyermek gondolata is megérkezik; a levétel. Rontás öt ágra — az őrjárat csak induláskor nyitja a családot
-  (mindkettő bukik), a kör csak a fő koinó feljegyzésébe (az 1.), a lap nem veszi fel a társat, nem jegyzi a becenevet, nem
+  (mindkettő bukik), a kör csak a fő koino feljegyzésébe (az 1.), a lap nem veszi fel a társat, nem jegyzi a becenevet, nem
   nyitja meg a kártyáról a gyermeket (a 2.) — mind bukik. Böngészőben végigjárva (a tér a kártyáról ismert gyermekkel, a két
   ablak, telefon-szélességen is).
-- ⚠️ **A felület a koinót induláskor rögzíti (mérve, 2026-10-31) — ✅ D119/C: a (B) (a 17. szakasz).** A felület a SAJÁT (indításkori) koinójában
+- ⚠️ **A felület a koinot induláskor rögzíti (mérve, 2026-10-31) — ✅ D119/C: a (B) (a 17. szakasz).** A felület a SAJÁT (indításkori) koinojában
   dolgozik teljesen: a böngészés hiányzó részeit elkéri (függő kérelem — az őrjárat hozza), a bemondott össz-pontokkal és
-  gyerekszámokkal számol, felderít, költöztet, és a kártyáról ismert gyermekeit mutatja. Egy MÁSIK koinóban (a téren „Belépek”)
+  gyerekszámokkal számol, felderít, költöztet, és a kártyáról ismert gyermekeit mutatja. Egy MÁSIK koinoban (a téren „Belépek”)
   csak néz és ír: a nézete a tartott szeletek nélkül készül, ezért mindent tartottnak vesz, és semmit nem kér el (mérve: a
   gyermekbe lépett lap a gyermek gondolatát — ami a készüléken nincs — nem mutatja, és kérelmet sem ír; a szülő jegyzékébe sem —
   a kezelő `aktivKoino === KOINO` feltétele a `KOINO` árnyékolása miatt mindig igaz, de a kérelem így sem jön létre). A
-  családdal ez a lap fő útja lett: aki beköltözött, annak a gyermek a fő koinója, a felülete viszont a szülővel indult — a
+  családdal ez a lap fő útja lett: aki beköltözött, annak a gyermek a fő koinoja, a felülete viszont a szülővel indult — a
   gyermekben újraindításig (a gyermek becenevével) csak a helyi tudást látja; egy friss készüléken a csatlakozás után a lap
-  újraindítást kér. **(A)** marad így — a lap kimondja, ha újraindítás kell · **(B)** ⭐ a felület minden koinóban teljesen
-  dolgozik: a kezelő a belépett koinó PÉLDÁNYÁVAL fut (`koinoPeldany` — a két tár nézete, a bemondások, a függő kérelmek, a
-  felderítés, a költözés, a kártyáról ismert gyermekek), a felületnek nincs „saját” koinója — a kérelmeket a koinó családjának
+  újraindítást kér. **(A)** marad így — a lap kimondja, ha újraindítás kell · **(B)** ⭐ a felület minden koinoban teljesen
+  dolgozik: a kezelő a belépett koino PÉLDÁNYÁVAL fut (`koinoPeldany` — a két tár nézete, a bemondások, a függő kérelmek, a
+  felderítés, a költözés, a kártyáról ismert gyermekek), a felületnek nincs „saját” koinoja — a kérelmeket a koino családjának
   őrjárata viszi (a ④ óta a család minden példányáét). Nagyobb átalakítás (a kezelő ~1100 sora), de a ⑦ (a terepi próba: költözés
   a lapról, aztán a gyermek a lapon) erre épül.
-- ⏭️ **Az ⑥ kész** (a 3. szakasz terve: *„a téren »Csatlakozás egy koinóhoz…« és »Társ felvétele…«; a gyermek ③ után magától
+- ⏭️ **Az ⑥ kész** (a 3. szakasz terve: *„a téren »Csatlakozás egy koinohoz…« és »Társ felvétele…«; a gyermek ③ után magától
   jelenik meg”*). ✅ Az FL1 eldőlt (D119/C — a 17. szakasz); utána a ⑦ (terepi próba).
 
-## 17. ✅ D119/C — a felület kötése: a belépett koinó a saját példányával (2026-10-31)
+## 17. ✅ D119/C — a felület kötése: a belépett koino a saját példányával (2026-10-31)
 
-Csaba (az FL1-re): *„rendben, elfogadom a javaslatodat, mehetünk tovább”* — a **(B)**: a felület minden koinóban teljesen
-dolgozik, nincs „saját” koinója.
+Csaba (az FL1-re): *„rendben, elfogadom a javaslatodat, mehetünk tovább”* — a **(B)**: a felület minden koinoban teljesen
+dolgozik, nincs „saját” koinoja.
 
 - ✅ **A példány folyamatonként egyszer** (`koino.js` `koinoPeldanyEgyszer`): a fő, a család (`csaladMegnyitasa`) és a felület
-  belépett koinója ugyanazt a példányt kapja — két példány ugyanarra a koinóra két átmeneti tárat és két gyorsítótárat jelentene
+  belépett koinoja ugyanazt a példányt kapja — két példány ugyanarra a koinora két átmeneti tárat és két gyorsítótárat jelentene
   (mint a tárnál a `koinoTaraEgyszer`). A hibás nyitás nem ragad a jegyzékben.
-- ✅ **A kezelő a belépett koinó példányával** (`felulet` — `aktivAllapot`): a koinó-szintű nevek (a tár, az átmeneti tár, a
+- ✅ **A kezelő a belépett koino példányával** (`felulet` — `aktivAllapot`): a koino-szintű nevek (a tár, az átmeneti tár, a
   környezet, a bemondások, a fejléc-tudás, a függő kérelmek, a felderítés, a postafiók, a költözés, a koino-verzió, a törzs, a
   csere-állapot, a kép) a példányéi — ugyanazok a nevek, mint a parancsoké, ezért egyetlen végpont kódja sem változott, csak a
-  „csak a saját (indításkori) koinódban” őrök (11 hely) és a `sajatKoino` / `aktivKoino === KOINO` ágak (27 hely) estek ki. A nézet minden koinóban a
+  „csak a saját (indításkori) koinodban” őrök (11 hely) és a `sajatKoino` / `aktivKoino === KOINO` ágak (27 hely) estek ki. A nézet minden koinoban a
   sajátjai szerint készül: a tartott szeletek (a szigorú (b) — D100) és az ellenőrzött lezárási összegzések (D95/1) a példányból.
-  ⭐ A lap kéréseit (függő kérelem, felderítés) a koinó CSALÁDJÁNAK őrjárata viszi — a ④ óta a család minden példányának
-  kérelmeit és háztartását; ha egy koinónak nem fut őrjárata, a tér kimondja (⑥b).
-- ✅ **A tér** a felület minden megnyitott koinójának kártyáiról ismert gyermekeit mutatja (eddig csak az indításkoriét), és a
-  kártyáról csatlakozást az a példány végzi, amelyik koinójának a kártyáján a gyermek van.
+  ⭐ A lap kéréseit (függő kérelem, felderítés) a koino CSALÁDJÁNAK őrjárata viszi — a ④ óta a család minden példányának
+  kérelmeit és háztartását; ha egy koinonak nem fut őrjárata, a tér kimondja (⑥b).
+- ✅ **A tér** a felület minden megnyitott koinojának kártyáiról ismert gyermekeit mutatja (eddig csak az indításkoriét), és a
+  kártyáról csatlakozást az a példány végzi, amelyik koinojának a kártyáján a gyermek van.
 - ✅ **A csatlakozás után** a lap már nem kér újraindítást a felületnek: elég a téren belépni; újraindítani csak egy régi
   őrjáratot kell, ha fut (a felület becenevét a sima `orjarat` is használja).
 - **A próba** (a parancssor, +1): a D100 háza a gyermekben — A a nyílt gyermekben a lapjáról ír egy gondolatot és alá egy
@@ -463,8 +463,8 @@ dolgozik, nincs „saját” koinója.
   mappájába függő kérelemként írja, és „betöltés”-t jelez; B családi őrjárata elhozza, és UGYANAZ a futó felület a gyereket és az
   ellenőrzött össz-pontot (110) mutatja; a csere-állapot a C tudását is mondja, és a C-ben felderítés indítható (a jegyzék a C
   mappájában). Rontás: a régi `koino.js` (a lap a C-ben semmit nem lát — a nézet tartott szeletek nélkül a nem látott pontú
-  gondolatot elfelejti, D14 — és nem kér) · a nézet a nem fő koinóban tartott szeletek nélkül · a lap a fő koinó példányával kér (a
-  kérelem nem a C-é) · az olvasó az átmeneti tár nélkül (a megjött gyerek nem látszik) · a felderítés csak a fő koinóban — mind
+  gondolatot elfelejti, D14 — és nem kér) · a nézet a nem fő koinoban tartott szeletek nélkül · a lap a fő koino példányával kér (a
+  kérelem nem a C-é) · az olvasó az átmeneti tár nélkül (a megjött gyerek nem látszik) · a felderítés csak a fő koinoban — mind
   bukik, a saját ágán. Böngészőben végigjárva: a tér → „Belépek” a gyermekbe → „⏳ betöltés: a hiányzó részeket az őrjárat hozza
   el” → az őrjárat indítása után a gyermek gondolata a futó lapon, „100 ✓”-val, az alsó sávon a gyermek cseréje; a gyermekben a
   költözés, a felderítések, a program, a koino-verzió, az értesítések és a törzs végpontja teljes választ ad.
@@ -473,7 +473,7 @@ dolgozik, nincs „saját” koinója.
 ## 18. ✅ A ⑦ — a terepi próba (2026-11-01, laptop + telefon, egy wifin)
 
 **A menet** (a laptop a `42bfa68`-on, „mindent” a szülőben; a telefon friss mappával, `~/koino-terep2`, ugyanazon a kódon):
-a laptop új koinót hozott létre („Terepi próba”); a telefon **a lapján csatlakozott** (⑥ — „🔗 Csatlakozás egy koinóhoz…”,
+a laptop új koinot hozott létre („Terepi próba”); a telefon **a lapján csatlakozott** (⑥ — „🔗 Csatlakozás egy koinohoz…”,
 becenévvel), a lapján vette fel a laptopot társnak, belépett (`belep`, parancssor), a laptop meghívta (`meghiv`, parancssor), és a
 telefon a lapján gondolatot írt, pontot tett. 13:49-kor a laptop **a lapjáról** létrehozta a gyermeket (koino-verzió kártya,
 „terepi gyermek koino”, zárt, a szülő szabályaival) — a futó családi őrjárat a következő körében, újraindítás nélkül felvette, és
@@ -483,7 +483,7 @@ a kártyát a telefonra vitte. 14:06-kor a telefon **a lapján beköltözött** 
 - ✅ A **gyermek a telefon súlyával számol**: a laptop gyermek-képében „A telefon gondolata” 100, „Az első gondolat” 41 (a laptop 1
   + a telefon 40) — a beköltözés (`Bekoltozes`, a vágáskori tagsági bizonyítékkal) a cserén átért, a két réteg (③) számol vele.
 - ✅ A **családi őrjárat** (④–⑥) mindkét gépen: percenként a szülő cseréje, utána ugyanazon a résen a gyermeké („a család közös
-  koinói is”); a telefon a gyermeket a futó őrjáratában vette fel (a 10-25-i 3. lelet a terepen zárva).
+  koinoi is”); a telefon a gyermeket a futó őrjáratában vette fel (a 10-25-i 3. lelet a terepen zárva).
 - ✅ A **címváltás**: a telefon ~15:53-kor a wifin új címet kapott (.124 → .144) — a laptop kötése két percen belül követte
   (a telefon kopogott be a laptop ismert címére), a tábla a telefon nyilvános címét is megtalálta (31.46.x).
 - ✅ **A 10-25-i 1. lelet** (két úton két csere, összeakadt üzenetek) nem jött elő: a kötés három címe közül a kör a rangban
@@ -498,7 +498,7 @@ a kártyát a telefonra vitte. 14:06-kor a telefon **a lapján beköltözött** 
   társ `KERELEM`-ét átlépte, mint a `NYITAS`-t — mindkettő a tétlenségi óráig várt, és mert a kétperces jel mindkettőnél
   egyszerre járt le, a következő próbálkozás megint ütközött. ✅ **A javítás** (`vonal.js` `kerelemUtkozes`): a két fél ugyanazt a
   két üzenetet látja, tehát ugyanúgy dönt — a kisebbik (a JSON-alak szerint; a függő kérelem véletlen azonosítója miatt
-  gyakorlatilag pénzfeldobás) megy elöl, a nagyobbik kérő ugyanazon a kapcsolaton kiszolgálja (a kérelem koinójának példányával —
+  gyakorlatilag pénzfeldobás) megy elöl, a nagyobbik kérő ugyanazon a kapcsolaton kiszolgálja (a kérelem koinojának példányával —
   `koino.js` `utkozesKiszolgaloja`, a családi átadás útja: `kerelemAtvetele`), és a sajátja a kétperces jel nélkül a következő
   munkában megy; ha nem tud kiszolgálni, `KESZ`-t mond. A kérelem, a sorozat, a szelet-kérés és a továbbadás egyaránt.
   Visszafelé kompatibilis: a régi program nyertesként ugyanígy vár, vesztesként a régi módon akad el.
@@ -518,28 +518,28 @@ a kártyát a telefonra vitte. 14:06-kor a telefon **a lapján beköltözött** 
 **⏸️ Még nyitott leletek (döntésre vagy mérésre — Csabával átbeszélendő):**
 1. A DHT-n a vakított témáinkon IDEGEN címek is jelentkeznek (egy kopogtató téma más hirdetője), és a kör percenként kopog rájuk
    (~0,9 MB/nap) — javaslat: a rést soha nem nyitó cím negatív jegyzéke.
-2. A jegyzetlen becenévvel (`KOINO_AZONOSITO`) a program csendben egy üres, régi alakú (szabad nevű) koinót indít — ki kell mondania.
-3. Egy ismeretlen koinónak szóló kérelmet a nyitott koinó szolgál ki (vagy vesz át) — a `vonal.js` „régi út”-ja.
+2. A jegyzetlen becenévvel (`KOINO_AZONOSITO`) a program csendben egy üres, régi alakú (szabad nevű) koinot indít — ki kell mondania.
+3. Egy ismeretlen koinonak szóló kérelmet a nyitott koino szolgál ki (vagy vesz át) — a `vonal.js` „régi út”-ja.
 4. A lap egy elavult entitásra (a böngésző tárolójából) örökös függő kérelmet írt, ami minden ismeretlen bekopogót kérelemre
    fordított a csere helyett (a kétperces jel vs. a telefon 5 perces köre — az első találkozás csak kézi társfelvétellel ment).
 5. A lap által javasolt őrjárat-parancs 5 perces kört és a 7373-as portot adja (a telefon próbasora ugyanezt használja).
-6. A csatlakozás ablaka „Belépek”-et kínálhatna — különben a lap a régi koinóban marad.
+6. A csatlakozás ablaka „Belépek”-et kínálhatna — különben a lap a régi koinoban marad.
 7. A belépés és a meghívás csak parancssor, és a 43 jeles név nehezen vihető át — ⭐ Csaba kérése: a meghívás felhasználóbarát
    útja, Termux nélkül (a ⑦ után átbeszéljük).
-8. Apró: a „mindent” laptop parancssora a szülőben „nem tartod”-ot ír; a gyermek a „mindent” beállítást nem örökli (koinónként
+8. Apró: a „mindent” laptop parancssora a szülőben „nem tartod”-ot ír; a gyermek a „mindent” beállítást nem örökli (koinonként
    külön).
-9. ⭐ **A lap a megjegyzett entitást a ROSSZ koinóban kéri** (a frissítés utáni újraindításkor mérve — és ez a 4. lelet oka is):
-   a felület a saját (indításkori) koinójával nyit, a böngésző viszont az utoljára nézett entitást jegyezte meg — egy gyermekbelit.
+9. ⭐ **A lap a megjegyzett entitást a ROSSZ koinoban kéri** (a frissítés utáni újraindításkor mérve — és ez a 4. lelet oka is):
+   a felület a saját (indításkori) koinojával nyit, a böngésző viszont az utoljára nézett entitást jegyezte meg — egy gyermekbelit.
    Mindkét lap a szülőben vette fel rá a függő kérelmet (a laptopé: `szelet lWvHasTk` a szülő `kerelmek.json`-jában), ami ott
    soha nem teljesülhet: a telefon átvette továbbadásra, a laptop a telefontól kérte — kétpercenként „nem szolgálta ki”. A reggeli
-   örökös `XBnE`-kérés ugyanígy keletkezett. Javítás iránya: a lap a megjegyzett entitást koinónként tárolja, és a program nem
-   vesz fel kérelmet a család egy MÁSIK koinójának ismert entitására.
+   örökös `XBnE`-kérés ugyanígy keletkezett. Javítás iránya: a lap a megjegyzett entitást koinonként tárolja, és a program nem
+   vesz fel kérelmet a család egy MÁSIK koinojának ismert entitására.
 10. **„⚠ más programverzió” minden frissítés után** — a gyermek a születése programjával (`42bfa68`) jött létre, a két gép a
    javítás után a `dfda545`-öt futtatja: a lap (mindkét gépen) igazat mond, de a KZ besorolását (az eredményt nem érintő javítás
    egyszerű programfrissítés, nem költözés) nem tudja megkülönböztetni. Javaslat: a jelzés marad, de ne hibának hangozzék („ez a
-   készülék újabb programot futtat, mint amivel a koinó született”), a kártyán magyarázattal; hogy egy változás a számítást
+   készülék újabb programot futtat, mint amivel a koino született”), a kártyán magyarázattal; hogy egy változás a számítást
    érinti-e, azt a program nem tudja megbízhatóan eldönteni — a forráskód-kormányzás kérdése. ⏸️ Csabánál. ✅ **D123 ① (2026-11-06)
-   zárja:** a koinó a számítás MAGJÁT nevezi meg (a kép és a kapu import-zárványa), és a lap csak a mag eltérésére figyelmeztet
+   zárja:** a koino a számítás MAGJÁT nevezi meg (a kép és a kapu import-zárványa), és a lap csak a mag eltérésére figyelmeztet
    („⚠ más számítás”); egy felületi vagy hálózati frissítés után „ℹ más felület” (halvány) — `program_retegek_atvizsgalas.md` 6.
 
 **A frissítés után (21:16–21:31, mindkét gép a `dfda545`-ön) — a ⑦ célja teljesült:**

@@ -1,7 +1,7 @@
 /* felulet/css/components/koinoTelepites.css */
 
 /* Felelősség: ⭐⭐ D125 — a telepítés a kártyáról ablaka (`felulet/js/koinoTelepites.js`): az előnézet (a kártya, a fájlok, a rétegek,
-   a más mag koinónként, a figyelmeztetés), a telepítés és a visszaút gombjai, a csere állása. A színek a lap változói. */
+   a más mag koinonként, a figyelmeztetés), a telepítés és a visszaút gombjai, a csere állása. A színek a lap változói. */
 
 .koino-telepites {
   display: flex;

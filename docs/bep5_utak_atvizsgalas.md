@@ -1,7 +1,7 @@
-# A koinó többi BEP 5 útja — átvizsgálás (2026-11-05, kód nélkül)
+# A koino többi BEP 5 útja — átvizsgálás (2026-11-05, kód nélkül)
 
 > **Állapot:** átvizsgálás — ⏸️ a kérdések (BP1–BP4) Csabáé. A belépő megtalálásának átvizsgálása (`belepo_megtalalasa_atvizsgalas.md`
-> 7.) mondta ki, hogy a koinó többi BEP 5 útja ugyanattól a szennyezéstől szenved, mint a belépő cetlije — ez az a „külön
+> 7.) mondta ki, hogy a koino többi BEP 5 útja ugyanattól a szennyezéstől szenved, mint a belépő cetlije — ez az a „külön
 > átvizsgálás”. Semmi nem épült belőle.
 
 ## 1. A lelet (87. mérés, 2026-11-04 terep)
@@ -18,7 +18,7 @@ Az aláírt bejegyzés (BEP 44 — a hirdetőtábla és, 2026-11-05 óta, a megh
 **Ami már enyhít:** az M3 (a) (2026-11-05) a 3 kör óta néma kopogtató és régió-társ címeket 6 órára kihagyja — a zaj így nem eszi
 a kopogásokat. A *hiányt* (a valódi bejelentés el sem jut a keresőhöz) nem pótolja.
 
-## 2. A leltár — hol használja a koinó a BEP 5-öt
+## 2. A leltár — hol használja a koino a BEP 5-öt
 
 1. **A gyökér-darab hirdetése** (D91/3, D95/4, D110): minden készülék a saját darabját hirdeti (~20 percenként); erre épül a hideg
    indulás (egy friss készülék a gyökér fejléceihez tartót keres — a függő kérelem `gyoker:m:d` kopogtatói és a DHT-keresés).
@@ -41,14 +41,14 @@ jött. A „ki tartja X-et” kérdésnél viszont sok tartó van, és a kérdez
 
 ## 4. A lehetőségek útonként
 
-- **(i) A kopogtatók (3.) — a legtöbbet érő:** a tartó **postaládája** BEP 44-en: a kulcspár a tartó tábla-aláírójából és a koinó
+- **(i) A kopogtatók (3.) — a legtöbbet érő:** a tartó **postaládája** BEP 44-en: a kulcspár a tartó tábla-aláírójából és a koino
   nevéből számítható (bárki, aki a kettőt tudja, írhat bele), a postaládának S rekesze van (a só = lenyomat(téma | i), i < S), a kérő a
   saját tábla-kulcsa szerinti rekeszbe írja a címét titkosítva (a tartó nyilvános titkosító-kulcsára — csak ő olvassa), a tartó a
-  címjegyzék-körében S rekeszt néz meg. ⚠️ Ára: S keresés körönként (~16 mp, ~7,5 KB egy — 87. mérés), és aki a koinó nevét és a tartó
+  címjegyzék-körében S rekeszt néz meg. ⚠️ Ára: S keresés körönként (~16 mp, ~7,5 KB egy — 87. mérés), és aki a koino nevét és a tartó
   aláíróját tudja, felülírhat egy rekeszt (egy kérőt kiszoríthat — hamisítani nem tud). A D111 tippje és a régi MH6 ugyanezt kapná.
 - **(ii) A gyökér-darab és a kereső-régió (1., 4.) — sok hirdető:** (a) marad a BEP 5, és mérni kell, hogy egy témán SOK hirdetőnél
-  (egy élő koinó gyökér-darabja) is „vagy mindig, vagy soha”-e — több hirdető több tároló géphez juttatja a bejelentést, a hiány itt
-  talán ritkább (a 87. egy hirdetőt mért); (b) ugyanaz a rekeszes alak, mint az (i)-ben, de a kulcs a koinó nevéből és a darabból
+  (egy élő koino gyökér-darabja) is „vagy mindig, vagy soha”-e — több hirdető több tároló géphez juttatja a bejelentést, a hiány itt
+  talán ritkább (a 87. egy hirdetőt mért); (b) ugyanaz a rekeszes alak, mint az (i)-ben, de a kulcs a koino nevéből és a darabból
   (a darab tartói közül legfeljebb S kerül bele — a hideg induláshoz egy is elég); (c) a hideg indulást a meghívó vigye: a belépő a
   meghívótól kapja az első tartók listáját (a meghívó gépe maga is tartó — D122 óta a belépő úgyis vele cserél először).
 - **(iii) A vállalt szeletek hirdetése (2.):** alapból ki van kapcsolva (0), a raj fedezi — elég kimondani a dokumentációban, hogy
@@ -68,7 +68,7 @@ jött. A „ki tartja X-et” kérdésnél viszont sok tartó van, és a kérdez
 - **BP2 — a kopogtatók útja:** (A) ⭐ a tartó postaládája BEP 44-en (i), a BEP 5 mellette marad (mint az M8-nál — B6 (a)); (B) marad
   a BEP 5 + az M3 (a) szűrője.
 - **BP3 — a hideg indulás:** (A) a mérés (88/a) dönti el: ha sok hirdetőnél megbízható, marad; ha nem, (ii)(b); (B) ⭐ mellette a
-  meghívó is hozza az első tartókat (ii)(c) — olcsó, és a zárt koinóban a belépő úgyis a meghívóval kezd.
+  meghívó is hozza az első tartókat (ii)(c) — olcsó, és a zárt koinoban a belépő úgyis a meghívóval kezd.
 - **BP4 — a sorrend a többi munkához képest:** a terepi próba (egy mobilnetes telefon) előtt vagy után? Javaslat: **után** — a terep
   megmutatja, a belépő mennyire jut be az M5–M8-cal, és hogy a BEP 5 hiánya a gyakorlatban hol fáj.
 

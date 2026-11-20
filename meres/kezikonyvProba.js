@@ -1,6 +1,6 @@
 // meres/kezikonyvProba.js
 
-// Felelősség: ⭐⭐ D129 (①, 2026-11-19) — A KÉZIKÖNYV MAGJA: a rendszer-entitás neve és azonosítója, a koinó kézikönyv-szabálya,
+// Felelősség: ⭐⭐ D129 (①, 2026-11-19) — A KÉZIKÖNYV MAGJA: a rendszer-entitás neve és azonosítója, a koino kézikönyv-szabálya,
 // a kapu és a bejelentés, a születés nélküli létezés és a D14 kivétele (MA4 (B)), az óvatosabb alap-küszöb (MA8 (B)), és a
 // vállalás (mindenki tartja a kézikönyv szeletét).
 //
@@ -39,7 +39,7 @@ const KEZDET = Date.UTC(2026, 10, 19);
 const KERESES = 'kezikonyv/menu/kereses';
 
 /**
- * Egy koinó — a kézikönyv szabályával (az új születés) vagy nélküle (a régi) —, egy e-ember, aki a „menü / Keresés”
+ * Egy koino — a kézikönyv szabályával (az új születés) vagy nélküle (a régi) —, egy e-ember, aki a „menü / Keresés”
  * magyarázatára pontot tesz (a nevével), és egy hétköznapi gondolat.
  */
 async function eset({ kezikonyv = true } = {}) {
@@ -81,10 +81,10 @@ proba('⭐⭐ D129 (①): a kézikönyv-név útvonal (kezikonyv/…), az azonos
   });
 
 // ===================================
-// 2. A KOINÓ SZABÁLYA
+// 2. A KOINO SZABÁLYA
 // ===================================
 
-proba('⭐⭐ D129 (①): a kézikönyv a koinó szabálya — az új születésben van (≥ 3 nap), a régiben (mező nélkül) nincs; a kapu az alakját nézi',
+proba('⭐⭐ D129 (①): a kézikönyv a koino szabálya — az új születésben van (≥ 3 nap), a régiben (mező nélkül) nincs; a kapu az alakját nézi',
   async () => {
     const uj = teljesSzabalyok();
     const { szuletes: ujSz } = await eset();
@@ -133,7 +133,7 @@ proba('⭐⭐ D129 (①): a kapu az adat.rendszer alakját nézi; a kézikönyv-
 // 4. A LÉTEZÉS ÉS A KOINON
 // ===================================
 
-proba('⭐⭐ D129 (①, MA4 (B), a koinon): a kézikönyv-entitás születés nélkül létezik (a felmenőivel), a koinon 1 passzív pontjával; a közösség pontjainak levétele után sem felejtődik el (a koinoné marad) — a hétköznapi gondolat igen; kézikönyv nélküli koinóban nincs',
+proba('⭐⭐ D129 (①, MA4 (B), a koinon): a kézikönyv-entitás születés nélkül létezik (a felmenőivel), a koinon 1 passzív pontjával; a közösség pontjainak levétele után sem felejtődik el (a koinoné marad) — a hétköznapi gondolat igen; kézikönyv nélküli koinoban nincs',
   async () => {
     const { a, K, g, esemenyek } = await eset();
     const elotte = await allapotbol(esemenyek);
@@ -168,11 +168,11 @@ proba('⭐⭐ D129 (①, MA4 (B), a koinon): a kézikönyv-entitás születés n
 // 5. AZ ÓVATOSABB ALAP-KÜSZÖB (MA8 (B))
 // ===================================
 
-proba('⭐⭐ D129 (①, MA8 (B)): a kézikönyv-entitás javaslata a kézikönyv óvatosabb alap-küszöbével dönt (≥ 3 nap) — a név elhagyásával sem kerülhető meg; a hétköznapi gondolaté a koinóé',
+proba('⭐⭐ D129 (①, MA8 (B)): a kézikönyv-entitás javaslata a kézikönyv óvatosabb alap-küszöbével dönt (≥ 3 nap) — a név elhagyásával sem kerülhető meg; a hétköznapi gondolaté a koinoé',
   async () => {
     const { a, K, g, esemenyek } = await eset();
     // ⛔ A név nélküli javaslat egy MÁSIK kézikönyv-entitásra mutat, amelynek a nevét csak a javaslattevő pont-eseménye hozza —
-    // így a nevesített javaslat neve nem „segítheti ki”: a döntés a koinó minden eseményéből ismeri fel.
+    // így a nevesített javaslat neve nem „segítheti ki”: a döntés a koino minden eseményéből ismeri fel.
     const RENDEZES = 'kezikonyv/menu/rendezes';
     const K2 = rendszerAzonosito(RENDEZES);
     const pontK2 = await a.tesz('TudatpontRendezes', { entitas: K2, pont: 30, szerep: 'aktiv', rendszer: [RENDEZES] }, KEZDET + 4000);
@@ -208,7 +208,7 @@ proba('⭐⭐ D129 (①, MA8 (B)): a kézikönyv-entitás javaslata a kéziköny
 // 6. A VÁLLALÁS
 // ===================================
 
-proba('⭐⭐ D129 (①, MA4 (B)): a kézikönyves koinóban mindenki tartja a kézikönyv szeletét (pont nélkül is); a kézikönyv nélküliben nem',
+proba('⭐⭐ D129 (①, MA4 (B)): a kézikönyves koinoban mindenki tartja a kézikönyv szeletét (pont nélkül is); a kézikönyv nélküliben nem',
   async () => {
     const igen = vallalasSzamitasa([], { kezikonyv: true });
     const nem = vallalasSzamitasa([], {});

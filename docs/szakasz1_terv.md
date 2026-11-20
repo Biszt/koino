@@ -25,7 +25,7 @@
 > A **döntési idő 168 → 24 óra rövidülése** a bizonyossági mutató (D4) működése élőben:
 > minél egyértelműbb az eredmény, annál hamarabb zárul a döntés.
 
-**Épít:** egy működő koinót **egyetlen készüléken, hálózat nélkül**. A végén egy ember
+**Épít:** egy működő koinot **egyetlen készüléken, hálózat nélkül**. A végén egy ember
 gondolatot hoz létre, tudatpontot rendez, javaslatot tesz, szavaz — és az egyezmény
 megszületik. **Minden művelet aláírva**, az adat a készüléken.
 
@@ -39,7 +39,7 @@ megszületik. **Minden művelet aláírva**, az adat a készüléken.
 | **Az érték javaslat felülete** | A küszöb-medián (D4) számítása kész és próbázott, de a fejlesztői nézetből nem hívható — a kártyák ezért „alapértelmezett" küszöböt mutatnak. |
 | ~~**A szabályok kikényszerítése a SZÁMÍTÁSBAN**~~ | ✅ **Megépült** (2026-08-28, Csaba döntése: még a hálózat előtt) — lásd a 9. szakaszt. |
 
-> **Miért van értelme egy magányos koinónak?** Mert minden más ezen áll. Ha az esemény-modell
+> **Miért van értelme egy magányos koinonak?** Mert minden más ezen áll. Ha az esemény-modell
 > és az aláírás nem működik egy gépen, hálózaton sem fog. És mert **egyedül is
 > kipróbálható**: nem kell hozzá se másik ember, se infrastruktúra.
 
@@ -54,7 +54,7 @@ adat **esemény**: *„én, ekkor, ezt tettem"* — aláírva. Az állapot ebbő
 
 | Mező | Mi ez | Miért kell |
 |---|---|---|
-| `koino` | melyik koinóhoz tartozik | **D25**: egy ember több koinóban is tag lehet — az eseménynek tudnia kell, hol érvényes |
+| `koino` | melyik koinohoz tartozik | **D25**: egy ember több koinoban is tag lehet — az eseménynek tudnia kell, hol érvényes |
 | `tipus` | mi történt (pl. `GondolatLetrehozas`) | ez dönti el, hogyan hat az állapotra |
 | `szerzo` | a nyilvános kulcs (32 bájt) | **ez a személyazonosság** — nem név, nem fiók |
 | `elozo` | az előző **saját** eseményem azonosítója | ez fűzi láncba a cselekedeteimet |
@@ -407,7 +407,7 @@ kézzel aláírt eseményekkel (vagyis pontosan úgy, ahogy egy rosszindulatú m
 
 1. ✅ **EGY KULCS A BELÉPŐ TÉRBEN** *(Csaba, 2026-08-26)*. A D25-ből következik: ha az
    azonosság és a tanúsítások közösek a térben, akkor **egy kulcs viszi át mindet** —
-   különben nem lenne mit „átvinni". A **megjelenített név** viszont koinónként külön
+   különben nem lenne mit „átvinni". A **megjelenített név** viszont koinonként külön
    lehet. *Vállalt ára: ugyanaz a kulcs azonosít mindenhol, tehát összeköthető, ki hol
    tag.*
 2. ✅ **A PRIVÁT KULCS KIMENTHETŐ, ÉS A PROGRAM KÉRI IS A MENTÉST** *(Csaba, 2026-08-26)*.

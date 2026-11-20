@@ -1,6 +1,6 @@
 # koino — a P2P program
 
-*Ez a mappa a **Fázis 2** koinója: a készüléken futó, aláírt eseményekre épülő,
+*Ez a mappa a **Fázis 2** koinoja: a készüléken futó, aláírt eseményekre épülő,
 központi szerver nélküli program.*
 
 ## Mi ez, és mi nem
@@ -134,15 +134,15 @@ find koino -type f -printf '%s\n' | awk '{n++; s+=$1} END {printf "%d fajl, %.1f
 | `meres/javaslatProba.js` | a döntés kiszámítható, és **a lezárt döntés nem fordul vissza** |
 | `meres/szabalyProba.js` | a szabályokat a **számítás** őrzi, nem a felület |
 | `meres/csereProba.js` | a csere teljes: a hézag és a rejtett elágazás is kiderül, és a hálózat **nem kap engedékenyebb kaput** |
-| `meres/fajlCsereProba.js` | ⛔⛔ **a 4. szabály** (a kézi út): fájlba vinni és fájlból hozni hálózat nélkül — ⭐ és hogy **a fájl sem kap engedékenyebb kaput**: a szövegszerkesztővel átírt esemény elbukik, az idegen koinóé kimarad, a hibás sor nem állítja meg a többit |
+| `meres/fajlCsereProba.js` | ⛔⛔ **a 4. szabály** (a kézi út): fájlba vinni és fájlból hozni hálózat nélkül — ⭐ és hogy **a fájl sem kap engedékenyebb kaput**: a szövegszerkesztővel átírt esemény elbukik, az idegen koinoé kimarad, a hibás sor nem állítja meg a többit |
 | `meres/tarsakProba.js` | ⭐ **egy társ bukása nem dönti el a kört** — a csere nem múlik egyetlen címen |
 | `meres/identitasProba.js` | ⭐ **a KÉT LÉPCSŐ és a KONTRASZT-JELZÉS** — a lánc visszavezet az alapítóig, a kör nem szül jogot, a választótestület zárt, a hiány nem vád, és a jelzés a becsületesre néma, a megvettre megszólal |
 | `meres/kapuProba.js` | ⭐ **a helyi kapu** (5.1): a négy őr + az útvonal-őr — ⛔ a kulcsfájl nem szerezhető meg, idegen oldal nem jut be, és **a program sehol nem importálja a felületet** (forrás-próba) |
 | `meres/fajlProba.js` | ⭐⭐ **a tartalom-címzett fájltár** (5.7): a név a lenyomat — ⛔ a **megrontott fájlt nem adja ki** (újra-lenyomatolás olvasáskor), a duplikátum elnyelődik, és a **típus a bájtokból** jön, nem a kliens szavából (HTML soha nem `text/html`) |
-| `meres/fajlIgenyProba.js` | ⭐ **a fájl-igény** (a szállítás első fele): a felderítés **nem kíván új adatot** — az események már elmondják, mely fájlok tartoznak a koinóhoz; ⛔ és a **tudatpont tárolási vállalás** (D3): amire pontot tettem, azt vállaltam |
+| `meres/fajlIgenyProba.js` | ⭐ **a fájl-igény** (a szállítás első fele): a felderítés **nem kíván új adatot** — az események már elmondják, mely fájlok tartoznak a koinohoz; ⛔ és a **tudatpont tárolási vállalás** (D3): amire pontot tettem, azt vállaltam |
 | `meres/fajlKerelemProba.js` | ⭐ **a fájl-kérelem**: ⛔ **csak arra felelünk, amit kérdeztek** (a fájl-listám elárulná, mit néztem meg — D6), a kérdés és a válasz is korlátos, és ⭐ **a ritkábbat előbb** — de a **vállalás erősebb** a ritkaságnál (D3) |
 | `meres/fajlAtvitelProba.js` | ⭐⭐ **a bájtok átvitele** (5.7/B): a részleges fájl **mérete maga az állapot** (onnan folytatódik), ⛔ a lezárás **újra lenyomatol** — a meghamisított letöltés **nem kerül a végleges nevére, és nem hagy hátra semmit**; és a munka szétterül (társanként egy átvitel) |
-| `meres/terProba.js` | ⭐ **a belépő tér** (5.6): a koinók FÖLÖTTI nézet — ⛔ **létszám szerint nem lehet rendezni** (D18/2), ⭐ a létszám súlya **három számban** van (tag · nem ellenőrizhető · belépő), és a hiány (ismeretlen születés) **megnevezve** jelenik meg |
+| `meres/terProba.js` | ⭐ **a belépő tér** (5.6): a koinok FÖLÖTTI nézet — ⛔ **létszám szerint nem lehet rendezni** (D18/2), ⭐ a létszám súlya **három számban** van (tag · nem ellenőrizhető · belépő), és a hiány (ismeretlen születés) **megnevezve** jelenik meg |
 | `meres/egyezmenyProba.js` | ⭐⭐ **a hurok bezárul**: az elfogadott szerkesztési egyezmény ÁTÍRJA az entitást — a folyamatban lévő és az általános (D27) nem; a sorrend a **lejárat** szerint dől el; ⛔ a kört csináló áthelyezés kimarad |
 | `meres/pakliProba.js` | ⛔⛔ **a 9. szabály** (5.2): a `darab` felülről korlátos, a lista nem hordoz szövegeket, és ⭐ **a lapozás nem csúszik el**, ha közben átrendezik a tudatpontot — a **horgony** tartja együtt a képet |
 | `meres/vizsgaProba.js` | ⭐ **a Szakasz 2 vizsgája**: kevert események, csere, **azonos állapot** — és a **postaláda** (D34) |
@@ -198,8 +198,8 @@ Az eredmények: [`meres/eredmenyek.md`](meres/eredmenyek.md).
 | `js/esemeny/szovegDarab.js` | ⭐⭐ **a szöveg külön darab** (D72): az esemény a szöveg lenyomatát hordozza, a szöveg a fájl-tárba kerül, és úgy jön, mint egy kép — az állapot ettől független, a megjelenítés oldja fel |
 | `js/tar/fajlTar.js` | a tár: **hozzáfűzhető** fájl, soronként egy esemény — ⭐ 3.2 óta **kérdezhető** (`esemeny`, `szerzoLanca`, `szeletEsemenyei`, `sorszamSzerint`), nem csak `betolt()` — ⭐ D73 óta a **mutató** (test nélkül) és a pillanatképe (`mutato.json`) mellette: lusta testek, `szeletek()`, `szeletLenyomata()` |
 | `js/tar/esemenyTar.js` | a lánc kezelése — ellenőrizetlen esemény nem kerül be |
-| `js/tar/iro.js` | ⭐ **az író** (D70): koinónként és készülékenként egy folyamat fűz a tárhoz — a gépen belüli csatorna maga a zár; aki nem író, a kész eseményt átadja; a saját új esemény csak a lánc végére kerül |
-| `js/kulcs/kulcsTar.js` | a kulcs = a személyazonosság (D15) — kimentés **és visszatöltés**; ⛔ az egyetlen művelet a koinóban, ami ELDOB valamit, ezért kimondott engedély kell hozzá |
+| `js/tar/iro.js` | ⭐ **az író** (D70): koinonként és készülékenként egy folyamat fűz a tárhoz — a gépen belüli csatorna maga a zár; aki nem író, a kész eseményt átadja; a saját új esemény csak a lánc végére kerül |
+| `js/kulcs/kulcsTar.js` | a kulcs = a személyazonosság (D15) — kimentés **és visszatöltés**; ⛔ az egyetlen művelet a koinoban, ami ELDOB valamit, ezért kimondott engedély kell hozzá |
 | `js/allapot/szabalyok.js` | mely események **számítanak** (keret, jogosultság) |
 | `js/allapot/allapotSzamitas.js` | események → entitások |
 | `js/allapot/javaslatSzamitas.js` | a döntéshozatal; **az egyezmény mint számítás** |
@@ -212,18 +212,18 @@ Az eredmények: [`meres/eredmenyek.md`](meres/eredmenyek.md).
 | `js/allapot/ellentmondas.js` | ⭐⭐ **az ellentmondás bizonyítéka** (D79, D80): a vádolt saját, egymásnak ellentmondó aláírt állításai önmagát igazoló alakban; a kapu ellenőrzi, a szabály-réteg a vádponttól kihagyja a pontjait — becsületes láncra nem állítható össze vád |
 | `js/allapot/lancGyoker.js` | ⭐⭐ **a szerző lánc-gyökere** (D78): minden új saját esemény elköti a szerző esemény előtti naplóját és kiosztását — egy pont-esemény így önmagában ellenőrizhető; gyorsítótár (`lanc.json`), ami a lánchoz kötött és ellenőrző-lenyomattal védett |
 | `js/esemeny/osszegzoFa.js` | ⭐⭐ **az összegző Merkle-fa** (D78): egy csomópont (lenyomat + darab + összeg), két elrendezés — a **napló-fa** (a szerző lánca) és az **állapot-fa** (a kiosztás); bizonyíték a jelenlétre és a hiányra, és a változás a bizonyítékból — hálózat nélkül |
-| `js/csere/vonal.js` | a **párbeszéd**: soronként egy JSON-üzenet egy foglalat-szerű kapcsolaton (2026-09-26 óta csak a UDP-résen). Semmit nem tud a koinóról |
+| `js/csere/vonal.js` | a **párbeszéd**: soronként egy JSON-üzenet egy foglalat-szerű kapcsolaton (2026-09-26 óta csak a UDP-résen). Semmit nem tud a koinoról |
 | `js/csere/kapunyitas.js` | megkérjük a routert, hogy engedje be a kapcsolatot — ⚠️ **segédeszköz, nem előfeltétel** |
 | `js/tar/fajlTar.js` → `fajlBlobTarolo` | ⭐ **a fájlok** (5.7): bájtok a **lenyomatuk** neve alatt — az esemény csak a ~100 bájtos hivatkozást hordozza (6. szabály), a bájtok a tartalmi rétegben (D3); olvasáskor **újra lenyomatolunk**, tehát a csatornát nem kell megbízhatóvá tenni |
 | `js/csere/fajlAtvitel.js` | ⭐ **a bájtok logikája** (5.7/B): szeletelés (64 KB), a türelem a források számából, és a munka elosztása — három egyidejű **kapcsolat**, társanként legfeljebb egy. ⭐⭐ 2026-09-15 óta **több forrás egy fájlra** (D68 / 6.): munkalopó megosztás, a bukott ág szelete visszakerül, a lezárás joga **egyszer** adódik ki. ⚠️ Hálózatot **nem importál** (1. szabály) |
 | `js/csere/fajlKerelem.js` | ⭐ **mit kérdezek a bulin, és mit tanulok belőle** — a kérelem **múlékony üzenet**, nem esemény (Csaba döntése: a böngészésem nem való a láncra); amit tanulunk, az **helyi feljegyzés** (3. szabály) |
 | `js/allapot/fajlIgeny.js` | ⭐ **mire van szükségem?** — a gondolat szövegében ott a kép-hivatkozás, a besorolásban az ikon; ez a réteg csak összeveti a lemezzel. ⚠️ Tárat és hálózatot **nem importál** (1. szabály): a „megvan-e?” kérdést kívülről kapja |
-| `js/allapot/ter.js` | ⭐ **A BELÉPŐ TÉR** (D25, 5.6): egy kártya minden koinóról, amit ez a készülék ismer — a kulcs és a társ-lista eddig is a koinók FÖLÖTT laktak, a tér ezt teszi láthatóvá |
+| `js/allapot/ter.js` | ⭐ **A BELÉPŐ TÉR** (D25, 5.6): egy kártya minden koinoról, amit ez a készülék ismer — a kulcs és a társ-lista eddig is a koinok FÖLÖTT laktak, a tér ezt teszi láthatóvá |
 | `js/csere/fajlCsere.js` | ⛔⛔ **a KÉZI ÚT** (4. szabály): események fájlba és fájlból — ⭐ a kivitel alakja **bájtra a táré** (a másolt `esemenyek.jsonl` behozható), a behozatal pedig a `csere.js` `beolvasztas()`-át hívja, tehát **ugyanazon a kapun** megy be, mint a hálózatról jött |
 | `js/csere/tarsak.js` | **a társ-lista** (D33) — 2026-09-26 óta az **induló címek**: kire kopogjunk az első találkozáshoz — ⭐ 3.4 óta a **szelet-címjegyzék** is („kinél van EZ az entitás?"): név nélkül, elévüléssel |
 | `js/csere/pajzsfuro.js` | **pajzsfúrás** (E. lépés): mindkét fél kifelé kopog, hogy a két router rése egymásra illeszkedjen |
 | `js/csere/udpVonal.js` | ugyanaz a csere **az átfúrt UDP-résen** — sorszám, nyugta, újraküldés, kiürítés és tétlenségi óra |
-| `js/csere/udpKapu.js` | ⭐ **az állandó UDP-kapu** (D69/3, 2026-09-25): **egy foglalat a teljes őrjáratra** — a kopogásra bármikor felel, a bekopogóval is munka indul, társanként egyszerre egy (`FOGLALT`), és a saját külső címet is ezen méri (egy leképezés, egész futásra). A munkát kívülről kapja: a kapu nem tud a koinóról. ⭐⭐ **D71: a kör a TÁRSAT keresi** — a kötésből jött cél a várt tábla-aláírót hordozza, és az azonos IP-jű, más portú válasz csak feltevés, amit a munka végén kapott aláíró erősít meg (különben „nem felelt", és a kör hívja tovább) |
+| `js/csere/udpKapu.js` | ⭐ **az állandó UDP-kapu** (D69/3, 2026-09-25): **egy foglalat a teljes őrjáratra** — a kopogásra bármikor felel, a bekopogóval is munka indul, társanként egyszerre egy (`FOGLALT`), és a saját külső címet is ezen méri (egy leképezés, egész futásra). A munkát kívülről kapja: a kapu nem tud a koinoról. ⭐⭐ **D71: a kör a TÁRSAT keresi** — a kötésből jött cél a várt tábla-aláírót hordozza, és az azonos IP-jű, más portú válasz csak feltevés, amit a munka végén kapott aláíró erősít meg (különben „nem felelt", és a kör hívja tovább) |
 | `js/csere/helyiFelfedezes.js` | **helyi felfedezés** (F. lépés): aki keres, kiált; aki dolgozik, felel — cím beírása nélkül |
 | `js/csere/dht.js` | ⭐ **a BitTorrent DHT kliense** (BEP 5 + 44): egy kis, aláírt, kulcshoz kötött bejegyzés feltétele és visszakeresése — ma ez viszi a **hirdetőtáblát** (35–37. mérés). ⛔ Minden talált bejegyzés aláírását ellenőrzi (3. szabály), a belépők csak paraméterek (2. szabály), a belépő pedig **csak kurbli**: a készülék a saját emlékezetéből indul |
 | `js/csere/tablaKulcs.js` | ⭐⭐ **a TÁBLA-KULCS**: a készülék neve a táblán és a kötések azonosítója — ⛔ **soha nem az azonosságod** (D6). Két kulcspár: Ed25519 (a rekesz neve, ez ír alá) és X25519 (ebből lesz a társankénti közös titok, **küldés nélkül**) |
@@ -234,7 +234,7 @@ Az eredmények: [`meres/eredmenyek.md`](meres/eredmenyek.md).
 | `js/allapot/szerkesztesiVegrehajtas.js` | **a harmadik fázis**: az elfogadott szerkesztési egyezmények rávezetése az entitásokra (módosítás · áthelyezés · törlés · egyesítés · különválás) |
 | `js/allapot/pakli.js` | ⛔ **egy oldalnyi kártya, soha nem az egész** (5.2): korlátos `darab`, kulcs-alapú kurzor, horgony a lapozáshoz |
 | `js/allapot/felszabaditas.js` | az elakadt tudatpontok visszavétele — **bulikban mérve**, nem időben, és a láncok vége a bizonyíték |
-| `js/felulet/kapu.js` | a **helyi kapu** a böngészőnek (5.1) — öt őr, és ⛔ **semmit nem tud a koinóról** (7. szabály) |
+| `js/felulet/kapu.js` | a **helyi kapu** a böngészőnek (5.1) — öt őr, és ⛔ **semmit nem tud a koinoról** (7. szabály) |
 | `js/muveletek.js` | a **tizenhat** művelet — mindegyik: lánc vége → aláírt esemény → mentés |
 | `koino.js` | a parancssori arc |
 

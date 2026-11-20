@@ -379,7 +379,7 @@ proba('⛔⛔ A TÚL NAGY TEST elakad — a memória nem tölthető meg', () => 
 // A kérés teste darabokban érkezik, és egy darab BÁRMELYIK bájtnál végződhet. Az „ű" UTF-8-ban
 // két bájt: ha a határ a kettő közé esik, és a kapu darabonként alakít szöveggé, mindkét fele
 // „�" lesz. ⚠️ Mérve: „Árvíztűrő" → „Árvízt��rő" — és ez a szöveg a kulcsommal aláírt
-// eseménybe kerülne, onnan pedig mindenkihez. *Egy magyar nyelvű koinóban ez nem kivétel.*
+// eseménybe kerülne, onnan pedig mindenkihez. *Egy magyar nyelvű koinoban ez nem kivétel.*
 //
 // ⭐ A próba a határt SZÁNDÉKOSAN a két bájt közé teszi: két külön írás, köztük szünet.
 // ⚠️ Rontás-próba: a régi `nyers += darab` alakkal ez a próba bukik (kipróbálva).
@@ -496,7 +496,7 @@ proba('⛔ Jelszó-mentes lista NÉLKÜL minden /api/ zárva marad (ez az alapé
 // mit kellett a P2P miatt átírni. ⭐ **NÉGY fájl, több ezer sor örökölt kód mellett.**
 const SZANDEKOSAN_MAS = [
   'utils/apiHelper.js',        // JWT → a helyi kapu jelszava (D15)
-  'utils/authHelper.js',       // a koinóban nincs bejelentkezés (D15)
+  'utils/authHelper.js',       // a koinoban nincs bejelentkezés (D15)
   'components/kartya/kartyaGyar.js'                  // 5.3: nincs Kategória/GondolatTípus… (majd lett)
 ];
 // ⭐ HÁROM FÁJL — és a `FeltoltesKezelo` 2026-09-12-óta MÁR NEM köztük van: a fájl-réteg

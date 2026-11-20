@@ -8,14 +8,14 @@
 # ⭐ A program szerkezete nem változik (CS5 (A): két külön folyamat, a felület nem indít őrjáratot) — ez csak a telefonos
 # indítás kényelme: a `koino` parancs (a `telepit.sh` teszi a Termux PATH-jára) ezt hívja.
 #
-# ⭐ HA MÉG NINCS KOINÓ: csak a felület indul; a lapon csatlakozol egy koinóhoz („🔗 Csatlakozás egy koinóhoz…”, a felület
-# saját becenevével), és amint a becenév a koinó nevére mutat, az őrjárat magától elindul. ⚠️ Előbb nem: a jegyzetlen
-# becenévvel az őrjárat egy üres, régi alakú koinót nyitna (a ⑦ terepi próba 2. lelete).
+# ⭐ HA MÉG NINCS KOINO: csak a felület indul; a lapon csatlakozol egy koinohoz („🔗 Csatlakozás egy koinohoz…”, a felület
+# saját becenevével), és amint a becenév a koino nevére mutat, az őrjárat magától elindul. ⚠️ Előbb nem: a jegyzetlen
+# becenévvel az őrjárat egy üres, régi alakú koinot nyitna (a ⑦ terepi próba 2. lelete).
 #
 # ⭐ ARGUMENTUMMAL a program parancsa fut, ugyanazzal az adat-mappával: `koino belep`, `koino meghiv <horgony>`, `koino ter`.
 # ⭐ `koino lap`: a futó program lapja (a címe a felület naplójából — egy csere után is), megnyitva.
 # ⭐⭐ D122: ha az első argumentum egy MEGHÍVÓ (`koino-meghivo:2:…` — a meghívó telepítő sorának vége), előbb elfogadja (csatlakozás,
-# a meghívó készüléke társnak, belépés), aztán indul: a lap már a koinóban nyílik, és a következő csere után tag vagy.
+# a meghívó készüléke társnak, belépés), aztán indul: a lap már a koinoban nyílik, és a következő csere után tag vagy.
 #
 # Beállítható (környezet): KOINO_ADAT (alapból ~/koino-adat), KOINO_AZONOSITO (a becenév, alapból sajat), KOINO_ORJARAT_PORT
 # (7373), KOINO_FELULET_PORT (7499), KOINO_KOR (az őrjárat köre percben, 1).
@@ -76,7 +76,7 @@ if [ -n "$PAROSITO" ]; then
 fi
 if [ -n "$MEGHIVO" ]; then
   echo "· A meghívó: csatlakozás és belépés…"
-  node "$PROGRAM" csatlakoz "$MEGHIVO"     || echo "⚠ A meghívót most nem sikerült elfogadni — a lapon is beillesztheted („🔗 Csatlakozás egy koinóhoz…”)."
+  node "$PROGRAM" csatlakoz "$MEGHIVO"     || echo "⚠ A meghívót most nem sikerült elfogadni — a lapon is beillesztheted („🔗 Csatlakozás egy koinohoz…”)."
 fi
 NAPLO_ORJARAT="$KOINO_ADAT/orjarat.log"
 NAPLO_FELULET="$KOINO_ADAT/felulet.log"
@@ -96,7 +96,7 @@ leallitas() {
 }
 trap 'leallitas 0' INT TERM
 
-# Van-e már koinó a becenév alatt? (a `koino`, a `csatlakoz` és a lap csatlakozása jegyzi — `becenevek.json`)
+# Van-e már koino a becenév alatt? (a `koino`, a `csatlakoz` és a lap csatlakozása jegyzi — `becenevek.json`)
 van_koino() {
   grep -q "\"$BECENEV\"" "$KOINO_ADAT/becenevek.json" 2>/dev/null
 }
@@ -133,7 +133,7 @@ command -v termux-open-url >/dev/null 2>&1 && termux-open-url "$CIM"
 if van_koino; then
   orjarat_indul
 else
-  echo "· Még nincs koinód: a lapon csatlakozz egyhez („🔗 Csatlakozás egy koinóhoz…”) — az őrjárat utána magától indul."
+  echo "· Még nincs koinod: a lapon csatlakozz egyhez („🔗 Csatlakozás egy koinohoz…”) — az őrjárat utána magától indul."
 fi
 echo "Leállítás: Ctrl+C"
 

@@ -126,7 +126,7 @@ export function kovetkezoKeres(eddigiMeret) {
  *
  * ⛔ A 9. szabály kérdése („mit csinál egymilliárdnál?"): a szeletszám fájlonként korlátos
  * (2 MB / 64 KB = 32), de a **források számának is** felülről korlátosnak kell lennie —
- * különben egy nagy koinóban egyetlen fájlért száz kapcsolat nyílna. ⚠️ A 29. mérés szerint
+ * különben egy nagy koinoban egyetlen fájlért száz kapcsolat nyílna. ⚠️ A 29. mérés szerint
  * a haszon 5 forrásig még nőtt (×2,6), de laposodik: a `3` a `EGYIDEJU_ATVITEL`-lel is
  * összhangban van. *Nem állapot-befolyásoló állandó (D66): szabadon hangolható.*
  */
@@ -408,7 +408,7 @@ export function szeletEllenorzes(kertEltolas, eltolas, hossz, korlat) {
 //      *a védekezés elvágná az utat az adathoz, amit védeni akar.*
 //
 // ⚠️ A jegyzet **helyi megfigyelés, nem esemény** (3. szabály): sosem terjed, és semmit
-// nem dönt el a koinóban — csak azt, hogy MI kitől kérünk legközelebb.
+// nem dönt el a koinoban — csak azt, hogy MI kitől kérünk legközelebb.
 
 /**
  * Kiket válasszunk ehhez a fájlhoz — a bukott forrásokat kerülve, ha van kit helyettük.

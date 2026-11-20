@@ -7,13 +7,13 @@
 # ⭐ A program szerkezete nem változik (CS5 (A): két külön folyamat, a felület nem indít őrjáratot) — ez csak a windowsos indítás
 # kényelme.
 #
-# ⭐ HA MÉG NINCS KOINÓ: csak a felület indul; a lapon csatlakozol egy koinóhoz („🔗 Csatlakozás egy koinóhoz…”), és amint a becenév
-# a koinó nevére mutat, az őrjárat magától elindul. ⚠️ Előbb nem: a jegyzetlen becenévvel az őrjárat egy üres, régi alakú koinót
+# ⭐ HA MÉG NINCS KOINO: csak a felület indul; a lapon csatlakozol egy koinohoz („🔗 Csatlakozás egy koinohoz…”), és amint a becenév
+# a koino nevére mutat, az őrjárat magától elindul. ⚠️ Előbb nem: a jegyzetlen becenévvel az őrjárat egy üres, régi alakú koinot
 # nyitna (a ⑦ terepi próba 2. lelete).
 #
 # ⭐ ARGUMENTUMMAL a program parancsa fut, ugyanazzal az adat-mappával: `koino.cmd belep`, `koino.cmd ter`.
 # ⭐⭐ D122: ha az első argumentum egy MEGHÍVÓ (`koino-meghivo:2:…` — a windowsos telepítő sor vége), előbb elfogadja (csatlakozás, a
-# meghívó készüléke társnak, belépés), aztán indul: a lap már a koinóban nyílik, és a következő csere után tag vagy.
+# meghívó készüléke társnak, belépés), aztán indul: a lap már a koinoban nyílik, és a következő csere után tag vagy.
 #
 # ⭐ A két folyamat UGYANABBAN a konzolban fut (`-NoNewWindow`): a Ctrl+C és az ablak bezárása őket is leállítja — egy rejtett
 # ablakban indított folyamat bezáráskor tovább futna, és a következő indítás foglalt portot találna.
@@ -77,7 +77,7 @@ if ($meghivo) {
   Write-Host '· A meghívó: csatlakozás és belépés…'
   & $NODE $PROGRAM csatlakoz $meghivo
   if ($LASTEXITCODE -ne 0) {
-    Write-Host '⚠ A meghívót most nem sikerült elfogadni — a lapon is beillesztheted („🔗 Csatlakozás egy koinóhoz…”).'
+    Write-Host '⚠ A meghívót most nem sikerült elfogadni — a lapon is beillesztheted („🔗 Csatlakozás egy koinohoz…”).'
   }
 }
 
@@ -99,7 +99,7 @@ function NaploVege([string]$nev) {
   }
 }
 
-# Van-e már koinó a becenév alatt? (a `koino`, a `csatlakoz` és a lap csatlakozása jegyzi — `becenevek.json`)
+# Van-e már koino a becenév alatt? (a `koino`, a `csatlakoz` és a lap csatlakozása jegyzi — `becenevek.json`)
 function VanKoino {
   $f = Join-Path $env:KOINO_ADAT 'becenevek.json'
   if (-not (Test-Path $f)) { return $false }
@@ -138,7 +138,7 @@ try {
   if (VanKoino) {
     $orjarat = OrjaratIndul
   } else {
-    Write-Host '· Még nincs koinód: a lapon csatlakozz egyhez („🔗 Csatlakozás egy koinóhoz…”) — az őrjárat utána magától indul.'
+    Write-Host '· Még nincs koinod: a lapon csatlakozz egyhez („🔗 Csatlakozás egy koinohoz…”) — az őrjárat utána magától indul.'
   }
   Write-Host 'Leállítás: Ctrl+C (vagy az ablak bezárása)'
 

@@ -10,7 +10,7 @@
 //
 // ⭐⭐ **A FELDERÍTÉS NEM KÍVÁN ÚJ ADATOT.** A gondolatok szövegében ott a kép-hivatkozás,
 // a besorolásokban az ikon — vagyis az **események már elmondják**, mely fájlok tartoznak
-// a koinóhoz. Ez a lap csak összeveti azzal, ami a lemezen megvan. *Az olcsó rész
+// a koinohoz. Ez a lap csak összeveti azzal, ami a lemezen megvan. *Az olcsó rész
 // (a hivatkozások) mondja meg, mire érdemes elindítani a drága részt (a bájtokat).*
 //
 // ===== ⛔⛔ ÉS A TUDATPONT ITT TÁROLÁSI VÁLLALÁS (D3) =====
@@ -45,7 +45,7 @@ const HIVATKOZAS = /^\/api\/fajl\/([A-Za-z0-9_-]{43})$/;
 // jegyzéke) mindig, egy fájl (kép, csatolmány) a határig — a nagyobbat a letöltő az első szeletnél felismeri (`teljes`),
 // megáll, és a méretét megjegyezzük; a kártya kód-csomagja EGY elem (a fájljai egyenként kicsik — a határ így nem fogná meg
 // őket): csak a vállalónak és a kérőnek. Amit kértek (a „kattintás”), az határ nélkül jön; amire pontot tettem, az is.
-// ⚠️ Helyi mennyiség: a koinóban semmiről nem dönt (D66), csak arról, mit hoz el a készülék magától — később a beállításokban.
+// ⚠️ Helyi mennyiség: a koinoban semmiről nem dönt (D66), csak arról, mit hoz el a készülék magától — később a beállításokban.
 
 /** A határ (bájt) — e fölött egy nem vállalt elem csak kérésre jön. */
 export const TORZS_HATAR = 1024 * 1024;

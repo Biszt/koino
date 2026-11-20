@@ -43,7 +43,7 @@ async function keszulek(kulcs = null) {
   return { koino: KOINO, kulcspar, szerzo, tar, darabTar: fajlBlobTarolo(KOINO, mappa), lancTarolo: lancTarolo(KOINO, mappa) };
 }
 
-/** A szerző becsületes élete: koinó, két gondolat, pontok. */
+/** A szerző becsületes élete: koino, két gondolat, pontok. */
 async function elet(k) {
   await koinoLetrehozasa(k, 'Lánc-ellenőrzés');
   const g1 = await gondolatLetrehozasa(k, { cim: 'Első' });

@@ -194,7 +194,7 @@ proba('⭐ A nála LÁTOTT elágazást CÉLZOTTAN kérjük el (a bizonyíték ol
     await allasOsszeallitasa(tudja, KOINO)
   );
   // ⚠️ CSAK a 3-ast kéri, és épp ez a lényeg. Az elágazásról az ujjlenyomat-tartalék is
-  // tudomást szerezne — de az a TELJES láncot kérné el. Egy 10 000 eseményes koinóban ez
+  // tudomást szerezne — de az a TELJES láncot kérné el. Egy 10 000 eseményes koinoban ez
   // a különbség egyetlen esemény és az egész lánc újratöltése között.
   return kertek(kerelem, anna.keszulek).join(',') === '3';
 });
@@ -413,7 +413,7 @@ proba('A LEMARADT fél egy körben behozza a hátrányát', async () => {
 
 proba('⭐ Az ELŐRÉBB TARTÓ fél nem kér vissza fölöslegesen', async () => {
   // Aki hosszabb láncot ismer, annak az ujjlenyomat-eltérés MAGÁTÓL ÉRTETŐDŐ — nem szabad
-  // emiatt visszakérnie az egész láncot, amit már tud. Egy 10 000 eseményes koinóban ez
+  // emiatt visszakérnie az egész láncot, amit már tud. Egy 10 000 eseményes koinoban ez
   // különbség a „pár bájt" és a „töltsük le újra az egészet" között.
   const anna = await ujEember(KOINO);
   const esemenyek = await lanc(anna, 10);
@@ -769,13 +769,13 @@ proba('⛔⛔ A KI NEM MONDHATÓ SZELET (az entitas nem 43 jeles) nem akasztja m
 //
 //   · az eseményei BEKERÜLTEK a mappánkba (az állapotot nem rontották el, mert a
 //     `koinoEsemenyei` szűr — de ott ültek, és egy hazug fél így tölthetné a lemezünket),
-//   · és mivel az ÁLLÁS mindig csak a saját koinóra készül, a két lenyomat SOSEM
+//   · és mivel az ÁLLÁS mindig csak a saját koinora készül, a két lenyomat SOSEM
 //     konvergált: a csere a kör-korlátig pörgött, ugyanazt küldve újra. Mérve: 17,2 KB.
 //
-// A javítás két rétegű, szándékosan: a LENYOMAT megmondja, melyik koinóról beszélünk
+// A javítás két rétegű, szándékosan: a LENYOMAT megmondja, melyik koinoról beszélünk
 // (ez az ŐSZINTE tévedést fogja meg), a beolvasztás pedig szűr (ez a HAZUGOT).
 
-/** Külön tár egy MÁSIK koinónak — ugyanabban az eldobható mappa-rendszerben. */
+/** Külön tár egy MÁSIK koinonak — ugyanabban az eldobható mappa-rendszerben. */
 async function ujTarMasKoinonak(masKoino) {
   const mappa = await mkdtemp(join(tmpdir(), 'koino-csere-'));
   mappak.push(mappa);
@@ -829,11 +829,11 @@ proba('⛔ a társ nyitása a nyitó lenyomat számítása KÖZBEN érkezik — 
   }
 });
 
-proba('⭐ D119 (③): a társ családja a nyitásából — a nyitott koinója és a „cs” lista; a régi és a hibás nyitás nem család', () => {
+proba('⭐ D119 (③): a társ családja a nyitásából — a nyitott koinoja és a „cs” lista; a régi és a hibás nyitás nem család', () => {
   const k1 = 'A'.repeat(43), k2 = 'B'.repeat(43), k3 = 'C'.repeat(43);
   const jo = csaladNyitasbol({ uzenet: 'NYITAS', koino: k1, cs: [k2, k3, k2] });
   const ures = csaladNyitasbol({ uzenet: 'NYITAS', koino: k1, cs: [] });
-  return JSON.stringify(jo) === JSON.stringify([k1, k2, k3])   // a nyitott koinó is benne (a két fél így ugyanazt számolja)
+  return JSON.stringify(jo) === JSON.stringify([k1, k2, k3])   // a nyitott koino is benne (a két fél így ugyanazt számolja)
     && JSON.stringify(ures) === JSON.stringify([k1])
     && csaladNyitasbol({ uzenet: 'NYITAS', koino: k1 }) === null                              // a régi program: nincs család
     && csaladNyitasbol({ uzenet: 'NYITAS', koino: k1, cs: 'x' }) === null
@@ -863,7 +863,7 @@ proba('⭐ A MAPPA is tiszta marad — nem csak a számított állapot', async (
 
 proba('⭐ A HAZUG fél ellen is véd: idegen koino eseményét a beolvasztás kiszűri', async () => {
   // A protokoll eleji egyeztetés az ŐSZINTE tévedést fogja meg — de aki HAZUDIK
-  // (a mi koinónkat mondja, és mást küld), azt csak ez a réteg állítja meg.
+  // (a mi koinonkat mondja, és mást küld), azt csak ez a réteg állítja meg.
   const tar = await ujTar();
   const anna = await ujEember(KOINO);
   const bela = await ujEember('idegen-koino');
@@ -880,7 +880,7 @@ proba('⭐ A HAZUG fél ellen is véd: idegen koino eseményét a beolvasztás k
 
 // ===== A PAJZSFÚRÓ (E. lépés) =====
 //
-// ⚠️ Ez SZÁLLÍTÁS, nem protokoll — a `pajzsfuro.js` semmit nem tud a koinóról. Itt csak
+// ⚠️ Ez SZÁLLÍTÁS, nem protokoll — a `pajzsfuro.js` semmit nem tud a koinoról. Itt csak
 // azt mérjük, hogy a kopogás működik-e: két példány egymásra talál-e, és megkülönbözteti-e
 // a fél sikert (csak az egyik irány) a teljestől.
 
@@ -1039,7 +1039,7 @@ proba('⭐ A rossz UDP-címeket eldobjuk, és MÁSOKÉBÓL legfeljebb HÁRMAT hi
 proba('⭐⭐ A TÜKÖR: a másik megmondja, milyen címről lát minket', async () => {
   // ⭐ EZ VÁLTJA KI A STUN-T. IPv4-en a router átírja a portot, tehát a készülék nem
   // ismeri a saját külső címét — enélkül nem tudja megmondani, hova kopogjanak neki.
-  // A koinóban nem kell hozzá szolgáltatás: akivel beszélünk, az látja, és visszamondja.
+  // A koinoban nem kell hozzá szolgáltatás: akivel beszélünk, az látja, és visszamondja.
   const anna = await ujEember(KOINO);
   const egyik = await ujTar(); await ment(egyik, await lanc(anna, 2));
   const masik = await ujTar();
@@ -1854,13 +1854,13 @@ proba('⭐ A UDP-résen is megvan a TÜKÖR és a CÍMJEGYZÉK', async () => {
 // csak címeket szerez. Ezért a bizalom-kérdés itt fel sem merül — de a szűrés igen: ki
 // tartozik ide, mi a saját visszhangunk, és mi a szemét.
 
-proba('A kiáltás alakja: apró és unalmas (a koinó rejtett jele, port, jel)', () => {
+proba('A kiáltás alakja: apró és unalmas (a koino rejtett jele, port, jel)', () => {
   const u = JSON.parse(felfedezoUzenet('KOPOGOK', 'proba', 7373, 'abc123'));
   return u.mi === 'KOPOGOK' && typeof u.k === 'string' && u.port === 7373 && u.jel === 'abc123'
     && Object.keys(u).length === 4;           // semmi több nem szivárog ki rólunk
 });
 
-proba('⭐⭐ D89/7: A KOINÓ AZONOSÍTÓJA NEM HANGZIK EL a wifin — és a rejtett jel kiáltásonként más', () => {
+proba('⭐⭐ D89/7: A KOINO AZONOSÍTÓJA NEM HANGZIK EL a wifin — és a rejtett jel kiáltásonként más', () => {
   const koino = 'zart-csaladi-koino-azonosito';
   const egy = felfedezoUzenet('KOPOGOK', koino, 7373, 'jel-1');
   const ketto = felfedezoUzenet('KOPOGOK', koino, 7373, 'jel-2');
@@ -2113,7 +2113,7 @@ proba('⭐⭐ D85: a javaslat és a szavazat a SAJÁT szeletében — és az ér
 
   // ⭐ A VONALON: a másik készülék csak a második gondolat szeletét kéri.
   const kero = await ujTar();
-  // ⭐⭐ D128: a koinó születése minden tagnál megvan (azzal lépett be) — és az alapító készülékének tanúsítványát is hozza.
+  // ⭐⭐ D128: a koino születése minden tagnál megvan (azzal lépett be) — és az alapító készülékének tanúsítványát is hozza.
   await esemenyMentese(kero, szuletes);
   await szeletResen(szolgalo, kero, g2.azonosito);
   const nala = (await koinoEsemenyei(kero, KOINO)).map((e) => e.azonosito);
@@ -2364,7 +2364,7 @@ proba('⭐⭐⭐ EGY FÁJL HÁROM FORRÁSBÓL ÁLL ÖSSZE — bájtra azonosan, 
     const { fajlBlobTarolo } = await import('../js/tar/fajlTar.js');
     const { ujMunkamegosztas, SZELET_MERET } = await import('../js/csere/fajlAtvitel.js');
 
-    // ⭐ UGYANAZ A FÁJL HÁROM KÉSZÜLÉKEN — a koinóban ez a szokásos: a lenyomat a név,
+    // ⭐ UGYANAZ A FÁJL HÁROM KÉSZÜLÉKEN — a koinoban ez a szokásos: a lenyomat a név,
     // tehát ugyanaz a tartalom mindenkinél ugyanazt az azonosítót kapja.
     const tartalom = new Uint8Array(6 * SZELET_MERET);
     for (let i = 0; i < tartalom.length; i++) tartalom[i] = (i * 7) % 251;

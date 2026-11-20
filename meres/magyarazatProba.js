@@ -4,7 +4,7 @@
 //   · a FÁJLOKBAN (gyors, minden helyre): minden ⓘ-hely címének darabjai — az osztály- és azonosító-nevek, a választó értékei, és a
 //     felirat, amiről a hely a gombot / az ablakot felismeri — ott vannak a felület programjában (a `koinoMagyarazat.js`-en és a
 //     stíluslapokon kívül). ⛔ Ha valaki egy elemet átnevez, az ⓘ némán eltűnne a lapról (nincs hibaüzenet) — ez a próba megfogja;
-//   · a VALÓDI LAPON (fej nélküli Chrome-mal, mint a nézet-próba — csomag nélkül, a Node beépített WebSocketjével): egy friss koinó
+//   · a VALÓDI LAPON (fej nélküli Chrome-mal, mint a nézet-próba — csomag nélkül, a Node beépített WebSocketjével): egy friss koino
 //     felületén az ⓘ ténylegesen kikerül (az alsó sáv, az állapot-sor, a kártya, a fő menü és a kártya menüje — a kettő nem keveredik,
 //     a Keresés ablakának címe), a buborék a program szövegével nyílik, és az ⓘ kattintása a menüpontot NEM indítja el. ⛔ Kézzel már
 //     volt ilyen hiba: a figyelő egy háttérfülön beragadt, és a menü ⓘ-i ki sem kerültek (④a). Ha nincs Chrome a gépen, kimarad.

@@ -115,8 +115,8 @@ törésébe került). A dátum a kódban áll (a jegyzékben); a lap 30 nappal e
 
 ## 6. Amit ez nem old meg (kimondott határok)
 
-- **A számítás magjának változását** — az költözés (D118), nem nyelvváltozat. A nyelvváltozat a koinótól független (a készüléké): két
-  koinó ugyanazon a nyelven beszél (a családi csere) — ezért nem lehet a mag része (PR6 (C) — elvetve).
+- **A számítás magjának változását** — az költözés (D118), nem nyelvváltozat. A nyelvváltozat a koinotól független (a készüléké): két
+  koino ugyanazon a nyelven beszél (a családi csere) — ezért nem lehet a mag része (PR6 (C) — elvetve).
 - **A rossz órát:** ha egy készülék órája rossz, a dátum korábban vagy később zár. A jelzés kimondja a dátumot — az e-ember látja.
 - **A biztonsági zárást:** ha egy régi nyelvben hiba van, a dátum előtt is le lehet zárni — de csak kimondva, a kiadásban.
 - **A régi kód árát:** a régi nyelv ideig-óráig kód marad (fordító, régi számítás) — a dátumig. Ezért a gyűjtés (⑦).
@@ -192,7 +192,7 @@ mindegyikben néznek (a legújabbtól); a válaszoló a hallott alakban felel; a
 telepítő sor a legújabb programot hozza), de a dátumig a régit is olvassa. ⭐ **Ahol a régi olvasó lát, ott kimondja**: a mai
 olvasó a más alakú kiáltást (`ujabb-alak` / `regebbi-alak`) és a más számú meghívót az iránnyal nevezi meg — ⛔ az építés
 lelete: eddig minden más számú meghívóra a „régi alakú — kérj újat” állt, egy újabb programmal kiadottra is (fordítva), és a
-régi kiáltás-olvasó a más számú kiáltást csendben „másik koinónak” veszi; a `koino` parancs kimondja a kiírt alakokat. ⚠️ A
+régi kiáltás-olvasó a más számú kiáltást csendben „másik koinonak” veszi; a `koino` parancs kimondja a kiírt alakokat. ⚠️ A
 rekeszeknél és a témáknál a régi olvasó nem lát semmit (más helyen keres) — ezért kell az átmenet; a lejárt lépés után a régi és
 az új egymást nem találja meg (kimondott határ — a lap a ⑦ dátumát a nyelvnél mondja). ⚠️ Ára: az átmenet alatt a DHT-kiírás
 kétszer megy. A próba egy kitalált következővel (`KOINO_PROBAALAK` — csak a számában más): `nyelvProba.js` +4 (a régi program

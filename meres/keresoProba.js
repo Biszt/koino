@@ -163,7 +163,7 @@ proba('⭐ a régió mélységének becslése a saját régióból ugyanaz, mint
     && keresoMelysegBecslese(helyek.slice(0, 100), sajat).melyseg === 0;
 });
 
-proba('a régió témája vakított (a koinó a só), és nem azonos a gyökér-darab témájával', () =>
+proba('a régió témája vakított (a koino a só), és nem azonos a gyökér-darab témájával', () =>
   keresoRegioTemaja('k1', 3, 5n).length === 20 && !keresoRegioTemaja('k1', 3, 5n).equals(keresoRegioTemaja('k2', 3, 5n))
   && !keresoRegioTemaja('k1', 3, 5n).equals(gyokerDarabTemaja('k1', 3, 5n))
   && keresoRegioTemaja('k1', 3, 5n).equals(keresoRegioTemaja('k1', 3, 5)));

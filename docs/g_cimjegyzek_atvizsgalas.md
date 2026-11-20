@@ -9,11 +9,11 @@ irodalom, a jelöltek, egy javaslat, és a mérések, amik a döntés után az �
 
 ## 1. Mit kell tudnia — a követelmények (a meglévő döntésekből)
 
-1. **A „végtelen” (9. szabály):** egy készülék terhe ne a koinó méretétől függjön, hanem a saját vállalásától;
+1. **A „végtelen” (9. szabály):** egy készülék terhe ne a koino méretétől függjön, hanem a saját vállalásától;
    ahol elkerülhetetlen (egy keresés), legfeljebb logaritmikusan nőjön.
-2. **A zárt koinó (D89/2):** a címjegyzéke nem kerülhet olyan nyilvános helyre, ahonnan kívülálló kiolvashatja,
+2. **A zárt koino (D89/2):** a címjegyzéke nem kerülhet olyan nyilvános helyre, ahonnan kívülálló kiolvashatja,
    kik a résztvevői.
-3. **Elhagyható (2. szabály, 5.7):** ha a G nem működik, a koinó működik — a csere, a döntés, a bejárás nem függhet
+3. **Elhagyható (2. szabály, 5.7):** ha a G nem működik, a koino működik — a csere, a döntés, a bejárás nem függhet
    tőle. *Ami dönt, ne kívánjon élő lekérdezést; csak a megtalálás kívánhat.*
 4. **Bizalom nem jár vele (3. szabály, 4.2):** a cím nem esemény; a hamis cím elérhetetlenséget okoz, nem hamisítást.
 5. **Név nélkül (SK2, D6):** a bejegyzés egy készülék-azonosító (tábla-aláíró) és egy utolsó cím — a személyhez
@@ -44,12 +44,12 @@ csak TAKARÉKOSAN jöhet szóba: kevés, ritka hirdetésre, és igény szerinti 
   ⚠️ Klasszikus gyengéje: bárki sok azonosítót vehet fel, és odaállhat egy célkulcs mellé (Sybil).
 - **IPFS (libp2p Kademlia, „provider record”):** minden blokk meghirdetése a nagy tárolóknál nem skálázik (a
   „reprovide” gondja) — a gyakorlat az, hogy csak a gyökereket hirdetik, a többit a gyökérből bejárják. ⭐ Ez
-  pontosan a koinó fája: **hirdess keveset, járd be a többit.**
+  pontosan a koino fája: **hirdess keveset, járd be a többit.**
 - **Hypercore / Hyperswarm:** a téma (topic) egy titok lenyomata — aki nem ismeri a titkot, nem tudja kiszámolni, hol
-  keresse; a DHT-n csak a lenyomat látszik. ⭐ Ez a zárt koinó mintája: **a koinó azonosítója a só.**
+  keresse; a DHT-n csak a lenyomat látszik. ⭐ Ez a zárt koino mintája: **a koino azonosítója a só.**
 - **Whānau (2010), a Freenet „darknet” módja:** a társas gráfra épített, Sybil-ellenálló útvonalválasztás (véletlen
   séták). Erős, de bonyolult kód, és a társas hubokra torlódik — a skálázási terv 5.3 ezért javasolt középutat.
-- **Scuttlebutt, Briar:** csak a barátok között terjed, nincs globális megtalálás — a koinó kötés-hálója és a
+- **Scuttlebutt, Briar:** csak a barátok között terjed, nincs globális megtalálás — a koino kötés-hálója és a
   „kitől kaptam” ehhez a családhoz tartozik.
 
 ## 4. A jelöltek
@@ -58,17 +58,17 @@ csak TAKARÉKOSAN jöhet szóba: kevés, ritka hirdetésre, és igény szerinti 
 (a `hozd`, a D kérelme vagy a csere) — tehát ismer legalább egy tartót. A tartók a szelet cseréjekor egymás tábla-
 aláíróját és utolsó címét is átadják (a `CIMEK` mintájára, szeletenként korlátos listában, név nélkül), és a szülő
 tartói a gyerekek születésével együtt néhány tartójuk aláíróját is ismerik — a böngészés így a fa bejárása, minden
-lépés megadja a következő lépés címeit. ⭐ Mind a titkosított cserén belül (a zárt koinó semmit nem tesz nyilvános
+lépés megadja a következő lépés címeit. ⭐ Mind a titkosított cserén belül (a zárt koino semmit nem tesz nyilvános
 helyre), a terhe a saját vállalással arányos. ⚠️ Ami hiányzik belőle: a **gyökér** (a legfelső szinthez nincs
 szülő), és a **közvetlen keresés azonosító alapján**, ha nincs fa-út (egy hivatkozásból).
 
-**C2 — HASH-DHT A KOINÓ SAJÁT KÉSZÜLÉKEIN (belső Kademlia).** Minden készüléknek koinón belüli azonosítója és
+**C2 — HASH-DHT A KOINO SAJÁT KÉSZÜLÉKEIN (belső Kademlia).** Minden készüléknek koino-n belüli azonosítója és
 útvonal-táblája van (log N), a szelet lenyomata megmondja, mely készülékek őrzik a „ki tartja” bejegyzést. ⭐ Nem
 függ külső hálótól. ⚠️ Saját útvonal-tábla és karbantartás (több kód — 6. szabály), és a Sybil ellen az E kell
 (a tartó azonosítója a bizonyított identitásból jöjjön — 5.6).
 
-**C3 — A BITTORRENT-DHT, VAKÍTOTT TÉMÁVAL (BEP 5).** A téma `H(„koino-g” ‖ koinó-azonosító ‖ szelet)`: aki nem
-ismeri a koinó azonosítóját, nem tudja kiszámolni (a Hyperswarm mintája); a „ki tartja” bejegyzést a meglévő,
+**C3 — A BITTORRENT-DHT, VAKÍTOTT TÉMÁVAL (BEP 5).** A téma `H(„koino-g” ‖ koino-azonosító ‖ szelet)`: aki nem
+ismeri a koino azonosítóját, nem tudja kiszámolni (a Hyperswarm mintája); a „ki tartja” bejegyzést a meglévő,
 milliós háló őrzi. ⭐ Nincs saját útvonal-tábla, a DHT-kliens és a belépés már megvan (36.). ⚠️ Ára ~5–10 KB
 műveletenként, a hirdetés mulandó; a DHT-gépek látják, hogy egy IP egy (értelmezhetetlen) lenyomatot hirdet; és a
 háló nem a miénk (a 2. szabály szerint ezért cserélhető és elhagyható kell legyen — mint a tábla).
@@ -77,8 +77,8 @@ háló nem a miénk (a 2. szabály szerint ezért cserélhető és elhagyható k
 
 ## 5. A javaslat
 
-⭐ **A „mi kinél van” FŐ ÚTJA a C1 (a fa és a raj)** — mert a koinó fája maga az útvonal-gráf (4.2), a hirdetés a
-cserén belül marad (a zárt koinó is biztonságban), és a terhe a saját vállalással nő. ⭐ **A hash-elhelyezés CSAK két
+⭐ **A „mi kinél van” FŐ ÚTJA a C1 (a fa és a raj)** — mert a koino fája maga az útvonal-gráf (4.2), a hirdetés a
+cserén belül marad (a zárt koino is biztonságban), és a terhe a saját vállalással nő. ⭐ **A hash-elhelyezés CSAK két
 helyen kell:** (1) a **gyökér darabjai** (D90 — egy készülék a saját lenyomata szerint néhány darabért felel, és
 azokat hirdeti), (2) a **közvetlen keresés azonosító alapján** (gyorsító, elhagyható). Így a DHT-forgalom
 készülékenként néhány hirdetés, és igény szerinti keresés — nem szeletenkénti.

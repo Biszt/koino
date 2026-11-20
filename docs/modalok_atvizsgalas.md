@@ -39,7 +39,7 @@ hiányzik alóla, és melyik kérdés Csabáé.*
 **Tudatpontok** (a prototípusban 284 sor). A saját aktív pont-hozzárendeléseim listája (cím, típus, pont), fejlécben a
 szabad pont; sorra kattintva a pakli odaugrik, a „Módosítás” a meglévő `TudatpontModal`-t nyitja. Itt a forrás a SAJÁT
 láncom — a szigorú (b) alatt minden pozitív pontú szeletemet tartom (B/1), tehát a címek is megvannak. 🔍 *Egymilliárdnál?*
-A lista a saját tevékenységemmel nő (legfeljebb a keret, 10 000 tétel), nem a koinóval — rendben. Az ág-szűrés („csak X
+A lista a saját tevékenységemmel nő (legfeljebb a keret, 10 000 tétel), nem a koinoval — rendben. Az ág-szűrés („csak X
 ága alatt”) a felmenő-láncon dől el; ahol egy felmenő nincs meg, ott „nem eldönthető” (D19), és a ház útján elkérhető.
 
 **Kategória és gondolattípus létrehozása** (a `KategoriaModal` 467 sor, a fő menü `GondolatTipusModal`-ja 447 sor). A
@@ -62,7 +62,7 @@ megváltozik: a fa **a legerősebb ágaktól kifelé nő, egy keretig** (3. szak
 
 ⚠️ **Egy átvételi csapda:** a letöltő metódus nyers `fetch`-et használ (`Authorization: Bearer` fejléccel, a megszakítás
 miatt), nem az `apiGet`-et — ezt a lap fordítója nem látja, és a kapu sem fogadja el (az `X-Koino-Kulcs` fejlécet várja).
-Bájtra változatlan átvételnél vagy a kapu fogadja el a Bearer-alakot is (ugyanaz a jelszó), vagy a koinós alosztály írja
+Bájtra változatlan átvételnél vagy a kapu fogadja el a Bearer-alakot is (ugyanaz a jelszó), vagy a koinos alosztály írja
 felül a letöltést.
 
 **Síkidom nézet** (3439 sor + a `SikidomKartyaPanel` + kilenc `sikidom*.js` segéd, ~2850 sor). A legnagyobb darab — és a
@@ -79,10 +79,10 @@ nélkül, vagy elkérhető). ⭐ Csaba 2026-09-02-i mondata (SK10) épp ezt mond
 
 ### III. Ami alá új réteg kell
 
-**Keresés** (258 sor). Cím-részlet, típus-szűrő, legfeljebb 20 találat típusonként, ág-szűrve vagy az egész koinóban; a
+**Keresés** (258 sor). Cím-részlet, típus-szűrő, legfeljebb 20 találat típusonként, ág-szűrve vagy az egész koinoban; a
 találatra a pakli odaugrik. Két fele van:
 - A **helyi** fele megvan (`/api/kereses` — a két tár állapotában, amit a készülék tart vagy látott); az ág-szűrés a
-  felmenő-láncon jöhet, mint a Tudatpontoknál. 🔍 *Egymilliárdnál?* A készülék tudásával nő, nem a koinóval — rendben;
+  felmenő-láncon jöhet, mint a Tudatpontoknál. 🔍 *Egymilliárdnál?* A készülék tudásával nő, nem a koinoval — rendben;
   de egy friss tag szinte semmit nem talál.
 - A **hálózati** fele — „hol van, aminek a címében ez áll” — a **kereső-réteg** (`skalazas_terv.md` II. réteg, S8–S10;
   nyitott: SK7 a szelet-megtalálás, SK10 a láthatósági küszöb), ami még egyáltalán nincs. ⭐ A 2. szabály szerint
@@ -105,7 +105,7 @@ pontú szeletek és az azonosság-szelet). Ami ott van, arról minden fajta kisz
 bejelentve (D85/1), a gyerek születése a szülőnél, a döntés a lezárás után a számításból (D17), a határidő az óra szerint.
 Ami a tartott ágon **mélyebben** történik, az nem érkezik meg: a prototípus „(és leszármazottain)” öröklődése csak a
 tartott leszármazottakra teljesíthető. ⭐ A domain itt segít: a prototípus „passzív” szerepe épp a **figyelő** — *„csak
-figyeled az entitást és prioritást jelzel a tudatpontoddal”* (`SzerepValasztoModal`). A koinóban a figyelés eszköze a
+figyeled az entitást és prioritást jelzel a tudatpontoddal”* (`SzerepValasztoModal`). A koinoban a figyelés eszköze a
 tudatpont.
 
 ## 3. A közös alap, amit az átvizsgálás talált: a fa bejárása össz-pont szerint
@@ -114,10 +114,10 @@ tudatpont.
 negatívak — tehát egy gyerek össz-pontja sosem nagyobb a szülőjénél. Ebből következik, hogy **„az ág entitásai ágazati
 pont szerint csökkenően” legjobb-először bejárással kiszámolható**: a gyökértől (vagy X-től) indulva mindig a legnagyobb
 ismert össz-pontút vesszük ki, és a gyerekeit (a fejléc-kérdéssel) betesszük a sorba. Egy 20 kártyás oldal legfeljebb 20
-kibontás — a terhe az oldallal arányos, nem a koinóval.
+kibontás — a terhe az oldallal arányos, nem a koinoval.
 
 Ugyanez a bejáró hordozza:
-- a **lapos „ágazati pont” rendezést** — az egész koinóban (ma csak a helyben ismert részen fut, és semmit nem kér el) és
+- a **lapos „ágazati pont” rendezést** — az egész koinoban (ma csak a helyben ismert részen fut, és semmit nem kér el) és
   ág-szűrve (a Rendezés modál);
 - a **Struktúra** nézetet (ugyanez a sorrend, egy csomópont-keretig — a fa a legerősebb ágaktól kifelé nő);
 - a **Síkidomot** (a küszöb fölötti gyerekek — ott sor sem kell, csak a fejléc és a folytatása).
@@ -131,7 +131,7 @@ Ugyanez a bejáró hordozza:
    mérés kell a bejáró előtt (keret, kérelem-szám, körök), és ebből derül ki, kell-e több kulcsos kérelem.
 
 ⛔ **Ami NEM monoton, az így nem járható be:** az időrend, a saját (közvetlen) pont és a növekvő irány. Ezekhez egy ág
-(vagy az egész koinó) teljes listája kellene, vagy egy új részfa-összegző. A kettő közül az **idő-összegző nem jó**: az
+(vagy az egész koino) teljes listája kellene, vagy egy új részfa-összegző. A kettő közül az **idő-összegző nem jó**: az
 `ido` a szerző órája (az állapot-számítás ezért nem is erre építi a bemenet sorrendjét), és egy jövőbe állított óra a
 „legfrissebb” lista élére tűzné az ágát. A **darabszám-összegző** ellenőrizhető volna (ugyanúgy, mint az össz-pont:
 bemondás + minták), de ma semmi nem dönt rajta — a prototípusban egy figyelmeztetést szolgált („elkészíted?”).
@@ -151,7 +151,7 @@ felmenő nincs meg, ott „nem eldönthető” (D19) — egy helyen kell megírn
 - **(B) Mindhárom csak a helyben ismert részt mutatja**, semmit nem kér el. Egy friss tag Struktúrája és Síkidomja szinte
   üres maradna — ugyanaz a helyzet, ami a ház előtt a paklival volt.
 
-**M2. Ami nem monoton (az időrend, a saját pont, a növekvő irány — ág-szűrve és az egész koinóban), és a Struktúra
+**M2. Ami nem monoton (az időrend, a saját pont, a növekvő irány — ág-szűrve és az egész koinoban), és a Struktúra
 darabszáma.**
 
 - **(A) ⭐ A helyben ismert részből, kimondva, VÉGLEGES alakként — ezt javaslom.** A lista alján: „csak a készülékeden
@@ -183,10 +183,10 @@ darabszáma.**
 **M5. Az átvétel módja — a ház H3/A-ja szerint** (*„a felület öröklődik, nem rögtönzünk újat”*).
 
 - **(A) ⭐ A prototípus modáljai bájtra változatlanul jönnek át** (a Síkidomé a panellel és a segédeivel, a fő menü
-  `GondolatTipusModal`-ja is), a lap fordít (`kartyaAdat.js`, `apiHelper.js`), a koinós többlet alosztályba kerül (mint
+  `GondolatTipusModal`-ja is), a lap fordít (`kartyaAdat.js`, `apiHelper.js`), a koinos többlet alosztályba kerül (mint
   a `koinoPakli.js`), és a Struktúra nyers `fetch`-ét a kapu fogadja (a Bearer-alakot is elfogadja, ugyanazzal a
   jelszóval) — ezt javaslom.
-- **(B) Koinós átírások** ott, ahol a forma megváltozik (a Struktúránál).
+- **(B) Koinos átírások** ott, ahol a forma megváltozik (a Struktúránál).
 
 **M6. A fő menü.**
 
@@ -204,7 +204,7 @@ A függőségek szerint:
 1. **Az I. csoport:** a Tudatpontok (a saját láncból; az „X ága alatt van-e?” egy helyen), a besorolások létrehozása a
    kapun (a kép a feltöltésen át), a Rendezés modál (az ág-szűrt helyi módokkal), és a fő menü (M6).
 2. **A bejáró (M1):** előbb a mérés, aztán a fejléc folytatása (protokoll) és a legjobb-először bejáró a `pakli.js`-ben;
-   rá a lapos ágazati rendezés (az egész koinóban és ág-szűrve).
+   rá a lapos ágazati rendezés (az egész koinoban és ág-szűrve).
 3. **A Struktúra** — a bejárón, kerettel.
 4. **A Síkidom** — a fejlécen és a folytatásán, a küszöbbel.
 5. **A Keresés** — a helyi alj, ág-szűrve.
@@ -218,8 +218,8 @@ másik készülékről jönnek), a hosszan futót hosszan futó felülettel (D10
 
 *A D101/M1 szerint a bejáró előtt mérés: `meres/bejaroMeres.js`, a 74. mérés az `eredmenyek.md`-ben.*
 
-**Amit a mérés mondott.** Egy friss készüléken (a koinóból semmit nem tart) a mai menettel egy 20 kártyás oldal 80–114
-percig, egy 200 csomópontos Struktúra 6–8 óráig tart — és ez nem a koinó méretétől függ (N = 2000-től 200 000-ig
+**Amit a mérés mondott.** Egy friss készüléken (a koinoból semmit nem tart) a mai menettel egy 20 kártyás oldal 80–114
+percig, egy 200 csomópontos Struktúra 6–8 óráig tart — és ez nem a koino méretétől függ (N = 2000-től 200 000-ig
 ugyanaz), hanem a KÉRÉSENKÉNTI KÉSÉSTŐL (a NAT mögötti tartó a kopogtató témáját ~20 percenként nézi) szorozva a sorrend
 SZINTJEIVEL (egy csomópont gyerekei csak a kibontása után kérhetők). ⭐ A kapcsolatonkénti több kérelem NEM segít (a
 kérelmek úgyis más-más tartóhoz mennek). Ami segít: ha egy kérelemre több szint jön — a tartó maga jár be legjobb-először,
@@ -247,7 +247,7 @@ csak a nagy Struktúrát érinti (a 2000-esből 55–107 kimaradna).
 **J3. Több kérelem egy kapcsolaton?**
 
 - **(A) ⭐ Nem kell — ezt javaslom:** a mérés szerint nem ez a szűk keresztmetszet; a protokoll egyszerűbb marad.
-- **(B) Mégis** (egy kis koinóban, ahol kevés tartó van, segíthetne) — a mérés ezt nem igazolta.
+- **(B) Mégis** (egy kis koinoban, ahol kevés tartó van, segíthetne) — a mérés ezt nem igazolta.
 
 **J4. Kitől kérjen a bejáró?**
 
@@ -258,18 +258,18 @@ csak a nagy Struktúrát érinti (a 2000-esből 55–107 kimaradna).
 
 **A javasolt sorrend (a döntések után):** a fejléc-kérdés új alakja (J1 + a gyerekszám + a folytatás — egy protokoll-
 bővítés) → a bejáró a `pakli.js`-ben (a kérő oldal: a sor, az előre kérés a 64-es korlátig, a célválasztás — J4) → rá a
-lapos ágazati rendezés (az egész koinóban és ág-szűrve) → ③ Struktúra.
+lapos ágazati rendezés (az egész koinoban és ág-szűrve) → ③ Struktúra.
 
 **D102 (Csaba: „minden javaslatodat elfogadom”):** J1, J2, J4 (A) — megépült (a fázis-2 terv D102-e, elágazás 112–118).
 
 **⚠️ J3 ÚJRA (a 74. mérés pótlása, még aznap).** A „több kérelem egy kapcsolaton” változatot csak véletlen tartókkal mértem;
-ott valóban nem számít. De ha EGYETLEN jól ellátott tartó kapja a kérelmeket — a kis, családi koinó, ahol egy laptop
+ott valóban nem számít. De ha EGYETLEN jól ellátott tartó kapja a kérelmeket — a kis, családi koino, ahol egy laptop
 „mindent” tart (D22: a kis családi közösségeknek is P2P-nek kell lenniük) —, a kapcsolatonkénti 1 kérelem mindent sorba
 állít: egy oldal 1 kör helyett 6, egy 200-as Struktúra 2–3 perc helyett 46–85 perc (1 perces körrel).
 
 - **(A) ⭐ Egy kapcsolaton egy kérelem-SOROZAT — ezt javaslom most:** a kérő ugyanazon a védett résen egymás után több
   `KERELEM`-et küld (a társhoz illő függőket, legfeljebb 16-ot), a tartó egyenként kiszolgálja, a végén `KESZ`.
   Protokoll-bővítés (korlátos), a mai menet változatlan marad, ha csak egy kérelem van.
-- **(B) Marad 1 kérelem / kapcsolat** — egyszerűbb, de a családi koinóban a Struktúra percek helyett órák.
+- **(B) Marad 1 kérelem / kapcsolat** — egyszerűbb, de a családi koinoban a Struktúra percek helyett órák.
 
 ✅ **Csaba: „elfogadom a javaslatodat, legyen az (A)”** — megépült (a fázis-2 terv D102-e, elágazás 119).

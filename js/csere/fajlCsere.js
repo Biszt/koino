@@ -7,7 +7,7 @@
 // *„Legyen mindig kézi út. Minden automatikus cseréhez tartozzon fájlba mentés / fájlból
 // olvasás. **Ha egy funkció csak online tud működni, az fojtópont.**"*
 //
-// Eddig a koinónak volt TCP-cseréje, UDP-cseréje, lyukfúrása, postaládája és helyi
+// Eddig a koinonak volt TCP-cseréje, UDP-cseréje, lyukfúrása, postaládája és helyi
 // felfedezése — de ha egyik sem megy (lekapcsolt hálózat, tiltó wifi, más országban lévő
 // társ, vagy egyszerűen egy pendrive-nyi távolság), **nem volt parancs**, amivel az
 // eseményeket át lehetett volna vinni. A kézi út az adat-fájl kézi másolása volt: működött,
@@ -108,10 +108,10 @@ export async function kivitelSzovege(tar, koino, beallitas = {}) {
 
   } else if (hatokor === 'mind') {
     // ⚠️ EZ AZ EGYETLEN ÁG, AMI VÉGIGOLVASSA A TÁRAT — és ugyanazt a korlátot örökli, amit
-    // a `koinoEsemenyei` fejléce kimond. Kis koinónál ez a helyes és legegyszerűbb válasz
+    // a `koinoEsemenyei` fejléce kimond. Kis koinonál ez a helyes és legegyszerűbb válasz
     // („add ide az egészet, viszem"); nagyban a másik két hatókör a járható út.
     esemenyek = await koinoEsemenyei(tar, koino);
-    // ⭐⭐ D118 (②a): a koinó őseinek születése is utazik (a gyökértől, előre) — a túloldal kapuja a gyermek születését csak
+    // ⭐⭐ D118 (②a): a koino őseinek születése is utazik (a gyökértől, előre) — a túloldal kapuja a gyermek születését csak
     // a szülőével ellenőrizheti.
     if (azonositoAlaku(koino)) {
       const osok = (await szuletesLanc(tar, koino)).lanc.slice(1).reverse();
@@ -186,7 +186,7 @@ export async function kivitelSzovege(tar, koino, beallitas = {}) {
  * dobjuk el az egészet egy rossz sor miatt.*
  *
  * @param {Object} tar
- * @param {string} koino - CSAK ennek a koinónak az eseményeit vesszük be
+ * @param {string} koino - CSAK ennek a koinonak az eseményeit vesszük be
  * @param {string} szoveg
  * @returns {Promise<Object>} { sorok, uj, marMegvolt, idegen, elutasitva, elagazasok, hibasSorok }
  */

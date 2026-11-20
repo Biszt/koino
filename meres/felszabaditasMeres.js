@@ -77,7 +77,7 @@ function veletlenGenerator(mag) {
  */
 function lejatszas({ n, tarsak, kellBuli, alvasKorok, ebrenlet, korok, veletlen }) {
   // ----- A HÁLÓZAT -----
-  // Mindenkinek T véletlen társa. ⚠️ A társ-viszony a koinóban NEM kölcsönös (én felveszem
+  // Mindenkinek T véletlen társa. ⚠️ A társ-viszony a koinoban NEM kölcsönös (én felveszem
   // a te címedet, te nem feltétlenül az enyémet) — de a csere igen: ha én hívlak, mindketten
   // megkapjuk a másik újdonságait. Ezért a kapcsolatot kölcsönösként kezeljük a cserénél.
   const szomszedok = [];

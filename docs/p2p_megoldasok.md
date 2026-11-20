@@ -51,7 +51,7 @@ valamit, az **hézagként látszik**.
 | **Tailscale** | **DERP** továbbítók a cégnél, ha a közvetlen út nem áll össze | ⭐ **2025 óta „Peer Relay": a SAJÁT eszközeid is lehetnek továbbítók** |
 
 ⭐ A Tailscale fordulata fontos precedens: rájöttek, hogy a továbbítónak **nem kell a
-cégnél** lennie. Pontosan az az irány, ami a koinónak kell.
+cégnél** lennie. Pontosan az az irány, ami a koinonak kell.
 
 ### Amik közösségre támaszkodnak
 
@@ -59,7 +59,7 @@ cégnél** lennie. Pontosan az az irány, ami a koinónak kell.
 |---|---|---|
 | **BitTorrent** | DHT (elosztott címjegyzék) + lyukfúrás; **sok peer közül elég, ha néhány fogad** | a **sokaság** old meg mindent — kis közösségben nem működne |
 | **Bitcoin** | nyitott portos csomópontok + DNS-magok az induláshoz | a legtöbb felhasználó **csak kifelé** kapcsolódik, és ez rendben van |
-| **IPFS / libp2p** | **DCUtR**: lyukfúrás **jelzőszerver nélkül**, egy továbbítón keresztül összehangolva | ⭐ ez a legközelebbi a koinóhoz — lásd a mért számokat lentebb |
+| **IPFS / libp2p** | **DCUtR**: lyukfúrás **jelzőszerver nélkül**, egy továbbítón keresztül összehangolva | ⭐ ez a legközelebbi a koinohoz — lásd a mért számokat lentebb |
 | **Syncthing** | globális felfedező-szerverek + **önkéntes továbbítók**, de **helyi felfedezés is** | a helyi hálózaton **semmi nem kell** |
 | **Nostr** | **kizárólag továbbítók** („relay"), a kliens csak kifelé kapcsolódik | ⭐ **bárki üzemeltethet továbbítót**, és mindenki többre csatlakozik |
 | **Scuttlebutt** | pletyka-terjedés + „pub"-ok (fogadó csomópontok) + **helyi felfedezés + pendrive** | a **futár-modell** működik a gyakorlatban is |
@@ -116,17 +116,17 @@ hálózaton, 167 országban**.*
    Csaba **vezetékes** kapcsolata ugyanúgy CGNAT mögött van, mint egy mobilos. A választóvonal
    nem a pénz, hanem hogy **a szolgáltató ad-e működő IPv6-ot.**
 2. ⭐ **Két csak-mobilos e-ember EGYMÁST nem éri el, sehogyan.** Ezt ki kell mondani: ha egy
-   koinóban **mindenki** csak mobilnetes, akkor kell valaki kívülről, aki fogad. Ezen
+   koinoban **mindenki** csak mobilnetes, akkor kell valaki kívülről, aki fogad. Ezen
    semmilyen tervezés nem segít.
 
 ---
 
-## 4. Mit jelent ez a koinóra
+## 4. Mit jelent ez a koinora
 
 **A cél nem lehet az, hogy „ne legyen továbbító"** — ilyen rendszer nem létezik, és nem is
 tudunk ilyet tervezni. **A cél az, hogy ne legyen KITÜNTETETT továbbító.**
 
-Négy tulajdonság, ami ezt biztosítja — és mindegyik **már ma is teljesül** a koinóban:
+Négy tulajdonság, ami ezt biztosítja — és mindegyik **már ma is teljesül** a koinoban:
 
 | Tulajdonság | Hogyan áll ma |
 |---|---|
@@ -141,7 +141,7 @@ eleve elveszi a közvetítő hatalmát.
 
 ### ⭐ Csaba felismerése, ami átírta az egészet (2026-08-29)
 
-> *„a koinóban nem konkrét címzetthez kell eljuttatni valamit, hanem mindenkinek […]
+> *„a koinoban nem konkrét címzetthez kell eljuttatni valamit, hanem mindenkinek […]
 > mindegy, hogy kivel sikerül kapcsolódni, az már tudja továbbítani máshova is."*
 
 **Ez más feladat, mint amit a fenti rendszerek nagy része megold.** A WebRTC, a Signal, a

@@ -163,9 +163,9 @@ proba('⭐ M7: a sáv szélei — a múltbeli „legközelebb” nem látszik, a
   return Object.values(ki).every(Boolean);
 });
 
-// ⭐ A tároló: a fájl a koinó mappájában, a módosítások a folyamaton belül sorban (az őrjárat körének vége és egy
+// ⭐ A tároló: a fájl a koino mappájában, a módosítások a folyamaton belül sorban (az őrjárat körének vége és egy
 // bekopogó cseréje egyszerre írhat). Rontás: a sor nélkül a párhuzamos módosítások egymást írják felül → bukik.
-proba('⭐ A tároló: a feljegyzés a koinó mappájában, a párhuzamos módosítások sorban (egy sem vész el), a sérült fájl üres', async () => {
+proba('⭐ A tároló: a feljegyzés a koino mappájában, a párhuzamos módosítások sorban (egy sem vész el), a sérült fájl üres', async () => {
   const hely = await mkdtemp(join(tmpdir(), 'koino-csereallapot-'));
   const t = csereAllapotTarolo('proba', hely, csereAllapotAlakja);
   const t0 = Date.UTC(2026, 9, 15, 12, 0, 0);

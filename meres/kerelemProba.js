@@ -134,7 +134,7 @@ proba('⭐⭐ D102 (J1): MÉLYEN a tartó maga jár be legjobb-először — egy
 
 // ⭐⭐ D116: a fejléc az alatta lévők számát (`ad`) is hozza, és a gyökere köti (a darab és a gyerekszám); a kérdező a darab-
 // és a gyerek-mintákkal ellenőrzi (a gyerekek születése a listából vagy a mintákkal jön). A kérdezett maga is mondja (a gyökérnél:
-// amit a tartó a koinóból ismer), és ha a tartó nem tartja mind, kimondja (`adb`). Rontás: a gyökértől eltérő darab elbukik.
+// amit a tartó a koinoból ismer), és ha a tartó nem tartja mind, kimondja (`adb`). Rontás: a gyökértől eltérő darab elbukik.
 proba('⭐⭐ D116: a fejléc az ALATTA lévők számát is hozza — a gyökere köti, a darab-minták ellenőrzik', async () => {
   const v = await vilag();
   const { valasz, fak, letrehozoAz, listazott } = await fejlecekValasza({ allapot: v.allapot, kulcs: GYOKER_KULCS, n: 10, m: true,
@@ -143,7 +143,7 @@ proba('⭐⭐ D116: a fejléc az ALATTA lévők számát is hozza — a gyökere
   const { mintak, esemenyek } = await mintakValasza({ fak, kert, esemenyOlvas: olvaso(v.terkep), letrehozoAz, listazott });
   const e = await fejlecekEllenorzese({ valasz, kert, mintak, esemenyek });
   const t = (az) => valasz.lista.find((x) => x.az === az);
-  // A NAGY alatt: G1, G2, G3, az UNOKA és a két töredék = 6; a koinóban összesen 8 (+ a NAGY és a KICSI).
+  // A NAGY alatt: G1, G2, G3, az UNOKA és a két töredék = 6; a koinoban összesen 8 (+ a NAGY és a KICSI).
   const hamis = { ...valasz, lista: valasz.lista.map((x) => (x.az === v.nagy ? { ...x, ad: x.ad + 5 } : x)) };
   const eh = await fejlecekEllenorzese({ valasz: hamis, kert: {}, mintak: {}, esemenyek: [] });
   const { valasz: reszleges } = await fejlecekValasza({ allapot: v.allapot, kulcs: GYOKER_KULCS, n: 10, m: true,
@@ -425,7 +425,7 @@ proba('⭐⭐ D102 (J3): a KÉRELEM-SOROZAT a védett résen — három fejléc-
 // ⭐⭐ AZ ÜTKÖZÉS (a ⑦ terepi próba lelete, 2026-11-01): egy munkában MINDKÉT fél kér a másiktól
 // ===================================
 //
-// A terepen (laptop + telefon, a gyermek koinóban — két „alap” készülék, mindkettő a másiknál lévőt kérte) a két kérő egymás
+// A terepen (laptop + telefon, a gyermek koinoban — két „alap” készülék, mindkettő a másiknál lévőt kérte) a két kérő egymás
 // kérelmét átlépte, és mindkettő a tétlenségi óráig várt: fél órán át kétpercenként „a másik fél nem válaszol”. ⭐ Mérve: a
 // két fél ugyanúgy dönt (`vonal.js` `kerelemUtkozes`) — az egyik kérelme lemegy, a másik kérő kiszolgálja (a hívótól kapott
 // `utkozesben`-nel), és a sajátja `utkozes` jellel tér vissza. A tétlenségi órát itt rövidre vesszük (4 mp): a javítás

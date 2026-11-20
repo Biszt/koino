@@ -24,7 +24,7 @@ szándékát", nem „a társadalmi többség döntését". A közvetlen dönté
 
 ## TERVEZÉSI ALAPELV: egyszerű és változtatható > összetett és teljes (2026-08-25, Csaba)
 
-> „A koinóban az a jó, hogy nem kell az első verziónak tökéletesnek lennie, mert tud
+> „A koinoban az a jó, hogy nem kell az első verziónak tökéletesnek lennie, mert tud
 > fejlődni, sokszorozódni." — Csaba
 
 Ez nem megjegyzés, hanem **alapelv, ami újra és újra dönt helyettünk.** A tervezés során
@@ -106,7 +106,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > **A terv első változata megbukott, és Csaba buktatta le:** *„az 5 percenkénti egyeztetés
 > nem jó, mivel böngészés közben az összes entitásnak elérhetőnek kell lennie… és legalább
 > az egyik tudatpont-tulajdonosnak elérhetőnek kell lennie."* Az első változat
-> **replikációnak** tekintette a koinót; a valóságban az ember **nézelődik**, és az nem tűri
+> **replikációnak** tekintette a koinot; a valóságban az ember **nézelődik**, és az nem tűri
 > a késleltetést. Hiába ér körbe minden esemény öt perc alatt, ha egy nem tárolt entitást
 > akarok megnyitni.
 >
@@ -171,7 +171,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 >    láncot soha nem fogunk látni.
 > 2. **A hézag megszűnik jel lenni** (a más entitáson történt esemény jogosan hiányzik) →
 >    ezzel a H3/H4 védelme elveszik. Javasolt javítás: **`entitasSorszam`** mező.
-> 3. **A D35 megtakarítása mérettel elpárolog** *(számítás, mérendő)*: milliós koinóban a
+> 3. **A D35 megtakarítása mérettel elpárolog** *(számítás, mérendő)*: milliós koinoban a
 >    globális lenyomat soha nem egyezik → minden kör visszaesik a teljes ÁLLÁS-ra.
 > 4. Az `esemenyek.jsonl` **koino-szintű egyetlen fájlja** nem tartható.
 >
@@ -235,7 +235,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 >   őszinte-kommunikációs pontja ezt már ki is mondja: *„a duplikátum-kizárás nem abszolút —
 >   a szabályok valószínűtlenné teszik, nem a program ellenőrzi."* A tanúsító azt állítja,
 >   hogy a jelölt *„még nem regisztrált"* — de **kulcsot lehet keresni, embert nem**, mert a
->   **D6** tiltja a személyes adatot a láncon. Faluban működik; kétmilliós koinóban Anna nem
+>   **D6** tiltja a személyes adatot a láncon. Faluban működik; kétmilliós koinoban Anna nem
 >   tudhatja, hogy Béla nem lépett-e be a munkahelyi körén át.
 >
 > ⭐⭐ **CSABA VÁLASZA:** *„a koino nem egy lapra tesz fel mindent, mivel több koino is
@@ -245,7 +245,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 >
 > Ez a **D13/b** („a paramétereket nem eltaláljuk, hanem szétosztjuk") — eddig **kényelmi**
 > érv volt, most **biztonsági** érvvé vált. **És megváltoztatja, mit jelent a bukás:** egy
-> globális rendszerben a Sybil-áttörés végzetes és végleges; koinók családjában **helyi és
+> globális rendszerben a Sybil-áttörés végzetes és végleges; koinok családjában **helyi és
 > tanulságos.**
 >
 > **HÁROM FELTÉTEL, ami nélkül ez nem evolúció, csak sodródás:**
@@ -281,7 +281,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > > *(Csaba: „egyetértek.")*
 >
 > **3. ⚠️ A közös belépő tér átszivárgása → a D25 MÓDOSÍTVA.** Egy laza koino
-> tanúsítás-gyárrá válhatott volna. **Csaba döntése: a tanúsítások NEM jönnek át koinók
+> tanúsítás-gyárrá válhatott volna. **Csaba döntése: a tanúsítások NEM jönnek át koinok
 > között** — a belépő tér csak **böngészésre** közös. *(Részletek a D25-nél; ebből az is
 > következik, hogy a tartós mag koino-helyi lesz, és hogy a belépő tér a **kereső-réteg**
 > szintje, nem a DAG-rétegé.)*
@@ -297,7 +297,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > | **láthatósági küszöb** (2 tulajdonos kell) | az **egyedüli igazat mondót** |
 > | **gyenge tanúsítás** (D18/1) | *fordítva*: emberségessé teszi a belépést, de olcsóvá a támadási éleket |
 > | **utólagos EUDI-követelmény** | a **menekültet, hontalant, papír nélkülit** (a D15 már írt erről a bizottságnál) |
-> | **koinónkénti újratanúsítás** (D25) | a **sokfelé mozgó, gyökértelen embert** |
+> | **koinonkénti újratanúsítás** (D25) | a **sokfelé mozgó, gyökértelen embert** |
 >
 > ⭐ **A visszatérő feloldás mindannyiszor ugyanaz volt:** a szabály **ne a létezésre**
 > hasson, hanem egy **elhagyható, felsőbb rétegre** (kereső-réteg), és **ne visszamenőleg**.
@@ -320,13 +320,13 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 >
 > **D30 — ELŐFELTÉTEL.** Csaba a Google fejlesztő-ellenőrzési szabálya miatt **befagyasztotta
 > a fejlesztést**, amíg ez elméletben nincs áthidalva: *„a technikai korlátozhatóságoknak
-> nem szabad, hogy hatni tudjanak a koinóra."* A híd elkészült, **a fagyasztás feloldva** —
+> nem szabad, hogy hatni tudjanak a koinora."* A híd elkészült, **a fagyasztás feloldva** —
 > de az előfeltétel megmarad: minden új funkciónak meg kell felelnie a 8 szabálynak.
 >
 > **D31 — A MÉRCE.** *Egy lezárt készülék tulajdonosa is teljes értékű e-ember lehet — de
 > ehhez szüksége van legalább egy elérhető társra a hálózatban.* Csaba: *„a pc-sek
 > segítségével ugyanúgy tud működni… már az is elég nekem, hogy a pc-sek fent tudják
-> tartani a koinót."* ⚠️ A függés **nem érdem, csak elfogadható ár** (Csaba helyesbítése).
+> tartani a koinot."* ⚠️ A függés **nem érdem, csak elfogadható ár** (Csaba helyesbítése).
 >
 > **D32 — SZÁLLÍTÁSI FÜGGÉS IGEN, IGAZSÁG-FÜGGÉS SOHA.** Amire a koino rászorul, az legyen
 > mindig csak **postás**: cserélhető (bárki más is lehet) és ellenőrizhető (ha kihagy, az
@@ -346,7 +346,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > szabvány (NAT-PMP, PCP, UPnP) megbukott a routeren, és a kézi szabály sem működött. Aztán
 > Csaba feltett egy kérdést, ami kiderítette, hogy **rossz feladatot oldottunk meg.***
 >
-> **D33 — A CÉL AZ ÖSSZEFÜGGŐSÉG, NEM AZ ELÉRHETŐSÉG.** Csaba: *„a koinóban nem konkrét
+> **D33 — A CÉL AZ ÖSSZEFÜGGŐSÉG, NEM AZ ELÉRHETŐSÉG.** Csaba: *„a koinoban nem konkrét
 > címzetthez kell eljuttatni valamit, hanem mindenkinek […] mindegy, hogy kivel sikerül
 > kapcsolódni, az már tudja továbbítani máshova is."*
 > A régi kérdés — *„el tud-e érni A a B-hez?"* — **N² kapcsolatot** követelne. Az új —
@@ -367,7 +367,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > döntései nem másodpercesek.
 >
 > **D35 — A CSERE ÁRA BEFOGADÁSI KÉRDÉS, NEM OPTIMALIZÁLÁS.** Az `ALLAS` mérve **162
-> bájt/e-ember**; 1000 fős koinónál 5 percenkénti cserével **46 MB/nap**, 10 000-nél
+> bájt/e-ember**; 1000 fős koinonál 5 percenkénti cserével **46 MB/nap**, 10 000-nél
 > **460 MB/nap**. *Ez nem a hálózatot terheli meg, hanem a mobilos e-ember számláját
 > zárná ki — épp azt, akinek a legkevesebb pénze van.*
 > **A javítás:** a csere kezdődjön **egyetlen összesített ujjlenyomattal** (43 karakter);
@@ -494,7 +494,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 
 > ### 🔒 D40 (2026-08-30): A FOGADÓKÉPESSÉG-FÜGGÉS MINIMALIZÁLÁSA — sebesség árán is
 >
-> *Egy UDP-holtpont javítása közben oda jutottunk, hogy a koinóban lesz TÖMEGES forgalom is,
+> *Egy UDP-holtpont javítása közben oda jutottunk, hogy a koinoban lesz TÖMEGES forgalom is,
 > nem csak apró szinkron — Csaba vetette fel: „ha valaki tudatpont-tulajdonos lesz egy
 > entitáson, akkor azt le kell töltenie a hálózatról, mert ő tárolja onnantól kezdve."
 > Erre azt javasoltam, hogy a tömeges letöltés menjen TCP-n, ahol a másik fogadóképes.
@@ -556,7 +556,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > - **darab-címzés** — a fájlhoz lenyomat-fa kell (a **D21** Merkle-gondolata már itt van);
 > - **új üzenettípusok**: „megvan-e neked az X fájl Y darabja?";
 > - **folytatási állapot** — mit szedtem már össze; **helyi megfigyelés**, sosem terjed és
->   semmit nem dönt el a koinóban (mint a `tarsak.js` `utoljara` mezője).
+>   semmit nem dönt el a koinoban (mint a `tarsak.js` `utoljara` mezője).
 >
 > ⚠️ **Mikor:** a Szakasz 2 / **3. lépés** (részleges tudás) UTÁN. Előbb nincs is mit mérni:
 > ma a [`csere.js`](../js/csere/csere.js) `koinoEsemenyei`-t hív, vagyis **mindenki
@@ -902,7 +902,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > - ⛔ **D49/c — HÁROM VÉDŐKORLÁT**, mert ez boszorkányüldözéssé tud válni: **nincs**
 >   személyre szóló gyanú-pontszám, rangsor, piros jelzés · a jelzés **tájékoztat, nem
 >   jogosít** (N9) — vékony hálótól **semmilyen jog nem csökken** · az összesített nézet **a
->   koinóról** szóljon (*„mennyire vagyunk kitéve"*), ne emberekről.
+>   koinoról** szóljon (*„mennyire vagyunk kitéve"*), ne emberekről.
 >
 > 🔍 **A mérce, amivel egy jelzés értékét eldöntjük:** *akkor ér valamit, ha a szimulált
 > szigetre KIGYULLAD, egy valódi, gyorsan növő közösségre viszont NEM.* ⚠️ Ami a
@@ -959,7 +959,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > > hanem **üzenet, ami ugrál**.
 >
 > ⭐ **Van rá minta a programban:** a [`tarsak.js`](../js/csere/tarsak.js) társ-listája
-> pontosan ilyen — *„helyi megfigyelés — sosem terjed, és semmit nem dönt el a koinóban."*
+> pontosan ilyen — *„helyi megfigyelés — sosem terjed, és semmit nem dönt el a koinoban."*
 > Senki nem látja az utat (mindenki csak azt, kitől kapta és kinek adta), **nem áll össze
 > térkép**, és az összevetés elvégezhető úgy, hogy csak a **darabszám** derüljön ki.
 >
@@ -1287,8 +1287,8 @@ megőrizve).** 2026-08-25-én három elméleti hidat építettünk
 >   a magot).
 > - **D24** — a meglévő adat sem költözik: **új regisztráció** lesz. Ezzel a **Szakasz 0
 >   (híd-feladatok) lezárult**, egyetlen elkészült termékkel: a **H6 adat-osztályozással**.
-> - **D25** — **A BELÉPŐ TÉR**: a koinók családfája. Az azonosság és a tanúsítások
->   **közösek a térben**, a küszöbök, szabályok, gondolat és a pénz **koinónként külön**.
+> - **D25** — **A BELÉPŐ TÉR**: a koinok családfája. Az azonosság és a tanúsítások
+>   **közösek a térben**, a küszöbök, szabályok, gondolat és a pénz **koinonként külön**.
 >   *Az azonosság közös, a jogosultság helyi.* A tér a **tartós mag második hasznosítása**
 >   — új mechanizmus nélkül.
 >
@@ -1384,8 +1384,8 @@ működő közösség adja majd.*
 | D9 | Kód | Konszenzuális önfrissítés (egyezmény-vezérelt, időzáras, hash-ellenőrzött) + a visszautasítás/fork joga. *(A „vésznyílás" keret a D13-ban felülírva: normál üzemmód.)* |
 | D10 | Pénz | Alkotmányos kibocsátási szabály + egyenlő osztalék minden e-embernél; hozam-ígéret nincs; vagyon ≠ hatalom. |
 | D11 | Pénz-ütemezés | Pénz csak az identitás-réteg éles bizonyítása után (az osztalék a hamis regisztrációt pénznyomtatóvá tenné). |
-| D12 | Kód-kormányzás | Három szint: a verzió-entitás a koinón BELÜL él (önalkalmazás, nincs regresszus), a koinók sokasága fölött pedig NINCS kormányzat — ott nincs mit eldönteni. A térkép nem kormányzat. |
-| D13 | A koino mint eszköz | Bárki indíthat koinót; a fork normál üzemmód, nem vésznyílás; az egység az ADATBÁZIS. A skálázás nem opcionális — a legfőbb koino evolúciósan jön létre. **D13/b:** a paramétereket nem eltaláljuk, hanem koinónként szétosztjuk. |
+| D12 | Kód-kormányzás | Három szint: a verzió-entitás a koino-n BELÜL él (önalkalmazás, nincs regresszus), a koinok sokasága fölött pedig NINCS kormányzat — ott nincs mit eldönteni. A térkép nem kormányzat. |
+| D13 | A koino mint eszköz | Bárki indíthat koinot; a fork normál üzemmód, nem vésznyílás; az egység az ADATBÁZIS. A skálázás nem opcionális — a legfőbb koino evolúciósan jön létre. **D13/b:** a paramétereket nem eltaláljuk, hanem koinonként szétosztjuk. |
 | D14 | Tartós mag | A csalás-elleni CSONTVÁZRA szűkül (azonosság-egyszeriség, később pénz); minden más — az **egyezmény is** — a tudatpontot követi és elfelejthető. → **N2 (GDPR) megoldva.** |
 | D15 | Kulcs | A kulcs HITELESÍT, nem titkol — a lopás minden kára visszafordítható, kivéve a pénzt. A helyreállítás TÖBB FÜGGETLEN TANÚBÓL áll (háló + opcionálisan EUDI + opcionálisan választott bizottság); a bizottság **tanú, nem hatóság**. |
 | D16 | Pénz-tempó | Az irreverzibilitás DÖNTÉS, nem törvény: a nagyobb átutalás késleltetve, nyilvánosan, az ablakban megtámadhatóan megy — értesítéssel, **külön csatornán**. A kulcslopás így túlélhető. |
@@ -1393,7 +1393,7 @@ működő közösség adja majd.*
 | D18 | Identitás | **Pozíció, nem darabszám** (távolság-szabály, Duniter-precedens) + **folytonos igazolás** (kockázati korlát, SOHA nem hang). Megújítás helyett **tevékenység = életjel**; a halál megtámadható tanúsítás. ⚠️ Az aláírás a KULCS használatát bizonyítja, nem az EMBER életét (kulcs-öröklés) → a védelem a D20 ösztönző-szerkezete. **Osztalék csak hitelesítettnek** — birtoklás, keresés, befektetés mindenkinek. |
 | D19 | Rendszer-gondolat | A program **BEJELENTŐ, nem BÍRÓ**: ellentmondásnál gondolatot hoz létre, a közösség dönt, egyezmény zárja. Ez adja meg a D15/D16/D18 hiányzó „hol"-ját. Zárt lista, felismerhető, gazdát kap, határidőre alapértelmezett kimenet. A **vita** a tartalmi rétegben marad, csak a **kimenet** megy a magba. |
 | D20 | Öröklés | **Pénz igen; tudatpont és azonosság soha.** Nem csak méltányosság: **ösztönző-védelem a kulcs-öröklés ellen** — a családot cinkosból egymás őrzőjévé alakítja. Az egyenlő osztalék miatt a dinasztikus koncentráció magától gyengül. |
-| D21 | Mag-replikáció | **Ujjlenyomat + bizonyíték** (a tároló nem tud hazudni → bizalmi helyett elérhetőségi probléma). **Három réteg:** önkéntesek · **mindenki tárolja a saját lapját** (~1 KB — az újjáépítés magja) · szeletelés később. **Napi kötegelés** → évi ~365 konszenzus-esemény, bármekkora koinónál. |
+| D21 | Mag-replikáció | **Ujjlenyomat + bizonyíték** (a tároló nem tud hazudni → bizalmi helyett elérhetőségi probléma). **Három réteg:** önkéntesek · **mindenki tárolja a saját lapját** (~1 KB — az újjáépítés magja) · szeletelés később. **Napi kötegelés** → évi ~365 konszenzus-esemény, bármekkora koinonál. |
 
 További lezárt kérdések: EUDI = belépési kapu, nem üzemi függőség — a meghívó-rendszer
 MELLÉ jön (~2027), nem helyette; nincs regisztrációs korhatár (16 alatt szülői lépés);
@@ -1518,7 +1518,7 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
       magad ellenőrizni — meg kell kérdezned valakit, aki tárolja. **És aki olyat tárol,
       amit más nem tud ellenőrizni, az kapuőr.** Ha a mag akkorára nő, hogy egy átlagos
       telefon nem bírja, akkor csak a jól felszerelt gépek tartják → **ők lesznek az
-      érvényesítők → a koinónak megint lesz teteje → a D12 bukása.** *(A Bitcoin
+      érvényesítők → a koinonak megint lesz teteje → a D12 bukása.** *(A Bitcoin
       gyakorlatilag ezen bukott meg: a lánca akkorára nőtt, hogy teljes csomópontot már
       kevesen futtatnak.)*
     - **MÉRET-BECSLÉS (2026-08-25):** egy azonosság-rekord a magban durván **~600 bájt–1 KB**
@@ -1576,7 +1576,7 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
   önalkalmazás + kormányzat-nélküli legfelső szint) és **D13** (a koino eszköz, nem
   közösség; a fork normál üzemmód). A teljes levezetés önálló dokumentumban:
   [`kormanyzas.md`](kormanyzas.md). Ami NEM zárult le, és a nyitott listán marad:
-  a **névvédelem kérdése** (védjegy vagy sem — lásd D13), valamint a koinók közti
+  a **névvédelem kérdése** (védjegy vagy sem — lásd D13), valamint a koinok közti
   **felfedezési formátum** részletei (N1-gyel együtt vizsgálandó).
 - **N6. Elérhetőség és replikáció-padló** — 🟡 **A FELE LEZÁRVA (2026-08-25, Csaba).**
   - ✅ **A replikáció-padló KIVÁLTVA a tartalmi rétegre — nem kell megépíteni.** Csaba
@@ -1724,7 +1724,7 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
 
 *Teljes levezetés: [`kormanyzas.md`](kormanyzas.md).*
 
-- **A koino-verzió entitásként él a fában**, a gyökér-entitások felett — de AZON A KOINÓN
+- **A koino-verzió entitásként él a fában**, a gyökér-entitások felett — de AZON A KOINON
   BELÜL, amit leír. Ezért a teljes meglévő gépezet magától vonatkozik rá: tudatpont,
   küszöb, javaslat, szavazás, **különválás**. A forráskód-kormányzás nem új mechanizmus,
   hanem **ugyanaz a mechanizmus, magasabb magasságban**.
@@ -1732,13 +1732,13 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
   BENNE: a program a saját módosítását a saját eszközeivel dönti el (**önalkalmazás** —
   ahogy egy alkotmány tartalmazza a saját módosítási szabályát). Az 1. és 2. szint
   valójában egy szint; a hurok bezárul.
-- **A koinók sokasága NEM kormányzott szint.** Nincs rajta tudatpont, szavazás, küszöb —
+- **A koinok sokasága NEM kormányzott szint.** Nincs rajta tudatpont, szavazás, küszöb —
   mert **nincs mit eldönteni**: egy koino léte tény, nem határozat. A legfelső szinten a
   szabályozó erő nem a döntés, hanem a **kompatibilitás** (RFC-minta: ajánlás, nem
   jogszabály). A közös megjelenítés **térkép, nem kormányzat** — bárki rajzolhat egyet,
   több létezhet egyszerre.
 - **Ez nem hiányosság, hanem a garancia:** ha a legfelső szinten kormányzat lenne, a
-  koinónak lenne TETEJE — aminek pedig teteje van, azt egyetlen ponton el lehet foglalni.
+  koinonak lenne TETEJE — aminek pedig teteje van, azt egyetlen ponton el lehet foglalni.
 - **A különválás és a fork ugyanaz a művelet**, két szinten: gondolat-szinten egy gondolat
   válik szét, verzió-szinten egy világ. A Fázis 1-ben megépített különválás (2026-08-25)
   ennek a főpróbája — és empirikus választ ad a kérdésre, amire a blokklánc-világ csak
@@ -1749,8 +1749,8 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
 *Ez a vita 9. pontjához képest ÚJ álláspont — Csaba továbbgondolása.*
 
 - A vitában a fork **vésznyílás** volt („az ereje a létezése, nem a gyakorlása"). Mostantól
-  **normál működés**, sőt: **bárki indíthat teljesen új koinót** — család, osztály,
-  munkahely, párt. *„A koinót nem kizárólag egy közösségnek építem, hanem egy eszközt
+  **normál működés**, sőt: **bárki indíthat teljesen új koinot** — család, osztály,
+  munkahely, párt. *„A koinot nem kizárólag egy közösségnek építem, hanem egy eszközt
   szeretnék adni, amivel bárkik csinálhatnak közösséget."*
 - ~~**Siker-mérce változik:** nem az, hányan vannak a koino.hu-n, hanem **hány koino létezik**.~~ ⛔ **Helyreigazítás (Csaba,
   2026-11-08):** *„én nem állítok ilyet.”* — ilyen siker-mérce nincs.
@@ -1761,12 +1761,12 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
 - **Verzió-szinten a szétosztás TELJES, nem arányos** (szemben a gondolat-szintűvel) — mert
   a verzió nem csomópont, hanem **talaj**: programból nem lehet „felet" elvinni. Az e-ember
   kezdetben mindkét ágon létezik.
-- **A koinók közti kapcsolat választható**: lehetnek szigetek, lehetnek összekapcsolva.
+- **A koinok közti kapcsolat választható**: lehetnek szigetek, lehetnek összekapcsolva.
 - **A bootstrap-probléma helye megszűnik:** ha nincs „a koino", nincs mit átadni. A koino.hu
   egy koino lesz — az első, talán a legnagyobb, de nem kiváltságos. A többlet-jog nem
   lemondással szűnik meg, hanem mert megszűnik a hely, ahol létezhetne. *(A H7 az ÁTMENETRE
   továbbra is kell.)*
-- **Az identitás koinónként külön van** → az „egy ember = egy e-ember" szabály koinón belüli,
+- **Az identitás koinonként külön van** → az „egy ember = egy e-ember" szabály koino-n belüli,
   nem világszintű (a **D1** hatókörének pontosítása).
 - **A skálázás NEM opcionális** (Csaba helyesbítése): az igény az, hogy BÁRMELYIK koino
   megnőhessen milliárdos nagyságrendre. Az N3/N4/N8 tehát nem gördül le a projektről — csak
@@ -1780,7 +1780,7 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
   a kockázatot, hogy rosszul használják majd fel mások."*
   - **A kérdés amúgy is rossz volt: nem megakadályozni kell.** A koino nem tiltja az
     elárult változatot, hanem **veszteségessé teszi** — az olcsó kilépés miatt aki elfoglal
-    egy koinót, pontosan azt semmisíti meg, amiért érdemes volt elfoglalni. Ez a **D4
+    egy koinot, pontosan azt semmisíti meg, amiért érdemes volt elfoglalni. Ez a **D4
     felelősség-elve egy szinttel feljebb**.
   - **Ha MÁS védeti le a nevet:** a védjegy a névhasználatot korlátozza, nem a szoftvert —
     a futtatást/másolást/módosítást az AGPL rendezi, P2P-ben pedig senki engedélye nem kell.
@@ -1812,14 +1812,14 @@ valakinek el kell találnia.
 > alkothassa meg a szabályait, és így természetes módon valamelyik pont optimális lesz."
 > — Csaba
 
-**Ne találja el senki: legyen paraméter, és a koinók térjenek el benne.** Ez nem új elv —
+**Ne találja el senki: legyen paraméter, és a koinok térjenek el benne.** Ez nem új elv —
 a koino BELÜL már így működik (**D4**: a küszöböket az érték javaslatok mediánja adja, nem
-a tervező). A D13 ezt viszi **a koinók közé**, ahogy a D12 a kormányzást vitte egy
+a tervező). A D13 ezt viszi **a koinok közé**, ahogy a D12 a kormányzást vitte egy
 szinttel feljebb.
 
 **Gyakorlati következmény a tervezésre:** ahol a terv „nyitott paramétert" mond (D15
 tanú-szám, D16 összeghatár és ablak-hossz, D4 küszöbök), ott NEM kell egy helyes értéket
-találni — **alapértelmezést** kell adni, és a koinóra bízni a változtatást.
+találni — **alapértelmezést** kell adni, és a koinora bízni a változtatást.
 
 > **Őszinte fenntartás.** Az evolúciós érveléshez három dolog kell: változatosság ✅ (sok
 > koino), öröklődés ✅ (a fork viszi a szabályokat) — és **kiválasztódási nyomás**, ami itt
@@ -1858,7 +1858,7 @@ alapállapota** — nem kell „törlés" funkciót építeni a megmásíthatatl
 
 ### D15. A kulcs hitelesít, nem titkol — a helyreállítás több tanúból áll (2026-08-25)
 
-**A kulcsnak a koinóban egyetlen dolga van.** Egy kulcspár kétféle munkát végezhet:
+**A kulcsnak a koinoban egyetlen dolga van.** Egy kulcspár kétféle munkát végezhet:
 **hitelesítés** („ez tényleg ő") és **titkosítás** („csak ő olvashatja"). A koino
 **szándékosan nyilvános** — a gondolat, a tudatpont, a név mind az —, ezért a titkosítási
 munkából alig marad valami (egyedül a szavazat, D2).
@@ -1884,7 +1884,7 @@ koino amúgy is folyamatosan felülír.
 Ez a probléma valódi magja.
 
 **A koino megoldása — amivel a Bitcoin nem rendelkezik:** ott a kulcs MAGA a számla, nincs
-mögötte ember. A koinóban az e-ember **személy, akiért mások kezeskedtek** (D1). Ezért:
+mögötte ember. A koinoban az e-ember **személy, akiért mások kezeskedtek** (D1). Ezért:
 
 > Nem a kulcsot állítjuk helyre, hanem **új kulcsot** veszel fel, és **tanúk igazolják,
 > hogy te vagy.**
@@ -1934,7 +1934,7 @@ Minden javaslatnak van minimum döntési ideje, nyilvános, és amíg tart, bár
 
 Ezzel a kulcslopás **túlélhetővé** válik. Nem külön mentőöv: ugyanaz az elv, amiből az
 egész koino épül. *(A bankoknál is van visszahívási ablak; a kripto azért nincs, mert ott
-nincs kihez fordulni — a koinóban **van**: maga a közösség.)*
+nincs kihez fordulni — a koinoban **van**: maga a közösség.)*
 
 **Az értesítés teszi valóságossá az ablakot** — papíron egy ablak semmit nem ér, ha nem
 tudsz róla. Az infrastruktúra **megvan** (a 2026-08-24-i értesítés-rendszer: azonnali vagy
@@ -1952,15 +1952,15 @@ az ablak.
 
 ### 🌓 KÉT KOINO INDUL, NEM EGY (Csaba döntése, 2026-09-02) — a D13/b első valódi alkalmazása
 
-⛔⛔ **Helyreigazítás (Csaba, 2026-11-08):** *„ilyet sem mondtam. eggyel indulunk.”* — a mai döntés: **egy koinóval indulunk.** Az
-alábbi szakasz a 2026-09-02-i feljegyzés, történetként marad meg; a „két koinó” nem terv.
+⛔⛔ **Helyreigazítás (Csaba, 2026-11-08):** *„ilyet sem mondtam. eggyel indulunk.”* — a mai döntés: **egy koinoval indulunk.** Az
+alábbi szakasz a 2026-09-02-i feljegyzés, történetként marad meg; a „két koino” nem terv.
 
-> *„Eldöntöttem, hogy legalább 2 koinót fogok indítani. Ha lesz még ilyen morális kérdés,
+> *„Eldöntöttem, hogy legalább 2 koinot fogok indítani. Ha lesz még ilyen morális kérdés,
 > akkor az egyik verzió megy az egyikbe, a másik a másikba."*
 
 **Mi váltotta ki:** a **valódi név** kérdése. A Sybil-védelem erősebb, ha a meghívás valódi
 néven történik — de ez ütközik a **D6**-tal (*személyes adat SOHA a láncra*), és pontosan
-azokat zárja ki, akiknek a legnagyobb szükségük lenne a koinóra (ellenséges kormány alatt
+azokat zárja ki, akiknek a legnagyobb szükségük lenne a koinora (ellenséges kormány alatt
 élők, menekültek, papír nélküliek). ⚠️ Ez a **„vak mechanizmus"** újabb előfordulása.
 
 ⭐ **A feloldás nem egységes szabály, hanem KÉT KOINO.** Ez a **D13/b** gyakorlatban: *a
@@ -1991,7 +1991,7 @@ bizonyított identitás után; D16: lassú, nyilvános, megtámadható; D20: ör
 pihenőidő alatt írt füzetében megírta az első **konkrét** változatot. ⚠️ **Ez javaslat, nem
 lezárt döntés — de a szerkezete egybevág a meglévő döntésekkel.***
 
-**A belső piac.** A koinón belül legyen piac, ahol a pénzzel kereskedni lehet, akár készpénzért
+**A belső piac.** A koino-n belül legyen piac, ahol a pénzzel kereskedni lehet, akár készpénzért
 is — *„csak az a lényeg, hogy jegyezve legyen"*. Vételi és eladási szándékot egyaránt lehet
 jelezni, tetszőleges áron; az érték a keresletből és kínálatból **kiderül**, nem meg van
 mondva. Az ettől eltérő ajánlat sem inkorrekt: *„mindenki annyiért adja, amennyiért akarja,
@@ -2038,7 +2038,7 @@ létszámhoz köti —, nem ösztönző.
 
 **Nyitott kérdés, amit Csaba feltett:** *„tudnánk közös kripto kasszát létrehozni?"* —
 Technikailag igen (több-aláírásos tárca, küszöb-aláírás). ⚠️ De egy **konkrét külső lánchoz**
-kötné a koinót, azon keresztül pedig csomópont-szolgáltatókhoz és tőzsdékhez — vagyis egy
+kötné a koinot, azon keresztül pedig csomópont-szolgáltatókhoz és tőzsdékhez — vagyis egy
 egész függőségi sorhoz, aminek minden kapuőrét megörökölnénk (2. szabály, D32). **Külső
 ügyletekre kiegészítő eszközként elképzelhető; a koino BELSŐ pénze soha ne ezen álljon.**
 
@@ -2200,7 +2200,7 @@ pénzügyi mozgásteret ad** (pl. az egyszerre utalható összeg).
 
 **Miért erős:** pont a **közepes rést tömi be**. Ott az emberek egyszerűen kevesebb
 igazolással rendelkeznek, tehát alacsonyabb a korlátjuk — a rendszer **magától fékez a
-tényleges bizonyosság szerint**, emberenként, nem koinónként. Ez a D11-logika finomabb
+tényleges bizonyosság szerint**, emberenként, nem koinonként. Ez a D11-logika finomabb
 felbontásban.
 
 > **🔒 KÖTELEZŐ VÉDŐKORLÁT: a több igazolás KOCKÁZATI KORLÁTOT emeljen, SOHA NEM HANGOT.**
@@ -2279,7 +2279,7 @@ normális esetet, hanem **akkor néz oda, amikor tényleg ellentmondás van** (7
 
 #### 6. Éves megújítás helyett: A TEVÉKENYSÉG AZ ÉLETJEL
 
-Minden művelet a koinóban **aláírt** (a privát kulcs matematikai bizonyítékot ad arról,
+Minden művelet a koinoban **aláírt** (a privát kulcs matematikai bizonyítékot ad arról,
 hogy te állítottad elő). Ezért **nincs szükség külön „még élek" gombra**: aki szavaz,
 tudatpontot rendez, gondolatot ír — az él.
 
@@ -2432,7 +2432,7 @@ A **D15** (kulcs-helyreállítás), a **D16** (pénzmozgás) és a **D18** (hal�
 mind ugyanazt mondja: *„lassú, nyilvános, megtámadható"*. Egyikük sem mondta meg, **HOL**.
 Hol látja meg bárki? Hol tiltakozik? Hol vitatkoznak róla?
 
-> **A válasz: a koinóban magában.** Ellentmondás vagy döntést igénylő kivétel esetén **a
+> **A válasz: a koinoban magában.** Ellentmondás vagy döntést igénylő kivétel esetén **a
 > program létrehoz egy GONDOLATOT**, ami jelzi a helyzetet; a közösség megvitatja, és
 > **egyezmény zárja le.**
 
@@ -2562,7 +2562,7 @@ pedig elveszíti a sajátját, **újra tanúsíttathatja magát** (D18) — **fo
 #### KÖTEGELÉS — a konszenzus-teher eltüntetése
 
 Minden regisztrációtól új csúcs-szám lesz, és hogy melyik az érvényes, abban mindenkinek egyet
-kell értenie (D17). **De a koinóban nincs azonnali véglegesség** (D16/D17) — egy új tag ráér
+kell értenie (D17). **De a koinoban nincs azonnali véglegesség** (D16/D17) — egy új tag ráér
 órákat várni.
 
 > **Ezért a regisztrációk KÖTEGEKBEN rögzülnek.** Napi köteggel egy koino **évi ~365
@@ -2573,7 +2573,7 @@ egyben a belépés várakozási ideje. Közösségi paraméter (lásd D13/c).
 
 #### BOOTSTRAP: honnan tudja egy új készülék a helyes csúcs-számot?
 
-A koinóba **valaki meghív** (D1) — **tőle kapod meg a kiinduló ujjlenyomatot is**, és
+A koinoba **valaki meghív** (D1) — **tőle kapod meg a kiinduló ujjlenyomatot is**, és
 összevetheted másokéval.
 
 > **Ugyanaz a társas bizalom, ami beenged a közösségbe, alapozza meg a technikai bizalmadat
@@ -2662,7 +2662,7 @@ A **WebRTC** az a technológia, amivel a böngészők közvetlenül beszélnek e
 | Mihez? | Kell domain? |
 |---|---|
 | **A program letöltéséhez** | Kell egy hely, ahonnan először megszerzed — de ez lehet **fájl is**: a program egy mappa, elküldhető e-mailben, átvihető pendrive-on. **A program terjesztése és a hálózat működése két külön dolog.** |
-| **A csomópontok egymásra találásához** | **Nem domain kell, hanem KULCS.** A koinóban a címed a **nyilvános kulcsod** — nem egy név, amit bérelni kell valakitől, és nem vehető el. Domain csak a *jelzőpontoknak* kell (azokat meg kell találni induláskor), de ezekből több is lehet, cserélhetők, és nem birtokolják a hálózatot |
+| **A csomópontok egymásra találásához** | **Nem domain kell, hanem KULCS.** A koinoban a címed a **nyilvános kulcsod** — nem egy név, amit bérelni kell valakitől, és nem vehető el. Domain csak a *jelzőpontoknak* kell (azokat meg kell találni induláskor), de ezekből több is lehet, cserélhetők, és nem birtokolják a hálózatot |
 
 > **A domain tehát kényelmi réteg, nem hatóság.** Ha a koino.hu holnap eltűnik, a program
 > megmarad mindenkinél, akinél már fut, és más jelzőponttal működik tovább.
@@ -2737,22 +2737,22 @@ minősítést viselte, mert a meglévő adat átmentését szolgálta. A D24 ezt
 > javaslatok, egyezmények, tudatpont-elrendezések) ezzel **elvész**. Ez vállalt ár —
 > pontosan azért tartottuk kicsiben a közösséget, hogy ez az ár alacsony maradjon.
 
-### D25. A BELÉPŐ TÉR — a koinók családfája (2026-08-26, Csaba)
+### D25. A BELÉPŐ TÉR — a koinok családfája (2026-08-26, Csaba)
 
 > „Bárki létrehozhat közösséget. Az elsőt én fogom létrehozni, de tőlem teljesen független
 > közösségeket is lehet indítani — ekkor azok nincsenek egymás belépő rétegében. Azonban a
-> már meglévő közösség több koinót is létrehozhat, **ugyanabban a belépő térben**." — Csaba
+> már meglévő közösség több koinot is létrehozhat, **ugyanabban a belépő térben**." — Csaba
 
-**A D12 eddig azt mondta:** *a koinók sokasága felett nincs kormányzat — „a térkép nem
+**A D12 eddig azt mondta:** *a koinok sokasága felett nincs kormányzat — „a térkép nem
 kormányzat"*. Ez igaz volt, de a térképnek **nem volt szerkezete**. A D25 megadja:
 
 > **A belépő teret a LESZÁRMAZÁS hozza létre.** Nem globális regiszter, amibe valaki
-> felvesz, hanem **családfa**: aki egy koinóból származik, az annak a terében van.
+> felvesz, hanem **családfa**: aki egy koinoból származik, az annak a terében van.
 
 *(Csaba szóhasználatában „belépő réteg" és „belépő tér" ugyanaz; a dokumentum a **belépő
 tér** alakot használja.)*
 
-#### Hogyan szaporodnak a koinók
+#### Hogyan szaporodnak a koinok
 
 | Mód | Mi történik | Melyik döntés folytatása |
 |---|---|---|
@@ -2768,17 +2768,17 @@ tér** alakot használja.)*
 > D13/c-ben kimondott minta harmadik előfordulása: *ugyanaz a gépezet, megint egy szinttel
 > feljebb.*
 
-#### ⭐ A D25 MAGVA: mi közös a térben, és mi koinónként külön
+#### ⭐ A D25 MAGVA: mi közös a térben, és mi koinonként külön
 
 > ### ⚠️ MÓDOSÍTVA (2026-08-31): A TANÚSÍTÁSOK NEM JÖNNEK ÁT
 >
 > **Csaba döntése:** *„inkább ne legyen közös belépő tér igazolásra, csak böngészésre, a
-> koinók között. De minden koinóba való bekerüléshez az adott koino igazolási rendszerén át
+> koinok között. De minden koinoba való bekerüléshez az adott koino igazolási rendszerén át
 > kell mennie mindenkinek, hiába azonosította magát máshol."*
 >
 > **Miért:** a közös tanúsítás-halmaz **átszivárgási utat** nyitott. Egy laza koino
 > **tanúsítás-gyárrá** válhatott volna: ott olcsón összeszedett tanúsítások átjönnek a
-> szigorú koinóba, és beleszámítanak a küszöbébe. A régi szöveg azt írta, *„egy szigorúbb
+> szigorú koinoba, és beleszámítanak a küszöbébe. A régi szöveg azt írta, *„egy szigorúbb
 > koino nem tudja felhígítani a lazábbat, és fordítva sem"* — ez a **küszöbökre** igaz volt,
 > de nem a tanúsítások **kínálatára**.
 >
@@ -2798,14 +2798,14 @@ tér** alakot használja.)*
 > ⏸️ **NYITVA HAGYVA (Csaba, 2026-08-31): *„erre még nem tudom a választ, de ez maradhat
 > későbbre."*** A kérdés: a kivétel **csak a szétválásra** vonatkozzon (Csaba eredeti
 > megfogalmazása), vagy a **szándékos koino-alapításra is** (D25 1–2. módja)? Az utóbbi
-> mellett szól, hogy különben a *„egy közösség több koinót is létrehozhat"* mozdulat minden
+> mellett szól, hogy különben a *„egy közösség több koinot is létrehozhat"* mozdulat minden
 > alkalommal teljes újratanúsítást kívánna. **Amíg nincs döntés, a szűkebb olvasat érvényes:
 > csak a szétválás.** *(A „szigorúan indulj, bizonyíték alapján lazíts" szabály szerint ez az
 > alapértelmezés is a helyes irány.)*
 >
 > ⭐⭐ **KÉT KÖVETKEZMÉNY, ami máshol fizet:**
 > 1. **A tartós mag koino-helyi lesz.** A „ez az ember már regisztrált" állítás mostantól
->    *ebben a koinóban* értendő — vagyis **a D21 magja kisebb**, és a globálisan egyeztetendő
+>    *ebben a koinoban* értendő — vagyis **a D21 magja kisebb**, és a globálisan egyeztetendő
 >    halmaz tovább zsugorodik (D14/D17 iránya).
 > 2. ⭐ **A belépő tér a KERESŐ-RÉTEG szintje, nem a DAG-rétegé** — megtalálhatóság bizalom
 >    nélkül, és **elhagyható**. *Ugyanaz a kétréteges felosztás, megint egy szinttel feljebb.*
@@ -2818,25 +2818,25 @@ tér** alakot használja.)*
 > ✅ átjönnek" sor és a rá épülő „közös tanúsítások, helyi küszöb" szakasz **már nem
 > érvényes**).
 
-| | Közös a térben | Koinónként külön |
+| | Közös a térben | Koinonként külön |
 |---|---|---|
 | **Azonosság (kulcs)** | ✅ | |
-| ~~**Tanúsítások** (a bizalmi háló élei)~~ | ⚠️ ~~✅ átjönnek~~ **VISSZAVONVA** | ✅ **koinónként** |
+| ~~**Tanúsítások** (a bizalmi háló élei)~~ | ⚠️ ~~✅ átjönnek~~ **VISSZAVONVA** | ✅ **koinonként** |
 | **A hitelesítettség KÜSZÖBE** | | ✅ |
 | **Belépési szabály** | | ✅ |
 | **Szabályrendszer, paraméterek** | | ✅ |
 | **Gondolat, javaslatok, egyezmények** | | ✅ |
 | **Pénz** | | ✅ (de **átvihető** — lásd lentebb) |
-| **Tudatpont** | | ⚠️ *feltehetően koinónként — megerősítendő* |
+| **Tudatpont** | | ⚠️ *feltehetően koinonként — megerősítendő* |
 
 > **Az azonosság közös, a jogosultság helyi.** Ez a D25 egy mondatban — és ettől lesz
 > értelme a „belépő" szónak: **a tér az, ahol az azonosságod érvényes.**
 
 #### A hitelesítettség: közös tanúsítások, helyi küszöb
 
-> „Elképzelhető, hogy egy koinóban te már elérted a teljesen hitelesített állapotot, de a
+> „Elképzelhető, hogy egy koinoban te már elérted a teljesen hitelesített állapotot, de a
 > másikban szigorúbbak a paraméterek… Pl. az egyik azt mondja, hogy **3 tanúsító elég**, és
-> az neked már meg is van; de ha csak annyi van, és a másik koinóban **10 tanúsító kell**,
+> az neked már meg is van; de ha csak annyi van, és a másik koinoban **10 tanúsító kell**,
 > akkor még **7-et össze kell szedned**." — Csaba
 
 Vagyis a **tanúsítások halmaza közös**, a belőle levont **következtetés koino-szintű**. Ez
@@ -2846,12 +2846,12 @@ kiderül, hogy **a fokozat-skála is koino-paraméter** (D13/c).
 **Ez erős tulajdonság, nem bonyodalom:**
 - egy szigorúbb koino **nem tudja felhígítani** a lazábbat, és fordítva sem;
 - aki sok tanúsítást gyűjt, azt **mindenhová viszi** — a bizalmi háló építése egyszeri munka;
-- a **köztes méret veszélyzónája** (D18/0) koinónként külön kezelhető: a fiatal koino
+- a **köztes méret veszélyzónája** (D18/0) koinonként külön kezelhető: a fiatal koino
   szigorúbb küszöböt állíthat, amíg a hálója gyenge.
 
 #### A belépés szabálya is koino-paraméter
 
-> „Az is lehet, hogy egy közösség **nyílt azok számára, akik a tér valamelyik koinójában már
+> „Az is lehet, hogy egy közösség **nyílt azok számára, akik a tér valamelyik koinojában már
 > benne vannak**, meg olyan is lehet, amelyik **egy plusz meghívást igényel**." — Csaba
 
 Két ismert fokozat tehát: **tér-nyílt** (aki a térben bárhol tag, beléphet) és
@@ -2860,16 +2860,16 @@ futtatja: meghívó kötelező.)*
 
 #### A pénz a térben (Csaba, 2026-08-26)
 
-> „A pénzt **nem a térhez kötjük, hanem a koinókhoz** a térben. Egy új koino átviheti
-> ugyanazt a pénzt, de **a pénzről az eredeti koinóban döntenek, és ott is termelődik**.
+> „A pénzt **nem a térhez kötjük, hanem a koinokhoz** a térben. Egy új koino átviheti
+> ugyanazt a pénzt, de **a pénzről az eredeti koinoban döntenek, és ott is termelődik**.
 > Létrehozhatnak új pénzt is, és akár később a közös térben **kriptopiac** is kialakulhat."
 
 | Kérdés | Válasz |
 |---|---|
-| Hol él a pénz? | **a koinóban**, nem a térben |
+| Hol él a pénz? | **a koinoban**, nem a térben |
 | Átvihető? | ✅ egy új koino **használhatja** ugyanazt a pénzt |
 | Ki dönt róla? | **a kibocsátó koino** — a paraméterek, a szabályok ott vannak |
-| Hol termelődik? | **a kibocsátó koinóban** (D10: alkotmányos kibocsátás + egyenlő osztalék) |
+| Hol termelődik? | **a kibocsátó koinoban** (D10: alkotmányos kibocsátás + egyenlő osztalék) |
 | Lehet saját pénz? | ✅ egy koino **új pénzt** is létrehozhat |
 | Több pénz egymás mellett? | ✅ és később **csere is** — kriptopiac a térben |
 
@@ -2889,12 +2889,12 @@ A D25 **nem hoz új mechanizmust**. Amit használ, az mind megvan:
 |---|---|
 | közös azonosság több koino felett | **a tartós mag** (D14) + a Merkle-fa (D21) — a mag **eleve téri, nem koino-szintű** |
 | tanúsítások, amik átjönnek | **D18** bizalmi háló |
-| koinónként eltérő küszöb | **D13/b** + **D13/c** (a paraméter is entitás) |
+| koinonként eltérő küszöb | **D13/b** + **D13/c** (a paraméter is entitás) |
 | kettéválás nézeteltérésnél | **KÜLÖNVÁLÁS** (megépítve) + **D9** |
 | „nincs felette hatóság" | **D12** |
 
 > **A belépő tér tehát a tartós mag MÁSODIK hasznosítása.** Ugyanaz az adat (ki valódi
-> ember, ki tanúsította), amit a csalás ellen amúgy is őriznünk kell — most a koinók közti
+> ember, ki tanúsította), amit a csalás ellen amúgy is őriznünk kell — most a koinok közti
 > mozgást is ez teszi lehetővé, **külön ár nélkül**.
 
 #### A belépő tér KLIENS OLDALA
@@ -2920,8 +2920,8 @@ alsó sáv — a **[`felulet_terv.md`](felulet_terv.md)**-ben van (Csaba, 2026-0
 2. **Osztalék-aszimmetria:** ha egy koino más koino pénzét használja, a tagjai **nem
    kapnak osztalékot** (az a kibocsátó koino tagjainak jár). Ez valós gazdasági
    következmény — nem hiba, de **ki kell mondani**, mielőtt valaki meglepődik rajta.
-3. **A tér elárasztása:** ha bárki indíthat koinót a térben, ezerszám gyárthatók üres
-   koinók. Védelem valószínűleg **magától adódik** (a létszám szerinti rendezés az üreseket
+3. **A tér elárasztása:** ha bárki indíthat koinot a térben, ezerszám gyárthatók üres
+   koinok. Védelem valószínűleg **magától adódik** (a létszám szerinti rendezés az üreseket
    a lista aljára teszi — a D14 elve: *ami senkit nem érdekel, az láthatatlan*), de
    érdemes kimondani.
 4. **Kihalt koino:** a D14 szerint *ami senkinek nem kell, eltűnik* — a térképről is
@@ -3050,7 +3050,7 @@ a szavazók köre a gondolat tudatpont-tulajdonosai, a küszöbök az ő érték
 
 #### 2. ⭐ AZ ÁLTALÁNOS EGYEZMÉNY ÉLŐ — csatlakozás, tiltakozás, ütközés
 
-Ez az, ami a mai koinóban nincs, és ami a **D8-at gyakorlattá teszi**:
+Ez az, ami a mai koinoban nincs, és ami a **D8-at gyakorlattá teszi**:
 
 | Művelet | Mit jelent |
 |---|---|
@@ -3142,7 +3142,7 @@ gondolatokban van.
 - **Az egyesítés csatlakozói:** ha két általános egyezményt egyesítenek, a csatlakozóik
   összeadódnak-e.
 - **A prototípus (1.1) NEM kap átnevezést** — befagyasztva marad (D22/D24). Az
-  elnevezés az új koinóban él.
+  elnevezés az új koinoban él.
 
 ### D64. AZ ALKOTMÁNY — az általános javaslat/egyezmény helyére (2026-09-10, Csaba)
 
@@ -3175,7 +3175,7 @@ hatókör, felfelé vitel újraszavazással) **tárgytalan**. A teljes kép ábr
 
 A szerkesztési javaslat **esemény**-állítás: megtörtént, egy pillanatban, véglegesen. Az
 alkotmány **állapot**-állítás: igaz MOST, ameddig igaz. ⭐ Ezért **nincs döntési ideje** —
-és ettől nem lesz idegen a koinóban, mert **van már pontosan ilyen gépezet: a tudatpont**
+és ettől nem lesz idegen a koinoban, mert **van már pontosan ilyen gépezet: a tudatpont**
 (emberenként az utolsó nyer, az állapot a mostani összeg, mindig ideiglenes). *Az alkotmány
 ugyanez, egy 2/3-os próbával a tetején.*
 
@@ -3297,7 +3297,7 @@ küszöbe medián lenne, a közösség **leszállíthatná a saját alkotmány-k
 
 #### A rés, amire ez a válasz
 
-Az alkotmány elhalasztásakor (D64) kiderült, hogy a koinóban **kétféle kemény szabály**
+Az alkotmány elhalasztásakor (D64) kiderült, hogy a koinoban **kétféle kemény szabály**
 lesz, és egyiket sem lehet azzá tenni, ami kellene:
 
 - amit a **medián** állít (küszöbök, D4) → a **közösségé**, de ⛔ **nem rögzíthető**: az
@@ -3388,7 +3388,7 @@ rosszak voltak, hanem hogy mindegyik **új élt** hozott a gépezetbe.*
 
 #### 1. ⭐⭐⭐ Ez nem új irány — Csaba 2026-08-31-én már kimondta
 
-A **D25** (a koinók családfája) a koinók szaporodásának **2. módjaként** sorolja fel:
+A **D25** (a koinok családfája) a koinok szaporodásának **2. módjaként** sorolja fel:
 *„Új szabályrendszer — módosított program, saját szabályokkal"*, a **D13** alá kötve (*a fork
 normál üzemmód*). És a tanúsítás-öröklés kivételét Csaba szó szerint így fogalmazta meg:
 
@@ -3404,7 +3404,7 @@ Az `esemeny.js` aláírt mezői: `'koino'`, `'tipus'`, `'szerzo'`, `'elozo'`, `'
 `'ido'` — **a koino azonosítója az első aláírt mező**. Két következménye van, és mindkettő a
 modellt erősíti:
 
-- ⭐ **Régi esemény nem tud beszivárogni az új koinóba** — az aláírása egy másik koino nevére
+- ⭐ **Régi esemény nem tud beszivárogni az új koinoba** — az aláírása egy másik koino nevére
   szól. *Nem kell őrszabály; a kriptográfia zárja.*
 - ⭐⭐ **Ezért az „átmásolás" valójában ÚJRA ALÁÍRÁS**, emberenként — pontosan az, amit Csaba
   mond (*„az e-ember utasítására"*). A **D15** miatt nem is lehet másképp: senki nem írhat alá
@@ -3415,7 +3415,7 @@ modellt erősíti:
 A 15. mérés (ugyanaz a 8 esemény, eltérő `TUDATPONT_KERET` → 4 entitás vs 2, **és a csere nem
 veszi észre**) mostantól **nem javítandó hibát mutat, hanem az INDOKOT**. Ebben a modellben a
 helyzet elő sem állhat: két program-verzió = **két koino**, és a csere a `LENYOMAT`-nál tisztán
-elutasítja az idegen koinót (mérve: 1 kör, ~334 bájt).
+elutasítja az idegen koinot (mérve: 1 kör, ~334 bájt).
 
 *A kettéhasadást nem megoldjuk, hanem megszüntetjük — ami eddig csendes eltérés volt, az
 mostantól két külön, bejelentett közösség.*
@@ -3446,7 +3446,7 @@ Nem minden viselkedik egyformán a költözésnél:
 | **Amit MÁSOK állítottak rólam** — meghívás, felhatalmazás, tanúsítás | ⚠️ **nem én viszem** | nem az én aláírásom (`allitokRola`); a **D25 születéskori pillanatképe** menti át, vagy újra kell szerezni |
 | **A PÉNZ** | ⛔ **NEM** | a másolása **hamisítás** (lásd lent) |
 
-⛔ Ha a tanúsítások nem jönnek át, **mindenki visszaesik az 1. lépcsőre** az új koinóban, és a
+⛔ Ha a tanúsítások nem jönnek át, **mindenki visszaesik az 1. lépcsőre** az új koinoban, és a
 pénztárca bezárul (D11). *A D25 pillanatkép-szabálya ezért nem részletkérdés.*
 
 #### 6. ⛔⛔ A PÉNZ — amit Csaba maga is meglátott
@@ -3459,13 +3459,13 @@ attól, hogy **MÁS mondta ki nekem**. Ha átmásolom az egyenlegemet, olyat ál
 amit nem én adtam magamnak — és ha a régi koino tovább él, ugyanaz a pénz **kétszer létezik**.
 
 ⭐ **Az irány, ami a koino saját mintájából jön:** a pénznél nem *másolás* kell, hanem
-**átvitel** — kétoldalú és aláírt. A régi koinóban aláírom, hogy *„ezt az összeget itt
-kivezetem"*, és az új koinóban **ez a kivezetés a fedezete** annak, amit kapok.
+**átvitel** — kétoldalú és aláírt. A régi koinoban aláírom, hogy *„ezt az összeget itt
+kivezetem"*, és az új koinoban **ez a kivezetés a fedezete** annak, amit kapok.
 
 ⛔ **És az őszinte korlát:** a kivezetés csak akkor ér valamit, ha a **régi koino is
 megszünteti** azt a pénzt — és azt a régi koino *programja* tartja be. Aki ott más programot
 futtat, annál megmarad. *A kettős költés a verzióváltásnál ugyanaz a nehézség, mint a
-hálózatokban — és a koinónak nincs globális könyve, ami eldöntené.*
+hálózatokban — és a koinonak nincs globális könyve, ami eldöntené.*
 
 ⚠️⚠️ **ELHALASZTHATÓ, DE CSAK A PÉNZ MEGÉPÍTÉSÉIG.** A költözés pénz-szabályát a pénzzel
 **EGYÜTT** kell megtervezni, nem utána — ez pont az a fajta dolog, amit utólag nem lehet
@@ -3609,7 +3609,7 @@ legtöbben épp mobilon lesznek. *Ez romlás, nem törés, de a mérésnek model
 > **megengedhetjük a veszteséget, vonalanként**, mert ami elveszett az egyik vonalról, az
 > átjöhetett egy másik vonalon." — Csaba, 2026-09-14
 
-⭐ **Az alapgondolat helyes, és a koinóban MÁR MŰKÖDIK — csak nem a vonalon, hanem a
+⭐ **Az alapgondolat helyes, és a koinoban MÁR MŰKÖDIK — csak nem a vonalon, hanem a
 protokollban.** A csere `ALLAS`/`KEREK` köre **minden alkalommal újra felderíti**, mi hiányzik;
 a postaláda (D34) továbbadja azt, amit ő maga sem ért. *Ha egy esemény nem jön át Annától,
 átjön Bélától, vagy Annától a következő bulin.* **A koino eleve veszteségtűrő — eseményszinten.**
@@ -3811,7 +3811,7 @@ tehát az utóhang csak `k`-val érkező, BÁJTRA azonos ismétlést nyugtáz, �
 szolgáltató) a pajzsfúrás elvi okból nehéz — **nem mértük**. Amíg nincs mérve, feltételezzük, hogy
 nem áll útban; a napló bukás esetén megnevezi („rés nyílt, de…” / „egyik rés sem nyílt meg”).
 
-### D70. EGY ÍRÓ — koinónként és készülékenként egyetlen folyamat fűz a tárhoz (2026-09-26, Csaba)
+### D70. EGY ÍRÓ — koinonként és készülékenként egyetlen folyamat fűz a tárhoz (2026-09-26, Csaba)
 
 > *„nem szeretnék ideiglenes megoldást. szerkezeti tisztaság fontosabb, mint a munka spórolás."*
 > — Csaba (a három lehetőség közül: zárolás · **egy író** · marad így)
@@ -3828,7 +3828,7 @@ milliszekundumos résre szűkíti — Csaba szerint ez ideiglenes, és nem ez a 
 
 #### 2. A DÖNTÉS
 
-⭐ **Koinónként és készülékenként EGY folyamat fűz a tárhoz: az ÍRÓ.** Minden más folyamat — a kézi
+⭐ **Koinonként és készülékenként EGY folyamat fűz a tárhoz: az ÍRÓ.** Minden más folyamat — a kézi
 parancs, a felület, az őrjárat, ha épp nem ő az író — **átadja neki** az eseményt, és az író a
 saját kapuján (`esemenyMentese`, 3. szabály) engedi be. *A lánc vége így egyetlen helyen dől el:
 ott, ahol a lánc készül.*
@@ -3877,7 +3877,7 @@ ott, ahol a lánc készül.*
 2. ✅ A tár-illesztő: aki nem író, annak a `hozzafuz()`-e átad; az író a saját új eseményt csak a
    lánc végére engedi (`esemenyMentese` harmadik paramétere: `ujSajat`).
 3. ✅ `esemenytTeszek`: „elavult" válaszra frissít, az adatot is újraszámolja, újra aláír.
-4. ✅ A bekötés: a parancssor minden útja (`koinoTaraNyitasa`) és a felület koinónkénti tára; az
+4. ✅ A bekötés: a parancssor minden útja (`koinoTaraNyitasa`) és a felület koinonkénti tára; az
    őrjárat, a `figyel` és a felület induláskor jelentkezik íróként.
 5. ✅ Próbák: `iroProba.js` (öt: a szerep, az átvétel, ⛔ **a verseny — író nélkül háromból háromszor
    elágazik, íróval soha; a próba mindkettőt megköveteli**, az elavult saját esemény, és az idegen
@@ -3930,7 +3930,7 @@ A négy csere egy társsal egyperces körrel ~6,5–8 MB/nap; eggyel ~1,4 MB/nap
 #### 3. A felépítés
 
 - **A cél hordozhatja a várt társat** (`alairo` — a kötés tábla-aláírója); a **munka visszaadja,
-  kivel dolgozott** (`alairo`, csak érvényes tábla-kulcsból). A kapu így sem tud a koinóról: két
+  kivel dolgozott** (`alairo`, csak érvényes tábla-kulcsból). A kapu így sem tud a koinoról: két
   átlátszatlan szöveget vet össze.
 - ⭐ **A portváltás-hozzárendelés FELTÉTELES, ha a cél várt társat hordoz:** a cél addig nem
   „hallott", amíg a munka a várt aláírót nem hozza — közben a kör kopog tovább. Pontos címen a
@@ -3963,7 +3963,7 @@ A négy csere egy társsal egyperces körrel ~6,5–8 MB/nap; eggyel ~1,4 MB/nap
    hírt a következő ablakig tartja; a továbbadással (**V3**) a hír 5–8 mp alatt ér körbe (ma 2–3
    ablak). ⭐ **Csaba (2026-09-26 éjjel):** az entitások a tudatpont-tulajdonosok szerint terjedjenek
    (+ véletlen kötések, 4.2/b), és *„úgy tervezzünk meg mindent, hogy végtelenig lehessen skálázni"*.
-   ⛔ Ezért a V2 és a V3 **nem a koino-szintű lenyomatra épül** (nagy koinóban soha nem egyezik, a V2
+   ⛔ Ezért a V2 és a V3 **nem a koino-szintű lenyomatra épül** (nagy koinoban soha nem egyezik, a V2
    semmit nem spórolna) — ⏭️ előbb a skálázási terv **S3–S4** (entitásonkénti tár, lenyomat és ÁLLÁS),
    és azokra a V2, a V3 és a tulajdonosi körök.
 
@@ -4268,7 +4268,7 @@ meg. A kérdés: ki és mikor kérje le.
 
 **Amiből jött:** a D79 szerint lebukáskor a csaló pont-eseményei nem számítanak — a **D17** szerint
 viszont az állapotot minden gép maga számolja. Ha a bizonyíték csak annál van, aki megtalálta, az
-egyik gép már kihagyja a csaló pontjait, a másik még nem: **a két gép másképp látja a koinót.** A
+egyik gép már kihagyja a csaló pontjait, a másik még nem: **a két gép másképp látja a koinot.** A
 bizonyítéknak tehát oda kell jutnia, ahol a csaló pontjait számolják.
 
 #### A DÖNTÉS
@@ -4451,7 +4451,7 @@ róluk döntenek, és a javaslat élete elszakad a döntéstől. A prototípus m
    erre kerül a pont. Egy érintettnél nincs töredék. A csoport maga a javaslat; elfogadás után az az
    egyezmény. A döntés változatlan (2026-09-07): töredékenként a saját küszöbök, közös lezárás, ÉS.
 6. ⭐ **Az ÉS-szabály a szeletelt világban:** a többi érintett nevezője (a pont-eseményeik a lezárásig)
-   bejelentésként a javaslat szeletébe is bekerül — a terhe a döntés méretével arányos, nem a koinóéval.
+   bejelentésként a javaslat szeletébe is bekerül — a terhe a döntés méretével arányos, nem a koinoéval.
 
 ⏸️ **A megépítéskor eldöntendő:** a beadó kezdő pontjának szétosztása a töredékek között (a prototípusban
 mindegyikre legalább 1) · a csomag-javaslat (a prototípusban a létrehozó választ tárhelyet; a P2P-ben még
@@ -4537,7 +4537,7 @@ tárba, holott ugyanez a pont kimondja, hogy átkerül.
 3. A meghívott azonosság-szeletéről (tartsa-e a meghívó) az **E** dönt.
 
 ✅ **Eldőlt (D90, 2026-10-03):** a gyökér (a legfelső szintű születések listája) nem vállalás, hanem a G dolga;
-a koinó születését mindenki tartja.
+a koino születését mindenki tartja.
 
 ### D87. A KÉRELEM ÚTJA: a törzs és a kérdező (2026-10-02, Csaba)
 
@@ -4576,25 +4576,25 @@ bizonyíték kerül").
 2. ⭐ **A törlés:** a darabot senki nem szolgálja ki tovább, és eldobható; az esemény marad, de semmit nem
    árul el. Az utolsó Profil számít, mint eddig (D28/3).
 
-### D89. KI OLVASHATJA EGY KOINÓ TARTALMÁT: titkosított csere, zárt vagy nyílt koinó (2026-10-02, Csaba)
+### D89. KI OLVASHATJA EGY KOINO TARTALMÁT: titkosított csere, zárt vagy nyílt koino (2026-10-02, Csaba)
 
 **Amiből jött:** az adatkezelés átnézése (2026-10-02) két rést talált. A csere titkosítatlan — az úton
-(szolgáltató, nyilvános wifi) minden olvasható —, és a társat nem kérdezi meg, tag-e: csak a koinó
+(szolgáltató, nyilvános wifi) minden olvasható —, és a társat nem kérdezi meg, tag-e: csak a koino
 azonosítóját veti össze (`vonal.js`, a `NYITAS` után), az pedig minden esemény `koino` mezőjében benne
-van, tehát aki egyszer látott egy eseményt, bármelyik tag készülékéről letöltheti az egész koinót.
+van, tehát aki egyszer látott egy eseményt, bármelyik tag készülékéről letöltheti az egész koinot.
 
 #### A DÖNTÉS
 
 1. ⭐ **A csere titkosított.** Két kötött társ a tábla-kulcsuk X25519 párjából közös titkot számol, küldés
    nélkül; az első találkozásnál (még nincs kötés) egy egyszer használatos kulcsot cserélnek a nyitáskor.
-2. ⭐ **A koinó a létrehozásakor megmondja, zárt-e vagy nyílt** (koinó-paraméter a `KoinoLetrehozas`-ban,
-   mint a D28 belépési adatai). A **zárt** koinó tartalmát a készülék csak tagnak adja ki: a társ a
+2. ⭐ **A koino a létrehozásakor megmondja, zárt-e vagy nyílt** (koino-paraméter a `KoinoLetrehozas`-ban,
+   mint a D28 belépési adatai). A **zárt** koino tartalmát a készülék csak tagnak adja ki: a társ a
    kézfogásban bizonyítja a tagságát (aláír a saját kulcsával, és megmutatja a meghívási láncát) — ez az
    **E** pillérre épül (a P2P-ben a „nem tag" és a „még nem láttam a bizonyítékát" ugyanaz, D19).
 3. A tagok egymás közti láthatósága **nem változik**: a titkosítás és a zártság a KÍVÜLÁLLÓK ellen véd.
 
-⚠️ **A G-re is hat:** egy zárt koinó címjegyzéke nem kerülhet nyilvános helyre (pl. a BitTorrent-DHT-re)
-úgy, hogy kívülálló kiolvashassa belőle, kik a koinó résztvevői.
+⚠️ **A G-re is hat:** egy zárt koino címjegyzéke nem kerülhet nyilvános helyre (pl. a BitTorrent-DHT-re)
+úgy, hogy kívülálló kiolvashassa belőle, kik a koino résztvevői.
 
 #### PONTOSÍTÁS AZ ÉPÍTÉS ELŐTT (2026-10-03, Csaba: „minden javaslatodat elfogadom”)
 
@@ -4607,13 +4607,13 @@ van, tehát aki egyszer látott egy eseményt, bármelyik tag készülékéről 
 2. **Az első találkozás:** a társ kulcsát elfogadjuk, és a kötés megjegyzi (mint az SSH); később más kulcs
    ugyanott = „más felelt” (a D71 ellenőrzése a kézfogásba költözik). A legelső kapcsolatot egy aktív
    közbeékelődő elolvashatja, eseményt hamisítani nem tud. **A személyhez kötés az E-vel jön** a zárt
-   koinóknál: a tag a személyes kulcsával aláírja a kézfogást.
+   koinoknál: a tag a személyes kulcsával aláírja a kézfogást.
 3. **A kézi út fájlja nyílt marad** (te adod oda, akinek akarod); a jelszavas fájlt az E-vel együtt nézzük.
-4. **Az új koinó alapból ZÁRT** — a nyílthoz ki kell mondani (`koino "név" nyilt`).
-5. **A mező nélküli (régi) koinó zártnak számít** (a biztonságosabb).
-6. **A létrehozáskor dől el, nem változtatható**; ha egyszer kell, az egy közösségi döntés a koinóról
+4. **Az új koino alapból ZÁRT** — a nyílthoz ki kell mondani (`koino "név" nyilt`).
+5. **A mező nélküli (régi) koino zártnak számít** (a biztonságosabb).
+6. **A létrehozáskor dől el, nem változtatható**; ha egyszer kell, az egy közösségi döntés a koinoról
    (külön téma).
-7. *(A beszélgetésből:)* a **helyi felfedezés** a koinó azonosítóját nem kiáltja ki nyíltan, hanem egy
+7. *(A beszélgetésből:)* a **helyi felfedezés** a koino azonosítóját nem kiáltja ki nyíltan, hanem egy
    rejtett jelet, amit csak az ismer fel, aki tudja az azonosítót.
 
 ⚠️ **Amit kimondunk:** a zártság betartatása az E-vel jön (a végleges sor ⑥) — addig a mező ott van, de nem
@@ -4637,17 +4637,17 @@ lemezen nem része a ②-nek.
   nyílt csere nincs; a kézfogás nélküli társsal megnevezett hibával áll le („nem fogott kezet”). A társ
   tábla-kulcsa CSAK érvényes aláírással számít (különben nincs kötés belőle). A kapu a titkosított csomagot
   adatnak látja (a FOGLALT-szabály ezen múlik).
-- **A felfedezés** a koinó rejtett jelét kiáltja (a koinó azonosítója és a futás jele, lenyomatolva).
-- **A zárt/nyílt mező** a `KoinoLetrehozas`-ban (`zart`), alapból zárt, a mező nélküli régi koinó is zárt, a
+- **A felfedezés** a koino rejtett jelét kiáltja (a koino azonosítója és a futás jele, lenyomatolva).
+- **A zárt/nyílt mező** a `KoinoLetrehozas`-ban (`zart`), alapból zárt, a mező nélküli régi koino is zárt, a
   kapu csak igaz/hamisat enged; `koino "név" [leírás] nyilt`; az állapot fejléce kimondja.
 
-### D90. A GYÖKÉR ÉS A KOINÓ SZÜLETÉSE (2026-10-03, Csaba: „legyen a (B)”)
+### D90. A GYÖKÉR ÉS A KOINO SZÜLETÉSE (2026-10-03, Csaba: „legyen a (B)”)
 
 **Amiből jött:** a ③ (B/1 — a vállalás) előtt: a gyökérre nem lehet pontot tenni (nem gondolat, hanem a
 legfelső szintű gondolatok képzeletbeli szülője — nincs eseménye, nincs entitása), ezért a vállalásból nem
 jön ki, ki tartja a legfelső szintű gondolatok SZÜLETÉSÉNEK LISTÁJÁT (a gyökér bejelentés-listáját). A
 legfelső szintű gondolatokat magukat a pont-tartóik tartják (a szeletükben a saját születésük is benne van);
-a lista ahhoz kell, hogy valaki felülről böngészhesse a koinót (pl. egy új tag).
+a lista ahhoz kell, hogy valaki felülről böngészhesse a koinot (pl. egy új tag).
 
 #### A DÖNTÉS
 
@@ -4655,10 +4655,10 @@ a lista ahhoz kell, hogy valaki felülről böngészhesse a koinót (pl. egy új
    (a címjegyzék / a kereső-réteg) osztja szét lenyomat szerinti darabokban, több helyen — bárki kiszámolja,
    kitől kérdezze; egy készülék a gyökérből csak egy korlátos darabot tart (a „mindent” beállítású, D83/2,
    tarthatja az egészet). *Miért:* az (A) („aki legfelső szintű gondolatot tart, a teljes listát is”) terhe a
-   koinó méretével nőne (a „végtelen” ellen); és *ami dönt, ne kívánjon élő lekérdezést — csak a megtalálás
+   koino méretével nőne (a „végtelen” ellen); és *ami dönt, ne kívánjon élő lekérdezést — csak a megtalálás
    kívánhat*: a gyökér semmiről nem dönt.
-2. **A koinó születését (`KoinoLetrehozas`) mindenki tartja** — egyetlen esemény (név, alapítók, zárt/nyílt),
-   nélküle a program el sem indul a koinóval, és nem nő a koinó méretével. *(Claude javaslata; Csaba a
+2. **A koino születését (`KoinoLetrehozas`) mindenki tartja** — egyetlen esemény (név, alapítók, zárt/nyílt),
+   nélküle a program el sem indul a koinoval, és nem nő a koino méretével. *(Claude javaslata; Csaba a
    gyökér-kérdéssel együtt kapta, külön nem vitatta — visszafordítható.)*
 
 ### D91. A CÍMJEGYZÉK (G): A FA ÉS A RAJ, A HASH-ELHELYEZÉS CSAK KÉT HELYEN (2026-10-03, Csaba: „1. igen 2. igen”)
@@ -4671,10 +4671,10 @@ DHT-művelet ~50 kérdés ≈ 5–10 KB (mérve), tehát a szeletenkénti, gyako
 1. ⭐ **A „mi kinél van” fő útja a FA és a RAJ** (a skálázási terv 4.2, Csaba 2026-09-02-i ötlete): aki egy szeletet
    vállal, valakitől kapta — ismer legalább egy tartót; a tartók a szelet cseréjekor egymás készülék-azonosítóját
    (tábla-aláíró, név nélkül) és utolsó címét átadják, a szülő tartói a gyerekek tartóit is ismerik — a böngészés a
-   fa bejárása. Mind a titkosított cserén belül (a zárt koinó semmit nem tesz nyilvános helyre), a terhe a saját
+   fa bejárása. Mind a titkosított cserén belül (a zárt koino semmit nem tesz nyilvános helyre), a terhe a saját
    vállalással arányos.
 2. ⭐ **A hash-elhelyezés CSAK két helyen:** a **gyökér darabjai** (D90) és a **közvetlen keresés azonosító alapján**
-   (gyorsító, elhagyható). **A közege most a BitTorrent-DHT, vakított témával** (C3: a téma a koinó azonosítójával
+   (gyorsító, elhagyható). **A közege most a BitTorrent-DHT, vakított témával** (C3: a téma a koino azonosítójával
    sózott lenyomat — kívülálló nem tudja kiszámolni; cserélhetően és elhagyhatóan, mint a hirdetőtábla); a **belső
    hash-DHT / a középút (C2 / C4) az E után** kerül újra elő, ha a Sybil-veszély ott valósnak bizonyul.
 
@@ -4687,8 +4687,8 @@ Az 58. mérés után: a háló a hirdetést 30–60 perc alatt elfelejti, egy t�
 
 1. ⭐ **Minden készülék a saját GYÖKÉR-DARABJÁT hirdeti** — egy téma, ~20 percenként (`HIRDETES_KOZ`), az őrjárat
    a háttérben (a kört nem tartja fel: egy bejelentés 7–17 mp). A darab mélysége a legfelső szintű gondolatok
-   számából jön (`gyokerMelysege`: egy darabba ~256 jusson — kis koinóban 0, és kettőzésenként +1, tehát egy darab
-   mérete nem nő a koinóval); a kereső ugyanabból számol, és a szomszédos mélységet is megpróbálja (a becslés két
+   számából jön (`gyokerMelysege`: egy darabba ~256 jusson — kis koinoban 0, és kettőzésenként +1, tehát egy darab
+   mérete nem nő a koinoval); a kereső ugyanabból számol, és a szomszédos mélységet is megpróbálja (a becslés két
    gépen eltérhet).
 2. ⭐ **A szeletenkénti hirdetés csak KÉSZÜLÉKENKÉNTI beállítással** (`cimjegyzek hirdetes <n>` → `cimjegyzek.json`,
    helyi, nem esemény; **alapból 0**, legfeljebb 50): egy PC, amelyiknek nem számít a forgalom, néhány vállalt
@@ -4701,12 +4701,12 @@ Az 58. mérés után: a háló a hirdetést 30–60 perc alatt elfelejti, egy t�
 dönt. ⚠️ A port a kapu külső portja (ha a tükör megmérte), különben a helyi — NAT mögött ez csak jelölt, mint a raj
 címei. ✅ **Megépült (2026-10-03):** `cimjegyzek.js` (`gyokerMelysege`, `hirdetendoTemak`), `koino.js` (az őrjárat
 hirdetése, a `cimjegyzek` parancs, a `hozd` tartaléka); próbák: `cimjegyzekProba.js` és a parancssor (hamis DHT-n,
-két készülékkel — a beállítás nélkül nem hirdet szeletet, más koinóból nem található, a `hozd` cím nélkül elhoz).
+két készülékkel — a beállítás nélkül nem hirdet szeletet, más koinoból nem található, a `hozd` cím nélkül elhoz).
 
 ### D92. A KÉRELMEZÉS ÚTJA ÉS ALAKJA (D): a kopogtatás a fő út, a továbbadás kiegészítő (2026-10-03, Csaba: „minden javaslatodat elfogadom”)
 
 **Amiből jött:** a D átvizsgálása ([`d_kerelmezes_atvizsgalas.md`](d_kerelmezes_atvizsgalas.md)) és a 60. mérés
-(szimuláció): a kötés-hálón való elárasztás nagy koinóban szinte semmit nem ad (K = 3, 70% élő mellett a kérelem
+(szimuláció): a kötés-hálón való elárasztás nagy koinoban szinte semmit nem ad (K = 3, 70% élő mellett a kérelem
 alig terjed; 2 ugrás után semmi többet), a közvetlen elérés a fogadóképesek arányán áll (nélkülük 0,1%), a döntő
 pedig a rés nyitása a tartóhoz — a kopogtatással T = 3 tartónál 20% → 76% (ha a NAT-párok fele fúrható).
 
@@ -4714,11 +4714,11 @@ pedig a rés nyitása a tartóhoz — a kopogtatással T = 3 tartónál 20% → 
 
 1. ⭐ **Az út (K1) — három, egyszerre indítva:** (a) **közvetlenül** a G-ből ismert tartóhoz, ha a kötésem vagy
    fogadóképes; (b) ⭐ **KOPOGTATÁS** — a kérő a BEP 5-tel bejelenti a címét a tartó kopogtató témáján
-   (`H(koinó ‖ „kopogtató” ‖ a tartó tábla-aláírója)`, vakítva, mint a D91 témái); minden készülék ~20 percenként
+   (`H(koino ‖ „kopogtató” ‖ a tartó tábla-aláírója)`, vakítva, mint a D91 témái); minden készülék ~20 percenként
    ránéz a sajátjára, és a következő buliban a kérők felé is kopog; a rés után a kérés közvetlen (a tartó a
    válaszoló — D87/3); (c) **továbbadás a kötés-hálón**, 2–3 ugrásig. ⚠️ Ez a D76/4 és a D87 hangsúlyát
-   megfordítja: a továbbadás kiegészítő út (a közösségi és a kis koinókban számít). ⚠️ A kopogtatás csak olyan
-   tartóhoz megy, akinek a tábla-aláíróját ismerem (a raj-jegyzék); és aki ismeri a koinót és a tartó aláíróját, az
+   megfordítja: a továbbadás kiegészítő út (a közösségi és a kis koinokban számít). ⚠️ A kopogtatás csak olyan
+   tartóhoz megy, akinek a tábla-aláíróját ismerem (a raj-jegyzék); és aki ismeri a koinot és a tartó aláíróját, az
    látja, hány cím kopogtat nála (azt nem, hogy mit kér).
 2. ⭐ **A közvetítő tartása (K2):** a kérelmet és a választ csak a memóriájában őrzi, időkorláttal (két ablak) és
    darabkorláttal; nem kerül a tárba, nem szolgálja ki — ez a D87/1 „nem tartja meg” értelmezése.
@@ -4748,16 +4748,16 @@ lineáris; és egy régi rés: a szabály-réteg nem kérdezett tagságot (bárk
 2. ⭐ **A TAGSÁGI CSOMAG (E2):** aki taggá válik, egy aláírt csomagot tesz a SAJÁT azonosság-szeletébe a lánca
    eseményeinek másolatával az alapítóig (a D85 T3 mintája: a kapu ellenőrzi, a számítás a bemenetébe bontja). A
    legrövidebb lánc számít; a mélység-korlát **D = 64** (D59 — a „végtelent” őrzi: a bizonyíték felülről korlátos); egy
-   rövidebb láncú meghívás után új csomag váltja a régit. *(Elvetve: a koinó-szintű tagsági gyökér — a tartós maggal
+   rövidebb láncú meghívás után új csomag váltja a régit. *(Elvetve: a koino-szintű tagsági gyökér — a tartós maggal
    és a pénzzel jön, D66; az ősönkénti kérelem — sok kör.)*
-3. ⭐ **A ZÁRT KOINÓ A KÉZFOGÁSBAN (E3):** a társ a SZEMÉLYES kulcsával is aláírja a kézfogás átiratát és megnevezi a
+3. ⭐ **A ZÁRT KOINO A KÉZFOGÁSBAN (E3):** a társ a SZEMÉLYES kulcsával is aláírja a kézfogás átiratát és megnevezi a
    horgonyát; ha nálunk még nem ellenőrzött, a tagsági csomagját is elküldi. Aki nem tag (vagy nem ellenőrizhető),
-   annak a zárt koinóból csak a koinó születése és a SAJÁT azonosság-szelete jár. Nyílt koinóban nincs ilyen kapu.
+   annak a zárt koinoból csak a koino születése és a SAJÁT azonosság-szelete jár. Nyílt koinoban nincs ilyen kapu.
 4. ⭐ **A 2. LÉPCSŐ BIZONYÍTÉKA (E4):** ugyanaz a csomag-forma, a tanúsítások és a felhatalmazások láncával — csak a 2.
    lépcsősnél; előbb a mérés.
-5. ⭐ **A PROFIL (E5):** a koinó a létrehozásakor megmondja a kötelező mezőit (`KoinoLetrehozas.profil`); a `Profil`
+5. ⭐ **A PROFIL (E5):** a koino a létrehozásakor megmondja a kötelező mezőit (`KoinoLetrehozas.profil`); a `Profil`
    esemény az azonosság-szeletben a darab sózott lenyomatát hordozza (D88), a darab a fájl-tárban; ⭐ a meghívás
-   megnevezi a profil lenyomatát (a meghívó ezzel tanúsítja a nevet — D28/2); ahol a koinó mezőket vár, ott a meghívás
+   megnevezi a profil lenyomatát (a meghívó ezzel tanúsítja a nevet — D28/2); ahol a koino mezőket vár, ott a meghívás
    csak ezzel érvényes.
 6. ⭐ **A KONTRASZT-JELZÉS (E6):** a felhatalmazók számolják, a tanúsítottak azonosság-szeletéből és a láncuk
    összegzéséből (a lánc-gyökér darabszáma), kérésre, gyorsítótárral; a jelzés nem dönt (D46). A B/3 után válik élessé;
@@ -4775,13 +4775,13 @@ lineáris; és egy régi rés: a szabály-réteg nem kérdezett tagságot (bárk
 - **A 2.:** `tagsag.js` (a legrövidebb lánc, körbiztosan, D = 64) — ugyanazt használja az `identitas.js` és a szabály-réteg;
   a `TagsagiCsomag` a saját azonosság-szeletbe (a kapu ellenőrzi), a `tagsag` parancs és az őrjárat adja ki.
 - **Az 5.:** `koino "név" profil=nev,telepules` · `profil nev=... telepules=...` (a darab sózva a fájl-tárba, az esemény
-  csak a lenyomatot) · a `meghiv` a meghívott legutóbbi profil-lenyomatát teszi a meghívásba, és ha a koinó vár profilt,
+  csak a lenyomatot) · a `meghiv` a meghívott legutóbbi profil-lenyomatát teszi a meghívásba, és ha a koino vár profilt,
   nélküle nem megy (megnevezi, mit kérj).
 - **A 3.:** a tábla-kulcs a nyitásba került; a kapu (`koino.js`: `tarsKapuja`) a tábla-kulcshoz megjegyzett személyből
-  dönt, és ha nem ismeri a társat, a `CIMEK`-ben kér — a bizonyítás (a személyes aláírás az átiratra a koinóval, a
+  dönt, és ha nem ismeri a társat, a `CIMEK`-ben kér — a bizonyítás (a személyes aláírás az átiratra a koinoval, a
   horgony, a tagsági csomag) egy `TAGSAG` körben jön, a kérelemnél `KELL` → `TAGSAG`. ⚠️ A pontosítások (alappillérek,
   elágazás 57–60): a személyt csak az ismeretlen társtól kérjük (a 64. mérés: különben minden csere ~30%-kal drágulna);
-  a nem tag a MI azonosság-szeletünket is megkapja; ahol a koinó születése ismeretlen, nincs kapu; a korlát a fájlokra
+  a nem tag a MI azonosság-szeletünket is megkapja; ahol a koino születése ismeretlen, nincs kapu; a korlát a fájlokra
   és a címekre is vonatkozik. ⛔ Protokoll-törés: a régi program a nyitásban nem küld tábla-kulcsot, és a kérésre nem
   felel — a telefont frissíteni kell.
 - **A 4.:** a 65. mérés után a D94 váltja (szúrópróba).
@@ -4818,7 +4818,7 @@ a részben hamis 8 úttal ~96%-kal; a maradékot a kontraszt-jelzés és a vissz
    bizonyít — ugyanaz, mint a teljes ellenőrzésben); a mélység-korlát 64 (D59).
 3. **A keret:** ha a teljes zárvány egy munka-keretbe belefér (alapból 1000 esemény-olvasás — nagyjából annyi, mint 8 út
    egymillió 2. lépcsősnél), a teljes ellenőrzés fut, és az ítélet pontos; különben a szúrópróba. A keret helyi mennyiség
-   (mennyit olvastam), nem a koinó mérete — a kis koinó ugyanazt a kódot futtatja. *(Alappillérek, elágazás 61.)*
+   (mennyit olvastam), nem a koino mérete — a kis koino ugyanazt a kódot futtatja. *(Alappillérek, elágazás 61.)*
 4. **A hiány nem vád** (D19): ha egy út hiányzó eseménybe ütközik, az ítélet „nem ellenőrizhető”, és megnevezi, mi hiányzik.
 5. **Egy szabály, egy helyen:** a teljes ellenőrzés és a szúrópróba ugyanazokat a helyi szabályokat hívja
    (`identitas.js`: `allitasHelyben`, `tanusitoFelhatalmazoi`).
@@ -4861,7 +4861,7 @@ tulajdonosok, az érték javaslatok érték szerint; a medián helye mindig a mi
 panaszából kiderül) · **(b)** az összegzés eseményként (`LezarasiOsszegzes`, a javaslat szeletébe, az érintetthez
 bejelentve; a kapu az alakját ellenőrzi), és a döntés-számítás: a nagy szeletű rész az ellenőrzött összegzésből, a többi a
 közös lezáráshoz igazítva · **(c)** a két fok (`ketFok.js`: 1000 esemény fölött összegzett, vissza 800 alatt; az
-azonosság-szelet és a koinó születése mindig teljes; a „mindent” beállítás — `kiszolgalas mindent` — mindent egészében
+azonosság-szelet és a koino születése mindig teljes; a „mindent” beállítás — `kiszolgalas mindent` — mindent egészében
 tart) és a helyi jegyzék (`osszegzesek.json`) · **(d)** a csere (`vonal.js` — `osz`/`kul` a CIMEK-ben, két kör:
 `OSSZEGZESEK`, `OSSZEGZESMINTAKEREK`, `OSSZEGZESMINTAK`; a szerepek: `osszegzoTartas.js`): az összegző tartó a nagy
 szeletet nem egyezteti halmazként, a teljes tartótól a gyökeret (a D92/5 részfa-fája) és az azóta lezárt döntések
@@ -4894,7 +4894,7 @@ visszavont pontom), vagy csak összegezve tartom (`osszegzoTartas.js` `sajatKuld
 egészében tartja) a hiányzókat kéri, és megmondja, mi van már meg (`megvan`); amit egy tartó átvett vagy tudott, azt
 többé nem ajánlom fel (`kezbesites.json`, helyi) — így a felajánlás csak az új eseményeimre utazik, a „nincs újdonság”
 csere nem drágul. A felajánlás a `KULDES_ELETTARTAM`-nál (14 nap) frissebb eseményekre megy (a régebbi a kérelem útján
-elérhető). A zárt koinó nem tagjának is megy — de csak a neki megengedett szeletekben (a saját azonosság-szeletében: így
+elérhető). A zárt koino nem tagjának is megy — de csak a neki megengedett szeletekben (a saját azonosság-szeletében: így
 jut el hozzá a meghívása). A `vallalas` parancs kimondja, hány saját esemény vár kézbesítésre. ⚠️ Egy tartó elég (a tartók
 egymás közt egyeztetnek; a saját eseményemet én is megtartom és kiszolgálom — D86/2).
 
@@ -4911,24 +4911,24 @@ különböző darabú készülék lenyomata soha nem egyezne): a NYITÁS egy tö
 11 jeles lenyomata), a társ a tábla-aláíróból és a mélységből ugyanazokat a kulcsokat számolja, és csak a legsekélyebb
 KÖZÖS darab egyeztetődik, ha eltér (a darabok egymásba ágyazottak). Ha csak nem közös darab tér el, a csere az első szint
 nélkül véget ér. A teljes gyökér, ha darabonként megy, egészében nem cserélődik. A saját legfelső szintű születésem a
-csak küldő úton a darab-kulcsa alatt is felajánlódik (ha nem a saját darabomba esik). A zárt koinó nem tagjánál a közös
+csak küldő úton a darab-kulcsa alatt is felajánlódik (ha nem a saját darabomba esik). A zárt koino nem tagjánál a közös
 darab is kimarad (a részvételi lépés kimondja). ⭐ Az ára: egy „nincs újdonság” cserén +76–100 B (1146 → 1222–1246 B; az
 első tömörítetlen alak +136–178 B volt). ⚠️ A parancssor-próbája a bekapcsolással jön (ma a születés a saját szeletével is
 eljut mindenkihez).
 
-### D96. A KOINÓ SZÜLETÉSE ÉS AZ ALAPÍTÓ AZONOSSÁG-SZELETE (2026-10-06, Csaba: „rendben, elfogadom a javaslatodat”)
+### D96. A KOINO SZÜLETÉSE ÉS AZ ALAPÍTÓ AZONOSSÁG-SZELETE (2026-10-06, Csaba: „rendben, elfogadom a javaslatodat”)
 
 **Amiből jött:** a B3 próbáinak írásakor derült ki (a B/3 átvizsgálás B5 kérdése): az alapító horgonya maga a
-`KoinoLetrehozas`, tehát az alapító azonosság-szelete UGYANAZ, mint a koinó születésének szelete. A D93/6 óta az
+`KoinoLetrehozas`, tehát az alapító azonosság-szelete UGYANAZ, mint a koino születésének szelete. A D93/6 óta az
 identitás-állítás a szerző azonosság-szeletébe is bejelentődik — így az alapító minden meghívása, felhatalmazása és
 tanúsítása oda kerül, amit a D90/2 szerint mindenki tart.
 
 #### A DÖNTÉS
 
-**A koinó születését mindenki tartja — az ESEMÉNYT; a szeletét (a bejelentésekkel) csak aki az alapító azonosságát
+**A koino születését mindenki tartja — az ESEMÉNYT; a szeletét (a bejelentésekkel) csak aki az alapító azonosságát
 vállalja** (az alapító maga, és aki a jelzést kéri — mint bárki más azonosság-szeleténél). Az esemény úgyis minden
-tagsági láncban és csomagban benne van, és soha nem változik. Ha később koinó-szintű paraméter-események lesznek, azok
-külön szeletbe menjenek. A kód a bekapcsolásnál változik (a részvétel a vállalásból: a koinó születésének szeletében
+tagsági láncban és csomagban benne van, és soha nem változik. Ha később koino-szintű paraméter-események lesznek, azok
+külön szeletbe menjenek. A kód a bekapcsolásnál változik (a részvétel a vállalásból: a koino születésének szeletében
 csak az alapító vesz részt).
 
 ### D97. A BEKAPCSOLÁS KÉT KÉRDÉSE: a közös halmaz és a raj a körben (2026-10-08, Csaba: „elfogadom a javaslataidat”)
@@ -4952,7 +4952,7 @@ A sorrend: a közös halmaz → a részvétel a vállalásból (a D96-tal) → a
 `csere/kozosHalmaz.js` (az ujjlenyomat: 6 bájt, 8 jel; a változat: 11 jel; a napló a legutóbbi 64 változással; a változás
 kiszámolása és alkalmazása változat-ellenőrzéssel; a metszet szűrője) + `vonal.js`: a NYITÁS a saját halmazom változatát
 viszi (`pv`); a CÍMEK a jelet (`kz` = állapot : amit a társ halmazából ismerek : a közös lenyomat 11 jeles eleje — `k` a
-metszetet ki tudom számolni, `s` csere kell, `x` a zárt koinó kapuja korlátoz). Ha mindkettő `k`, a két közös lenyomatot
+metszetet ki tudom számolni, `s` csere kell, `x` a zárt koino kapuja korlátoz). Ha mindkettő `k`, a két közös lenyomatot
 vetjük össze; ha valamelyik `s`, a HALMAZ (a változás, vagy a teljes lista; a fogadó a változatot ellenőrzi) és a KOZOS
 üzenet jön; hiba vagy `x` esetén a régi menet. A „minden” részvétel (null) változat nélkül megy — a mai mód változatlan.
 `fajlTar.js` `halmazTarolo` (`halmazok.json`: a saját naplóm és a társak halmazai, legfeljebb 64 társ). ⭐ Mérve (a 68.
@@ -4962,12 +4962,12 @@ mérés kiegészítése): az első találkozás 2,9 / 7,0 / 28,3 KB 50 / 200 / 1
 #### ✅ MEGÉPÜLT — a részvétel a vállalásból (2026-10-08)
 
 **A szigorú (b) élesítve** (`koino.js` `reszvetelHalmazom`): az „alap” készülék csak abban vesz részt, amit vállal — a
-pozitív pontú szeleteiben (a javaslatok és a töredékek is), az azonosság-szeletében; a koinó születésének szeletében csak
+pozitív pontú szeleteiben (a javaslatok és a töredékek is), az azonosság-szeletében; a koino születésének szeletében csak
 az alapító (D96); az összegzett nagy szeletben nem; a töredék-részvétel (D85 T3) a javaslatok állapotából, a tár
 eseményszáma szerint gyorsítótárazva. A „mindent” beállítás (D83/2) a mai módban cserél. A nyitó lenyomat a közös
-halmazon fut (D97/1). ⭐ **A koinó születése mint ESEMÉNY** (D96): egy virtuális kulcs (`KOINO_SZULETES_KULCS`) mindenki
-részvételében, amelynek halmaza egyedül a `KoinoLetrehozas` — mindenkihez eljut, a zárt koinó nem tagjához is, az alapító
-állításai nem. **A zárt koinó korlátozott útja** a megengedett szeleteket a saját vállalásától függetlenül egyezteti (a
+halmazon fut (D97/1). ⭐ **A koino születése mint ESEMÉNY** (D96): egy virtuális kulcs (`KOINO_SZULETES_KULCS`) mindenki
+részvételében, amelynek halmaza egyedül a `KoinoLetrehozas` — mindenkihez eljut, a zárt koino nem tagjához is, az alapító
+állításai nem. **A zárt koino korlátozott útja** a megengedett szeleteket a saját vállalásától függetlenül egyezteti (a
 nem tag azonosság-szeletét a tag nem vállalja — a belépéshez épp ez kell). **A saját tagság a kísérőkből:** aki
 meghívást kapott, de a saját láncát nem tudja bizonyítani, magát is kérdezi (a meghívója összerakja). A `vallalas`
 kimondja a részvételt. ⚠️ A parancssor-próbák alapból „mindent” módban futnak (a környezetből — `KOINO_KISZOLGALAS`); a
@@ -4992,7 +4992,7 @@ szolgálom ki (`fajlIgeny.js` `vallaltLenyomatok`, `koino.js` `fajlResz`); a „
 eseményeinek szerzőihez a tagsági kísérőket is küldöm (a nem tagnak nem). **A visszavett vállalás és a tár tömörítése**
 (D75/1, D73): a tartós tár ritka újraírása (`fajlTar.js` `ujrairas`, csak az író — `iro.js` `tomorites`; a többi folyamat a
 generáció-jelből újraépíti a mutatóját), a kivett események az átmeneti tárba kerülnek; marad a saját minden eseményem,
-a koinó születése, a részvételem szeletei és bejelentései, a vállalt szeletek születése, a gyökér-darabjaim, a tagsági
+a koino születése, a részvételem szeletei és bejelentései, a vállalt szeletek születése, a gyökér-darabjaim, a tagsági
 láncok és a lezárási összegzések. ⛔ Az összegzett szeletből csak az ellenőrzött gyökér után (különben a két fokú
 vállalás billegne). Az őrjárat naponta egyszer, kézzel a `tomorit [proba]`. ⭐ **A ⑦ (B/3 — a szigorú (b)) ezzel kész.**
 
@@ -5032,19 +5032,19 @@ tároló (`emlekezetTarolo`, `<koino>/emlekezet.json`, legfeljebb 64 társ, csak
 (a „nincs újdonság” után is) a társ tábla-aláírója alatt feljegyződik a tárom állása (a mutató hossza, a tömörítés
 generációja) és a MARADÉK (a csere végén is eltérő szeletek — ahol valamelyik fél kimaradt). Ha a nyitó lenyomatok
 eltérnek, mindkét fél elküldi, mi változott NÁLA a feljegyzése óta (VALTOZOTT: a tár vége óta hozzáfűzött események szeletei
-és bejelentési helyei, a koinó születése, a maradék — vagy null, ha nincs feljegyzés, más a generáció, vagy túl sok);
+és bejelentési helyei, a koino születése, a maradék — vagy null, ha nincs feljegyzés, más a generáció, vagy túl sok);
 a VALTOZOTTPAROK a U-n KÍVÜLI párok lenyomatát (22 jel) és a U párjait (a teljes lenyomatukkal) viszi. ⭐ Ha a két kívüli
 lenyomat egyezik, a U a két fél párjaiból osztályozható (az ELTERO is elmarad); ha nem, ugyanabban a cserében a rendes
 első szint fut — a lista nem kíván bizalmat (a hazug lista próbája). ⚠️ Két eltérés a döntés szövegétől (elágazás 88–89): a
 közös alap nem a NYITÁS-ban egyeztetődik (mindkét fél a saját feljegyzéséhez mér), és az ellenőrzés a második szint előtt
-van (a kívüli lenyomat), nem a csere végén. A zárt koinó korlátozott útján nincs feljegyzés. Mérve (70.): lásd ott.
+van (a kívüli lenyomat), nem a csere végén. A zárt koino korlátozott útján nincs feljegyzés. Mérve (70.): lásd ott.
 
 #### ✅ MEGÉPÜLT — az A hátralévői: a lánc-ellenőrzés a cserében (2026-10-09)
 
 `allapot/lancEllenorzes.js` + `osszegzoFa.js` (a napló-fa KÖVETKEZETESSÉGE — RFC 9162, 2.1.4: `naploKovetkezetesseg`,
 `naploKovetkezetessegEllenorzese` — és a részfa-gyorsítótár: a 64 levélnél nagyobb teljes részfák gyökere megmarad, egy
 bizonyíték így O(log n)) + a vonal LÁNC-KÖRE (`LANCKEREK` → `LANCVALASZ`, a szelet-csere végén — minden cserében, ami nem
-ért véget a nyitásnál; ⛔ az „eltérő szeletek száma” nem jó feltétel: a zárt koinó korlátozott útján a két félnél eltér, és a
+ért véget a nyitásnál; ⛔ az „eltérő szeletek száma” nem jó feltétel: a zárt koino korlátozott útján a két félnél eltér, és a
 csere megakadt — a teljes próbasor mérte) + `koino.js` (`lancKerdeseim`, `lancValaszokFogadasa`; a tároló:
 `fajlTar.js` `lancEllenorzesTarolo`, `lancellenorzes.json`). **A kérdező** szerzőnként a nálam lévő legújabb, lánc-gyökeres
 eseményt veszi fejnek, és kérdez: a fej az övé-e (`f`), a nálam lévő többi eseménye benne van-e a fej napló-gyökerében
@@ -5064,8 +5064,8 @@ gyorsítótárral a szerző a második kérdéstől 9–42 ms. ⭐ **Ezzel a ⑧
 **Amiből jött:** a 72. mérés (terep: laptop otthon, telefon a szomszéd wifijén): egy társpár között percenként KÉT csere
 ment (mindkét gép a saját körében hívta a másikat — ~6,5 MB/nap „nincs újdonságra”), és ha a két kör egy másodpercre járt
 egymástól, a második csere az első végébe csúszott, és 10 mp-re elakadt (aznap háromszor). A D71 (iii) „V2” változatát a 47.
-mérés már ártalmatlannak mérte (a hír nem lassul), de a „van-e mondanivalóm” kérdéshez akkor csak a koinó-szintű lenyomat
-lett volna — nagy koinóban soha nem egyezik. A D98/1 (a társankénti emlékezet) óta társanként megmondható.
+mérés már ártalmatlannak mérte (a hír nem lassul), de a „van-e mondanivalóm” kérdéshez akkor csak a koino-szintű lenyomat
+lett volna — nagy koinoban soha nem egyezik. A D98/1 (a társankénti emlékezet) óta társanként megmondható.
 
 #### A DÖNTÉS (A)
 
@@ -5123,7 +5123,7 @@ fordít (H3/A):** a `Pakli.js` a prototípus útvonalait kérdezi (`pakli?entita
 `kartyaAdat.js` `prototipusUtvonala` megmondja, hova menjen a kérés a programban (`/api/pakli/hierarchikus`, `/api/pakli`), és
 a választ a prototípus alakjába fordítja (`hierarchiaAdatta`, `rendezettAdatta`); az `apiHelper.js` (a prototípus teljes
 szerver-kapcsolata ezen az egy fájlon megy át) csak megkérdezi, a pakli válaszát a lap horgonyává teszi, és a `Pakli.js`
-által nem tárolt részt (betöltés, hiányzók, kurzor) egy eseménnyel adja tovább. A koinós többlet a `felulet/js/koinoPakli.js`
+által nem tárolt részt (betöltés, hiányzók, kurzor) egy eseménnyel adja tovább. A koinos többlet a `felulet/js/koinoPakli.js`
 alosztályban, a meglévő metódusok KÖRÉ: ⭐ **a betöltés (H1)** — a lap csendben újrakérdez (4 mp-től 60 mp-ig ritkulva), és
 ha a fa-szelet változott, a kiválasztás helyén újrarajzol; ha nincs kitől kérni (se társ, se ismert tartó), nem „betöltést”
 ígér, hanem kimondja, hogy a tartóit keresi (`kitolKerni`); ⭐ **a forrás (H2)** — az ágazati pont mellé ✓ / ≈ / +? / ?, a
@@ -5155,7 +5155,7 @@ Síkidomot.
    össz-pont és azonosító — a prototípus síkidom-kurzora is ez). A ház útján kér (függő kérelem, az őrjárat hozza, a lap
    csendben újrakérdez); a keretet a nézet adja (egy oldal, egy csomópont-szám, egy küszöb). ⛔ Előtte mérés: hány kérelem
    és hány kör egy oldal, és egy 200 / 500 / 2000 csomópontos Struktúra.
-2. ⭐ **M2 (A) — ami nem monoton (az időrend, a saját pont, a növekvő irány — ág-szűrve és az egész koinóban), az a helyben
+2. ⭐ **M2 (A) — ami nem monoton (az időrend, a saját pont, a növekvő irány — ág-szűrve és az egész koinoban), az a helyben
    ismert részből megy, kimondva, VÉGLEGES alakként;** a Struktúra a darabszám helyén „ismert N (keret: B)” feliratot mutat.
    Idő-összegző nincs (az `ido` a szerző órája — egy jövőbe állított óra a „legfrissebb” élére tűzné az ágát); a
    darabszám-összegző ráér, mert semmi nem dönt rajta.
@@ -5167,7 +5167,7 @@ Síkidomot.
    még nincs; **a kereső-réteg UTÁNA, külön alappillérként**, saját átvizsgálással és méréssel (S8–S10; az SK7 és az SK10
    vele dől el) — mert három dolog épül rá: a Keresés, a besorolás-lenyílók és az entitás-hivatkozás.
 5. ⭐ **M5 (A) — a prototípus modáljai bájtra változatlanul jönnek át** (a ház H3/A-ja szerint), a lap fordít
-   (`kartyaAdat.js`, `apiHelper.js`), a koinós többlet alosztályba kerül; a kapu a Struktúra nyers `fetch`-ének
+   (`kartyaAdat.js`, `apiHelper.js`), a koinos többlet alosztályba kerül; a kapu a Struktúra nyers `fetch`-ének
    `Authorization: Bearer` alakját is elfogadja (ugyanaz a jelszó).
 6. ⭐ **M6 (A) — a prototípus fő menüje a modálokkal együtt átjön;** ami a P2P-ben más út (a Meghívóim: kód helyett esemény;
    az e-ember beállításai: a Profil és a kulcs mentése), az a prototípus „fejlesztésre vár” jelzését kapja a saját
@@ -5193,12 +5193,12 @@ eldönthetőt kimondja, a hiányzó felmenőt elkéri (107.). ⭐ **A besorolás
 ⭐ **A fő menü** (`foMenu.js`: a prototípus `foOldal.js`-ének menüje — a nyolc modál ág nélküli változata, az „Új
 kategória / gondolattípus”; a Meghívóim és az eember beállítások „fejlesztésre vár”, a Kijelentkezés kimarad) (111.). A
 modálok (`TudatpontokModal`, `KategoriaModal`, `GondolatTipusModal`, `RendezesModal` + sablonjaik, CSS-ük) bájtra a
-prototípuséi; a koinós többlet (a tudás határa a modál alján) a prototípus-metódus KÖRÉ kerül (`koinoModalok.js` —
+prototípuséi; a koinos többlet (a tudás határa a modál alján) a prototípus-metódus KÖRÉ kerül (`koinoModalok.js` —
 105.).
 
 ⛔⛔ **Egy régi hiba, amit a bekötés mért (109.):** a prototípusban a küszöbnek KÉT alakja van — a medián az időket
 `aktualMinimumDontesiIdo` néven mondja, egy e-ember javaslata (amit a modálok küldenek és visszaolvasnak)
-`minimumDontesiIdo` néven. A koinó egyetlen táblával, a medián nevein fordított, ezért 2026-09-06/12 óta a lapról jött
+`minimumDontesiIdo` néven. A koino egyetlen táblával, a medián nevein fordított, ezért 2026-09-06/12 óta a lapról jött
 küszöb nem fordult le: a gondolat létrehozásakor némán elveszett, az érték javaslatban (fordítás nélkül írva) az
 elfogadási és a részvételi küszöb elveszett (a döntés az alapértéken maradt — nem romlott el, `kuszobokItt`). A régi
 „oda-vissza” próba önmagával volt következetes, a valódi hívóval nem — és négy további próba a hibás alakra épült (a
@@ -5219,12 +5219,12 @@ le — itt a készüléken ismert rész, az ágazati pont szerint csökkenően (
 (`STRUKTURA_KERET` = 5000; a lapok 2000 sorosak, mint a prototípusban). Mivel a szülő össz-pontja mindig nagyobb a
 gyerekénél (a saját pontja ≥ 1 — D14), a sorrend minden előtagja ZÁRT FA: a keret nem vág ki szülőt a gyereke alól. A
 kurzor a horgonyt is viszi — a lapok egy képből jönnek. A darabszám a prototípus alakjában (`osszesDarab`, `agDarab`), és
-mellette a koinós többlet: hány entitást ismerek, mennyi látszik, meddig biztos a sorrend (`biztosElotag`); a hiányzót
+mellette a koinos többlet: hány entitást ismerek, mennyi látszik, meddig biztos a sorrend (`biztosElotag`); a hiányzót
 (a bizonytalan ágakat, ág-szűrésnél a hiányzó felmenőt) a ház útján elkéri, és kimondja, mire épül a fa (`koino.js`
 `strukturaMegjegyzes` — D101/M2). ⭐ **A kapun** a prototípus két útvonala (`/api/struktura/darabszam`, `/api/struktura`);
 a modál a lapokat nyers `fetch`-csel kéri, ezért a kapu a jelszót az `Authorization: Bearer` fejlécből is elfogadja. ⭐
 **A lapon** a `StrukturaModal` és a `faElrendezes.js` (+ sablon, CSS) bájtra a prototípusé; a megjegyzés a
-`koinoModalok.js`-ből (a `koruleIr` ezért ígéret-tudó lett: a koinós rész a válasz UTÁN fut) — építés közben a
+`koinoModalok.js`-ből (a `koruleIr` ezért ígéret-tudó lett: a koinos rész a válasz UTÁN fut) — építés közben a
 folyamatjelző alatt, a kész fán a vászon tetején. Elágazás 122–126. Próbák: három modul-próba (`pakliProba.js`: a sorrend
 és a hiánytalan lapozás, az ág és a keret, és hogy a prototípus fa-elrendezője a program sorait hiánytalanul elhelyezi),
 egy kapu-próba (a Bearer), és a bekötés (`parancssorProba.js`: a darabszám, a lapok Bearer-rel, az ág részfája, a
@@ -5246,7 +5246,7 @@ egy helyen** (`gyerekTudas`): a bejáró (`biztosElotag`) és a Síkidom közös
 lehet egy még nem ismert gyereke (`hatar`), és mennyi az összegük (`maradek`). ⭐ **A lapon** a `SikidomModal`, a
 `SikidomKartyaPanel` és a nyolc segéd (`sikidomMeret`, `sikidomPakolas`, `sikidomHorgony`, `sikidomRajzolo`,
 `sikidomFormak`, `sikidomRacs`, `sikidomTar`, `sikidomNagyitas` — + `debugFogantyu`, sablon, CSS) bájtra a prototípuséi; a
-koinós többlet a `koinoModalok.js`-ben: ha a program egy síkidom hiányzó gyerekeit elkérte (`betoltes`), a lap csendben
+koinos többlet a `koinoModalok.js`-ben: ha a program egy síkidom hiányzó gyerekeit elkérte (`betoltes`), a lap csendben
 újrakérdez (4 → 60 mp) — a síkidom „kész” jegyét és a kurzorát visszaállítja, és a prototípus a szokásos útján kéri újra
 (a meglévőket a saját szűrője kihagyja); az üres világnál a megnyitás útját futtatja újra. A megjegyzés a vászon tetején.
 
@@ -5256,7 +5256,7 @@ viszont a legfelső szintűek saját pontja is megjön, a gyerekeik nem, így eg
 bejáró biztos előtagja ettől hibásan bővülhetett (a D102 sorrendje is ezen a számon áll). Javítva: az
 `osszPontokSzamitasa` a `tartott` kérdéssel a nem tartott entitásnál a bemondást veszi; a pakli, a Struktúra, a Síkidom és
 a kérelem fejlécei ugyanazt adják. (2) **Egy importkör a lapon** (a böngésző mérte): az örökölt kártyák körbe importálnak
-(Kartya → SikidomModal → SikidomKartyaPanel → kartyaGyar → GondolatKartya → Kartya); a koinó lapja a fát a `Kartya.js`
+(Kartya → SikidomModal → SikidomKartyaPanel → kartyaGyar → GondolatKartya → Kartya); a koino lapja a fát a `Kartya.js`
 felől érte el, és a lap semmit nem töltött be. Javítva az `index.html`-ben (a kártya-gyár előre), és egy próba őrzi (az ES
 kiértékelési sorrendje az `index.html` belépőitől). (3) **A Síkidom adatlapja „(cím nélkül)”** — régi hiba a prototípusban:
 a panel a pakli válaszának `kivalasztottEntitas`-ából építi a kártyát, ami ott csak azonosító és típus. Javítva a
@@ -5273,12 +5273,12 @@ az adatlap a címmel jön, a megjegyzés a vászon tetején, bezáráskor az új
 
 ⭐ **A prototípus kérdése, a készüléken ismert entitásokon** (`pakli.js` `keresesHelyben`): `q`, `tipusok` (a cím-viselők:
 gondolat, kategória, gondolattípus), `limit` TÍPUSONKÉNT (alapból 10, legfeljebb 50 — a prototípus `keresesController`-e;
-eddig a koinó egyetlen 20-as összkorlátot tartott), `agEntitasId` (ág-szűrve az `agHelyzete`-vel: a nem eldönthetőt
+eddig a koino egyetlen 20-as összkorlátot tartott), `agEntitasId` (ág-szűrve az `agHelyzete`-vel: a nem eldönthetőt
 kimondja, a hiányzó felmenőt elkéri). A két tárból keres (amit tartok és amit láttam — eddig csak a tartósból), és
 típusonként a legerősebb elöl (az ágazati pont szerint — a prototípusé az adatbázis sorrendje volt). ⭐ **A tudás határa:**
 a válasz kimondja, hogy a készüléken ismert N entitás címében keresett, és hogy a hálózati keresés (a kereső-réteg — ⑦)
 még nincs (`koino.js` `keresesMegjegyzes`); a lap a találati lista alá írja (`koinoModalok.js` — a keresés UTÁN; üres
-mezőnél eltűnik). Egy készülék terhe itt a saját szeletein múlik, nem a koinó méretén. A `KeresesModal` (+ sablon, CSS)
+mezőnél eltűnik). Egy készülék terhe itt a saját szeletein múlik, nem a koino méretén. A `KeresesModal` (+ sablon, CSS)
 bájtra a prototípusé; az `EntitasKeresoMezo` (a hivatkozás-mező) ugyanezt az útvonalat kérdezi, változatlanul. Elágazás
 136–138. Próbák: két modul-próba (`pakliProba.js`: a sorrend, a rész-egyezés, a típus-szűrő, az ág, az árva felmenője; a
 típusonkénti korlát) és a bekötés (`parancssorProba.js`: a meglévő keresés-próba a prototípus korlátjára, a
@@ -5294,7 +5294,7 @@ szavazóinak száma) szól (`pakli.js` `ertesitesiKep`); a nyolc fajta a két k�
 pont-változása a négy küszöbbel, küszöbváltozás a modál alakjában, új javaslat, elfogadás / elvetés, a határidő egyszer, új
 szavazat). Az első kép ALAPVONAL (semmit nem jelez), egy most tartani kezdett entitás szintén; a saját cselekvésem nem jelez
 (a prototípus „a cselekvőt nem értesítjük”); a nem tartott entitás nem jelez (M3/A — csak a részvételi szeletekből; ami
-csak most jött meg, az nem „új”). Egy készülék terhe a saját szeleteitől függ, nem a koinó méretétől. ⭐ **A beállítások**
+csak most jött meg, az nem „új”). Egy készülék terhe a saját szeleteitől függ, nem a koino méretétől. ⭐ **A beállítások**
 (entitásonként és a globális): a felmenőkön öröklődnek, a legközelebbi nyer, ha sehol nincs, a globális — a prototípus
 szabálya (`ervenyesBeallitas`: `forras` 'sajat' | 'orokolt' | 'globalis'); a tudatpont-szűrő (csak ahol pontom van). ⭐ **A
 helyi tár** (`fajlTar.js` `ertesitesTarolo`: `ertesitesek.json` — a tételek és a kép; `ertesitesiBeallitasok.json`):
@@ -5305,7 +5305,7 @@ felület folyamata számol és ír (egy író), a postafiók kérdésére mindig
 és a postafiók-műveletek sorban mennek (egy olvasott-jelölés nem veszhet el egy közben futó számolás alatt). A kártyák
 számlálója (`olvasatlanErtesitesek`) a postafiók ős-láncaiból, a pakli válaszain (a `kartyaAdat.js` átveszi). ⭐ **A lapon**
 az `ErtesitesekModal` és az `ErtesitesiBeallitasModal` (+ sablon, CSS) bájtra a prototípuséi; a megjegyzés kimondja, miből
-számolódik a postafiók, és a globális beállításnál, hogy a koinóban nincs levél-kézbesítés (nincs szerver, ami küldené —
+számolódik a postafiók, és a globális beállításnál, hogy a koinoban nincs levél-kézbesítés (nincs szerver, ami küldené —
 2. szabály; a kapcsoló megmarad, hatása nincs). Helyőrző modál már nincs.
 
 ⛔⛔ **Egy lelet a bekötésből — a csak küldő út rése (D95/3):** a `kuldoKulcsai` egy saját eseményt csak a saját szeletén
@@ -5322,7 +5322,7 @@ globális beállítás mentése.
 
 **Amiből jött:** a 74. mérés (`bejaroMeres.js`) és a [`modalok_atvizsgalas.md`](modalok_atvizsgalas.md) 6. szakasza: egy friss
 készüléken a mai menettel egy oldal 80–114 perc — a kérésenkénti késés (a NAT-os tartó ~20 perces kopogtatása) × a sorrend
-szintjei; nem a koinó méretétől függ.
+szintjei; nem a koino méretétől függ.
 
 #### A DÖNTÉS
 
@@ -5333,7 +5333,7 @@ szintjei; nem a koinó méretétől függ.
    függő-korlát 64 (helyi paraméter).
 3. ⭐ **J3 — a KÉRELEM-SOROZAT egy kapcsolaton** (Csaba, a második döntés: „elfogadom a javaslatodat, legyen az (A)”). Az
    első döntés (A — nincs több kérelem egy kapcsolaton) a 74. mérés hiányos változatán állt: véletlen tartókkal valóban nem
-   számít, de ha EGYETLEN jól ellátott tartó kapja a kérelmeket (a kis, családi koinó), a kapcsolatonkénti 1 kérelem
+   számít, de ha EGYETLEN jól ellátott tartó kapja a kérelmeket (a kis, családi koino), a kapcsolatonkénti 1 kérelem
    mindent sorba állít (egy 200-as Struktúra 2–3 perc helyett 46–85 perc). Ezért: a kérő ugyanazon a védett résen egymás
    után több `KERELEM`-et küld (legfeljebb 16), a tartó egyenként kiszolgálja, a végén `VEGE`.
 4. ⭐ **J4 (A) — a célválasztás:** X ismert tartói közül előre az, amelyik X ágából a legtöbbet tartja (a raj-jegyzékből).
@@ -5381,7 +5381,7 @@ egyetlen szolgáltatáson). A kérdés: jöjjön-e helyette a készülék saját
 
 #### A DÖNTÉS
 
-⭐ **Igen.** A prototípus kapcsolója és üteme (azonnal / összefoglaló N óránként) megmarad, de a koinóban az operációs
+⭐ **Igen.** A prototípus kapcsolója és üteme (azonnal / összefoglaló N óránként) megmarad, de a koinoban az operációs
 rendszer felugró értesítését kapcsolja: ugyanazokról az eseményekről, amiket az e-ember kipipált, amikor a koino fut (a
 felület vagy az őrjárat). Az illesztő npm-csomag nélkül, a platform saját eszközével szól (Windows: a PowerShell
 értesítése; Mac: `osascript`; Linux: `notify-send`; telefon: a Termux `termux-notification`-je), és CSERÉLHETŐ
@@ -5400,7 +5400,7 @@ alkalmazás-azonosítójával), Macen `osascript`, Linuxon `notify-send`, Termux
 parancs; a hiba visszajön, nem dob. ⭐ **Ki számol:** a felület ÉS az őrjárat (percenként legfeljebb egyszer) — hogy zárt
 lapnál is jöjjön az értesítés; a két folyamat egy zárral váltja egymást (`ertesitesTarolo` `zar` — a mappa létrehozása
 atomi, az elhalt folyamat zárja 60 mp után elesik), a kiküldés a záron kívül megy. ⭐ **A lapon** a modál bájtra a
-prototípusé; a koinós többlet a betöltés után átírja az e-mail kapcsoló és az ütem feliratait („A készülékem is jelezzen
+prototípusé; a koinos többlet a betöltés után átírja az e-mail kapcsoló és az ütem feliratait („A készülékem is jelezzen
 (felugró értesítéssel)”, „egy értesítés, benne az időszak értesítéseinek száma”), és engedi a kapcsolót (a prototípus az
 e-mail cím hiányában letiltaná); a megjegyzés kimondja, mi történik, és ha legutóbb nem sikerült, miért. Elágazás 144–147.
 Próbák: három modul-próba (mit jelez — a kapcsoló, az öt, az időköz; a platform parancsa — a szöveg nem a parancsban; a
@@ -5411,7 +5411,7 @@ bekapcsolt értesítés, a felület bezárva, az őrjárat a cserében megkapja 
 ### D28. A BELÉPÉSI ADATOK — amit a koino elvár (2026-08-27, Csaba)
 
 > „Szeretném, hogy a közösségbe úgy tudna valaki belépni, hogy már megadta azokat a
-> **kötelező adatokat, amit az adott koino elvár**. Az első koinót én fogom létrehozni, és
+> **kötelező adatokat, amit az adott koino elvár**. Az első koinot én fogom létrehozni, és
 > én szeretném, hogy megadják a **teljes nevüket és a lokációjukat is, település
 > szintig**." — Csaba
 
@@ -5432,7 +5432,7 @@ behívott, az ismer** — és a D18 szerint ő tanúsítja, hogy valódi, külö
 
 #### 3. Koino-paraméter: mindegyik maga mondja meg, mit vár el
 
-Csaba első koinója: **teljes név + lokáció település szintig**. Egy másik koino kérhet
+Csaba első koinoja: **teljes név + lokáció település szintig**. Egy másik koino kérhet
 mást, vagy semmit — ugyanaz a paraméter-szabadság, mint a küszöböknél (D13/b, D25).
 
 #### 4. ⭐ KÉT ESEMÉNY, NEM EGY
@@ -5449,7 +5449,7 @@ Profil   { koino, nev, lokacio }      → az ADATAID: „ezt mondom magamról"
 | 1 | **A költözés ne hamisítsa meg a belépés dátumát.** Egy eseménnyel új „belépést" kellene aláírni — mintha most csatlakoztál volna |
 | 2 | **A tagság bizonyítéka ne tartalmazzon személyes adatot.** A létszám-rangsorhoz (D25) a tagságok bizonyítékai kellenek — ha a név bennük lenne, a létszám ellenőrzése egyben **a névsor kiadása** is volna |
 | 3 | **Törölhető legyen a név, a tagság elvesztése nélkül.** Egy üres Profil-esemény leveszi az adatokat (az utolsó számít), miközben tag maradsz |
-| 4 | **Koinónként külön profil** — az azonosság közös a térben, a megjelenés helyi (D25) |
+| 4 | **Koinonként külön profil** — az azonosság közös a térben, a megjelenés helyi (D25) |
 
 **A felületen ez nem látszik:** egy űrlap, egy „Belépés" gomb — a háttérben két aláírás.
 *(Pontosan úgy, ahogy ma is: gondolat létrehozásakor két esemény születik — a gondolat és
@@ -5526,7 +5526,7 @@ A natív futtatókörnyezetben a koino **kinyithat egy portot és figyelhet**. E
 
 ✅ **MEGÉPÜLT (2026-10-15).** A prototípus alsó sávja a helyén: a fő menü, a vissza/előre gombok (a prototípus
 történet-kezelőjével, Alt+←/→), és az infók — a név, a szabad tudatpont, és a számok, amelyek itt a KÉSZÜLÉKEN ismert részéi
-(9. szabály; a lap képéből, `helyiStatisztika`). A koinós többlet a sáv végén a CSERE: „🔄 2 perce +3 · ⏭ 0:42” (az utolsó
+(9. szabály; a lap képéből, `helyiStatisztika`). A koinos többlet a sáv végén a CSERE: „🔄 2 perce +3 · ⏭ 0:42” (az utolsó
 csere ideje és hozama, a következő kör visszaszámlálása; ha az őrjárat nem fut, kimondja), a súgóban a részletek, és a
 feliratra kattintva azonnal frissít. ⭐ Ha egy csere új eseményt hozott, a lap magától frissül — csendben, a kiválasztás
 helyén, nyitott modál alatt vár. A cserét az őrjárat végzi, ezért egy helyi feljegyzés (`csere.json`) köti össze a kettőt
@@ -5559,7 +5559,7 @@ tömörítés (a kifutó szelet a tartós tárban marad; a lejárat után a napi
 a lap tartott-kérdése. A D14 a kifutás alatt megkapott 0-s eseményből ítél (a 0 pont tudás), és a kifutás után is: amíg a
 pont-események bármelyik tárban megvannak, az entitás nem tér vissza. A `vallalas` parancs kiírja a kifutó szeleteket és a
 lejáratukat. A próbák a környezetből állíthatják (`KOINO_KIFUTAS`, ms; 0: nincs kifutás). ⚠️ A vállalás helyi: semmit nem
-dönt el a koinóban (D17 áll), és a terhe a saját tevékenységemmel arányos (egy nap levételei — a „végtelen” próbája).
+dönt el a koinoban (D17 áll), és a terhe a saját tevékenységemmel arányos (egy nap levételei — a „végtelen” próbája).
 
 Próbák: a modul-próba (`atmenetiProba.js`: a kifutás kezdete a levételtől, a 24 órás határ, az újra pontozott és a soha nem
 pozitív szelet) és a bekötés (`parancssorProba.js`: a terepi eset két készüléken — a telefon („alap”) leveszi a pontját,
@@ -5577,13 +5577,13 @@ hamisíthatatlan); a fiókot a saját tartói tartják és hirdetik, a szerző f
 **Csaba döntései:** *„minden javaslatodat elfogadom, »Javaslatom: (A), most tágítsuk, például 48 bitre (ez gyakorlatilag
 végtelen).« ezt leszámítva, addig, ameddig át nem pontosítjuk, a gyakorlatilag végtelen fogalmat.”*
 - **K1 (A)** — hash szerinti elhelyezés a meglévő DHT-n (a gyökér-darab mintája, vakított téma), a társak a bizalmi
-  hálóból; több tartó, egyesítés — az elhallgatás így elérhetőségi kérdés; zárt koinóban a nem tag a fiók tartalmához nem
+  hálóból; több tartó, egyesítés — az elhallgatás így elérhetőségi kérdés; zárt koinoban a nem tag a fiók tartalmához nem
   jut.
 - **K2 (C)** — minden szó két kulcs alatt: az egész szó és az első négy betűje (a négynél rövidebb szó csak egészében); a
   kérdés a szóeleje-fiókot (az őrző a címekben a kérdezett szóelejére szűr) és a pontos alak fiókját kérdezi. Az ok: a
   magyar toldalékol (a „park” a „parkban”-t csak így találja; a helyi alj szórészletre keres). Szótár és nyelvtani
   értelmezés nincs (5.1); a tőváltozás kimarad. ⭐ Az index puha állapot (K5): a kulcs-séma később egy átmeneti időszakkal
-  váltható, a koinó magja nélkül.
+  váltható, a koino magja nélkül.
 - **K3 (A)** — a hálózati kereső csak a legalább két különböző, ELLENŐRZÖTT TAG tulajdonosú gondolatot adja; rögzített,
   nem közösségi paraméter (SK10, 5.8); a helyi alj és a létezés nem szűr. ⭐ A nem tag szerző születése a küszöbtől
   függetlenül sem kerül az indexbe (a kulcs ingyen van, a tudatpont-keret csak a tagot köti — D93/1). A tagság a tagsági
@@ -5605,8 +5605,8 @@ végtelen).« ezt leszámítva, addig, ameddig át nem pontosítjuk, a gyakorlat
 kérdés → ⑥ a halványulás → ⑦ a Keresés modálja a hálózati találatokkal. Elágazás 154.
 
 ✅ **① A 75. MÉRÉS (2026-10-16, `keresoMeres.js` — az eredmények 75.): a D105 alakja kiállja.** A K7 nélkül a gyakori szó
-fiókja (a „nem”: a címek ~5%-a) a koinóval lineárisan nő — egymillió gondolatnál egy készüléken ~31 MB; osztódással (B =
-256) ~1,4 MB a legtöbbet tartónál, ~0,5 MB átlagosan, és nem nő a koinóval. A K2 (C) a tőre keresve a „legalább 10
+fiókja (a „nem”: a címek ~5%-a) a koinoval lineárisan nő — egymillió gondolatnál egy készüléken ~31 MB; osztódással (B =
+256) ~1,4 MB a legtöbbet tartónál, ~0,5 MB átlagosan, és nem nő a koinoval. A K2 (C) a tőre keresve a „legalább 10
 találatot” 47–72% helyett 91–96%-ban hozza. Az első válasz 1 perces körrel medián 1 perc. ⭐ A mérés két paramétert ad a
 ②–④-hez: a darab **B = 256** (kisebbel a teher simább, de a teljesség romlik), és a tartó tagság-gyorsítótára a régiója
 szerzőinél nagyobb (**4096**); az új tartó első kitöltése (~8,4 MB egymillió gondolatnál) a háttérben jöjjön, a tagsági
@@ -5637,7 +5637,7 @@ a tartóitól elkéri, és a valódi címével szűr (a kereső a megtalálás r
 tulajdonos többé nem újítja: 30 nap alatt elhalványul. Ára: egy el nem fogadott javaslat címe is felkerülhet, ha valaki
 felajánlja — a K3 (két tag-tulajdonos) és a kérdező szűrője fogja meg. Elágazás 157.
 
-### D106. A „VÉGTELEN” MÉRCÉJE: A KOINÓ SAJÁT HATÁRA, ÉS A KIMONDOTT KIVÉTEL (2026-10-15, Csaba: „A (C)-t választom”)
+### D106. A „VÉGTELEN” MÉRCÉJE: A KOINO SAJÁT HATÁRA, ÉS A KIMONDOTT KIVÉTEL (2026-10-15, Csaba: „A (C)-t választom”)
 
 **A kérdés** (a D105 K8-a nyomán): Csaba a darab-szám szélessége előtt a „gyakorlatilag végtelen” fogalmát pontosíttatta.
 A szó két állítást mosott össze: *nincs korlát*, és *van, de a valóságban nem érjük el* — az utóbbi egy feltevésen áll a
@@ -5645,16 +5645,16 @@ valóságról (az IPv4 32 bitje 1981-ben „gyakorlatilag végtelen” volt; 201
 változott).
 
 **A megkülönböztetés:** a *teher-korlát* egy készülék munkáját fogja meg (K = 3 kötés, ≤ 3 cím, 8 raj-tartó, 20 MB
-átmeneti tár, a bizonyítékok hossza) — ezek a „végtelen” eszközei: ettől nem nő a teher a koinóval. A *méret-korlát* egy
-szám, ami a koinóval nőne, de rögzített szélességű: ha a koinó kinövi, vagy a teher kezd nőni, vagy a szám nem ábrázolható.
+átmeneti tár, a bizonyítékok hossza) — ezek a „végtelen” eszközei: ettől nem nő a teher a koinoval. A *méret-korlát* egy
+szám, ami a koinoval nőne, de rögzített szélességű: ha a koino kinövi, vagy a teher kezd nőni, vagy a szám nem ábrázolható.
 Az átnézéskor három ilyen állt: a gyökér-darab 16 bites száma, a tagsági lánc 64-es mélység-korlátja, és a kanonikus alak
 „biztonságos egész” határa (2^53).
 
 **Csaba döntése — (C):** *„A (C)-t választom: az (A) a szabály, a drága helyen kimondott (B)-kivétel.”*
-- **A SZABÁLY (A — a belső mérce):** egy méret-korlát se legyen szűkebb, mint a koinó SAJÁT határa — az azonosító-tér: egy
-  entitás neve a 256 bites lenyomata, és ~2^128 entitás fölött két név véletlenül egybeeshet; ennél többet a koinó semmilyen
+- **A SZABÁLY (A — a belső mérce):** egy méret-korlát se legyen szűkebb, mint a koino SAJÁT határa — az azonosító-tér: egy
+  entitás neve a 256 bites lenyomata, és ~2^128 entitás fölött két név véletlenül egybeeshet; ennél többet a koino semmilyen
   formában nem tud megkülönböztetni. Feltevés nélküli.
-- **A KIVÉTEL (B — a levezetett mérce):** ahol a szabály betartása drága, ott KIMONDOTT kivétel áll, a koinó szabályaiból
+- **A KIVÉTEL (B — a levezetett mérce):** ahol a szabály betartása drága, ott KIMONDOTT kivétel áll, a koino szabályaiból
   levezetett legnagyobb mérettel (az e-ember élő, külön ember — D18/1 → legfeljebb az emberiség, ~10^10; élő entitás csak
   ponttal — D14, fejenként 10 000 pont → legfeljebb ~10^14 élő entitás) és a tartalékkal, EGY HELYEN leírva (a CLAUDE.md
   „végtelen” szakasza).
@@ -5662,11 +5662,11 @@ Az átnézéskor három ilyen állt: a gyökér-darab 16 bites száma, a tagság
   összegei, az össz-pont bemondása — `osszegzoFa.js`, `osszPont.js`): egy ág össz-pontja (legfeljebb e-ember × 10 000) ~900
   milliárd e-emberig pontos, az emberiség ~87-szereséig. A nagy egészek a kanonikus alakban (a „legveszélyesebb részlet”)
   formátum-szintű munka lennének.
-- **Az ellenőrizhető alak:** minden rögzített számnál a kérdés: *a koinó saját határa előtt áll-e meg?* Ha igen, vagy
+- **Az ellenőrizhető alak:** minden rögzített számnál a kérdés: *a koino saját határa előtt áll-e meg?* Ha igen, vagy
   tágítjuk, vagy kimondott kivétel lesz belőle — a számmal és az indoklással. A „gyakorlatilag” szó nem érv.
 
 **A K8 (a D105-ből) ezzel:** a darab-szám a lenyomat annyi bitje, amennyi a mélységhez kell, legfeljebb
-`GYOKER_MAX_MELYSEG` = 144 — amennyi a 43 jeles kulcsba fér (a koinó határához ~120 bit kell, a kereső-réteg indexéhez —
+`GYOKER_MAX_MELYSEG` = 144 — amennyi a 43 jeles kulcsba fér (a koino határához ~120 bit kell, a kereső-réteg indexéhez —
 gondolatonként ~10 bejegyzéssel — ~124).
 
 #### ✅ MEGÉPÜLT (2026-10-15) — a K8
@@ -5679,9 +5679,9 @@ mélység becslése a saját darab maradékát szűri tovább (a munka a darab m
 egy helyen íródik és olvasódik (`gyokerJelSzovege`, `gyokerJelOlvasasa` — a mélység legfeljebb három számjegy, 144-ig).
 A `vonal.js`, a `szeletEgyeztetes.js` és a `koino.js` (a mélység becslése, a tömörítés, a függő kérelem szomszédos
 mélységei, a `cimjegyzek gyoker` parancs) a gyökér-lenyomatból számol, a mélység 144-ig. ⚠️ Visszafelé: 16 mélységig minden
-kulcs és DHT-téma bájtra a régi — a mai koinókban és a telefonnal semmi nem változik (a 16-os mélységen a ±1 szint a 17-est
+kulcs és DHT-téma bájtra a régi — a mai koinokban és a telefonnal semmi nem változik (a 16-os mélységen a ±1 szint a 17-est
 is hozza; a régi program a nyitás jelét a sorrend szerint ugyanígy olvassa). A gyökér-darab nem állapot-befolyásoló (azt
-mondja meg, ki mit tart, nem azt, mi a koinó állapota) — a D66 nem érinti.
+mondja meg, ki mit tart, nem azt, mi a koino állapota) — a D66 nem érinti.
 
 Próbák: négy új (`gyokerDarabProba.js`: a kulcs oda-vissza 144-ig és 16-ig bájtra a régi alak, egy darab = egy kulcs ·
 az egymásba ágyazás 144 bitig · a mélység 16 fölött a saját darabból (sűrű darab → 21), a ±1 szint 16-on · a nyitás jele),
@@ -5689,8 +5689,8 @@ a meglévők `BigInt`-re igazítva; rontás (`GYOKER_MAX_MELYSEG` = 16): pontosa
 
 ⏸️ **A szabály másik következménye (külön lépés):** a tagsági lánc 64-es mélység-korlátja (`MELYSEG_KORLAT`, és a 2.
 lépcső szúrópróbájának útja) az (A) szerint szűk: a természetes lánc (63. mérés: egymillió tagnál ~13 lépés, lépésenként
-~2,9-szeres) ~10^29–10^30 tagnál éri el, a koinó határához ~85 kell. A felemelése olcsó (a legrosszabb bizonyíték kétszer
-hosszabb), de ⚠️ állapotot befolyásoló állandó (D66 — a tagság a döntés bemenete): éles koinó előtt kell megtenni. Elágazás
+~2,9-szeres) ~10^29–10^30 tagnál éri el, a koino határához ~85 kell. A felemelése olcsó (a legrosszabb bizonyíték kétszer
+hosszabb), de ⚠️ állapotot befolyásoló állandó (D66 — a tagság a döntés bemenete): éles koino előtt kell megtenni. Elágazás
 155. → ✅ **D113** (2026-10-19): 256 — ⚠️ a fenti „~10^29–10^30” az ÁTLAGOS mélység volt; a korlát a legmélyebb tagnál dönt
 (78. mérés: a 64-et ~1,3·10^11 tagnál elérte volna).
 
@@ -5702,7 +5702,7 @@ javaslat — K9 — + két tag-tulajdonos pont-eseménye — K3); a csomag pont-
 a K5 és a raj együtt rést nyit (a lejárt bejegyzés egy másik tartótól visszajöhet).
 
 **Csaba döntései — mind (A):**
-- **L1 — külön KERESŐ-TÁR:** puha állapot, a koinó állapotába nem számít bele; korlátos és eldobható (mint az átmeneti tár
+- **L1 — külön KERESŐ-TÁR:** puha állapot, a koino állapotába nem számít bele; korlátos és eldobható (mint az átmeneti tár
   — B/2); ugyanazon a kapun íródik (`esemenyMentese` a tár három műveletével — 3. szabály).
 - **L2 — a régió tartói a CSERÉBEN egyeztetnek, a régió kulcsa alatt** (a gyökér-darab mintája — D95/4): a NYITÁS-ban egy
   rövid jel, a vonal a régió kulcsánál a kereső-tárat olvassa és írja; a társakat a DHT-n a régió témáján találják meg, a
@@ -5794,7 +5794,7 @@ eseménynél ~1,1 s CPU kérésenként).
 - **KK1 — a kérés ára korlátos:** a kiszolgáló a képét (az állapot, a döntések, az össz-pontok, a gyerek-jegyzék) a tár
   állása, az átmeneti tár változata és a vállalás szerint gyorsítótárban tartja, legfeljebb ~60 mp-ig — a keret előfeltétele.
 - **KK2 — két mérce:** a kimenő bájt és a kérések száma, csúszó óránként (helyi feljegyzés).
-- **KK3 — a társ:** zárt koinóban a személy (a `ki`), egyébként a tábla-kulcs (a kérelembe is bekerül — a kérő vele is
+- **KK3 — a társ:** zárt koinoban a személy (a `ki`), egyébként a tábla-kulcs (a kérelembe is bekerül — a kérő vele is
   aláírja a kézfogás átiratát), végső esetben a cím; a közös keret a sok-azonosságos kerülőút ellen.
 - **KK4 — ami alá tartozik:** minden, amit másnak teszek (a kérelem mindhárom fajtája a kísérőkkel, a továbbadás, a
   fájl-randevú törzse, a csere azzal, aki nem a kötésem); a kötéseimmel folytatott csere nem.
@@ -5810,7 +5810,7 @@ eseménynél ~1,1 s CPU kérésenként).
 ✅ **① MEGÉPÜLT (2026-10-17):** a kiszolgáló képe gyorsítótárban (`koino.js` `kiszolgaloKepe` — a tár állása, az átmeneti tár
 változás-számlálója, a vállalás és a bemondások szerint, ≤ 60 mp; a fejléc- és a törzs-kérelem használja), a fejléc-kép
 (`kerelem.js` `fejlecKepe`: az össz-pontok, a gyerek-jegyzék, a lustán rendezett gyereklisták), és a fejléc-válasz LUSTA
-ÖSSZEFÉSÜLÉSSEL (a lapos gyökér egy nagy koinóban minden kérésnél a teljes koinót a kupacba tette). A 76. mérés újra: egy
+ÖSSZEFÉSÜLÉSSEL (a lapos gyökér egy nagy koinoban minden kérésnél a teljes koinot a kupacba tette). A 76. mérés újra: egy
 kérés 0,5–0,7 ms a tár méretétől függetlenül. Elágazás 161.
 
 ✅ **A KÉRELEM ÚTJA A KERETEN (2026-10-17):** a könyvelés (`kiszolgalasiKeret.js`), a kérő tábla-kulcsa a kérelemben (KK3), az
@@ -5819,8 +5819,8 @@ kérés 0,5–0,7 ms a tár méretétől függetlenül. Elágazás 161.
 
 ✅ **MEGÉPÜLT (③–⑤, 2026-10-17):** az idegen csere a kereten (a nyitás után `KESOBB` — tiszta vég; ha enged, a maradék bájtig
 küld, a többit a következő csere hozza; a csere is könyvelődik), a kötés a keretben a RENDSZERES társ (a három legrendszeresebb
-közül, ≥ 3 találkozás, az első ≥ 1 órája), a társ kulcsa egy helyen (zárt koinóban a személy, különben a tábla-kulcs), a tag jel
-csak ellenőrzött tagságnál (nyílt koinóban a kérelemben bizonyított személy a lánca szerint), a ki nem szolgált kérelem nem csere,
+közül, ≥ 3 találkozás, az első ≥ 1 órája), a társ kulcsa egy helyen (zárt koinoban a személy, különben a tábla-kulcs), a tag jel
+csak ellenőrzött tagságnál (nyílt koinoban a kérelemben bizonyított személy a lánca szerint), a ki nem szolgált kérelem nem csere,
 a kérő a „később”-t mondót addig kihagyja, és a beállítás (`kiszolgalas keret <MB> <kérés>`; az elmúlt óra a `keret.json`-ből).
 Két hibát a próba mért meg: a kapu `szabad`-ja nem tagság, és a „később”-t kapott kérelem nem csere. Elágazás 163–165.
 ⏸️ Maradt: a továbbadott válasz visszavitele nem könyvelődik; a lap a „később”-t a felderítés paneljével mondja ki.
@@ -5828,7 +5828,7 @@ Két hibát a próba mért meg: a kapu `szabad`-ja nem tagság, és a „későb
 ### D110. A TANULT MÉLYSÉG — a K10 (A2) (2026-10-18, Csaba: „rendben. elfogadom a javaslatodat, mehetünk tovább” → a pontosításra: „(A2) Medián”)
 
 **A rés:** a mélységet (a gyökér-darabét és a kereső-régióét is) minden készülék a SAJÁT darabjából becsüli; egy új (vagy
-hosszan offline) készülék darabja üres vagy elavult, a becslése sekély, és egy nagy koinó mély tartóival nincs közös kulcsa —
+hosszan offline) készülék darabja üres vagy elavult, a becslése sekély, és egy nagy koino mély tartóival nincs közös kulcsa —
 a cserében soha nem egyeztetnek, a felajánló a mély témán nem találja meg. A gyökér-darabnál ugyanez a rés állt (D95/4).
 
 **A döntés (A2):** a készülék a társai bemondott mélységét (a NYITÁS `gyd` / `kd` jelének első tagja — a vonalon semmi nem
@@ -5838,7 +5838,7 @@ Ugyanaz a szabály a gyökér-darabra és a kereső-régióra, egy helyen (`mely
 
 ⛔ **Az elvetett feltétel** (a K10 (A) eredeti szövege: „csak amíg a saját darabja kevés”): a pontosításkor kiderült, hogy egy
 régen jól szinkronban lévő, aztán hónapokig offline készüléket beragaszt — a darabja a régi, sekély mélység szerint „teli”,
-tehát nem tanulna, és a megnőtt koinó mély tartóival soha többé nem egyeztetne. A hazug társ ellen a MEDIÁN véd (a friss
+tehát nem tanulna, és a megnőtt koino mély tartóival soha többé nem egyeztetne. A hazug társ ellen a MEDIÁN véd (a friss
 társaim többsége kell, nem kettő); a mélyre tolás ára amúgy is csak az, hogy kevesebbet tartok (a többi tartó fedez).
 
 ✅ **MEGÉPÜLT (2026-10-18):** `js/csere/melysegTanulas.js` (a jegyzék alakja, a feljegyzés, a tanult mélység, az érvényes
@@ -5888,7 +5888,7 @@ a fájl-tár nem korlátos.
 3. **F4 + F6 (A) — az alapértékek:** K = 200 (≤ 2000), d nincs (≤ 64), csak fejléc (a törzs bekapcsolható), 20 MB (≤ 500),
    körönként 4 kérés (≤ 16), egyszerre ≤ 8 felderítés, összesen ≤ 1 GB, 30 nap után eldobható; a lap interaktív kérései
    mindig előbb mennek; a kiszolgálónál nincs „háttér” jel (a keret véd).
-4. **F5 (A) — a felület:** a kártya menüjéből indul (a koinós többlet egy pontot fűz a prototípus menüjéhez — körülírva), a
+4. **F5 (A) — a felület:** a kártya menüjéből indul (a koinos többlet egy pontot fűz a prototípus menüjéhez — körülírva), a
    felderítések listája (állás, újrafelderítés, törlés) a fő menüben, a rögzített kártyán egy jel („pillanatkép, 3 napja”);
    a parancssorban `felderites`.
 
@@ -5927,33 +5927,33 @@ törzsét védettnek látja). ⚠️ Megfigyelés (a bekötés-próba mérte): a
 kéri, tehát egy csere-társtól a törzs a felderítés nélkül is jön — a két út versenyez; a fájl-tár kerete (①) ezt korlátozza.
 Elágazás 179.
 
-✅ **⑤ MEGÉPÜLT (2026-10-19) — a felület — a D112 KÉSZ:** `felulet/js/koinoFelderites.js` (koinós többlet: a kártya menüjében
+✅ **⑤ MEGÉPÜLT (2026-10-19) — a felület — a D112 KÉSZ:** `felulet/js/koinoFelderites.js` (koinos többlet: a kártya menüjében
 „📷 Felderítés…” — a kártya bővítési pontján, `extraMenuOpciok`, a prototípus kártyája bájtra változatlan —, a beállító ablak
 és a „📷 Felderítések” ablak: az állás, újra, törlés, öt másodpercenként frissül), `foMenu.js` (a „Felderítések” és „Az egész
-koinó felderítése…” pont), a kártya „📷” jele (`koinoPakli.js`, a fordító: `kartyaAdat.js` — a forrás-jel mellett,
+koino felderítése…” pont), a kártya „📷” jele (`koinoPakli.js`, a fordító: `kartyaAdat.js` — a forrás-jel mellett,
 „pillanatkép, N napja”), `koinoFelderites.css`; a program oldala: `koino.js` (`GET /api/felderitesek` — a jegyzék, a
 rögzített rész, a beállítás határai; `POST /api/felderites` — új / újra; `POST /api/felderites/torol`; a hierarchikus pakli
 kártyái a rögzítés idejével — `atmenetiTar.js` `rogzitesIdeje`). ⚠️ A böngészős próba két leletet hozott: (1) a kis
-pillanatkép mérete „0 MB”-nak látszott (most 1 MB alatt KB); (2) ⛔ az egész koinó felderítése soha nem lett volna kész: a
+pillanatkép mérete „0 MB”-nak látszott (most 1 MB alatt KB); (2) ⛔ az egész koino felderítése soha nem lett volna kész: a
 tartó teljes gyökér-válasza után a sorrend biztos, de a bejáró a gyökeret (gyerekszám híján) tovább kérendőnek tartja — a
 lapnak ez jó, egy pillanatképnek a teljes válasz elég (`pakli.js` `felderitesAllasa`). Elágazás 180. Mellette (a ⑦b próba
 megnevezett bukásából): a függő kérelem „már próbáltuk” jele időre szól (2 perc), nem a futás végéig — elágazás 181.
 
 ### D113. A TAGSÁGI LÁNC KORLÁTJA — 256 (2026-10-19, Csaba: „(A) 256”)
 
-**Az alap:** a D106 (A) szabálya (egy méret-korlát se legyen szűkebb, mint a koinó saját határa) és a 78. mérés. A D106 a
+**Az alap:** a D106 (A) szabálya (egy méret-korlát se legyen szűkebb, mint a koino saját határa) és a 78. mérés. A D106 a
 64-es korlátot „~10^29–10^30 tagnál” szűknek mondta — ez az ÁTLAGOS mélység volt. A korlát viszont a LEGMÉLYEBB tagnál dönt
 (aki mélyebben ül, nem tag, amíg egy közelebbi tag be nem hívja), és véletlen meghívónál a fa magassága ~e·ln n: a 64-et a
 legmélyebb tag már ~1,3·10^11 tagnál eléri — az emberiség ~13-szorosánál, a (B) tízszeres tartalékán épp csak túl. A 2.
 lépcső szúrópróbájának útja ugyanezt a korlátot használja, és a helyi növekedésnél gyorsabban nő (évtizedenként ~4–6 lépés).
 
-**A három lehetőség:** (A) 256 — a legmélyebb tag is belefér a koinó saját határáig (2^128-nál ~234, aktív meghívóknál ~156),
+**A három lehetőség:** (A) 256 — a legmélyebb tag is belefér a koino saját határáig (2^128-nál ~234, aktív meghívóknál ~156),
 és a szúrópróba útja is; ára a korlátnál ülő tag csomagja (~240 KB) és két protokoll-őr · (B) 128 kimondott kivételként — a
 legmélyebb tag ~3·10^21-ig fér bele, a határon a tagok ~0,003%-a rövidítene, protokoll-változás nélkül · (C) 64 marad,
 kivételként — nem javasolt.
 
 **Csaba döntése — (A):** `MELYSEG_KORLAT` = 256 (`tagsag.js`) — a tagság és a 2. lépcső szúrópróbájának útja (`identitas.js`
-`seta`). ⚠️ Állapotot befolyásoló állandó (D66): éles koinó még nincs, a teszt-koinókban 64-nél mélyebb lánc nincs (bennük a
+`seta`). ⚠️ Állapotot befolyásoló állandó (D66): éles koino még nincs, a teszt-koinokban 64-nél mélyebb lánc nincs (bennük a
 változás semmit nem mozdít); a régi program a 197 eseménynél nagyobb csomagot elutasítja — a telefon a terepi teszteléskor
 frissül (együtt).
 
@@ -6060,10 +6060,10 @@ mintájára; a jel **a ház kártyáin, a testvér-jelzőben, a Struktúra és a
 
 ### D117. A STRUKTÚRA MAGÁTÓL AZ ELSŐ 200-IG KÉR (2026-10-23, Csaba: „(B) Az első 200-at”)
 
-**Az alap — Csaba lelete:** a telefon „felderítés nélkül” áthozta a koinó mind a 475 gondolatát (az első ~180-at magától —
+**Az alap — Csaba lelete:** a telefon „felderítés nélkül” áthozta a koino mind a 475 gondolatát (az első ~180-at magától —
 a ház böngészése —, a többit a többi nézet). Két ok volt: (1) a lapos (ágazati pont szerinti) lista bejárója a TELJES sor
 biztosságáig kért, és a lap percenként újrakérdezett — HIBA, javítva: a bejáró csak addig kér, amit a nézet mutat (elágazás
-188); (2) a Struktúra a terv szerint (D101 ③) a keretéig — 5000 — kért, egy kis koinóban tehát mindent. Csaba kérdése: *„a
+188); (2) a Struktúra a terv szerint (D101 ③) a keretéig — 5000 — kért, egy kis koinoban tehát mindent. Csaba kérdése: *„a
 struktura nézetben 5000-ig nem terhelő túlságosan?”*
 
 **A döntés (B):** a Struktúra megnyitáskor magától annyit kér, mint egy alapbeállítású felderítés (`STRUKTURA_KERES` =
@@ -6081,14 +6081,14 @@ de mielött elkezdjük beszéljük át, alapossan.”*
 költözik.
 
 **A hat döntés:**
-1. **A múlt közös, a jelenlét személyes:** az új koinó a szülőjére épül (a születése megnevezi; a vágás a saját születése);
-   a szülő múltja a vágásig az új koinó múltja is, a régi aláírásokkal, átírás nélkül — az entitások a régi nevükön élnek.
+1. **A múlt közös, a jelenlét személyes:** az új koino a szülőjére épül (a születése megnevezi; a vágás a saját születése);
+   a szülő múltja a vágásig az új koino múltja is, a régi aláírásokkal, átírás nélkül — az entitások a régi nevükön élnek.
    Súlyt (pont, szavazat, érték javaslat, állásfoglalás) csak a költöző hoz; amire senki nem hozott, azt a D14 elfelejti
    (az árvák felkerülnek); a vágás előtt lezárt döntés múlt (a szülő szabályaival, mindenki szavazatával), a nyitott jövő.
-2. **A szabályok a koinó születésében, a koinó neve a születés lenyomatából** — egy szabály-változás új koinó ugyanazzal a
+2. **A szabályok a koino születésében, a koino neve a születés lenyomatából** — egy szabály-változás új koino ugyanazzal a
    programmal (D25 1. mód, D13/b), a szülő múltját ugyanaz a kód számolja a szülő paramétereivel, és a 15. mérés néma
    kettéhasadása szerkezetileg megszűnik.
-3. **A tagság (és a 2. lépcső) a vágáskor öröklődik**, csak a költözőnek ad súlyt, utána csak az új koinó meghívásai — a D25
+3. **A tagság (és a 2. lépcső) a vágáskor öröklődik**, csak a költözőnek ad súlyt, utána csak az új koino meghívásai — a D25
    kivétele (*„születéskor örökölhet, utána soha”*). ⚠️ A tanúsításokat (a D25 nyitott kérdését) az „elfogadom mind”
    szerint igennek vettük.
 4. **A vágáskor nyitott javaslatok a költözőkkel folytatódnak** (az új szabályokkal).
@@ -6099,27 +6099,27 @@ költözik.
 
 ⏸️ Elhalasztva: a vágáskor lezárt döntések lezárási összegzése (D95/1), mérés után. ✅ **KZ1–KZ5** (Csaba, 2026-10-24:
 *„miden javaslatodat elfogadom, kezdheted az elsővel”*) — mind a javaslat szerint: **KZ1** a paraméterek besorolása (a)–(e) ·
-**KZ2** gyermeket a szülő vágáskori tagja hozhat létre (különben önálló új koinó, szülő nélkül) · **KZ3** ha a hozott pontok nem
+**KZ2** gyermeket a szülő vágáskori tagja hozhat létre (különben önálló új koino, szülő nélkül) · **KZ3** ha a hozott pontok nem
 férnek az új keretbe, a beköltöző maga választ (elhagyni lehet, növelni nem) · **KZ4** az eredményt változtató hibajavítás is
-költözés · **KZ5** a protokoll-törés szabálya külön átvizsgálás a költözés után. ✅ **Az ① (2026-10-24):** a koinó neve a
+költözés · **KZ5** a protokoll-törés szabálya külön átvizsgálás a költözés után. ✅ **Az ① (2026-10-24):** a koino neve a
 születés lenyomata (elágazás 193), és a szabályai a születésében — a program az új születésbe mindet kiírja, az
-`ALAP_SZABALYOK` soha nem változik (elágazás 194; a 15. mérés megismételve: a régi alakú koinó hasad, az új nem). ⛔ A
+`ALAP_SZABALYOK` soha nem változik (elágazás 194; a 15. mérés megismételve: a régi alakú koino hasad, az új nem). ⛔ A
 meghívó-szám nem szabály, hanem a modell része, rögzítve 1 (Csaba, 2026-10-24: *„igen, maradjon 1 egyenlőre”*). ✅ **A ②a (2026-10-24):** a gyermek születése (`szulo` + a létrehozó tagsági bizonyítéka a szülőben — KZ2; zárt szülőnek
 csak zárt gyermeke; a szülő szabályait örökli; a létrehozó szülőbeli láncát folytatja), a születések lánca a gyökértől a
-cserében és a kézi úton (elágazás 195). ✅ **A ②b:** a kapu koinó-szabálya — az ős vágás előtti eseményei a gyermek tárában
-és cseréjében (a létrehozóé a lánc-pont, mindenki másé az óra szerint; elágazás 196). ✅ **KZ6** (Csaba, 2026-10-24: *„elfogadom a javaslataidat, mehetünk tovább”*): a vágáskor nyitott javaslat, amit nem költöző tett, a gyermekben NEM folytatódik (a javaslattétel is súly — D118/1); a költözők nyitott javaslatai a szavazataikkal és a gyermek küszöbeivel folytatódnak. ✅ **A ③ (2026-10-24):** a koinó képe két rétegben — a múlt az ős szabályaival, a lezárt döntések rögzítve; a jelenben a
+cserében és a kézi úton (elágazás 195). ✅ **A ②b:** a kapu koino-szabálya — az ős vágás előtti eseményei a gyermek tárában
+és cseréjében (a létrehozóé a lánc-pont, mindenki másé az óra szerint; elágazás 196). ✅ **KZ6** (Csaba, 2026-10-24: *„elfogadom a javaslataidat, mehetünk tovább”*): a vágáskor nyitott javaslat, amit nem költöző tett, a gyermekben NEM folytatódik (a javaslattétel is súly — D118/1); a költözők nyitott javaslatai a szavazataikkal és a gyermek küszöbeivel folytatódnak. ✅ **A ③ (2026-10-24):** a koino képe két rétegben — a múlt az ős szabályaival, a lezárt döntések rögzítve; a jelenben a
 súly csak a költözőké (a létrehozó a születésével költözik); elágazás 197, 83. mérés. ✅ **A ④a:** a ki- és a beköltözés eseménye (a beköltözés a szülőbeli láncot a vágás előtti utolsó esemény után folytatja, a
 vágáskori tagsági bizonyítékkal), a tagság öröklése (a beköltözés tagsági horgony), a költözők a képben a beköltözésekből
 (KZ3 (A): az elhagyott pontok); elágazás 198. ✅ **A ④b:** a `koltozes` parancs (a kiköltözés, az első kitöltés, a beköltözés,
 a kézi út) és a létrehozó első kitöltése; elágazás 199, 82. mérés. ✅ **A ④c:** a 2. lépcső és a tanúsítás joga a szülőből,
 a vágáskori állapot szerint, a szülő szabályaival; a gyermek születése nem alapító kör (4.2); elágazás 200. ✅ **A ⑤a:** a
-vállalás, a kereső-réteg és az átmeneti tár a hozott entitásokra (elágazás 201). ✅ **A ⑤b:** a szerző LÁNCA a koinóban egy
+vállalás, a kereső-réteg és az átmeneti tár a hozott entitásokra (elágazás 201). ✅ **A ⑤b:** a szerző LÁNCA a koinoban egy
 szabállyal (a költözőé a hozott előtaggal; a nem költöző gyermekbeli lánca 1-ről indul) — a lánc-vég, a lánc-gyökér, a
-koinó képe (a lánc-ág, az ismert sorszámok), a lánc-ellenőrzés; elágazás 202. ✅ **A ⑥:** a felület — a tér családfája és a
+koino képe (a lánc-ág, az ismert sorszámok), a lánc-ellenőrzés; elágazás 202. ✅ **A ⑥:** a felület — a tér családfája és a
 „🧳 Költözés…” ablak (elágazás 203). ⭐ **A KÖLTÖZÉS (D118) MEGÉPÜLT.** ✅ A kézi próba (laptop + telefon) négy
 leletet hozott (a 4. javítva). ✅ **D119** (Csaba, 2026-10-25 — [`csaladi_orjarat_atvizsgalas.md`](csaladi_orjarat_atvizsgalas.md)
-7. szakasz): **a családi őrjárat** (egy készüléken egy családnak — a közös gyökérből eredő koinóknak — egy őrjárata és portja,
-a független családok külön; egy társsal egy munka, a közös koinók sorban) és **a koino-verzió kártya** (Csaba ötlete: minden
+7. szakasz): **a családi őrjárat** (egy készüléken egy családnak — a közös gyökérből eredő koinoknak — egy őrjárata és portja,
+a független családok külön; egy társsal egy munka, a közös koinok sorban) és **a koino-verzió kártya** (Csaba ötlete: minden
 gyermek a szülőben egy koino-verzió entitással születik — a feltöltő az űrlappal hozza létre, pontot rendel hozzá, a „Kód”
 fülén a teljes program, és a gyermek születése a kód lenyomatát is megnevezi; a `kormanyzas.md` 2. szintje). ✅ A 84. mérés
 (a kód-csomag: 331 fájl / 6,4 MB, a jegyzék 28,5 KB) és ✅ **az ①a** (a program oldala: a kód-csomag, a születés programja, a
@@ -6127,30 +6127,30 @@ kártya a kapuval, a `koinoverzio` parancs, a gyermek a kártyából — elágaz
 költözik”): a kártyára tett pont a szülő ügye — a program a beköltözés és (új) a gyermek születésének `elhagy`-ába írja, az
 elhagyott, de látott pont tudás (elágazás 206). ✅ **Az ①b** (a kártya kódja a fájl-igényben és a törzs-kérelemben, az
 elvárás-őr a kérőnél, a kapu útvonalai, a „Kód” fül, az űrlap a fő menüben, a más verzió jelzése; elágazás 207) — ⭐ **az ①
-kész.** ✅ **A ②** (a koinó-példány: a `koino.js` koinó-szintű része egy gyárban — `koinoPeldany(KOINO)`; elágazás 208). ✅ **A ③
-a családi csere** (2026-10-26, elágazás 209–211, 85. mérés): a nyitás a család többi koinóját is megnevezi (`cs`), a két fél
-ugyanazt a közös listát számolja, a közös koinók ugyanabban a munkában jönnek (koinónként új kézfogással), a más koinóra
-nyitott csere is a családot cseréli, a más koinónak szóló kérelem a példányához kerül; a postaláda és az őrjárat a családot
+kész.** ✅ **A ②** (a koino-példány: a `koino.js` koino-szintű része egy gyárban — `koinoPeldany(KOINO)`; elágazás 208). ✅ **A ③
+a családi csere** (2026-10-26, elágazás 209–211, 85. mérés): a nyitás a család többi koinoját is megnevezi (`cs`), a két fél
+ugyanazt a közös listát számolja, a közös koinok ugyanabban a munkában jönnek (koinonként új kézfogással), a más koinora
+nyitott csere is a családot cseréli, a más koinonak szóló kérelem a példányához kerül; a postaláda és az őrjárat a családot
 szolgálja. Közben két szállítási hiba (mérve) és a randevú vége (`FAJLVEGE` — a kiszolgáló nem várja ki a tétlenségi órát).
 ✅ **Közben a D120** (a törzs-határ — lent). ✅ **A ④ a kör a családra** (2026-10-29, elágazás 214–216): a kör céljai a család
 minden példányából (a raj, a fájl-források, a függő kérelmek, a továbbítások, a kopogtatók), egy társnak egy munka, minden
-példány a saját munka-állapotával; a háztartás koinónként; a kiszolgálási keret és a „később” a családban egy (a határ és a
-feljegyzés a fő koinóé — mért hiba: eleinte a kérdező családtag beállítása szabta meg); a D99 a közös koinók mindegyikére.
+példány a saját munka-állapotával; a háztartás koinonként; a kiszolgálási keret és a „később” a családban egy (a határ és a
+feljegyzés a fő koinoé — mért hiba: eleinte a kérdező családtag beállítása szabta meg); a D99 a közös koinok mindegyikére.
 ✅ **Az ⑤ a független családok** (2026-10-30 → 10-31, elágazás 217–219): ✅ a másik család kapuja nem elérés (a munka kimondja —
 `masutt` —, a kör a társ következő címét hívja); ⛔ közben mérve és javítva: két egyszerre induló folyamat két tábla-kulcsot írt
 (a készülék két társnak látszott) — a létrehozás kizárólagos. ✅ **D119/B** (Csaba, 2026-10-31: *„elfogadom a javaslatodat,
 mehetünk tovább.”*) — az ⑤c (A): **a kötés-jegyzék családonként külön** (a közös 3/5-ös jegyzékben két független család 3 + 3
 társa egymást szorította ki — senki nem lett rendszeres), és **a tábla rekesze is a családé** (a két család őrjárata különben
 egymás címét írta volna felül); a régi közös jegyzék az első író családé lesz. ✅ **Az ⑥ a lap** (2026-10-31, elágazás 220): a
-téren „🔗 Csatlakozás egy koinóhoz…” és „🤝 Társak…”, a kártyáról ismert gyermeknél „Csatlakozom…” (a parancs és a lap ugyanazt
-hívja); ⛔ mérve és javítva: a futó őrjárat a családját csak induláskor nyitotta meg — most körönként, és a tér koinónként kimondja,
+téren „🔗 Csatlakozás egy koinohoz…” és „🤝 Társak…”, a kártyáról ismert gyermeknél „Csatlakozom…” (a parancs és a lap ugyanazt
+hívja); ⛔ mérve és javítva: a futó őrjárat a családját csak induláskor nyitotta meg — most körönként, és a tér koinonként kimondja,
 fut-e az őrjárata (ha nem, a család egy indító parancsát — CS5 (A)). ⚠️ A D118/3 kimondva: a csatlakozott nem költöző a gyermekben
 nem tag. ✅ **D119/C — a felület kötése** (az FL1; Csaba, 2026-10-31: *„rendben, elfogadom a javaslatodat, mehetünk tovább”* —
-a (B), elágazás 221): a felület kezelője a belépett koinó PÉLDÁNYÁVAL fut (a fő, a család és a felület ugyanazt kapja), így minden
-koinóban teljesen dolgozik — elkéri a hiányzót (a koinó családjának őrjárata hozza), felderít, költöztet; ⛔ mérve: eddig egy
-másik koinóban a lap semmit nem kért el, és a nem látott pontú gondolatot el is felejtette. Utána a ⑦ (terepi próba).
+a (B), elágazás 221): a felület kezelője a belépett koino PÉLDÁNYÁVAL fut (a fő, a család és a felület ugyanazt kapja), így minden
+koinoban teljesen dolgozik — elkéri a hiányzót (a koino családjának őrjárata hozza), felderít, költöztet; ⛔ mérve: eddig egy
+másik koinoban a lap semmit nem kért el, és a nem látott pontú gondolatot el is felejtette. Utána a ⑦ (terepi próba).
 
-⛔ **A lelet (2026-10-24, mérve):** a koinó neve ma szabad szöveg, és a születést három hely háromféleképp választja (az
+⛔ **A lelet (2026-10-24, mérve):** a koino neve ma szabad szöveg, és a születést három hely háromféleképp választja (az
 állapot az utolsót, a tagság az elsőt, a kapu a saját láncból) — egy kívülálló egyetlen, azonos nevű `KoinoLetrehozas`-szal
 (a cserén is) „nem ellenőrizhetővé” tette az alapító — és így minden tag — döntéseit. A D118/2 zárja; ezért az építés első
 lépése. Elágazás 192.
@@ -6167,7 +6167,7 @@ fejlesztési sorrend, azt rád bízom.”*):
 1. **Elemenként:** böngészés közben a törzs ELEMEI (a szöveg-darab, minden kép és csatolt fájl, a kártya kód-csomagja) közül
    magától csak a határ alatti jön — a szöveg mindig; ami fölötte van, a saját helyén kattintással kérhető, és a következő
    csere hozza el.
-2. **A határ 1 MB** — helyi mennyiség (a koinóban semmiről nem dönt, csak arról, mit hoz el a készülék magától); később a
+2. **A határ 1 MB** — helyi mennyiség (a koinoban semmiről nem dönt, csak arról, mit hoz el a készülék magától); később a
    beállításokban állítható, mint a többi határérték.
 3. **A fejlécen a törzs mérete** — hogy látsszon, mekkora, mielőtt kérem.
 4. **Amihez tudatpontot rendelt, azt teljesen tárolja** (a vállalt törzs határ nélkül — a vállaló a forrás, D84/1); a költözés
@@ -6189,15 +6189,15 @@ rugjuk fel. maradjon a termux.” (a telefonra a program egy bemásolt sorral ke
 
 **A döntés** (Csaba, 2026-11-01: *„minden javaslatodat, elfogadom, mehetünk tovább.”*) — MH1–MH6 mind (A):
 1. **MH1:** a meghívó egy bemásolható SZÖVEG (bármilyen csatornán, papíron is); a QR-kód később, külön lépésben.
-2. **MH2:** nincs benne egyszer használható jel — a meghívó szöveg nem titok (a koinó neve, a meghívó készülékének címei és
+2. **MH2:** nincs benne egyszer használható jel — a meghívó szöveg nem titok (a koino neve, a meghívó készülékének címei és
    tábla-aláírója, egy megnevezés); a védelem az ellenőrző kód.
 3. **MH3:** az ELLENŐRZŐ KÓD — 6 jel a belépés horgonyának lenyomatából, mindkét lapon; a meghívó az összevetés után nyom gombot.
-4. **MH4:** a belépő oldalán a beillesztés után minden magától (csatlakozás, társ, belépés; a profil-űrlap, ha a koinó vár).
+4. **MH4:** a belépő oldalán a beillesztés után minden magától (csatlakozás, társ, belépés; a profil-űrlap, ha a koino vár).
 5. **MH5:** a meghívó oldalán „👋 Belépők” ablak a fő menüben, és a készülék értesítése az új belépőről (D103).
 6. **MH6:** két külön hálózat között a belépő a meghívó készülékének kopogtató témáján jelentkezik (a D92/1 útja); ugyanazon
    a wifin a helyi cím.
-7. **MH7** (Csaba, 2026-11-02: *„elfogadom az (A)-t, mehetünk tovább”*) — a mért lelet (nyílt koinóban az „alap” meghívóhoz a
-   belépés nem ért át) javítása: a nyílt koinó kapuja is elkéri a még ismeretlen társ személyét (a zárt kapu köre, nem zár), és
+7. **MH7** (Csaba, 2026-11-02: *„elfogadom az (A)-t, mehetünk tovább”*) — a mért lelet (nyílt koinoban az „alap” meghívóhoz a
+   belépés nem ért át) javítása: a nyílt koino kapuja is elkéri a még ismeretlen társ személyét (a zárt kapu köre, nem zár), és
    ha a társ nem tag, a belépése pedig még nincs a tag készüléknél, az azonosság-szeletét függő kérelemmel elhozza (az átmeneti
    tárba); a belépők jegyzéke és a meghívás a két tárból olvas.
 
@@ -6210,18 +6210,18 @@ meghívott a lapon beilleszti, és a csere után bent van. Az átbeszélés: [`m
 **A döntés** (Csaba, 2026-11-03: *„minden javaslatodat elfogadom, kezdhetsz kódot írni. ha lehet, nézzen ki úgy mint a
 prototipusban van.”*) — a D121 MH2-t és MH3-at váltja:
 1. **A meghívó egy TITKOT hordoz** — a belépő az első cserében (a kapu személy-körében) bizonyítja, hogy nála van (HMAC a titokkal,
-   a koinóra, a személyes kulcsára és a horgonyára kötve), és a meghívó készüléke MAGÁTÓL aláírja a meghívást. A kódos összevetés és
+   a koinora, a személyes kulcsára és a horgonyára kötve), és a meghívó készüléke MAGÁTÓL aláírja a meghívást. A kódos összevetés és
    a „👋 Belépők” menüpont megszűnik (tartalék sincs belőle).
 2. **Egy üzenet**: a telepítő sor, a végén a meghívóval — a már telepített gépen a lapon is beilleszthető.
 3. **Egy hónapig él**, egyszer használható, felhasználás előtt visszavonható. A kiállításhoz kötelező a meghívott TELJES NEVE és a
-   nyilatkozat (*„Kijelentem, hogy a meghívott valódi személy, és tudomásom szerint még nem csatlakozott ehhez a koinóhoz.”* — a
-   „tanúsítom” a koinóban a 2. lépcső szava), és a nyilatkozat az ALÁÍRT meghívásba is bekerül (állítás — a visszacsatolásnak
+   nyilatkozat (*„Kijelentem, hogy a meghívott valódi személy, és tudomásom szerint még nem csatlakozott ehhez a koinohoz.”* — a
+   „tanúsítom” a koinoban a 2. lépcső szava), és a nyilatkozat az ALÁÍRT meghívásba is bekerül (állítás — a visszacsatolásnak
    bizonyíték, D56).
-4. **A meghívás a meghívott SAJÁT profilját tanúsítja** (a meghívó által beírt név csak előtöltés és felirat); ha a koinó profilt
+4. **A meghívás a meghívott SAJÁT profilját tanúsítja** (a meghívó által beírt név csak előtöltés és felirat); ha a koino profilt
    vár, az automatikus meghívás megvárja.
 5. **A meghívott lapja az első megnyitáskor egy űrlapot kínál** (nem kötelező): teljes név (a meghívóból előtöltve, átírható),
-   becenév, ország, régió, település; ha a készülék még egy koinót sem ismer, a csatlakozás ablakát („Meghívtak? illeszd be”).
-6. **A lap a prototípus „Meghívóim” ablakát** használja (bájtra változatlanul; a koinós többlet köré írva), a profil-űrlap a
+   becenév, ország, régió, település; ha a készülék még egy koinot sem ismer, a csatlakozás ablakát („Meghívtak? illeszd be”).
+6. **A lap a prototípus „Meghívóim” ablakát** használja (bájtra változatlanul; a koinos többlet köré írva), a profil-űrlap a
    regisztrációs űrlap kinézetét.
 
 *Az építés közben (a böngészős végigjárás lelete, 2026-11-03 — elágazás 231): a bizonyíték a kapu személy-körében a KÉRELEM útján
@@ -6235,7 +6235,7 @@ módozatok közül, amiket a közösség »feltölt«, szabadon lehet használni
 már költözést igényel.” Az átvizsgálás: [`program_retegek_atvizsgalas.md`](program_retegek_atvizsgalas.md).*
 
 **A döntés** (Csaba, 2026-11-06: *„Mindet elfogadom”* — PR1–PR7 a javaslat szerint, a sorrend PR1–3 → PR7 → PR6 → PR5 → PR4):
-1. **PR1 — a koinó a számítás MAGJÁT nevezi meg.** A mag (R1) a koinó képe és a kapu; ennek kell egy koinón belül mindenkinél
+1. **PR1 — a koino a számítás MAGJÁT nevezi meg.** A mag (R1) a koino képe és a kapu; ennek kell egy koino-n belül mindenkinél
    azonosnak lennie. A protokoll (R2), a helyi viselkedés (R3) és a felület (R4) szabadon változhat.
 2. **PR2 — a mag számítva:** a két belépő (`ketReteg.js`, `esemenyTar.js`) import-zárványa; egy próba őrzi, hogy a mag nem kap
    kívülről döntő függvényt (a beadott függvények egy kimondott listán, okkal).
@@ -6254,9 +6254,9 @@ figyelmeztet, ha a mag más. A 89. mérés előtte: a mag 10-24 óta 36 commitb�
 
 *Az építés alakja (②, 2026-11-06 — elágazás 239):* a telepítő sor a már telepített programot is frissíti — a Termuxon
 `git fetch` + `git reset --hard` (hálózat nélkül kimondja, és a meglévő indul), Windowson a zip a régi MELLÉ (`koino_1.1-uj`), és az
-ÚJ telepítő cserél: leállítja a régi mappából futó koinót (mérve: amíg egy folyamat a mappában áll, az nem nevezhető át), a régit
+ÚJ telepítő cserél: leállítja a régi mappából futó koinot (mérve: amíg egy folyamat a mappában áll, az nem nevezhető át), a régit
 `koino_1.1-regi`-nek nevezi, az újat a helyére teszi; egy git-tárat nem cserél le; ha a csere nem sikerül, a régi program indul. A
-Termux-telepítő is leállítja a futó régi koinót (`pkill`). Az adat mindkét helyen a program mappáján kívül van.
+Termux-telepítő is leállítja a futó régi koinot (`pkill`). Az adat mindkét helyen a program mappáján kívül van.
 
 *2026-11-06 (a ② után): a P2P koino saját tárba költözött (`github.com/Biszt/koino`, a gépen `C:\koino`) — Csaba: „a p2p koino-nak
 külön kéne lennie” → „tiszta lappal szeretnék indúlni”. A telepítő sorok azóta a `~/koino` / `%USERPROFILE%\koino` helyre mutatnak
@@ -6303,7 +6303,7 @@ munkához is átér (`tars.szallitas`). A próba a valódi régi kapuval is (a g
 „nincs közös” egy kört elvehet (mint egy hamis `FOGLALT`) — a ③ emlékezete ezért nem épülhet egyetlen csomagra.
 
 *Az emlékezet és a kimondás (③, 2026-11-07 — elágazás 243):* `js/csere/nyelvEmlekezet.js` (a szabály) + `<adat>/nyelvek.json`
-(készülék-szintű — a nyelv a programé, nem a koinóé; `fajlTar.js` `nyelvJegyzekTarolo`: sorban ír, és ha nincs változás, nem). A kapu
+(készülék-szintű — a nyelv a programé, nem a koinoé; `fajlTar.js` `nyelvJegyzekTarolo`: sorban ír, és ha nincs változás, nem). A kapu
 a nyelv hiányát is a kör eredményébe teszi (`nincsKozos` — `mi`: `szallitas` | `nyelv`, az iránnyal). Az őrjárat az első menet
 eredményeiből jegyez: társanként (a kötés tábla-aláírója, különben a cím) egy körben egy megfigyelés; **3 egymás utáni kör után 6
 óra szünet** (`NEM_ERTJUK_HATAR`, `NEM_ERTJUK_SZUNET` — mint az M3 (a)), a szünet után egy megfigyelés is újra szünetet ad; a „nem
@@ -6355,9 +6355,9 @@ mérés (a kártya kódjából egy működő program összerakható; a lelete �
 **A döntés** (Csaba, 2026-11-07: *„mindet elfogadom, mehetünk tovább.”* — TK1–TK5 mind (A)):
 1. **TK1 — a csere a mai frissítés láncán:** a kártya kódja a `koino-uj`-ba (fájlonként a lenyomata szerint), a régi `koino-regi`-be,
    az új a helyére, és indul; a telefonon a `.git` az új programmal megy (a telepítő sor így később is a GitHubról frissít).
-2. **TK2 — az előnézet, küszöb nélkül:** a szerző, a pont, rétegenként a változás (a mag, a felület, a többi), a mag koinónként, és
+2. **TK2 — az előnézet, küszöb nélkül:** a szerző, a pont, rétegenként a változás (a mag, a felület, a többi), a mag koinonként, és
    kimondva: a kód a kulcsaiddal fut, a lenyomat azt bizonyítja, hogy ez az a kód — azt nem, hogy jó. Az e-ember dönt.
-3. **TK3 — a más mag kimondva, nem tiltva:** egy program fut a készüléken; ahol a koinó más maggal született, az előnézet megnevezi.
+3. **TK3 — a más mag kimondva, nem tiltva:** egy program fut a készüléken; ahol a koino más maggal született, az előnézet megnevezi.
 4. **TK4 — csak a teljes, ellenőrzött kóddal;** ha hiányzik fájl, az előnézet megmondja, és felajánlja az elhozást.
 5. **TK5 — a visszaút:** a régi a `koino-regi`-ben marad („↩ Vissza az előző programra” — a lapon és parancsként); ha az új program
    30 mp-en belül nem felel, a régi kerül vissza, kimondva.
@@ -6375,7 +6375,7 @@ eredmény az adat-mappa `telepites.json`-ja), a lap (`felulet/js/koinoTelepites.
 azonnal kilép (a szkriptet egy `Start-Process` indítja); a kártya és a kód base64url neve környezetben megy (egy kötőjellel kezdődőt a
 PowerShell paraméternévnek venne); a lap kulcsa indításonként új — a régi fül a régi kulcsával figyel. A próba: `telepitesProba.js` (8),
 16 rontás. ✅ **A terepi próba:** a telefon (Termux, közös wifin, 2026-11-08) a laptopról feltöltött koino-verzió kártyáról (a „B” program: csak a felület más)
-elkérte a kódot (381 fájl, 7,5 MB), telepítette — a futó koinót leállította (`pkill`), a régit a `koino-regi`-be tette, az újat a
+elkérte a kódot (381 fájl, 7,5 MB), telepítette — a futó koinot leállította (`pkill`), a régit a `koino-regi`-be tette, az újat a
 háttérben indította, és az felelt (a lapján „koino (B)”) —, majd a visszaút ugyanígy lement. ⛔ A lelete: a háttérben induló program
 Androidon NEM nyit új fület (a füleid száma nem nőtt), a régi fül pedig a régi jelszóval nem jut tovább — a csere után a lapot
 csak kézzel lehetett megtalálni. ✅ Csaba: *„legyen a (B)”* — a `koino lap` parancs (a futó program lapja, a felület naplójából;
@@ -6383,7 +6383,7 @@ ha nem fut, kimondja), a lap a telefonon ezt mondja a csere után; és (Csaba: *
 kattínthatóvá tenni, hogy ne keljen kimásólni?”*) a telepítő bekapcsolja a Termux `terminal-onclick-url-open` beállítását (ha még
 nincs kimondva): a kiírt címek koppintásra megnyílnak. A próba: `telepitesProba.js` (sh-val), 3 rontás. (Elágazás 251.)
 
-### D126. A KÖZÖSSÉG FELTÖLTÖTT NÉZETEI: „A KÁRTYA SZÖVEGÉBEN, A SAJÁT KOINÓJÁBAN, NÉGY RÉTEG MÖGÖTT” (2026-11-08)
+### D126. A KÖZÖSSÉG FELTÖLTÖTT NÉZETEI: „A KÁRTYA SZÖVEGÉBEN, A SAJÁT KOINOJÁBAN, NÉGY RÉTEG MÖGÖTT” (2026-11-08)
 
 *A D123 PR4-ének hol-ja és hogyan-ja. Az átvizsgálás: [`nezetek_atvizsgalas.md`](nezetek_atvizsgalas.md), a 92. mérés (a nézet-kártya
 a mag változása nélkül megy, ha a kód a kártya szövegében egy csatolt fájl; a böngésző négy réteggel szigetel — a sandbox egymagában
@@ -6393,14 +6393,14 @@ kevés).*
 1. **NZ1 — a kód helye:** a saját típusú kártya (`Nezet`) SZÖVEGÉBEN, egy csatolt HTML-fájlként (a szkript és a stílus benne). A mag
    nem változik, a mai szállítás viszi, a még nem frissített társak is. Változni csak szerkesztési egyezménnyel tud; a bekapcsolás a
    kód lenyomatához kötött — az új kódot mindenki maga kapcsolja be újra.
-2. **NZ2 — a hatókör:** egy nézet csak abban a koinóban fut, ahol a kártyája van (a szerzője ott tag: amit a nézet lát, azt ő is látja).
-3. **NZ3 — mit lát:** a koinó közös képét, és hogy melyik az én kulcsom, a pontjaimmal. Meghívót, társat, értesítést, kulcsot nem.
+2. **NZ2 — a hatókör:** egy nézet csak abban a koinoban fut, ahol a kártyája van (a szerzője ott tag: amit a nézet lát, azt ő is látja).
+3. **NZ3 — mit lát:** a koino közös képét, és hogy melyik az én kulcsom, a pontjaimmal. Meghívót, társat, értesítést, kulcsot nem.
 4. **NZ4 — a nézet-felület:** egy külön, kicsi, SZÁMOZOTT kérdés-készlet (ma az 1-es), nem a lap belső útjai.
 5. **NZ5 — hol:** a pakli helyén, egész lapon, a fő menüből („🧩 Nézetek…”), felirattal és bezárással.
 6. **NZ6 — mit tehet:** olvas, és kérheti, hogy a lap nyisson meg egy kártyát; a cselekvés a lap saját ablakában marad, a te kezeddel.
 
 *Az építés (①–④, 2026-11-08 — elágazás 249):* `js/allapot/nezetKartya.js` (a kártya szövege, a kód — a szöveg ELSŐ fájl-blokkja —, a
-bekapcsolás jegyzéke: koinónként, a lenyomathoz kötve, korlátosan — `<adat>/nezetek.json`), `js/muveletek.js` `nezetLetrehozasa`,
+bekapcsolás jegyzéke: koinonként, a lenyomathoz kötve, korlátosan — `<adat>/nezetek.json`), `js/muveletek.js` `nezetLetrehozasa`,
 `js/felulet/nezetFelulet.js` (a keret tartalma: a nézet CSP-je és az őr a LEGELEJÉN, a kliens — `koinoNezet.kerdez/figyel` —, a kód; a
 kérdés-készlet: `koino`, `en`, `entitasok` (lapozva, ≤ 100), `szoveg` a programnál, `fajl` és `megnyit` a lapnál; a válasz csak a
 kimondott mezőkkel), `js/felulet/kapu.js` (a lap CSP-je: `frame-src 'none'` — a harmadik réteg), `koino.js` (`nezetFeltoltese`,
@@ -6413,10 +6413,10 @@ saját keret üzenete, egyszerre ≤ 4 kérdés úton, a `megnyit` után „🧩
 lelete: (1) a Chrome a sandbox-keretet KÜLÖN FOLYAMATBA teszi — a próba a keret saját DevTools-munkamenetén éri el (`Target.setAutoAttach`);
 (2) egy második, „engedékeny” CSP (`default-src *`) a `data:` és a `blob:` képet is tiltja (a böngésző a kettőt metszi, a `*` ezeket nem
 fedi) — a feloldási kísérlet csak szigorít. ✅ **A terepi próba (2026-11-08, közös wifin):** a telefon böngészőjén (Brave, Android)
-a próba-nézet a koinó kártyáit mutatta, a kijutási utak mind zárva, a `data:` kép betöltött — a laptop figyelőjébe a nézetből semmi
+a próba-nézet a koino kártyáit mutatta, a kijutási utak mind zárva, a `data:` kép betöltött — a laptop figyelőjébe a nézetből semmi
 nem érkezett, a KONTROLL (egy közönséges lapról ugyanazok a kérések, egy másik eredetre) viszont megérkezett.
 
-### D127. A BEKAPCSOLÓDÁS: „A SZÜLŐBEN MEGMARADSZ — A KÉT KOINÓ PÁRHUZAMOS” (2026-11-08)
+### D127. A BEKAPCSOLÓDÁS: „A SZÜLŐBEN MEGMARADSZ — A KÉT KOINO PÁRHUZAMOS” (2026-11-08)
 
 *Csaba (a PR5 terepi próbája közben): „én azt hittem, hogy a kőltözés, másol, nem áthelyez. én így értelmeztem azt, hogy közös a
 múlt. min egy párhuzamos valóság, amik között az e-ember váltogatni tud, és akár mind kettőben, is aktív lehet. A kőltözés szó nem is
@@ -6425,15 +6425,15 @@ számítás nem is használta); csak a szó, a kiírások és a leírás mondtak
 a szülőben a pontok elvesznek — a kód mást mutatott.)*
 
 **A döntés** (Csaba, 2026-11-08):
-1. **KÖ1 — a szó: bekapcsolódás** (*„rendben”*): az e-ember egy gyermek-koinóba bekapcsolódik — a szülőben megmarad; a mag
-   változása is így megy (egy új számítású koinó, amibe bekapcsolódnak).
+1. **KÖ1 — a szó: bekapcsolódás** (*„rendben”*): az e-ember egy gyermek-koinoba bekapcsolódik — a szülőben megmarad; a mag
+   változása is így megy (egy új számítású koino, amibe bekapcsolódnak).
 2. **KÖ2 — mindenhol, a magban is** (*„ne maradjon ott sem. még bátran variálhatjuk a magot is. akárhányszór indulhatunk teljessen
    új koino családdal.”*): az esemény `Bekapcsolodas`, a parancs `bekapcsolodas`, a lap „🌿 Bekapcsolódás…”.
 3. **KÖ3 — egy próba őrzi a modellt** (*„rendben”*): a bekapcsolódó a szülőben megmarad a teljes súlyával, és tovább dolgozhat.
 4. **KÖ4 (A) — egy esemény, a gyermekben:** a szülőben nem írunk semmit (a gyermekről a koino-verzió kártya szól — D119; hogy ki
    hova kapcsolódott be, azt a gyermek tára tudja).
-5. ⏸️ **A pénz és a koinók kapcsolata** (a D118/6 a pénz kivezetését ide kötötte): *„még kérdőjeles. ezt majd a tervezős fork-ban
-   megtervezzük.”* — a tudatpont koinónként külön keret (másolható), a pénz nem.
+5. ⏸️ **A pénz és a koinok kapcsolata** (a D118/6 a pénz kivezetését ide kötötte): *„még kérdőjeles. ezt majd a tervezős fork-ban
+   megtervezzük.”* — a tudatpont koinonként külön keret (másolható), a pénz nem.
 
 *Az építés (2026-11-08 — elágazás 250):* a mag (`esemeny.js` — a `Bekapcsolodas` alakja a `kikoltozes` mező nélkül, a `Kikoltozes`
 megszűnt; `koinoLanc.js`, `ketReteg.js`, `tagsag.js`, `esemenyTar.js` és a többi: a nevek), `muveletek.js` (`bekapcsolodas`, a
@@ -6441,7 +6441,7 @@ megszűnt; `koinoLanc.js`, `ketReteg.js`, `tagsag.js`, `esemenyTar.js` és a tö
 a tér (`ter.js` — innen hova kapcsolódtam be: a gyermekek kártyáiból), a lap (`koinoBekapcsolodas.js` + css, a családfa, a
 koino-verzió űrlap szövege). A próba: `bekapcsolodasProba.js` (a KÖ3: a szülőben a pontok és a vágás utáni esemény számítanak, a
 gyermekben a hozott súly), a parancssor-próba (a szülőben B a bekapcsolódás után is tag, a pontja áll, és tovább ír). ⛔ A mag
-változott: a régi koinók „más számítást” mutatnak — új koinó-családdal indulunk.
+változott: a régi koinok „más számítást” mutatnak — új koino-családdal indulunk.
 
 ### D128. A KULCS: TÖBB KÉSZÜLÉK ÉS A HELYREÁLLÍTÁS — „KÉSZÜLÉKKULCSOK AZ AZONOSSÁG ALATT” (ET-3, 2026-11-13)
 
@@ -6457,15 +6457,15 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
 2. **Az esemény:** a `szerzo` marad az AZONOSSÁG; új aláírt mező a **`keszulek`** (a készülékkulcs nyilvános része), az aláírás a
    készülékkulccsal; a lánc (sorszám, előző, lánc-gyökér) a **(szerző, készülék)** páré. A tagság, a meghívás, a tanúsítás, a szavazat
    az azonosságé (a szavazatnál ma is az utolsó számít — nincs teendő).
-3. **A készülék-tanúsítvány koinók FÖLÖTT** (KU2 (A); ET-3/4 (A) — csak az azonosság kulcsa vesz fel): az azonosság kulcsa aláírja,
-   koinótól függetlenül; egy koinóban a készülék első eseménye hozza, és ha hiányzik, a kérelem elkéri (+57 B eseményenként).
-4. **A kizárás** is koinók fölötti tanúsítvány: koinónként kimondja, a készülék láncából meddig érvényes; **ahol egy koinó nincs
+3. **A készülék-tanúsítvány koinok FÖLÖTT** (KU2 (A); ET-3/4 (A) — csak az azonosság kulcsa vesz fel): az azonosság kulcsa aláírja,
+   koinotól függetlenül; egy koinoban a készülék első eseménye hozza, és ha hiányzik, a kérelem elkéri (+57 B eseményenként).
+4. **A kizárás** is koinok fölötti tanúsítvány: koinonként kimondja, a készülék láncából meddig érvényes; **ahol egy koino nincs
    felsorolva, ott a kizárt készülék egyetlen eseménye sem számít** (a tervező kiegészítése) — visszamenőleges, kimondva: nem a szabály
-   szigorítása (D47), hanem annak kimondása, hogy azok az események nem tőled jöttek. A készülékek találkozáskor a koinó-listájukat is
+   szigorítása (D47), hanem annak kimondása, hogy azok az események nem tőled jöttek. A készülékek találkozáskor a koino-listájukat is
    kicserélik. **Ahová egyik másik készüléked sem jár** (KH2 (A), Csaba, 2026-11-16: *„IGEN MEHETÜNK TOVÁBB”*): ha a kizárt (vagy a
-   kulcscsere előtti) készülék egy olyan koinóban is tag, ahol egyik másik készüléked sincs, a kezelő készülék — ahol a kizárást vagy a
-   kulcscserét kiadod — a koinó-listából ismeri, és magától csatlakozik oda, csak a bevitelhez (pontja ott nincs; ott a kizárt
-   készülék tartaná a koinó teljes keretét, amit a határ sem fékez).
+   kulcscsere előtti) készülék egy olyan koinoban is tag, ahol egyik másik készüléked sincs, a kezelő készülék — ahol a kizárást vagy a
+   kulcscserét kiadod — a koino-listából ismeri, és magától csatlakozik oda, csak a bevitelhez (pontja ott nincs; ott a kizárt
+   készülék tartaná a koino teljes keretét, amit a határ sem fékez).
 5. **A tudatpont-keret készülékenként osztott** (KU1 (B) — az ET-3/3 (A) „közös keret” helyett, mert a D42 (a bemondott összeg) „egyetlen
    eseményből eldől”-jét a közös keret elvenné — 93. (b)): az első készüléké alapból az egész. **A keret magától átfolyik** a
    készülékek között, amikor találkoznak: az átadást a több szabad ponttal rendelkező készülék írja alá, a fogadó a saját láncában
@@ -6474,12 +6474,12 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
    KH1 (A), Csaba, 2026-11-16: *„jó a 2000, de írdfel, hogy ezek az értékek, személyre szabhatók lesznek majd.”*): ez csak az
    alapérték, a határt mindenki maga szabja meg, készülékenként. Egy készülék csak a maga tett pontjait
    rendezi át; a másikét az hajtja végre, amikor legközelebb fut, és a lap kimondja.
-6. **Egy kizárt készülék pontjai** (KU7 (A)): a kizárás megnevez egy **örököst** (a másik készülékedet), az koinónként átveszi a kizárt
+6. **Egy kizárt készülék pontjai** (KU7 (A)): a kizárás megnevez egy **örököst** (a másik készülékedet), az koinonként átveszi a kizárt
    készülék vágásig érvényes elhelyezéseit és a szabad részét — a pontok a gondolatokon maradnak.
-7. **A kulcscsere** (KU3 (A)): koinók fölötti tanúsítvány, a csere-kulcs írja alá (új azonosság-kulcs, új lekötés); **a név marad** — a
+7. **A kulcscsere** (KU3 (A)): koinok fölötti tanúsítvány, a csere-kulcs írja alá (új azonosság-kulcs, új lekötés); **a név marad** — a
    mostani kezelő kulcsot a cserék lánca mondja meg.
 8. **A fizetési kulcs** (KU4 (A); ET-11 — az átutalás): a nyilvános része már az azonosság születésében lekötve — a pénz így nem kíván
-   új koinó-családot, és egy tolvaj nem köthetné le előbb a sajátját.
+   új koino-családot, és egy tolvaj nem köthetné le előbb a sajátját.
 9. **A sorrend** (KU5 (A); az ET-3/5 — a csere-kulcs mentése — áll, csak a sorrend ez): most a mag, a csere-kulcs lekötése, a kulcscsere
    és a papír- vagy fájl-mentés (a lapon is); a darabolt hálózati mentés később, saját átvizsgálással (nem mag). Ha minden elveszett,
    a jelszó is: új regisztráció, kimondva (ET-3/6 (A)).
@@ -6496,7 +6496,7 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
 13. **A név a születés lenyomata** (Csaba, 2026-11-15 — KC1 (A)): az azonosság születése az első kulcsot, a csere-kulcs lenyomatát és
     a fizetési kulcsot együtt köti, és a NÉV ebből a lenyomatból jön (a KERI „önmagát címző” azonosítója) — ugyanarra a névre más
     lekötés nem létezhet, egy tolvaj az azonosság kulcsával sem köthet le mást. A név a kulcscsere után is marad (KU3 (A)); a születés
-    minden koinóban a horgonnyal utazik, a tanúsítványok ellenőrzése belőle (és a kulcscserék láncából) veszi a kezelő kulcsot.
+    minden koinoban a horgonnyal utazik, a tanúsítványok ellenőrzése belőle (és a kulcscserék láncából) veszi a kezelő kulcsot.
 14. **A kulcscsere felsorolja a megmaradó készülékeket** (KC2 (A)): azok újra-tanúsítás nélkül maradnak; minden más, amit a régi kulcs
     tanúsított (a tolvaj által felvett készülék is), érvénytelen. **A régi készülék múltja** (KH3 (A), Csaba, 2026-11-16: *„rendben.
     mehetünk, tovább, ha kész a próbasór.”*): ha a kulcscsere (vagy a helyreállítás) UTÁN az új kezelő kulccsal kizárod a régi
@@ -6517,7 +6517,7 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
     meghívód vagy egy tanúsítód — ő köti az új kulcsot a régi azonossághoz), és KÉT tanúsító, akinek most is él a joga (D60) — a 2.
     lépcső mércéje. Ha a meghívó és a tanúsítók közül senki nincs meg, a régi ismerőst a bemutatkozók (D62) pótolhatják — *„csak akkor
     abból, legalább 10 legyen.”* A helyreállítás **várakozás után** lép életbe, amely alatt minden meglévő készülék értesítést kap, és
-    megállíthatja; és **minden koinóban érvényes**, mert a bizonyítékát (ki hagyta jóvá, és hogy ott tanúsító volt) magával viszi (a D93
+    megállíthatja; és **minden koinoban érvényes**, mert a bizonyítékát (ki hagyta jóvá, és hogy ott tanúsító volt) magával viszi (a D93
     mintája). **A várakozás** 7 nap, a bemutatkozók útján 30 nap; **megállítás után** újrakezdhető, de 5 ember kell (egy régi ismerős és
     négy élő tanúsító), kétszeres várakozással, és ezt már nem lehet megállítani (Csaba: *„minden javaslatodat, elfogadom, mehetünk
     tovább.”*). A segítők által jóváhagyott helyreállítás erősebb a papírnál; a 2. lépcsőn a papír egy utolsó aláírással átadja a helyét
@@ -6527,7 +6527,7 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
 
 *Az építés sorrendje:* ① a mag (a `keszulek` mező és a (szerző, készülék) lánc, a tanúsítvány és a kizárás az örökössel, a keret az
 átadással, a sorrend az azonosság eseményei között) → ② a csere-kulcs és a kulcscsere, a mentés (a lapon is) → ③ a hálózat → ④ a lap
-(„📱 Készülékeim”) → ⑤ a próbák és a terep (a laptop és a telefon mint egy azonosság). ⛔ A mag változik → új koinó-család.
+(„📱 Készülékeim”) → ⑤ a próbák és a terep (a laptop és a telefon mint egy azonosság). ⛔ A mag változik → új koino-család.
 
 *Az építés — ①a (2026-11-14):* `js/kulcs/keszulek.js` (a tanúsítvány, a készülék a gépen — `keszulek.json`), az esemény
 `keszulek` és `tanusitvany` mezője (`tanusitvanyKell`), `lancKulcsa` (a lánc a készüléké) a tárban, a kapuban, az elágazásban, a
@@ -6537,7 +6537,7 @@ szabály-rétegben, a lánc-gyökérben, a lánc-ellenőrzésben, a bekapcsolód
 `keszulekProba.js` (8). A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.7.
 
 *Az építés — ①b (2026-11-14, folyamatban):* **(1)** az azonosság utolsó állítása (`kesobbiAllitas`: egy láncon a sorszám, két
-készülék között az idő — 9.5); **(2a)** a keret alapja láncónként: a koinó kerete a horgonyt író készülék láncáé, a többié 0
+készülék között az idő — 9.5); **(2a)** a keret alapja láncónként: a koino kerete a horgonyt író készülék láncáé, a többié 0
 (`tagsag.js` `alapHorgony`/`azonossagAlapjai`, `lancGyoker.js` `lancAlapjai`, `muveletek.js` `sajatKeretem`); **(2b)** a kapott: a lánc-gyökér
 harmadik fája, a `KeretAtadas` (halmozott — saját típus, hogy egy eseményből eldőljön, hogy nem csökkenhet) és a `KeretAtvetel`
 (az adó aláírt átadását hozza, egy eseményből ellenőrizhető), `szabalyok.js` `lancLepese` (egy forrás a szabálynak, a saját
@@ -6546,8 +6546,8 @@ fogadó határáig; a határ alapértéke akkor még nyitott volt — 2000, KH1,
 állapot, a döntés, az össz-pont levele — a láncok pont-eseményeivel); **(4)** a szavazás és a javaslattétel joga készülékenként (ahol a
 pont a másik készüléken van, ez előbb 1 pontot tesz rá).
 
-*Az építés — ①d (2026-11-14):* a kizárás és az örökös — a kizárás-tanúsítvány (az azonosság kulcsa írja alá, koinónként a vágással és
-az örökössel), a `Kizaras` esemény (bárki beviheti, mint az ellentmondás bizonyítékát), a vágás utáni (a fel nem sorolt koinóban minden)
+*Az építés — ①d (2026-11-14):* a kizárás és az örökös — a kizárás-tanúsítvány (az azonosság kulcsa írja alá, koinonként a vágással és
+az örökössel), a `Kizaras` esemény (bárki beviheti, mint az ellentmondás bizonyítékát), a vágás utáni (a fel nem sorolt koinoban minden)
 kizárt esemény nem számít, az örökös a `lanc` mezővel folytatja a láncot. ⭐ Az ① (a mag) ezzel kész. A részletek:
 [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.10. A részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.8–9.9.
 
@@ -6556,10 +6556,10 @@ a KÉSZÜLÉK kulcsa írja alá; **②a** a születés és a név (13. pont): `k
 is; **②b** a kulcscsere (14. pont): a csere-kulccsal aláírt, egymásra lekötött cserék lánca, a `Kulcscsere` esemény, a régi
 korszakban tanúsított, fel nem sorolt készülék eseményei kiesnek, `kulcscsere` parancs; **②c** a csere-kulcs papíron (15–16. pont):
 `kulcs/papir.js` (56 jel, 14 csoport × 4, a súlyozott prím-összeg ellenőrzése minden egyes elírást és cserét kimond), `kulcs/qr.js`
-(saját QR-kódoló), `papir` / `papir kesz <kód>` (a leírt kód ellenőrzése után a fájl törlése), `kulcscsere <kód>`. ⭐ A ② a papírral ezzel kész; a 17. pont (a helyreállítás a segítőkkel) ②d–②f-ként folytatja, a ③ előtt: **②d** a papír visszavonása (`papir visszavon` — a 2. lépcsőn az állapot szól), a két ág közül az erősebb (nem a hosszabb) nyer, a vesztes ágon tanúsított készülék kiesik, a kulcscsere a fizetési kulcsot is cseréli; **②e** a helyreállítás a segítőkkel (a jóváhagyás, a megállítás, a szerepek; a lánc bejegyzése és a minden koinóban érvényes bizonyíték; a segítők készüléke a várakozás után magától véglegesít és beviszi); **②f** a parancsok (`helyreallitas kerelem` / `befejez` az új készüléken, `segit` az ellenőrző kóddal, `megallit`). ⭐ A ② ezzel kész. **③b** (2026-11-16) a kezelés minden koinómba, helyben: a kezelés-jegyzék (`kezeles.json` — a legerősebb kulcscsere-lánc a bizonyítékaival és a kizárások, amit a készülék bármelyik koinójában látott), a gondozás minden parancs elején és az őrjárat körében, a `kulcscsere` és a `papir visszavon` minden koinóba, és az új `kizar` parancs (a készülékeim listája; a kizárás koinónként a vágással, minden koinómba). **③c** a saját készülék a cserében: a kapu kötése a társ készülékét is megjegyzi (és egy még semmit nem írt saját telefon tanúsítványát a tárba veszi), a csere után a laptop a határig (a keret 20%-a — KH1) átad, a nekem szóló átadást a készülék a parancsok elején és az őrjárat körében átveszi; egy kizárt készüléknek semmit. **③d** a koinó-lista a saját készülékek között (a `CIMEK` `kl` mezője — csak a saját készüléknek, csak tőle), a `kizar` a kizárt készülék listájának koinóit is felsorolja, és ahová a listából tud, de ott nincs, oda csatlakozik (KH2 (A) — csak a bevitelhez); a `kulcscsere` ugyanígy; **③e** a csere állásában `szerzo` → `lanc`. ⭐ A ③ ezzel megépült. **③f** (KH3 (A)): a kulcscsere után csak a mostani kulccsal aláírt kizárás számít, és a vágása megtartja a régi készülék múltját (a tagságot, a pontokat); a kulcscsere az ezen a készüléken kiadott kizárásokat az új kulccsal újra aláírja (a gyűjtötteket nem — egy tolvaj régi kulcsú kizárása így nem válhat érvényessé). **④a** (KF1 (A)): a második készülék felvétele párosító kóddal a hálózaton (`keszulek felvesz` a kezelőn, `keszulek csatlakoz <kód>` az új készüléken — a titok bizonyítása a kézfogáshoz kötve, az ellenőrző kód mindkét gépen); a felvett készüléken NINCS az azonosság kulcsa (a kezelést kívánó parancsok a kezelőn mennek). **④c** a személyes határ (`keszulek hatar <készülék> <pont | alap>` — készülékenként, az alap a keret 20%-a). **④b** a lap: „📱 Készülékeim” (a készülékek, a felvétel — a telepítő sor a párosító kóddal és a QR-je: a telefonon egy bemásolt sor —, a kizárás, a határ, a papír állása); az indítók a párosító kódot felismerik. ⭐ A ④ ezzel kész. **⑤ a terep** (2026-11-17 — a laptop és Csaba telefonja, egy e-ember két készüléke): a telefon a hálózaton párosítva felkerült (az ellenőrző kód egyezett), és a laptop átadta, a telefon átvette a keretet (2000). Közben négy lelet: a felvett készülék a társ őrjáratának portját jegyzi; a felvett készülék az azonossága horgonyának szeletét is vállalja (a horgonyt a másik készülék írta — enélkül a keret átadása és a profil nem jutott át); a próbák „mindent” kiszolgálása ezt elfedte (a ④a próba most „alap”-pal cserél); „Az adataid” űrlapot a lap magától csak a kezelőn kínálja fel. ⏸️ Nyitott: a legutóbbi profil két készüléknél (a sorszám nem rendez két láncot). A
+(saját QR-kódoló), `papir` / `papir kesz <kód>` (a leírt kód ellenőrzése után a fájl törlése), `kulcscsere <kód>`. ⭐ A ② a papírral ezzel kész; a 17. pont (a helyreállítás a segítőkkel) ②d–②f-ként folytatja, a ③ előtt: **②d** a papír visszavonása (`papir visszavon` — a 2. lépcsőn az állapot szól), a két ág közül az erősebb (nem a hosszabb) nyer, a vesztes ágon tanúsított készülék kiesik, a kulcscsere a fizetési kulcsot is cseréli; **②e** a helyreállítás a segítőkkel (a jóváhagyás, a megállítás, a szerepek; a lánc bejegyzése és a minden koinoban érvényes bizonyíték; a segítők készüléke a várakozás után magától véglegesít és beviszi); **②f** a parancsok (`helyreallitas kerelem` / `befejez` az új készüléken, `segit` az ellenőrző kóddal, `megallit`). ⭐ A ② ezzel kész. **③b** (2026-11-16) a kezelés minden koinomba, helyben: a kezelés-jegyzék (`kezeles.json` — a legerősebb kulcscsere-lánc a bizonyítékaival és a kizárások, amit a készülék bármelyik koinojában látott), a gondozás minden parancs elején és az őrjárat körében, a `kulcscsere` és a `papir visszavon` minden koinoba, és az új `kizar` parancs (a készülékeim listája; a kizárás koinonként a vágással, minden koinomba). **③c** a saját készülék a cserében: a kapu kötése a társ készülékét is megjegyzi (és egy még semmit nem írt saját telefon tanúsítványát a tárba veszi), a csere után a laptop a határig (a keret 20%-a — KH1) átad, a nekem szóló átadást a készülék a parancsok elején és az őrjárat körében átveszi; egy kizárt készüléknek semmit. **③d** a koino-lista a saját készülékek között (a `CIMEK` `kl` mezője — csak a saját készüléknek, csak tőle), a `kizar` a kizárt készülék listájának koinoit is felsorolja, és ahová a listából tud, de ott nincs, oda csatlakozik (KH2 (A) — csak a bevitelhez); a `kulcscsere` ugyanígy; **③e** a csere állásában `szerzo` → `lanc`. ⭐ A ③ ezzel megépült. **③f** (KH3 (A)): a kulcscsere után csak a mostani kulccsal aláírt kizárás számít, és a vágása megtartja a régi készülék múltját (a tagságot, a pontokat); a kulcscsere az ezen a készüléken kiadott kizárásokat az új kulccsal újra aláírja (a gyűjtötteket nem — egy tolvaj régi kulcsú kizárása így nem válhat érvényessé). **④a** (KF1 (A)): a második készülék felvétele párosító kóddal a hálózaton (`keszulek felvesz` a kezelőn, `keszulek csatlakoz <kód>` az új készüléken — a titok bizonyítása a kézfogáshoz kötve, az ellenőrző kód mindkét gépen); a felvett készüléken NINCS az azonosság kulcsa (a kezelést kívánó parancsok a kezelőn mennek). **④c** a személyes határ (`keszulek hatar <készülék> <pont | alap>` — készülékenként, az alap a keret 20%-a). **④b** a lap: „📱 Készülékeim” (a készülékek, a felvétel — a telepítő sor a párosító kóddal és a QR-je: a telefonon egy bemásolt sor —, a kizárás, a határ, a papír állása); az indítók a párosító kódot felismerik. ⭐ A ④ ezzel kész. **⑤ a terep** (2026-11-17 — a laptop és Csaba telefonja, egy e-ember két készüléke): a telefon a hálózaton párosítva felkerült (az ellenőrző kód egyezett), és a laptop átadta, a telefon átvette a keretet (2000). Közben négy lelet: a felvett készülék a társ őrjáratának portját jegyzi; a felvett készülék az azonossága horgonyának szeletét is vállalja (a horgonyt a másik készülék írta — enélkül a keret átadása és a profil nem jutott át); a próbák „mindent” kiszolgálása ezt elfedte (a ④a próba most „alap”-pal cserél); „Az adataid” űrlapot a lap magától csak a kezelőn kínálja fel. ⏸️ Nyitott: a legutóbbi profil két készüléknél (a sorszám nem rendez két láncot). A
 részletek: [`kulcs_atvizsgalas.md`](kulcs_atvizsgalas.md) 9.11–9.15.
 
-### D129. A MAGYARÁZAT-RÉTEG: „AZ ⓘ TARTALMA A KOINÓ ELSŐ TÉMÁJA” (2026-11-19)
+### D129. A MAGYARÁZAT-RÉTEG: „AZ ⓘ TARTALMA A KOINO ELSŐ TÉMÁJA” (2026-11-19)
 
 *Csaba (a ⑤ terep képei után, a „📱 Készülékeim” feliratain): „nem egyértelműek a leírások, a felületen. úgy kéne őket
 megfogalmazni, hogy a jövőbeli társak is megértsék. ezt az egész koino felületére értem. … az információk, egy "i" jelre kattínva,
@@ -6578,19 +6578,19 @@ fejlesztést.”*
    (egy érintéssel bezárul, nem takarja el az ablakot), alján egy gomb az entitáshoz.
 2. **A hang** (MA2 (B)): részletes — mi ez, mire jó, mit tehetsz itt, és HOGYAN MŰKÖDIK; példával, belső kódok (D-számok,
    kulcs-darabok) nélkül.
-3. **A fogalomtár** (MA3 (A)): minden koinós fogalom egy helyen (e-ember, tudatpont, gondolat, javaslat, egyezmény, küszöb, bizonyossági
+3. **A fogalomtár** (MA3 (A)): minden koinos fogalom egy helyen (e-ember, tudatpont, gondolat, javaslat, egyezmény, küszöb, bizonyossági
    mutató, társ, csere, őrjárat, készülék, kezelő, papír…), a menüből és a buborékokból elérhetően.
 4. **A RENDSZER-ENTITÁS — a kézikönyv.** A program egy fájlban hozza az **alap-tartalmat**: minden ⓘ magyarázatát és a fogalmakat, a
-   struktúrájukkal. Ez minden (kézikönyves) koinóban megvan, ahogy a program szabályai: nem esemény, senki nem írja alá, nem utazik a
-   hálózaton. Minden darabnak állandó NEVE van (pl. „menü / Keresés”), és az azonosítója a koinóból és ebből a névből számolódik —
+   struktúrájukkal. Ez minden (kézikönyves) koinoban megvan, ahogy a program szabályai: nem esemény, senki nem írja alá, nem utazik a
+   hálózaton. Minden darabnak állandó NEVE van (pl. „menü / Keresés”), és az azonosítója a koinoból és ebből a névből számolódik —
    mindenkinél ugyanaz, így bárki tehet rá tudatpontot és javaslatot, mint egy e-ember gondolatára. A hálózaton csak a közösség
    módosításai utaznak.
 5. **Nem felejtődik el** (MA4 (B)): a rendszer-entitás megmarad, és a közösség módosítása pont nélkül is megmarad. ⭐ Ebből
-   következik: a kézikönyv szeleteit **minden tag tartja** (mint a koinó születését) — különben egy pont nélküli módosítást senki nem
+   következik: a kézikönyv szeleteit **minden tag tartja** (mint a koino születését) — különben egy pont nélküli módosítást senki nem
    őrizne meg. ⭐⭐ **A KOINON** (Csaba, 2026-11-19: *„hozzunk létre, egy koinon-t ami maga a program azon tárhelye, amit darabokban,
    replikálva, őriz meg, és neki, mondjuk végtelen tudatpontja lenne, és minden entitást, 1 tudatpontal hozza létre”* — *„rendben.
    jöhet az 1-es, aztán mehetsz tovább a 2-essel”*): a megmaradás nem a D14 kivétele, hanem minden kézikönyv-entitáson **1 passzív
-   pont a koinóné** — így a D14 kivétel nélkül igaz (nincs 0 pontos entitás). A koinon nem e-ember: nem szavaz, nem javasol, nem ad
+   pont a koinoné** — így a D14 kivétel nélkül igaz (nincs 0 pontos entitás). A koinon nem e-ember: nem szavaz, nem javasol, nem ad
    érték javaslatot, a pontja nem számít a részvétel nevezőjébe, nem a tudatpont-keretből jön, és senki nem írja alá (minden készülék
    ugyanúgy számolja — a nevekből). ⏭️ Az általános egyezmények koinon-pontja és a darabokra osztott, replikált őrzés: **D130**.
    A sorrend (Csaba: *„ugyan úgy kell rendezni a rendszer entitás típusú kártyákat is, mint az többit”*): a kézikönyv kártyáira
@@ -6598,32 +6598,32 @@ fejlesztést.”*
 6. **Az új programverzió** (MA5 (A)): az új név (pl. egy új menüpont magyarázata) magától megjelenik; a közösség által nem módosított
    szöveg magától a program új szövegére vált; ahol a közösség módosított, ott a program nem ír felül — az új szöveg **a program által
    megírt javaslatként** érkezik, amit egy e-ember elindíthat (Csaba 2026-09-11-i ötlete — `jegyzetek.md`).
-7. **A helye** (MA6 (A)): a pakliban, egy gyökér-gondolat („A koinó kézikönyve”) alatt, struktúrában (Menü, Ablakok — ablakonként a
-   részei —, Alsó sáv, Fejléc, Kártyák, Fogalomtár) — **egy új koinó első témái**; a struktúra és a síkidom nézet is mutatja.
+7. **A helye** (MA6 (A)): a pakliban, egy gyökér-gondolat („A koino kézikönyve”) alatt, struktúrában (Menü, Ablakok — ablakonként a
+   részei —, Alsó sáv, Fejléc, Kártyák, Fogalomtár) — **egy új koino első témái**; a struktúra és a síkidom nézet is mutatja.
 8. **A javaslatok** (MA7 (A)): a hétköznapi szabály (aki tudatpontot tett rá, javasolhat); csak **módosítás** és **áthelyezés a
    kézikönyvön belül** — törlés és egyesítés nem (amíg a gomb a felületen van, az ⓘ-jének tartalma legyen).
 9. **A küszöb** (MA8 (B)): ugyanaz a szabály (a pont-tartók döntenek), de a kézikönyv **saját, óvatosabb alap-küszöbbel** születik —
    legalább 3 nap döntési idő, hogy mások észrevehessék és csatlakozhassanak (ma 1 ponttal, egyedül, 1 mp alatt át lehetne írni);
    a kézikönyvre fel lehet iratkozni (az értesítési beállítás az ágra öröklődik); a küszöböt érték javaslattal ugyanúgy meg lehet
    változtatni.
-10. **A koinó szabálya** (D118/2): a kézikönyv a születés szabályai közé kerül (`kezikonyv` — a küszöbével); a régi születésben nincs,
-    tehát a régi (teszt) koinókban nem jelenik meg — egy születés szabályai utólag nem változnak. ⚠️ A régi program az ismeretlen
-    szabályú születést elutasítja: kézikönyves koinóhoz csak a frissített program csatlakozhat.
+10. **A koino szabálya** (D118/2): a kézikönyv a születés szabályai közé kerül (`kezikonyv` — a küszöbével); a régi születésben nincs,
+    tehát a régi (teszt) koinokban nem jelenik meg — egy születés szabályai utólag nem változnak. ⚠️ A régi program az ismeretlen
+    szabályú születést elutasítja: kézikönyves koinohoz csak a frissített program csatlakozhat.
 11. **A küszöb-mezők alapértéke** (MA9 (B), Csaba, 2026-11-20: „rendben, legyen a (B)” — a ④ szövegeinek kódolvasása hozta elő):
-    az új gondolat, kategória és gondolattípus ablaka a négy küszöb-mezőt a **koinó saját alapértékeivel** tölti ki (a születés
+    az új gondolat, kategória és gondolattípus ablaka a négy küszöb-mezőt a **koino saját alapértékeivel** tölti ki (a születés
     `alapKuszobok`-ja, nem a prototípus 51 % / 51 % / 0 mp / 1 év-e), és a program **csak akkor ment érték javaslatot, ha a létrehozó
-    változtatott** rajtuk — különben a gondolat a koinó alapját követi, amíg valaki mást nem mond (a mediánba csak az számít, aki
+    változtatott** rajtuk — különben a gondolat a koino alapját követi, amíg valaki mást nem mond (a mediánba csak az számít, aki
     tényleg mondott valamit). Eddig a felületről írt gondolat a prototípus értékeit kapta a létrehozó érték javaslataként.
 12. **A felület próbája** (MA10 (C), Csaba, 2026-11-20: „ma10: (c)”): az ⓘ helyeit két próba őrzi — a **fájlokban** (minden hely
     címének darabjai — az osztály- és azonosító-nevek, a felismerő feliratok — ott vannak-e a felület programjában: egy átnevezett
     elemről az ⓘ némán eltűnne), és a **valódi lapon**, fej nélküli Chrome-mal (a nézet-próba eszközével, csomag nélkül): a fő
     felületeken az ⓘ ténylegesen kikerül, a buborék a program szövegével nyílik, és az ⓘ a gombját nem indítja el.
 
-**Az építés sorrendje:** ① **a mag** — az alap-tartalom fájlja (név, szülő, cím, szöveg, típus), az azonosító (koinó + név), az
+**Az építés sorrendje:** ① **a mag** — az alap-tartalom fájlja (név, szülő, cím, szöveg, típus), az azonosító (koino + név), az
 entitás születési esemény nélkül, a D14 kivétele, a kapu (pont és javaslat a rendszer-entitásra), a vállalás (mindenki tartja), a
 születés szabálya és a küszöb; ② **a javaslatok** — a módosítás és a kézikönyvön belüli áthelyezés, a tiltások (`szabalyok.js`
 `TILTOTT_MUVELETEK` mintájára), és az új programverzió belépése (MA5 (A)); ③ **a felület** — az ⓘ réteg (az örökölt, bájtra azonos
-fájlokhoz nem nyúl: a kirajzolás után teszi a helyére, mint a `koinoModalok.js` a koinós többletet), a buborék az entitás gombjával,
+fájlokhoz nem nyúl: a kirajzolás után teszi a helyére, mint a `koinoModalok.js` a koinos többletet), a buborék az entitás gombjával,
 a kézikönyv a pakliban, a struktúrában és a síkidomban; ④ **a szövegek** területenként (Készülékeim, alsó sáv, fejléc, menü, ablakok,
 kártyák, pakli), majd a fogalomtár; ⑤ **a próba**, ami figyeli, hogy minden ⓘ megtalálja a helyét, és minden névnek van szövege.
 A méret: az alap-tartalom becslés szerint 200–300 KB (a program ~8 MB).
@@ -6646,13 +6646,13 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
    szerinti darabot vállalja egy olyan mélységen, hogy minden darabnak ~`r` tartója legyen (a készülékek számából becsülve, óvatosan —
    az ismert tagokból: azt alá lehet becsülni, túl nem). ⭐ KO6 (A) (Csaba: „ko6: (A)”): **átfedés nélkül** — a 95. mérés szerint nélküle
    is minden darabnak 13+ tartója marad, az átfedés háromszoros terhet hozna. A minta helyei a tömör alak saját lenyomatából (a 95. mérés
-   lelete). Egy készülék terhe ~`entitások × r / készülékek` — nem nő a koinóval. Egy fenntartó kör (órás
+   lelete). Egy készülék terhe ~`entitások × r / készülékek` — nem nő a koinoval. Egy fenntartó kör (órás
    ütemben) figyeli a darabok tartóit (a skálázási terv 5.2 „külön munkája”). ✅ *A darab a cserében megépült (③c, 2026-11-20 —
    `koinon_atvizsgalas.md` napló):* `n` jelű darab-kulcs, a mélység `floor(log2(ismert tagok / r))`; a szomszéd mélységű társsal a
    mélyebb darab a közös (az átfedés nélkül is mindkettőnél megvan).
 4. **Mit őriznek** (KO3 (A)): tömören — a javaslatot, a döntés ellenőrizhető bizonyítékát (a lezárási összegzés — D95/1) és az
    állásfoglalásokat (a hatály); a nyers szavazatokat nem.
-5. **A példányszám** (KO4 (A)): közösségi paraméter a koinó születésében (D118/2), alapból **`r` = 20** (30%-os elérhetőségnél 99,9%,
+5. **A példányszám** (KO4 (A)): közösségi paraméter a koino születésében (D118/2), alapból **`r` = 20** (30%-os elérhetőségnél 99,9%,
    hogy legalább egy tartó válaszol).
 6. **A kézikönyv is** (KO5 (B)): már most a koinon darabjaiba kerül — nem tartja mindenki (a D129 „mindenki tartja” helyett).
    ⭐ KO9 (A) (Csaba, 2026-11-20: „elfogadom, a javaslataidat”): a következményével együtt — a közösség módosításait az a készülék,
@@ -6733,7 +6733,7 @@ hatóság nélkül — évekkel a blokklánc divatja előtt.
 |---|---|---|
 | **DAG entitás-láncokból** (N8) | a commit-történet pontosan egy DAG; a merge-commitnak több szülője van | az N8 „kutatási terep" — de a DAG-alakzat maga bizonyított |
 | **Az egyesítés legyen natív** — lineáris láncban rémálom | a `merge` alapművelet | egybevág az N8 megállapításával |
-| **Fork: a teljes történet lemásolódik, közös múlt + külön jövő** (D13) | szó szerint ez a `clone` + saját ág | a D13 nem újdonság a világban, csak a koinóban |
+| **Fork: a teljes történet lemásolódik, közös múlt + külön jövő** (D13) | szó szerint ez a `clone` + saját ág | a D13 nem újdonság a világban, csak a koinoban |
 | **Hamisíthatatlan történet hash-ellenőrzéssel** (D9) | minden objektum a GONDOLATA lenyomatával azonosított — a múlt átírása minden leszármazott azonosítót megváltoztat | **gondolat-címzés = ingyen manipuláció-bizonyíték** |
 | **TÉNY örök ↔ HATÁLY elavulhat** (D8) | a git szétválasztja a **megváltoztathatatlan objektum-DAG-ot** a **mozgatható mutatóktól** (branch/tag) | a D8-at magunktól találtuk ki — a git implementálja |
 | **Tudatpont = tárolási vállalás, érdeklődés-vezérelt replikáció** (D3) | `partial clone`, `sparse checkout`, `shallow clone` — részleges másolat ismert kompromisszumokkal | a D3 „csak azt tárolom, ami érdekel" mérnökileg megoldott terep |
@@ -6768,13 +6768,13 @@ bele-pecsételik az állapot-ujjlenyomatukat"). A git bizonyítja, hogy a horgon
 
 ### Ahol az átvitel NEM működik — ez a fontosabb fele
 
-| A git NEM ad | Miért kritikus a koinónál |
+| A git NEM ad | Miért kritikus a koinonál |
 |---|---|
 | **Konszenzust** | a git SOHA nem dönti el, melyik ág az igazság — azt ember dönti el, kézzel. **A koino lényege épp a közös döntés.** A git a HORDOZÓT adja, a KORMÁNYZÁST soha. Aki azt mondja, „használjatok gitet", az a nehéz felét hagyta ki. |
 | **Identitást** | a commit szerző-mezője szabad szöveg — bárki bárkinek kiadhatja magát (az aláírás segít, de a git nem tud „egy ember = egy fiók"-ról). A D1/N4 teljesen a git hatókörén kívül van. |
 | **Jogosultságot** | a git nem ismer hozzáférés-vezérlést — **pontosan ezért létezik a GitHub üzletként**. A tudatpont-alapú jogosultság külön réteg marad. |
 | **Jelentés-szintű összefésülést** | a git SOROKAT fésül össze. A koino **jelentést** egyesít: két gondolat egyesítése emberi ítélet, nem szöveg-diff. **A közös-ős GONDOLATA átvihető, az ALGORITMUS nem.** |
-| **A koino DAG-ja gazdagabb** | a git-commit csak a saját előzményére mutat, egy repón belül. A koinóban egy esemény **két láncot köt össze** (cselekvő + entitás, N8) — ez inkább több-láncú főkönyv, mint git. |
+| **A koino DAG-ja gazdagabb** | a git-commit csak a saját előzményére mutat, egy repón belül. A koinoban egy esemény **két láncot köt össze** (cselekvő + entitás, N8) — ez inkább több-láncú főkönyv, mint git. |
 
 ### A SHA-1 csapda (mérve, 2026-08-25)
 
@@ -6919,7 +6919,7 @@ Hálózat nélkül, szerver nélkül — és ez nem játék-üzemmód, hanem a v
 
 | | |
 |---|---|
-| Mit tud a végén? | **egy család, egy baráti kör koinózik** — központi szereplő nélkül |
+| Mit tud a végén? | **egy család, egy baráti kör koinozik** — központi szereplő nélkül |
 | Miért itt? | a D22 szerint ez az első kiadás feltétele; és **itt derül ki, mennyi infrastruktúra kell valójában** |
 | Kockázat | 🟠 mérnökileg nehéz (NAT, tűzfalak, mobil-háttérfutás, N11) — **mérni kell, nem feltételezni** |
 
@@ -6975,8 +6975,8 @@ törlésekor), és most is jogos volt: a szakaszokat könnyű úgy olvasni, mint
 
 | Rossz olvasat | Helyes olvasat |
 |---|---|
-| „a családi koinóhoz elég az 1–2. szakasz" | **minden koino a teljes programot futtatja** |
-| „a 4–6. szakasz a nagy verzió" | a 4–6. szakasz mechanizmusa **minden koinóban ott van** |
+| „a családi koinohoz elég az 1–2. szakasz" | **minden koino a teljes programot futtatja** |
+| „a 4–6. szakasz a nagy verzió" | a 4–6. szakasz mechanizmusa **minden koinoban ott van** |
 | „később kicseréljük a nagyra" | **nincs csere** — ugyanaz a kód, más terhelés alatt |
 
 **Ami a mérettel változik, az nem a program, hanem a TERHELÉS:**
@@ -7016,7 +7016,7 @@ nélkül (A).
 > #### ⚠️ Látszólagos ellentmondás a D22-vel — és a feloldása (2026-08-26)
 >
 > A fenti szakasz azt mondja: *„a kisebb közösség nem lépcsőfok"*. Az új sorrend viszont
-> épp azzal kezd, hogy **egy család koinózni tudjon**. Ez nem ellentmondás, mert **két
+> épp azzal kezd, hogy **egy család koinozni tudjon**. Ez nem ellentmondás, mert **két
 > különböző dologról szól**:
 >
 > | | Amiről a 2026-08-25-i pontosítás szól | Amiről a D22 szól |
@@ -7117,7 +7117,7 @@ hanem egymást.*
 | **H5** | Entitások önhordozóvá tétele | ❌ **ELESETT** | **D24**: nincs adat-migráció, a 16 fő újra regisztrál |
 | **H1** | Küszöbváltozás-értesítés | ❌ **ELESETT** | a központi szerver funkciója lett volna; a D4 követelménye a Szakasz 1-ben teljesül majd, új alapon |
 | **H8/2** | Verzió-végpont | ❌ **ELESETT** | a futó **központi** példány önvallomása volt — nincs mit vallania |
-| **H8/1** | Tükör-másolat (Codeberg) | ❌ elvetve *(2026-08-25)* | lásd a részleteket lentebb: a repó nyilvános + AGPL, és a Codeberg ToU kizárja a koinót |
+| **H8/1** | Tükör-másolat (Codeberg) | ❌ elvetve *(2026-08-25)* | lásd a részleteket lentebb: a repó nyilvános + AGPL, és a Codeberg ToU kizárja a koinot |
 | **H4** | Identitás-réteg leválasztása | 🔄 **BEOLVAD** | nem a régi kódból választjuk le, hanem eleve P2P-ként épül → **Szakasz 1 + 3** |
 | **H2** | Szavazat-titkosság 1. lépés | ⏸️ **HALASZTVA** | a befagyasztott éles rendszert védte volna; az elv a Szakasz 1-ben épül be (a szavazat aláírt esemény, nem szerver-rekord) |
 | **H3** | E-mail privát | ⏸️ **HALASZTVA** | *(átvizsgálva 2026-08-26: a `populate()` hívások mindenütt projekcióval mennek, e-mail csak a saját adatok válaszában van)* |
@@ -7148,7 +7148,7 @@ hanem egymást.*
      2026-08-25 óta **nyilvános, AGPL-3.0 alatt**, tehát **minden klón teljes biztonsági
      mentés a történettel** — a kód nem tud elveszni akkor sem, ha a GitHub önkényesen
      törli (a helyi példány teljes: 189 commit, az első commitig).
-     > ⚠️ **A Codeberg NEM jelölt — a felhasználási feltételeik kizárják a koinót.**
+     > ⚠️ **A Codeberg NEM jelölt — a felhasználási feltételeik kizárják a koinot.**
      > (Ellenőrizve 2026-08-25, a ToU szövegéből, MIUTÁN Csaba fiókot nyitott ott.) Két
      > kikötés is talál: *„You must not share projects that mostly consist of code written
      > by 'generative AI'-tools (including services such as Claude…)"* — a koino kódja
@@ -7214,7 +7214,7 @@ hanem egymást.*
   előbb a legkritikusabb problémákat hidaljuk át elméletben, és csak utána jön a részletes
   terv és a kódolás. Indok: *„ha az lesz a vége, hogy ez lehetetlen, akkor tényleg nem
   világmegváltás lesz belőle, hanem csak esetleg egy hasznos program, és akkor úgy is
-  állok hozzá"* — plusz az ismertető anyagokhoz tudni kell, mit lehet kihozni a koinóból.
+  állok hozzá"* — plusz az ismertető anyagokhoz tudni kell, mit lehet kihozni a koinoból.
   - Claude **helyesbítette** korábbi pesszimizmusát: rossz dolgokhoz hasonlított
     (a Holochain általános platform, a Matrix szándékosan föderált), és a **D13 előtti
     léptékhez** mért (globális konszenzus), pedig a D13 azt már átírta.
@@ -7272,7 +7272,7 @@ hanem egymást.*
     cinkosból **egymás őrzőjévé** alakul.
   - **N1: a mag mérete a valódi korlát** (Csaba kérdésére) — nem a tárhely ára, hanem hogy
     egy átlagos telefon teljes értékű résztvevő maradhasson, különben kapuőrök keletkeznek
-    (D12 bukása). Becslés: ~1 KB/fő → 10 milliós koinónál ~10 GB, **ami már sok**. A
+    (D12 bukása). Becslés: ~1 KB/fő → 10 milliós koinonál ~10 GB, **ami már sok**. A
     megoldás alakja: **ujjlenyomat + ellenőrizhető bizonyíték** (a tároló nem tud hazudni).
   - **Új tervezési alapelv rögzítve:** *egyszerű és változtatható > összetett és teljes* —
     ami ritka és nem végzetes, azt felírjuk, de nem építjük meg.
@@ -7284,7 +7284,7 @@ hanem egymást.*
     felvetése** („mi van, ha valaki egyszerre törli az összes önkéntes tárolót?") hiányosnak
     mutatta az első tervet → **három réteg**, és a középső a valódi védelem: **mindenki
     tárolja a saját lapját** (~1 KB), amiből a mag újjáépíthető. **Napi kötegelés** (Csaba
-    alapértéke): évi ~365 konszenzus-esemény, bármekkora koinónál. **Bootstrap:** a kiinduló
+    alapértéke): évi ~365 konszenzus-esemény, bármekkora koinonál. **Bootstrap:** a kiinduló
     ujjlenyomatot attól kapod, aki meghívott — *ugyanaz a társas bizalom alapozza meg a
     technikait is*.
   - **D13/c:** a koino-szintű paraméterek (kötegzárás, tanúszám…) **maguk is entitások** a fa
@@ -7298,7 +7298,7 @@ hanem egymást.*
     felismerés: az identitás-réteg (A szakasz) megépíthető P2P NÉLKÜL**, a mostani
     kódbázisban, és a mai 16 fővel kipróbálható. Az egyetlen valódi kutatási kérdés
     (érvényesítő-kiválasztás) a legkésőbbi szakaszban (E) ül, tehát **semmi nem áll az első
-    három szakasz útjában**. *(A „menü" keret — kis koinónak elég a C/D — másnap törölve,
+    három szakasz útjában**. *(A „menü" keret — kis koinonak elég a C/D — másnap törölve,
     lásd lentebb.)*
 - **2026-08-25 (8)** — **Csaba két pontosítása a lépés-sorrendhez.**
   - **A cél az első naptól a MILLIÁRDOS lépték, a pénzzel együtt.** A „menü" keret
@@ -7359,22 +7359,22 @@ hanem egymást.*
     csak triviális; a konszenzus ott van, csak magától teljesül). A szakaszok a
     **fejlesztés** sorrendjét adják, nem a termék változatait — és amikor a 4. szakasz
     elkészül, **a tízfős koino is megkapja**.
-- **2026-08-26 (2)** — **D25: A BELÉPŐ TÉR** — Csaba kifejtette a koinók sokaságának
+- **2026-08-26 (2)** — **D25: A BELÉPŐ TÉR** — Csaba kifejtette a koinok sokaságának
   szerkezetét, amiről a D12 eddig csak annyit mondott, hogy „a térkép nem kormányzat".
   - **A teret a LESZÁRMAZÁS hozza létre** (családfa, nem globális regiszter): a független
     indulás **új teret nyit**, egy meglévő közösség viszont a **saját terébe** hozhat létre
-    új koinókat — három módon: más paraméterekkel (D13/b) · új szabályrendszerrel (D13) ·
+    új koinokat — három módon: más paraméterekkel (D13/b) · új szabályrendszerrel (D13) ·
     **program-szintű nézeteltérésből** (D9).
   - 🔁 **A harmadik mód a KÜLÖNVÁLÁS egy szinttel feljebb** — amit entitás-szinten már
     megépítettünk (S29), az itt a **közösség** szintjén ismétlődik. A D13/c mintájának
     harmadik előfordulása: *ugyanaz a gépezet, megint egy szinttel feljebb.*
   - ⭐ **A DÖNTÉS MAGVA: az azonosság közös, a jogosultság helyi.** A kulcs és a
-    **tanúsítások átjönnek** a tér koinói között; a **hitelesítettség küszöbe** viszont
-    koinónként eltér (Csaba példája: ahol 3 tanúsító elég, ott kész vagy; ahol 10 kell, ott
+    **tanúsítások átjönnek** a tér koinoi között; a **hitelesítettség küszöbe** viszont
+    koinonként eltér (Csaba példája: ahol 3 tanúsító elég, ott kész vagy; ahol 10 kell, ott
     még 7-et kell szerezned). A **belépési szabály** is koino-paraméter: lehet **tér-nyílt**
     (aki a térben bárhol tag) vagy **plusz meghívást igénylő**.
-  - 💰 **A pénz: nem a térhez, hanem a KOINÓKHOZ kötött.** Egy új koino **átviheti** ugyanazt
-    a pénzt, de **a döntés és a kibocsátás az eredeti koinóban marad**; saját, új pénz is
+  - 💰 **A pénz: nem a térhez, hanem a KOINOKHOZ kötött.** Egy új koino **átviheti** ugyanazt
+    a pénzt, de **a döntés és a kibocsátás az eredeti koinoban marad**; saját, új pénz is
     létrehozható; később a térben **kriptopiac** alakulhat ki. Ez a **D10/D16 hatókörét
     pontosítja**: az alkotmányos kibocsátás és az egyenlő osztalék **egy koino belügye** —
     a tér nem pénzügyi hatóság, ahogy kormányzati sem (D12).
@@ -7383,7 +7383,7 @@ hanem egymást.*
     nélkül.
   - **Négy nyitott kérdés felírva:** (1) a koino-tagság a tartós mag része-e — ettől függ,
     hogy a **létszám szerinti besorolás hamisítható-e**; (2) osztalék-aszimmetria az átvett
-    pénznél; (3) a tér elárasztása üres koinókkal; (4) a kihalt koino sorsa.
+    pénznél; (3) a tér elárasztása üres koinokkal; (4) a kihalt koino sorsa.
 - **2026-08-27** — **D26: az entitás MÉRETE** (Csaba felvetése a Szakasz 1 kodolasa kozben).
   A D3 egyenes következménye, amit eddig nem vezettünk le a végéig: *ha a tudatpont
   tárolási vállalás is, akkor tudni kell, mit vállalsz, MIELŐTT vállalod.*
@@ -7438,7 +7438,7 @@ hanem egymást.*
     nem érvénytelenít magától — a rendszer **bejelent, nem bíró** (D19).
   - **A prototípus (1.1) NEM kap átnevezést** — befagyasztva marad.
 - **2026-08-27 (3)** — **D28: a BELÉPÉSI ADATOK.** Csaba elvárása: a koino kötelező
-  adatokat kérhet a belépéskor; az ő első koinója **teljes nevet és lokációt (település
+  adatokat kérhet a belépéskor; az ő első koinoja **teljes nevet és lokációt (település
   szintig)** vár el.
   - **Az adatot nem „megadod egy szolgáltatónak", hanem ALÁÍROD MAGADRÓL.** A valódiságát
     nem ellenőrzés adja, hanem a **tanúsítás**: aki behívott, az ismer (D18). *Ez már ma is
@@ -7449,7 +7449,7 @@ hanem egymást.*
     `Profil { koino, nev, lokacio }` (az adatok). Négy indok: a költözés ne hamisítsa meg a
     belépés dátumát · **a tagság bizonyítéka ne tartalmazzon személyes adatot** (különben a
     létszám ellenőrzése egyben a névsor kiadása volna) · a név törölhető legyen a tagság
-    elvesztése nélkül · koinónként külön profil. **A felületen ez nem látszik**: egy űrlap,
+    elvesztése nélkül · koinonként külön profil. **A felületen ez nem látszik**: egy űrlap,
     egy gomb, a háttérben két aláírás.
   - **A D6 sértetlen:** a `Belepes` a `lanc` rétegbe tartozik, a `Profil` a `gondolat`-ba
     `szemelyes` jelöléssel — a tartós magban a névről **egyetlen bit sincs**.

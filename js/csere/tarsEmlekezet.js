@@ -77,11 +77,11 @@ export function feljegyzesAlakja(x) {
 
 /**
  * ⭐ A NÁLAM VÁLTOZOTT kulcsok a feljegyzés óta (a vonal kulcsaival): a tár vége óta hozzáfűzött események szeletei és
- * bejelentési helyei (a gyökér '' → a gyökér vonal-kulcsa), a koinó születése (ha az esemény közöttük van), és a maradék.
+ * bejelentési helyei (a gyökér '' → a gyökér vonal-kulcsa), a koino születése (ha az esemény közöttük van), és a maradék.
  * Null, ha nincs (használható) feljegyzés — más generáció, a tár rövidebb, mint a feljegyzés, túl sok esemény vagy kulcs.
  * @param {Object} tar - `allas()`, `valtozottSzeletek(n, korlat)`
  * @param {Object|null} feljegyzes
- * @param {{szuletes?: string|null, szuro?: Function}} [b] - a koinó születésének azonosítója; a résztvevő kulcsok szűrője
+ * @param {{szuletes?: string|null, szuro?: Function}} [b] - a koino születésének azonosítója; a résztvevő kulcsok szűrője
  *   (a maradékra nem — azt az a fél tartja meg, amelyik részt vesz benne)
  * @returns {Array<string>|null} rendezve
  */
@@ -97,7 +97,7 @@ export function valtozottKulcsok(tar, feljegyzes, { szuletes = null, szuro = () 
     const k = vonalKulcsa(s);
     if (ervenyesKulcs(k) && szuro(k)) kulcsok.add(k);
   }
-  // ⚠️ A koinó születésének párja a szűrőtől függetlenül a párok közt van (mindenki részt vesz benne — D96). ⭐ D118 (②a):
+  // ⚠️ A koino születésének párja a szűrőtől függetlenül a párok közt van (mindenki részt vesz benne — D96). ⭐ D118 (②a):
   // a pár a születések LÁNCÁÉ — ha bármelyik tagja most jött, a pár változott.
   const szuletesek = Array.isArray(szuletes) ? szuletes : szuletes ? [szuletes] : [];
   if (szuletesek.some((az) => v.azonositok.includes(az))) kulcsok.add(KOINO_SZULETES_KULCS);

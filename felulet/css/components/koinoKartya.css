@@ -143,7 +143,7 @@
   cursor: default;
 }
 
-/* ===== ⭐ A HÁZ (D100, H2): A PAKLI KOINÓS JELEI =====
+/* ===== ⭐ A HÁZ (D100, H2): A PAKLI KOINOS JELEI =====
    A kártyák bájtra a prototípuséi; ezeket a jeleket a `koinoPakli.js` teszi rájuk a kirajzolás után.
    ⚠️ A hiány látszik, de nem vád (D19): halvány és dőlt, nem piros. */
 
@@ -245,7 +245,7 @@
   font-style: italic;
 }
 
-/* ===== ⭐ AZ ALSÓ SÁV KOINÓS TÖBBLETE: A CSERE (2026-10-15) =====
+/* ===== ⭐ AZ ALSÓ SÁV KOINOS TÖBBLETE: A CSERE (2026-10-15) =====
    A prototípus info-elemének stílusa (`foOldal.css`) — csak gombként: kattintásra azonnal frissít. */
 .also-sav__csere {
   background: none;

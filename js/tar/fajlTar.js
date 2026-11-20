@@ -11,7 +11,7 @@
 //
 // ===== A TÁR ALAKJA =====
 //
-// Egyetlen HOZZÁFŰZHETŐ fájl koinónként (`esemenyek.jsonl`), soronként egy esemény.
+// Egyetlen HOZZÁFŰZHETŐ fájl koinonként (`esemenyek.jsonl`), soronként egy esemény.
 // Ez pontosan az, amit a modell megkövetel: az eseményt SOHA nem módosítjuk és nem
 // töröljük — csak új sor keletkezik. A fájl emberi szemmel is olvasható, bármikor
 // megnézhető, és egy szövegszerkesztővel is menthető.
@@ -20,7 +20,7 @@
 // 2026-09-27): eseményenként a sor helye, azonosítója, szerzője, sorszáma és szelete — az
 // esemény teste nélkül —, és a pillanatképe (`mutato.json`), hogy a megnyitásnak ne kelljen
 // az egész fájlt olvasnia. A testek kérésre jönnek. *Az adat a fájl; a mutató csak a térkép
-// hozzá — ha nem illik, a fájlból újraépül.* A zárolás nem itt van: egy koinó tárához egy
+// hozzá — ha nem illik, a fájlból újraépül.* A zárolás nem itt van: egy koino tárához egy
 // folyamat fűz, az író (`iro.js`, D70).
 //
 // Használják: esemenyTar.js és kulcsTar.js (rajtuk keresztül minden más).
@@ -33,7 +33,7 @@ import { join, dirname } from 'node:path';
 
 import { szelet, bejelentesHelyei, lancKulcsa } from '../esemeny/esemeny.js';
 import { kezelesAzonossaga } from '../allapot/kizaras.js';   // ⭐⭐ D128 (①d, ②b): a kezelés-események indexe
-// ⭐⭐ D128: a láncukon kívül érkezett események tanúsítványai — a készülék mappájában (koinótól független).
+// ⭐⭐ D128: a láncukon kívül érkezett események tanúsítványai — a készülék mappájában (koinotól független).
 import { tanusitvanyJegyzek } from './tanusitvanyJegyzek.js';
 import { bajtLenyomat } from '../esemeny/kanonikusAlak.js';
 import { rendezettHalmaz, halmazLenyomata } from '../esemeny/halmaz.js';
@@ -51,18 +51,18 @@ export function alapHely() {
 }
 
 // ===================================
-// ⭐⭐ D118/2: A BECENEVEK — melyik helyi becenév melyik koinóé
+// ⭐⭐ D118/2: A BECENEVEK — melyik helyi becenév melyik koinoé
 // ===================================
 //
-// A koinó neve a születése lenyomata (43 jel) — kézzel beírni kényelmetlen, ezért a készüléken a koinónak becenevet adunk
-// (a `KOINO_AZONOSITO`, alapból `sajat`). A jegyzék HELYI: sosem utazik, és semmit nem dönt el a koinóban (a vonalon, az
+// A koino neve a születése lenyomata (43 jel) — kézzel beírni kényelmetlen, ezért a készüléken a koinonak becenevet adunk
+// (a `KOINO_AZONOSITO`, alapból `sajat`). A jegyzék HELYI: sosem utazik, és semmit nem dönt el a koinoban (a vonalon, az
 // eseményekben és a mappa nevében a lenyomat jár). Egy lenyomat-alakú becenév maga a név; a nem jegyzett szabad becenév a
 // régi alak (a régi adat és a próbák).
 
 const BECENEV_FAJL = 'becenevek.json';
 const LENYOMAT_ALAK = /^[A-Za-z0-9_-]{43}$/;
 
-/** A becenév koinója ezen a készüléken (a lenyomat), vagy maga a becenév, ha nincs jegyezve (a régi alak). */
+/** A becenév koinoja ezen a készüléken (a lenyomat), vagy maga a becenév, ha nincs jegyezve (a régi alak). */
 export async function koinoBecenevFeloldasa(becenev, hely = alapHely()) {
   if (LENYOMAT_ALAK.test(becenev)) return becenev;
   try {
@@ -72,9 +72,9 @@ export async function koinoBecenevFeloldasa(becenev, hely = alapHely()) {
   return becenev;
 }
 
-/** A becenév mostantól ennek a koinónak a neve ezen a készüléken (a `koino`, a `csatlakoz` és a `behoz` jegyzi). */
+/** A becenév mostantól ennek a koinonak a neve ezen a készüléken (a `koino`, a `csatlakoz` és a `behoz` jegyzi). */
 export async function koinoBecenevKijelolese(becenev, azonosito, hely = alapHely()) {
-  if (!LENYOMAT_ALAK.test(azonosito)) throw new Error('a koinó neve egy lenyomat (43 jel)');
+  if (!LENYOMAT_ALAK.test(azonosito)) throw new Error('a koino neve egy lenyomat (43 jel)');
   let j = {};
   try { j = JSON.parse(await readFile(join(hely, BECENEV_FAJL), 'utf8')) ?? {}; } catch { /* még nincs */ }
   j[becenev] = azonosito;
@@ -85,7 +85,7 @@ export async function koinoBecenevKijelolese(becenev, azonosito, hely = alapHely
 }
 
 /**
- * ⭐ D119 (⑥): a koinó becenevei ezen a készüléken (a jegyzékből, rendezve) — a lap ebből írja ki a koinó őrjáratának indító
+ * ⭐ D119 (⑥): a koino becenevei ezen a készüléken (a jegyzékből, rendezve) — a lap ebből írja ki a koino őrjáratának indító
  * parancsát (egy rövid becenévvel a 43 jeles név helyett).
  */
 export async function koinoBecenevei(azonosito, hely = alapHely()) {
@@ -176,7 +176,7 @@ export async function esemenyTarNyitasa(koino, hely = alapHely(), beallitas = {}
   const mappa = join(hely, koino);
   await mkdir(mappa, { recursive: true });
   const fajl = join(mappa, 'esemenyek.jsonl');
-  // ⭐⭐ D128: a tanúsítvány-jegyzék a KÉSZÜLÉKÉ (a koinók mappái fölött) — egy tanúsítvány minden koinóban érvényes.
+  // ⭐⭐ D128: a tanúsítvány-jegyzék a KÉSZÜLÉKÉ (a koinok mappái fölött) — egy tanúsítvány minden koinoban érvényes.
   const jegyzek = tanusitvanyJegyzek(hely);
   const kepFajl = join(mappa, 'mutato.json');
   // ⭐ D75/1, D73: a tár ritka ÚJRAÍRÁSÁNAK (a tömörítés) jele — ha egy másik folyamat átírta a fájlt, a mi mutatónk
@@ -909,7 +909,7 @@ export function keszulekTarolo(hely = alapHely()) {
 
 /**
  * ⭐⭐ D128 (③b): A KEZELÉS-JEGYZÉK tárolója (`kezeles.json`) — amit a készülék az azonossága kezeléséről (a kulcscserék lánca, a
- * kizárások) bármelyik koinójában látott (`allapot/kezelesTerjesztes.js`). Helyi feljegyzés, nem esemény: a kapu minden bevitelt
+ * kizárások) bármelyik koinojában látott (`allapot/kezelesTerjesztes.js`). Helyi feljegyzés, nem esemény: a kapu minden bevitelt
  * újra ellenőriz, ezért egy átírt fájl hamisat nem visz be. Készülék-szintű, mint a kulcs.
  * ⚠️ A `modosit` a folyamaton belül sorba rendez; két folyamat egymás írását felülírhatja — a jegyzék a tárakból újra összegyűlik.
  * @param {string} [hely]
@@ -960,7 +960,7 @@ export function kezelesTarolo(hely = alapHely()) {
  * pont, ahol egy szolgáltatás kellene ahhoz, hogy a koino tudja, kikkel beszéljen.
  *
  * ⚠️ Készülék-szintű, nem koino-szintű (mint a kulcs): ugyanaz a társ jellemzően minden
- * közös koinóban ugyanaz a társ, és a cím a készülékhez tartozik, nem a témához.
+ * közös koinoban ugyanaz a társ, és a cím a készülékhez tartozik, nem a témához.
  *
  * ⛔⛔ TISZTA LAP (D69/2, 2026-09-26, Csaba döntése): a lista mostantól az INDULÓ CÍMEKÉ —
  * amit a `tars` és a helyi felfedezés vesz fel, és amire az őrjárat a UDP-kapun kopog. ⚠️ A
@@ -1042,7 +1042,7 @@ export function tarsakTarolo(hely = alapHely()) {
  * kimosnák a tartósakat.
  *
  * ⭐ És ugyanaz igaz rá, mint a társ-listára: **nem esemény, nem terjed igazságként, és
- * semmit nem dönt el a koinóban** (3. szabály). Kézzel is szerkeszthető, tehát a 4. szabály
+ * semmit nem dönt el a koinoban** (3. szabály). Kézzel is szerkeszthető, tehát a 4. szabály
  * kézi útja itt is megvan.
  *
  * @param {string} [hely]
@@ -1083,7 +1083,7 @@ export function szeletJegyzekTarolo(hely = alapHely()) {
 
 /**
  * A szerző lánc-gyökerének gyorsítótára (`allapot/lancGyoker.js`): a napló csúcsai és a kiosztás —
- * koinónként egy JSON-fájl (`lanc.json`).
+ * koinonként egy JSON-fájl (`lanc.json`).
  *
  * ⚠️ TISZTA GYORSÍTÓTÁR (mint a mutató pillanatképe, D73): ha nincs, sérült, vagy nem illik a
  * lánchoz, a láncból épül újra — ezért az olvasás hibája `null`, nem kivétel. Az írás átnevezéssel
@@ -1129,7 +1129,7 @@ export function lancTarolo(koino, hely = alapHely()) {
 
 /**
  * Az összegezve tartott (nagy) szeletek ellenőrzött összegzései és a rájuk vonatkozó, ellenőrzött lezárási összegzések
- * (`allapot/osszegzoTartas.js`) — koinónként egy JSON-fájl (`osszegzesek.json`): `{ szeletek: { kulcs: { fok, gyoker,
+ * (`allapot/osszegzoTartas.js`) — koinonként egy JSON-fájl (`osszegzesek.json`): `{ szeletek: { kulcs: { fok, gyoker,
  * osszPont, darab, mikor, ellenorizve } }, lezarasok: { 'javaslat|entitás': { esemeny, osszegzes, allas, ellenorizve } } }`.
  * ⚠️ HELYI feljegyzés (nem esemény, nem terjed) — de NEM tiszta gyorsítótár: a lezárási összegzés ellenőrzése (a minták)
  * a csere közben történt, újra csak a teljes tartótól lehetne. Az írás átnevezéssel kerül a helyére (több folyamat írhatja).
@@ -1514,7 +1514,7 @@ export function lancEllenorzesTarolo(koino, hely = alapHely()) {
 // egyetlen címen.
 //
 // ⭐ A MEGOLDÁS A KOINO SAJÁT MINTÁJA: a fájlt a **lenyomata** nevezi meg, ahogy minden
-// mást a koinóban. Az esemény csak ezt a ~43 karakteres nevet hordozza (a mérettel és a
+// mást a koinoban. Az esemény csak ezt a ~43 karakteres nevet hordozza (a mérettel és a
 // típussal együtt ~100 bájt), a **bájtok külön élnek** — a tartalmi rétegben (D3).
 //
 // ⭐⭐ ÉS EBBŐL KÉT DOLOG INGYEN JÖN:
@@ -1539,7 +1539,7 @@ export function lancEllenorzesTarolo(koino, hely = alapHely()) {
  * lekicsinyített 200–500 KB. ⭐ Egy helyen van, tehát a hangolása egyetlen sor.
  *
  * ⭐⭐ ÉS EGY FONTOS KÜLÖNBSÉGTÉTEL: ez **NEM** állapot-befolyásoló állandó (D66), tehát
- * **nem hasítja ketté a koinót**, ha két készüléken más. Ha nálam 2 MB a határ, nálad 5,
+ * **nem hasítja ketté a koinot**, ha két készüléken más. Ha nálam 2 MB a határ, nálad 5,
  * akkor ugyanazt az **állapotot** számoljuk (entitások, döntések) — csak nekem nincs meg
  * az a kép. *A D3 szerint a tartalmi réteg amúgy is elveszhet; a tartós magot ez nem
  * érinti.* Ezért szabad kiindulási értéket adni neki, és ezért nem kell koino-azonosítót
@@ -1581,7 +1581,7 @@ export function fajlTipus(bajtok) {
 /**
  * A koino fájl-tára: bájtok a lenyomatuk NEVE alatt.
  *
- * ⚠️ KOINÓNKÉNT KÜLÖN MAPPA, mint az eseményeknél — hogy egy koino elhagyásakor a hozzá
+ * ⚠️ KOINONKÉNT KÜLÖN MAPPA, mint az eseményeknél — hogy egy koino elhagyásakor a hozzá
  * tartozó fájlok is egyben legyenek.
  *
  * @param {string} koino
@@ -1950,11 +1950,11 @@ export function fajlTakaritasTerve(fajlok, { vedett, korlat = FAJL_ATMENETI_KORL
  * „Kinél van meg ez a fájl?" — amit a bulikon tanultunk.
  *
  * ⚠️ **HELYI FELJEGYZÉS, NEM ESEMÉNY** (3. szabály): sosem terjed, két készüléken mást
- * jelent, és semmit nem dönt el a koinóban — csak azt, hogy **kitől érdemes kérni**.
+ * jelent, és semmit nem dönt el a koinoban — csak azt, hogy **kitől érdemes kérni**.
  * Ugyanaz a fajta, mint a `tarsak.js` `utoljara` mezője. Ha elveszik, a következő buli
  * újratanulja.
  *
- * ⚠️ KOINÓNKÉNT KÜLÖN, mint a fájlok maguk.
+ * ⚠️ KOINONKÉNT KÜLÖN, mint a fájlok maguk.
  *
  * @param {string} koino
  * @param {string} [hely]
@@ -1989,11 +1989,11 @@ export function fajlJegyzekTarolo(koino, hely = alapHely()) {
 }
 
 // ===================================
-// ⭐ A TÉR — MELYIK KOINÓKAT ISMERI EZ A KÉSZÜLÉK? (Szakasz 5.6)
+// ⭐ A TÉR — MELYIK KOINOKAT ISMERI EZ A KÉSZÜLÉK? (Szakasz 5.6)
 // ===================================
 
 /**
- * A készüléken lévő koinók azonosítói.
+ * A készüléken lévő koinok azonosítói.
  *
  * ⭐ MIÉRT A MAPPÁK, ÉS MIÉRT NEM EGY NYILVÁNTARTÁS? Mert a mappa MAGA a nyilvántartás: egy
  * koino attól van meg nekem, hogy itt az `esemenyek.jsonl`-je. Egy külön lista mellette
@@ -2001,12 +2001,12 @@ export function fajlJegyzekTarolo(koino, hely = alapHely()) {
  * megfigyelés (kivel sikerült beszélni), ez viszont TÉNY (megvan-e az adat).
  *
  * ⚠️ **CSAK AMIT EZ A KÉSZÜLÉK ISMER.** A D25 belépő tere ennél többet szeretne majd
- * mutatni (böngészni az idegen koinókat is), de ahhoz a **kereső-réteg** kell, ami
+ * mutatni (böngészni az idegen koinokat is), de ahhoz a **kereső-réteg** kell, ami
  * szándékosan elhagyható és még nincs meg. Amíg nincs, ez a lista az őszinte válasz —
  * és nem hazudunk teljességet.
  *
  * 🔍 A 9. SZABÁLY PRÓBÁJA: *„mit csinál egymilliárd e-embernél?"* — ez a szám **nem** az
- * e-emberek száma, hanem **ahány koinóban EZ A KÉSZÜLÉK benne van**. Az szerkezetileg
+ * e-emberek száma, hanem **ahány koinoban EZ A KÉSZÜLÉK benne van**. Az szerkezetileg
  * kicsi marad (egy ember néhány közösségben él), tehát a felsorolás itt nem fojtópont.
  *
  * @param {string} [hely]
@@ -2019,7 +2019,7 @@ export async function ismertKoinok(hely = alapHely()) {
   try {
     bejegyzesek = await readdir(hely, { withFileTypes: true });
   } catch (hiba) {
-    // Nincs még adat-mappa: ez nem hiba, csak még nincs egy koinónk sem.
+    // Nincs még adat-mappa: ez nem hiba, csak még nincs egy koinonk sem.
     if (hiba.code === 'ENOENT') return [];
     throw hiba;
   }
@@ -2027,7 +2027,7 @@ export async function ismertKoinok(hely = alapHely()) {
   const koinok = [];
   for (const b of bejegyzesek) {
     if (!b.isDirectory()) continue;
-    // ⛔ A MAPPA ÖNMAGÁBAN NEM ELÉG: csak az számít koinónak, aminek van esemény-fájlja.
+    // ⛔ A MAPPA ÖNMAGÁBAN NEM ELÉG: csak az számít koinonak, aminek van esemény-fájlja.
     // Különben egy odatévedt mappa üres kártyaként jelenne meg a téren.
     try {
       await access(join(hely, b.name, 'esemenyek.jsonl'));
@@ -2041,10 +2041,10 @@ export async function ismertKoinok(hely = alapHely()) {
 }
 
 /**
- * „Mikor láttam ELŐSZÖR ezt a koinót?" — koinónként egy időpont.
+ * „Mikor láttam ELŐSZÖR ezt a koinot?" — koinonként egy időpont.
  *
  * ⚠️ **Helyi feljegyzés, nem esemény** (3. szabály): sosem terjed, két készüléken mást
- * jelent, és semmit nem dönt el a koinóban — ugyanaz a fajta, mint a `tarsak.js`
+ * jelent, és semmit nem dönt el a koinoban — ugyanaz a fajta, mint a `tarsak.js`
  * `utoljara` mezője vagy a felszabadítási óra.
  *
  * ⭐ MIRE KELL? A belépő tér rendezéséhez a terv két időpontot kínál, és a különbségük
@@ -2094,7 +2094,7 @@ export function terJegyzekTarolo(hely = alapHely()) {
  * határidőn belüli szavazat még visszafordíthatja a döntést. Ez a fájl tartja az órát.
  *
  * ⚠️ **Helyi feljegyzés, nem esemény** (3. szabály): sosem terjed, két készüléken mást
- * jelent, és semmit nem dönt el a koinóban — csak azt, hogy MIKOR könyvelek. Ha elveszik,
+ * jelent, és semmit nem dönt el a koinoban — csak azt, hogy MIKOR könyvelek. Ha elveszik,
  * az óra újraindul: legrosszabb esetben egy nappal később szabadul fel a pont.
  *
  * @param {string} [hely]
@@ -2137,7 +2137,7 @@ export function felszabaditasTarolo(hely = alapHely()) {
  * hogy hol érhető el ez a KÉSZÜLÉK. Szándékosan külön fájl és külön kulcs — aki a táblát
  * figyeli, ne tudja a címeidet a személyedhez kötni.
  *
- * ⚠️ A KOINÓK FÖLÖTT lakik, mint a kulcs és a társ-lista: a készülék elérhetősége nem
+ * ⚠️ A KOINOK FÖLÖTT lakik, mint a kulcs és a társ-lista: a készülék elérhetősége nem
  * koino-helyi kérdés (D25).
  */
 export function tablaKulcsTarolo(hely = alapHely()) {
@@ -2183,7 +2183,7 @@ export function tablaKulcsTarolo(hely = alapHely()) {
 /**
  * A KÖTÉS-JEGYZÉK: kivel tartok rendszeres kapcsolatot (helyi megfigyelés, 3. szabály).
  *
- * ⚠️ Sosem terjed, és semmit nem dönt el a koinóban — ha elveszik, a következő bulikon
+ * ⚠️ Sosem terjed, és semmit nem dönt el a koinoban — ha elveszik, a következő bulikon
  * újraépül. *Ezért nem is baj, hogy sima JSON: a 4. szabály kézi útja is ez.*
  *
  * ⭐⭐ D119 (⑤c, Csaba: „elfogadom a javaslatodat”): A JEGYZÉK A CSALÁDÉ — `kotesek/<a család gyökere>.json`, családonként
@@ -2195,7 +2195,7 @@ export function tablaKulcsTarolo(hely = alapHely()) {
  * amíg a családé nincs meg, abból indulunk, és az első írás után `kotesek-regi.json` lesz (az átvevő családé a tartalma;
  * kézzel törölhető).
  * @param {string} [hely]
- * @param {string|null} [csalad] - a család gyökere (a koinó neve; régi alakú koinónál maga a koinó); null: a régi fájl
+ * @param {string|null} [csalad] - a család gyökere (a koino neve; régi alakú koinonál maga a koino); null: a régi fájl
  */
 export function kotesTarolo(hely = alapHely(), csalad = null) {
   const regi = join(hely, 'kotesek.json');
@@ -2354,7 +2354,7 @@ export function udpCimTarolo(hely = alapHely()) {
 // ===================================
 
 /**
- * ⭐ D124 ③: a nem értett társak jegyzéke (`<adat>/nyelvek.json` — KÉSZÜLÉK-szintű: a nyelv a programé, nem a koinóé). Az alak és
+ * ⭐ D124 ③: a nem értett társak jegyzéke (`<adat>/nyelvek.json` — KÉSZÜLÉK-szintű: a nyelv a programé, nem a koinoé). Az alak és
  * a szabály a `nyelvEmlekezet.js`-é; helyi feljegyzés, nem esemény, nem terjed. Több folyamat írhatja (az őrjárat, egy kézi
  * csere munkája): a `modosit` a mostanit olvassa, és arra vezeti rá a változást, folyamaton belül sorban; ⭐ ha az átalakítás
  * ugyanazt az objektumot adja vissza (nincs változás), nem ír — egy munka után a szokásos eset ez. Ha az írás nem sikerül,
@@ -2367,7 +2367,7 @@ export function nyelvJegyzekTarolo(hely = alapHely(), alak = (x) => x ?? { tarsa
 }
 
 /**
- * ⭐⭐ D126 (PR4): a bekapcsolt nézetek jegyzéke (`<adat>/nezetek.json` — KÉSZÜLÉK-szintű, koinónként: a nézet a te készülékeden
+ * ⭐⭐ D126 (PR4): a bekapcsolt nézetek jegyzéke (`<adat>/nezetek.json` — KÉSZÜLÉK-szintű, koinonként: a nézet a te készülékeden
  * fut, a bekapcsolás nem esemény, nem terjed). Az alak és a szabály a `nezetKartya.js`-é; ugyanúgy ír, mint a `nyelvek.json`.
  * @param {string} [hely]
  * @param {Function} [alak] - a beolvasott adat ellenőrzött alakja (`nezetJegyzekAlakja`)

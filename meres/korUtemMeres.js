@@ -5,7 +5,7 @@
 // mindkettő a percfordulón kopog — a kör viszont a kopogás után sorban végzi a táblát (a néma kötések keresése, az új cím
 // kiírása — DHT-művelet) és a házimunkát, és ha ez túlnyúlik a következő percfordulón, az az ablak kimarad.
 //
-// A beállítás (ideiglenes adatmappa, a valódi `koino-adat` érintetlen): egy friss készülék egy koinóval, két NÉMA kötéssel
+// A beállítás (ideiglenes adatmappa, a valódi `koino-adat` érintetlen): egy friss készülék egy koinoval, két NÉMA kötéssel
 // (valódi tábla-kulcs, halott cím — a tábláról keresi őket a VALÓDI DHT-n) és három halott induló címmel (nem routolható —
 // a kopogás az ablakig próbál). `orjarat 1`, `PERC` percig. A kör kezdetét a `csere.json` mondja meg (az őrjárat a kör elején
 // írja); a percfordulók közül azt számoljuk kimaradtnak, amelyik után 5 mp-en belül nem indult kör.

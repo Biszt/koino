@@ -215,7 +215,7 @@ export function lezarasiSzamokEllenorzese(o, javaslatEsemeny, alapKuszobok = ALA
   if (o.fak.nevezo.d !== sz.nevezo || o.fak.nevezo.o[0] !== sz.nevezo) return { rendben: false, ok: 'a nevező-fa mást számol' };
   if (sz.nevezo < sz.tamogatok + sz.ellenzok + sz.tartozkodok) return { rendben: false, ok: 'a nevező kisebb a szavazóknál' };
   for (const nev of KUSZOB_NEVEK) {
-    // ⭐ D118/2: az alapérték a koinóé (a születéséből — a hívó adja; ha nem, a mai érték).
+    // ⭐ D118/2: az alapérték a koinoé (a születéséből — a hívó adja; ha nem, a mai érték).
     if (o.fak.ertek[nev].d === 0 && o.kuszobok[nev] !== alapKuszobok[nev]) return { rendben: false, ok: 'üres naplóhoz nem alapérték' };
   }
   const allas = allasSzamokbol(javaslatEsemeny, sz, sz.nevezo, o.kuszobok);

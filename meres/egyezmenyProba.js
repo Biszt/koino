@@ -463,7 +463,7 @@ proba('⭐ HÁROM FORRÁS is összevonható, egy lépésben', async () => {
 // ===================================
 //
 // A prototípusban a törlés NEM külön mechanizmus: `tudatpontokVisszaosztasa` — mindenki
-// visszakapja a pontjait, és az entitás ettől szűnik meg létezni (D14). A koinóban a
+// visszakapja a pontjait, és az entitás ettől szűnik meg létezni (D14). A koinoban a
 // visszaosztást nem tehetjük meg más nevében (aláírt esemény), de az EREDMÉNY ugyanaz.
 
 proba('⭐⭐ A TÖRLÉSI egyezmény MEGSZÜNTETI az entitást', async () => {

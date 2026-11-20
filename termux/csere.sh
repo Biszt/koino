@@ -6,7 +6,7 @@
 # telepítője (egy régebbi kártyáé nem tudna cserélni, és ez a visszafordítás sem volna benne — D125).
 #
 # A MENET:
-#   1. vár egy kicsit (a hívó felület még válaszol a lapnak), és leállítja a program mappájából futó koinót (az indító és a node);
+#   1. vár egy kicsit (a hívó felület még válaszol a lapnak), és leállítja a program mappájából futó koinot (az indító és a node);
 #   2. CSERÉL: telepítésnél a régi a `-regi`-be (az előző generáció ilyenkor törlődik), az új (`-uj`) a helyére; visszaútnál a
 #      mostani és a `-regi` helyet cserél. ⭐ A `.git` MINDIG a helyén lévő programmal van (TK1): a `~/koino` a telepítő sor sekély
 #      klónja — ha a git-tár a programmal megy, a sor később is a GitHubról frissít (`git reset` a legújabbra);
@@ -16,7 +16,7 @@
 #   4. kimondja: a naplóba (`<adat>/telepites.log`) és az eredményt (`<adat>/telepites.json`).
 #
 # Hívás: sh csere.sh <helye> <uj> <regi> <adat> <port> telepites|vissza  (a kód és a kártya: KOINO_CSERE_KOD, KOINO_CSERE_KARTYA)
-# Csak POSIX sh (a Termux `sh`-ja dash). ⚠️ `pkill` nélkül (a `procps` hiányában) a futó koinót nem tudja leállítani — kimondja.
+# Csak POSIX sh (a Termux `sh`-ja dash). ⚠️ `pkill` nélkül (a `procps` hiányában) a futó koinot nem tudja leállítani — kimondja.
 
 HELYE="$1"
 UJ="$2"
@@ -49,7 +49,7 @@ eredmeny() {
 # A program mappájából futó koino leállítása: az indító és a node (a `telepit.sh` ugyanígy).
 leallitas() {
   if ! command -v pkill >/dev/null 2>&1; then
-    naplo "· pkill nélkül a futó koinót nem tudom leállítani (pkg install procps)"
+    naplo "· pkill nélkül a futó koinot nem tudom leállítani (pkg install procps)"
     return 0
   fi
   pkill -TERM -f "$HELYE/termux/indit.sh" 2>/dev/null
@@ -101,7 +101,7 @@ felel() {
 sleep 4
 if [ "$MOD" = vissza ]; then naplo "A csere kezdete (vissza az előző programra)"; else naplo "A csere kezdete (telepítés: $UJ)"; fi
 leallitas
-naplo "· a futó koinó leállítva"
+naplo "· a futó koino leállítva"
 
 # ===== 2. a csere =====
 if [ "$MOD" = vissza ]; then

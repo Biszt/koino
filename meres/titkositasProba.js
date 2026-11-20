@@ -104,7 +104,7 @@ async function tarGondolattal(cim, reszlet = null) {
   const szerzo = kulcspar.azonossag;
   const k = { koino: KOINO, kulcspar, szerzo, tar, lancTarolo: null };
   if (cim) {
-    const szul = await koinoLetrehozasa(k, 'Titkos koinó');
+    const szul = await koinoLetrehozasa(k, 'Titkos koino');
     const g = await gondolatLetrehozasa(k, { cim });
     // ⭐ D93/3: a kapu-próbáknak a szeletek neve is kell (a születés és a gondolat).
     if (reszlet) Object.assign(reszlet, { szuletes: szul.azonosito, gondolat: g.azonosito });
@@ -124,7 +124,7 @@ const oldal = (tabla, alairoTabla = tabla) => ({
   tablaAlairo: (atirat) => kezfogasAlairasa(alairoTabla, atirat)
 });
 
-proba('⭐⭐⭐ A LEHALLGATÓ SEMMIT NEM LÁT: se a gondolat címét, se a koinót, se a tábla-kulcsot — és a csere megy', async () => {
+proba('⭐⭐⭐ A LEHALLGATÓ SEMMIT NEM LÁT: se a gondolat címét, se a koinot, se a tábla-kulcsot — és a csere megy', async () => {
   const p = await udpParos();
   const tA = await ujTablaKulcs(), tB = await ujTablaKulcs();
   try {
@@ -159,7 +159,7 @@ proba('⛔⛔ A HAMISAN ALÁÍRT TÁBLA-KULCS NEM SZÁMÍT — aki más nevében
 });
 
 // ===================================
-// ⭐⭐ D93/3: A SZEMÉLY A KÉZFOGÁSBAN ÉS A ZÁRT KOINÓ KAPUJA
+// ⭐⭐ D93/3: A SZEMÉLY A KÉZFOGÁSBAN ÉS A ZÁRT KOINO KAPUJA
 // ===================================
 
 /** ⭐⭐ D128 (②a): a `masik` a saját azonosság-kulcsával aláír egy tanúsítványt `r` nevére (a saját születésével), és azzal kezet fog. */
@@ -178,7 +178,7 @@ const szemelyesAlairo = (r, horgony = null, kulcsJwk = r.jwk) => (atirat) => ({
   a: szemelyesKezfogasAlairasa(kulcsJwk, KOINO, atirat)
 });
 
-proba('⭐ a személyes aláírás csak a SAJÁT átiratára, a SAJÁT koinójára és a SAJÁT kulcsával igaz — ⭐⭐ D128 (③): a KÉSZÜLÉK írja alá, a tanúsítványa köti (egy idegen vagy hamis tanúsítvány, az azonosság kulcsával írt aláírás nem elég)', async () => {
+proba('⭐ a személyes aláírás csak a SAJÁT átiratára, a SAJÁT koinojára és a SAJÁT kulcsával igaz — ⭐⭐ D128 (③): a KÉSZÜLÉK írja alá, a tanúsítványa köti (egy idegen vagy hamis tanúsítvány, az azonosság kulcsával írt aláírás nem elég)', async () => {
   const r = {};
   await tarGondolattal(null, r);
   const masik = {};
@@ -215,7 +215,7 @@ proba('⭐⭐ D93/3: A NEM SZABAD TÁRS CSAK A MEGENGEDETT SZELETET KAPJA — a 
   const tarA = await tarGondolattal(CIM, ra);
   const tarB = await tarGondolattal(null, rb);
   const hivasok = [];
-  // A kapuja: senkit nem ismer, csak a koinó születését engedi.
+  // A kapuja: senkit nem ismer, csak a koino születését engedi.
   const zartKapu = async (x) => { hivasok.push(x); return { szabad: false, kell: true, szeletek: [ra.szuletes] }; };
   try {
     const [a, b] = await Promise.all([

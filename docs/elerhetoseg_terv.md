@@ -66,7 +66,7 @@ döntés) — így egy friss telepítés az első buli után független a közis
 - **Terepmérés két valódi mobillal** (a terv 4. lépése) — ez a döntő próba.
 - **A véletlen séta:** ma a kötések abból lesznek, akivel amúgy is összeérünk; a társakat még
   nem „kérjük el" egymástól. A 35. mérés szerint a séta az, ami NAGY méretnél tartja egyben a
-  hálót — kis koinóban mindenki amúgy is mindenkivel találkozik.
+  hálót — kis koinoban mindenki amúgy is mindenkivel találkozik.
 - ⏸️ **Olcsóbb tábla-kulcs:** ma minden körben utazik (212 bájt). Elég lenne egy rövid
   ujjlenyomat, és a teljes kulcs csak az első találkozáskor — de ez protokoll-bonyolítás, és
   a kör ma **olcsóbb, mint tegnap volt** (38. mérés). *Nem kell megvenni.*

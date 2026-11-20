@@ -1,7 +1,7 @@
 // meres/lepcsoMeres.js
 
 // Felelősség: A 65. MÉRÉS — A 2. LÉPCSŐ BIZONYÍTÉKA (D93/4, az E4 — „előbb a mérés”): mekkora annak a bizonyítéka,
-// hogy valaki 2. lépcsős (D11, D56: a pénztárca kapuja), és hogyan nő a koinó méretével?
+// hogy valaki 2. lépcsős (D11, D56: a pénztárca kapuja), és hogyan nő a koino méretével?
 //
 // A szabály (`identitas.js`): 2. LÉPCSŐS, akinek 3 tanúsítása van KÜLÖNBÖZŐ, felhatalmazott tanúsítóktól; TANÚSÍTHAT,
 // aki 2. lépcsős ÉS N felhatalmazása van különböző 2. lépcsősöktől (emberenként egyet adhat — D57/b, D60); a tanúsítás

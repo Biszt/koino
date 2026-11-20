@@ -36,7 +36,7 @@
 // Használja: csere/vonal.js (a párbeszéd), a próbák.
 
 import { alakiHiba, szelet, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, KOINON_KULCS } from '../esemeny/esemeny.js';
-import { koinoNezete } from '../allapot/koinoLanc.js';   // ⭐ D118 (②b): a koinó-szabály
+import { koinoNezete } from '../allapot/koinoLanc.js';   // ⭐ D118 (②b): a koino-szabály
 import { rendezettHalmaz, halmazLenyomata } from '../esemeny/halmaz.js';
 import { gyokerDarabBol, gyokerLenyomata, darabbaEsik, koinonDarabBol, koinonLenyomata } from './cimjegyzek.js';
 
@@ -47,8 +47,8 @@ import { gyokerDarabBol, gyokerLenyomata, darabbaEsik, koinonDarabBol, koinonLen
 export const GYOKER_KULCS = '0'.repeat(43);
 
 /**
- * ⭐ D96: A KOINÓ SZÜLETÉSE MINT ESEMÉNY a vonalon — egy virtuális kulcs (mint a gyökéré és a gyökér-darabé), amelynek
- * halmaza egyedül a `KoinoLetrehozas` (a bejelentései nélkül). Mindenki részt vesz benne (a zárt koinó nem tagja is):
+ * ⭐ D96: A KOINO SZÜLETÉSE MINT ESEMÉNY a vonalon — egy virtuális kulcs (mint a gyökéré és a gyökér-darabé), amelynek
+ * halmaza egyedül a `KoinoLetrehozas` (a bejelentései nélkül). Mindenki részt vesz benne (a zárt koino nem tagja is):
  * így az esemény mindenkihez eljut, az alapító állításai (a valódi szelete bejelentései) viszont nem. A halmazát a vonal
  * a hívótól kapott eseményből számolja.
  */
@@ -89,7 +89,7 @@ export async function egyeztetettEsemenyek(tar, koino, kulcs) {
   const s = tarKulcsa(kulcs);
   const sajat = s === '' ? [] : await tar.szeletEsemenyei(s);
   const bejelentettek = await tar.bejelentesek(s);
-  // ⭐⭐ D118 (②b): a koinó-szabály — UGYANAZ, mint a kapué (`beolvasztas`): az ős vágás előtti eseményei is a halmazban
+  // ⭐⭐ D118 (②b): a koino-szabály — UGYANAZ, mint a kapué (`beolvasztas`): az ős vágás előtti eseményei is a halmazban
   // (a csere két névvel egy szeletben). ⚠️ Ha a kettő eltérne, két készülék minden cserében újraküldené, amit a másik elvet.
   const tartozik = azonositoAlaku(koino) ? (await koinoNezete(tar, koino)).tartozik : (e) => esemenyKoinoja(e) === koino;
   const lattuk = new Set();

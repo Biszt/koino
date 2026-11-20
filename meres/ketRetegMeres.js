@@ -2,7 +2,7 @@
 
 // Felelősség: ⭐⭐ A 83. MÉRÉS — A KÉT RÉTEG ÁRA (D118, a bekapcsolódás ③, 2026-10-24).
 //
-// Mennyibe kerül egy szülőre épülő koinó képe (`koinoKepe`) a szülő nélkülihez képest? A múlt rétege egy állapot-számítás a
+// Mennyibe kerül egy szülőre épülő koino képe (`koinoKepe`) a szülő nélkülihez képest? A múlt rétege egy állapot-számítás a
 // múlt eseményein; a múlt nem változik, csak bővül — ezért gyorsítótárban van. A mérés:
 //   · a szülő nélküli kép (az alapvonal) N eseménnyel;
 //   · a gyermek képe, ha a múlt N esemény és a jelen kevés — először (a múlt kiszámolódik) és másodszor (a gyorsítótárból);
@@ -20,7 +20,7 @@ const kiir = (s) => process.stdout.write(s + '\n');
 const NAP = 86400 * 1000;
 const T0 = Date.UTC(2026, 0, 1);
 
-/** Egy nemzedék: a koinó születése, 4 tag, `n` gondolat ponttal, és minden 20. gondolaton egy lezárt javaslat. */
+/** Egy nemzedék: a koino születése, 4 tag, `n` gondolat ponttal, és minden 20. gondolaton egy lezárt javaslat. */
 async function nemzedek(alapito, szulo, n, kezdet) {
   alapito.koinotValt('');
   const sz = await alapito.tesz('KoinoLetrehozas', { nev: 'Mérés', leiras: null, alapitok: [], zart: true,

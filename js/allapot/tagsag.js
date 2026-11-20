@@ -6,10 +6,10 @@
 //
 // ===== A SZABÁLY =====
 //
-//   · ALAPÍTÓ (a rekurzió alapesete, mélység 0): a koinó létrehozója (a horgonya maga a `KoinoLetrehozas`), vagy akit a
+//   · ALAPÍTÓ (a rekurzió alapesete, mélység 0): a koino létrehozója (a horgonya maga a `KoinoLetrehozas`), vagy akit a
 //     létrehozás az `alapitok` közt megnevez, és a `Belepes`-e erre hivatkozik (`adat.alapitas`);
 //   · TAG: a `Belepes`-e szeletében van egy ÉRVÉNYES meghívás egy TAGTÓL — a meghívás neki szól (`kit` = a horgony
-//     szerzője), nem önmagáé, a meghívó horgonya (`sajatBelepes`) a meghívás szerzőjéé; ⭐ D93/5: ha a koinó profil-
+//     szerzője), nem önmagáé, a meghívó horgonya (`sajatBelepes`) a meghívás szerzőjéé; ⭐ D93/5: ha a koino profil-
 //     mezőket vár, a meghívás megnevezi a profil lenyomatát, és a tagnak van ilyen `Profil` eseménye;
 //   · ⭐ a LEGRÖVIDEBB lánc számít, és legfeljebb `MELYSEG_KORLAT` mély (D59, D93/2, D113 — a „végtelen”: a bizonyíték
 //     így felülről korlátos; a mélyen ülő becsületes tag egy közelebbi tag ingyenes meghívásával rövidít — 63. mérés).
@@ -20,7 +20,7 @@
 //
 // A tag a SAJÁT azonosság-szeletébe tesz egy aláírt csomagot a legrövidebb lánca eseményeinek másolatával az alapítóig
 // (a D85 T3 döntési csomag mintája). A kapu ellenőrzi (`tagsagiCsomagEllenorzese`: minden belső esemény hiteles, egy
-// koinóé, és a lánc ezen a szabályon tagságot ad), az index a tartalmát is beolvassa — így a tagság a lánc ősei
+// koinoé, és a lánc ezen a szabályon tagságot ad), az index a tartalmát is beolvassa — így a tagság a lánc ősei
 // szeleteinek tartása nélkül is számítható.
 //
 // Használják: a szabály-réteg (`szabalyok.js`), az `identitas.js`, a kapu (`esemenyTar.js`), a művelet-réteg (a
@@ -33,7 +33,7 @@ import { esemenyEllenorzese, azonositoAlaku, esemenyKoinoja, koinoSzuleteseLista
  * A meghívási lánc legnagyobb mélysége (D59 biztonsági szelepe — a bizonyíték hosszának őre). ⭐ D113 (Csaba,
  * 2026-10-19 — a D106 (A) szabálya): 256. A korlát a LEGMÉLYEBB tagnál dönt, nem az átlagnál (78. mérés): véletlen
  * meghívónál a fa magassága e·ln n, a 64-et a legmélyebb tag már ~1,3·10^11 tagnál elérte volna (az emberiség ~13-szoros),
- * a 256-ot a koinó saját határáig (2^128) sem éri el (~234; aktív meghívóknál ~156). A 2. lépcső szúrópróbájának útja is
+ * a 256-ot a koino saját határáig (2^128) sem éri el (~234; aktív meghívóknál ~156). A 2. lépcső szúrópróbájának útja is
  * ezt használja (`identitas.js` `seta`). ⚠️ Állapotot befolyásoló állandó (D66).
  */
 export const MELYSEG_KORLAT = 256;
@@ -45,14 +45,14 @@ export const CSOMAG_ESEMENY_KORLAT = 3 * (MELYSEG_KORLAT + 1) + 2;
 // ⭐⭐ D118 (④a): a BEKAPCSOLÓDÁS is a lánc része — a gyermekben a bekapcsolódó horgonya, és tagságot ad (a szülőbeli vágáskori
 // tagsága — a kapu a szülő születésével ellenőrzi, `koinoLanc.js` `bekapcsolodasEllenorzese`).
 export const LANC_TIPUSOK = new Set(['KoinoLetrehozas', 'Belepes', 'Meghivas', PROFIL, 'Bekapcsolodas']);
-/** Az azonosság-horgonyok típusai: a koinó születése (az alapítóé), a belépés, és a bekapcsolódás (a bekapcsolódóé — D118). */
+/** Az azonosság-horgonyok típusai: a koino születése (az alapítóé), a belépés, és a bekapcsolódás (a bekapcsolódóé — D118). */
 export const HORGONY_TIPUSOK = new Set(['KoinoLetrehozas', 'Belepes', 'Bekapcsolodas']);
 
 /**
- * A TAGSÁGI INDEX egy esemény-halmazból (egy koinóé): a horgonyok, a horgonyonkénti meghívások és profilok — a
+ * A TAGSÁGI INDEX egy esemény-halmazból (egy koinoé): a horgonyok, a horgonyonkénti meghívások és profilok — a
  * tagsági csomagok TARTALMÁVAL együtt (azokat a kapu már ellenőrizte).
  * @param {Array<Object>} esemenyek
- * @param {string|null} [koino] - ha nincs megadva, az első `KoinoLetrehozas` koinója
+ * @param {string|null} [koino] - ha nincs megadva, az első `KoinoLetrehozas` koinoja
  */
 export function tagsagiIndex(esemenyek, koino = null) {
   const idx = { koino: null, koinoAzonosito: koino, horgonyok: new Map(), meghivasok: new Map(), profilok: new Map(),
@@ -60,8 +60,8 @@ export function tagsagiIndex(esemenyek, koino = null) {
   const lista = Array.isArray(esemenyek) ? esemenyek : [];
   const csomagokbol = lista.flatMap((e) => (e?.tipus === TAGSAGI_CSOMAG && Array.isArray(e.adat?.lanc)
     ? e.adat.lanc.slice(0, CSOMAG_ESEMENY_KORLAT) : []));
-  // ⭐⭐ D118/2: a koinó születése EGY szabállyal (`koinoSzuleteseListabol` — az állapot, a kapu és a belépő tér is ezt
-  // hívja). Lenyomat-nevű koinónál csak az az esemény lehet, amelyiknek az azonosítója maga a név: egy második, azonos
+  // ⭐⭐ D118/2: a koino születése EGY szabállyal (`koinoSzuleteseListabol` — az állapot, a kapu és a belépő tér is ezt
+  // hívja). Lenyomat-nevű koinonál csak az az esemény lehet, amelyiknek az azonosítója maga a név: egy második, azonos
   // nevű születés nem veheti át az alapító helyét (a lelet — eddig a lista ELSŐ születése lett az alapító).
   const szuletes = koinoSzuleteseListabol([...lista, ...csomagokbol], idx.koinoAzonosito);
   if (!idx.koinoAzonosito) idx.koinoAzonosito = szuletes ? esemenyKoinoja(szuletes) : null;
@@ -69,7 +69,7 @@ export function tagsagiIndex(esemenyek, koino = null) {
   const felvesz = (e) => {
     if (!e || typeof e !== 'object' || esemenyKoinoja(e) !== idx.koinoAzonosito) return;
     if (e.tipus === 'KoinoLetrehozas') {
-      if (e !== szuletes && e.azonosito !== szuletes?.azonosito) return;   // nem a koinó születése: nem horgony
+      if (e !== szuletes && e.azonosito !== szuletes?.azonosito) return;   // nem a koino születése: nem horgony
       idx.horgonyok.set(e.azonosito, e);
       szerzohoz(idx, e.szerzo, e.azonosito);
     } else if (e.tipus === 'Belepes' || e.tipus === 'Bekapcsolodas') {
@@ -93,11 +93,11 @@ export function tagsagiIndex(esemenyek, koino = null) {
 }
 
 // ===================================
-// ⭐⭐ D128 (9.9): A LÁNC ALAPJA — melyik készülék kapja a koinó keretét
+// ⭐⭐ D128 (9.9): A LÁNC ALAPJA — melyik készülék kapja a koino keretét
 // ===================================
 //
-// Egy azonosság több készülékkel ír; a tudatpont-keret készülékenként osztott (KU1 (B)). Az ALAP — a koinó teljes kerete —
-// annak a láncnak jár, amelyik az azonosság HORGONYÁT írta ebben a koinóban (a belépés, a születés, a bekapcsolódás); minden más
+// Egy azonosság több készülékkel ír; a tudatpont-keret készülékenként osztott (KU1 (B)). Az ALAP — a koino teljes kerete —
+// annak a láncnak jár, amelyik az azonosság HORGONYÁT írta ebben a koinoban (a belépés, a születés, a bekapcsolódás); minden más
 // láncé 0, és az átvétellel kap (9.9). ⭐ Ha több horgony van (pl. két készülékről lépett be), a LEGKORÁBBI (idő, holtversenyben a
 // kisebb azonosító) — EGY szabály a szabály-rétegnek és a műveletnek (`lancGyoker.js` `lancAlapjai`).
 
@@ -112,8 +112,8 @@ export function alapHorgony(horgonyEsemenyek) {
 }
 
 /**
- * Egy azonosság láncainak ALAPJAI adatként (⛔ D123 PR2: nem beadott függvény — a mag maga számol belőle): a koinó kerete és a
- * horgony lánca (null, ha nem ismert — akkor mindegyik láncé a koinó kerete: a tagság nélküli pont úgysem számít — D93/1).
+ * Egy azonosság láncainak ALAPJAI adatként (⛔ D123 PR2: nem beadott függvény — a mag maga számol belőle): a koino kerete és a
+ * horgony lánca (null, ha nem ismert — akkor mindegyik láncé a koino kerete: a tagság nélküli pont úgysem számít — D93/1).
  * @returns {{keret: number, horgonyLanca: string|null}}
  */
 export function azonossagAlapjai(idx, szerzo, keret) {
@@ -133,7 +133,7 @@ function szerzohoz(idx, szerzo, az) {
   idx.szerzoHorgonyai.set(szerzo, l);
 }
 
-/** Vár-e a koinó profil-mezőket (D28/3, D93/5)? */
+/** Vár-e a koino profil-mezőket (D28/3, D93/5)? */
 export function profilKell(idx) {
   const p = idx.koino?.adat?.profil;
   return Array.isArray(p) && p.length > 0;
@@ -152,8 +152,8 @@ export function horgonyTagsaga(idx, horgony, folyamatban = new Set()) {
     if (!e) return veg(idx, horgony, { igen: false, ok: 'nem ellenőrizhető: hiányzik a horgony-esemény', ellenorizheto: false });
     if (e.tipus === 'KoinoLetrehozas') {
       return veg(idx, horgony, idx.koino && e.azonosito === idx.koino.azonosito
-        ? { igen: true, ok: 'a koinó létrehozója', ellenorizheto: true, melyseg: 0 }
-        : { igen: false, ok: 'más koinó létrehozása', ellenorizheto: true });
+        ? { igen: true, ok: 'a koino létrehozója', ellenorizheto: true, melyseg: 0 }
+        : { igen: false, ok: 'más koino létrehozása', ellenorizheto: true });
     }
     // ⭐⭐ D118 (④a, D118/3): a bekapcsolódás TAG — a szülő vágáskori tagja, aki bekapcsolódott (a bizonyítékát a kapu nézte).
     if (e.tipus === 'Bekapcsolodas') {
@@ -163,7 +163,7 @@ export function horgonyTagsaga(idx, horgony, folyamatban = new Set()) {
     // Alapító (a létrehozás megnevezte, a belépése erre hivatkozik)?
     if (typeof e.adat?.alapitas === 'string') {
       if (!idx.koino || idx.koino.azonosito !== e.adat.alapitas) {
-        if (!idx.koino) return veg(idx, horgony, { igen: false, ok: 'nem ellenőrizhető: hiányzik a koinó létrehozása', ellenorizheto: false });
+        if (!idx.koino) return veg(idx, horgony, { igen: false, ok: 'nem ellenőrizhető: hiányzik a koino létrehozása', ellenorizheto: false });
       } else if (Array.isArray(idx.koino.adat?.alapitok) && idx.koino.adat.alapitok.includes(e.szerzo)) {
         return veg(idx, horgony, { igen: true, ok: 'alapító', ellenorizheto: true, melyseg: 0 });
       }
@@ -209,7 +209,7 @@ function veg(idx, horgony, ered) {
 }
 
 /**
- * Tag-e a SZERZŐ? — bármelyik horgonya (a koinó létrehozása vagy egy belépése) tagságot ad; a legrövidebb számít.
+ * Tag-e a SZERZŐ? — bármelyik horgonya (a koino létrehozása vagy egy belépése) tagságot ad; a legrövidebb számít.
  * @returns {{igen: boolean, ok: string, ellenorizheto: boolean, horgony?: string, melyseg?: number}}
  */
 export function szerzoTagsaga(idx, szerzo) {
@@ -229,7 +229,7 @@ export function szerzoTagsaga(idx, szerzo) {
 
 /**
  * A legrövidebb tagsági lánc eseményei (a csomaghoz): a horgonytól az alapítóig — lépésenként a belépés, a meghívás
- * és (ha kell) a profil; a végén az alapító horgonya és a koinó létrehozása. Ha nem tag, null.
+ * és (ha kell) a profil; a végén az alapító horgonya és a koino létrehozása. Ha nem tag, null.
  */
 export function tagsagiLanc(idx, horgony) {
   const ki = [];
@@ -252,7 +252,7 @@ export function tagsagiLanc(idx, horgony) {
 
 /**
  * ⭐ A TAGSÁGI CSOMAG ELLENŐRZÉSE (a kapu hívja): a csomag a SZERZŐ saját azonosság-szeletébe szól (`entitas` = az ő
- * horgonya), minden belső esemény hiteles (aláírás), ugyanannak a koinónak a lánc-típusa, és a lánc EZEN a szabályon
+ * horgonya), minden belső esemény hiteles (aláírás), ugyanannak a koinonak a lánc-típusa, és a lánc EZEN a szabályon
  * tagságot ad a horgonynak. Egy hamis belső esemény az egészet elveti.
  * ⭐⭐ D128: a belső események készülék-tanúsítványa a csomagból (a láncok első eseményei) vagy az `alap`-ból (a kapu: a tár).
  * @param {Object} esemeny

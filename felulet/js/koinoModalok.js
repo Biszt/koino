@@ -1,14 +1,14 @@
 // felulet/js/koinoModalok.js
 
-// Felelősség: a maradék modálok (5.8, D101) koinós TÖBBLETE — és CSAK az, amit a prototípus nem tudhatott.
+// Felelősség: a maradék modálok (5.8, D101) koinos TÖBBLETE — és CSAK az, amit a prototípus nem tudhatott.
 //
 // ===== ⭐ MIÉRT ÍGY, ÉS NEM ALOSZTÁLLYAL =====
 //
-// A modálok a prototípusból **bájtra változatlanul** jönnek át (D101, M5/A — a ház H3/A-ja szerint). A pakli koinós
+// A modálok a prototípusból **bájtra változatlanul** jönnek át (D101, M5/A — a ház H3/A-ja szerint). A pakli koinos
 // többlete alosztály lett (`koinoPakli.js`), mert a pakliT a lap maga példányosítja. Ezeket a modálokat viszont az
 // ÖRÖKÖLT kártyák példányosítják (`Kartya.js`: `new TudatpontokModal(…)`), tehát alosztályt nem tudunk a helyükbe
 // tenni anélkül, hogy a kártyához nyúlnánk. ⭐ Ezért a többlet a prototípus-osztály egy meglévő metódusa KÖRÉ kerül
-// (`koruleIr`: az eredeti lefut, UTÁNA jön a koinós rész) — ugyanaz a „körülötte, nem benne” elv, mint a
+// (`koruleIr`: az eredeti lefut, UTÁNA jön a koinos rész) — ugyanaz a „körülötte, nem benne” elv, mint a
 // `koinoPakli.js`-é, csak a metódus becsomagolásával.
 //
 // ===== ⭐ A TUDÁS HATÁRA (D19, D101/M2) =====
@@ -88,8 +88,8 @@ export function megjegyzesKirajzolasa(elem, szoveg) {
 
 /**
  * Egy prototípus-osztály metódusa KÖRÉ ír: az eredeti lefut (ugyanazokkal az érvekkel, ugyanazzal a visszatérési
- * értékkel), utána a koinós rész. Kétszeri becsomagolás ellen őrzött (a modul kétszeri betöltése se duplázzon).
- * ⚠️ Ha az eredeti aszinkron (ígéretet ad), a koinós rész az ígéret TELJESÜLÉSE után fut — különben a válasz előtt
+ * értékkel), utána a koinos rész. Kétszeri becsomagolás ellen őrzött (a modul kétszeri betöltése se duplázzon).
+ * ⚠️ Ha az eredeti aszinkron (ígéretet ad), a koinos rész az ígéret TELJESÜLÉSE után fut — különben a válasz előtt
  * írna (D101 ③: a Struktúra darabszám-lekérése).
  */
 function koruleIr(Osztaly, metodus, utana) {
@@ -97,7 +97,7 @@ function koruleIr(Osztaly, metodus, utana) {
 }
 
 /**
- * Mint a `koruleIr`, de a koinós rész az eredeti VISSZATÉRÉSI ÉRTÉKÉT is megkapja (első érvként) — D116: a Struktúra a sorait
+ * Mint a `koruleIr`, de a koinos rész az eredeti VISSZATÉRÉSI ÉRTÉKÉT is megkapja (első érvként) — D116: a Struktúra a sorait
  * így adja át (a letöltő metódus értéke, a modál nem tárolja).
  */
 function ertekUtan(Osztaly, metodus, utana) {
@@ -187,7 +187,7 @@ function tudatpontokTovabbGombja(modal) {
 // ⭐ A STRUKTÚRA (D101 ③)
 // ===================================
 //
-// A prototípusban a fa a TELJES koinó volt; itt a készüléken ismert rész, a legerősebb ágaktól kifelé, egy keretig. A
+// A prototípusban a fa a TELJES koino volt; itt a készüléken ismert rész, a legerősebb ágaktól kifelé, egy keretig. A
 // program kimondja, mire épül a fa, meddig biztos a sorrend, és mit kért el (`koinoMegjegyzes`) — a lap a folyamatjelző
 // (építés közben) és a súgó-sor (a kész fán) alá írja.
 koruleIr(StrukturaModal, '_darabszamLekerese', function () {
@@ -346,7 +346,7 @@ koruleIr(ErtesitesiBeallitasModal, '_adatokBetoltese', function () {
   megjegyzesKirajzolasa(info, this.globalis ? megjegyzes('ertesitesi-beallitasok/globalis') : null);
 });
 
-// ⭐ D103: a prototípus e-mail kapcsolója a koinóban a KÉSZÜLÉK SAJÁT ÉRTESÍTÉSÉT kapcsolja (felugró értesítés az
+// ⭐ D103: a prototípus e-mail kapcsolója a koinoban a KÉSZÜLÉK SAJÁT ÉRTESÍTÉSÉT kapcsolja (felugró értesítés az
 // operációs rendszer felé — nincs szerver, ami levelet küldene). A modál bájtra a prototípusé; a feliratait ez írja át a
 // betöltés után, és a kapcsolót engedi (a prototípus e-mail cím hiányában letiltaná). Az ütem (azonnal / összefoglaló N
 // óránként) ugyanaz.
@@ -379,13 +379,13 @@ koruleIr(SikidomModal, '_takaritasBezaraskor', function () {
 });
 
 // ===================================
-// ⭐⭐ D129 MA9 (B): AZ ÚJ GONDOLAT, KATEGÓRIA ÉS GONDOLATTÍPUS KÜSZÖBEI — a koinó saját alapértékei
+// ⭐⭐ D129 MA9 (B): AZ ÚJ GONDOLAT, KATEGÓRIA ÉS GONDOLATTÍPUS KÜSZÖBEI — a koino saját alapértékei
 // ===================================
 //
 // Csaba (2026-11-20): „legyen a (B)”. A három ablak a négy küszöb-mezőt a prototípus alapértékeivel tölti ki (51 %, 51 %, 0 mp,
-// 1 év — `kuszobErtekMezok.js` `KUSZOB_ALAPERTEKEK`); a koinóé a születésében áll (`alapKuszobok`). Az ablak megnyitása UTÁN a
-// mezőkbe a koinóét írjuk (a program mondja meg — `/api/koino/alapkuszobok`), és ha a létrehozó nem változtat rajtuk, a program
-// nem ment érték javaslatot (`koino.js` `letrehozoKuszobJavaslata`): a gondolat a koinó alapját követi. ⚠️ Ha a létrehozó már
+// 1 év — `kuszobErtekMezok.js` `KUSZOB_ALAPERTEKEK`); a koinoé a születésében áll (`alapKuszobok`). Az ablak megnyitása UTÁN a
+// mezőkbe a koinoét írjuk (a program mondja meg — `/api/koino/alapkuszobok`), és ha a létrehozó nem változtat rajtuk, a program
+// nem ment érték javaslatot (`koino.js` `letrehozoKuszobJavaslata`): a gondolat a koino alapját követi. ⚠️ Ha a létrehozó már
 // írt a mezőkbe, mielőtt a válasz megjött, nem írjuk felül (az övé az utolsó szó).
 for (const [Osztaly, elotag] of [[GondolatModal, 'uj'], [KategoriaModal, 'kat'], [GondolatTipusModal, 'tt']]) {
   koruleIr(Osztaly, 'init', function () {
@@ -399,7 +399,7 @@ for (const [Osztaly, elotag] of [[GondolatModal, 'uj'], [KategoriaModal, 'kat'],
       szakasz.removeEventListener('input', jelez);
       if (irt || !document.getElementById(elotag + '-tamogatottsag')) return;
       kuszobMezokKitoltese(elotag, alap);
-      console.log('koinoModalok - a koinó alap-küszöbei a mezőkben', { elotag, alap });
-    }).catch((hiba) => console.warn('koinoModalok - a koinó alap-küszöbei nem jöttek meg', hiba?.message));
+      console.log('koinoModalok - a koino alap-küszöbei a mezőkben', { elotag, alap });
+    }).catch((hiba) => console.warn('koinoModalok - a koino alap-küszöbei nem jöttek meg', hiba?.message));
   });
 }

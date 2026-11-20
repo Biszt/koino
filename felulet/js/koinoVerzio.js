@@ -1,6 +1,6 @@
 // felulet/js/koinoVerzio.js
 
-// Felelősség: ⭐⭐ A KOINO-VERZIÓ A FELÜLETEN (D119 ①b) — koinós többlet, a prototípusban nincs ilyen (Csaba ötlete, CS3):
+// Felelősség: ⭐⭐ A KOINO-VERZIÓ A FELÜLETEN (D119 ①b) — koinos többlet, a prototípusban nincs ilyen (Csaba ötlete, CS3):
 //   · A KÁRTYA: a lap a gondolat-kártyával rajzolja (a `kartyaAdat.js` fordít), és itt kap a fejlécébe egy „🧬 koino-verzió”
 //     jelet, a törzsébe egy „Kód” fület — a teljes program jegyzéke (útvonal, méret), egy fájlra kattintva a tartalma, és hogy
 //     ezen a készüléken ez a program fut-e (a lap kimondja, ha más — nem tiltja);
@@ -10,7 +10,7 @@
 //
 // ⭐ A lap csak rajzol (7. szabály): a kód-csomagot, a születést, a kártyát és a pontot a program végzi (`koino.js`
 // `koinoVerzioKeszitese` — ugyanaz, mint a `koinoverzio` parancsé); a lap a kapu útvonalain kérdez (`/api/koinoverzio`,
-// `/api/kod`, a fájl tartalma a meglévő `/api/fajl/<lenyomat>` úton). A prototípus kártyája bájtra változatlan: a koinós rész
+// `/api/kod`, a fájl tartalma a meglévő `/api/fajl/<lenyomat>` úton). A prototípus kártyája bájtra változatlan: a koinos rész
 // a metódusai KÖRÉ kerül, a modul betöltésekor (mint a `koinoFelderites.js`-ben).
 //
 // Használja: `index.html` (egyszer betölti), `foMenu.js` (az űrlap).
@@ -52,7 +52,7 @@ GondolatKartya.prototype._fejlecFeltoltese = function (cimSav, masodikSor, ...to
     const jel = document.createElement('span');
     jel.className = 'koino-verzio-jel';
     jel.textContent = '🧬 koino-verzió';
-    jel.title = 'Egy gyermek-koinó születése és a programja — a „Kód” fülön a teljes kód ellenőrizhető.';
+    jel.title = 'Egy gyermek-koino születése és a programja — a „Kód” fülön a teljes kód ellenőrizhető.';
     masodikSor.insertBefore(jel, masodikSor.firstChild);
   }
   return ertek;
@@ -141,8 +141,8 @@ async function kodFulBetoltese(elem, kartya) {
   }
   elem.innerHTML = fej + '<div class="koino-kod__keres"></div><ul class="koino-kod__lista">' + fajlok.map((f) => '<li><button type="button" class="koino-kod__fajl"'
     + ' data-lenyomat="' + html(f[1]) + '" data-ut="' + html(f[0]) + '">' + html(f[0]) + '</button> <span class="koino-kod__meret">'
-    + kb(f[2]) + '</span>' + (magban.has(f[0]) ? '<span class="koino-kod__mag" title="A számítás magja: a koinó képe és a kapu ebből '
-      + 'a fájlból is áll — ha változik, az a koinó számítását változtatja (új koinó, bekapcsolódással).">⚙ mag</span>' : '') + '</li>').join('')
+    + kb(f[2]) + '</span>' + (magban.has(f[0]) ? '<span class="koino-kod__mag" title="A számítás magja: a koino képe és a kapu ebből '
+      + 'a fájlból is áll — ha változik, az a koino számítását változtatja (új koino, bekapcsolódással).">⚙ mag</span>' : '') + '</li>').join('')
     + '</ul><div class="koino-kod__tartalom" hidden></div>';
   // ⭐ D120: ha a kód a határ fölött van (nem vállalom a kártyát), a kérés gombja a lista fölött
   if (a.megvan < fajlok.length) {
@@ -195,7 +195,7 @@ export async function koinoVerzioMegnyitasa({ terMegnyitasa = null } = {}) {
   const tartalom = document.createElement('div');
   tartalom.className = 'koino-verzio-urlap';
   const modal = new Modal(MODAL_KONTENER, {
-    cim: '🧬 Új koino-verzió (gyermek-koinó)',
+    cim: '🧬 Új koino-verzió (gyermek-koino)',
     meret: 'alap',
     tartalom,
     gombok: [{ felirat: 'Bezárás', tipus: 'masodlagos', akcio: () => modal.bezaras() }]
@@ -232,8 +232,8 @@ export async function koinoVerzioMegnyitasa({ terMegnyitasa = null } = {}) {
     }
     const sz = szuloSzabalyai();
     const ki = (x) => (folyamatban || megerosites ? ' disabled' : '') + x;
-    tartalom.innerHTML = '<p class="koino-verzio-urlap__leiras">A koino-verzió egy gyermek-koinó: a „' + html(elo.nev ?? '?')
-      + '” koinóra épül (a múlt közös, a súlyt a bekapcsolódó hozza), a saját szabályaival, és a kódja a te FUTÓ programod — a '
+    tartalom.innerHTML = '<p class="koino-verzio-urlap__leiras">A koino-verzió egy gyermek-koino: a „' + html(elo.nev ?? '?')
+      + '” koinora épül (a múlt közös, a súlyt a bekapcsolódó hozza), a saját szabályaival, és a kódja a te FUTÓ programod — a '
       + 'kártyája „Kód” fülén bárki ellenőrizheti.</p>'
       + '<label class="koino-verzio-urlap__mezo">A gyermek neve <input type="text" data-mezo="nev" maxlength="200" value="'
       + html(ertekek.nev) + '"' + ki('') + '></label>'
@@ -253,7 +253,7 @@ export async function koinoVerzioMegnyitasa({ terMegnyitasa = null } = {}) {
       + ' (<code title="' + html(elo.program.lenyomat) + '">' + html(rovid(elo.program.lenyomat)) + '</code>).'
       // ⭐ D123 (PR1): a gyermeket a számítás MAGJA köti — a többi réteg később szabadon változhat
       + (elo.mag ? ' A gyermeket a számítás magja köti: <code title="' + html(elo.mag.lenyomat) + '">' + html(rovid(elo.mag.lenyomat))
-        + '</code> — a felület és a többi réteg később új koinó nélkül is frissülhet.' : '') + '</p>'
+        + '</code> — a felület és a többi réteg később új koino nélkül is frissülhet.' : '') + '</p>'
       + (megerosites
         ? '<p class="koino-verzio-urlap__figyelem">Biztos? A gyermek születése és a kártya aláírt esemény — nem vonható vissza. A '
           + 'születéseddel bekapcsolódsz a gyermekbe: itt megmaradsz a teljes súlyoddal, és a pontjaid a gyermekben is számítanak (a '

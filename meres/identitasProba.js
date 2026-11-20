@@ -60,7 +60,7 @@ async function ment(tar, ...esemenyek) {
 // SEGÉDEK — a két új esemény, ugyanúgy, ahogy a `muveletek.js` írja alá
 // ===================================
 
-/** Az alapító: létrehozza a koinót. A horgonya maga a létrehozó esemény. */
+/** Az alapító: létrehozza a koinot. A horgonya maga a létrehozó esemény. */
 async function alapito(alapitok = []) {
   const eember = await ujEember(KOINO);
   const esemeny = await eember.tesz('KoinoLetrehozas',
@@ -134,7 +134,7 @@ function meghivas(meghivo, meghivott, beallitas = {}) {
 // AZ ALAPESET ÉS A LÁNC
 // ===================================
 
-proba('⭐ AZ ALAPÍTÓ TAG — ő hozta létre a koinót, nem kell hozzá meghívás', async () => {
+proba('⭐ AZ ALAPÍTÓ TAG — ő hozta létre a koinot, nem kell hozzá meghívás', async () => {
   const tar = await ujTar();
   const a = await alapito();
   await ment(tar, a.esemeny);
@@ -251,7 +251,7 @@ proba('⚠️ RONTÁS: a MÁSIK koino meghívása nem számít', async () => {
   const a = await alapito();
   const b = await belepo();
   const meghivo = await meghivas(a, b);
-  // Ugyanaz az esemény, de másik koinóban kérdezünk rá.
+  // Ugyanaz az esemény, de másik koinoban kérdezünk rá.
   await ment(tar, a.esemeny, b.esemeny, meghivo);
 
   const eredmeny = await tagE(tar, 'masik-koino', b.horgony);
@@ -622,7 +622,7 @@ proba('🔍 9. SZABÁLY: a jelzés ára a GYANÚVAL arányos, nem a koino méret
     const hamis = await belepo();
     mind.push(hamis.esemeny, await tanusitas(kor[0], hamis));
   }
-  // …és MELLETTE ötven olyan e-ember él a koinóban, akihez semmi köze.
+  // …és MELLETTE ötven olyan e-ember él a koinoban, akihez semmi köze.
   for (let i = 0; i < 50; i++) {
     const idegen = await belepo();
     mind.push(idegen.esemeny, await meghivas(kor[1], idegen));
@@ -1349,14 +1349,14 @@ proba('⭐⭐ D93/6: a jelzés CSAK SZELETEKBŐL — a tanúsító szelete és a
 });
 
 // ===================================
-// ⭐⭐ D118/2 (①b): A TANÚSÍTÁS-SZÁM A KOINÓ SZÜLETÉSÉBŐL
+// ⭐⭐ D118/2 (①b): A TANÚSÍTÁS-SZÁM A KOINO SZÜLETÉSÉBŐL
 // ===================================
 //
-// Az új alakú koinó (a neve a születés lenyomata) a születésében kettőt mond: egy újonnan jött e-ember két tanúsítással
-// 2. lépcsős. ⭐ A nézet a tárból olvassa ki (a koinó neve a születés azonosítója — egy kérdés). ⚠️ Rontás: ha a nézet a
+// Az új alakú koino (a neve a születés lenyomata) a születésében kettőt mond: egy újonnan jött e-ember két tanúsítással
+// 2. lépcsős. ⭐ A nézet a tárból olvassa ki (a koino neve a születés azonosítója — egy kérdés). ⚠️ Rontás: ha a nézet a
 // mai állandóval számol (3), bukik; és a kimondott beállítás (a próbák, a mérések) erősebb a születésnél.
 
-/** Egy új alakú koinó alapító körrel (`db` fő), a születésben a megadott szabályokkal. */
+/** Egy új alakú koino alapító körrel (`db` fő), a születésben a megadott szabályokkal. */
 async function ujAlakuAlapitoKor(db, szabalyok) {
   const tagok = [];
   for (let i = 1; i < db; i++) tagok.push(await ujEember(''));
@@ -1376,7 +1376,7 @@ async function ujAlakuAlapitoKor(db, szabalyok) {
   return { K, kor, esemenyek };
 }
 
-proba('⭐⭐ D118/2 (①b): a koinó születése KÉT tanúsítást mond — két tanúsítással 2. lépcsős; a mai (három) koinóban nem, és a kimondott beállítás erősebb',
+proba('⭐⭐ D118/2 (①b): a koino születése KÉT tanúsítást mond — két tanúsítással 2. lépcsős; a mai (három) koinoban nem, és a kimondott beállítás erősebb',
   async () => {
     const eset = async (szabalyok) => {
       const { K, kor, esemenyek } = await ujAlakuAlapitoKor(4, szabalyok);

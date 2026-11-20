@@ -103,7 +103,7 @@ export async function koinonCsomagEpitese(esemenyek, javaslatEsemeny, esemenyOlv
  * @param {Object} cs - a csomag
  * @param {Object} [b]
  * @param {Function} [b.tagE] - async (szerző) → true | false | null (nem ellenőrizhető)
- * @param {Object} [b.alapKuszobok] - a koinó alap-küszöbei (a születéséből)
+ * @param {Object} [b.alapKuszobok] - a koino alap-küszöbei (a születéséből)
  * @returns {Promise<{rendben: boolean, ok?: string, elfogadva?: boolean, lezaras?: number, ellenorzott?: number, nemEllenorizheto?: number}>}
  */
 export async function koinonCsomagEllenorzese(cs, { tagE, alapKuszobok } = {}) {

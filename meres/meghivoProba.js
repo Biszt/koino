@@ -3,23 +3,23 @@
 // Mit bizonyít ez a lap?
 //
 // ⭐ Hogy a meghívó szöveg (D122) és a bizonyíték a döntés szerint jár:
-//   · a meghívó visszaolvasva ugyanazt adja (a koinó, a készülék tábla-aláírója, a címek, az azonosító és a titok, a meghívott
+//   · a meghívó visszaolvasva ugyanazt adja (a koino, a készülék tábla-aláírója, a címek, az azonosító és a titok, a meghívott
 //     neve, a lejárat, a kötelező profil-mezők), és egy üzenetben elfér;
 //   · a beillesztett üzenet körülötte lévő szövege — a TELEPÍTŐ SOR is — nem zavar, és a tördelt sor is olvasható;
 //   · ⛔ a hibás meghívóból semmi nem lesz (előtag, jelek, tartalom, a nevek, a címek, a titok, a név, a lejárat, a hossz) —
 //     kimondott okkal; a régi alakú (D121, titok nélküli) meghívó a „kérj újat” okkal;
 //   · a készítés a rossz címet és az ismétlést kihagyja, korlátosan; a meghívott neve kötelező;
-//   · ⭐ a bizonyíték: a helyes titokkal készült elfogadható, és a koinóra, a SZEMÉLYRE és a HORGONYRA kötött — bármelyik más,
+//   · ⭐ a bizonyíték: a helyes titokkal készült elfogadható, és a koinora, a SZEMÉLYRE és a HORGONYRA kötött — bármelyik más,
 //     vagy más a titok: elutasítva (másra nem másolható át);
 //   · ⭐ a WINDOWSOS sor (elágazás 232): ugyanaz a meghívó a végén; a héjak semmit nem bontanak ki belőle (az őr a rossz jelet,
 //     a belső idézőjelet és a meghívó utáni idegen szöveget is megfogja); a telepítő ott van, ahol a sor keresi; a két .ps1
 //     UTF-8 BOM-mal (a Windows PowerShell 5.1 nélküle ANSI-ként olvasná); és Windowson: a PowerShell hibátlanul értelmezi a
 //     szkripteket, és a sor a cmd-ben ÉS a PowerShellben is egyetlen argumentumként adja át a meghívót a telepítőnek;
 //   · ⭐⭐ D123 (PR7): a telepítő sor a már telepített programot FRISSÍTI — a windowsos sor friss gépen és frissítéskor az ÚJ
-//     telepítőt, hálózat nélkül a meglévőt hívja (a régi letöltés maradékát nem); az új telepítő a régi mappából futó koinót
+//     telepítőt, hálózat nélkül a meglévőt hívja (a régi letöltés maradékát nem); az új telepítő a régi mappából futó koinot
 //     leállítja (a másikét nem), cserél (a régi a `koino-regi`-be; a régi tár helyéről — `koino_1.1\koino` — futót is leállítja, a régi tár sorának letöltését — `koino_1.1-uj` — eltakarítja), és a zárolt mappát és a git-tárat nem cseréli; a Termux-sor
 //     a git-tel frissít (a nem követett adat marad; hálózat nélkül kimondja, és a meglévő indul), és a Termux-telepítő a futó régi
-//     koinót leállítja (ahol van `pkill`).
+//     koinot leállítja (ahol van `pkill`).
 
 import { randomBytes } from 'node:crypto';
 import { readFileSync, existsSync, realpathSync } from 'node:fs';
@@ -55,7 +55,7 @@ const nyersMeghivo = (j) => MEGHIVO_ELOTAG + Buffer.from(JSON.stringify(j), 'utf
 const jo = () => ({ k: K, t: T, c: [['192.168.1.134', 7373]], i: jelek.azonosito, s: jelek.titok, m: 'Kovács Anna', l: LEJAR });
 
 // Rontás: a titok, a név, a lejárat vagy a profil-mezők kimaradnak a szövegből → bukik.
-proba('⭐ a meghívó visszaolvasva ugyanazt adja — a koinó, a kulcs, a címek, az azonosító és a titok, a meghívott neve, a lejárat, a profil-mezők', () => {
+proba('⭐ a meghívó visszaolvasva ugyanazt adja — a koino, a kulcs, a címek, az azonosító és a titok, a meghívott neve, a lejárat, a profil-mezők', () => {
   const sz = meghivoKeszitese({ ...alap(), profilMezok: ['nev', 'telepules'] });
   const r = meghivoOlvasasa(sz);
   return sz.startsWith(MEGHIVO_ELOTAG) && sz.length < 600 && /^[A-Za-z0-9_:-]+$/.test(sz) && meghivoE(sz)
@@ -86,7 +86,7 @@ proba('⛔ a hibás meghívóból semmi nem lesz — előtag, jelek, tartalom, a
     MEGHIVO_ELOTAG + '!!!!',                                                            // rossz jelek
     MEGHIVO_ELOTAG + Buffer.from('nem json').toString('base64url'),                     // nem JSON
     nyersMeghivo([1, 2, 3]),                                                            // nem objektum
-    nyersMeghivo({ ...jo(), k: 'rovid' }),                                              // a koinó nem 43 jeles
+    nyersMeghivo({ ...jo(), k: 'rovid' }),                                              // a koino nem 43 jeles
     nyersMeghivo({ ...jo(), t: 'x'.repeat(42) }),                                       // a kulcs nem ép
     nyersMeghivo({ ...jo(), c: [['192.168.1.134', 70000]] }),                           // rossz port
     nyersMeghivo({ ...jo(), c: Array.from({ length: MEGHIVO_CIM_KORLAT + 1 }, (_, i) => ['10.0.0.' + i, 7373]) }), // túl sok
@@ -106,7 +106,7 @@ proba('⛔ a hibás meghívóból semmi nem lesz — előtag, jelek, tartalom, a
 });
 
 // Rontás: a készítés nem szűr → a rossz cím vagy az ismétlés a szövegbe kerül, és a beolvasás az egészet elveti → bukik.
-proba('a készítés a rossz címet és az ismétlést kihagyja (legfeljebb 8); a meghívott neve kötelező; a rossz koinó és titok hiba', () => {
+proba('a készítés a rossz címet és az ismétlést kihagyja (legfeljebb 8); a meghívott neve kötelező; a rossz koino és titok hiba', () => {
   const cimek = [...CIMEK, CIMEK[0], { hoszt: 'rossz cím', port: 1 }, { hoszt: '10.0.0.1', port: 0 },
     ...Array.from({ length: 12 }, (_, i) => ({ hoszt: '10.1.1.' + i, port: 7373 }))];
   const r = meghivoOlvasasa(meghivoKeszitese({ ...alap(), cimek }));
@@ -118,9 +118,9 @@ proba('a készítés a rossz címet és az ismétlést kihagyja (legfeljebb 8); 
     && !r.meghivo.cimek.some((c) => c.hoszt === 'rossz cím' || c.port === 0) && dobott === 5;
 });
 
-// Rontás: a bizonyíték nem köti a személyt (vagy a horgonyt, a koinót) → egy másik belépőé is elfogadható → bukik; a titok nem
+// Rontás: a bizonyíték nem köti a személyt (vagy a horgonyt, a koinot) → egy másik belépőé is elfogadható → bukik; a titok nem
 // számít → a rossz titokkal készült is elfogadható → bukik.
-proba('⭐⭐ a bizonyíték: a helyes titokkal elfogadható; a koinóra, a SZEMÉLYRE és a HORGONYRA kötött — más, vagy más titok: elutasítva', () => {
+proba('⭐⭐ a bizonyíték: a helyes titokkal elfogadható; a koinora, a SZEMÉLYRE és a HORGONYRA kötött — más, vagy más titok: elutasítva', () => {
   const kotes = { koino: K, szemely: azonosito(), horgony: azonosito() };
   const b = meghivoBizonyitek(jelek.titok, kotes);
   const masTitok = ujMeghivoJelei().titok;
@@ -286,7 +286,7 @@ const leallt = (p) => p.exitCode !== null || p.signalCode !== null || !fut(p.pid
 const vart = (ms) => new Promise((t) => setTimeout(t, ms));
 
 // Egy otthon: a meglévő program (egy helyettes telepítő, egy jel és egy „koino.js”), egy még régebbi generáció, és a letöltött
-// új program (a VALÓDI telepítő, a lényeges fájlok helyettesei, egy jel); és egy másik mappa „koinója”.
+// új program (a VALÓDI telepítő, a lényeges fájlok helyettesei, egy jel); és egy másik mappa „koinoja”.
 async function frissitesOtthona(otthon, { git = false } = {}) {
   const regi = join(otthon, 'koino');
   await mkdir(join(regi, 'windows'), { recursive: true });
@@ -321,7 +321,7 @@ const ujTelepitoFuttatasa = (otthon, telepito, sz) => futtat('powershell.exe',
 // `koino_1.1\koino` — marad). Rontás: (a) a leállítás kimarad → a régi „koino.js” tovább fut → bukik; (b) a leállítás
 // mintája túl tág (csak `koino.js`) → a másik mappáé is leáll → bukik; (c) a régebbi generáció nem törlődik / a régi nem kerül
 // a `-regi`-be → bukik; (d) a régi sor letöltésének takarítása kimarad → bukik.
-proba('⭐⭐ (Windowson) PR7: a letöltött telepítő leállítja a régi mappából futó koinót (a másikét nem), a régi tár helyéről futót is, cserél (a régi a koino-regi-be), a régi sor letöltését eltakarítja, és a helyén folytat', async () => {
+proba('⭐⭐ (Windowson) PR7: a letöltött telepítő leállítja a régi mappából futó koinot (a másikét nem), a régi tár helyéről futót is, cserél (a régi a koino-regi-be), a régi sor letöltését eltakarítja, és a helyén folytat', async () => {
   if (process.platform !== 'win32') { process.stdout.write('    (nem Windows — kihagyva)\n'); return true; }
   const otthon = realpathSync.native(await mkdtemp(join(tmpdir(), 'koino-csere-')));
   const folyamatok = [];
@@ -469,9 +469,9 @@ proba('⭐⭐ PR7: a Termux-sor a már telepített programot FRISSÍTI (git) —
   }
 });
 
-// ⭐ (Termuxon / Linuxon, ahol van `pkill`) a valódi telepit.sh leállítja az ebből a mappából futó régi koinót — a másik mappáét nem.
+// ⭐ (Termuxon / Linuxon, ahol van `pkill`) a valódi telepit.sh leállítja az ebből a mappából futó régi koinot — a másik mappáét nem.
 // Rontás: (a) a leállítás kimarad → a régi „koino.js” fut → bukik; (b) a minta túl tág → a másik is leáll → bukik.
-proba('⭐ (Termuxon) PR7: a telepit.sh leállítja az ebből a mappából futó régi koinót (a másikét nem), és a `koino` parancsot felveszi', async () => {
+proba('⭐ (Termuxon) PR7: a telepit.sh leállítja az ebből a mappából futó régi koinot (a másikét nem), és a `koino` parancsot felveszi', async () => {
   if (process.platform === 'win32' || !(await futtat('sh', ['-c', 'command -v pkill'])).ki.trim()) {
     process.stdout.write('    (nincs pkill — kihagyva; a telefonon fut)\n');
     return true;

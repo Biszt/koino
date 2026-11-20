@@ -129,7 +129,7 @@ async function meret() {
     elozo: 'P'.repeat(43), sorszam: 57, ido: T0, entitas: 'E'.repeat(43), entitasSorszam: 3, latott: ['L'.repeat(43)] }, keszulek);
   const ma = bajt(e);
   const keszulekMezo = { ...e, keszulek: await pub(keszulek) };
-  // a tanúsítvány: az azonosság kulcsa aláírja: „ez a kulcs az én készülékem” — koinótól függetlenül
+  // a tanúsítvány: az azonosság kulcsa aláírja: „ez a kulcs az én készülékem” — koinotól függetlenül
   const tan = { azonossag: await pub(azonossag), keszulek: await pub(keszulek), nev: 'telefon', ido: T0 };
   const alairas = b64(new Uint8Array(await wc.subtle.sign('Ed25519', azonossag.privateKey, kanonikusBajtok(tan))));
   const tanusitvany = { ...tan, alairas };
@@ -137,7 +137,7 @@ async function meret() {
   kiir('  ma: ' + ma + ' B · + a `keszulek` mező: ' + bajt(keszulekMezo) + ' B (+' + (bajt(keszulekMezo) - ma) + ') · + a beágyazott tanúsítvány: '
     + bajt(beagyazva) + ' B (+' + (bajt(beagyazva) - ma) + ')');
   kiir('  a tanúsítvány maga: ' + bajt(tanusitvany) + ' B — ⭐ ha minden eseményben utazna, minden esemény ~' + Math.round(100 * (bajt(beagyazva) - ma) / ma)
-    + '%-kal nőne; ha készülékenként és koinónként EGYSZER (a készülék első eseménye hozza, vagy a kérelem kéri el), az esemény csak a mezővel nő.');
+    + '%-kal nőne; ha készülékenként és koinonként EGYSZER (a készülék első eseménye hozza, vagy a kérelem kéri el), az esemény csak a mezővel nő.');
 }
 
 // ===================================
@@ -185,7 +185,7 @@ function osszefesules() {
       kiir('  ' + d + ' készülék, ' + n + ' esemény: ' + (performance.now() - t).toFixed(1) + ' ms (' + r.length + ' rendezve)');
     }
   }
-  kiir('  ⭐ egy azonosság eseményein, lineárisan (lépésenként d jelölt) — a teher a saját eseményeivel nő, nem a koinóval (9. szabály).');
+  kiir('  ⭐ egy azonosság eseményein, lineárisan (lépésenként d jelölt) — a teher a saját eseményeivel nő, nem a koinoval (9. szabály).');
 }
 
 // ===================================

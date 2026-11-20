@@ -18,7 +18,7 @@
 // ===== A MENET =====
 //
 //   1. Kikiáltunk a helyi hálózatra:  „KOPOGOK — a koino X vagyok, a 7373-on hallgatok"
-//   2. Aki hallja és UGYANANNAK a koinónak a tagja, VISSZASZÓL neki közvetlenül:
+//   2. Aki hallja és UGYANANNAK a koinonak a tagja, VISSZASZÓL neki közvetlenül:
 //      „ITT-VAGYOK — én is, a 7373-on"
 //   3. Mindkettő feljegyzi a másikat. Utána a rendes `csere` viszi tovább.
 //
@@ -28,12 +28,12 @@
 //
 // ===== AMIT EZ ELÁRUL MAGUNKRÓL — őszintén =====
 //
-// ⚠️ Aki ugyanazon a wifin van, LÁTJA, hogy koino fut itt, és MELYIK koinóé. Ezt nem lehet
+// ⚠️ Aki ugyanazon a wifin van, LÁTJA, hogy koino fut itt, és MELYIK koinoé. Ezt nem lehet
 // elrejteni: a felfedezés lényege, hogy idegenek is meghallják, különben nem találnánk meg
 // egymást. A helyi hálózat viszont az a hely, ahol amúgy is látszunk (a többi készülék
 // forgalmából). Ezért:
 //   · a felfedezés KÜLÖN parancs, nem fut magától;
-//   · nem mond semmit rólunk azon túl, hogy melyik koinóé vagyunk és hol hallgatunk;
+//   · nem mond semmit rólunk azon túl, hogy melyik koinoé vagyunk és hol hallgatunk;
 //   · aki ezt sem akarja, annak ott a kézi `tars` út (4. szabály).
 //
 // ===== ⭐⭐ D124 ⑤ (PV5 (A)): A KIÁLTÁS HORDOZZA A VÁLTOZATÁT =====
@@ -42,12 +42,12 @@
 // címke száma: `koino-felfedezes-1` — a mai az 1-es, bájtra változatlanul), és a 2-estől a `v` mezőben is (a mai alak nem
 // hordja: ami nem mond számot, az az 1-es). Az átmenet alatt a kiáltó MINDEN élő alakban kiált (`kiirtAlak.js`), a válaszoló
 // abban az alakban felel, amelyikben a kiáltást hallotta. ⭐ És ha egy alakot nem olvasunk, MEGNEVEZZÜK (`ujabb-alak` —
-// frissíts; `regebbi-alak`), nem „másik koinónak” vesszük — a mai olvasó így a következő törést már kimondja. (A `v` nélküli,
-// de más számú rejtett jelet a régi olvasó csak „másik koinónak” láthatja — ezért kell az átmenet.)
+// frissíts; `regebbi-alak`), nem „másik koinonak” vesszük — a mai olvasó így a következő törést már kimondja. (A `v` nélküli,
+// de más számú rejtett jelet a régi olvasó csak „másik koinonak” láthatja — ezért kell az átmenet.)
 //
 // Használják: koino.js (`felfedez` parancs) és a csereProba.js.
 
-// ⭐ D89/7: a koinó azonosítója nem hangzik el nyíltan — a rejtett jel lenyomat.
+// ⭐ D89/7: a koino azonosítója nem hangzik el nyíltan — a rejtett jel lenyomat.
 import { createHash } from 'node:crypto';
 import { createSocket } from 'node:dgram';
 import { randomBytes } from 'node:crypto';
@@ -93,10 +93,10 @@ export const VALASZ_KOZ = 1000;
 // ===================================
 
 /**
- * ⭐⭐ D89/7 (Csaba, 2026-10-03): A KOINÓ REJTETT JELE — a koinó azonosítója és a futás véletlen jele
+ * ⭐⭐ D89/7 (Csaba, 2026-10-03): A KOINO REJTETT JELE — a koino azonosítója és a futás véletlen jele
  * együtt, lenyomatolva. Aki tudja az azonosítót, ugyanezt kiszámolja és felismeri; aki nem, az a wifin csak
- * annyit lát, hogy egy koino fut itt — azt nem, hogy MELYIK koinóé (egy zárt koinó tagságát se árulja el).
- * ⚠️ A futás jele minden kiáltásban más, így két kiáltásból sem lehet összefűzni, hogy ugyanaz a koinó.
+ * annyit lát, hogy egy koino fut itt — azt nem, hogy MELYIK koinoé (egy zárt koino tagságát se árulja el).
+ * ⚠️ A futás jele minden kiáltásban más, így két kiáltásból sem lehet összefűzni, hogy ugyanaz a koino.
  * ⭐ D124 ⑤: `n` — a kiáltás változata (a címke száma; a mai az 1-es).
  */
 export function koinoRejtettJele(koino, jel, n = 1) {
@@ -107,12 +107,12 @@ export function koinoRejtettJele(koino, jel, n = 1) {
 /**
  * Az üzenet, amit kikiáltunk vagy visszaszólunk.
  *
- * ⚠️ Szándékosan APRÓ és unalmas: a koinó rejtett jele, egy port, és egy véletlen jel.
+ * ⚠️ Szándékosan APRÓ és unalmas: a koino rejtett jele, egy port, és egy véletlen jel.
  * Minden további mező olyasmi lenne, amit egy idegen a wifin ingyen megtudhat rólunk.
  * ⭐ D124 ⑤: a 2-estől a `v` (a kiáltás változata) is — a mai, 1-es alak bájtra a régi (`v` nélkül).
  *
  * @param {'KOPOGOK'|'ITT-VAGYOK'} mi
- * @param {string} koino - melyik koinóé vagyunk
+ * @param {string} koino - melyik koinoé vagyunk
  * @param {number} port - hol hallgatunk cserére
  * @param {string} jel - a FUTÁS véletlen jele (ettől ismerjük fel a saját visszhangunkat)
  * @param {number} [n] - a kiáltás változata (a mai az 1-es)
@@ -127,7 +127,7 @@ export function felfedezoUzenet(mi, koino, port, jel, n = 1) {
  *
  * ⭐ A „miért" nem díszítés: a felfedezés jellemző hibája az, hogy NEM TÖRTÉNIK SEMMI, és
  * abból nem derül ki, hogy senki nincs ott, vagy hogy a hálózat nyelte el, vagy hogy a
- * másik egy másik koinóé. A néma nem-esemény a legrosszabb hibafajta.
+ * másik egy másik koinoé. A néma nem-esemény a legrosszabb hibafajta.
  *
  * @param {Buffer|string} nyers - a csomag gondolata
  * @param {Object} felado - { address, port } — akitől jött
@@ -152,7 +152,7 @@ export function kialtasFeldolgozasa(nyers, felado, sajatKoino, sajatJel, valtoza
   if (uzenet.jel === sajatJel) return { rendben: false, ok: 'sajat-visszhang' };
 
   // ⭐⭐ D124 ⑤: A KIÁLTÁS VÁLTOZATA — `v` nélkül az 1-es (a mai és a régebbi programok). Amit nem olvasunk, azt megnevezzük:
-  // egy újabb program kiáltását nem vesszük „másik koinónak” (a rejtett jele a mi számunkkal nem egyezne — csendben).
+  // egy újabb program kiáltását nem vesszük „másik koinonak” (a rejtett jele a mi számunkkal nem egyezne — csendben).
   const v = uzenet.v === undefined ? 1 : uzenet.v;
   if (!Number.isSafeInteger(v) || v < 1) return { rendben: false, ok: 'hibas-alakjel' };
   const irany = alakIranya(v, valtozatok);
@@ -160,7 +160,7 @@ export function kialtasFeldolgozasa(nyers, felado, sajatKoino, sajatJel, valtoza
 
   // ⚠️ MÁS KOINO — teljesen rendes dolog egy közös wifin (egy lakásban két koino is futhat).
   // Nem hiba, nem gyanús: egyszerűen nincs miről beszélnünk.
-  // ⭐ D89/7: a rejtett jelet a saját azonosítónkból számoljuk újra — ha nem egyezik, más koinóé.
+  // ⭐ D89/7: a rejtett jelet a saját azonosítónkból számoljuk újra — ha nem egyezik, más koinoé.
   if (typeof uzenet.jel !== 'string' || uzenet.k !== koinoRejtettJele(sajatKoino, uzenet.jel, v)) {
     return { rendben: false, ok: 'mas-koino' };
   }
@@ -212,7 +212,7 @@ export function felfedezettekOsszefesulese(eddigiek, uj) {
  * „nem találtam senkit" ÉRVÉNYES eredmény, nem hiba. (A `pajzsfuro.js` ugyanígy csinálja.)
  *
  * @param {Object} beallitas
- * @param {string} beallitas.koino - melyik koinóé vagyunk
+ * @param {string} beallitas.koino - melyik koinoé vagyunk
  * @param {number} beallitas.sajatPort - hol hallgatunk cserére (ezt hirdetjük)
  * @param {number} [beallitas.figyeloPort] - hol figyeljük a kiáltásokat
  * @param {string[]} [beallitas.celok] - hova kiáltunk (több cím, lásd ALAP_CELOK)

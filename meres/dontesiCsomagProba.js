@@ -72,7 +72,7 @@ async function helyzet() {
 const szeletben = (e, k) => szelet(e) === k || bejelentesHelyei(e).includes(k);
 
 /**
- * A csak-Gi-nézet: a koinó születése, a Gi szelete és a Gi-es töredék szelete — ⭐ D93: és a tagsági bizonyítékok (a
+ * A csak-Gi-nézet: a koino születése, a Gi szelete és a Gi-es töredék szelete — ⭐ D93: és a tagsági bizonyítékok (a
  * résztvevők azonosság-szeletei; a tartó a tagsági csomagjukat egy szelet-kérelemmel elhozza — D93/2). A próba a
  * DÖNTÉS ismeretét méri, nem a tagságét.
  */
@@ -114,7 +114,7 @@ proba('⭐⭐ a csak-G1-nézet a csomaggal ugyanazt a döntést számolja, mint 
 });
 
 // ⭐⭐ D93/1: a csomag a résztvevők TAGSÁGI BIZONYÍTÉKÁT is hozza. A csak-G1-nézetben itt egyetlen tagsági esemény
-// sincs (csak a koinó születése, a G1 szelete és a töredéke) — a csomaggal mégis ugyanaz a döntés, mint a teljes
+// sincs (csak a koino születése, a G1 szelete és a töredéke) — a csomaggal mégis ugyanaz a döntés, mint a teljes
 // tudással; a csomag nélkül a résztvevők „függőben” vannak (a tagságuk nem ellenőrizhető).
 proba('⭐⭐ D93/1: a csomag a résztvevők TAGSÁGI bizonyítékát is hozza — tagsági események nélkül is ugyanaz a döntés', async () => {
   const { tar, A, g1, j } = await helyzet();

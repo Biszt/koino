@@ -1,7 +1,7 @@
 // meres/udpKapuProba.js
 
 // Felelősség: bizonyítani, hogy az ÁLLANDÓ UDP-KAPU (D69/3) azt teszi, amiért született —
-// hálózat és koinó nélkül, egy HAMIS munkával, két kapuval a gépen belül.
+// hálózat és koino nélkül, egy HAMIS munkával, két kapuval a gépen belül.
 //
 // ⭐ MIT KELL ITT BIZONYÍTANI (a mért bajokból, 2026-09-25):
 //   · a kopogásra a kapu ABLAK NÉLKÜL is felel, és a bekopogóval munka indul (41., 42. mérés);

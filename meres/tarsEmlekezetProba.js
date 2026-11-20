@@ -1,7 +1,7 @@
 // meres/tarsEmlekezetProba.js
 
 // Felelősség: bizonyítani, hogy a TÁRSANKÉNTI EMLÉKEZET (D98/1 — `csere/tarsEmlekezet.js`, a tár állása és a vonal) működik:
-// a változott kulcsok a tár vége óta pontosak (a szelet, a bejelentési helyek, a gyökér, a koinó születése, a maradék),
+// a változott kulcsok a tár vége óta pontosak (a szelet, a bejelentési helyek, a gyökér, a koino születése, a maradék),
 // tömörítés után és túl sok változásnál nincs lista; a U osztályozása és a kívüli lenyomat pontos, a hibás üzenet
 // elbukik; és a valódi cserén (UDP-rés, titkosítva) a második csere után a változott szelet AZ ELSŐ SZINT NÉLKÜL átjön
 // (mindkét irányból), a hazug (hiányos) lista után is minden megérkezik (a rendes első szint fut), és a maradék (ahol az
@@ -44,7 +44,7 @@ async function tarIrasa(esemenyek) {
 // 1. A SZÁMÍTÁS
 // ===================================
 
-proba('⭐ a változott kulcsok a feljegyzés óta: a szelet, a bejelentési helye (a gyökér is), a koinó születése és a maradék', async () => {
+proba('⭐ a változott kulcsok a feljegyzés óta: a szelet, a bejelentési helye (a gyökér is), a koino születése és a maradék', async () => {
   const sz = await ujEember(KOINO);
   const szuletes = await sz.tesz('KoinoLetrehozas', { nev: 'P' });
   const g1 = await sz.tesz('GondolatLetrehozas', { cim: 'G1', meret: 10 });

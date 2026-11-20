@@ -5,10 +5,10 @@
 //     csatolmány; a mag nem változik (NZ1 (A): a kép a típust megőrzi, a szöveget a mai szállítás viszi — 92. mérés (a));
 //   · a KÓD: a szöveg ELSŐ fájl-blokkja (a lenyomata, a neve) — ha egy szerkesztési egyezmény a szöveget módosítja, a kód is
 //     változhat; a bekapcsolás ezért a LENYOMATHOZ kötött (NZ1);
-//   · a BEKAPCSOLÁS: koinónként (NZ2 (A) — a nézet csak a saját koinójában fut) és a kód lenyomatához kötve — a helyi jegyzék
+//   · a BEKAPCSOLÁS: koinonként (NZ2 (A) — a nézet csak a saját koinojában fut) és a kód lenyomatához kötve — a helyi jegyzék
 //     (`<adat>/nezetek.json`) alakja, és hogy egy kártya most be van-e kapcsolva, ki, vagy a kódja azóta változott.
 //
-// ⭐ Helyi viselkedés (R3), nem számítás: a koinó képe ettől semmiben nem más (a kártya egy legfelső szintű entitás, mint a
+// ⭐ Helyi viselkedés (R3), nem számítás: a koino képe ettől semmiben nem más (a kártya egy legfelső szintű entitás, mint a
 // koino-verzió kártya — D119). A bekapcsolás nem esemény, nem terjed: a te készülékedé (D123 PR4 (B): „te kapcsolod be a saját
 // készülékeden”).
 //
@@ -16,16 +16,16 @@
 
 import { lenyomatUrlbol } from './fajlIgeny.js';
 
-/** A nézet-kártya típusa (a létrehozó esemény `adat.tipus`-a — a koinó képe ezt megőrzi). */
+/** A nézet-kártya típusa (a létrehozó esemény `adat.tipus`-a — a koino képe ezt megőrzi). */
 export const NEZET_TIPUS = 'Nezet';
 
-/** Ennyi nézet-kártyát nézünk egy koinóban (a legtöbb pontút) — 9. szabály: a lista korlátos, a pont a közösség jelzése. */
+/** Ennyi nézet-kártyát nézünk egy koinoban (a legtöbb pontút) — 9. szabály: a lista korlátos, a pont a közösség jelzése. */
 export const NEZET_LISTA_KORLAT = 64;
 
-/** Egy koinóban legfeljebb ennyi bekapcsolt nézet (a helyi jegyzék korlátja). */
+/** Egy koinoban legfeljebb ennyi bekapcsolt nézet (a helyi jegyzék korlátja). */
 export const NEZET_BEKAPCSOLT_KORLAT = 64;
 
-/** A helyi jegyzékben legfeljebb ennyi koinó (a legutóbb érintettek maradnak). */
+/** A helyi jegyzékben legfeljebb ennyi koino (a legutóbb érintettek maradnak). */
 export const NEZET_KOINO_KORLAT = 256;
 
 const LENYOMAT = /^[A-Za-z0-9_-]{43}$/;
@@ -95,7 +95,7 @@ export function kodSzovege(bajtok) {
 // A BEKAPCSOLÁS — a helyi jegyzék (`<adat>/nezetek.json`)
 // ===================================
 //
-//   { koinok: { <koinó>: { ido, nezetek: { <kártya>: { lenyomat, ido, cim } } } } }
+//   { koinok: { <koino>: { ido, nezetek: { <kártya>: { lenyomat, ido, cim } } } } }
 
 /** Üres jegyzék. */
 export function uresNezetJegyzek() {
@@ -103,7 +103,7 @@ export function uresNezetJegyzek() {
 }
 
 /**
- * A jegyzék ellenőrzött alakja — a hibás részt eldobja, korlátosan (a legutóbb érintett koinók és nézetek maradnak).
+ * A jegyzék ellenőrzött alakja — a hibás részt eldobja, korlátosan (a legutóbb érintett koinok és nézetek maradnak).
  * @param {*} nyers
  * @returns {{koinok: Object}}
  */
@@ -126,17 +126,17 @@ export function nezetJegyzekAlakja(nyers) {
 }
 
 /**
- * Egy nézet bekapcsolása egy koinóban, a kód lenyomatához kötve (az új jegyzék — a régi változatlan).
+ * Egy nézet bekapcsolása egy koinoban, a kód lenyomatához kötve (az új jegyzék — a régi változatlan).
  * @param {Object} j - a mostani jegyzék
  * @param {{koino: string, kartya: string, lenyomat: string, cim?: string|null, most?: number}} b
  */
 export function nezetBekapcsolasa(j, { koino, kartya, lenyomat, cim = null, most = Date.now() }) {
-  if (!koino) throw new Error('Melyik koinóban?');
+  if (!koino) throw new Error('Melyik koinoban?');
   if (!LENYOMAT.test(kartya ?? '') || !LENYOMAT.test(lenyomat ?? '')) throw new Error('A kártya és a kód lenyomata kell.');
   const a = nezetJegyzekAlakja(j);
   const regi = a.koinok[koino]?.nezetek ?? {};
   if (!regi[kartya] && Object.keys(regi).length >= NEZET_BEKAPCSOLT_KORLAT) {
-    throw new Error('Ebben a koinóban már ' + NEZET_BEKAPCSOLT_KORLAT + ' nézet van bekapcsolva — előbb kapcsolj ki egyet.');
+    throw new Error('Ebben a koinoban már ' + NEZET_BEKAPCSOLT_KORLAT + ' nézet van bekapcsolva — előbb kapcsolj ki egyet.');
   }
   a.koinok[koino] = { ido: most, nezetek: { ...regi, [kartya]: { lenyomat, ido: most, cim: cim ?? null } } };
   return nezetJegyzekAlakja(a);

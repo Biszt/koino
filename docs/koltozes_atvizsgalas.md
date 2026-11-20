@@ -1,6 +1,6 @@
 # A KÖLTÖZÉS ÁTVIZSGÁLÁSA (D66, D118 — 2026-10-24)
 
-> ⭐ **2026-11-08 óta: BEKAPCSOLÓDÁS (D127 — a szülőben megmaradsz, a két koinó párhuzamos).** Ez a dokumentum a történet, a
+> ⭐ **2026-11-08 óta: BEKAPCSOLÓDÁS (D127 — a szülőben megmaradsz, a két koino párhuzamos).** Ez a dokumentum a történet, a
 > régi szóval. A program már akkor is így számolt (a „kiköltözés” a szülőben a súlyt nem vette el); a D127 a szót, a kiírásokat és a
 > mag eseményeit igazította hozzá (a szülőbeli esemény megszűnt).
 
@@ -21,22 +21,22 @@ rendszerben senki nem kényszeríthet senkit az elfogadott kód futtatására, e
 Csaba, 2026-11-08: *„nem kell szavazás a kódról.”*), a
 valódi döntés az, hogy **ki költözik** (a D65 kérdésére is ez lett a válasz). A kormányzás így inkább választás, mint
 határozat. Két irányban nem esik egybe a kettő: a költözés **tágabb** (ugyanez kell a szétváláshoz, egy változat
-kipróbálásához és a „más paraméterekkel” induló koinóhoz — D13, D25), és **szűkebb** is (a kód változásainak többsége nem
+kipróbálásához és a „más paraméterekkel” induló koinohoz — D13, D25), és **szűkebb** is (a kód változásainak többsége nem
 kíván költözést — 4.1).
 
 ### ✅ D118 — Csaba: *„rendben, mind a hatot elfogadom, jöhet az átvizsgálás”* (2026-10-24)
 
-1. **Az alapelv: a múlt közös, a jelenlét személyes.** Az új koinó nem másolat, hanem a szülőjére épül: a születése
-   megnevezi a szülőt, és a vágás pillanata a saját születése. A szülő múltja (a vágásig) az új koinó múltja is, a régi
+1. **Az alapelv: a múlt közös, a jelenlét személyes.** Az új koino nem másolat, hanem a szülőjére épül: a születése
+   megnevezi a szülőt, és a vágás pillanata a saját születése. A szülő múltja (a vágásig) az új koino múltja is, a régi
    aláírásokkal, átírás nélkül; az entitások a régi nevükön élnek. **Súlyt** (pont, szavazat, érték javaslat, állásfoglalás)
    csak az hoz, aki maga költözik. Amire senki nem hozott súlyt, azt a D14 elfelejti, a gyerekei felkerülnek; ami a vágás
    előtt lezárult, az múlt (a szülő szabályaival, mindenki szavazatával); ami nyitva volt, az jövő.
-2. **A szabályok a koinó születésében**, nem a programban; és **a koinó neve a születése lenyomatából** jön.
+2. **A szabályok a koino születésében**, nem a programban; és **a koino neve a születése lenyomatából** jön.
 3. **A tagság a vágáskor öröklődik** (a D25 kivétele: *„születéskor örökölhet, utána soha”*), de csak a költözőnek ad súlyt;
-   utána csak az új koinó meghívásai számítanak. ⚠️ *A kérdés két része („és a tanúsítások is?”) közül a másodikat — amit
+   utána csak az új koino meghívásai számítanak. ⚠️ *A kérdés két része („és a tanúsítások is?”) közül a másodikat — amit
    Csaba a D25-nél nyitva hagyott — az „elfogadom mind” szerint IGEN-nek vettük: a 2. lépcső (tanúsítások, felhatalmazások)
    is a vágáskori állapotból öröklődik, ugyanígy. Ha nem így gondolta, ez az egy pont visszanyitandó.*
-4. **A vágáskor nyitott javaslatok a költözőkkel folytatódnak** az új koinóban (a szavazatukkal, az új szabályokkal).
+4. **A vágáskor nyitott javaslatok a költözőkkel folytatódnak** az új koinoban (a szavazatukkal, az új szabályokkal).
 5. **A zártság öröklődik:** zárt szülőnek csak zárt gyermeke lehet (a nyílt szülő gyermeke lehet zárt).
 6. **A költözés két esemény:** **kiköltözés** a szülőben (a saját azonosság-szeletemben: hova mentem) és **beköltözés** az
    újban (ez köti meg a láncomat, és megnevezi a kiköltözést); a kiköltözés már most, pénz nélkül is — ebből tudja meg a
@@ -47,8 +47,8 @@ fán álljon) — mérés után; a szerkezet helyet hagy neki (4.4).
 
 ## 2. Ami már megvan — és amire a költözés épít
 
-- **Az esemény koinó-mezője** — az első aláírt mező (`esemeny.js`), és az azonosító a tartalom lenyomata: egy esemény
-  sosem „vándorol át” egy másik koinóba (D66/2). ⭐ Ezért nem kell átírni semmit: a szülő eseménye a gyermekben is
+- **Az esemény koino-mezője** — az első aláírt mező (`esemeny.js`), és az azonosító a tartalom lenyomata: egy esemény
+  sosem „vándorol át” egy másik koinoba (D66/2). ⭐ Ezért nem kell átírni semmit: a szülő eseménye a gyermekben is
   ugyanaz az esemény, ugyanazzal a névvel — csak a kapunak kell tudnia, mikor számít (4.3).
 - **A lánc-gyökér** (D78, D81 — `lancGyoker.js`): minden esemény hozza a szerzője láncának napló-gyökerét és
   kiosztás-gyökerét. ⭐ A beköltözés ezzel köti meg egyetlen aláírással, mely eseményeimről van szó (4.5).
@@ -58,57 +58,57 @@ fán álljon) — mérés után; a szerkezet helyet hagy neki (4.4).
   gyerekei a legközelebbi élő felmenőhöz kerülnek — a részleges költözés lyukaira **nem kell új szabály**.
 - **A döntési csomag és a lezárási összegzés** (D85 T3, D95/1): mások aláírt eseményeinek másolata egy hordozóban („a
   teljességéért senki nem kezeskedik — egy teljesebb pótolja”), és egy döntés bemenete fában rögzítve — a mintái itt is.
-- **A belépő tér** (5.6, `ter.js`) — a koinók családfájának helye (D25).
+- **A belépő tér** (5.6, `ter.js`) — a koinok családfájának helye (D25).
 - **A kézi út** (`kivisz` / `behoz`) — a költözés fájlon át is megy (4. szabály).
 
-## 3. ⛔ A LELET: a koinó neve ma nincs a születéséhez kötve (mérve, 2026-10-24)
+## 3. ⛔ A LELET: a koino neve ma nincs a születéséhez kötve (mérve, 2026-10-24)
 
-A koinó neve ma **szabad szöveg** (`KOINO_AZONOSITO`, a próbákon `sajat`), és három hely háromféleképp választja ki „a”
-koinó születését:
+A koino neve ma **szabad szöveg** (`KOINO_AZONOSITO`, a próbákon `sajat`), és három hely háromféleképp választja ki „a”
+koino születését:
 - az állapot (`allapotSzamitas.js`) a rendezett bemenetben az **utolsó** `KoinoLetrehozas`-t (a név, a zártság innen jön);
 - a tagság (`tagsag.js` `tagsagiIndex`) az **elsőt** — az ő szerzője az alapító, a tagsági fa gyökere;
 - a kapu (`koino.js` `koinoSzuletese`) a **saját tagsági láncomból** keresi.
 
-**A próba** (a scratchpadban, két ideiglenes „készülékkel”, nyílt koinóban): A létrehoz egy koinót és egy gondolatot 100
+**A próba** (a scratchpadban, két ideiglenes „készülékkel”, nyílt koinoban): A létrehoz egy koinot és egy gondolatot 100
 ponttal; egy kívülálló C — tagság nélkül, egy olyan kulccsal, ami az A kulcsa elé rendeződik („EL…” az „aw…” előtt) —
-aláír egy **második** `KoinoLetrehozas`-t ugyanazzal a koinó-névvel.
-- **A kézi úton** (`behoz`): az A készüléken a koinó neve a hamisé lett, az A pontja „nem számít, amíg a szerzője tagsága
+aláír egy **második** `KoinoLetrehozas`-t ugyanazzal a koino-névvel.
+- **A kézi úton** (`behoz`): az A készüléken a koino neve a hamisé lett, az A pontja „nem számít, amíg a szerzője tagsága
   nem ellenőrizhető (… köztük te — D93/1)”, és **a gondolata eltűnt** (D14). Közben az AZONOSSÁG rész továbbra is azt írta:
-  „✔ tag — a koinó létrehozója” (a két út eltér).
+  „✔ tag — a koino létrehozója” (a két út eltér).
 - **A cserén** (`figyel` + `csere`): ugyanez — a kívülálló **egyetlen eseményt** küldött (a csere 8,2 KB volt), és az A2
   készüléken a valódi alapító pontja megszűnt számítani.
-- ⭐ Ha a hamis szerző kulcsa **a valódi mögé** rendeződik („eE…”), a tagság megmarad, de a koinó neve akkor is a hamisé.
+- ⭐ Ha a hamis szerző kulcsa **a valódi mögé** rendeződik („eE…”), a tagság megmarad, de a koino neve akkor is a hamisé.
 
 ⛔ Vagyis ma **egy kívülálló egyetlen aláírt eseménnyel** az alapító — és mivel minden tag lánca hozzá vezet, **minden tag**
-— döntéseit „nem ellenőrizhetővé” teheti minden készüléken, amihez az esemény eljut. ⚠️ Zárt koinóban nem mértük; a zárt
+— döntéseit „nem ellenőrizhetővé” teheti minden készüléken, amihez az esemény eljut. ⚠️ Zárt koinoban nem mértük; a zárt
 kapu korlátozott útja a nem tagtól is átveszi a `KoinoLetrehozas`-t (`vonal.js`, a megengedett szeletek), tehát ott is
-valószínű. ⭐ **Élő koinó ma nincs** (a koino.hu a prototípus), a kockázat a laptop–telefon próba-koinója.
+valószínű. ⭐ **Élő koino ma nincs** (a koino.hu a prototípus), a kockázat a laptop–telefon próba-koinoja.
 
-⭐ **A javítás a D118/2 maga:** ha a koinó neve a születésének lenyomata, egy második születés **másik koinó** — nincs mit
+⭐ **A javítás a D118/2 maga:** ha a koino neve a születésének lenyomata, egy második születés **másik koino** — nincs mit
 választani. Ezért ez az építés **első** lépése (7. szakasz), bekötés-próbával és rontással (a régi névválasztás visszahozza
 a bukást).
 
 ## 4. A költözés alakja — a döntések kibontva
 
-### 4.1 A koinó neve és a szabályok a születésben (D118/2)
+### 4.1 A koino neve és a szabályok a születésben (D118/2)
 
-**A név:** a `KoinoLetrehozas` a koinó-mezőben még nem nevezheti meg önmagát (a lenyomata a tartalmából jön), ezért a
-születés koinó-mezője üres jel, és **a koinó neve a születés azonosítója**; minden további esemény ezt viszi. A `nev` mező
+**A név:** a `KoinoLetrehozas` a koino-mezőben még nem nevezheti meg önmagát (a lenyomata a tartalmából jön), ezért a
+születés koino-mezője üres jel, és **a koino neve a születés azonosítója**; minden további esemény ezt viszi. A `nev` mező
 marad az emberi név. ⚠️ A `KOINO_AZONOSITO` a készüléken **helyi becenév** maradhat (a készülék tudja, melyik születéshez
-tartozik) — a vonalon, a DHT-témákban és az eseményekben a lenyomat jár; a csatlakozó a koinó nevét a meghívással (vagy az
+tartozik) — a vonalon, a DHT-témákban és az eseményekben a lenyomat jár; a csatlakozó a koino nevét a meghívással (vagy az
 első cserével) kapja. *(A részlet az építésé; a próbák becenevei így nagyrészt maradhatnak.)*
 
 **A szabályok:** az állapotot befolyásoló állandók a születés `szabalyok` mezőjébe kerülnek, a számítás onnan olvassa őket
 (egy helyen), és a kapu ellenőrzi az értékek határait. Ha a mező hiányzik, a mai értékek érvényesek (a régi születések
 ugyanazt számolják). Ettől:
-- egy szabály-változás **nem programváltozás**, hanem egy új koinó születése ugyanazzal a programmal (a D25 első módja, a
+- egy szabály-változás **nem programváltozás**, hanem egy új koino születése ugyanazzal a programmal (a D25 első módja, a
   D13/b paraméter-pluralizmusa — a `javaslatSzamitas.js` megjegyzése már ezt ígéri: *„később koino-szintű PARAMÉTEREK
   lesznek”*);
 - a szülő múltját **ugyanaz a kód** számolja, a szülő paramétereivel — a nemzedékekhez csak a születések lánca kell;
 - a 15. mérés néma kettéhasadása (ugyanaz a név, más állandó) szerkezetileg megszűnik.
 
 **A besorolás** (a mai állandók — ⏸️ KZ1):
-- **(a) szabály a születésben** (csak új koinóval változik): `TUDATPONT_KERET` (10 000), `KATEGORIA_KORLAT` (3),
+- **(a) szabály a születésben** (csak új koinoval változik): `TUDATPONT_KERET` (10 000), `KATEGORIA_KORLAT` (3),
   `TANUSITAS_KELL` (3), `ALAP_KUSZOBOK` (az alapérték — az entitásonkénti medián ma is mozgatja).
 - **(b) élő paraméter** (a születés az alapértéket adja, a közösség a mediánnal mozgatja — D57/b; a bekötés még nincs meg):
   `FELHATALMAZAS_KELL` (5).
@@ -117,22 +117,22 @@ ugyanazt számolják). Ettől:
   különböző tag hívjon meg egy új embert, hogy tag legyen) — Csaba, 2026-10-24: *„igen, maradjon 1 egyelőre”*. Az
   `identitas.js` állandója ma holt (a `tagsag.js` egy meghívással és a legrövidebb lánccal számol), és a 11–12. mérés
   szerint a nagyobb szám árcédula, nem védelem; ha valaha mégis szabály lenne, az a tagsági lánc új számítása — költözés.
-- **(d) méret-korlát** (D106: nem lehet szűkebb a koinó saját határánál, ezért nem paraméter): `MELYSEG_KORLAT` (256).
+- **(d) méret-korlát** (D106: nem lehet szűkebb a koino saját határánál, ezért nem paraméter): `MELYSEG_KORLAT` (256).
 - **(e) helyi** (a készülék ellenőrzési mélysége vagy szokása, nem szabály — az eredményt becsületes esetben nem
   változtatja): `LEPCSO_KERET`, `SZUROPROBA_SETAK`, `LEZARASI_MINTA`, `MINTA_ALAP`, `MEGULEPEDES_BULIK`, `KIFUTAS`,
   `ONALLO_KUSZOB`.
 
 **A változások négy fajtája:**
-- **paraméter-változás** → új koinó, ugyanaz a program;
-- **a számítás változása** → új koinó **és** új program, ami a szülő múltjához megtartja a régi számítást (változatként);
+- **paraméter-változás** → új koino, ugyanaz a program;
+- **a számítás változása** → új koino **és** új program, ami a szülő múltjához megtartja a régi számítást (változatként);
   ⚠️ ide tartozik minden hibajavítás is, ami egy számítás **eredményét** változtatja (⏸️ KZ4);
 - **minden más** (a felület, a szállítás, az eredményt nem érintő javítás) → egyszerű programfrissítés;
-- **protokoll-törés** → ugyanaz a koinó, de szabály kell rá, különben kettévágja a hálót (⏸️ KZ5).
+- **protokoll-törés** → ugyanaz a koino, de szabály kell rá, különben kettévágja a hálót (⏸️ KZ5).
 
 ### 4.2 A gyermek születése
 
-- A `KoinoLetrehozas` új mezői: `szulo` (a szülő koinó neve — a szülő születésének lenyomata) és a `szabalyok`. **A vágás a
-  gyermek születésének ideje.** Egy gyermeknek egy szülője van (koinók egyesítése nem cél); egy szülőnek több gyermeke is
+- A `KoinoLetrehozas` új mezői: `szulo` (a szülő koino neve — a szülő születésének lenyomata) és a `szabalyok`. **A vágás a
+  gyermek születésének ideje.** Egy gyermeknek egy szülője van (koinok egyesítése nem cél); egy szülőnek több gyermeke is
   lehet, és egy e-ember több gyermekbe is költözhet (D13: „mindkét ágon létezik”).
 - **A zártság öröklődik** (D118/5): zárt szülő gyermekének a születése csak zárt lehet — a kapu a nyíltat elveti.
 - **Ki hozhat létre gyermeket?** — ⏸️ KZ2 (javaslat: aki a vágáskor a szülő tagja).
@@ -140,11 +140,11 @@ ugyanazt számolják). Ettől:
   fa gyökere. *(A szülő alapítója marad a gyökér a múlt rétegében; a jelenben a fa a költözőkkel és az új meghívásokkal
   él.)*
 
-### 4.3 A kapu koinó-szabálya (D118/1)
+### 4.3 A kapu koino-szabálya (D118/1)
 
-A kapu (`esemenyMentese`) ma nem nézi a koinót — az olvasás szűr (`koinoEsemenyei`). ⭐ A szabály a **kapuba** kerül, egy
-helyre, mert mostantól érvényességi kérdés. Egy esemény akkor tartozik egy koinóba, ha:
-- a koinóé; **vagy**
+A kapu (`esemenyMentese`) ma nem nézi a koinot — az olvasás szűr (`koinoEsemenyei`). ⭐ A szabály a **kapuba** kerül, egy
+helyre, mert mostantól érvényességi kérdés. Egy esemény akkor tartozik egy koinoba, ha:
+- a koinoé; **vagy**
 - egy ősé a születések láncában, és **a vágás előtti** (egy ős eseménye annak a nemzedéknek a születéséig számít, amelyik
   tőle örökölt); **vagy**
 - egy költöző **kiköltözése**, amit a saját beköltözése megnevez (ez a vágás utáni, mégis kell — 4.5).
@@ -172,7 +172,7 @@ elhalasztva.
 
 - **Kiköltözés** (`Kikoltozes`, a szülőben, a saját azonosság-szeletemben): `{ gyermek: <a gyermek neve> }`. Csak tagtól
   számít. ⭐ Ebből látja a szülő (és a belépő tér), hogy született egy gyermek, és ki ment át — a családfa (D25). A pontjaim
-  a szülőben maradnak (a két koinóban külön keretem van); a pénznél majd itt lesz a kivezetés (4.8).
+  a szülőben maradnak (a két koinoban külön keretem van); a pénznél majd itt lesz a kivezetés (4.8).
 - **Beköltözés** (`Bekoltozes`, a gyermekben — a láncom első eseménye ott): `{ szulo, kikoltozes: <az>, lanc: { sorszam,
   azonosito, naplo } — a vágás előtti utolsó eseményem a szülőben és a láncom napló-gyökere ott; kiosztas: <gyökér> —
   amit hozok; tagsag: a vágáskori tagsági csomagom }`. Egyetlen aláírás, nem ezer.
@@ -196,7 +196,7 @@ tanúsítás-gyár rése nem nyílik vissza: a pillanatkép egyszeri.)*
   fogadó a kapun dönt. A szelet halmazának szabálya (`szeletEgyeztetes.js`) a kapuéval egyezik.
 - **Az első kitöltés:** a költöző készüléke a beköltözéskor a saját szeleteinek örökölt múltját a szülő tárából a gyermek
   tárába viszi, a kapun át (a terhe a vállalásával arányos); a később jövők a cserén kapják.
-- **A többi réteg** a koinó nevével sózott (a DHT-témák, a gyökér-darab, a kereső-régió) — a gyermeknek sajátjai vannak; az
+- **A többi réteg** a koino nevével sózott (a DHT-témák, a gyökér-darab, a kereső-régió) — a gyermeknek sajátjai vannak; az
   örökölt entitásokat a gyermekben újra kell indexelni (a kereső-bejegyzés két jelenlegi tag-tulajdonossal — a
   költözőkkel). A vállalás, a felderítés, az értesítés, a lánc-ellenőrzés a költözött láncon — mind az ⑤ lépés.
 - **A kézi út:** `koino "<név>" … szulo=<szülő>` (a gyermek születése) és `koltozes <gyermek> [fájl]` (a kiköltözés, a
@@ -212,17 +212,17 @@ Most csak a két fél szerkezete épül; a pénz mezői később hozzáadhatók,
 
 - **KZ1 — a paraméterek besorolása** (4.1 (a)–(e)). Javaslat: ahogy fent; a (b)-nél a medián bekötése külön lépés.
 - **KZ2 — ki hozhat létre gyermeket?** (A) aki a vágáskor a szülő tagja — ⭐ javaslat: ő ismeri a szülő múltját, és a
-  családfát nem szemetelheti tele egy kívülálló; ha nem tag, a születése önálló új koinó, szülő nélkül. (B) bárki (D13:
-  „bárki indíthat”) — az alapító úgysem kap hatalmat, de a belépő térben bárki „gyermeket” mutathatna bármely koinónak.
+  családfát nem szemetelheti tele egy kívülálló; ha nem tag, a születése önálló új koino, szülő nélkül. (B) bárki (D13:
+  „bárki indíthat”) — az alapító úgysem kap hatalmat, de a belépő térben bárki „gyermeket” mutathatna bármely koinonak.
 - **KZ3 — ha a hozott pontok nem férnek a gyermek keretébe** (kisebb `TUDATPONT_KERET`). (A) a beköltöző maga választ:
   elhagyni lehet, növelni nem, és a program felajánlja, mit hagyjon el — ⭐ javaslat („az e-ember utasítására”). (B)
   arányosan csökken — ehhez új számítás kellene, és nem az ő döntése. (C) a beköltözés érvénytelen, amíg nem fér.
 - **KZ4 — a hibajavítás, ami egy számítás eredményét változtatja** (amilyen a 133. elágazás össz-pontos javítása volt).
   (A) mindig költözés — ⭐ javaslat: ez következik a D118/2-ből és a 9. szabályból (különben a régi és az új program
-  ugyanabból más állapotot számol — a 15. mérés néma kettéhasadása); az ára, hogy egy élő koinóban minden ilyen javítás
+  ugyanabból más állapotot számol — a 15. mérés néma kettéhasadása); az ára, hogy egy élő koinoban minden ilyen javítás
   költözés — ezért a javításokat érdemes gyűjteni, és a költözés olcsó (egy aláírás fejenként). (B) programfrissítés,
-  kimondott eltéréssel — amíg mindenki frissít, a koinó kettéhasadva számol. (C) a születés egy „számítás-változatot” is
-  megnevez, amit a koinón belül lehet emelni — ez visszahozná a D9-et (ki emeli?), ezért nem javaslom.
+  kimondott eltéréssel — amíg mindenki frissít, a koino kettéhasadva számol. (C) a születés egy „számítás-változatot” is
+  megnevez, amit a koino-n belül lehet emelni — ez visszahozná a D9-et (ki emeli?), ezért nem javaslom.
 - **KZ5 — a protokoll-törés szabálya.** Javaslat: nem a költözés része — a költözés után külön átvizsgálás (pl. az új
   program egy ideig a régi protokollt is beszéli).
 
@@ -232,34 +232,34 @@ Most csak a két fél szerkezete épül; a pénz mezői később hozzáadhatók,
   vonalon és a lemezen, a tagsági csomag; és a gyermek első cseréje.
 - **83. mérés — a két réteg ára** (a ③ előtt): a múlt rétegének számítása szeletenként és nemzedékenként (a
   `kiszolgalasMeres.js` mintájára).
-- **A 15. mérés megismétlése** (az ① után, `verzioMeres.js`): ugyanaz az esemény-halmaz, eltérő szabály → **két koinó**,
+- **A 15. mérés megismétlése** (az ① után, `verzioMeres.js`): ugyanaz az esemény-halmaz, eltérő szabály → **két koino**,
   nem kettéhasadás; rontás: az állandó vissza a programba.
-- **A 3. szakasz lelete próbaként** (az ①-ben, bekötés-próba): a hamis születés a cserén → külön koinó, a valódi alapító
+- **A 3. szakasz lelete próbaként** (az ①-ben, bekötés-próba): a hamis születés a cserén → külön koino, a valódi alapító
   pontja számít; rontás: a régi névválasztás.
 
 ## 7. A javasolt építési sor
 
-1. **① A koinó neve a születés lenyomatából, a szabályok a születésben** — a 3. szakasz lelete ezzel zárul; minden koinót
-   érint. ✅ **①a a név (2026-10-24):** az új alakú születés koinó-mezője üres, a koinó neve a születés azonosítója
+1. **① A koino neve a születés lenyomatából, a szabályok a születésben** — a 3. szakasz lelete ezzel zárul; minden koinot
+   érint. ✅ **①a a név (2026-10-24):** az új alakú születés koino-mezője üres, a koino neve a születés azonosítója
    (`esemeny.js` `esemenyKoinoja`, `koinoSzuleteseE`, `koinoSzuleteseListabol` — a születés EGY szabállyal az állapotban, a
    tagságban, a kapuban, a vonalon és a belépő térben; a kapu elveti a lenyomat-nevet mondó születést), a `KOINO_AZONOSITO`
    helyi becenév (`becenevek.json`), `koino` (új alakban; argumentum nélkül a név), `csatlakoz <név>`, a `behoz` egyértelmű
-   fájlnál csatlakozik; a mappa a koinó neve. ✅ **①b a szabályok a születésben (2026-10-24, elágazás 194):** a 4.1 (a)
+   fájlnál csatlakozik; a mappa a koino neve. ✅ **①b a szabályok a születésben (2026-10-24, elágazás 194):** a 4.1 (a)
    csoportja és a (b) alapértéke a születés `szabalyok` mezőjében (`koinoSzabalyok.js`: `ALAP_SZABALYOK`, a határok,
    `szabalyokAlakiHibaja` — a kapu —, `koinoSzabalyai`, `teljesSzabalyok`); ⭐ a program az új születésbe MINDET kiírja
    (+206 B), így egy későbbi program alapértéke nem írhatja át — ⛔ az `ALAP_SZABALYOK` ezért soha nem változik (csak a régi
    alakú és a még meg nem érkezett születésre szól). A keret felső határa a mai 10 000 (a D106 kivétele erre van
-   levezetve), tehát a születés nélkül a kapu a legengedékenyebb. A számítás mindenütt a koinó számával: a szabály-réteg
+   levezetve), tehát a születés nélkül a kapu a legengedékenyebb. A számítás mindenütt a koino számával: a szabály-réteg
    (a keret mindkét vizsgálata, a kategória-korlát), a döntés (a küszöbök alapértéke, a lezárási pillanatkép és az
-   összegzés ellenőrzése), az identitás (a tanúsítás-szám, a felhatalmazás alapértéke — a nézet a tárból: a koinó neve a
+   összegzés ellenőrzése), az identitás (a tanúsítás-szám, a felhatalmazás alapértéke — a nézet a tárból: a koino neve a
    születés azonosítója), a lánc-gyökér (a gyorsítótár a kerethez kötött), a lánc-ellenőrzés, az ellentmondás, az
    észlelő, a vállalás, a művelet, a pakli és a parancssor (`koino "<név>" … tudatpontKeret=500 elfogadasiKuszob=66`).
    ⛔ A meghívó-szám NEM szabály (Csaba: „maradjon 1 egyelőre” — a 4.1 (c)). ⭐ A 15. mérés megismételve
-   (`eredmenyek.md` 15.): a régi alakú koinó a program-állandó átírásával kettéhasad, az új alakú nem — és a mérés egy
+   (`eredmenyek.md` 15.): a régi alakú koino a program-állandó átírásával kettéhasad, az új alakú nem — és a mérés egy
    hibát is talált (a keret második vizsgálata még az állandót nézte; javítva, próbával). ⚠️ A laptop–telefon
-   próba-koinója (`sajat`) így nem folytatható (régi alakú események is vannak benne) — a következő kézi próbához új koinó
+   próba-koinoja (`sajat`) így nem folytatható (régi alakú események is vannak benne) — a következő kézi próbához új koino
    kell, és a telefon frissítése.
-2. ✅ **② A gyermek születése** (szülő, vágás, zártság) **és a kapu koinó-szabálya**, a csere két névvel egy szeletben
+2. ✅ **② A gyermek születése** (szülő, vágás, zártság) **és a kapu koino-szabálya**, a csere két névvel egy szeletben
    (2026-10-24 — ②a és ②b, a 8. szakasz; elágazás 195–196).
 3. ✅ **③ A két réteg a számításban** (a múlt az ős szabályaival; a talaj; a lezárt és a nyitott döntések) — 2026-10-24, a 9.
    szakasz; elágazás 197; 83. mérés.
@@ -270,30 +270,30 @@ Most csak a két fél szerkezete épül; a pénz mezői később hozzáadhatók,
 6. ✅ **⑥ A felület** (a belépő tér családfája, „Költözés…” a fő menüben) — a 12. szakasz; elágazás 203. ⭐ **A KÖLTÖZÉS
    (D118) MEGÉPÜLT.**
 
-*Amit ez nem old meg:* a koinók egyesítését, a pénzt (csak a helyét), és a protokoll-törést (KZ5).
+*Amit ez nem old meg:* a koinok egyesítését, a pénzt (csak a helyét), és a protokoll-törést (KZ5).
 
 ## 8. A ② építési alakja (2026-10-24)
 
 A 4.2–4.3 és a 4.7 első pontja, a kódhoz igazítva. Két rész: **②a a gyermek születése** (és a születések lánca), **②b a
-kapu koinó-szabálya** (az ős vágás előtti eseményei a gyermek tárában és cseréjében). A számítás még NEM veszi őket
+kapu koino-szabálya** (az ős vágás előtti eseményei a gyermek tárában és cseréjében). A számítás még NEM veszi őket
 figyelembe — az a ③ (a két réteg); a ②-ben a gyermek állapota ugyanaz, mintha szülő nélkül született volna, csak a
 múltja már megérkezhet.
 
 **②a — a gyermek születése.** ✅ *(2026-10-24, elágazás 195 — `koinoLanc.js`; a próbák a `koinoLancProba.js`-ben és a
 parancssorban, 13 rontással.)*
-- A születés új mezői: `szulo` (a szülő koinó neve) és `szuloTagsag` — **a létrehozó tagsági bizonyítéka a szülőben**
+- A születés új mezői: `szulo` (a szülő koino neve) és `szuloTagsag` — **a létrehozó tagsági bizonyítéka a szülőben**
   (KZ2): a horgonya és a tagsági lánca a szülő eseményeiből (ugyanaz, amit a `TagsagiCsomag` visz), **a szülő születése
   nélkül** — arra a `szulo` mutat. ⭐ Így a születés mérete nem nő a nemzedékekkel (ha a szülő születése benne volna, az a
-  sajátját is hozná: egymásba ágyazva minden ős — egyetlen esemény, ami a koinó történetével nő, a 9. szabályba ütközik).
+  sajátját is hozná: egymásba ágyazva minden ős — egyetlen esemény, ami a koino történetével nő, a 9. szabályba ütközik).
 - **A kapu** (`esemenyMentese`): a gyermek születése csak akkor kerül a tárba, ha a szülő születése már ott van, és a
   bizonyíték megáll — a lánc minden eseménye hiteles és a szülőé, a horgony a létrehozóé, és a szülő születésével együtt
   tagságot ad; ⛔ és a zárt szülő gyermeke csak zárt lehet (D118/5 — a 4.2 szerint a kapu elveti). Ha a szülő születése
   még nincs meg, az elutasítás nem végleges: a csere legközelebb újra hozza (a lánc a gyökértől jön, lent).
-- **A születések lánca:** a gyermek születésétől a `szulo` mutatókon a gyökérig. A koinó születés-szelete
+- **A születések lánca:** a gyermek születésétől a `szulo` mutatókon a gyökérig. A koino születés-szelete
   (`KOINO_SZULETES_KULCS`, D96) mostantól a TELJES láncot hordozza, **a gyökértől** (így a fogadó kapuja a szülőt a
-  gyermek előtt kapja); a fogadó a lánc születéseit akkor veszi be, ha a koinója láncán vannak (a láncot a kapott
-  születésekből és a tárából együtt követi). A lánc a vállalás része (D90/2: a koinó születése mindenkié — a tömörítés
-  sem viheti el), és a kézi út (`kivisz` / `behoz`) is viszi; egy fájl koinója a lánc legfiatalabb tagja.
+  gyermek előtt kapja); a fogadó a lánc születéseit akkor veszi be, ha a koinoja láncán vannak (a láncot a kapott
+  születésekből és a tárából együtt követi). A lánc a vállalás része (D90/2: a koino születése mindenkié — a tömörítés
+  sem viheti el), és a kézi út (`kivisz` / `behoz`) is viszi; egy fájl koinoja a lánc legfiatalabb tagja.
 - **A létrehozás:** `koino "<név>" … szulo=<a szülő neve vagy becenéve>` — a készülék, ami a szülőben tag; ⭐ a gyermek a
   szülő SZABÁLYAIT örökli (ami nincs megadva, az a szülőé, nem a mai érték — a költözés célja jellemzően egy szabály
   változtatása), és a szülő zártságát (zárt szülőnél a `nyilt` hibát ad). A gyermek tárába a szülő születés-lánca is
@@ -308,15 +308,15 @@ parancssorban, 13 rontással.)*
   szerint** jönnek (a sorszám a pont alatt), nem az óra szerint — különben egy óra-csúszás a vágás utáni szülőbeli
   eseményét is beengedné, ugyanazzal a sorszámmal, mint a gyermekbeli folytatás (elágazás). Az óra a nem költözőké (4.3).
 
-**②b — a kapu koinó-szabálya** (4.3). ✅ *(2026-10-24, elágazás 196 — `koinoLanc.js` `koinoNezete`, `koinohozTartozik`; a
+**②b — a kapu koino-szabálya** (4.3). ✅ *(2026-10-24, elágazás 196 — `koinoLanc.js` `koinoNezete`, `koinohozTartozik`; a
 próbák a `koinoLancProba.js`-ben és a parancssorban, 6 rontással.)* Egy esemény a gyermek tárába tartozik, ha a gyermeké; vagy a lánc egy ősének
 születése; vagy egy ős eseménye a vágása előtt (`ido` ≤ annak a nemzedéknek a születése, amelyik tőle örökölt). Ez EGY
-segéd (`koinohozTartozik`), és mindenütt ezt hívja, ahol ma a koinó nevére szűrünk a hálózat és a kézi út kapujában
+segéd (`koinohozTartozik`), és mindenütt ezt hívja, ahol ma a koino nevére szűrünk a hálózat és a kézi út kapujában
 (`beolvasztas`) és a szelet halmazában (`szeletEgyeztetes.js` — a csere két névvel egy szeletben); ⚠️ a halmaz szabálya
 a kapuéval egyezik (különben két készülék minden cserében újraküldené, amit a másik elvet — a 40. mérés tanulsága). A
 kiköltözés kivétele (a vágás utáni, mégis kell) a ④-gyel jön.
 - ⭐ **A létrehozóé a lánc-pont szerint** (a sorszáma a gyermek születéséé alatt — a ②a-ból), mindenki másé az óra
-  szerint; több nemzedéknél minden ős a saját vágásáig (a tőle örökölt nemzedék születéséig). A nézet a koinó nevéből
+  szerint; több nemzedéknél minden ős a saját vágásáig (a tőle örökölt nemzedék születéséig). A nézet a koino nevéből
   következik (a lánc lenyomatokkal kötött): ha egyszer teljes, megmarad (`koinoNezete`).
 - ⚠️ **Ami még a név szerint szűr** (a ⑤-ben jön): az átmeneti tár (a kérelmek válaszai — egy ős-esemény oda bekerülhet, de
   az újranyitáskor kiesik), a számítás (`koinoEsemenyei` — szándékosan, a ③-ig), a lánc-ellenőrzés, az észlelő és a
@@ -338,7 +338,7 @@ hézagos — az ős születése nincs a jelen bemenetében —, ezért a bemondo
 
 A 4.4 a kódhoz igazítva. A számítás ma három fázis (`allapotSzamitasa` → `javaslatokSzamitasa` →
 `szerkesztesiEgyezmenyekAlkalmazasa`), és három helyen fut (a parancssor `kepetKeszit`-je, a pakli képe, egy művelet). A ③
-ezt EGY függvénybe foglalja (a koinó képe), ami a koinó-szabály (②b) szerinti bemenetet két rétegre bontja:
+ezt EGY függvénybe foglalja (a koino képe), ami a koino-szabály (②b) szerinti bemenetet két rétegre bontja:
 
 - **A múlt rétege (a talaj):** nemzedékenként, a gyökértől lefelé — az ős vágás előtti eseményei, **az ős szabályaival**, a
   vágás pillanatára számolva (és az ős saját múltjával, rekurzívan). Ebből a gyermekbe a **lezárt döntések** kerülnek át,
@@ -400,7 +400,7 @@ lépcső öröklése**. Előtte, a formátum után a 82. mérés (a két esemén
   `lanc.azonosito`, a sorszám annak +1-e — a lánc a vágásig közös, utána két ág: a szülőben a jelene, a gyermekben a
   beköltözés). A késő költöző a vágás utáni szülőbeli tevékenységét így nem hozza (4.5). ⭐ A tagsági bizonyíték a szülőben
   ugyanaz, mint a születésé (a lánc a szülő születése nélkül).
-- **A kapu:** a beköltözés csak a koinó születésével (a szülő neve egyezik) és a szülő születésével együtt — a bizonyíték
+- **A kapu:** a beköltözés csak a koino születésével (a szülő neve egyezik) és a szülő születésével együtt — a bizonyíték
   hiteles, a szülőé, a horgony a beköltözőé, tagságot ad (a vágáskor: a lánc eseményei a vágás előtt), a lánc-pont alakja
   rendben (`elozo`, sorszám). ⛔ A tagsági csomagban utazó beköltözést a csomag ellenőrzése is így nézi — különben egy hamis
   beköltözés egy csomagba csomagolva ingyen tagságot adna.
@@ -414,39 +414,39 @@ lépcső öröklése**. Előtte, a formátum után a 82. mérés (a két esemén
 
 ## 11. Az ⑤ építési alakja — a többi réteg a hozott entitásokra (2026-10-24)
 
-A ③–④ után a koinó KÉPE a költözőkkel számol, de a többi réteg még a koinó nevére szűrt: ami az ős láncából jött, azt nem
+A ③–④ után a koino KÉPE a költözőkkel számol, de a többi réteg még a koino nevére szűrt: ami az ős láncából jött, azt nem
 látta a gyermekhez tartozónak. Két részben: **⑤a a vállalás, a kereső-réteg és az átmeneti tár**, **⑤b a lánc** (a
 lánc-gyökér, a lánc-ellenőrzés, a folytonosság, a nem költöző lánca).
 
 ✅ *⑤a megépült (2026-10-24, elágazás 201).*
-- **A vállalás** (`vallalas.js`, `koino.js` `sajatJelenLancom`): a saját láncom a koinó jelen rétege szerint (`jelenSzuro` —
-  ugyanaz, mint a képben), és a más koinóé (hozott) pont-esemény a SZÁMÍTOTT összeggel (`pontEsemenyMerlege` `hozott`, mint a
+- **A vállalás** (`vallalas.js`, `koino.js` `sajatJelenLancom`): a saját láncom a koino jelen rétege szerint (`jelenSzuro` —
+  ugyanaz, mint a képben), és a más koinoé (hozott) pont-esemény a SZÁMÍTOTT összeggel (`pontEsemenyMerlege` `hozott`, mint a
   szabály-rétegben). Eddig a beköltöző a hozott gondolatait a gyermekben „nem tartod”-nak látta — a szigorú (b) alatt így
   nem is cserélte volna őket; a kisebb keretű gyermekben a szülőbeli bemondás (200 a 150-be) még a hozott pontokat is
   elvetette volna.
 - **A kereső-réteg** (`keresoTar.js` `bejegyzesTartalma`, `kereses.js` `helyTalalatai` / `talalatokEllenorzese`, `koino.js`
   `koinoOsei`): a hozott gondolat bejegyzése az ős eseményeit hordozza (a születését, a költözők pontjait) — a tartó, a
-  kereső-tár és a kérdező az ősök neveit is a koinóénak veszi (a születések láncából). A szerzők tagságát a ④b külön nézi (a
-  nem költöző nem tag a gyermekben, a bejegyzése így függő marad). Eddig minden hozott gondolat bejegyzése „más koinó
+  kereső-tár és a kérdező az ősök neveit is a koinoénak veszi (a születések láncából). A szerzők tagságát a ④b külön nézi (a
+  nem költöző nem tag a gyermekben, a bejegyzése így függő marad). Eddig minden hozott gondolat bejegyzése „más koino
   eseménye” volt — a 4.7 „újra kell indexelni” pontja így valósul meg: a költözők a gyermekben felajánlják.
-- **Az átmeneti tár** (`atmenetiTar.js`): az olvasás nem szűr a koinó nevére — a fájlba csak a kapun (a koinó-szabály
+- **Az átmeneti tár** (`atmenetiTar.js`): az olvasás nem szűr a koino nevére — a fájlba csak a kapun (a koino-szabály
   szerint) átjutott esemény kerül, és abban az ős vágás előtti eseménye is lehet (egy kérelem válasza). Eddig az újranyitáskor
   eltűnt.
 - *A próbák:* 3 modul-próba (a vállalás a kisebb kerettel és az elhagyással; a kereső-bejegyzés a tiszta ellenőrzésen, a
   kereső-tár útján és a kérdés két oldalán; az átmeneti tár újranyitva) és a ④b parancssor-próbája (B a gyermekben tartja a
   hozott gondolatát; a kereső-bejegyzését fájlban felajánlja, A a kereső-tárába veszi) — 8 rontással, mind bukik.
-- ⛔ *A teljes sor lelete (javítva):* ha a készülék még nem kapta meg a koinó születését (a vendég a csere előtt lép be), a
+- ⛔ *A teljes sor lelete (javítva):* ha a készülék még nem kapta meg a koino születését (a vendég a csere előtt lép be), a
   lánc üres, és a jelen szűrője üres láncnál MINDENT kizár — a vendég saját azonosság-szelete kiesett a vállalásából, és a
-  csak küldő út kézbesítése nem nyugtázódott (a D95/3 parancssor-próbája mérte). A vállalás ilyenkor a koinó saját
+  csak küldő út kézbesítése nem nyugtázódott (a D95/3 parancssor-próbája mérte). A vállalás ilyenkor a koino saját
   eseményeiből. ⚠️ Ugyanez a ③ óta a művelet bemondott összegében is (`muveletek.js` `sajatKiosztott` — a születés nélkül a
   korábbi pontjaim nem számítanak bele); a ⑤b `lancNezete`-je zárja.
-- ⚠️ *Ami az ⑤-ből a kód olvasása szerint már a ③–④-gyel kész (külön próbával még NEM mérve):* a gyökér-darab és a kereső-régió a koinó nevével sózott (a gyermeknek sajátja van —
+- ⚠️ *Ami az ⑤-ből a kód olvasása szerint már a ③–④-gyel kész (külön próbával még NEM mérve):* a gyökér-darab és a kereső-régió a koino nevével sózott (a gyermeknek sajátja van —
   a hozott gondolatok születése a gyermek gyökér-darabjaiba esik, mert a darab a gyermek gyökeréhez bejelentett születésekből
-  számol); a felderítés és az értesítés a koinó KÉPÉBŐL dolgozik (a pakli `koinoKepe`-t hív), tehát a hozott entitásokat látja.
+  számol); a felderítés és az értesítés a koino KÉPÉBŐL dolgozik (a pakli `koinoKepe`-t hív), tehát a hozott entitásokat látja.
 
 ✅ *⑤b megépült (2026-10-25, elágazás 202) — a három lelet (mérve 2026-10-24, a scratchpad `m5b.mjs` és `m5b_nem.mjs`),
 és az építés alakja:*
-- ⛔ **A költöző gyermekbeli eseményének nincs lánc-gyökere.** A lánc-gyökér (`lancGyoker.js` `allapotIg`) a koinó nevére
+- ⛔ **A költöző gyermekbeli eseményének nincs lánc-gyökere.** A lánc-gyökér (`lancGyoker.js` `allapotIg`) a koino nevére
   szűrve járja a láncot, a költöző lánca viszont a szülőbeli előtagjával kezdődik — az 1. sorszámon nem talál semmit
   („a saját lánc nem ép”), és null-t ír. A D81 önbizonyítása és a D98 lánc-ellenőrzése így a költözőkre nem működik: a
   lánc-ellenőrzés szerzői oldala (`lancFejtol`) ugyanígy szűr, nem felel.
@@ -459,9 +459,9 @@ lánc-gyökér, a lánc-ellenőrzés, a folytonosság, a nem költöző lánca).
   még nincs a gyermek tárában). Amikor a múlt megérkezik, a szülőbeli gondolata (szerkezet — a jelenben mindenkié) és a
   gyermekbeli eseménye ugyanazt a sorszámot viseli, és az elágazás-feloldás (a kisebb azonosító nyer) az egyiket eldobja —
   mérve: a gyermekbeli gondolata a pontjaival együtt eltűnt. Két készülék így más képet számolna (aki a múltat már látja, és
-  aki még nem). A lánc-vég (`lancVege`) ráadásul a tár legnagyobb sorszáma után folytatná, akármelyik koinóé.
-- ⭐ **Az alak (a 4.5 és a 4.6 következménye — „a beköltözés a láncom első eseménye ott”):** a szerző LÁNCA egy koinóban a
-  koinó saját eseményei, és ha költözött, az ős láncából hozott előtag (a lánc-pontja előtt — `lancbanVan`); a nem költöző
+  aki még nem). A lánc-vég (`lancVege`) ráadásul a tár legnagyobb sorszáma után folytatná, akármelyik koinoé.
+- ⭐ **Az alak (a 4.5 és a 4.6 következménye — „a beköltözés a láncom első eseménye ott”):** a szerző LÁNCA egy koinoban a
+  koino saját eseményei, és ha költözött, az ős láncából hozott előtag (a lánc-pontja előtt — `lancbanVan`); a nem költöző
   szülőbeli eseménye NEM a gyermekbeli lánca, csak a múlt szerkezete. Erre épül: a lánc-vég (a nem költöző gyermekbeli
   lánca 1-ről indul), az elágazás-feloldás és az idő-ellentmondás (a láncon kívüli ős-esemény külön ág, nem elágazás), a
   szabály-réteg folytonossága (a láncon lévő, de a jelenből kizárt esemény ismert, nem hézag), a lánc-gyökér (a napló a
@@ -472,17 +472,17 @@ lánc-gyökér, a lánc-ellenőrzés, a folytonosság, a nem költöző lánca).
 - ✅ **Az építés** (egy szabály — `koinoLanc.js` `lancbanVan`, `lancNezete`: `tagja` · `szamit` · `hozott` · `kulcs`): a
   lánc-vég (`esemenyTar.js` `ujSajatHelye` — a művelet és az író ELAVULT-ja is; a beköltözésé a saját adatából), a
   lánc-gyökér (`lancGyoker.js` `allapotIg` — a gyorsítótár a nézet kulcsához köt; `lancAllapotaLancbol` nézettel), a
-  művelet összege (`sajatKiosztott` — a folytonosság a láncon, a súly a jelen szerint), a vállalás (`szamit`), a koinó képe
+  művelet összege (`sajatKiosztott` — a folytonosság a láncon, a súly a jelen szerint), a vállalás (`szamit`), a koino képe
   (`ketReteg.js`: nemzedékenként a lánc-ág — `allapotSzamitas.js` `elagazasokFeloldasa`, `idoEllentmondasokKeresese`, a
   szabály-réteg láncai — és az ismert, de kizárt sorszámok: a szabály-réteg `ismertHezag`-a), a lánc-ellenőrzés két
   oldala (`szerzoNalam`, `lancFejtol`, a teljes kiosztás-lista a nézettel), és a `koltozes` őre a kiköltözés ELŐTT.
   *A próbák:* 4 modul-próba (a lánc-gyökér és a hazug bemondás tagsági csomaggal; a nem költöző lánca és a megérkező
   múltja; a születés nélküli lánc; a lánc-ellenőrzés a hozott előtagon) és a ④b parancssor-próbája (E nem költöző: a
   gyermekbeli belépése 1-es sorszámú — a szülőbeli múltja a gyermek tárában —, és nem költözhet; a kiköltözés sem történik
-  meg) — 13 rontással. ⛔ *Az építés két lelete:* a születés nélkül (a vendég a csere előtt) a lánc a koinó saját eseményei
+  meg) — 13 rontással. ⛔ *Az építés két lelete:* a születés nélkül (a vendég a csere előtt) a lánc a koino saját eseményei
   — a ③ óta a művelet bemondott összege ilyenkor a korábbi pontjaimat kihagyta (a ⑤a teljes sora a vállalásnál találta meg,
-  a ⑤b zárja a műveletben is); és a koinó SZÜLETÉSÉNEK helyét a hívó adja a tárral (a gyermeké a létrehozó szülőbeli
-  láncának vége után) — az első alakban a koinó láncán keresve 1-es sorszámot kapott, és a létrehozó hozott múltja nem jutott
+  a ⑤b zárja a műveletben is); és a koino SZÜLETÉSÉNEK helyét a hívó adja a tárral (a gyermeké a létrehozó szülőbeli
+  láncának vége után) — az első alakban a koino láncán keresve 1-es sorszámot kapott, és a létrehozó hozott múltja nem jutott
   át a kapun (a ④b próba mérte).
 - ⚠️ *Ami marad:* az elágazás- és a folytonosság-VÁD (`Ellentmondas`) a gyermekben csak a gyermek eseményeiről szólhat — a
   hozott előtagon (két szülőbeli esemény azonos sorszámon) a kapu ma nem fogad el bizonyítékot (a lánc-ellenőrzés ott
@@ -491,28 +491,28 @@ lánc-gyökér, a lánc-ellenőrzés, a folytonosság, a nem költöző lánca).
 
 ## 12. A ⑥ építési alakja — a felület (2026-10-25)
 
-✅ *Megépült (2026-10-25, elágazás 203).* A költözés a felületen két helyen jelenik meg, mindkettő koinós többlet (a
-prototípusban a koinó mint fogalom nem volt):
+✅ *Megépült (2026-10-25, elágazás 203).* A költözés a felületen két helyen jelenik meg, mindkettő koinos többlet (a
+prototípusban a koino mint fogalom nem volt):
 
-- **A tér családfája** (`ter.js`, `terNezet.js`): a koinó kártyáján „↑ a szülője” (a születéséből; a nevére kattintva oda
+- **A tér családfája** (`ter.js`, `terNezet.js`): a koino kártyáján „↑ a szülője” (a születéséből; a nevére kattintva oda
   lépünk — ha a szülő születése nincs a készüléken, halványan „nem ismert”, D19), „↓ a gyermekei” (a készüléken ismert
   gyermekek), és a költözéseim („🧳 ide költöztél”, „🧳 innen kiköltöztél ide: …”). ⛔ Lelet közben: a tér kártyája csak
   a belépést és a születést vette horgonynak — egy gyermekben a beköltözők kimaradtak a számokból, és a beköltöző a saját
   kártyáján „nem léptem be”-t látott; most a beköltözés is horgony (`tagsag.js` `HORGONY_TIPUSOK`).
-- **„🧳 Költözés…” a fő menüben** (`koinoKoltozes.js`): a mostani koinó ismert gyermekei, mindegyiknél: költözhetek-e (ha
+- **„🧳 Költözés…” a fő menüben** (`koinoKoltozes.js`): a mostani koino ismert gyermekei, mindegyiknél: költözhetek-e (ha
   nem, a program kimondott oka), a gyermek kerete, a hozott pontjaim a gondolatok címével, és ha nem férnek (KZ3), az
   elhagyandók jelölése — az összeg élőben frissül, a költözés gomb addig nem nyomható. A megerősítés kimondja, mi
   visszavonhatatlan, mi jön át és mi marad; a siker után a tér nyitható.
 - **A program oldala** (`koino.js`): a `koltozes` parancs törzse közös függvényekbe került (`koltozesElokeszitese` — semmit
   nem ír; `koltozesVegrehajtasa`; `koltozesElonezete` — a gyermekek a készüléken), a kapun `GET /api/koltozes` (az
   előnézet) és `POST /api/koltozes` (a költözés) — a parancs és a lap ugyanazt hívja. ⚠️ Költözni a saját (indításkori)
-  koinóból lehet (mint a felderítés). A többi koinó tára folyamatonként egyszer nyílik (`koinoTaraEgyszer` — a felület
-  aktív koinója és a költözés gyermeke ugyanazt kapja).
+  koinoból lehet (mint a felderítés). A többi koino tára folyamatonként egyszer nyílik (`koinoTaraEgyszer` — a felület
+  aktív koinoja és a költözés gyermeke ugyanazt kapja).
 - *A próbák:* 2 tér-próba (a családfa és a beköltöző a téren; a nem ismert szülő) és egy felület-próba (a lapról: az
   előnézet, a költözés, a lemez, a tér, a második kísérlet) — 5 rontással. ⭐ Böngészőben végigjárva (egy kisebb keretű
   gyermekkel: az elhagyás, a megerősítés, a siker, a tér, a gyermek paklija a hozott gondolattal és a szabad ponttal).
-- ⚠️ *Ami marad:* gyermeket létrehozni a felületről nem lehet (a koinó létrehozása ma egyáltalán parancs —
-  `koino "<név>" … szulo=…`); a tér „esemény” száma a koinó saját eseményei (a hozott múlt nélkül).
+- ⚠️ *Ami marad:* gyermeket létrehozni a felületről nem lehet (a koino létrehozása ma egyáltalán parancs —
+  `koino "<név>" … szulo=…`); a tér „esemény” száma a koino saját eseményei (a hozott múlt nélkül).
 
 ## 13. A kézi próba (Csaba, 2026-10-25) — laptop + telefon
 
@@ -537,13 +537,13 @@ lapján a szabad pont 20 (a 120-as keretből). **A költözés működik.** A pr
 2. ⚠️ **A gyermek nem fedezhető fel magától.** A telefon a gyermek 43 jeles nevét begépelte (`csatlakoz`), és a laptop
    gyermek-portját kézzel vette fel (`tars`); a szülő cseréje a gyermekek hírét nem viszi. A csatlakozás, a társ felvétele
    és a kézi csere ma csak parancs (a szülőnél is az volt). ⏸️ **Tervezési kérdés (Csabánál).**
-3. ⛔⛔ **Egy készülék két koinója: a gyermek magától nem cserél.** Minden koinónak külön őrjárat és port kell („egy
-   figyel = egy koinó”), a két őrjárat viszont a KÉSZÜLÉK kulcsával dolgozik, és a kopogás a TÁRSAT keresi: a telefon
-   gyermek-őrjárata a laptopot a szülő-portján (7373) érte el elsőként, ott „MÁSIK koinóé, nem cseréltünk” lett, és a
+3. ⛔⛔ **Egy készülék két koinoja: a gyermek magától nem cserél.** Minden koinonak külön őrjárat és port kell („egy
+   figyel = egy koino”), a két őrjárat viszont a KÉSZÜLÉK kulcsával dolgozik, és a kopogás a TÁRSAT keresi: a telefon
+   gyermek-őrjárata a laptopot a szülő-portján (7373) érte el elsőként, ott „MÁSIK koinoé, nem cseréltünk” lett, és a
    társ többi címét (a gyermek-port, 7375) már nem próbálta — fordítva ugyanígy. A kézi `csere` működött (az a megadott
    címre megy). A költözés tehát megtörténik, de utána a gyermek csak kézzel jut tovább. ⏸️ **Gyors javítás (a „MÁSIK
-   koinó” nem elérés, a kötés koinónként jegyzi a portot) vagy szerkezeti (egy őrjárat, egy port a készülék minden
-   koinójának) — Csabánál.**
+   koino” nem elérés, a kötés koinonként jegyzi a portot) vagy szerkezeti (egy őrjárat, egy port a készülék minden
+   koinojának) — Csabánál.**
 4. ⛔ **A zárt gyermekbe költözés utáni első csere félig visz.** A laptop zárt kapuja a csere ELEJÉN ítélte meg, hogy a
    telefon tag-e a gyermekben — még nem volt (a beköltözése épp abban a cserében jött), és a nem tagnak csak az azonosság-
    szelete ment át (a beköltözés és egy csak küldő esemény); a következő csere hozott mindent (mérve: 2:33 → 2:37).

@@ -9,12 +9,12 @@
 //
 // ===== HÁROM VÁLTOZÁS A PROTOTÍPUSHOZ KÉPEST =====
 //
-// 1. ⭐ **A JWT token helyett a KAPU JELSZAVA.** A **D15** szerint a koinóban nincs
+// 1. ⭐ **A JWT token helyett a KAPU JELSZAVA.** A **D15** szerint a koinoban nincs
 //    bejelentkezés: a személyazonosság a készülék kulcsa. A jelszó itt nem azonosít, csak
 //    azt bizonyítja, hogy a kérés a **saját gépről, a saját lapról** jön — hogy egy másik
 //    weboldal ne írhasson eseményt a te kulcsoddal (lásd `js/felulet/kapu.js`).
 //    ⚠️ *A koino kapuja változatlanul az `esemenyMentese` (3. szabály); ez a jelszó
-//    NEM biztonsági réteg a koinón belül.*
+//    NEM biztonsági réteg a koino-n belül.*
 // 2. A hiba-mezők közé bekerült a koino `hiba` mezője.
 // 3. ⭐ (D100, a ház) A `Pakli.js` prototípus-útvonalai a program útvonalaira fordulnak — lásd `apiGet`
 //    (a fordítás maga a `kartyaAdat.js`-é).
@@ -52,7 +52,7 @@ export function kapuKulcs() {
 // A `/api/pakli` válasza megmondja, melyik KÉPBŐL készült a lista (`horgony` + `most`), és
 // minden további kártya-kérésnek **ugyanabból** kell dolgoznia. Enélkül a kártya a mostani
 // állapotot mutatná: mást mondana, mint a lista, amiből megnyitották — és a program
-// gyorsítótára sem találna, tehát minden kattintás újraszámolná az egész koinót.
+// gyorsítótára sem találna, tehát minden kattintás újraszámolná az egész koinot.
 //
 // ⭐ MIÉRT ITT, ÉS NEM A KÁRTYÁKBAN? Mert a kártyák és a modálok **változatlanul jöttek át
 // a prototípusból**, és ez az érték maradjon is így. A prototípus teljes szerver-kapcsolata
@@ -197,7 +197,7 @@ async function apiPostFormData(utvonal, formData, token = null) {
 // ===================================
 // PATCH KÉRÉS (FORMDATA - FÁJLFELTÖLTÉS)
 // ===================================
-// Ugyanaz, PATCH metódussal — ⭐ D101: JSON-ra fordítva. ⚠️ A koinóban a besorolás SZERKESZTÉSE javaslat (a
+// Ugyanaz, PATCH metódussal — ⭐ D101: JSON-ra fordítva. ⚠️ A koinoban a besorolás SZERKESZTÉSE javaslat (a
 // `JavaslatModal` útja), a kapu ezért ezt az útvonalat nem szolgálja ki; a fordítás csak az egyformaságért van itt.
 // @param {string} utvonal - pl. 'kategoria/abc123'
 // @param {FormData} formData
@@ -262,7 +262,7 @@ function valaszHianyai(eredmeny) {
   return valaszMezoi(eredmeny, 'koinoHiany');
 }
 
-/** Egy válasz soraiban (a Síkidom gyerekei és ős-lánca, a Struktúra sorai) egy koinós mező — [entitás, érték] párok. */
+/** Egy válasz soraiban (a Síkidom gyerekei és ős-lánca, a Struktúra sorai) egy koinos mező — [entitás, érték] párok. */
 function valaszMezoi(eredmeny, nev) {
   const ki = [];
   if (!eredmeny || typeof eredmeny !== 'object') return ki;
@@ -340,7 +340,7 @@ async function apiDelete(utvonal, adatok, token = null) {
 // A backend a 'kep' mezőnevű fájlt várja (Multer konfig alapján).
 // @param {File} fajl - A feltöltendő képfájl
 // @param {string|null} token
-// ⭐⭐ A KOINÓBAN NEM `multipart/form-data`, HANEM BASE64 EGY JSON TESTBEN (5.7).
+// ⭐⭐ A KOINOBAN NEM `multipart/form-data`, HANEM BASE64 EGY JSON TESTBEN (5.7).
 //
 // ⛔ MIÉRT: az 5.5 harmadik őre szerint a kapu **csak `application/json` testet** fogad el,
 // mert a JSON tartalomtípus **kötelezővé teszi** a böngésző előellenőrzését (preflight),

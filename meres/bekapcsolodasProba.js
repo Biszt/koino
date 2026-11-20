@@ -1,10 +1,10 @@
 // meres/bekapcsolodasProba.js — ⭐⭐ D118 (a bekapcsolódás ④a): a bekapcsolódás
 //
 // Azt bizonyítja, hogy a szülő vágáskori tagja a bekapcsolódásával a gyermekbe viszi a súlyát és a tagságát: a bekapcsolódás a
-// szülőbeli láncát a vágás előtti utolsó eseménye után folytatja, és a tagsági bizonyítékát hozza; a kapu a koinó és a
-// szülő születésével ellenőriz (a nem tagot, a vágás utáni meghívást, a rossz lánc-pontot, a más koinóból jövőt, a hamis
+// szülőbeli láncát a vágás előtti utolsó eseménye után folytatja, és a tagsági bizonyítékát hozza; a kapu a koino és a
+// szülő születésével ellenőriz (a nem tagot, a vágás utáni meghívást, a rossz lánc-pontot, a más koinoból jövőt, a hamis
 // bizonyítékot elveti — a tagsági csomagba csomagolt hamis bekapcsolódást is); a gyermekben a bekapcsolódás tagsági horgony (D118/3);
-// a koinó képe a bekapcsolódásokból tudja, ki bekapcsolódott (a lánc-pontjával, és ami a bekapcsolódó elhagyott — KZ3 (A)); és a
+// a koino képe a bekapcsolódásokból tudja, ki bekapcsolódott (a lánc-pontjával, és ami a bekapcsolódó elhagyott — KZ3 (A)); és a
 // művelet bemondott összege ugyanezt számolja.
 
 import { mkdtemp } from 'node:fs/promises';
@@ -94,12 +94,12 @@ async function tarba(s, ...tobbi) {
 // 1. A KAPU
 // ===================================
 
-proba('⭐⭐ D118 (④a): a bekapcsolódás a kapun — a koinó és a szülő születésével átmegy; nélkülük nem (de nem végleg)', async () => {
+proba('⭐⭐ D118 (④a): a bekapcsolódás a kapun — a koino és a szülő születésével átmegy; nélkülük nem (de nem végleg)', async () => {
   const s = await bekapcsolodas();
   const ures = await ujTar(s.K.azonosito);
   const nincsKoino = await esemenyMentese(ures, s.bek);
   if (!(await esemenyMentese(ures, s.P)).mentve) return false;
-  const nincsKoino2 = await esemenyMentese(ures, s.bek);   // a szülő megvan, a koinó még nem
+  const nincsKoino2 = await esemenyMentese(ures, s.bek);   // a szülő megvan, a koino még nem
   const tar = await tarba(s);
   const jo = await esemenyMentese(tar, s.bek);
   return !nincsKoino.mentve && nincsKoino.hianyzik === true && !nincsKoino2.mentve && nincsKoino2.hianyzik === true
@@ -118,7 +118,7 @@ proba('⛔ D118 (④a): a kapu elveti a hamis bekapcsolódást — nem tag, a v�
     // (c) rossz lánc-pont: a bekapcsolódás nem a megnevezett esemény után folytat
     const c = await bekapcsolodas();
     const rosszPont = await c.B.elagaztat('Bekapcsolodas', { ...c.bek.adat, lanc: { sorszam: c.c.sorszam - 1, azonosito: c.p[3].azonosito } });
-    // (d) más szülőből: a bekapcsolódás egy másik koinót nevez meg szülőnek
+    // (d) más szülőből: a bekapcsolódás egy másik koinot nevez meg szülőnek
     const d = await bekapcsolodas();
     const masik = await bekapcsolodas();
     const masSzulo = await d.B.elagaztat('Bekapcsolodas', { ...d.bek.adat, szulo: masik.P.azonosito });
@@ -130,7 +130,7 @@ proba('⛔ D118 (④a): a kapu elveti a hamis bekapcsolódást — nem tag, a v�
       [await esemenyMentese(await tar(a), nemTag), /nem tagja a szülőnek/],
       [await esemenyMentese(await tar(b), b.bek), /vágás utáni/],
       [await esemenyMentese(await tar(c), rosszPont), /folytatja/],
-      [await esemenyMentese(await tar(d), masSzulo), /nem a koinó szülőjéből/],
+      [await esemenyMentese(await tar(d), masSzulo), /nem a koino szülőjéből/],
       [await esemenyMentese(await tar(e), atirt), /nem hiteles/]
     ];
     const ok = r.every(([m, minta]) => !m.mentve && minta.test(m.ok));
@@ -156,7 +156,7 @@ proba('⛔ D118 (④a): a tagsági csomagba csomagolt HAMIS bekapcsolódás nem 
   async () => {
     const s = await bekapcsolodas();
     const tar = await tarba(s);
-    // A jó: B tagsági csomagja a gyermekben (a lánca: a bekapcsolódása és a koinó születése).
+    // A jó: B tagsági csomagja a gyermekben (a lánca: a bekapcsolódása és a koino születése).
     const idx = tagsagiIndex([s.K, s.bek], s.K.azonosito);
     const lanc = tagsagiLanc(idx, s.bek.azonosito);
     const jo = await s.B.tesz(TAGSAGI_CSOMAG, { lanc }, undefined, { entitas: s.bek.azonosito });
@@ -192,7 +192,7 @@ proba('⭐⭐ D118 (④a): a bekapcsolódott súlya a képben — a hozott pontj
 
 // Rontás: a bekapcsolódás a szülőből „elviszi” a súlyt (a régi, áthelyező értelmezés: a szülőbeli pont 0-ra) → a szülőben Y és W
 // eltűnik → bukik; a szülőbeli későbbi esemény a gyermekbe is átszivárog → a gyermekben W 120 → bukik.
-proba('⭐⭐ D127 (KÖ3): a bekapcsolódó a SZÜLŐBEN megmarad — a pontjai ott élnek, a bekapcsolódás után írt szülőbeli eseménye is számít; a gyermekben a hozott (vágáskori) súlya — a két koinó párhuzamos',
+proba('⭐⭐ D127 (KÖ3): a bekapcsolódó a SZÜLŐBEN megmarad — a pontjai ott élnek, a bekapcsolódás után írt szülőbeli eseménye is számít; a gyermekben a hozott (vágáskori) súlya — a két koino párhuzamos',
   async () => {
     const s = await bekapcsolodas();
     const most = VAGAS + 30 * NAP;
@@ -422,7 +422,7 @@ proba('⭐⭐ D118 (⑤a): a vállalás a hozott entitásokra — a bekapcsolód
       && !regi.szeletek.has(el.W.azonosito) && !bemondassal.szeletek.has(el.W.azonosito);
   });
 
-proba('⭐ D118 (⑤a): a hozott entitás kereső-bejegyzése a gyermekben — az ősök eseményeivel elfogadott, nélkülük „más koinó eseménye”',
+proba('⭐ D118 (⑤a): a hozott entitás kereső-bejegyzése a gyermekben — az ősök eseményeivel elfogadott, nélkülük „más koino eseménye”',
   async () => {
     const A = await ujEember('');
     const P = await A.tesz('KoinoLetrehozas', { nev: 'Szülő', leiras: null, alapitok: [], zart: true, szabalyok: teljesSzabalyok() }, T0);
@@ -448,7 +448,7 @@ proba('⭐ D118 (⑤a): a hozott entitás kereső-bejegyzése a gyermekben — a
     const kerdes = { kerdes: 'közösségi', koino: K, most: T0 + 100 };
     const talal = helyTalalatai([{ ...b, m: null }], { ...kerdes, osok: new Set([P.azonosito]) });
     const ellenor = talalatokEllenorzese(talal, { ...kerdes, osok: new Set([P.azonosito]) });
-    const ok = vele.rendben === true && !nelkule.rendben && /más koinó/.test(nelkule.ok)
+    const ok = vele.rendben === true && !nelkule.rendben && /más koino/.test(nelkule.ok)
       && be.uj === true && kt.regioHalmaza(0, 0n).includes(be.azonosito) && !be2.uj && kt2.darab() === 0
       && talal.length === 1 && helyTalalatai([{ ...b, m: null }], kerdes).length === 0
       && ellenor.length === 1 && talalatokEllenorzese(talal, kerdes).length === 0;
@@ -470,7 +470,7 @@ proba('⭐ D118 (⑤a): az átmeneti tár az ős eseményét is megtartja (a ké
 // 8. ⭐⭐ ⑤b — A LÁNC A BEKAPCSOLÓDOTT LÁNCON
 // ===================================
 
-/** B láncának eseményei a koinóban (a hozott előtaggal), sorszám szerint. */
+/** B láncának eseményei a koinoban (a hozott előtaggal), sorszám szerint. */
 async function bLanca(tar, s) {
   const nezet = await lancNezete(tar, s.K.azonosito, s.B.kulcspar.keszulek);
   return { nezet, lanc: (await tar.lancEsemenyei(s.B.kulcspar.keszulek)).filter(nezet.tagja).sort((a, b) => a.sorszam - b.sorszam) };
@@ -536,7 +536,7 @@ proba('⛔⛔ D118 (⑤b): a NEM BEKAPCSOLÓDÓ gyermekbeli lánca 1-ről indul 
     return ok;
   });
 
-proba('⛔ D118 (⑤b): ha a koinó születése még NEM érkezett meg, a láncom a koinó saját eseményei — a bemondott összeg a korábbi pontjaimmal (a ③ óta az üres lánc jelen-szűrője mindent kizárt)',
+proba('⛔ D118 (⑤b): ha a koino születése még NEM érkezett meg, a láncom a koino saját eseményei — a bemondott összeg a korábbi pontjaimmal (a ③ óta az üres lánc jelen-szűrője mindent kizárt)',
   async () => {
     const A = await ujEember('');
     const P = await A.tesz('KoinoLetrehozas', { nev: 'Szülő', leiras: null, alapitok: [], zart: true,

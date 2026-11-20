@@ -118,7 +118,7 @@ export function rendezettBemenet(esemenyek) {
 export function elagazasokFeloldasa(esemenyek, lancAga = null) {
   const kulcsSzerint = new Map();      // "lánc|sorszam" → események (⭐⭐ D128: a lánc a készüléké)
   for (const e of esemenyek) {
-    // ⭐ D118 (⑤b): a lánc-ág szerint (a koinó képe adja) — a nem bekapcsolódó ős-eseménye külön ág, nem a gyermekbeli lánca.
+    // ⭐ D118 (⑤b): a lánc-ág szerint (a koino képe adja) — a nem bekapcsolódó ős-eseménye külön ág, nem a gyermekbeli lánca.
     const kulcs = (lancAga ? lancAga(e) : lancKulcsa(e)) + '|' + e.sorszam;
     if (!kulcsSzerint.has(kulcs)) kulcsSzerint.set(kulcs, []);
     kulcsSzerint.get(kulcs).push(e);
@@ -310,12 +310,12 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
   //    ugyanabból a halmazból ugyanazt a LISTÁT is kapja, nem csak ugyanazokat az értékeket.
   // ⭐ D85 T3: a döntési csomagok belső eseményei is a bemenet részei (azonosító szerint egyszer) — a
   // csak-G1-tartó így a G2-es rész bemenetét is látja, a G2 szeletének tartása nélkül.
-  // ⭐⭐ D128 (①d, 9.10): a KIZÁRT készülék vágás utáni eseményei (a fel nem sorolt koinóban mind) kiválnak — nem elágazások, nem
+  // ⭐⭐ D128 (①d, 9.10): a KIZÁRT készülék vágás utáni eseményei (a fel nem sorolt koinoban mind) kiválnak — nem elágazások, nem
   // vádak: nem a szerző eseményei. A vágás után a láncot az örökös folytatja (az ő eseményei maradnak). Kimondva (D19): `kizartak`.
   const { megmaradok: kizarasUtan, kizartak } = kizartakSzurese(rendezettBemenet(csomagokKibontasa(esemenyek)));
   const rendezettek = kizarasUtan;
 
-  // ⭐⭐ D118 (⑤b): a szerzők LÁNC-ÁGA és a láncon ismert, de a jelenből kizárt sorszámok (a koinó képe adja — `ketReteg.js`):
+  // ⭐⭐ D118 (⑤b): a szerzők LÁNC-ÁGA és a láncon ismert, de a jelenből kizárt sorszámok (a koino képe adja — `ketReteg.js`):
   // a nem bekapcsolódó ős-eseménye külön ág (nem elágazás, nem idő-visszalépés), és a kizárt esemény helye nem hézag.
   const lancAga = typeof beallitas.lancAga === 'function' ? beallitas.lancAga : null;
   const ismertSorszamok = beallitas.ismertSorszamok instanceof Map ? beallitas.ismertSorszamok : null;
@@ -325,11 +325,11 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
 
   // ----- NYERSANYAG-GYŰJTÉS -----
   const koinoAdatok = { nev: null, leiras: null };
-  // ⭐⭐ D118/2: a koinó születése EGY szabállyal (`koinoSzuleteseListabol` — a tagság, a kapu, a belépő tér ugyanezt
-  // hívja). ⛔ Eddig a rendezett sor UTOLSÓ születése írta felül a koinó adatait — egy második, azonos nevű születés így
-  // a koinó nevét és zártságát is átvette (a lelet).
+  // ⭐⭐ D118/2: a koino születése EGY szabállyal (`koinoSzuleteseListabol` — a tagság, a kapu, a belépő tér ugyanezt
+  // hívja). ⛔ Eddig a rendezett sor UTOLSÓ születése írta felül a koino adatait — egy második, azonos nevű születés így
+  // a koino nevét és zártságát is átvette (a lelet).
   const koinoSzuletes = koinoSzuleteseListabol(szamitok, beallitas.koino ?? null);
-  // ⭐⭐ D118/2 (①b): a koinó SZABÁLYAI a születéséből (ha nincs meg, a mai értékek) — a döntés, a pakli és a parancssor
+  // ⭐⭐ D118/2 (①b): a koino SZABÁLYAI a születéséből (ha nincs meg, a mai értékek) — a döntés, a pakli és a parancssor
   // innen veszi őket.
   koinoAdatok.szabalyok = koinoSzabalyai(koinoSzuletes);
   const letrehozasok = new Map();        // entitás azonosító → a létrehozó esemény
@@ -343,11 +343,11 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
       case 'KoinoLetrehozas':
         if (e !== koinoSzuletes) break;
         koinoAdatok.nev = e.adat.nev;
-        // ⭐ D90/2: a koinó születése mindenki vállalása — ehhez kell az azonosítója (`vallalas.js`).
+        // ⭐ D90/2: a koino születése mindenki vállalása — ehhez kell az azonosítója (`vallalas.js`).
         koinoAdatok.azonosito = e.azonosito;
-        // ⭐ D89/2: zárt, hacsak ki nem mondta, hogy nyílt (a mező nélküli régi koinó is zárt — D89/5).
+        // ⭐ D89/2: zárt, hacsak ki nem mondta, hogy nyílt (a mező nélküli régi koino is zárt — D89/5).
         koinoAdatok.zart = e.adat.zart !== false;
-        // ⭐ D93/5: a koinó kötelező profil-mezői (üres: nem vár profilt).
+        // ⭐ D93/5: a koino kötelező profil-mezői (üres: nem vár profilt).
         koinoAdatok.profil = Array.isArray(e.adat.profil) ? [...e.adat.profil] : [];
         koinoAdatok.leiras = e.adat.leiras ?? null;
         koinoAdatok.letrehozo = e.szerzo;
@@ -476,9 +476,9 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
   // nevét az esemény hozza (`adat.rendszer`), az azonosítót és a szülőt a névből számoljuk (`rendszerEntitas.js`), és a
   // felmenői is létrejönnek (a fa összefüggő, az ágazati pont a kézikönyv gyökeréig folyik). ⛔ A szövege itt NINCS (null): az
   // alap-tartalmat a mag nem kapja meg (különben minden új ⓘ „más számítás” lenne — D123); a lap rajzolja, amíg a közösség
-  // módosítással meg nem adja. Csak a kézikönyves koinóban (a születése viszi a szabályát — `koinoSzabalyok.js`).
+  // módosítással meg nem adja. Csak a kézikönyves koinoban (a születése viszi a szabályát — `koinoSzabalyok.js`).
   // A sorrend a nevek szerinti (determinisztikus), a születéssel bírók után.
-  // ⭐⭐ A KOINON (Csaba, 2026-11-19): minden kézikönyv-entitáson 1 passzív pont a koinóné — így a D14 rá is vonatkozik, kivétel
+  // ⭐⭐ A KOINON (Csaba, 2026-11-19): minden kézikönyv-entitáson 1 passzív pont a koinoné — így a D14 rá is vonatkozik, kivétel
   // nélkül (`rendszerEntitas.js` `KOINON`); a koinon nem szavaz, a részvétel nevezőjébe nem számít (a döntés a pont-eseményekből számol).
   if (kezikonyvesE(koinoAdatok.szabalyok)) {
     const nevek = new Set();
@@ -581,7 +581,7 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
 
   const elfelejtettek = [];
   for (const [azonosito, entitas] of entitasok) {
-    // ⭐⭐ D129 (MA4 (B)): a kézikönyv-entitást nem kell kivenni — 1 pontja mindig van, a koinóné (fent); a közösség módosítása
+    // ⭐⭐ D129 (MA4 (B)): a kézikönyv-entitást nem kell kivenni — 1 pontja mindig van, a koinoné (fent); a közösség módosítása
     // így pont nélkül is megmarad (a kézikönyv szeletét ezért mindenki tartja — `vallalas.js`).
     if (entitas.osszesPont <= 0) {
       // ⭐⭐ B/2 (D75/4): A D14 CSAK A TARTÓS TÁRRA VONATKOZIK. Ha az entitást csak az átmeneti tárból
@@ -643,7 +643,7 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
     pontEsemenyek,
     // Szabályt sértő események (keret, jogosultság) — szintén jelzés, nem büntetés (D19)
     kivetelek,
-    // ⭐⭐ D128 (①d): a kizárt készülék eseményei (a vágás után — a fel nem sorolt koinóban mind) — nem számítanak, kimondva.
+    // ⭐⭐ D128 (①d): a kizárt készülék eseményei (a vágás után — a fel nem sorolt koinoban mind) — nem számítanak, kimondva.
     kizartak: kizartak.map((e) => ({ azonosito: e.azonosito, szerzo: e.szerzo, keszulek: e.keszulek, sorszam: e.sorszam,
       tipus: e.tipus })),
     // ⚠️ A HARMADIK KATEGÓRIA: az esemény SZÁMÍT, csak valamit nem tudtunk ellenőrizni
