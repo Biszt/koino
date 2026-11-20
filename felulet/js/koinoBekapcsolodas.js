@@ -95,7 +95,7 @@ export async function bekapcsolodasMegnyitasa({ terMegnyitasa = null } = {}) {
     }
     const gyermekek = elonezet?.gyermekek ?? [];
     tartalom.innerHTML = '<p class="koino-bekapcsolodas__leiras">A bekapcsolódással egy gyermekébe is belépsz — ebben a koinóban megmaradsz, a '
-      + 'teljes súlyoddal (a kettő párhuzamos). A gyermek a szülőre épül (a múlt közös), és ott a súlyt a bekapcsolódó hozza (D127). '
+      + 'teljes súlyoddal (a kettő párhuzamos). A gyermek a szülőre épül (a múlt közös), és ott a súlyt a bekapcsolódó hozza. '
       + 'Csak a készüléken ismert gyermekek látszanak.</p>'
       + (elonezet?.megjegyzes ? '<p class="koino-megjegyzes">' + html(elonezet.megjegyzes) + '</p>' : '')
       + (gyermekek.length ? gyermekek.map(gyermekSora).join('')

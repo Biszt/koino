@@ -48,7 +48,7 @@ GondolatKartya.prototype._fejlecFeltoltese = function (cimSav, masodikSor, ...to
     const jel = document.createElement('span');
     jel.className = 'koino-nezet-jel';
     jel.textContent = '🧩 nézet';
-    jel.title = 'A közösség egy feltöltött nézete — a kódja a „🧩 Kód” fülön olvasható; a saját készülékeden kapcsolod be (D126).';
+    jel.title = 'A közösség egy feltöltött nézete — a kódja a „🧩 Kód” fülön olvasható; a saját készülékeden kapcsolod be.';
     masodikSor.insertBefore(jel, masodikSor.firstChild);
   }
   return ertek;

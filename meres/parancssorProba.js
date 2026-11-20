@@ -6197,8 +6197,10 @@ proba('⭐ ÁTHELYEZÉSI javaslat a lapról — és a gyökérre helyezés is (`
     if (javaslat.allapot !== 200) return false;
 
     // ⭐ A hierarchikus rendezésben a gyerek a szülője alá kerül. ⭐⭐ D129: a lapos fában a kézikönyv ága is ott van (az ágak
-    // sorrendje az azonosítóké) — a lap elég nagy, hogy a két gondolat biztosan rajta legyen.
-    const oldal = await hiv('/api/pakli?darab=' + (10 + KEZIKONYV_DB) + '&rendezes=hierarchikus');
+    // sorrendje az azonosítóké) — ⛔ eddig a lapot a kézikönyv méretével nagyítottuk, de egy lap legfeljebb `MAX_DARAB` (100):
+    // a 115 bejegyzéses kézikönyv mellett a két gondolat a következő lapra csúszott (a ④ lezáró teljes sora fogta meg). Most a
+    // SZÜLŐ ágára szűkítve kérdezünk (a kártya menüjének Rendezése is így kér) — a kézikönyv méretétől függetlenül.
+    const oldal = await hiv('/api/pakli?darab=10&rendezes=hierarchikus&agazat=' + szulo.adat.data._id);
     const k = oldal.adat.kartyak.find((x) => x.cim === 'A GYEREK');
     return k?.szulo === szulo.adat.data._id;
   } finally {

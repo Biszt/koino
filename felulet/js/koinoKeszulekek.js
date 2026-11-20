@@ -77,7 +77,7 @@ function felvetelHtml(f, kezelo) {
 function papirHtml(p) {
   if (!p) return '';
   const sorok = [p.el ? 'A papírod él (a csere-kulcs — vele cserélheted a kulcsodat, ha ellopják).'
-    : 'A papírodat visszavontad — a helyreállítás a segítőidé (D128 17. pont).'];
+    : 'A papírodat visszavontad — a helyreállítás a segítőidé.'];
   if (p.fajlGepen) sorok.push('⚠ A csere-kulcs fájlja még a gépen van: vidd papírra (node koino.js papir), és töröld innen.');
   if (p.intelem) sorok.push(p.intelem);
   return '<h4>A papír</h4><ul class="koino-keszulekek__papir">' + sorok.map((s) => '<li>' + html(s) + '</li>').join('') + '</ul>';

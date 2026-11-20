@@ -52,7 +52,7 @@ GondolatKartya.prototype._fejlecFeltoltese = function (cimSav, masodikSor, ...to
     const jel = document.createElement('span');
     jel.className = 'koino-verzio-jel';
     jel.textContent = '🧬 koino-verzió';
-    jel.title = 'Egy gyermek-koinó születése és a programja — a „Kód” fülön a teljes kód ellenőrizhető (D119).';
+    jel.title = 'Egy gyermek-koinó születése és a programja — a „Kód” fülön a teljes kód ellenőrizhető.';
     masodikSor.insertBefore(jel, masodikSor.firstChild);
   }
   return ertek;
@@ -136,7 +136,7 @@ async function kodFulBetoltese(elem, kartya) {
   const magban = new Set(a.mag?.utak ?? []);
   if (!a.jegyzek) {
     elem.innerHTML = fej + '<p class="koino-megjegyzes">A kód jegyzéke még nem jött meg erre a készülékre. A kód a kártya '
-      + 'vállalóitól jön (D84/1): ha pontot teszel a kártyára, a csere elhozza.</p>';
+      + 'vállalóitól jön: ha pontot teszel a kártyára, a csere elhozza.</p>';
     return;
   }
   elem.innerHTML = fej + '<div class="koino-kod__keres"></div><ul class="koino-kod__lista">' + fajlok.map((f) => '<li><button type="button" class="koino-kod__fajl"'
@@ -233,8 +233,8 @@ export async function koinoVerzioMegnyitasa({ terMegnyitasa = null } = {}) {
     const sz = szuloSzabalyai();
     const ki = (x) => (folyamatban || megerosites ? ' disabled' : '') + x;
     tartalom.innerHTML = '<p class="koino-verzio-urlap__leiras">A koino-verzió egy gyermek-koinó: a „' + html(elo.nev ?? '?')
-      + '” koinóra épül (a múlt közös, a súlyt a bekapcsolódó hozza — D118), a saját szabályaival, és a kódja a te FUTÓ programod — a '
-      + 'kártyája „Kód” fülén bárki ellenőrizheti (D119).</p>'
+      + '” koinóra épül (a múlt közös, a súlyt a bekapcsolódó hozza), a saját szabályaival, és a kódja a te FUTÓ programod — a '
+      + 'kártyája „Kód” fülén bárki ellenőrizheti.</p>'
       + '<label class="koino-verzio-urlap__mezo">A gyermek neve <input type="text" data-mezo="nev" maxlength="200" value="'
       + html(ertekek.nev) + '"' + ki('') + '></label>'
       + '<label class="koino-verzio-urlap__mezo">Leírás (miért kell ez a verzió?) <textarea data-mezo="leiras" rows="3"'
@@ -244,7 +244,7 @@ export async function koinoVerzioMegnyitasa({ terMegnyitasa = null } = {}) {
       + '"' + ki('') + '></label>'
       + '<label class="koino-verzio-urlap__jelolo"><input type="checkbox" data-mezo="nyilt"' + (ertekek.nyilt ? ' checked' : '')
       + (elo.zart ? ' disabled' : ki('')) + '> nyílt (bárki olvashatja, aki eljut egy tagjához)' + (elo.zart
-        ? ' — <em>zárt szülőnek csak zárt gyermeke lehet (D118/5)</em>' : '') + '</label>'
+        ? ' — <em>zárt szülőnek csak zárt gyermeke lehet</em>' : '') + '</label>'
       + '<fieldset class="koino-verzio-urlap__szabalyok"><legend>A szabályai (a szülőé az alap — amit átírsz, az lesz más)</legend>'
       + Object.keys(SZABALY_NEVEK).filter((k) => k in sz).map((k) => '<label class="koino-verzio-urlap__szabaly">'
         + html(SZABALY_NEVEK[k]) + ' <input type="number" data-szabaly="' + k + '" value="' + (ertekek.szabalyok[k] ?? sz[k]) + '"'

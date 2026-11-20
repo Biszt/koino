@@ -459,7 +459,122 @@
     {
       "nev": "kezikonyv/fogalom",
       "cim": "A fogalomtár",
-      "szoveg": "A fogalomtár a koinó szavait magyarázza egy helyen: mi az e-ember, a tudatpont, a gondolat, a javaslat, az egyezmény, a küszöb, a bizonyossági mutató, a társ, a csere, az őrjárat, a készülék, a kezelő és a papír."
+      "szoveg": "A fogalomtár a koinó szavait magyarázza egy helyen — röviden; a részleteket a kézikönyv többi fejezete mondja el. Lent, a „Részei” között egy-egy fogalomra koppintva olvashatod."
+    },
+    {
+      "nev": "kezikonyv/fogalom/e-ember",
+      "cim": "e-ember",
+      "szoveg": "Aki a koinóban tag. Nem „felhasználó”: egyszerre tulajdonos, fejlesztő, moderátor és felelős — a koinót a tagjai irányítják, központi szereplő nélkül. Egy e-embernek egy azonossága van (egy kulcs), és ehhez több készüléke tartozhat."
+    },
+    {
+      "nev": "kezikonyv/fogalom/koino",
+      "cim": "koinó",
+      "szoveg": "Egy közösség közös tere: a gondolatai, javaslatai, egyezményei, és a szabályai, amelyekkel született (például a tudatpont-keret és az alap-küszöbök). Nincs központja: a tagok készülékei együtt tartják, darabokban, egymással cserélve. A neve a görög koinón — „közös”."
+    },
+    {
+      "nev": "kezikonyv/fogalom/tudatpont",
+      "cim": "tudatpont",
+      "szoveg": "Mindenkinek ugyanannyi van (a koinó kerete — alapból 10 000). Nem költődik el: szétosztod a kártyák között, és bármikor átrendezheted. Azt fejezi ki, mi fontos neked — NEM szavazaterő: a szavazásnál mindenki egyenlő.\n\nAmin senki nem tart tudatpontot, azt a koinó elfelejti; amin pontod van, azt a készüléked őrzi."
+    },
+    {
+      "nev": "kezikonyv/fogalom/gondolat",
+      "cim": "gondolat",
+      "szoveg": "A koinó alapegysége: egy cím és egy szöveg (képekkel, fájlokkal, hivatkozásokkal), egy szülő alatt — így áll össze a koinó fája. Lehet típusa (gondolattípus) és legfeljebb három kategóriája."
+    },
+    {
+      "nev": "kezikonyv/fogalom/kategoria",
+      "cim": "kategória",
+      "szoveg": "A gondolatok besorolása, mint egy címke; alkategóriái is lehetnek. A kategória is a közösségé: tudatpont kell rá, és javaslattal módosítható."
+    },
+    {
+      "nev": "kezikonyv/fogalom/gondolattipus",
+      "cim": "gondolattípus",
+      "szoveg": "Megmondja, milyen fajta egy gondolat: kérdés, válasz, témakör, ismeret, feladat — vagy amit a közösség kitalál. A gondolattípus is a közösségé: tudatpont kell rá, és javaslattal módosítható."
+    },
+    {
+      "nev": "kezikonyv/fogalom/javaslat",
+      "cim": "javaslat",
+      "szoveg": "Egy kártya megváltoztatásának kezdeményezése: módosítás, áthelyezés, törlés, egyesítés — vagy ezek csomagja. Az tehet javaslatot, akinek tudatpontja van a kártyán, és azok szavaznak róla, akiknek ott pontjuk van. A javaslat maga is kártya: pont nélkül elfelejtődne."
+    },
+    {
+      "nev": "kezikonyv/fogalom/ertek-javaslat",
+      "cim": "érték javaslat",
+      "szoveg": "KÜLÖN fogalom — nem javaslat! Egy e-ember véleménye egy gondolat küszöbeiről (mekkora támogatottság és részvétel kell, mennyi legyen a legrövidebb és a leghosszabb döntési idő). Nincs róla szavazás: a gondolat küszöbe a rajta pontot tartók érték javaslatainak középértéke (mediánja)."
+    },
+    {
+      "nev": "kezikonyv/fogalom/egyezmeny",
+      "cim": "egyezmény",
+      "szoveg": "Egy elfogadott javaslat eredménye: a változás végrehajtódik, az egyezmény pedig megőrzi a tényt — mi változott, mi volt előtte (a „Lecserélt gondolat”), és hogyan szavaztak. Senki nem „mondja ki”: minden készülék ugyanazokból az aláírt eseményekből ugyanazt számolja ki."
+    },
+    {
+      "nev": "kezikonyv/fogalom/kuszob",
+      "cim": "küszöb",
+      "szoveg": "Gondolatonként négy szám: a támogatottsági és a részvételi küszöb, a legrövidebb és a leghosszabb döntési idő. Ezek döntik el, mikor fogadnak el egy javaslatot. Ha senki nem adott be érték javaslatot, a koinó alap-küszöbe érvényes."
+    },
+    {
+      "nev": "kezikonyv/fogalom/bizonyossagi-mutato",
+      "cim": "bizonyossági mutató",
+      "szoveg": "Az eredmény egyértelműségének (a támogatók és az ellenzők arányának különbsége) és a részvételnek az átlaga. Minél nagyobb, annál hamarabb zárul a javaslat — a legrövidebb és a leghosszabb döntési idő között."
+    },
+    {
+      "nev": "kezikonyv/fogalom/kulonvalas",
+      "cim": "különválás",
+      "szoveg": "Aki egy szavazásnál külön ágat kér, annak a döntés nem veszi el az álláspontját: ha a döntés másképp alakul, az ő változata új ágként megmarad, a tudatpontjaival. A két ágat a kártya „Másik ág” füle köti össze."
+    },
+    {
+      "nev": "kezikonyv/fogalom/pakli",
+      "cim": "pakli",
+      "szoveg": "A kártyák egymásra tett sora a lapon: a kiválasztott kártya alatt a felmenői, fölötte a legerősebb gyerekeinek lánca, oldalt a testvér-jelzők."
+    },
+    {
+      "nev": "kezikonyv/fogalom/keszulek",
+      "cim": "készülék",
+      "szoveg": "Egy gép — telefon, laptop —, amin a koinód fut. Egy e-embernek több készüléke is lehet: mind ugyanaz az azonosság, és mindegyik a saját láncát írja a koinóban."
+    },
+    {
+      "nev": "kezikonyv/fogalom/kezelo",
+      "cim": "kezelő",
+      "szoveg": "A készülékeid közül az, amelyiken az azonosságod kulcsa van: csak ott vehetsz fel új készüléket, és csak ott zárhatsz ki egy régit. A többi felvett készülékeden ugyanúgy gondolkodhatsz, tudatpontot oszthatsz és szavazhatsz."
+    },
+    {
+      "nev": "kezikonyv/fogalom/papir",
+      "cim": "papír",
+      "szoveg": "A végső mentőöv: egy csere-kulcs papíron (vagy pendrive-on), amivel visszaszerezheted az azonosságodat, ha a kezelő készüléked elveszik vagy ellopják. A gépen ne tartsd."
+    },
+    {
+      "nev": "kezikonyv/fogalom/tars",
+      "cim": "társ",
+      "szoveg": "Egy másik készülék, amellyel a tiéd cserél. A társakon keresztül ismeri meg a koinó többi részét és a többi tagot; a program a meghívóból és a hálózatról magától talál társakat."
+    },
+    {
+      "nev": "kezikonyv/fogalom/csere",
+      "cim": "csere",
+      "szoveg": "Két készülék összeveti, mit tud a koinóról, és átadja egymásnak, ami a másiknál hiányzik — az aláírt eseményeket. Az aláírás miatt nem kell megbízni abban, akitől kapod: a program maga ellenőrzi, hogy azt kapta-e, amit a szerzője aláírt."
+    },
+    {
+      "nev": "kezikonyv/fogalom/orjarat",
+      "cim": "őrjárat",
+      "szoveg": "A program háttér-köre (alapból ötpercenként): felkeresi a társakat és cserél velük, elkéri a hiányzó részeket, végzi a felderítéseket, és számolja az értesítéseket — akkor is, ha a lap zárva van, amíg a koinó fut."
+    },
+    {
+      "nev": "kezikonyv/fogalom/szelet",
+      "cim": "szelet és tartó",
+      "szoveg": "A koinót a készülékek darabokban tartják: az események kártyánként szeletekbe rendeződnek. A készüléked azokat a szeleteket tartja (és adja tovább a társainak), amelyeken tudatpontod van — a kézikönyvét mindenki. Egy szelet tartója az a készülék, amelyiknél megvan."
+    },
+    {
+      "nev": "kezikonyv/fogalom/koinon",
+      "cim": "koinon",
+      "szoveg": "A közösség közös tárhelye. Ma a kézikönyv minden bejegyzésén tart egy passzív tudatpontot — ezért a kézikönyv akkor sem felejtődik el, ha senki nem tart rajta pontot. A terv szerint később az elfogadott közös egyezményeket is ő őrzi, darabokban, sok készüléken. A koinon nem szavaz, és nem javasol."
+    },
+    {
+      "nev": "kezikonyv/fogalom/mag",
+      "cim": "a számítás magja",
+      "szoveg": "A programnak az a része, amelyik a koinó állapotát az eseményekből kiszámolja. Ha két készülék magja eltér, ugyanabból a koinóból más jöhet ki — ezért a koinó a születésekor megnevezi a magját, és a lap kimondja, ha a készüléked más maggal fut."
+    },
+    {
+      "nev": "kezikonyv/fogalom/gyermek-koino",
+      "cim": "gyermek-koinó",
+      "szoveg": "Egy koinóból születő új koinó (koino-verzió): más szabályokkal vagy más programmal. A szülő tagjai bekapcsolódhatnak, és a pontjaikat — amennyi a gyermek keretébe fér — magukkal vihetik; a szülőben közben megmaradnak."
     }
   ]
 }

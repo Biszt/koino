@@ -11940,7 +11940,7 @@ try {
               if (modszer === 'GET') {
                 const pf = postafiokAlakja(await tarolo.postafiokOlvas());
                 return { adat: { success: true, adatok: beallitasok.globalis,
-                  koinoMegjegyzes: 'A koinóban a levél helyett a készüléked saját értesítése jön (felugró értesítés — D103):'
+                  koinoMegjegyzes: 'A koinóban a levél helyett a készüléked saját értesítése jön (felugró értesítés):'
                     + ' ugyanazokról, amiket kipipáltál, amikor a koino fut (a felület vagy az őrjárat).'
                     + (pf.kezbesites.hiba ? ' ⚠️ Legutóbb nem sikerült: ' + pf.kezbesites.hiba + '.' : '') } };
               }

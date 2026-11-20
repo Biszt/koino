@@ -226,3 +226,19 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   programot a lap kimondja, nem tiltja — TK3; a kártyáról telepíthető); a program ablaka nem azt mondja, „mikor telepítetted”, hanem a
   futó program és a magja lenyomatát, és az utolsó telepítés eredményét. Böngészőben hét ablak ⓘ-je a helyén (a telepítés
   előnézete koino-verzió kártya nélkül nem nyitható — ugyanaz a cím-alapú hely, mint a többié). Az alap-tartalom 92 bejegyzés.
+- **2026-11-20** — ✅ **a ④d: a fogalomtár.** 23 fogalom, mindegyik saját bejegyzés a „Fogalomtár” fejezet alatt (a buborék
+  „Részei” között koppintható): az e-ember, a koinó, a tudatpont, a gondolat, a kategória, a gondolattípus, a javaslat, az érték
+  javaslat (KÜLÖN fogalom), az egyezmény, a küszöb, a bizonyossági mutató, a különválás, a pakli, a készülék, a kezelő, a papír, a
+  társ, a csere, az őrjárat, a szelet és a tartó, a koinon, a számítás magja, a gyermek-koinó. Röviden (2–4 mondat) — a részleteket
+  a kézikönyv többi, a kódból ellenőrzött bejegyzése mondja; a fogalmak a projekt kötelező terminológiája szerint. A koinonnál a mai
+  állapot (a kézikönyv pontja) és külön a terv (a közös egyezmények darabos őrzése — a D130). Az alap-tartalom 115 bejegyzés.
+- **2026-11-20** — ✅ **a belső kódok a látható szövegekből** (a ③-ban feljegyzett „D128 17. pont”): nyolc felületi szöveg
+  (`koinoBekapcsolodas.js`, `koinoKeszulekek.js`, `koinoNezet.js`, `koinoVerzio.js` — a kártya-jelek címkéi, a magyarázó
+  bekezdések) és a program egy lapra küldött megjegyzése (`koino.js` — a levél helyett a készülék értesítése) már nem mond
+  döntés-számot. ⚠️ A parancssor kiírásaiban és a súgójában maradtak (a fejlesztőnek szólnak).
+- **2026-11-20** — ✅ **a ④ lezárva — a teljes sor:** 1532/1534 zöld + 2 ismert hiba. ⛔ **Lelet (amit a megbeszélt rend a ④
+  végére várt):** a kézikönyv növekedése elmozdított egy próbát — a parancssor „ÁTHELYEZÉSI javaslat a lapról” próbája a lapos
+  fát a kézikönyv méretével nagyított lapon kérte, de egy lap legfeljebb 100 kártya (`MAX_DARAB`): 115 bejegyzés mellett a két
+  gondolat a következő lapra csúszott (magában is bukott — nem szeszély). A program helyes; a próba most a szülő ágára szűkítve
+  kérdez (a kártya menüjének Rendezése is így), a kézikönyv méretétől függetlenül. A másik bukás a csere ismert, terhelés alatti
+  „lezárás 5×” próbája (magában zöld). ⏭️ Az ⑤ (a felület próbája) — Csaba döntésére.
