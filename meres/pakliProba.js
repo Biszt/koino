@@ -1744,6 +1744,72 @@ proba('⭐ D101 ③: a program sorait a prototípus fa-elrendezője (`faElrendez
   return helyez(egesz) === 5 && helyez(ag, f.A1) === 2;
 });
 
+// ⭐ Csaba (2026-11-20): „síkidom nézetben is mutatni kéne a leszármazottak számát, akárcsak a kártyák fejlécében, ugyanazzal az
+// ikonnal. a testvérek számát is.” — a Síkidom sorai a kártya számait hozzák (`koinoSzamok`, EGY forrás). Rontás: a sor nem hozza
+// → bukik.
+proba('⭐ a Síkidom sorai a leszármazottak és a testvérek számát is hozzák — ugyanazt, mint a kártya fejléce (egy forrás)', async () => {
+  const f = await kisFa();
+  const a = await sikidomGyerekek(f.tar, KOINO, { szulo: f.A });
+  const gyoker = await sikidomGyerekek(f.tar, KOINO, {});
+  const lanc = await sikidomOslanc(f.tar, KOINO, { entitas: f.A11 });
+  const kartyan = async (az) => (await pakliHierarchia(f.tar, KOINO, { entitas: az })).pakli.find((k) => k.azonosito === az)?.szamok;
+  const sor = (r, az) => (r.gyerekek ?? r.oslanc).find((x) => x.entitasId === az)?.koinoSzamok;
+  const ugyanaz = async (r, az) => JSON.stringify(sor(r, az)) === JSON.stringify(await kartyan(az));
+  const r = {
+    a: sor(gyoker, f.A)?.leszarmazott === 3 && sor(gyoker, f.A)?.testver === 1 && await ugyanaz(gyoker, f.A),
+    a1: sor(a, f.A1)?.leszarmazott === 1 && sor(a, f.A1)?.testver === 1 && await ugyanaz(a, f.A1),
+    lanc: sor(lanc, f.A11)?.leszarmazott === 0 && await ugyanaz(lanc, f.A11)
+  };
+  if (!Object.values(r).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ r, a: sor(gyoker, f.A), k: await kartyan(f.A) }) + ')\n');
+  return Object.values(r).every(Boolean);
+});
+
+// ⭐ Csaba (2026-11-20): a szerkesztési javaslat ötszögében a „Modositas” feliratú korong helyett „a cím mezőjébe, a cím után
+// legyen egy ikon, a javaslat típusának megfelelően” — és a síkidom alján a számok sávja. A rajzoló bájtra a prototípusé; a
+// `koinoModalok.js` írja körül. Egy rögzítő vásznon mérve (node alatt). Rontás: a cím nem kapja meg az ikont → bukik; a korong
+// marad → bukik; a sáv nem a kártya jeleit írja → bukik.
+proba('⭐ a síkidomon a javaslat típusa a CÍM UTÁN áll (✏️ a módosításé, 📢 az általános javaslaté) — a korong nincs —, és alul a számok sávja (▾ … · ↔ …, a hiány halványan)', async () => {
+  const volt = { location: Object.getOwnPropertyDescriptor(globalThis, 'location'), document: Object.getOwnPropertyDescriptor(globalThis, 'document') };
+  globalThis.location = { search: '?kulcs=proba', origin: 'http://127.0.0.1:7600' };
+  globalThis.document = { addEventListener() {}, querySelector() { return null; }, getElementById() { return null; },
+    querySelectorAll() { return []; }, documentElement: {} };
+  try {
+    await import('../felulet/js/koinoModalok.js');
+    const { SikidomRajzolo } = await import('../felulet/js/utils/sikidomRajzolo.js');
+    const { sikidomSzamokRajzolasa } = await import('../felulet/js/koinoFelderitetlen.js');
+    const irasok = [];
+    let korongok = 0;
+    const vaszon = new Proxy({}, { get: (_, n) => (n === 'measureText' ? (t) => ({ width: String(t).length * 7 })
+      : n === 'fillText' ? (t) => irasok.push(String(t)) : n === 'arc' ? () => { korongok++; } : () => {}), set: () => true });
+    const r = Object.create(SikidomRajzolo.prototype);
+    r.rajzolo = vaszon;
+    r._kepernyoMeret = 2000;
+    r._feliratSzinErtek = '#000';
+    const kep = { kepX: 500, kepY: 500, kepSugar: 200 };
+    r.cimkeRajzolasa({ id: 'j', entitasTipus: 'Javaslat', cim: 'ÚJ CÍM', javaslatTipus: 'Modositas' }, kep);
+    r.cimkeRajzolasa({ id: 'a', entitasTipus: 'Javaslat', cim: 'AZ ELV', javaslatTipus: 'Allaspont' }, kep);
+    r.cimkeRajzolasa({ id: 'g', entitasTipus: 'Gondolat', cim: 'GONDOLAT' }, kep);
+    const cimek = [...irasok];
+    irasok.length = 0;
+    r.mellekIkonokRajzolasa({ id: 'j', entitasTipus: 'Javaslat', cim: 'ÚJ CÍM', javaslatTipus: 'Modositas', kategoriaIkonok: [] }, kep);
+    const korongNelkul = korongok === 0 && !irasok.includes('Modositas');
+    irasok.length = 0;
+    sikidomSzamokRajzolasa(vaszon, kep, { leszarmazott: 12, leszarmazottHiany: 3, leszarmazottLegalabb: false, testver: 4,
+      testverHiany: null }, 1);
+    const sav = irasok.join('');
+    const e = {
+      cim: cimek.some((t) => t.includes('ÚJ CÍM ✏️')) && cimek.some((t) => t.includes('AZ ELV 📢'))
+        && cimek.some((t) => t === 'GONDOLAT'),
+      korong: korongNelkul,
+      sav: sav === '▾ 12 +3  ·  ↔ 4 +?'
+    };
+    if (!Object.values(e).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ e, cimek, sav, korongok }) + ')\n');
+    return Object.values(e).every(Boolean);
+  } finally {
+    for (const [n, d] of Object.entries(volt)) { if (d) Object.defineProperty(globalThis, n, d); else delete globalThis[n]; }
+  }
+});
+
 // ===================================
 // ⭐⭐ D101 ④: A SÍKIDOM — egy szülő gyerekei egy küszöb fölött, és az ős-lánc
 // ===================================

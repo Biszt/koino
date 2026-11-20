@@ -744,20 +744,7 @@ export async function pakliHierarchia(tar, koino, beallitas = {}) {
   // ⭐ D116: a felderítetlen rész — a kártyák jele és a testvér-jelző
   const hianya = felderitetlenTudas(entitasok, osszPontok, { tartott, gyokerTeljes, tudas: beallitas.fejlecTudas ?? new Map(),
     gyerekek });
-  // ⭐ (Csaba, 2026-10-23): a kártya MINDIG mutatja a leszármazottak és a testvérek ismert számát, és mellette, ami még nincs
-  // meg — nem csak a hiányt. A testvérek a szülő gyerekei (a gyökér-szintűeké a gyökér szintje) önmaga nélkül; ha a szülő nem
-  // ismert, a testvérekről nem tudunk (null).
-  const kartyaSzamai = (az) => {
-    const sz = hianya.szamok(az);
-    const szulo = entitasok.get(az)?.szulo ?? null;
-    const p = szulo && !entitasok.has(szulo) ? null : hianya.szamok(szulo ?? GYOKER);
-    return {
-      leszarmazott: sz.ismertAlatta, leszarmazottHiany: sz.alatta, leszarmazottOsszes: sz.osszesAlatta,
-      leszarmazottLegalabb: sz.legalabb,
-      testver: p ? Math.max(0, p.ismertGyerek - 1) : null, testverHiany: p ? p.gyerek : null,
-      testverOsszes: p ? p.osszesGyerek : null
-    };
-  };
+  const kartyaSzamai = (az) => leszarmazottEsTestverSzamok(hianya, entitasok, az);
   // ⭐ Az erősebb előbb, holtversenyben az azonosító (mint a kérelem fejléceinél — egy sorrend). ⭐⭐ D129 (Csaba, 2026-11-19:
   // „ugyan úgy kell rendezni a rendszer entitás típusú kártyákat is, mint az többit”): a kézikönyv kártyáira is ugyanez — nincs
   // külön szabály.
@@ -1497,13 +1484,35 @@ async function sikidomAlap(tar, koino, beallitas = {}) {
   return { kep, agazati, t, mindentTart: !tartottak, hianya };
 }
 
-/** Egy entitás Síkidom-sora (a prototípus `sikidomService` alakja): a Struktúra sora + van-e gyereke. */
+/**
+ * ⭐ (Csaba, 2026-10-23): a leszármazottak és a testvérek ismert száma, és mellette, ami még nincs meg — nem csak a hiány. A
+ * testvérek a szülő gyerekei (a gyökér-szintűeké a gyökér szintje) önmaga nélkül; ha a szülő nem ismert, a testvérekről nem
+ * tudunk (null). EGY forrás a kártya fejlécének és (Csaba, 2026-11-20: „síkidom nézetben is mutatni kéne a leszármazottak
+ * számát, akárcsak a kártyák fejlécében, ugyanazzal az ikonnal. a testvérek számát is”) a síkidomnak.
+ * @param {Function} hianya - `felderitetlenTudas` (a `.szamok`-kal)
+ * @param {Map} entitasok
+ * @param {string} az
+ */
+function leszarmazottEsTestverSzamok(hianya, entitasok, az) {
+  const sz = hianya.szamok(az);
+  const szulo = entitasok.get(az)?.szulo ?? null;
+  const p = szulo && !entitasok.has(szulo) ? null : hianya.szamok(szulo ?? GYOKER);
+  return {
+    leszarmazott: sz.ismertAlatta, leszarmazottHiany: sz.alatta, leszarmazottOsszes: sz.osszesAlatta,
+    leszarmazottLegalabb: sz.legalabb,
+    testver: p ? Math.max(0, p.ismertGyerek - 1) : null, testverHiany: p ? p.gyerek : null,
+    testverOsszes: p ? p.osszesGyerek : null
+  };
+}
+
+/** Egy entitás Síkidom-sora (a prototípus `sikidomService` alakja): a Struktúra sora + van-e gyereke + a számok. */
 function sikidomSora(e, s) {
   const { szuloId, ...sor } = strukturaSora(e, s.agazati, s.kep.entitasok, s.kep.javaslatok);
   const az = e.azonosito;
   const gy = s.t.tudasa(az)?.gy;
   return { ...sor, vanGyereke: s.t.ismertek(az).length > 0 || (Number.isSafeInteger(gy) && gy > 0)
-    || (!s.t.teljes(az) && s.t.hatar(az) > 0), koinoHiany: s.hianya(az) };
+    || (!s.t.teljes(az) && s.t.hatar(az) > 0), koinoHiany: s.hianya(az),
+    koinoSzamok: leszarmazottEsTestverSzamok(s.hianya, s.kep.entitasok, az) };
 }
 
 /**

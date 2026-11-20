@@ -30,7 +30,8 @@ import GondolatModal from './components/modals/GondolatModal.js';
 import KategoriaModal from './components/modals/KategoriaModal.js';
 import GondolatTipusModal from './components/modals/GondolatTipusModal.js';
 import { kuszobMezokKitoltese } from './components/modals/kuszobErtekMezok.js';
-import { strukturaHianyJelolese, sikidomHianyRajzolasa } from './koinoFelderitetlen.js';
+import { strukturaHianyJelolese, sikidomHianyRajzolasa, sikidomSzamokRajzolasa } from './koinoFelderitetlen.js';
+import { SikidomRajzolo } from './utils/sikidomRajzolo.js';
 import { apiGet } from './utils/apiHelper.js';
 
 // ===================================
@@ -128,6 +129,13 @@ function hianyokFeljegyzese(parok) {
   while (hianyok.size > HIANY_KORLAT) hianyok.delete(hianyok.keys().next().value);
 }
 document.addEventListener('koino:hiany', (e) => hianyokFeljegyzese(Array.isArray(e.detail) ? e.detail : []));
+
+// ⭐ (Csaba, 2026-11-20): a leszármazottak és a testvérek száma a síkidomon is (`koinoSzamok` — a sorokból, ugyanígy feljegyezve).
+const szamok = new Map();
+document.addEventListener('koino:szamok', (e) => {
+  for (const [az, sz] of Array.isArray(e.detail) ? e.detail : []) { szamok.delete(az); szamok.set(az, sz); }
+  while (szamok.size > HIANY_KORLAT) szamok.delete(szamok.keys().next().value);
+});
 
 // ===================================
 // ⭐ A TUDATPONTOK (D101, az I. csoport)
@@ -264,14 +272,36 @@ koruleIr(SikidomModal, '_osLancFelfuzese', function () {
   sikidomMegjegyzesKirajzolasa(this);
 });
 
-// ⭐ D116: a jel a síkidomokon — a prototípus menetei UTÁN, ugyanazokon az alakzatokon, amiket épp kirajzolt.
+// ⭐ D116: a jel a síkidomokon — a prototípus menetei UTÁN, ugyanazokon az alakzatokon, amiket épp kirajzolt. ⭐ (Csaba,
+// 2026-11-20): ahol a leszármazottak és a testvérek száma ismert, a sáv azt mondja (a kártya fejlécének jeleivel — „▾ 12 +3 ·
+// ↔ 4”), és a felderítetlen részt („+3”) magában foglalja; ahol nem, marad a D116 jele.
 koruleIr(SikidomModal, '_rajzolas', function () {
-  if (!this.kontextus || !hianyok.size) return;
+  if (!this.kontextus || (!hianyok.size && !szamok.size)) return;
   for (const { cs, kep } of this._utolsoLathatoak ?? []) {
-    const h = hianyok.get(String(cs?.id));
-    if (h) sikidomHianyRajzolasa(this.kontextus, kep, h, this.rajzolo?.halvanyodas?.(kep.kepSugar) ?? 1);
+    const az = String(cs?.id);
+    const lathatosag = this.rajzolo?.halvanyodas?.(kep.kepSugar) ?? 1;
+    if (szamok.has(az) && sikidomSzamokRajzolasa(this.kontextus, kep, szamok.get(az), lathatosag)) continue;
+    const h = hianyok.get(az);
+    if (h) sikidomHianyRajzolasa(this.kontextus, kep, h, lathatosag);
   }
 });
+
+// ⭐ A SZERKESZTÉSI ÉS AZ ÁLTALÁNOS JAVASLAT TÍPUSA A SÍKIDOMON (Csaba, 2026-11-20: „a módosítási javaslat, ami egy 5 szög,
+// tartalmaz egy kört, módosítás felirattal. az nem kell, hanem a cím mezőjébe, a cím után legyen egy ikon, a javaslat típusának
+// megfelelően”). Az örökölt rajzoló a típust (`javaslatTipus` — a nyers „Modositas”) a mellék-ikonok közé tette, egy korongba;
+// ⭐ itt a korong kimarad, és az ikon a cím után áll, a cím kártyáján belül. Az ikonok a Struktúra nézetéi (`StrukturaModal.js`),
+// az általános javaslaté (álláspont) a 📢. A rajzoló bájtra a prototípusé marad (a metódusait itt írjuk körül).
+const JAVASLAT_TIPUS_IKON = { Torles: '🗑️', Modositas: '✏️', Egyesites: '🔗', Athelyezes: '➡️', Csomag: '📦', Allaspont: '📢' };
+function rajzoloKorulirasa(metodus, atalakit) {
+  const eredeti = SikidomRajzolo.prototype[metodus];
+  if (typeof eredeti !== 'function' || eredeti.koinoKorulirva) return;
+  const uj = function (cs, ...ervek) { return eredeti.call(this, cs ? atalakit(cs) : cs, ...ervek); };
+  uj.koinoKorulirva = true;
+  SikidomRajzolo.prototype[metodus] = uj;
+}
+rajzoloKorulirasa('cimkeRajzolasa', (cs) => (cs.javaslatTipus && JAVASLAT_TIPUS_IKON[cs.javaslatTipus]
+  ? { ...cs, cim: ((cs.cim ?? '').trim() + ' ' + JAVASLAT_TIPUS_IKON[cs.javaslatTipus]).trim() } : cs));
+rajzoloKorulirasa('mellekIkonokRajzolasa', (cs) => (cs.javaslatTipus ? { ...cs, javaslatTipus: null } : cs));
 
 // ===================================
 // ⭐ A KERESÉS (D101 ⑤)

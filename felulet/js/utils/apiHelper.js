@@ -249,6 +249,9 @@ async function apiGet(utvonal, token = null) {
   // ezt a mezőt, a `koinoModalok.js` veszi át (az esemény viszi, a modál adat-útja érintetlen).
   const hianyok = valaszHianyai(eredmeny);
   if (hianyok.length) document.dispatchEvent(new CustomEvent('koino:hiany', { detail: hianyok }));
+  // ⭐ (Csaba, 2026-11-20): a leszármazottak és a testvérek száma a síkidomon is — a sorok `koinoSzamok`-ja, ugyanígy.
+  const szamok = valaszMezoi(eredmeny, 'koinoSzamok');
+  if (szamok.length) document.dispatchEvent(new CustomEvent('koino:szamok', { detail: szamok }));
   // Metódus vég log
   console.log('apiHelper.apiGet - VÉGE', { utvonal });
   return eredmeny;
@@ -256,11 +259,16 @@ async function apiGet(utvonal, token = null) {
 
 /** ⭐ D116: egy válasz soraiban a `koinoHiany` mezők — [entitás, hiány] párok (a sor nélküli válasznál üres). */
 function valaszHianyai(eredmeny) {
+  return valaszMezoi(eredmeny, 'koinoHiany');
+}
+
+/** Egy válasz soraiban (a Síkidom gyerekei és ős-lánca, a Struktúra sorai) egy koinós mező — [entitás, érték] párok. */
+function valaszMezoi(eredmeny, nev) {
   const ki = [];
   if (!eredmeny || typeof eredmeny !== 'object') return ki;
   for (const mezo of ['gyerekek', 'oslanc', 'sorok']) {
     for (const sor of Array.isArray(eredmeny[mezo]) ? eredmeny[mezo] : []) {
-      if (sor && sor.entitasId != null && 'koinoHiany' in sor) ki.push([String(sor.entitasId), sor.koinoHiany ?? null]);
+      if (sor && sor.entitasId != null && nev in sor) ki.push([String(sor.entitasId), sor[nev] ?? null]);
     }
   }
   return ki;

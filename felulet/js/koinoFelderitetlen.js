@@ -72,10 +72,10 @@ export function kartyaSzamokJelolese(dom, sz) {
   const sor = dom.querySelector('.pakli-kartya__ikon-sor--tudatpont');
   if (!sor) return;
   const elemek = [];
+  const rovid = szamokRovidAlakja(sz);
   // ----- a leszármazottak -----
-  if (Number.isSafeInteger(sz.leszarmazott)) {
-    const hiany = sz.leszarmazottHiany > 0 ? '+' + szam(sz.leszarmazottHiany) + (sz.leszarmazottLegalabb ? '…' : '')
-      : sz.leszarmazottLegalabb ? '+?' : null;
+  if (rovid.leszarmazott) {
+    const hiany = rovid.leszarmazott.hiany;
     const felirat = 'Leszármazottak (az ága alatt): ' + szam(sz.leszarmazott) + ' ismert ezen a készüléken'
       + (sz.leszarmazottHiany > 0
         ? '; a tartója szerint ' + (sz.leszarmazottLegalabb ? 'legalább ' : '') + szam(sz.leszarmazottOsszes)
@@ -85,8 +85,8 @@ export function kartyaSzamokJelolese(dom, sz) {
     elemek.push(szamElem('▾', sz.leszarmazott, hiany, felirat));
   }
   // ----- a testvérek -----
-  if (Number.isSafeInteger(sz.testver)) {
-    const hiany = sz.testverHiany > 0 ? '+' + szam(sz.testverHiany) : sz.testverHiany === null ? '+?' : null;
+  if (rovid.testver) {
+    const hiany = rovid.testver.hiany;
     const felirat = 'Testvérek: ' + szam(sz.testver) + ' ismert ezen a készüléken'
       + (sz.testverHiany > 0
         ? '; a tartó szerint a szülőnek ' + szam(sz.testverOsszes) + ' gyereke van — még nem ismert testvér: '
@@ -98,6 +98,73 @@ export function kartyaSzamokJelolese(dom, sz) {
   for (const elem of elemek) {
     if (elotte) { elotte.insertAdjacentElement('afterend', elem); elotte = elem; } else sor.appendChild(elem);
   }
+}
+
+/**
+ * A számok rövid alakja — EGY szabály a kártya fejlécének és a síkidomnak: az ismert szám, és ami még nincs meg („+N”, „+N…”,
+ * ha legalább ennyi, „+?”, ha nem tudjuk; null, ha mind megvan).
+ * @param {Object|null} sz - `koinoSzamok`
+ * @returns {{leszarmazott: {ismert: number, hiany: string|null}|null, testver: {ismert: number, hiany: string|null}|null}}
+ */
+export function szamokRovidAlakja(sz) {
+  if (!sz || typeof sz !== 'object') return { leszarmazott: null, testver: null };
+  return {
+    leszarmazott: Number.isSafeInteger(sz.leszarmazott) ? { ismert: sz.leszarmazott,
+      hiany: sz.leszarmazottHiany > 0 ? '+' + szam(sz.leszarmazottHiany) + (sz.leszarmazottLegalabb ? '…' : '')
+        : sz.leszarmazottLegalabb ? '+?' : null } : null,
+    testver: Number.isSafeInteger(sz.testver) ? { ismert: sz.testver,
+      hiany: sz.testverHiany > 0 ? '+' + szam(sz.testverHiany) : sz.testverHiany === null ? '+?' : null } : null
+  };
+}
+
+/**
+ * ⭐ A SÍKIDOM SZÁMAI (Csaba, 2026-11-20: „síkidom nézetben is mutatni kéne a leszármazottak számát, akárcsak a kártyák
+ * fejlécében, ugyanazzal az ikonnal. a testvérek számát is.”): a síkidom alján egy sávban „▾ 12 +3 · ↔ 4 +?” — a kártya
+ * jelei, a hiány halványabban. Ugyanott, ahol a D116 jele állt (`sikidomHianyRajzolasa`), és azt magában foglalja (a „+N” a
+ * felderítetlen rész) — ahol a számok ismertek, a hívó ezt rajzolja helyette.
+ * @param {CanvasRenderingContext2D} c
+ * @param {{kepX: number, kepY: number, kepSugar: number}} kep
+ * @param {Object} sz - `koinoSzamok`
+ * @param {number} [lathatosag]
+ * @returns {boolean} rajzolt-e
+ */
+export function sikidomSzamokRajzolasa(c, kep, sz, lathatosag = 1) {
+  const r = szamokRovidAlakja(sz);
+  if (!c || (!r.leszarmazott && !r.testver) || !(kep?.kepSugar * 2 >= 60) || lathatosag <= 0.05) return false;
+  const betu = Math.max(10, Math.min(16, kep.kepSugar * 0.18));
+  // [szöveg, halvány-e] darabok
+  const darabok = [];
+  if (r.leszarmazott) {
+    darabok.push(['▾ ' + szam(r.leszarmazott.ismert), false]);
+    if (r.leszarmazott.hiany) darabok.push([' ' + r.leszarmazott.hiany, true]);
+  }
+  if (r.testver) {
+    if (darabok.length) darabok.push(['  ·  ', true]);
+    darabok.push(['↔ ' + szam(r.testver.ismert), false]);
+    if (r.testver.hiany) darabok.push([' ' + r.testver.hiany, true]);
+  }
+  c.save();
+  c.font = `600 ${betu.toFixed(0)}px sans-serif`;
+  c.textAlign = 'left';
+  c.textBaseline = 'middle';
+  const szelessegek = darabok.map(([t]) => c.measureText(t).width);
+  const teljes = szelessegek.reduce((a, b) => a + b, 0);
+  const sz0 = teljes + betu * 0.9;
+  const m = betu * 1.5;
+  const y = kep.kepY + kep.kepSugar * 0.78;
+  c.globalAlpha = lathatosag * 0.9;
+  c.fillStyle = 'rgba(247, 243, 236, 0.85)';
+  c.beginPath();
+  c.rect(kep.kepX - sz0 / 2, y - m / 2, sz0, m);
+  c.fill();
+  let x = kep.kepX - teljes / 2;
+  darabok.forEach(([t, halvany], i) => {
+    c.fillStyle = halvany ? '#a3988b' : '#6b5f52';
+    c.fillText(t, x, y);
+    x += szelessegek[i];
+  });
+  c.restore();
+  return true;
 }
 
 /** Egy szám a tudatpont-sor stílusában (mint az ágazati pont), a hiány halványan mellette. */
