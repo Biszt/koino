@@ -1,6 +1,6 @@
 # A magyarázat-réteg (D129) — a kézikönyv és az ⓘ jelek
 
-*A döntés: [`fejlesztesi_terv_fazis2.md`](fejlesztesi_terv_fazis2.md) D129 (Csaba, 2026-11-19 — MA1–MA8). Ez a dokumentum az
+*A döntés: [`fejlesztesi_terv_fazis2.md`](fejlesztesi_terv_fazis2.md) D129 (Csaba, 2026-11-19 — MA1–MA8; 2026-11-20 — MA9). Ez a dokumentum az
 építés terve és naplója.*
 
 ## 1. Röviden
@@ -189,3 +189,23 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   egy koppintás az alakzatra FÓKUSZÁL, a dupla koppintás a paklit oda viszi (a ④a ezt tévesen kivette; az örökölt súgó-sor
   „koppintás: adatlap”-ja elavult — a fájl bájtra azonos, nem írjuk át). ③ A Struktúra nem behúzásos lista, hanem rajzolt fa
   (csomópontok, élek; a nagyítással egyre több részlet), és a kerete 5000 csomópont. Mindhárom szöveg kijavítva.
+- **2026-11-20** — ⭐⭐ **MA9 — a küszöb-mezők alapértéke az új gondolat, kategória és gondolattípus ablakában** (Csaba: „rendben,
+  legyen a (B)”). ⛔ A lelet (a ④c kódolvasása): az ablak a négy küszöb-mezőt a PROTOTÍPUS alapértékeivel töltötte ki (51 %, 51 %,
+  0 mp, 1 év — `kuszobErtekMezok.js`), és a program ezeket mindig a létrehozó érték javaslataként mentette: a felületről írt gondolat
+  így nem a koinó születési szabályát (`alapKuszobok`: 51 %, 0 %, 1 mp, 7 nap) követte. ⭐ (B): az ablak a koinó alapértékeit
+  mutatja (`/api/koino/alapkuszobok` → `koinoModalok.js` — az örökölt ablakok érintetlenek; ha a létrehozó már írt a mezőkbe, nem
+  írjuk felül), és a program CSAK akkor ment érték javaslatot, ha a létrehozó változtatott (`koino.js` `letrehozoKuszobJavaslata` —
+  a koinó-példány része: ⛔ elsőre a gyáron kívüli névként hívtuk, „is not defined” lett — a kezelő a belépett koinó nevein fut).
+  Próba: +1 parancssor (az alapérték-útvonal; változatlanul nincs érték javaslat, változtatva van; a kategóriánál ugyanígy); 2 rontás
+  mind bukik. Böngészőben: mindhárom ablak 51 % / 0 % / 1 mp / 7 nap.
+- **2026-11-20** — ✅ **a ④c második csoportja: a létrehozás és a döntés ablakai.** A címnél ⓘ (az új gondolat, kategória,
+  gondolattípus — csak létrehozáskor; a tudatpont, a szerep-választó és a részvételi beállítások, a részletek, az érték javaslat), a
+  Részletek két al-ablaka (a hozzájárulók, egy küszöb eloszlása — új bejegyzések). Közös bejegyzések, minden ablakban ugyanaz: a
+  szöveg-szerkesztő (a blokktípusok sorának elején), a küszöbértékek (a négy szám, a medián, az MA9 (B) — a tartózkodó is szavazónak
+  számít), a kezdő tudatpont (a javaslatnál is — a javaslat is entitás). A javaslat ablaka: a bevezetőnél a három lépés, a művelet-gombok
+  feliratánál a művelet (törlés: a gyerekek feljebb kerülnek, a pontok lekötve maradnak, amíg a gazdájuk vissza nem veszi;
+  egyesítés: a fejszám dönt, a vesztes beolvad vagy a radikális ellenzőkkel megmarad; csomag: csak ha MINDEN része eléri a saját
+  küszöbét) — az ⓘ a gombot nem nyomja meg. A ④a három szövege pontosítva (az új gondolat helye: a fő menüből gyökér, a kártyáról
+  gyerek; legfeljebb 3 kategória; az ikon kötelező képfájl). Az alap-tartalom most 90 bejegyzés. ⏭️ A harmadik csoportban a ④a
+  „értesítési beállítások” szövegét újra kell nézni: a „készülékem is jelezzen” (azonnal / N óránként összefoglalva) VALÓDI
+  (`koinoModalok.js` — a ④a tévesen kivette).

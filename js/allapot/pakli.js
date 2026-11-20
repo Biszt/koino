@@ -1017,7 +1017,7 @@ const KUSZOB_NEVEK_KINT = {
  * @param {Object} kuszobok - a koino nevein
  * @param {'median'|'javaslat'} [alak] - a medián (aktuális) vagy egy e-ember javaslata
  */
-function kuszobokKifele(kuszobok, alak = 'median') {
+export function kuszobokKifele(kuszobok, alak = 'median') {
   const ki = {};
   for (const [belso, nevek] of Object.entries(KUSZOB_NEVEK_KINT)) ki[nevek[alak]] = kuszobok?.[belso];
   return ki;

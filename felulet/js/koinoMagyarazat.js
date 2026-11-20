@@ -87,6 +87,33 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   { hely: '.modal-cim', felirat: '🧩 A koinó nézetei', nev: 'kezikonyv/menu/nezetek', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '🧩 Nézet bekapcsolása', nev: 'kezikonyv/menu/nezetek', mod: 'vegere' },
   { hely: '.modal-cim', felirat: '🧩 Új nézet', nev: 'kezikonyv/menu/uj-nezet', mod: 'vegere' },
+  // ----- ⭐ D129 (④c 2a) a létrehozó ablakok: a címnél a menüpont bejegyzése — CSAK létrehozáskor (a küszöb-szakasz látszik; a
+  // gondolat ablakának módosító módja is van) —, és a közös részek: a szerkesztő, a küszöbök, a kezdő tudatpont -----
+  { hely: '.modal-panel:has(#gondolat-modal-form #kuszob-mezok-szakasz:not([hidden])) .modal-cim', nev: 'kezikonyv/menu/uj-gondolat', mod: 'vegere' },
+  { hely: '.modal-panel:has(#kategoria-kuszob-szakasz:not([hidden])) .modal-cim', nev: 'kezikonyv/menu/uj-kategoria', mod: 'vegere' },
+  { hely: '.modal-panel:has(#gondolatTipus-kuszob-szakasz:not([hidden])) .modal-cim', nev: 'kezikonyv/menu/uj-gondolattipus', mod: 'vegere' },
+  // (a blokktípusok sorának elején — az eszköztár maga sorok oszlopa: oda téve külön sort kapott volna)
+  { hely: '.szoveg-szerkeszto .eszkoztar-sav--tipusok', nev: 'kezikonyv/ablak/szerkeszto', mod: 'elejere' },
+  { hely: '.t-modal-kuszob-cim', nev: 'kezikonyv/ablak/kuszobok', mod: 'vegere' },
+  { hely: 'label.kuszob-mezo__cimke[for$="kezdo-tudatpont"]', nev: 'kezikonyv/ablak/kezdo-tudatpont', mod: 'vegere' },
+  { hely: 'label.javaslat-modal__cimke[for="javaslat-kezdo-tudatpont"]', nev: 'kezikonyv/ablak/kezdo-tudatpont', mod: 'vegere' },
+  // ----- ⭐ D129 (④c 2b) a javaslat ablaka: a bevezető mondatnál az ablak egésze, a művelet-gombokban a felirat mellett a művelet
+  // (az ⓘ kattintása a gombot nem nyomja meg) -----
+  { hely: '.javaslat-modal__bevezeto', nev: 'kezikonyv/ablak/javaslat', mod: 'vegere' },
+  { hely: '.javaslat-modal__tipus-gomb[data-tipus="Torles"] .javaslat-modal__tipus-gomb-felirat', nev: 'kezikonyv/ablak/javaslat/torles', mod: 'vegere' },
+  { hely: '.javaslat-modal__tipus-gomb[data-tipus="Modositas"] .javaslat-modal__tipus-gomb-felirat', nev: 'kezikonyv/ablak/javaslat/modositas', mod: 'vegere' },
+  { hely: '.javaslat-modal__tipus-gomb[data-tipus="Athelyezes"] .javaslat-modal__tipus-gomb-felirat', nev: 'kezikonyv/ablak/javaslat/athelyezes', mod: 'vegere' },
+  { hely: '.javaslat-modal__tipus-gomb[data-tipus="Egyesites"] .javaslat-modal__tipus-gomb-felirat', nev: 'kezikonyv/ablak/javaslat/egyesites', mod: 'vegere' },
+  { hely: '.javaslat-modal__tipus-gomb[data-tipus="Csomag"] .javaslat-modal__tipus-gomb-felirat', nev: 'kezikonyv/ablak/javaslat/csomag', mod: 'vegere' },
+  // ----- ⭐ D129 (④c 2c) a döntés ablakai: a címnél a kártya-menü pontjának bejegyzése (az érték javaslatnál a küszöbök is), a
+  // Részletek al-ablakai külön -----
+  { hely: '.modal-panel:has(.ertek-javaslat-modal) .modal-cim', nev: 'kezikonyv/kartya/menu/kuszob-ertek-javaslat', mod: 'vegere' },
+  { hely: '.ertek-javaslat-modal__bevezeto', nev: 'kezikonyv/ablak/kuszobok', mod: 'vegere' },
+  { hely: '.modal-panel:has(#tudatpont-ertek) .modal-cim', nev: 'kezikonyv/kartya/menu/tudatpont-modositas', mod: 'vegere' },
+  { hely: '.modal-panel:has(.szerepvalaszto) .modal-cim', nev: 'kezikonyv/kartya/menu/reszveteli-beallitasok', mod: 'vegere' },
+  { hely: '.modal-panel:has(.reszletek-modal) .modal-cim', nev: 'kezikonyv/kartya/menu/reszletes-adatok', mod: 'vegere' },
+  { hely: '.modal-panel:has(.hozzajarulok-modal) .modal-cim', nev: 'kezikonyv/ablak/hozzajarulok', mod: 'vegere' },
+  { hely: '.modal-panel:has(.ertek-eloszlas-modal) .modal-cim', nev: 'kezikonyv/ablak/eloszlas', mod: 'vegere' },
   // ----- a „📱 Készülékeim” ablak -----
   { hely: '.koino-keszulekek__leiras', nev: 'kezikonyv/ablak/keszulekeim', mod: 'vegere' },
   { hely: '.koino-keszulekek__keszulek .koino-keszulekek__fej', nev: 'kezikonyv/ablak/keszulekeim/keszulek', mod: 'vegere' },

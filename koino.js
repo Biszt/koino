@@ -340,7 +340,7 @@ import {
 import { kapuNyitasa, ALAP_PORT as FELULET_PORT } from './js/felulet/kapu.js';
 import {
   pakliOldal, ujPakliNezet, entitasSzovege, entitasTudatpontja, entitasReszletei, entitasKuszobei,
-  kuszobokBefele,
+  kuszobokBefele, kuszobokKifele,
   hianyzoFelmenok,
   // ⭐ A ház (D100): a hierarchikus pakli.
   pakliHierarchia,
@@ -2636,6 +2636,35 @@ const felszabaditasJegyzet = felszabaditasTarolo();
 const kornyezet = { koino: KOINO, kulcspar, szerzo, tar, darabTar: fajlBlobTarolo(KOINO), lancTarolo: lancTarolo(KOINO),
   // ⭐⭐ D129 (②b, ②c): a kézikönyv-nevek és a program szövegének lenyomata — a műveletek az eseményre írják
   rendszerNevei: kezikonyvNevei, alapLenyomata: kezikonyvAlapLenyomata };
+
+// ===================================
+// ⭐⭐ D129 MA9 (B): A LÉTREHOZÓ KÜSZÖB-JAVASLATA — csak ha mást mond, mint a koinó
+// ===================================
+//
+// Csaba (2026-11-20): „legyen a (B)”. Az új gondolat, kategória és gondolattípus ablaka a négy küszöböt kitöltve küldi; eddig a
+// program ezt MINDIG a létrehozó érték javaslataként mentette — és mert a lap a prototípus alapértékeit töltötte be (51 %, 51 %,
+// 0 mp, 1 év), a felületről írt gondolat nem a koinó születési szabályát (`alapKuszobok`) követte, hanem azokat. ⭐ Most a lap a
+// koinó saját alapértékeit mutatja (`/api/koino/alapkuszobok`, `koinoModalok.js`), és ha a létrehozó nem változtatott rajtuk, NINCS
+// érték javaslat: a gondolat a koinó alapját követi, amíg valaki nem mond mást — a mediánba csak az számít, aki tényleg mondott
+// valamit (`javaslatSzamitas.js` `kuszobokItt`).
+// ⚠️ A koinó-PÉLDÁNY része (`koinoPeldany` — a gyár): a lap kezelője a belépett koinó nevein fut (a visszaadott objektumból
+// árnyékolva), így a belépett koinó szabályát nézi. ⛔ Elsőre a gyáron kívüli névként hívtuk — „is not defined” lett belőle.
+
+/**
+ * @param {string} entitas
+ * @param {Object|null} ertekek - a koino nevein (`kuszobokBefele`), null: hiányos — nincs javaslat
+ * @returns {Promise<boolean>} született-e érték javaslat
+ */
+async function letrehozoKuszobJavaslata(entitas, ertekek) {
+  if (!ertekek) return false;
+  const alap = (await koinomSzabalyai(kornyezet)).alapKuszobok ?? {};
+  if (Object.keys(ertekek).every((k) => ertekek[k] === alap[k])) {
+    console.log('letrehozoKuszobJavaslata - a koinó alapja, nincs érték javaslat', { entitas: entitas.slice(0, 8) });
+    return false;
+  }
+  await ertekJavaslat(kornyezet, entitas, ertekek);
+  return true;
+}
 
 // ===================================
 // SEGÉD: AZONOSÍTÓ-RÖVIDÍTÉS FELOLDÁSA
@@ -7626,7 +7655,9 @@ return {
   tovabbitasok,
   tovabbitasokTakaritasa, tukorBeallitas, ujKoinoSzuletese,
   // ⭐ D119 (③): a családi munkának (a parancsok nem használják)
-  resMunka, kerelemAtvetele
+  resMunka, kerelemAtvetele,
+  // ⭐⭐ D129 MA9 (B): a létrehozó küszöb-javaslata (a lap új gondolat / kategória / gondolattípus ablaka)
+  letrehozoKuszobJavaslata
 };
 }
 
@@ -11838,7 +11869,9 @@ try {
           torzsKerhetoi, meghivoKiadasa, kiadottMeghivok, meghivoVisszavonasa, tagsagAllapotom, profilomAllapota,
           telepitesElonezete, kartyaKodjanakKiirasa,
           // ⭐⭐ D126: a közösség feltöltött nézetei (a belépett koinóé — NZ2)
-          nezetFeltoltese, nezetKartyai, nezetKartyaja, nezetBekapcsolasaKeszuleken, nezetKikapcsolasaKeszuleken, nezetKerete, koinoSzuletese
+          nezetFeltoltese, nezetKartyai, nezetKartyaja, nezetBekapcsolasaKeszuleken, nezetKikapcsolasaKeszuleken, nezetKerete, koinoSzuletese,
+          // ⭐⭐ D129 MA9 (B)
+          letrehozoKuszobJavaslata
         } = aktiv.peldany;
         // ⭐ B/2: az olvasók (a pakli) a két tár nézetét kapják — FL1 óta minden koinóban (a koinó átmeneti tára is látszik).
         const olvasoTar = ketTarNezet(tar, atmeneti);
@@ -12390,7 +12423,7 @@ try {
             // 3. A KÜSZÖBÖK — csak ha a lap küldött. ⚠️ A medián (D4) egyetlen beadott
             // javaslattal is értelmes: a létrehozóé lesz az első szavazat a küszöbökről.
             const ertekek = kuszobokBefele(test);
-            if (ertekek) await ertekJavaslat(kornyezet, esemeny.azonosito, ertekek);
+            await letrehozoKuszobJavaslata(esemeny.azonosito, ertekek);   // ⭐⭐ D129 MA9 (B)
 
             pakliNezet.horgony = null;      // a kép elavult
             return { adat: { data: { _id: esemeny.azonosito, cim: cim.trim() } } };
@@ -12444,7 +12477,7 @@ try {
               if (typeof egeszek[n] === 'string' && /^\d+$/.test(egeszek[n].trim())) egeszek[n] = parseInt(egeszek[n], 10);
             }
             const ertekek = kuszobokBefele(egeszek);
-            if (ertekek) await ertekJavaslat(kornyezet, esemeny.azonosito, ertekek);
+            await letrehozoKuszobJavaslata(esemeny.azonosito, ertekek);   // ⭐⭐ D129 MA9 (B)
 
             pakliNezet.horgony = null;      // a kép elavult
             // A prototípus válaszának alakja (a modál az `onSiker`-nek adja tovább).
@@ -12792,6 +12825,11 @@ try {
         }
         // ⭐⭐ D129 (③): EGY KÉZIKÖNYV-BEJEGYZÉS — az ⓘ buborékja kéri (a név szerint): a megjelenítendő szöveg, honnan jön, az
         // entitás (a „📖 A kézikönyvben” gombhoz), a pontok, és ha a program azóta új szöveget mond (MA5 (A)).
+        // ⭐⭐ D129 MA9 (B): a koinó alap-küszöbei a lap ablakainak (az új gondolat, kategória, gondolattípus), a prototípus neveivel
+        // (ahogy a modál a saját javaslatot kitölti — `kuszobMezokKitoltese`). Semmit nem ír.
+        if (utvonal === '/api/koino/alapkuszobok') {
+          return { adat: kuszobokKifele((await koinomSzabalyai(kornyezet)).alapKuszobok ?? {}, 'javaslat') };
+        }
         if (utvonal === '/api/kezikonyv/bejegyzes') {
           const b = await kezikonyvBejegyzese(olvasoTar, KOINO, { nev: kereses.get('nev') ?? '', szerzo, nezet: pakliNezet,
             darabOlvas: (lenyomat) => fajlBlobTarolo(KOINO).olvas(lenyomat) });

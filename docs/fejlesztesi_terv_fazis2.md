@@ -6609,6 +6609,11 @@ fejlesztést.”*
 10. **A koinó szabálya** (D118/2): a kézikönyv a születés szabályai közé kerül (`kezikonyv` — a küszöbével); a régi születésben nincs,
     tehát a régi (teszt) koinókban nem jelenik meg — egy születés szabályai utólag nem változnak. ⚠️ A régi program az ismeretlen
     szabályú születést elutasítja: kézikönyves koinóhoz csak a frissített program csatlakozhat.
+11. **A küszöb-mezők alapértéke** (MA9 (B), Csaba, 2026-11-20: „rendben, legyen a (B)” — a ④ szövegeinek kódolvasása hozta elő):
+    az új gondolat, kategória és gondolattípus ablaka a négy küszöb-mezőt a **koinó saját alapértékeivel** tölti ki (a születés
+    `alapKuszobok`-ja, nem a prototípus 51 % / 51 % / 0 mp / 1 év-e), és a program **csak akkor ment érték javaslatot, ha a létrehozó
+    változtatott** rajtuk — különben a gondolat a koinó alapját követi, amíg valaki mást nem mond (a mediánba csak az számít, aki
+    tényleg mondott valamit). Eddig a felületről írt gondolat a prototípus értékeit kapta a létrehozó érték javaslataként.
 
 **Az építés sorrendje:** ① **a mag** — az alap-tartalom fájlja (név, szülő, cím, szöveg, típus), az azonosító (koinó + név), az
 entitás születési esemény nélkül, a D14 kivétele, a kapu (pont és javaslat a rendszer-entitásra), a vállalás (mindenki tartja), a

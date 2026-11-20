@@ -26,6 +26,10 @@ import SikidomModal from './components/modals/SikidomModal.js';
 import KeresesModal from './components/modals/KeresesModal.js';
 import ErtesitesekModal from './components/modals/ErtesitesekModal.js';
 import ErtesitesiBeallitasModal from './components/modals/ErtesitesiBeallitasModal.js';
+import GondolatModal from './components/modals/GondolatModal.js';
+import KategoriaModal from './components/modals/KategoriaModal.js';
+import GondolatTipusModal from './components/modals/GondolatTipusModal.js';
+import { kuszobMezokKitoltese } from './components/modals/kuszobErtekMezok.js';
 import { strukturaHianyJelolese, sikidomHianyRajzolasa } from './koinoFelderitetlen.js';
 import { apiGet } from './utils/apiHelper.js';
 
@@ -343,3 +347,29 @@ koruleIr(SikidomModal, '_takaritasBezaraskor', function () {
   this._koinoFuggok?.clear();
   this._koinoUjraKoz = null;
 });
+
+// ===================================
+// ⭐⭐ D129 MA9 (B): AZ ÚJ GONDOLAT, KATEGÓRIA ÉS GONDOLATTÍPUS KÜSZÖBEI — a koinó saját alapértékei
+// ===================================
+//
+// Csaba (2026-11-20): „legyen a (B)”. A három ablak a négy küszöb-mezőt a prototípus alapértékeivel tölti ki (51 %, 51 %, 0 mp,
+// 1 év — `kuszobErtekMezok.js` `KUSZOB_ALAPERTEKEK`); a koinóé a születésében áll (`alapKuszobok`). Az ablak megnyitása UTÁN a
+// mezőkbe a koinóét írjuk (a program mondja meg — `/api/koino/alapkuszobok`), és ha a létrehozó nem változtat rajtuk, a program
+// nem ment érték javaslatot (`koino.js` `letrehozoKuszobJavaslata`): a gondolat a koinó alapját követi. ⚠️ Ha a létrehozó már
+// írt a mezőkbe, mielőtt a válasz megjött, nem írjuk felül (az övé az utolsó szó).
+for (const [Osztaly, elotag] of [[GondolatModal, 'uj'], [KategoriaModal, 'kat'], [GondolatTipusModal, 'tt']]) {
+  koruleIr(Osztaly, 'init', function () {
+    const elso = document.getElementById(elotag + '-tamogatottsag');
+    if (!elso) return;   // nem létrehozás (nincsenek küszöb-mezők)
+    const szakasz = elso.closest('.kuszob-mezok, #kuszob-mezok-kontener, form') ?? elso.parentElement;
+    let irt = false;
+    const jelez = () => { irt = true; };
+    szakasz.addEventListener('input', jelez, { once: true });
+    apiGet('koino/alapkuszobok').then((alap) => {
+      szakasz.removeEventListener('input', jelez);
+      if (irt || !document.getElementById(elotag + '-tamogatottsag')) return;
+      kuszobMezokKitoltese(elotag, alap);
+      console.log('koinoModalok - a koinó alap-küszöbei a mezőkben', { elotag, alap });
+    }).catch((hiba) => console.warn('koinoModalok - a koinó alap-küszöbei nem jöttek meg', hiba?.message));
+  });
+}

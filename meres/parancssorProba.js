@@ -39,6 +39,7 @@ import { sajatMag } from '../js/tar/kodCsomag.js';
 // ⭐⭐ D129: egy új koinó kézikönyves — a lap fájában (struktúra, síkidom, bejáró) a kézikönyv is ott van (MA6 (A)); a próbák a
 // valódi gondolatokat ugyanúgy mérik, és mellettük a kézikönyvet a méretével
 import { programAlapTartalma } from '../js/kezikonyv/kezikonyv.js';
+import { ALAP_SZABALYOK } from '../js/esemeny/koinoSzabalyok.js';   // ⭐⭐ D129 MA9 (B): a koinó alap-küszöbei
 const KEZIKONYV_DB = programAlapTartalma().bejegyzesek.length;
 const KEZIKONYV_AZONOSITOK = new Set(programAlapTartalma().azonositoSzerint.keys());
 
@@ -5256,6 +5257,49 @@ proba('⛔⛔ D101: a lapról jött küszöb a gondolat létrehozásakor és az 
     await rm(hely, { recursive: true, force: true });
   }
 });
+
+// ⭐⭐ D129 MA9 (B) (Csaba, 2026-11-20: „legyen a (B)”): az új gondolat / kategória ablaka a KOINÓ alap-küszöbeit kapja
+// (`/api/koino/alapkuszobok` — a prototípus nevein, ahogy a modál kitölti), és ha a létrehozó nem változtat rajtuk, NINCS
+// érték javaslat (a gondolat a koinó alapját követi — a mediánba csak az számít, aki mondott valamit); ha változtat, van.
+// Rontás: a program mindig ment (a régi viselkedés) → a „nincs” ág bukik; az útvonal mást ad, mint a koinó szabálya → bukik.
+proba('⭐⭐ D129 MA9 (B): az új gondolat és kategória ablaka a koinó alap-küszöbeit kapja — ha a létrehozó nem változtat, nincs érték javaslat (a koinó alapja érvényes), ha változtat, van',
+  async () => {
+    const hely = await ujKeszulek();
+    let kiszolgalo = null;
+    try {
+      await fut(hely, 'koino', 'MA9');
+      kiszolgalo = await feluletet(hely, 7495);
+      const { hiv } = kiszolgalo;
+      const alap = (await hiv('/api/koino/alapkuszobok')).adat;
+      const vart = { javaslatElfogadasiKuszob: ALAP_SZABALYOK.alapKuszobok.elfogadasiKuszob,
+        reszveteliAranyKuszob: ALAP_SZABALYOK.alapKuszobok.reszveteliKuszob,
+        minimumDontesiIdo: ALAP_SZABALYOK.alapKuszobok.minimumDontesiIdo, maximumDontesiIdo: ALAP_SZABALYOK.alapKuszobok.maximumDontesiIdo };
+      const g1 = await hiv('/api/gondolat', { method: 'POST', body: JSON.stringify({ cim: 'Az alapon', kezdoTudatpont: 10, ...alap }) });
+      const g2 = await hiv('/api/gondolat', { method: 'POST', body: JSON.stringify({ cim: 'Mással', kezdoTudatpont: 10, ...alap,
+        maximumDontesiIdo: alap.maximumDontesiIdo + 3600 }) });
+      const k1 = await hiv('/api/kategoria', { method: 'POST', body: JSON.stringify({ nev: 'Alapos kategória', kezdoTudatpont: 5, ...alap }) });
+      const kuszob = (tipus, id) => hiv('/api/ertekJavaslat/aktualis/' + tipus + '/' + id);
+      const a1 = (await kuszob('Gondolat', g1.adat?.data?._id)).adat;
+      const a2 = (await kuszob('Gondolat', g2.adat?.data?._id)).adat;
+      const ak = (await kuszob('Kategoria', k1.adat?.kategoria?._id)).adat;
+      const ki = {
+        alap: JSON.stringify(alap) === JSON.stringify(vart),
+        nincs: a1?.eemberJavaslat === null && a1?.aktualisErtekek?.aktualMaximumDontesiIdo === vart.maximumDontesiIdo
+          && a1?.aktualisErtekek?.reszveteliAranyKuszob === vart.reszveteliAranyKuszob,
+        van: a2?.eemberJavaslat?.maximumDontesiIdo === vart.maximumDontesiIdo + 3600
+          && a2?.aktualisErtekek?.aktualMaximumDontesiIdo === vart.maximumDontesiIdo + 3600,
+        kategoria: k1.allapot === 200 && ak?.eemberJavaslat === null
+      };
+      if (!Object.values(ki).every(Boolean)) {
+        process.stdout.write('  MA9 — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ')
+          + ' · ' + JSON.stringify({ alap, a1, a2, ak, k1: k1.allapot }).slice(0, 900) + '\n');
+      }
+      return Object.values(ki).every(Boolean);
+    } finally {
+      if (kiszolgalo) { kiszolgalo.folyamat.kill(); await varj(500); }
+      await rm(hely, { recursive: true, force: true });
+    }
+  });
 
 // ===================================
 // ⭐⭐ D101 ③: A STRUKTÚRA A LAPON — a prototípus útvonalai, a modál nyers `fetch`-ével (Bearer)
