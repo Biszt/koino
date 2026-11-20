@@ -6653,6 +6653,13 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
 5. **A példányszám** (KO4 (A)): közösségi paraméter a koinó születésében (D118/2), alapból **`r` = 20** (30%-os elérhetőségnél 99,9%,
    hogy legalább egy tartó válaszol).
 6. **A kézikönyv is** (KO5 (B)): már most a koinon darabjaiba kerül — nem tartja mindenki (a D129 „mindenki tartja” helyett).
+   ⭐ KO9 (A) (Csaba, 2026-11-20: „elfogadom, a javaslataidat”): a következményével együtt — a közösség módosításait az a készülék,
+   amelyik a bejegyzés darabját nem tartja, KÉRÉSRE látja (mint bármely nem tartott kártyát; a program szövege mindenkinél ott van).
+7. **Hogyan utazik a döntés tömör alakja** (KO7 (A), 2026-11-20): egy új ALÁÍRT eseményben (`KoinonOsszegzes` — a lezárási
+   összegzések és a mintáik hivatkozásai), a meglévő csere-úton: a kapu az ismeretlen eseménytípust nem tiltja, a régi program átengedi
+   (nem protokoll-törés); bárki ellenőrzi (a minták önállók), az aláíró csak a nevét adja.
+8. **Ki írja meg** (KO8 (A), 2026-11-20): bárki, aki a döntés teljes bemenetét tartja, és még nem lát érvényeset (a lezárás után — az
+   őrjárat); ha több is készül, a tartó egyet tart meg (a legkisebb azonosítójút) — a tartalmuk úgyis ugyanaz.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

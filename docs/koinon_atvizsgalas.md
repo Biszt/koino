@@ -147,3 +147,7 @@ program átenged és tárol, csak nem érti — nem törés.
   mintáit és a tanúsítványokat: helyesbítve az `eredmenyek.md`-ben). Próba: +4 (`koinonCsomagProba.js`, az `allapot` csoportban — az
   építés és az ellenőrzés a nyers szavazatok és az építő nélkül; a helyek önállósága; kilenc hamisítás; az elvetett egyezmény), 8 rontás
   mind bukik; a lezárási összegzés próbái 12/12, a D123 mag-próbái 6/6. ⏭️ ③ a koinon darabjai.
+- **2026-11-20** — a ③ terve (7. szakasz); ✅ **Csaba: „elfogadom, a javaslataidat, mehetünk tovább”** — KO7 (A) a tömör alak egy új
+  aláírt eseményben (`KoinonOsszegzes`), KO8 (A) bárki írja, aki a teljes bemenetet tartja, KO9 (A) a kézikönyv a darabokban (kérésre
+  látszik). ⏭️ A ③ építése: ③a az esemény (alakja, ellenőrzése a tárból), ③b ki és mikor írja (az őrjárat), ③c a darab a vonalon és a
+  vállalásban, ③d a tartó döntése (D95/1 út), ③e a kézikönyv a darabokba, ③f az `r` a születésben (KO4).
