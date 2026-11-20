@@ -260,6 +260,30 @@ export function median(szamok) {
  * @param {Array<Object>} esemenyek - egy koino összes ismert eseménye
  * @returns {Object} az állapot
  */
+/**
+ * ⭐⭐ D130 (①, KO1 (A)) — A KOINON PONTJA AZ ELFOGADOTT ÁLTALÁNOS EGYEZMÉNYEKEN. Csaba (2026-11-19): „az általános egyezmények,
+ * mikor megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal biztosítva a létét.” A D27 szerint az egyezmény
+ * TÉNYE örök — eddig mégis elfelejtődött, ha mindenki levette róla a pontját (D14). Most 1 passzív koinon-pontot kap, mint a
+ * kézikönyv-entitás: számított (a döntésből), nem esemény; a koinon nem szavaz, a részvétel nevezőjébe nem számít.
+ *
+ * EGY FORRÁS két helyre: az első fázis (ha a halmazt kapja — `koinonEgyezmenyek`) és a `ketReteg.js` helyben adása is ezt hívja,
+ * hogy a kettő ne csúszhasson szét. Kétszer nem ad (ha már ott a koinon, kihagyja). A nem létező entitást kihagyja.
+ * @param {Map<string, Object>} entitasok
+ * @param {Iterable<string>} azonositok - az egyezmények entitásai (a javaslaté, több érintettnél a töredékeké)
+ * @returns {number} hány entitás kapta meg most
+ */
+export function koinonPontokRa(entitasok, azonositok) {
+  let db = 0;
+  for (const az of azonositok) {
+    const e = entitasok.get(az);
+    if (!e || e.hozzajarulok.has(KOINON)) continue;
+    e.hozzajarulok.set(KOINON, koinonHozzajarulasa());
+    e.osszesPont += KOINON_PONT;
+    db++;
+  }
+  return db;
+}
+
 export function allapotSzamitasa(esemenyek, beallitas = {}) {
   console.log('allapotSzamitasa - KEZDÉS', { esemenyDarab: esemenyek.length });
   // ⭐ B/2 (D75/4): azok az események, amik CSAK az átmeneti tárban vannak — a D14 kivételéhez (lent).
@@ -271,6 +295,9 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
   // ⭐ D119 (A): a jelenből kizárt, de látott ELHAGYOTT pont (a bekapcsolódó nem hozta — KZ3) is tudás: „ez a bekapcsolódó 0-t hoz rá”
   // (`ketReteg.js` adja) — különben az elhagyott entitás a gyermekben „a pontjai ismeretlenek” szellemként maradna.
   const pontjaIsmert = new Set(beallitas.elhagyottPontok instanceof Set ? beallitas.elhagyottPontok : []);
+  // ⭐⭐ D130 (①): az elfogadott ÁLTALÁNOS egyezmények entitásai — a koinon 1 pontját kapják, még a D14 ELŐTT (a döntés a második
+  // fázisé: ezt a halmazt a `ketReteg.js` `haromFazis` adja, ha egy ilyen egyezményt az első kör már elfelejtett — lent).
+  const koinonEgyezmenyek = beallitas.koinonEgyezmenyek instanceof Set ? beallitas.koinonEgyezmenyek : null;
 
   // ----- KÉT SZŰRŐ, EGYMÁS UTÁN -----
   // 1. ELÁGAZÁS: ha valaki két eseményt írt alá ugyanarról a pontról, determinisztikusan
@@ -511,6 +538,10 @@ export function allapotSzamitasa(esemenyek, beallitas = {}) {
     });
     entitas.osszesPont += o.pont;
   }
+
+  // ----- ⭐⭐ D130 (①): A KOINON PONTJA AZ ELFOGADOTT ÁLTALÁNOS EGYEZMÉNYEKEN — a tagok pontjai UTÁN (a hozzájárulók sorrendje
+  // ugyanaz, mint a helyben adásnál — `koinonPontokRa`), a D14 ELŐTT (így a pont nélküli egyezmény sem felejtődik el) -----
+  if (koinonEgyezmenyek) koinonPontokRa(entitasok, koinonEgyezmenyek);
 
   // ----- KÜSZÖBÖK: A TULAJDONOSOK MEDIÁNJA (D4) -----
   // Csak azoknak az érték javaslata számít, akiknek VAN tudatpontja az entitáson —

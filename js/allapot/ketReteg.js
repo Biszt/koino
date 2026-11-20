@@ -21,10 +21,11 @@
 //
 // Hálózatot és tárat nem érint — a bemenet egy esemény-lista. Használják: `koino.js` (`kepetKeszit`), `allapot/pakli.js`.
 
-import { allapotSzamitasa } from './allapotSzamitas.js';
+import { allapotSzamitasa, koinonPontokRa } from './allapotSzamitas.js';
 import { javaslatokSzamitasa } from './javaslatSzamitas.js';
 import { szerkesztesiEgyezmenyekAlkalmazasa } from './szerkesztesiVegrehajtas.js';
 import { lancBekapcsolodoi, jelenbenSzamit, lancbanVan } from './koinoLanc.js';
+import { javaslatEntitasai } from './szabalyok.js';
 import { esemenyKoinoja, azonositoAlaku, koinoSzuleteseE, lancKulcsa } from '../esemeny/esemeny.js';
 import { lenyomatSzinkron } from '../esemeny/kanonikusAlak.js';
 
@@ -132,19 +133,61 @@ async function multKepe(esemenyek, lanc, bekapcsolodok, i, vagas, beallitas) {
   return kep;
 }
 
-/** A három fázis egy rétegen. */
-async function haromFazis(bemenet, koino, most, beallitas, rogzitettek) {
-  const allapot = allapotSzamitasa(bemenet, {
+/**
+ * ⭐⭐ D130 (①, KO1 (A)): az elfogadott ÁLTALÁNOS egyezmények entitásai (a javaslaté — több érintettnél a töredékeké). A múlt
+ * rögzített döntései is (a `rogzitettek` másolatai a döntések közt állnak). Ha a javaslat eseménye nincs a számítók közt, az
+ * azonosítója maga.
+ * @param {Map<string, Object>} javaslatok - a második fázis döntései
+ * @param {Array<Object>} szamitok - az első fázis számító eseményei
+ * @returns {Set<string>}
+ */
+function koinonosEgyezmenyek(javaslatok, szamitok) {
+  const ki = new Set();
+  let esemenyek = null;
+  for (const [az, j] of javaslatok) {
+    if (j.fajta !== 'altalanos' || j.statusz !== 'elfogadva') continue;
+    esemenyek ??= new Map(szamitok.filter((e) => e.tipus === 'Javaslat').map((e) => [e.azonosito, e]));
+    const e = esemenyek.get(az);
+    for (const x of e ? javaslatEntitasai(e) : [{ azonosito: az }]) ki.add(x.azonosito);
+  }
+  return ki;
+}
+
+/**
+ * A három fázis egy rétegen — és KÖZTÜK a koinon pontja az elfogadott általános egyezményeken (D130 ①).
+ *
+ * ⚠️ A SORREND CSAPDÁJA: a D14 (a 0 pontú entitás elfelejtése) az ELSŐ fázisban fut, a döntés a MÁSODIKBAN — a koinon pontja
+ * pedig a döntésből következik. Ha egy elfogadott általános egyezményről mindenki levette a pontját, az első fázis már elfelejtette
+ * (és a gyerekeit a felmenőjéhez tette). ⭐ Ilyenkor az első két fázis ÚJRA fut, a halmazzal (`koinonEgyezmenyek` — a pontja a D14
+ * előtt kerül rá): az egyezmény a helyén marad, a gyerekeivel. A döntések ugyanazok (a koinon nem szavaz, a nevezőbe nem számít,
+ * a lezárt döntés a lezárásakor rögzült). Ha egyiket sem felejtette el, a pont helyben kerül rá (ugyanazzal a függvénnyel) —
+ * kétszeres számolás csak a ritka esetben.
+ */
+export async function haromFazis(bemenet, koino, most, beallitas = {}, rogzitettek = null) {
+  const allapotBeallitas = {
     ...(koino ? { koino } : {}),
     ...(beallitas.csakAtmeneti ? { csakAtmeneti: beallitas.csakAtmeneti } : {}),
     ...(beallitas.nemTartott ? { nemTartott: beallitas.nemTartott } : {}),
     ...(beallitas.lancAga ? { lancAga: beallitas.lancAga, ismertSorszamok: beallitas.ismertSorszamok } : {}),
     ...(beallitas.elhagyottPontok?.size ? { elhagyottPontok: beallitas.elhagyottPontok } : {})
-  });
-  const javaslatok = javaslatokSzamitasa(allapot.szamitok, allapot, most, {
+  };
+  const dontesBeallitas = {
     ...(beallitas.osszegzesek ? { osszegzesek: beallitas.osszegzesek } : {}),
     ...(rogzitettek ? { rogzitettek } : {})
-  });
+  };
+  let allapot = allapotSzamitasa(bemenet, allapotBeallitas);
+  let javaslatok = javaslatokSzamitasa(allapot.szamitok, allapot, most, dontesBeallitas);
+  // ----- ⭐⭐ D130 (①): A KOINON PONTJA -----
+  const koinonos = koinonosEgyezmenyek(javaslatok, allapot.szamitok);
+  if (koinonos.size) {
+    const elfelejtett = new Set(allapot.elfelejtettek);
+    if ([...koinonos].some((az) => elfelejtett.has(az))) {
+      allapot = allapotSzamitasa(bemenet, { ...allapotBeallitas, koinonEgyezmenyek: koinonos });
+      javaslatok = javaslatokSzamitasa(allapot.szamitok, allapot, most, dontesBeallitas);
+    } else {
+      koinonPontokRa(allapot.entitasok, koinonos);
+    }
+  }
   await szerkesztesiEgyezmenyekAlkalmazasa(allapot, javaslatok);
   return { allapot, javaslatok };
 }

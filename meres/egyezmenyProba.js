@@ -13,6 +13,8 @@ import { allapotSzamitasa, szetosztottPontok, elakadtPontok } from '../js/allapo
 import { javaslatokSzamitasa } from '../js/allapot/javaslatSzamitas.js';
 import { szerkesztesiEgyezmenyekAlkalmazasa } from '../js/allapot/szerkesztesiVegrehajtas.js';
 import { ALLASPONT_MUVELET, toredekAzonosito } from '../js/allapot/szabalyok.js';
+import { haromFazis } from '../js/allapot/ketReteg.js';   // ⭐⭐ D130 (①): a koinon pontja a fázisok közt
+import { KOINON, KOINON_PONT } from '../js/esemeny/rendszerEntitas.js';
 
 import { probaGyujtemeny, ujEember, tagokkal } from './probaFuttato.js';
 
@@ -1332,5 +1334,80 @@ proba('⛔ A SZERKESZTÉSI egyezménynek NINCS hatálya — az egyszeri, eldőlt
   const k = await kep(e.esemenyek);
   return k.javaslatok.get(e.javaslat.azonosito).egyezmeny.hataly === null;
 });
+
+// ===================================
+// ⭐⭐ D130 (①): A KOINON PONTJA AZ ELFOGADOTT ÁLTALÁNOS EGYEZMÉNYEN
+// ===================================
+//
+// Csaba (2026-11-19): „az általános egyezmények, mikor megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal
+// biztosítva a létét.” — KO1 (A): csak az elfogadott általános egyezmény. A három fázis a valódi úton (`ketReteg.js` `haromFazis`).
+
+/** A három fázis — a koinon pontjával (a program útja). */
+async function kepKoinonnal(esemenyek, most = KESOBB) {
+  return haromFazis(await tagokkal(esemenyek), null, most);
+}
+const koinonja = (k, az) => k.allapot.entitasok.get(az)?.hozzajarulok.get(KOINON) ?? null;
+
+// Rontás: (a) minden egyezmény kapja (a szerkesztési is) → bukik; (b) az elvetett is → bukik; (c) a folyamatban lévő is (a statusz
+// nélkül) → bukik; (d) a pont aktív szereppel → bukik.
+proba('⭐⭐ D130 ①: az ELFOGADOTT általános egyezmény a lezárásától 1 passzív koinon-pontot kap (az össz-pontja eggyel nő) — a folyamatban lévő, az elvetett és a szerkesztési egyezmény nem',
+  async () => {
+    const e = await eset({ fajta: 'altalanos' });
+    const elotte = (await kep(e.esemenyek)).allapot.entitasok.get(e.javaslat.azonosito).osszesPont;
+    const k = await kepKoinonnal(e.esemenyek);
+    const j = k.allapot.entitasok.get(e.javaslat.azonosito);
+    const folyamatban = await kepKoinonnal(e.esemenyek, KEZDET + 3000);
+    const elvetett = await eset({ fajta: 'altalanos', szavazat: 'Ellenez' });
+    const kElvetett = await kepKoinonnal(elvetett.esemenyek);
+    const szerk = await eset();
+    const kSzerk = await kepKoinonnal(szerk.esemenyek);
+    const r = {
+      elfogadva: k.javaslatok.get(e.javaslat.azonosito).statusz === 'elfogadva'
+        && koinonja(k, e.javaslat.azonosito)?.pont === KOINON_PONT && koinonja(k, e.javaslat.azonosito)?.szerep === 'passziv'
+        && j.osszesPont === elotte + KOINON_PONT,
+      folyamatban: koinonja(folyamatban, e.javaslat.azonosito) === null,
+      elvetett: kElvetett.javaslatok.get(elvetett.javaslat.azonosito).statusz === 'elvetve'
+        && koinonja(kElvetett, elvetett.javaslat.azonosito) === null,
+      szerkesztesi: kSzerk.javaslatok.get(szerk.javaslat.azonosito).statusz === 'elfogadva'
+        && koinonja(kSzerk, szerk.javaslat.azonosito) === null
+    };
+    if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify({ r, elotte, utana: j?.osszesPont }) + ')\n'); return false; }
+    return true;
+  });
+
+// Rontás: (a) az újraszámolás elmarad (csak a helyben adás) → az egyezmény elfelejtődik → bukik; (b) az újraszámolás a halmaz nélkül
+// → bukik; (c) a gyerek a felmenőjéhez kerül → bukik.
+proba('⭐⭐ D130 ①: ha mindenki leveszi róla a pontját, az elfogadott általános egyezmény MEGMARAD — a koinon pontjával, a helyén és a gyerekeivel (a D14 elfelejtené); az elvetett javaslat elfelejtődik, a gyereke feljebb kerül',
+  async () => {
+    const leveszi = async (e) => {
+      // egy gondolat AZ EGYEZMÉNY ALÁ (pontot tartanak rajta), és a lezárás után mindenki leveszi a pontját az egyezményről
+      const gyerek = await e.gazda.tesz('GondolatLetrehozas', { cim: 'Az egyezmény alatt', szulo: e.javaslat.azonosito, meret: 10 },
+        KEZDET + 5 * 24 * 3600 * 1000);
+      const pont = await e.gazda.tesz('TudatpontRendezes', { entitas: gyerek.azonosito, pont: 10 }, KEZDET + 5 * 24 * 3600 * 1000);
+      const le = await e.gazda.tesz('TudatpontRendezes', { entitas: e.javaslat.azonosito, pont: 0 }, KEZDET + 6 * 24 * 3600 * 1000);
+      return { gyerek, esemenyek: [...e.esemenyek, gyerek, pont, le] };
+    };
+    const e = await eset({ fajta: 'altalanos' });
+    const { gyerek, esemenyek } = await leveszi(e);
+    const k = await kepKoinonnal(esemenyek);
+    const j = k.allapot.entitasok.get(e.javaslat.azonosito);
+    const ev = await eset({ fajta: 'altalanos', szavazat: 'Ellenez' });
+    const lev = await leveszi(ev);
+    const kEv = await kepKoinonnal(lev.esemenyek);
+    const r = {
+      megmaradt: !!j && j.osszesPont === KOINON_PONT && j.hozzajarulok.size === 1 && koinonja(k, e.javaslat.azonosito)?.pont === KOINON_PONT
+        && !k.allapot.elfelejtettek.includes(e.javaslat.azonosito),
+      helyen: j?.szulo === e.gondolat.azonosito && k.allapot.entitasok.get(gyerek.azonosito)?.szulo === e.javaslat.azonosito,
+      dontes: k.javaslatok.get(e.javaslat.azonosito).statusz === 'elfogadva',
+      elvetettElfelejtve: !kEv.allapot.entitasok.has(ev.javaslat.azonosito)
+        && kEv.allapot.entitasok.get(lev.gyerek.azonosito)?.szulo === ev.gondolat.azonosito
+    };
+    if (!Object.values(r).every(Boolean)) {
+      process.stderr.write('    (' + JSON.stringify({ r, j: j && { osszesPont: j.osszesPont, szulo: j.szulo, h: [...j.hozzajarulok.keys()] },
+        gyerekSzulo: k.allapot.entitasok.get(gyerek.azonosito)?.szulo, statusz: k.javaslatok.get(e.javaslat.azonosito).statusz }) + ')\n');
+      return false;
+    }
+    return true;
+  });
 
 export default futtatas;
