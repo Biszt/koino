@@ -88,6 +88,36 @@ darabnak 13+ tartója marad, az átfedés pedig háromszoros terhet hoz; (B) mar
 4. **A fenntartó kör**: a darab hirdetése és a tartóinak megszámlálása a címjegyzéken, órás ütemben.
 5. **A terep.**
 
+## 7. A ③ terve — a koinon darabjai (2026-11-20, kód előtt)
+
+**Ami megvan, és amire épül (a kódból):** a darabolás eszköze (`cimjegyzek.js` `keszulekDarabjai(so, aláíró, bitek)` — a készülék
+tábla-aláírójából, egy CÉLHOZ kötött sóval; a gyökér és a kereső-réteg már így oszt), a darab mint SZELET a vonalon (`szeletEgyeztetes.js`
+— a gyökér-darab felismerhető kulcsa; a halmaza egy eseménylista), a tömör alak (②) és az ellenőrzött lezárási összegzés útja a
+döntésbe (D95/1 — `osszegzesek`). ⭐ A kapu az ismeretlen ESEMÉNYTÍPUST nem tiltja (csak a mezők alakját nézi): egy új típust a régi
+program átenged és tárol, csak nem érti — nem törés.
+
+**A terv:**
+1. **A darab:** `keszulekDarabjai('koinon', aláíró, bitek)`, `bitek = floor(log2(ismert tagok / r))` (r a születésből — KO4; a régi
+   születésben nincs: 20). Egy egyezmény a javaslata azonosítója szerint esik egy darabba (ugyanaz a lenyomat, mint a gyökér-darabé).
+2. **Mi van benne:** az elfogadott általános egyezmény tömör alakjának eseményei — a javaslat, a döntés tömör alakja (lásd KO7), az
+   állásfoglalások, a minták eseményei. A darab a vonalon SZELETKÉNT megy (a gyökér-darab mintájára — felismerhető kulcs).
+3. **A tartó döntése:** az ellenőrzött tömör alak a meglévő úton (D95/1 `osszegzesek`) adja a döntést — így a darab tartója a teljes
+   szelet nélkül is tudja: elfogadva → a koinon pontja (①) → az egyezmény él.
+4. **A kézikönyv** (KO5 (B)): a bejegyzései a darabokba, az azonosítójuk szerint (a „mindenki tartja” helyett).
+
+**A kérdések (Csabáé):**
+- **KO7 — hogyan utazik a döntés tömör alakja** (az összegzés nem esemény)? (A) ⭐ egy új ALÁÍRT eseményben (`KoinonOsszegzes`: a
+  tömör alak a hivatkozott események nélkül) — a meglévő csere-úton, a régi program átengedi (nem törés); bárki ellenőrzi (a minták
+  önállók — ②), tehát az aláíró nem kap bizalmat, csak a nevét adja; (B) egy új üzenet a cserében — protokoll-törés (D124: új
+  nyelvváltozat, a régiekkel nem beszél).
+- **KO8 — ki írja meg?** (A) ⭐ bárki, aki a döntés teljes bemenetét tartja, és még nem lát érvényeset (a lezárás után — az őrjárat);
+  ha több is készül, a tartó egyet tart meg (a legkisebb azonosítójút) — a tartalmuk úgyis ugyanaz; (B) csak a javaslattevő — ha ő
+  eltűnik, sosem készül el.
+- **KO9 — a kézikönyv a darabokban — a következmény most látszik:** a közösség módosításait az a készülék, amelyik a bejegyzés darabját
+  nem tartja, csak KÉRÉSRE látja (mint bármely nem tartott kártyát — a program szövege mindenkinél ott van, a módosítás egy kérésnyire,
+  a buborék kéri). (A) ⭐ így rendben (a KO5 (B) szerint — a kézikönyv a koinóval nőhet); (B) a kézikönyv maradjon mindenkinél (a KO5
+  visszavonása — kicsi, és az ⓘ így mindig azonnal a közösség szövegét mondja).
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
