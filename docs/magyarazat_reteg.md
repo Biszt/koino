@@ -209,3 +209,12 @@ entitás gombjával, a kézikönyv a pakliban, a struktúrában és a síkidomba
   gyerek; legfeljebb 3 kategória; az ikon kötelező képfájl). Az alap-tartalom most 90 bejegyzés. ⏭️ A harmadik csoportban a ④a
   „értesítési beállítások” szövegét újra kell nézni: a „készülékem is jelezzen” (azonnal / N óránként összefoglalva) VALÓDI
   (`koinoModalok.js` — a ④a tévesen kivette).
+- **2026-11-20** — ✅ **a ④c harmadik csoportja: a fiókod ablakai** (Tudatpontok, Értesítések, Értesítési beállítások, Meghívóim, az
+  adataid — a címnél ⓘ, a menüpont bejegyzésével; a kártyáról nyitott, ágra szűkített változatnál is). ⛔ **A ④a öt szövege a kód
+  szerint újraírva:** ① az értesítés CSAK a tartott részekről jön (`ertesites.js`: két pillanatkép különbsége, a részvételi
+  szeletekből; az első számolás alapvonal) — a „vagy amire értesítést kértél” többet ígért; ② a készülék saját értesítése VALÓDI
+  (D103: felugró értesítés az operációs rendszeren át, rögtön vagy 1–168 óránként összefoglalva; zárt lapnál is, amíg a koinó fut),
+  és a „Csak ahol tudatpontom van” szűrő; ③ a meghívó KÉT telepítő sort ad (📋 Termux, 💻 PowerShell / parancssor), és ha a
+  meghívottnál már fut a koino, a lapon is beillesztheti; ④ a Tudatpontok listája a LEGUTÓBB RENDEZETTEL kezdődik (nem a
+  legtöbbel — `sajatHozzarendelesek`), és a nem ismert kártyán lévő pont is látszik; ⑤ az adatoknál a „beceneved áll az alsó
+  sávban” nem igazolható — kivéve; a kötelező mezőket csillag jelöli, és a meghívó viszi. Böngészőben mind az öt ablak ⓘ-je a helyén.

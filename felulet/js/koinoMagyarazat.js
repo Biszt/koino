@@ -114,6 +114,13 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   { hely: '.modal-panel:has(.reszletek-modal) .modal-cim', nev: 'kezikonyv/kartya/menu/reszletes-adatok', mod: 'vegere' },
   { hely: '.modal-panel:has(.hozzajarulok-modal) .modal-cim', nev: 'kezikonyv/ablak/hozzajarulok', mod: 'vegere' },
   { hely: '.modal-panel:has(.ertek-eloszlas-modal) .modal-cim', nev: 'kezikonyv/ablak/eloszlas', mod: 'vegere' },
+  // ----- ⭐ D129 (④c 3) a fiókod ablakai: a címnél a menüpont bejegyzése (a kártyáról nyitott, ágra szűkített változatnál is) -----
+  { hely: '.modal-panel:has(#tudatpontok-szabad) .modal-cim', nev: 'kezikonyv/menu/tudatpontok', mod: 'vegere' },
+  { hely: '.modal-panel:has(#ertesitesek-lista) .modal-cim', nev: 'kezikonyv/menu/ertesitesek', mod: 'vegere' },
+  { hely: '.modal-panel:has(#ertesites-beallitas-mezok) .modal-cim', nev: 'kezikonyv/menu/ertesitesi-beallitasok', mod: 'vegere' },
+  { hely: '.modal-panel:has(#meghivo-info) .modal-cim', nev: 'kezikonyv/menu/meghivoim', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '📝 Az adataid', nev: 'kezikonyv/menu/eember-beallitasok', mod: 'vegere' },
+  { hely: '.modal-cim', felirat: '⚙️ eember beállítások', nev: 'kezikonyv/menu/eember-beallitasok', mod: 'vegere' },
   // ----- a „📱 Készülékeim” ablak -----
   { hely: '.koino-keszulekek__leiras', nev: 'kezikonyv/ablak/keszulekeim', mod: 'vegere' },
   { hely: '.koino-keszulekek__keszulek .koino-keszulekek__fej', nev: 'kezikonyv/ablak/keszulekeim/keszulek', mod: 'vegere' },

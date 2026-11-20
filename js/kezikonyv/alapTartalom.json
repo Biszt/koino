@@ -74,12 +74,12 @@
     {
       "nev": "kezikonyv/menu/ertesitesek",
       "cim": "🔔 Értesítések",
-      "szoveg": "Itt látod, mi változott a koinóban azóta, hogy legutóbb megnézted — azokon a részeken, amiket követsz (ahol tudatpontod van, vagy amire értesítést kértél): új gondolatok, javaslatok, döntések, módosítások.\n\nAz értesítéseket a te készüléked számolja ki, a saját két pillanatképéből — nincs központ, ami küldené őket. A menügombon egy szám mutatja, hány olvasatlan van."
+      "szoveg": "Itt látod, mi változott a koinóban azokon a részeken, amiket a készüléked tart — ahol tudatpontod van: új javaslat, döntés (elfogadás, elvetés), szavazat, közeledő határidő, tudatpont-változás, új gyerek, küszöb-változás —, az értesítési beállításaid szerint.\n\nAz értesítéseket a te készüléked számolja ki, két pillanatkép különbségéből — nincs központ, ami küldené őket. Ami egy olyan ágon történik, amit a készüléked nem tart, arról nem tud, és nem is jelez. A legelső számolás csak kiindulópont: egy friss készülék nem kap értesítést a teljes múltról. A menügombon egy szám mutatja, hány olvasatlan van."
     },
     {
       "nev": "kezikonyv/menu/ertesitesi-beallitasok",
       "cim": "🔔 Értesítési beállítások",
-      "szoveg": "Itt állítod be, miről kérsz értesítést: alapból vagy egy-egy ágra. Egy ágra tett beállítás az alatta lévő részekre is öröklődik — így például az egész kézikönyvre is feliratkozhatsz, hogy lásd, ha valaki módosítást javasol benne."
+      "szoveg": "Itt választod ki, mely eseményekről kérsz értesítést — a fő menüből az egészre, egy kártya menüjéből egy ágra. Egy ágra tett beállítás a lejjebb lévő részekre is öröklődik, amíg ott felül nem írod; ahol semmi nincs, a fő menüs beállítás érvényes. Így például az egész kézikönyvre is feliratkozhatsz, hogy lásd, ha valaki módosítást javasol benne.\n\n„Csak ahol tudatpontom van” — bekapcsolva csak akkor jön értesítés, ha az esemény kártyáján saját tudatpontod van.\n\nA fő menüs beállításban a készüléked magától is jelezhet: felugró értesítéssel, az operációs rendszeren át (a gépeden vagy a telefonodon) — minden eseményről rögtön, vagy összefoglalva, 1–168 óránként. Ez akkor is jön, ha a lap zárva van, amíg a koinó fut a készülékeden."
     },
     {
       "nev": "kezikonyv/menu/uj-gondolat",
@@ -104,7 +104,7 @@
     {
       "nev": "kezikonyv/menu/meghivoim",
       "cim": "✉️ Meghívóim",
-      "szoveg": "Itt hívhatsz meg valakit a koinóba. Megadod a nevét, és elfogadod a nyilatkozatot; a program egy SORT ad: egy telepítő sort a meghívóval. Ezt küldd el neki — a telefonján a Termuxba, Windowson a parancssorba másolja, és a program települ, majd a koinóba lép.\n\nA meghívó egy hónapig él, egyszer használható, és visszavonhatod. Amikor a meghívott készüléke először találkozik a tiéddel, a te készüléked magától aláírja a meghívást — utána tag. A listában látod a meghívóid állását."
+      "szoveg": "Itt hívhatsz meg valakit a koinóba. Megadod a nevét, és elfogadod a nyilatkozatot; a program két telepítő sort ad a meghívóval: a 📋-t a meghívott a telefonján a Termuxba, a 💻-t a Windowsos gépén a PowerShellbe vagy a parancssorba másolja — mindkettő telepíti a programot, és a koinóba lép. Ha nála már fut a koino, a meghívót a lapon is beillesztheti.\n\nA meghívó egy hónapig él, egyszer használható, és amíg fel nem használták, visszavonhatod (🗑️). Amikor a meghívott készüléke először cserél a tiéddel, a te készüléked magától aláírja a meghívást — utána tag. A listában látod a meghívóid állását."
     },
     {
       "nev": "kezikonyv/menu/keszulekeim",
@@ -114,12 +114,12 @@
     {
       "nev": "kezikonyv/menu/tudatpontok",
       "cim": "🌟 Tudatpontok",
-      "szoveg": "Itt látod, hova tetted a tudatpontjaidat: a gondolatokat, javaslatokat, amiken pontod van, a legtöbbtől kezdve — és hogy mennyi szabad pontod maradt.\n\nA tudatpont nem költődik el: bármikor átrendezheted, levehetsz egy gondolatról, és máshova teheted. Amiről mindenki leveszi a pontját, azt a koinó elfelejti (kivétel a kézikönyv: azon a koinon — a közösség közös tárhelye — is tart egy pontot)."
+      "szoveg": "Itt látod, hova tetted a tudatpontjaidat: a kártyákat, amiken pontod van, a legutóbb rendezettől kezdve — és hogy mennyi szabad pontod maradt. Egy sorra koppintva a pakli oda ugrik, a „Módosítás” gombbal a pontot itt is átírhatod. A pontod akkor is látszik, ha a kártyát a készüléked még nem ismeri.\n\nA tudatpont nem költődik el: bármikor átrendezheted, levehetsz egy kártyáról, és máshova teheted. Amiről mindenki leveszi a pontját, azt a koinó elfelejti (kivétel a kézikönyv: azon a koinon — a közösség közös tárhelye — is tart egy pontot)."
     },
     {
       "nev": "kezikonyv/menu/eember-beallitasok",
       "cim": "⚙️ eember beállítások",
-      "szoveg": "Itt adod meg az adataidat: a teljes nevedet, a becenevedet, az országodat, a régiódat, a településedet. Nem kötelező — de a többiek ezekből ismernek fel, és a beceneved áll az alsó sávban is. Egy koinó a születésekor kötelezővé tehet néhány mezőt; akkor a meghívásnál kell őket megadni."
+      "szoveg": "Itt adod meg az adataidat: a teljes nevedet (a meghívóból előtöltve), a becenevedet, az országodat, a régiódat, a településedet. Nem kötelező — de a többiek ezekből ismernek fel. Egy koinó a születésekor kötelezővé tehet néhány mezőt: ezeket csillag jelöli, és a meghívó is viszi őket a meghívottnak. Az első belépéskor az űrlap magától nyílik (kihagyhatod), utána innen éred el."
     },
     {
       "nev": "kezikonyv/ablak",
