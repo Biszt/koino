@@ -6664,6 +6664,10 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
    tartójának ez az egy esemény elég (13 szavazónál 33 KB); az állásfoglalások továbbra is külön (a hatály él).
 8. **Ki írja meg** (KO8 (A), 2026-11-20): bárki, aki a döntés teljes bemenetét tartja, és még nem lát érvényeset (a lezárás után — az
    őrjárat); ha több is készül, a tartó egyet tart meg (a legkisebb azonosítójút) — a tartalmuk úgyis ugyanaz.
+9. **A tartó ítélete az állásfoglalás jogáról** (KO10 (A), Csaba, 2026-11-21: „rendben”): a darab tartója a hely ágát nem tartja —
+   ha a helyet nem ismeri, vagy a szerző láncát hézagosan látja (a pontja a hely szeletében van), az állásfoglalás „nem
+   ellenőrizhető” (számít, jelölve — D19), nem kivétel; a teljes ítélet annál, aki az ágat tartja. ✅ Megépült a ③d-vel
+   (`koinon_atvizsgalas.md` napló, 2026-11-21) — a szigorú (b) régi esetét is megoldja.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

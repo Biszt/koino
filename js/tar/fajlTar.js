@@ -1164,6 +1164,40 @@ export function osszegzesTarolo(koino, hely = alapHely()) {
 }
 
 /**
+ * ⭐⭐ D130 (③d): A KOINON ELLENŐRZÖTT TÖMÖR ALAKJAI — a tartó helyi jegyzéke (`<koino>/koinon.json`): `{ ellenorzott: {
+ * <a KoinonOsszegzes esemény azonosítója>: { javaslat, rendben, elfogadva?, dontesek?: [{ entitas, osszegzes, allas }], ok?, ido } } }`.
+ * ⚠️ HELYI feljegyzés (nem esemény): hogy egy tömör alakot ne kelljen minden körben újra ellenőrizni (az ellenőrzés a minták
+ * aláírásait nézi). Ha elveszik, a tartó újra ellenőriz — az esemény a tárában van. Az írás átnevezéssel kerül a helyére.
+ * @returns {{olvas: Function, ir: Function, fajl: string}}
+ */
+export function koinonTarolo(koino, hely = alapHely()) {
+  const fajl = join(hely, koino, 'koinon.json');
+  return {
+    fajl,
+    /** @returns {Promise<{ellenorzott: Object}>} */
+    async olvas() {
+      try {
+        const j = JSON.parse(await readFile(fajl, 'utf8'));
+        return { ellenorzott: j?.ellenorzott && typeof j.ellenorzott === 'object' ? j.ellenorzott : {} };
+      } catch {
+        return { ellenorzott: {} };
+      }
+    },
+    async ir(adat) {
+      await mkdir(dirname(fajl), { recursive: true });
+      const ideiglenes = fajl + '.' + process.pid + '-' + Math.random().toString(36).slice(2) + '.uj';
+      try {
+        await writeFile(ideiglenes, JSON.stringify(adat), 'utf8');
+        await rename(ideiglenes, fajl);
+      } catch (hiba) {
+        await rm(ideiglenes, { force: true }).catch(() => {});
+        throw hiba;
+      }
+    }
+  };
+}
+
+/**
  * ⭐ D95/2: a FÜGGŐ TAGSÁGOK helyi jegyzéke (`<koino>/tagsagfuggo.json`): akiknek a tagságát a vállalt szeleteimben nem
  * tudom, és a cserében kérdezem (`tagsagKisero.js`). Helyi feljegyzés, nem esemény, nem terjed; korlátos és lejár.
  * @param {string} koino

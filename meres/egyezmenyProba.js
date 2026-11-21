@@ -1292,6 +1292,39 @@ proba('⛔⛔ A HATÓKÖR A HELYBŐL: akinek nincs pontja ezen az ágon, nem fog
          && x.ok.includes('nincs tudatpontod'));
 });
 
+// ⭐⭐ D130 KO10 (A) (Csaba, 2026-11-21: „rendben”): a koinon darabjának tartója az egyezményt ismeri (a ③d óta), a HELYÉT (a
+// gondolatot, ami alatt áll) nem — a hely ágát nem tartja. A hatókör így nem dönthető el: „nem ellenőrizhető” (számít, jelölve —
+// D19), nem kivétel. Rontás: a feltétel nélkül a hiányt tényként olvassa („nincs tudatpontod ezen az ágon”) → bukik.
+proba('⭐⭐ D130 KO10 (A): ha az egyezmény HELYÉT nem ismerjük, vagy a szerző láncát hézagosan (a koinon tartója — az ág szeletét nem tartja), az állásfoglalás „nem ellenőrizhető” (számít) — nem kivétel; hézagtalan lánccal marad a szabály', async () => {
+  const e = await altalanosEset();
+  const kivulallo = await ujEember();
+  const af = await kivulallo.tesz('Allasfoglalas', { egyezmeny: e.javaslat.azonosito, allas: 'csatlakozik' }, KESOBB);
+  // a tartó bemenete: minden, a hely születése nélkül
+  const helyNelkul = e.esemenyek.filter((x) => x.azonosito !== e.gondolat.azonosito);
+  const k = await kep([...helyNelkul, af]);
+  const r = {
+    nemEllenorizheto: k.allapot.nemEllenorizhetok.some((x) => x.azonosito === af.azonosito && /helyét/.test(x.ok)),
+    nemKivetel: !k.allapot.kivetelek.some((x) => x.azonosito === af.azonosito)
+  };
+  // ha a helyet ismerjük, a kívülálló állásfoglalása továbbra is kivétel (a szabály nem gyengült)
+  const teljes = await kep([...e.esemenyek, af]);
+  r.ismertHely = teljes.allapot.kivetelek.some((x) => x.azonosito === af.azonosito && x.ok.includes('nincs tudatpontod'));
+  // ⭐ a hely ismert, de a szerző pont-eseménye a hely szeletében maradt (a tartó nem tartja) — a lánca hézagos: „nem ellenőrizhető”,
+  // és számít; a teljes bemenettel rendesen jogosult
+  const tag = await ujEember();
+  const pontja = await tag.tesz('TudatpontRendezes', { entitas: e.gondolat.azonosito, pont: 5 }, KEZDET);
+  const tagAf = await tag.tesz('Allasfoglalas', { egyezmeny: e.javaslat.azonosito, allas: 'csatlakozik' }, KESOBB);
+  const hezagos = await kep([...e.esemenyek, tagAf]);
+  const egesz = await kep([...e.esemenyek, pontja, tagAf]);
+  r.hezagosLanc = hezagos.allapot.nemEllenorizhetok.some((x) => x.azonosito === tagAf.azonosito && /hézagosan/.test(x.ok))
+    && !hezagos.allapot.kivetelek.some((x) => x.azonosito === tagAf.azonosito)
+    && hezagos.javaslatok.get(e.javaslat.azonosito).egyezmeny.hataly.csatlakozok.includes(tag.szerzo);
+  r.teljesLanc = egesz.javaslatok.get(e.javaslat.azonosito).egyezmeny.hataly.csatlakozok.includes(tag.szerzo)
+    && !egesz.allapot.nemEllenorizhetok.some((x) => x.azonosito === tagAf.azonosito);
+  if (!Object.values(r).every(Boolean)) process.stdout.write('    (' + JSON.stringify(r) + ')\n');
+  return Object.values(r).every(Boolean);
+});
+
 proba('⭐ …ÉS A LESZÁRMAZOTTON LÉVŐ PONT IS ELÉG — a hatókör LEFELÉ terjed', async () => {
   // ⭐ EGYETLEN különbség: a pontja nem a témán, hanem annak egy GYEREKÉN van.
   const e = await altalanosEset();

@@ -104,6 +104,7 @@ import {
   lancTarolo,
   // ⭐ D95/1: az összegzések helyi jegyzéke (a nagy szelet gyökere, a lezárási összegzések).
   osszegzesTarolo,
+  koinonTarolo,   // ⭐⭐ D130 (③d): a koinon ellenőrzött tömör alakjai
   // ⭐ D95/2: a függő tagságok helyi jegyzéke.
   tagsagFuggoTarolo,
   // ⭐ D95/3: a csak küldő út kézbesítési jegyzéke.
@@ -6064,6 +6065,8 @@ async function tomoritesSzabalya() {
   const szuletes = await koinoSzuletese();
   const t = await osszegzesTarolo(KOINO).olvas();
   const lezarasJavaslatok = new Set(Object.keys(t.lezarasok).map((k) => k.split('|')[0]));
+  // ⭐⭐ D130 (③d): a koinon ellenőrzött tömör alakjainak javaslatai (a tárba mentve — a képem ezekből ismeri az egyezményt)
+  for (const x of Object.values((await koinonTarolo(KOINO).olvas()).ellenorzott)) if (x?.rendben && x.javaslat) lezarasJavaslatok.add(x.javaslat);
   const osszegzettKesz = (k) => t.szeletek[k]?.fok === 'osszegzo' && !!t.szeletek[k]?.gyoker;
   return (e) => {
     if (esemenyKoinoja(e) !== KOINO || e.szerzo === szerzo) return true;
@@ -6120,9 +6123,26 @@ async function tomoritesEsedekesE() {
  */
 async function ellenorzottOsszegzesek() {
   const t = await osszegzesTarolo(KOINO).olvas();
-  return new Map(Object.entries(t.lezarasok)
+  const ki = new Map(Object.entries(t.lezarasok)
     .filter(([k, x]) => x?.osszegzes && x?.allas && t.szeletek[k.split('|')[1]]?.fok === 'osszegzo')
     .map(([k, x]) => [k, { osszegzes: x.osszegzes, allas: x.allas }]));
+  // ⭐⭐ D130 (③d): a koinon ellenőrzött tömör alakjai — ugyanez az út (D95/1), ott, ahol a rész szeletét NEM tartom egészében
+  // (ahol igen, a teljes bemenet dönt — mint a két fokú tartásnál). Ha egy javaslathoz több érvényes van, a legkisebb azonosítójú
+  // esemény számít (KO8 (A)) — a tartalmuk úgyis ugyanaz.
+  const kn = await koinonTarolo(KOINO).olvas();
+  const bejegyzesek = Object.entries(kn.ellenorzott).filter(([, x]) => x?.rendben && Array.isArray(x.dontesek))
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([, x]) => x);
+  if (bejegyzesek.length) {
+    const kf = await ketFokAllapota();
+    const egeszben = (k) => kf.vallalas.szeletek.has(k) && kf.fokok.get(k) !== 'osszegzo';
+    for (const x of bejegyzesek) {
+      for (const d of x.dontesek) {
+        const kulcs = x.javaslat + '|' + d.entitas;
+        if (!ki.has(kulcs) && d?.osszegzes && d?.allas && !egeszben(d.entitas)) ki.set(kulcs, { osszegzes: d.osszegzes, allas: d.allas });
+      }
+    }
+  }
+  return ki;
 }
 
 /** ⭐ A csere beállításai a két fokú vállaláshoz és a csak küldő részvételhez (a `parbeszed` hívja őket). */
@@ -6287,6 +6307,39 @@ async function koinonOsszegzesekKiadasa() {
 }
 /** ⭐ D130 (③b): a javaslatok, amelyekhez már láttam érvényes tömör alakot (a folyamat élete alatt — újra nem ellenőrizzük). */
 const koinonOsszegzettek = new Set();
+
+/**
+ * ⭐⭐ D130 (③d): A TARTÓ DÖNTÉSE — a tárban lévő (a koinon-darabomból kapott, vagy a saját) `KoinonOsszegzes` események
+ * ellenőrzése (önmagukból — a beágyazott táblákból), és ha rendben: a javaslat eseménye a tárba (a képem így ismeri), a részek
+ * döntése a jegyzékbe (`koinonTarolo`) — onnan a döntés kapja (`ellenorzottOsszegzesek`): elfogadva → a koinon pontja (D130 ①) →
+ * az általános egyezmény él a tartónál is, a helye nélkül is (a sosem látott szülőt a számítás nem bántja — D19). Az
+ * állásfoglalások jogát a tartó nem ítéli meg, ha a helyet nem ismeri: „nem ellenőrizhető” (KO10 (A) — `szabalyok.js`).
+ * Körönként legfeljebb 16 új (az ellenőrzés a minták aláírásait nézi).
+ * @returns {Promise<number>} hányat ellenőrzött
+ */
+async function koinonOsszegzesekFelvetele() {
+  const tarolo = koinonTarolo(KOINO);
+  const t = await tarolo.olvas();
+  const ujak = (await tar.bejelentesek(KOINON_KULCS))
+    .filter((e) => esemenyKoinoja(e) === KOINO && e.tipus === KOINON_OSSZEGZES && !t.ellenorzott[e.azonosito])
+    .sort((a, b) => (a.azonosito < b.azonosito ? -1 : 1)).slice(0, 16);
+  if (!ujak.length) return 0;
+  const alapKuszobok = (await koinomSzabalyai(kornyezet)).alapKuszobok;
+  for (const e of ujak) {
+    const v = await koinonOsszegzesEllenorzese(e, { tagE: (sz) => tagsagKerdes.tagE(sz), alapKuszobok });
+    if (v.rendben) {
+      if (v.javaslat && !(await esemenyLekerese(tar, v.javaslat.azonosito))) {
+        try { await esemenyMentese(tar, v.javaslat); } catch (hiba) { console.warn('a koinon javaslata nem került a tárba', { ok: hiba.message }); }
+      }
+      t.ellenorzott[e.azonosito] = { javaslat: e.adat.javaslat, rendben: true, elfogadva: v.elfogadva, dontesek: v.dontesek,
+        ido: Date.now() };
+    } else {
+      t.ellenorzott[e.azonosito] = { javaslat: e.adat?.javaslat ?? null, rendben: false, ok: v.ok ?? null, ido: Date.now() };
+    }
+  }
+  await tarolo.ir(t);
+  return ujak.length;
+}
 
 // ===================================
 // ⭐⭐ D93/3: A ZÁRT KOINO KAPUJA — a személy a kézfogásban
@@ -6825,6 +6878,11 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
       const ko = await koinonOsszegzesekKiadasa();
       if (ko) kiir(SZIN.halvany + '  📜 ' + ora() + ' ' + kk + ko + ' általános egyezmény tömör alakja a koinonnak' + SZIN.vege);
     } catch (hiba) { console.warn('a tömör alak kiadása nem sikerült', { ok: hiba.message }); }
+    // ⭐⭐ D130 (③d): a kapott tömör alakok ellenőrzése (a koinon-darabom tartójaként) — a döntésük a képembe
+    try {
+      const kf = await koinonOsszegzesekFelvetele();
+      if (kf) kiir(SZIN.halvany + '  📜 ' + ora() + ' ' + kk + kf + ' tömör alakot ellenőriztem (a koinon darabjából)' + SZIN.vege);
+    } catch (hiba) { console.warn('a tömör alakok ellenőrzése nem sikerült', { ok: hiba.message }); }
     // ⭐ D75/1, D73: naponta egyszer a tár tömörítése (a szigorú (b) alatt; csak az író — az őrjárat az).
     if (tar.iroE?.() && await tomoritesEsedekesE()) {
       const t = await tomoritesFuttatasa();
@@ -7585,6 +7643,10 @@ async function allapotKiirasa(napokMulva) {
   // önmagában gyűjtőnév"). A számok és a rész-sorok ugyanazok — a **gépezet ugyanaz** —,
   // csak a következmény más, ezért egy rajzoló szolgálja ki mindkettőt.
   const folyamatban = [...javaslatok.values()];
+  // ⭐ (2026-11-20): a művelet neve magyarul — a nyers „Modositas”, „Allaspont” helyett (az általános javaslaté az álláspont)
+  const MUVELET_NEVE = { Modositas: 'Módosítás', Athelyezes: 'Áthelyezés', Torles: 'Törlés', Egyesites: 'Egyesítés', Csomag: 'Csomag',
+    Allaspont: 'Álláspont' };
+  const muveletNeve = (m) => MUVELET_NEVE[m] ?? m;
   const javaslatKiirasa = (j) => {
     const kik = j.erintettek ?? [];
     const szin = j.statusz === 'elfogadva' ? SZIN.jo : j.statusz === 'elvetve' ? SZIN.nem : '';
@@ -7592,7 +7654,7 @@ async function allapotKiirasa(napokMulva) {
     const felirat = j.statusz === 'nemIsmert' ? 'NEM ISMERT' : j.statusz.toUpperCase();
     kiir('  ' + SZIN.halvany + j.azonosito.slice(0, 8) + SZIN.vege
       + '  ' + szin + felirat + SZIN.vege
-      + '  ' + (kik.length > 1 ? kik.length + ' entitás' : j.muvelet + ': „' + (j.valtozas?.cim ?? '—') + '"'));
+      + '  ' + (kik.length > 1 ? kik.length + ' entitás' : muveletNeve(j.muvelet) + ': „' + (j.valtozas?.cim ?? '—') + '"'));
     // ⭐⭐ MINDEN ÉRINTETT SORONKÉNT, A SAJÁT DÖNTÉSÉVEL — a művelet entitásonkénti, ÉS a
     // döntés is: minden résznek teljesítenie kell a SAJÁT küszöbeit (töredék-modell).
     // Ezért nem lehet egyetlen sorral összefoglalni; a rész-sorok mutatják meg, MELYIK
@@ -7605,7 +7667,7 @@ async function allapotKiirasa(napokMulva) {
       // pont azt a különbséget tüntetné el, amit a D19 véd.
       const cel = allapot.entitasok.get(r.entitas)?.cim
         ?? (allapot.elfelejtettek.includes(r.entitas) ? '— már nincs —' : 'ismeretlen');
-      kiir('      ' + SZIN.halvany + '↳ ' + jel + SZIN.vege + SZIN.halvany + ' ' + r.muvelet + ': '
+      kiir('      ' + SZIN.halvany + '↳ ' + jel + SZIN.vege + SZIN.halvany + ' ' + muveletNeve(r.muvelet) + ': '
         + '„' + cel + '"'
         + (r.valtozas?.cim ? ' → „' + r.valtozas.cim + '"' : '')
         + '  👍 ' + r.tamogatok + ' 👎 ' + r.ellenzok + ' 🤷 ' + r.tartozkodok
@@ -7675,9 +7737,9 @@ async function allapotKiirasa(napokMulva) {
     const kik = e.erintettek ?? [];
     kiir('  ' + SZIN.jo + '📜 '
       + (kik.length > 1
-        ? kik.map((r) => r.muvelet + ' „' + (allapot.entitasok.get(r.entitas)?.cim
+        ? kik.map((r) => muveletNeve(r.muvelet) + ' „' + (allapot.entitasok.get(r.entitas)?.cim
             ?? (allapot.elfelejtettek.includes(r.entitas) ? '— már nincs —' : '?')) + '"').join(' + ')
-        : e.muvelet + ': „' + (e.valtozas?.cim ?? '—') + '"') + SZIN.vege);
+        : muveletNeve(e.muvelet) + ': „' + (e.valtozas?.cim ?? '—') + '"') + SZIN.vege);
     kiir('      ' + SZIN.halvany + j.azonosito.slice(0, 8)
       + ' · megszületett: ' + new Date(e.megszuletett).toLocaleString('hu-HU')
       + ' · ' + p.tamogatok + '/' + p.szavazok + ' támogató (' + szazalek(p.tamogatottsagEzrelek) + ')'
@@ -7738,7 +7800,7 @@ return {
   ketFokAllapota, keziCsere, keziHibaSzovege, keziKapuNyitasa, kiszolgalasBeallitas, kiszolgalasFajl, kiszolgalasiKeretHatara,
   keretAllasIrasa, kiszolgalasiKeretKapcsolo, kodOlvasoKeszites, koinoErvei, koinoSzuletese, koinoVerzioElonezete, koinoVerzioKeszitese,
   koinoVerzioKiirasa, bekapcsolodasElonezete, bekapcsolodasVegrehajtasa, kopogtatoTemaBuffer, kornyezet, kornyezetSzam, kotesFeljegyzese,
-  kuldoKulcsai, lapHianyzoinakElkerese, laposMegjegyzes, lezarasiOsszegzesekKiadasa, koinonOsszegzesekKiadasa, meghivottProfilja, ora,
+  kuldoKulcsai, lapHianyzoinakElkerese, laposMegjegyzes, lezarasiOsszegzesekKiadasa, koinonOsszegzesekKiadasa, koinonOsszegzesekFelvetele, meghivottProfilja, ora,
   orjaratErtesitesei, postafiokFrissitese, postafiokMegjegyzes, postafiokModositasa, programVerzioja, rajKorCeljaim,
   resAllapotKeszites, reszvetelHalmazom, sajatBejegyzesek, sajatHirdetendoTemak, sajatHorgonyom,
   sajatOsszesCim, sajatVallalasa, sikidomMegjegyzes, strukturaMegjegyzes, szabalyokSzovege, szovegKepeiKeresre,
@@ -7782,7 +7844,7 @@ const {
   ketFokAllapota, keziCsere, keziHibaSzovege, keziKapuNyitasa, kiszolgalasBeallitas, kiszolgalasFajl, kiszolgalasiKeretHatara,
   keretAllasIrasa, kiszolgalasiKeretKapcsolo, kodOlvasoKeszites, koinoErvei, koinoSzuletese, koinoVerzioElonezete, koinoVerzioKeszitese,
   koinoVerzioKiirasa, bekapcsolodasElonezete, bekapcsolodasVegrehajtasa, kopogtatoTemaBuffer, kornyezet, kornyezetSzam, kotesFeljegyzese,
-  kuldoKulcsai, lapHianyzoinakElkerese, laposMegjegyzes, lezarasiOsszegzesekKiadasa, koinonOsszegzesekKiadasa, meghivottProfilja, ora,
+  kuldoKulcsai, lapHianyzoinakElkerese, laposMegjegyzes, lezarasiOsszegzesekKiadasa, koinonOsszegzesekKiadasa, koinonOsszegzesekFelvetele, meghivottProfilja, ora,
   orjaratErtesitesei, postafiokFrissitese, postafiokMegjegyzes, postafiokModositasa, programVerzioja, rajKorCeljaim,
   resAllapotKeszites, reszvetelHalmazom, sajatBejegyzesek, sajatHirdetendoTemak, sajatHorgonyom,
   sajatOsszesCim, sajatVallalasa, sikidomMegjegyzes, strukturaMegjegyzes, szabalyokSzovege, szovegKepeiKeresre,
@@ -8898,10 +8960,12 @@ try {
       // Az őrjárat magától kiadja (ahol a döntés teljes bemenetét tartom, és még nincs érvényes); ezzel kézzel is. Utána a koino
       // elfogadott általános egyezményei, és hogy van-e mindegyikhez érvényes tömör alak a tárban.
       const db = await koinonOsszegzesekKiadasa();
+      // ⭐⭐ D130 (③d): és a kapott tömör alakok ellenőrzése (a tartó döntése) — utána a kép már ezekből is tudja
+      const felvett = await koinonOsszegzesekFelvetele();
       const { javaslatok } = await kepetKeszit();
       const egyezmenyek = [...javaslatok].filter(([, j]) => j.fajta === 'altalanos' && j.statusz === 'elfogadva' && !j.mult);
       kiir((db ? SZIN.jo : SZIN.halvany) + db + ' új tömör alak kiadva' + SZIN.vege + SZIN.halvany + ' · ' + egyezmenyek.length
-        + ' elfogadott általános egyezmény' + SZIN.vege);
+        + ' elfogadott általános egyezmény' + (felvett ? ' · ' + felvett + ' kapott tömör alak ellenőrizve' : '') + SZIN.vege);
       for (const [az, j] of egyezmenyek) {
         let ervenyes = 0;
         for (const e of (await tar.szeletEsemenyei(az)).filter((x) => x.tipus === KOINON_OSSZEGZES && x.adat?.javaslat === az)) {

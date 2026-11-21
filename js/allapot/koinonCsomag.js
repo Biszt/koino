@@ -164,6 +164,8 @@ async function tomorAlakEllenorzese({ javaslatAz, reszek, allasfoglalasok, eseme
   let ellenorzott = 0;
   let nemEllenorizheto = 0;
   const osszegzesek = [];
+  // ⭐ D130 (③d): részenként a döntés (az összegzés és a számaiból számolt állás) — a tartó ezt adja a döntésnek (a D95/1 útja)
+  const dontesek = [];
   for (const entitas of entitasok) {
     const r = reszek.find((x) => x?.osszegzes?.entitas === entitas);
     if (!r) return hiba('hiányzik egy rész összegzése');
@@ -176,6 +178,7 @@ async function tomorAlakEllenorzese({ javaslatAz, reszek, allasfoglalasok, eseme
     ellenorzott += v.ellenorzott;
     nemEllenorizheto += v.nemEllenorizheto;
     osszegzesek.push(r.osszegzes);
+    dontesek.push({ entitas, osszegzes: r.osszegzes, allas: v.allas });
   }
 
   const szerzok = new Set();
@@ -186,7 +189,8 @@ async function tomorAlakEllenorzese({ javaslatAz, reszek, allasfoglalasok, eseme
     szerzok.add(a.szerzo);
     if (!(await esemenyEllenorzese(a)).rendben) return hiba('az állásfoglalás nem hiteles');
   }
-  return { rendben: true, elfogadva, lezaras, ellenorzott, nemEllenorizheto, osszegzesek };
+  // `javaslat`: az ellenőrzött javaslat eseménye (a kísérőjével) — a tartó a tárába menti (③d), hogy a képe ismerje
+  return { rendben: true, elfogadva, lezaras, ellenorzott, nemEllenorizheto, osszegzesek, dontesek, javaslat: j };
 }
 
 // ===================================

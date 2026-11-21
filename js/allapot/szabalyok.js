@@ -997,6 +997,14 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
         // ⭐ A GYÖKÉRBEN BÁRKI: ha az egyezmény nem lóg semmi alatt, a hatókör a teljes koino.
         if (hatokorGyokere === null) continue;
 
+        // ⭐⭐ D130 KO10 (A) (Csaba, 2026-11-21: „rendben”): ha az egyezményt ismerjük, de a HELYÉT (a szülőjét) nem — a koinon
+        // darabjának tartója a hely ágát nem tartja (D130 ③) —, a hatókört sem tudjuk ellenőrizni: „nem ellenőrizhető” (számít, de
+        // jelölve — D19), nem kivétel. ⛔ Különben a hiányt tényként olvasnánk („nincs tudatpontod ezen az ágon”).
+        if (!szulok.has(hatokorGyokere)) {
+          nemEllenorizheto(e, 'nem ismerjük az egyezmény helyét (a szülőjét), ezért a hatókört sem tudtuk ellenőrizni');
+          continue;
+        }
+
         // Van-e pontom a hatókör gyökerén VAGY bármely leszármazottján?
         let jogosult = false;
         for (const [entitas, pont] of lancAllas.pontok) {
@@ -1004,7 +1012,14 @@ export function szabalyokErvenyesitese(esemenyek, beallitas = {}) {
           if (leszarmazottE(entitas, hatokorGyokere, szulok)) { jogosult = true; break; }
         }
         if (!jogosult) {
-          kivetel(e, 'nincs tudatpontod ezen az ágon, tehát nem foglalhatsz állást róla');
+          // ⭐⭐ D130 KO10 (A): a „nincs pontja” csak HÉZAGTALANUL ismert láncról állítható. A koinon darabjának tartója (és a
+          // szigorú (b) alatt bárki, aki a hely ágát nem tartja) a szerző láncát hézagosan látja — a pontja a hely szeletében van.
+          // Ilyenkor „nem ellenőrizhető” (számít, jelölve — D19), nem kivétel (ugyanaz a mérce, mint a keret-szabályé: `folytonos`).
+          if (!folytonos) {
+            nemEllenorizheto(e, 'a szerző láncát hézagosan ismerjük (nem tartjuk az ág szeletét), ezért a hatókört nem tudtuk ellenőrizni');
+          } else {
+            kivetel(e, 'nincs tudatpontod ezen az ágon, tehát nem foglalhatsz állást róla');
+          }
         }
         continue;
       }

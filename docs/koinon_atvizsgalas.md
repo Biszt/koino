@@ -237,3 +237,19 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
   készülékkulcson múlik) — a terepen. ⏭️ ③d a tartó döntése (a D95/1 útján), ④ a darab hirdetése a címjegyzéken.
 - **2026-11-20** — a ③d terve (8. szakasz). ⛔ Lelet: a ③d után a tartó az egyezményt ismerné, a helyét nem — és az állásfoglalás
   jogát a szabály hamis kivételnek olvasná. ⏸️ **KO10** (a tartó ítélete az állásfoglalás jogáról) Csabánál.
+- **2026-11-21** — ✅ **Csaba: „rendben”** — **KO10 (A): a tartó nem ítél.** ✅ **A ③d kész: a tartó döntése.** `koinonCsomag.js`: az
+  ellenőrzés részenként a döntést (az összegzés és a számaiból számolt állás) és a javaslat eseményét (a kísérőjével) is visszaadja;
+  `fajlTar.js` `koinonTarolo` (a koino mappájában `koinon.json` — a már ellenőrzött tömör alakok, hogy ne kelljen körönként újra);
+  `koino.js` `koinonOsszegzesekFelvetele` (az őrjárat háztartása és a `koinon` parancs hívja; körönként legfeljebb 16): a tárban lévő
+  `KoinonOsszegzes`-t önmagából ellenőrzi, a javaslatot a tárba menti, a részek döntését a jegyzékbe; `ellenorzottOsszegzesek` (EGY
+  út a parancssornak és a lapnak — D95/1) onnan adja a döntésnek, ott, ahol a rész szeletét nem tartom egészében (ha több érvényes
+  van, a legkisebb azonosítójú — KO8 (A)); a tömörítés megtartja a megmentett javaslatot. Így a darab tartójánál: elfogadva → a koinon
+  pontja (①) → az általános egyezmény ott áll a képében, a helye nélkül is. ⛔ **Lelet (a parancssori próba első futása):** a tartó a
+  HELYET ismerte (a legfelső szintű gondolat születését a gyökér-darabja hozta), csak a pontjait nem — a KO10 első alakja („ha a
+  helyet sem ismeri”) itt nem fogott, és a szabály az állásfoglalást mégis hamis kivételnek olvasta. ⭐ **A KO10 (A) végleges alakja**
+  (`szabalyok.js`): a „nincs pontja ezen az ágon” csak HÉZAGTALANUL ismert láncról állítható — ha a szerző láncát hézagosan látjuk
+  (a pont-eseménye a hely szeletében maradt), „nem ellenőrizhető” (számít, jelölve — D19); ugyanaz a mérce, mint a keret-szabályé
+  (`folytonos`). Ha a helyet sem ismerjük, szintén. Ez a szigorú (b) régi esetét is megoldja (aki a helyet tartja, de a mélyebb ágat
+  nem). A parancssor a művelet nevét magyarul írja (a nyers „Allaspont” helyett „Álláspont”). Próba: +1 egyezmény (a KO10 három
+  esete: ismeretlen hely, hézagos lánc, hézagtalan lánc), +1 parancssor (a szigorú vendég a `koinon` után a képében látja az általános
+  egyezményt, a hatályával), 4 rontás mind bukik. ⏭️ ③e a kézikönyv a darabokba, ③f az `r` a születésben, ④ a fenntartó kör.

@@ -350,6 +350,48 @@ proba('⭐⭐ D130 ③c: a koinon DARABJA a cserében — a szigorú vendég az 
   }
 });
 
+// ⭐⭐ D130 (③d — KO10 (A)): A TARTÓ DÖNTÉSE — a ③c folytatása: a szigorú vendég a `koinon` paranccsal (az őrjárat is) ellenőrzi a
+// kapott tömör alakot, a javaslatot a tárába menti, és a döntés az ellenőrzött összegzésből jön — így a képében az általános egyezmény
+// ott áll (a koinon pontjával, a helye nélkül), a hatályával: az állásfoglalás „nem ellenőrizhető” (a helyet nem ismeri), de számít.
+// Rontás: (a) a döntés nem kapja meg (az `ellenorzottOsszegzesek` a koinont kihagyja) → az egyezmény nem áll ott → bukik; (b) a
+// javaslat nem kerül a tárba → bukik.
+proba('⭐⭐ D130 ③d: a TARTÓ DÖNTÉSE — a szigorú vendég a kapott tömör alakot ellenőrzi, és a képében az általános egyezmény ott áll (a helye nélkül), a hatályával (a nem ellenőrizhető állásfoglalás is számít — KO10 (A))', async () => {
+  const a = await ujKeszulek();
+  const b = await ujKeszulek();
+  const alap = { KOINO_KISZOLGALAS: 'alap', KOINO_DHT_BELEPOK: 'nincs', KOINO_TUKOR: '127.0.0.1:9' };
+  try {
+    await fut(a, 'koino', 'Koinon-döntés', 'nyilt', alap);
+    const gondolat = azonosito(await fut(a, 'gondolat', 'A HELY', alap), 'Létrejött:');
+    if (!gondolat) return false;
+    await fut(a, 'ertek', gondolat, '51', '0', '2', '2', alap);
+    const javaslat = azonosito(await fut(a, 'altalanos', 'A KÖZÖS ÁLLÁSPONT', gondolat, alap), 'Általános javaslat beadva:');
+    if (!javaslat) return false;
+    await fut(a, 'szavaz', javaslat, 'tamogat', alap);
+    await varj(3000);                                    // a lezárás (a döntési idő 2 mp)
+    await fut(a, 'allast', javaslat, 'csatlakozik', alap);
+    await fut(a, 'koinon', alap);
+    await csereKor(a, b, 7447, alap);
+    const elotte = await fut(b, 'allapot', alap);
+    const koinon = await fut(b, 'koinon', alap);
+    const utana = await fut(b, 'allapot', alap);
+    const egyezmenyek = (k) => k.split('ÁLTALÁNOS EGYEZMÉNYEK')[1] ?? '';
+    const r = {
+      elotte: !egyezmenyek(elotte).includes('A KÖZÖS ÁLLÁSPONT'),
+      ellenorizve: /1 kapott tömör alak ellenőrizve/.test(koinon) && /1 elfogadott általános egyezmény/.test(koinon),
+      egyezmeny: egyezmenyek(utana).includes('A KÖZÖS ÁLLÁSPONT'),
+      hataly: /🤝 1/.test(egyezmenyek(utana))
+    };
+    if (!Object.values(r).every(Boolean)) {
+      process.stdout.write('  koinon-döntés — ami bukott: ' + JSON.stringify({ r, koinon: koinon.slice(0, 300),
+        utana: egyezmenyek(utana).slice(0, 400) }) + '\n');
+    }
+    return Object.values(r).every(Boolean);
+  } finally {
+    await rm(a, { recursive: true, force: true });
+    await rm(b, { recursive: true, force: true });
+  }
+});
+
 // ===================================
 // ⭐ ÉS A SZERKESZTÉSI KÖR IS — hogy a fenti ne legyen egyedi
 // ===================================
