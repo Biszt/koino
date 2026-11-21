@@ -25,7 +25,9 @@ const JAVASLAT_TIPUS_FELIRAT = {
   Modositas:  'Módosítás',
   Egyesites:  'Egyesítés',
   Athelyezes: 'Áthelyezés',
-  Csomag:     'Csomag'
+  Csomag:     'Csomag',
+  // ⭐ koino (D27): az általános javaslat művelete (a prototípusban nincs) — különben a nyers „Allaspont” állna
+  Allaspont:  'Álláspont'
 };
 
 const STATUSZ_FELIRAT = {

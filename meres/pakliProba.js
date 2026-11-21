@@ -713,6 +713,62 @@ proba('⭐ A RÉSZLETEK az egyezmény UTÁNI alakot adják, és a besorolást is
     && r.data.hozzajarulok.length === 1;
 });
 
+// ⭐ (Csaba, 2026-11-20: „a részletes adatok, menüpont, még nem mutatja az adatokat”): az örökölt ablak a prototípus alakját olvassa
+// (`data.gondolat`, `data.tudatpont`, `data.javaslat`…) — a program laposan felelt, és minden sor „—” volt. Most a részletek a döntést
+// (ugyanaz, mint a kártyáé), a saját szavazatot, az érintettek típusát, a szerkesztőket (a végrehajtott módosítás szerzője elöl, a
+// létrehozó utána, a szavazatával) és a módosítás idejét is hozzák, és a lap (`kartyaAdat.js` `reszletekAdatta`) fordít. Rontás: a döntés
+// kimarad → bukik; a szerkesztők sorrendje fordított → bukik; a saját szavazat nem jön → bukik; a fordító az arányokat nem váltja
+// százalékra → bukik.
+proba('⭐ A RÉSZLETEK a döntést, a saját szavazatot, a szerkesztőket és a módosítás idejét is hozzák — és a lap fordítása az örökölt ablak alakjára (a sorok nem „—”-k)', async () => {
+  const { tar, anna } = await ujKoino();
+  const bela = await ujTag(KOINO);
+  for (const e of tagsagiEsemenyei(bela)) await esemenyMentese(tar, e);
+  const kezdet = Date.UTC(2026, 0, 1);
+  const kesobb = kezdet + 30 * 24 * 3600 * 1000;
+  const g = await anna.tesz('GondolatLetrehozas', { cim: 'RÉGI', meret: 10 }, kezdet);
+  await esemenyMentese(tar, g);
+  await esemenyMentese(tar, await anna.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 400 }, kezdet));
+  await esemenyMentese(tar, await bela.tesz('TudatpontRendezes', { entitas: g.azonosito, pont: 100 }, kezdet));
+  await esemenyMentese(tar, await anna.tesz('ErtekJavaslat', { entitas: g.azonosito,
+    ertekek: { elfogadasiKuszob: 51, reszveteliKuszob: 0, minimumDontesiIdo: 3600, maximumDontesiIdo: 7200 } }, kezdet));
+  const j = await bela.tesz('Javaslat', { fajta: 'szerkesztesi', erintett: g.azonosito, muvelet: 'Modositas',
+    valtozas: { cim: 'ÚJ' }, indoklas: null }, kezdet + 1000);
+  await esemenyMentese(tar, j);
+  for (const ev of await bela.szavaz(j, { szavazat: 'Tamogat' }, kezdet + 2000)) await esemenyMentese(tar, ev);
+  for (const ev of await anna.szavaz(j, { szavazat: 'Tamogat' }, kezdet + 2100)) await esemenyMentese(tar, ev);
+
+  const kozben = await entitasReszletei(tar, KOINO, j.azonosito, { szerzo: anna.szerzo, most: kezdet + 2500 });
+  const egyezmeny = await entitasReszletei(tar, KOINO, j.azonosito, { szerzo: anna.szerzo, most: kesobb });
+  const gr = await entitasReszletei(tar, KOINO, g.azonosito, { szerzo: anna.szerzo, most: kesobb });
+  const { reszletekAdatta } = await import('../felulet/js/kartyaAdat.js');
+  const ge = reszletekAdatta(gr).data;
+  const ee = reszletekAdatta(egyezmeny).data;
+  const r = {
+    kozben: kozben.data.kartyaTipus === 'Javaslat' && kozben.data.javaslat?.statusz === 'folyamatban',
+    egyezmeny: egyezmeny.data.kartyaTipus === 'Egyezmeny' && egyezmeny.data.javaslat?.statusz === 'elfogadva'
+      && egyezmeny.data.javaslat.sajatSzavazat === 'Tamogat' && egyezmeny.data.javaslat.letrehozo === bela.szerzo
+      && egyezmeny.data.javaslat.letrehozoEn === false && egyezmeny.data.javaslat.erintettek[0]?.tipus === 'Gondolat',
+    szerkesztok: gr.data.szerkesztok.length === 2 && gr.data.szerkesztok[0].szerzo === bela.szerzo
+      && gr.data.szerkesztok[1].szerzo === anna.szerzo && gr.data.szerkesztok[1].en === true
+      && gr.data.szerkesztok[1].szavazat === 'Tamogat' && gr.data.modositva === egyezmeny.data.javaslat.lezarasIdeje,
+    // ----- a lap fordítása: az örökölt ablak alakja -----
+    gondolatAlak: ge.gondolat.letrehozva === kezdet && ge.gondolat.modositva === gr.data.modositva
+      && ge.tudatpont.osszesPont === gr.data.osszesPont && ge.tudatpont.hozzajarulokSzama === 2
+      && ge.gondolat.szerkesztok[0].eemberId.eemberNev === bela.szerzo.slice(0, 8) + '…'
+      && ge.gondolat.szerkesztok[1].eemberId.eemberNev === 'te — ' + anna.szerzo.slice(0, 8) + '…'
+      && ge.gondolat.szerkesztok[1].allapot === 'Tamogatja',
+    egyezmenyAlak: ee.egyezmeny.javaslatTipus === 'Modositas' && ee.egyezmeny.tamogatokSzama === 2
+      && ee.egyezmeny.vegrehajtva === egyezmeny.data.javaslat.lezarasIdeje
+      && ee.egyezmeny.reszveteliArany === egyezmeny.data.javaslat.reszveteliEzrelek / 10
+      && ee.egyezmeny.erintettEntitasok[0]?.entitasTipus === 'Gondolat' && ee.eeEmberSzavazat?.szavazatTipus === 'Tamogat'
+      && ee.javaslat.statusz === 'Elfogadva' && ee.tudatpontok.osszesPont === egyezmeny.data.osszesPont
+  };
+  if (!Object.values(r).every(Boolean)) {
+    process.stdout.write('    (' + JSON.stringify({ r, g: gr.data.szerkesztok, j: egyezmeny.data.javaslat }).slice(0, 900) + ')\n');
+  }
+  return Object.values(r).every(Boolean);
+});
+
 proba('⭐⭐ A KÜSZÖBÖK a prototípus NEVEIVEL érkeznek (a modal így olvassa)', async () => {
   const { tar, anna } = await ujKoino();
   const azonosito = await gondolat(tar, anna, 'Küszöbös', 100);

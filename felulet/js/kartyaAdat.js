@@ -270,6 +270,84 @@ export function rendezettAdatta(oldal) {
   return { rendezettLista: oldalAdatta(oldal?.kartyak) };
 }
 
+// ===================================
+// ⭐ A RÉSZLETES ADATOK (Csaba, 2026-11-20: „a részletes adatok, menüpont, még nem mutatja az adatokat”)
+// ===================================
+//
+// Az örökölt `ReszletekModal` a prototípus válaszát olvassa — típusonként egy al-objektumot (`gondolat`, `kategoria`,
+// `gondolatTipus`, `javaslat`, `egyezmeny`) és a pontokat külön (`tudatpont`, `tudatpontok`). A program a saját szótárában,
+// laposan felel (`pakli.js` `entitasReszletei`): fordítás nélkül minden sor „—” volt (a létrehozás ideje, a pontok, a
+// hozzájárulók, a szavazás állása). ⭐ Ugyanaz az elv, mint a kártyáknál: a fordítás itt, egy helyen; a javaslat arányai is
+// ugyanúgy (ezrelékből százalék), mint a kártyán.
+
+/** A szavazat a prototípus szerkesztő-színezésének szavával (`ReszletekModal._szerkesztoSzinOsztaly`). */
+const SZAVAZAT_ALLAPOTA = { Tamogat: 'Tamogatja', Ellenez: 'Ellenzi', Tartozkodik: 'Tartozkodik' };
+
+/** Ezrelékből százalék (a koino egész ezrelékben számol — a kártya is így vált); hiányzó érték: null (az ablak „—”-t ír). */
+const szazalekra = (ezrelek) => (Number.isFinite(ezrelek) ? ezrelek / 10 : null);
+
+/**
+ * Egy e-ember a részletekben: nevet a program nem mond (D6: személyes adat nem megy a láncra) — a kulcsa rövid alakja, és ha én
+ * vagyok, az is (mint a hozzájárulók listája).
+ */
+const eemberFelirata = (szerzo, en = false) => (typeof szerzo === 'string' && szerzo
+  ? (en ? 'te — ' : '') + szerzo.slice(0, 8) + '…' : '—');
+
+/**
+ * Egy érintett típusa az ablaknak: a gondolat, kategória, gondolattípus a prototípus kulcsával (az ablak fordítja), egy javaslat-
+ * entitás (egy egyezmény is lehet érintett — D27/5) a teljes nevével — a „javaslat” és az „egyezmény” soha nem magában.
+ */
+const erintettTipusa = (r) => (r.tipus === 'Javaslat' || r.tipus === 'Egyezmeny'
+  ? (r.fajta === 'altalanos' ? 'Általános ' : 'Szerkesztési ') + (r.tipus === 'Egyezmeny' ? 'egyezmény' : 'javaslat')
+  : (r.tipus ?? null));
+
+/**
+ * A `/api/<tipus>/<id>/reszletek` válasza → a `ReszletekModal` alakja. Minden típus al-objektuma kitöltve (az ablak a kártya
+ * típusa szerint választ: a koino-verzió és a nézet gondolat-kártya, az elfogadott javaslat egyezmény), a program saját
+ * mezői a `koino` alatt maradnak.
+ * @param {Object} v - a program válasza (`{ data: … }`)
+ * @returns {Object} `{ data: { gondolat, kategoria, gondolatTipus, tudatpont, javaslat, egyezmeny, eeEmberSzavazat, tudatpontok, koino } }`
+ */
+export function reszletekAdatta(v) {
+  const d = v?.data;
+  if (!d || typeof d !== 'object') return v;
+  const tudatpont = { eemberHozzajarulas: d.eemberHozzajarulas ?? 0, osszesPont: d.osszesPont ?? 0,
+    hozzajarulokSzama: d.hozzajarulokSzama ?? 0 };
+  const entitas = {
+    cim: d.cim ?? '', nev: d.nev ?? d.cim ?? '', ikon: ikonCime(d.ikon), leiras: null,
+    letrehozva: d.letrehozva ?? null,
+    // a koinoban nincs külön „módosítva” mező: az utolsó végrehajtott szerkesztési javaslat (módosítás) lezárása (a program mondja)
+    modositva: d.modositva ?? null,
+    szerkesztok: (d.szerkesztok ?? []).map((s) => ({ eemberId: { eemberNev: eemberFelirata(s.szerzo, s.en === true) },
+      allapot: SZAVAZAT_ALLAPOTA[s.szavazat] ?? 'NemSzavazott' }))
+  };
+  const j = d.javaslat && typeof d.javaslat === 'object' ? d.javaslat : null;
+  const kozos = j ? {
+    javaslatTipus: j.muvelet ?? null,
+    letrehozo: { eemberNev: eemberFelirata(j.letrehozo, j.letrehozoEn === true) },
+    erintettEntitasok: (j.erintettek ?? []).map((r) => ({ entitasId: r.entitas, entitasTipus: erintettTipusa(r), muvelet: r.muvelet })),
+    reszveteliArany: szazalekra(j.reszveteliEzrelek),
+    tamogatotsagiArany: szazalekra(j.tamogatottsagEzrelek),
+    bizonyossagiMutato: szazalekra(j.bizonyossagiMutato)
+  } : null;
+  return {
+    ...v,
+    data: {
+      gondolat: entitas, kategoria: entitas, gondolatTipus: entitas, tudatpont,
+      ...(j ? {
+        javaslat: { ...kozos, statusz: STATUSZ_KIFELE[j.statusz] ?? j.statusz, letrehozva: d.letrehozva ?? null,
+          javaslatTamogatoinakSzama: j.tamogatok ?? 0, javaslatEllenzoinekSzama: j.ellenzok ?? 0,
+          javaslatTartozkodoinakSzama: j.tartozkodok ?? 0, dontesiIdo: j.dontesiIdo ?? null },
+        eeEmberSzavazat: j.sajatSzavazat ? { szavazatTipus: j.sajatSzavazat } : null,
+        egyezmeny: { ...kozos, vegrehajtva: j.lezarasIdeje ?? null,
+          tamogatokSzama: j.tamogatok ?? 0, ellenzokSzama: j.ellenzok ?? 0, tartozkodokSzama: j.tartozkodok ?? 0 },
+        tudatpontok: tudatpont
+      } : {}),
+      koino: d
+    }
+  };
+}
+
 /**
  * ⭐ Prototípus-útvonal-e — és ha igen, hova menjen, és mit kapjon vissza a hívó.
  *
@@ -317,6 +395,17 @@ export function prototipusUtvonala(utvonal) {
         biztos: Number.isInteger(v?.biztos) ? v.biztos : null, betoltes: v?.betoltes === true, kitolKerni: v?.kitolKerni ?? 0 }),
       horgonyt: true
     };
+  }
+
+  // ----- ⭐ A Részletes adatok: `<tipus>/<id>/reszletek` (a `ReszletekModal`) -----
+  // ⚠️ A lap horgonya NÉLKÜL (a prototípus-út nem teszi rá — `apiHelper.js`), és a válasz sem állítja át: ha a program elkérte a
+  // hiányzó szeletet (`betoltes`), az újrakérdezés a frissen megjött eseményeket is lássa — a horgonyos kép a régit adná.
+  if (/^(gondolat|kategoria|gondolatTipus|javaslat|egyezmeny)\/[^/]+\/reszletek$/.test(ut)) {
+    return { utvonal: ut, fordit: reszletekAdatta, horgonyt: false };
+  }
+  // ⭐ Az ablak küszöb-szakasza ugyanígy (a program a prototípus alakjában adja — fordítás nélkül, csak a horgony marad le)
+  if (/^ertekJavaslat\/reszletek\/[^/]+\/[^/]+$/.test(ut)) {
+    return { utvonal: ut, fordit: (x) => x, horgonyt: false };
   }
   return null;
 }

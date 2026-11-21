@@ -48,7 +48,7 @@ import { koinoEsemenyei, koinoBemenete } from '../tar/esemenyTar.js';
 import { koinoKepe } from './ketReteg.js';
 import { szetosztottPontok } from './allapotSzamitas.js';
 import { TUDATPONT_KERET } from './szabalyok.js';
-import { ALAP_KUSZOBOK } from './javaslatSzamitas.js';
+import { ALAP_KUSZOBOK, sajatSzavazat } from './javaslatSzamitas.js';
 import { szovegFeloldasa, szovegHivatkozasE } from '../esemeny/szovegDarab.js';
 
 /** ⭐ D120: a hivatkozások által bemondott törzs-méret (a szöveg `torzs`-a + a kártya kódjáé) — null, ha egyik sem mondja. */
@@ -93,6 +93,9 @@ export const ALAP_DARAB = 20;
 // ⛔ A FELSŐ KORLÁT NEM UDVARIASSÁG, HANEM A 9. SZABÁLY. Enélkül a hívó `darab=999999999`-cel
 // visszakérhetné az egész paklit, és az illesztés máris azt jelentené, hogy „add ide mindet".
 export const MAX_DARAB = 100;
+
+/** A Részletes adatok szerkesztő-listája legfeljebb ennyi (9. szabály — egy sokszor módosított gondolatnál se nőjön a válasz). */
+export const SZERKESZTO_KORLAT = 20;
 
 // ===================================
 // A NÉZET — a horgonyhoz tartozó kép gyorsítótára
@@ -1103,11 +1106,46 @@ export async function entitasReszletei(tar, koino, azonosito, beallitas = {}) {
   // ⭐ D72: a szöveg feloldása (lásd `entitasSzovege`).
   const reszletSzoveg = await szovegFeloldasa(e.szoveg ?? null, beallitas.darabOlvas);
 
+  // ⭐ (Csaba, 2026-11-20: „a részletes adatok, menüpont, még nem mutatja az adatokat”) — a döntés, a szerkesztők és a módosítás
+  // ideje is. A szerkesztési vagy általános javaslat döntése UGYANAZ, mint a kártyáé (`kartya` — egy forrás), és mellé a saját
+  // szavazatom (töredéknél a csoporté) és az érintettek típusa.
+  const dontes = entitasDontese(e, kep.javaslatok);
+  const k = dontes ? kartya(e, agazati.get(e.azonosito) ?? 0, en, kep.entitasok, dontes) : null;
+  const szavazata = (javaslatAz, ki) => (ki && Array.isArray(kep.szamitok) ? sajatSzavazat(kep.szamitok, javaslatAz, ki) ?? null : null);
+  const javaslat = k?.javaslat ? {
+    ...k.javaslat,
+    letrehozo: dontes.letrehozo ?? null,
+    letrehozoEn: !!en && dontes.letrehozo === en,
+    // az érintett kártya-típusa (egy egyezmény is lehet érintett — D27/5), és ha javaslat-entitás, a fajtája
+    erintettek: k.javaslat.erintettek.map((r) => {
+      const x = kep.entitasok.get(r.entitas);
+      const xd = x ? entitasDontese(x, kep.javaslatok) : null;
+      return { ...r, tipus: x ? kartyaTipusa(x, xd) : null, fajta: xd?.fajta ?? null };
+    }),
+    sajatSzavazat: szavazata(e.toredek?.csoport ?? e.azonosito, en)
+  } : null;
+  // A szerkesztők: akiknek a MÓDOSÍTÁSA erre az entitásra végrehajtódott (a végrehajtás sorrendjében — a legutóbbi elöl), és a
+  // létrehozója. Az utolsó módosítás ideje a „Módosítva”. A többiek mellett, hogyan szavaztak az utolsó elfogadott módosításra
+  // (a prototípus színezése). ⚠️ Nevet nem mondunk (D6: személyes adat nem megy a láncra) — a kulcsot, és hogy én vagyok-e.
+  const modositasok = (kep.szerkesztesiAlkalmazasok ?? []).filter((a) => a.erintett === e.azonosito && a.muvelet === 'Modositas')
+    .map((a) => kep.javaslatok?.get(a.javaslat) ?? null).filter((d) => d !== null);
+  const utolso = modositasok[modositasok.length - 1] ?? null;
+  const szerkesztok = [];
+  for (const ki of [...modositasok.map((d) => d.letrehozo).reverse(), e.szerzo]) {
+    if (!ki || szerkesztok.some((s) => s.szerzo === ki) || szerkesztok.length >= SZERKESZTO_KORLAT) continue;
+    szerkesztok.push({ szerzo: ki, en: ki === en, szavazat: utolso ? szavazata(utolso.azonosito, ki) : null });
+  }
+
   console.log('pakli.entitasReszletei - VÉGE');
   return {
     data: {
       entitasId: e.azonosito,
       entitasTipus: e.tipus,
+      // ⭐ D85/4: a kártya típusa (az elfogadott javaslat egyezmény) — a felület ebből tudja, melyik alakra fordítson
+      kartyaTipus: kartyaTipusa(e, dontes),
+      javaslat,
+      szerkesztok,
+      modositva: utolso?.lezarasIdeje ?? null,
       // ⭐ A koinoban a `cim` a név MINDEN típusnál — a modal `nev`-et is olvashat.
       cim: e.cim,
       nev: e.cim,

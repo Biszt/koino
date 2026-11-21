@@ -5142,6 +5142,25 @@ function hozzarendelesMegjegyzes(lista, keres) {
   }
   return reszek.length ? reszek.join(' ') : null;
 }
+/**
+ * ⭐ (Csaba, 2026-11-20) a Részletes adatok megjegyzése — a tudás határa (D19): ha az entitás szeletét nem tartom, amit az ablak
+ * mutat, az a készüléken ismert rész — és ha elkértem, ki hozza. A lap az ablak listája alá írja (`koinoModalok.js`).
+ * @param {boolean} nemTartom - az entitás szeletét nem tartom (a szigorú (b) alatt)
+ * @param {{fuggo: number, celos: number}} keres - a `lapHianyzoinakElkerese` válasza
+ * @returns {string|null} null, ha nincs mit mondani (a szeletet tartom)
+ */
+function reszletekMegjegyzes(nemTartom, keres) {
+  if (!nemTartom) return null;
+  if (keres.fuggo > 0) {
+    return keres.celos > 0
+      ? '⏳ Ennek az entitásnak a szeletét nem tartom: a pontjai, a küszöbei és a szavazatai a tartójánál vannak. Elkértem — az '
+        + 'őrjárat hozza, és az ablak magától frissül. Addig amit látsz, a készüléken ismert rész.'
+      : '🔎 Ennek az entitásnak a szeletét nem tartom, és nem ismerek társat, aki tartaná — elkértem, a tartóit keresem. Amit látsz, '
+        + 'a készüléken ismert rész.';
+  }
+  return 'Ennek az entitásnak a szeletét nem tartom — amit látsz, a tartójától nemrég elkért másolat.';
+}
+
 // ⭐ Amit a kérelem nemrég elhozott, azt ennyi ideig nem kérjük újra (a nem tartott ág gyerekeit a lekérdezés soha nem
 // tekinti BIZTOSNAK — e nélkül a lap minden lekérésnél újra kérne, és örökké „betöltés”-t mutatna; próba mérte).
 const LAP_FRISSESSEG = 10 * 60 * 1000;
@@ -7793,7 +7812,7 @@ return {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -7837,7 +7856,7 @@ const {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -12055,7 +12074,7 @@ try {
         const pakliNezet = aktiv.pakliNezet;
         const {
           tar, kornyezet, atmeneti, bemondasok, csereAllapota, dontesAzonositoja, fejlecTudas, felderitesJegyzekIrasa,
-          felderitesJegyzekOlvasasa, felderitesKor, fuggoKerelmekAllasa, halozatiKereses, hozzarendelesMegjegyzes, kepetKeszit,
+          felderitesJegyzekOlvasasa, felderitesKor, fuggoKerelmekAllasa, halozatiKereses, hozzarendelesMegjegyzes, reszletekMegjegyzes, kepetKeszit,
           keresesFuggoAllasa, keresesMegjegyzes, kiszolgalasBeallitas, koinoVerzioElonezete, koinoVerzioKeszitese,
           bekapcsolodasElonezete, bekapcsolodasVegrehajtasa, lapHianyzoinakElkerese, laposMegjegyzes, postafiokFrissitese,
           postafiokMegjegyzes, postafiokModositasa, programVerzioja, sikidomMegjegyzes, strukturaMegjegyzes, torzsElemKerese,
@@ -13524,7 +13543,17 @@ try {
             { ...lapHorgonya, szerzo, nezet: pakliNezet,
               darabOlvas: (lenyomat) => fajlBlobTarolo(KOINO).olvas(lenyomat), bemondasok: await bemondasok() });
           if (!talalat) return { allapot: 404, adat: { hiba: 'nincs ilyen entitás' } };
-          return { adat: talalat };
+          // ⭐ (Csaba, 2026-11-20: „megnyitáskor, még csak a kérelem történne meg, és a csere/cserék hozná el, a friss adatokat, és
+          // ezt a modal jelezné”): ha az entitás szeletét nem tartom, a pontjai, a küszöbei (az érték javaslatok) és a szavazatai a
+          // tartójánál vannak — elkérjük (függő kérelem: az őrjárat hozza, a társ-csere is), a válasz kimondja, és a lap újrakérdez,
+          // amíg úton van. A nemrég megjött szeletet 10 percig nem kérjük újra (`lapHianyzoinakElkerese`).
+          const tartottSzeletek = typeof pakliNezet.tartott === 'function' ? await pakliNezet.tartott() : null;
+          const nemTartom = !!tartottSzeletek && !tartottSzeletek.has(decodeURIComponent(azonosito));
+          const keres = nemTartom
+            ? await lapHianyzoinakElkerese([{ fajta: 'szelet', kulcs: decodeURIComponent(azonosito), ok: 'a részletes adataihoz' }])
+            : { kert: 0, fuggo: 0, celos: 0 };
+          return { adat: { ...talalat, betoltes: keres.fuggo > 0, kitolKerni: keres.celos,
+            koinoMegjegyzes: reszletekMegjegyzes(nemTartom, keres) } };
         }
 
         // ----- A KÜSZÖBÖK (5.5) — az ErtekJavaslatModal és a ReszletekModal kéri -----

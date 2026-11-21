@@ -374,6 +374,119 @@ proba('⛔ (Csaba, 2026-11-21: „5 másodpercenként rángatozik”) a betölt�
     }
   });
 
+// ===================================
+// 4. ⭐ A RÉSZLETES ADATOK a valódi lapon (Csaba, 2026-11-20: „a részletes adatok, menüpont, még nem mutatja az adatokat, … szerintem
+//    az vólna a jó, ha megnyitáskór, még csak a kérelem tőrténne meg, és a csere/cserék hozná el, a friss adatokat, és ezt a modal
+//    jelezné”)
+// ===================================
+//
+// Az örökölt ablak a prototípus alakját olvassa — a lap fordít (`kartyaAdat.js` `reszletekAdatta`). A sorok egy friss koino saját
+// gondolatán: a létrehozás ideje, a pontok, a hozzájárulók, a szerkesztő (te). A betöltés: a lap betöltése ELŐTT egy `fetch`-csomagoló a
+// részletek válaszába `betoltes`-t és egy megjegyzést tesz (mintha a szelet úton volna) — a megjegyzés a lista alá kerül, az
+// újrakérdezés megy (4 mp után), és az ablak bezárása után leáll.
+
+const RESZLETEK_CSOMAGOLO = `(() => {
+  const eredeti = window.fetch.bind(window);
+  window.__reszletekKeres = 0;
+  window.fetch = async (cim, ...tobbi) => {
+    const v = await eredeti(cim, ...tobbi);
+    if (!/\\/api\\/gondolat\\/[^/]+\\/reszletek/.test(String(cim))) return v;
+    window.__reszletekKeres += 1;
+    const adat = await v.clone().json();
+    adat.betoltes = true;
+    adat.kitolKerni = 1;
+    adat.koinoMegjegyzes = '⏳ próba-megjegyzés: az őrjárat hozza';
+    return new Response(JSON.stringify(adat), { status: v.status, headers: { 'Content-Type': 'application/json' } });
+  };
+})()`;
+
+const RESZLETEK_PROBA = `(async () => {
+  const varj = (ms) => new Promise((r) => setTimeout(r, ms));
+  const p = window.aktivPakli;
+  for (let i = 0; i < 60 && !(p?.megjelenitettKulcs && (p.kartyaPeldanyok ?? []).length); i++) await varj(250);
+  // a pakli a legerősebb gyökérrel nyílik (a kézikönyv — D129): a próba gondolatára lépünk
+  const { apiGet } = await import('./js/utils/apiHelper.js');
+  const lap = await apiGet('pakli?rendezes=ido&irany=csokkeno&darab=50');
+  const az = (lap?.kartyak ?? []).find((k) => k.cim === 'Egy gondolat')?.azonosito;
+  if (az) await p.init(az, 'Gondolat');
+  const kartya = (p?.kartyaPeldanyok ?? []).find((k) => k?.entitas?.adatok?.cim === 'Egy gondolat');
+  if (!kartya) return JSON.stringify({ nincsKartya: true });
+  const { default: ReszletekModal } = await import('./js/components/modals/ReszletekModal.js');
+  const m = new ReszletekModal('modal-kontener', { entitas: kartya.entitas });
+  await m.init();
+  await m.megnyitas();
+  await varj(300);
+  const sorok = {};
+  for (const s of document.querySelectorAll('#reszletek-modal-lista .reszletek-modal__sor')) {
+    const c = s.querySelector('.reszletek-modal__cimke')?.textContent?.trim();
+    const e = [...s.querySelectorAll('.reszletek-modal__ertek')].map((x) => x.textContent.trim()).join(' | ');
+    if (c) sorok[c] = e;
+  }
+  const lista = document.getElementById('reszletek-modal-lista');
+  const ki = { sorok, megj: lista?.parentElement?.querySelector(':scope > .koino-megjegyzes')?.textContent ?? null,
+    ora: !!m._koinoReszletekOra, proba: m._koinoReszletekProba ?? 0, keresElotte: window.__reszletekKeres };
+  await varj(4600);
+  ki.keresUjra = window.__reszletekKeres;
+  ki.sorokUtana = document.querySelectorAll('#reszletek-modal-lista .reszletek-modal__sor').length;
+  m.bezaras();
+  const zaraskor = window.__reszletekKeres;
+  await varj(7000);
+  ki.keresZarasUtan = window.__reszletekKeres - zaraskor;
+  return JSON.stringify(ki);
+})()`;
+
+// Rontás: (a) a fordítás kimarad (a `prototipusUtvonala` részletek-ága nélkül) → a sorok „—” → bukik; (b) a megjegyzés nem kerül ki
+// → bukik; (c) az újrakérdezés a bezárt ablaknál is fut → bukik.
+proba('⭐ (Csaba, 2026-11-20) a RÉSZLETES ADATOK a valódi lapon: a sorok a koino adatait mutatják (nem „—”), a program megjegyzése a lista alatt, betöltés alatt csendes újrakérdezés — és az ablak bezárása után leáll',
+  async () => {
+    const chrome = chromeHelye();
+    if (!chrome) { process.stdout.write('    (nincs Chrome a gépen — a böngészős próba kihagyva; KOINO_CHROME=<út>)\n'); return true; }
+    if (typeof WebSocket !== 'function') { process.stdout.write('    (a Node-ban nincs WebSocket — a böngészős próba kihagyva)\n'); return true; }
+    const otthon = await ujMappa('koino-reszletek-');
+    const adat = join(otthon, 'adat');
+    await parancs(adat, ['koino', 'Részletek-próba']);
+    await parancs(adat, ['gondolat', 'Egy gondolat', 'a gondolat szövege']);
+    const f = await felulete(adat, 8095);
+    const profil = await ujMappa('koino-reszletek-profil-');
+    const b = spawn(chrome, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0',
+      '--remote-allow-origins=*', '--user-data-dir=' + profil, 'about:blank'], { stdio: 'ignore', windowsHide: true });
+    let cdp = null;
+    try {
+      let port = null;
+      for (let i = 0; i < 100 && !port; i++) {
+        await varj(200);
+        port = (await readFile(join(profil, 'DevToolsActivePort'), 'utf8').catch(() => '')).split('\n')[0].trim() || null;
+      }
+      if (!port) throw new Error('a Chrome nem nyitott DevTools-portot');
+      const lapok = await (await fetch('http://127.0.0.1:' + port + '/json/list')).json();
+      cdp = await cdpKapcsolat(lapok.find((l) => l.type === 'page').webSocketDebuggerUrl);
+      await cdp.kuld('Page.enable');
+      await cdp.kuld('Runtime.enable');
+      await cdp.kuld('Page.addScriptToEvaluateOnNewDocument', { source: RESZLETEK_CSOMAGOLO });
+      await cdp.kuld('Page.navigate', { url: 'http://127.0.0.1:' + f.port + '/?kulcs=' + f.kulcs });
+      for (let i = 0; i < 100 && !cdp.esemenyek.some((e) => e.method === 'Page.loadEventFired'); i++) await varj(200);
+      const ki = JSON.parse(await ertekel(cdp, RESZLETEK_PROBA));
+      const s = ki.sorok ?? {};
+      const r = {
+        sorok: !!s['Létrehozva'] && s['Létrehozva'] !== '—' && s['Összes (entitáson)'] === '100' && s['Saját pontod'] === '100'
+          && String(s['Hozzájárulók'] ?? '').startsWith('1') && String(s['Szerkesztő'] ?? '').startsWith('te — '),
+        megjegyzes: ki.megj === '⏳ próba-megjegyzés: az őrjárat hozza',
+        ujrakerdez: ki.ora === true && ki.proba === 1 && ki.keresUjra > ki.keresElotte && ki.sorokUtana > 5,
+        leall: ki.keresZarasUtan === 0
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (' + JSON.stringify({ r, ki }).slice(0, 1400) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      cdp?.zar();
+      b.kill();
+      f.folyamat.kill();
+      await varj(800);
+    }
+  });
+
 export default async function (csendes) {
   const eredmeny = await futtatas(csendes);
   for (const m of mappak) await rm(m, { recursive: true, force: true }).catch(() => {});

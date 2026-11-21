@@ -229,22 +229,16 @@ async function apiGet(utvonal, token = null) {
   if (proto) {
     const nyers = await apiKeres(proto.utvonal, { method: 'GET' }, token);
     if (proto.horgonyt) lapHorgonyaBeallitasa({ horgony: nyers?.horgony, most: nyers?.most });
-    document.dispatchEvent(new CustomEvent('koino:pakliValasz', { detail: proto.jel(nyers) }));
+    if (typeof proto.jel === 'function') document.dispatchEvent(new CustomEvent('koino:pakliValasz', { detail: proto.jel(nyers) }));
+    // ⭐ (2026-11-21, a Részletes adatok): a program megjegyzése és a `betoltes` jel a prototípus-úton is a `koinoModalok.js`-hez
+    megjegyzesJelzese(utvonal, nyers);
     console.log('apiHelper.apiGet - VÉGE (prototípus-útvonal)', { utvonal, hova: proto.utvonal });
     return proto.fordit(nyers);
   }
 
   // ⭐ A LAP HORGONYA: minden olvasás ugyanabból a képből jöjjön, amiből a lista készült.
   const eredmeny = await apiKeres(horgonnyal(utvonal), { method: 'GET' }, token);
-  // ⭐ D101: a tudás határa — ha a program megjegyzést fűzött a válaszhoz (D19: kimondja, amit nem tud), az esemény a
-  // `koinoModalok.js`-hez viszi (az örökölt modál nem ismeri ezt a mezőt). ⭐ D101 ④: vele a `betoltes` jel is (a
-  // program elkérte, ami hiányzik — érdemes később újrakérdezni).
-  if (eredmeny && typeof eredmeny === 'object' && 'koinoMegjegyzes' in eredmeny) {
-    document.dispatchEvent(new CustomEvent('koino:megjegyzes',
-      { detail: { utvonal, szoveg: eredmeny.koinoMegjegyzes, betoltes: eredmeny.betoltes === true,
-        // ⭐ (2026-10-23) a lapozás (a Tudatpontok „További” gombja): a következő oldal kurzora és az összes
-        kovetkezoKurzor: eredmeny.kovetkezoKurzor ?? null, osszes: Number.isInteger(eredmeny.osszes) ? eredmeny.osszes : null } }));
-  }
+  megjegyzesJelzese(utvonal, eredmeny);
   // ⭐ D116: a felderítetlen rész jele — a sorok `koinoHiany`-ja (a Síkidom gyerekei és ős-lánca); az örökölt modál nem ismeri
   // ezt a mezőt, a `koinoModalok.js` veszi át (az esemény viszi, a modál adat-útja érintetlen).
   const hianyok = valaszHianyai(eredmeny);
@@ -255,6 +249,21 @@ async function apiGet(utvonal, token = null) {
   // Metódus vég log
   console.log('apiHelper.apiGet - VÉGE', { utvonal });
   return eredmeny;
+}
+
+/**
+ * ⭐ D101: a tudás határa — ha a program megjegyzést fűzött a válaszhoz (D19: kimondja, amit nem tud), az esemény a
+ * `koinoModalok.js`-hez viszi (az örökölt modál nem ismeri ezt a mezőt). ⭐ D101 ④: vele a `betoltes` jel is (a program elkérte, ami
+ * hiányzik — érdemes később újrakérdezni). Egy helyen: a rendes és a prototípus-út (a Részletes adatok) is ezt hívja.
+ * @param {string} utvonal - ahogy a lap kérte
+ * @param {*} eredmeny - a program válasza
+ */
+function megjegyzesJelzese(utvonal, eredmeny) {
+  if (!eredmeny || typeof eredmeny !== 'object' || !('koinoMegjegyzes' in eredmeny)) return;
+  document.dispatchEvent(new CustomEvent('koino:megjegyzes',
+    { detail: { utvonal, szoveg: eredmeny.koinoMegjegyzes, betoltes: eredmeny.betoltes === true,
+      // ⭐ (2026-10-23) a lapozás (a Tudatpontok „További” gombja): a következő oldal kurzora és az összes
+      kovetkezoKurzor: eredmeny.kovetkezoKurzor ?? null, osszes: Number.isInteger(eredmeny.osszes) ? eredmeny.osszes : null } }));
 }
 
 /** ⭐ D116: egy válasz soraiban a `koinoHiany` mezők — [entitás, hiány] párok (a sor nélküli válasznál üres). */

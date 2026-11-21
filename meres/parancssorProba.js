@@ -5099,6 +5099,79 @@ proba('⭐⭐ D100: a lap hierarchikus paklija elkéri, ami hiányzik — az őr
   }
 });
 
+// ⭐ (Csaba, 2026-11-20: „szerintem az vólna a jó, ha megnyitáskór, még csak a kérelem tőrténne meg, és a csere/cserék hozná el, a
+// friss adatokat, és ezt a modal jelezné”): A egy gondolatot ír (ponttal és érték javaslattal); B (a szigorú (b)) a cserén csak a
+// születését kapja. B lapja a RÉSZLETES ADATOKNÁL a szeletet függő kérelemként beírja, és kimondja („⏳ … az őrjárat hozza”,
+// `betoltes`); B őrjárata elhozza, és utána UGYANAZ a felület a pontokat (A hozzájárulását) és A küszöbét is mutatja, betöltés nélkül
+// (a megjegyzés: „a tartójától nemrég elkért másolat”). Rontás: a kezelő nem kér (`nemTartom` mindig hamis) → nincs kérelem, nincs
+// megjegyzés, a pontok sem jönnek → bukik; a kérelem fajtája `fejlecek` (nem a szelet) → a pontok és a küszöb nem jönnek → bukik.
+proba('⭐ (Csaba, 2026-11-20) a RÉSZLETES ADATOK a nem tartott gondolatnál: megnyitáskor csak a kérelem, a megjegyzés kimondja — az őrjárat elhozza, és utána a pontok és a küszöb is látszanak', async () => {
+  const a = await ujKeszulek();
+  const b = await ujKeszulek();
+  const alap = { KOINO_KISZOLGALAS: 'alap' };
+  const futok = [];
+  let kulcs = null;
+  try {
+    await fut(a, 'koino', 'Részletek', 'próba', 'nyilt');
+    const g = azonosito(await fut(a, 'gondolat', 'Kis tető'), 'Létrejött:');   // ⚠️ rövid szavak: a segéd 8 betűt keres
+    await fut(a, 'ertek', g, '77', '0', '3', '3');
+    await fut(b, 'csatlakoz', await koinoNeve(a));
+    await fut(b, 'tars', '127.0.0.1', '7992', 'A');
+    await csereKor(a, b, 7992, alap);
+    const felulet = spawn(process.execPath, [KOINO_JS, 'felulet', '7975'], {
+      env: { ...process.env, KOINO_ADAT: b, KOINO_NAPLO: '', ...alap }, stdio: ['ignore', 'pipe', 'pipe'] });
+    futok.push(felulet);
+    let kimenet = '';
+    kulcs = await new Promise((teljesul, elakad) => {
+      const ido = setTimeout(() => elakad(new Error('a felület nem indult el: ' + kimenet)), 15000);
+      felulet.stdout.on('data', (d) => {
+        kimenet += d;
+        const t = kimenet.match(/kulcs=([A-Za-z0-9_-]+)/);
+        if (t) { clearTimeout(ido); teljesul(t[1]); }
+      });
+    });
+    const kerd = async (ut) => (await fetch('http://127.0.0.1:7975' + ut, { headers: { 'X-Koino-Kulcs': kulcs } })).json();
+    const lista = await kerd('/api/pakli?rendezes=ido&irany=csokkeno&darab=50');
+    const gTeljes = (lista.kartyak ?? []).find((k) => k.cim === 'Kis tető' && k.azonosito.startsWith(g))?.azonosito;
+    const elotte = await kerd('/api/gondolat/' + gTeljes + '/reszletek');
+    const kuszobElotte = await kerd('/api/ertekJavaslat/reszletek/Gondolat/' + gTeljes);
+    const kerelmek = JSON.parse(await readFile(join(await koinoMappa(b), 'kerelmek.json'), 'utf8').catch(() => '{}'));
+    const figyelo = spawn(process.execPath, [KOINO_JS, 'figyel', '7992'], { env: { ...process.env, KOINO_ADAT: a, KOINO_NAPLO: '' }, stdio: 'ignore' });
+    futok.push(figyelo);
+    await varj(1500);
+    const orjarat = spawn(process.execPath, [KOINO_JS, 'orjarat', '0.1', '7982'], { env: { ...process.env, KOINO_ADAT: b, KOINO_NAPLO: '', ...alap }, stdio: 'ignore' });
+    futok.push(orjarat);
+    let utana = null;
+    for (let i = 0; i < 30; i++) {
+      await varj(2000);
+      utana = await kerd('/api/gondolat/' + gTeljes + '/reszletek');
+      if ((utana?.data?.hozzajarulokSzama ?? 0) > 0 && utana.betoltes === false) break;
+    }
+    const kuszobUtana = await kerd('/api/ertekJavaslat/reszletek/Gondolat/' + gTeljes);
+    const ki = {
+      nemTudta: !!gTeljes && (elotte?.data?.hozzajarulokSzama ?? 0) === 0 && kuszobElotte?.aktualisErtekek?.javaslatElfogadasiKuszob !== 77,
+      kerte: elotte?.betoltes === true && String(elotte?.koinoMegjegyzes ?? '').startsWith('⏳')
+        && (kerelmek.fuggo ?? []).some((x) => x.fajta === 'szelet' && x.kulcs === gTeljes),
+      elhozta: (utana?.data?.hozzajarulokSzama ?? 0) === 1 && (utana?.data?.osszesPont ?? 0) > 0
+        && kuszobUtana?.aktualisErtekek?.javaslatElfogadasiKuszob === 77,
+      kesz: utana?.betoltes === false && String(utana?.koinoMegjegyzes ?? '').includes('nemrég elkért másolat')
+    };
+    if (!Object.values(ki).every(Boolean)) {
+      process.stdout.write('    (részletek — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ' · ' + JSON.stringify({
+        elotte: { b: elotte?.betoltes, m: elotte?.koinoMegjegyzes, h: elotte?.data?.hozzajarulokSzama },
+        utana: { b: utana?.betoltes, m: utana?.koinoMegjegyzes, h: utana?.data?.hozzajarulokSzama, p: utana?.data?.osszesPont },
+        kuszob: [kuszobElotte?.aktualisErtekek?.javaslatElfogadasiKuszob, kuszobUtana?.aktualisErtekek?.javaslatElfogadasiKuszob],
+        fuggo: (kerelmek.fuggo ?? []).map((x) => [x.fajta, String(x.kulcs).slice(0, 6)]) }).slice(0, 900) + ')\n');
+    }
+    return Object.values(ki).every(Boolean);
+  } finally {
+    for (const p of futok) p.kill();
+    await varj(1000);
+    await rm(a, { recursive: true, force: true });
+    await rm(b, { recursive: true, force: true });
+  }
+});
+
 // ===================================
 // ⭐ A HÁZ (D100): A CSATLAKOZÓ KÉSZÜLÉK KÉZI CSERÉJE CSERE MARAD, ha a gazdánál függő kérelem vár (2026-10-10)
 // ===================================

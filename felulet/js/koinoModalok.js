@@ -29,6 +29,7 @@ import ErtesitesiBeallitasModal from './components/modals/ErtesitesiBeallitasMod
 import GondolatModal from './components/modals/GondolatModal.js';
 import KategoriaModal from './components/modals/KategoriaModal.js';
 import GondolatTipusModal from './components/modals/GondolatTipusModal.js';
+import ReszletekModal from './components/modals/ReszletekModal.js';
 import { kuszobMezokKitoltese } from './components/modals/kuszobErtekMezok.js';
 import { strukturaHianyJelolese, sikidomHianyRajzolasa, sikidomSzamokRajzolasa } from './koinoFelderitetlen.js';
 import { SikidomRajzolo } from './utils/sikidomRajzolo.js';
@@ -38,7 +39,10 @@ import { apiGet } from './utils/apiHelper.js';
 // A PROGRAM MEGJEGYZÉSEI — útvonalanként a legutóbbi
 // ===================================
 
+const MEGJEGYZES_KORLAT = 500;
 const utolsoMegjegyzes = new Map();
+// ⭐ (2026-11-21) a `betoltes` jel útvonalanként (a program elkérte, ami hiányzik — a Részletes adatok ebből kérdez újra)
+const utolsoBetoltes = new Map();
 // ⭐ (2026-10-23) a lapozás útvonalanként: a következő oldal kurzora és az összes (a Tudatpontok „További” gombja)
 const utolsoLapozas = new Map();
 // ⭐ D101 ④: a Síkidom gyerek-kéréseinek `betoltes` jele, szülőnként (a gyökér szintje: 'vilag' — a modál jele).
@@ -53,7 +57,12 @@ document.addEventListener('koino:megjegyzes', (e) => {
   const [ut, kerdes = ''] = utvonal.split('?');
   // ⭐ Az útvonal a kérdőjel előtti rész — a modál ugyanazt az útvonalat kérdezi más paraméterekkel is.
   utolsoMegjegyzes.set(ut, typeof szoveg === 'string' && szoveg ? szoveg : null);
+  utolsoBetoltes.set(ut, betoltes === true);
   utolsoLapozas.set(ut, { kurzor: e.detail?.kovetkezoKurzor ?? null, osszes: e.detail?.osszes ?? null });
+  // korlátosan (a Részletes adatok entitásonként új útvonal — egy sokáig nyitott lapon se nőjön)
+  for (const m of [utolsoMegjegyzes, utolsoBetoltes, utolsoLapozas]) {
+    while (m.size > MEGJEGYZES_KORLAT) m.delete(m.keys().next().value);
+  }
   if (ut === 'kereses') keresesBetoltes = betoltes === true ? (new URLSearchParams(kerdes).get('q') ?? '').trim() : null;
   if (ut === 'sikidom/gyerekek') {
     sikidomBetoltes.set(new URLSearchParams(kerdes).get('szulo') || SIKIDOM_VILAG, betoltes === true);
@@ -339,6 +348,74 @@ koruleIr(KeresesModal, '_kereses', function () {
 // értesítése jön (D103 — nincs szerver, ami levelet küldene), és ha legutóbb nem sikerült, miért.
 koruleIr(ErtesitesekModal, '_oldalBetoltese', function () {
   megjegyzesKirajzolasa(document.getElementById('ertesitesek-lista'), megjegyzes('ertesitesek'));
+});
+
+// ===================================
+// ⭐ A RÉSZLETES ADATOK (Csaba, 2026-11-20: „szerintem az vólna a jó, ha megnyitáskór, még csak a kérelem tőrténne meg, és a
+// csere/cserék hozná el, a friss adatokat, és ezt a modal jelezné”)
+// ===================================
+//
+// Ha az entitás szeletét nem tartom, a program elkéri (függő kérelem — az őrjárat hozza) és kimondja (`koinoMegjegyzes`,
+// `betoltes`). A lap a megjegyzést a lista alá írja, és amíg úton van, csendben újrakérdez: 4 mp-től egyre ritkábban, legfeljebb
+// percenként, legfeljebb ~1 óráig. Újra csak akkor rajzol, ha a válasz más lett — a betöltés-jel (a pörgő) nélkül, hogy a lista ne
+// villogjon. Ha az ablak bezárult, vagy már egy másik entitásé, leáll. ⚠️ A kérés a lap horgonya nélkül megy (`kartyaAdat.js`): a
+// horgonyos kép a megjött eseményeket nem mutatná.
+const RESZLETEK_UT = { Gondolat: 'gondolat', Kategoria: 'kategoria', GondolatTipus: 'gondolatTipus', Javaslat: 'javaslat',
+  Egyezmeny: 'egyezmeny' };
+const RESZLETEK_KEZDO = 4000;
+const RESZLETEK_MAX = 60000;
+const RESZLETEK_PROBA = 60;
+const RESZLETEK_KUSZOBBEL = ['Gondolat', 'Kategoria', 'GondolatTipus'];
+const reszletekUtja = (m) => (RESZLETEK_UT[m?.entitasTipus] && m?.entitasId
+  ? RESZLETEK_UT[m.entitasTipus] + '/' + m.entitasId + '/reszletek' : null);
+
+/** A következő újrakérdezés ütemezése (az első a megnyitáskor, a kezdő közzel); ha nincs mire várni, nincs. */
+function reszletekUtemezese(modal, ut, elso) {
+  clearTimeout(modal._koinoReszletekOra);
+  if (elso) {
+    modal._koinoReszletekKoz = RESZLETEK_KEZDO;
+    modal._koinoReszletekProba = 0;
+    modal._koinoReszletekLenyomat = null;
+  }
+  if (utolsoBetoltes.get(ut) !== true || modal._koinoReszletekProba >= RESZLETEK_PROBA) return;
+  const varj = modal._koinoReszletekKoz;
+  modal._koinoReszletekKoz = Math.min(RESZLETEK_MAX, Math.round(varj * 1.5));
+  modal._koinoReszletekProba += 1;
+  modal._koinoReszletekOra = setTimeout(() => { reszletekUjrakerdezese(modal, ut); }, varj);
+  console.log('koinoModalok.reszletekUtemezese', { ut, mp: varj / 1000 });
+}
+
+/** Egy csendes újrakérdezés: ha a válasz más, a modál saját rajzolójával újra (a pörgő nélkül), a megjegyzés mindig frissül. */
+async function reszletekUjrakerdezese(modal, ut) {
+  if (modal.modal?.nyitottE !== true || reszletekUtja(modal) !== ut) return;
+  try {
+    const valasz = await apiGet(ut);
+    let kuszobok = null;
+    if (RESZLETEK_KUSZOBBEL.includes(modal.entitasTipus)) {
+      try {
+        kuszobok = (await apiGet('ertekJavaslat/reszletek/' + modal.entitasTipus + '/' + modal.entitasId))?.aktualisErtekek ?? null;
+      } catch (hiba) {
+        console.warn('koinoModalok.reszletekUjrakerdezese - a küszöbök nem jöttek', { hiba: hiba.message });
+      }
+    }
+    if (modal.modal?.nyitottE !== true || reszletekUtja(modal) !== ut) return;
+    const lenyomat = JSON.stringify([valasz?.data?.koino ?? valasz?.data ?? null, kuszobok]);
+    if (lenyomat !== modal._koinoReszletekLenyomat) {
+      modal._koinoReszletekLenyomat = lenyomat;
+      modal._render(valasz?.data ?? null, kuszobok);
+    }
+    megjegyzesKirajzolasa(document.getElementById('reszletek-modal-lista'), megjegyzes(ut));
+  } catch (hiba) {
+    console.warn('koinoModalok.reszletekUjrakerdezese - nem sikerült', { hiba: hiba.message });
+  }
+  reszletekUtemezese(modal, ut, false);
+}
+
+koruleIr(ReszletekModal, '_adatokBetoltese', function () {
+  const ut = reszletekUtja(this);
+  if (!ut) return;
+  megjegyzesKirajzolasa(document.getElementById('reszletek-modal-lista'), megjegyzes(ut));
+  reszletekUtemezese(this, ut, true);
 });
 
 koruleIr(ErtesitesiBeallitasModal, '_adatokBetoltese', function () {
