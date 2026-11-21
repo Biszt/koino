@@ -11,8 +11,8 @@ mivel kicsi, mindenki tartja. Ez a dokumentum a 2. lépés: **a koinon az által
 
 ## 1. A mai helyzet (a kódból)
 
-- **Az általános egyezmény egy entitás** (D27): a javaslat entitása, amely elfogadva egyezmény lett. A pontjai: a javaslattevő kezdő
-  pontja (100) és a szavazók 1-1 pontja a javaslaton (D85/2).
+- **Az általános egyezmény egy entitás** (D27): az általános javaslat entitása, amely elfogadva általános egyezmény lett. A pontjai: a javaslattevő kezdő
+  pontja (100) és a szavazók 1-1 pontja az általános javaslaton (D85/2).
 - ⛔ **Ha mindenki leveszi róla a pontját, a D14 elfelejti** (`allapotSzamitas.js` — a 0 pontú entitás kiesik). A tárolás is a
   pontokhoz kötött (a szigorú (b) — D97): a szeletét az tartja, akinek pontja van rajta, a levétel után még 24 óráig (a kifutás —
   D104). Utána az események a hálózatból is eltűnhetnek.
@@ -29,15 +29,15 @@ mivel kicsi, mindenki tartja. Ez a dokumentum a 2. lépés: **a koinon az által
 - **a skálázási terv 5.2** (Csaba korábbi mondata: *„nem egy eszközön kell rajta lennie, hanem elosztva, mindig a kellő mennyiségűre
   replikálva”*): a példányszám közösségi paraméter, és kell egy fenntartó kör, ami észreveszi, ha egy darab tartói megfogytak.
 
-## 2. A javaslat
+## 2. Az ajánlás
 
 1. **A koinon pontja:** egy általános javaslat a LEZÁRÁSA pillanatától, ha elfogadták, 1 passzív koinon-pontot kap — ugyanúgy, mint a
    kézikönyv: számított (a döntésből), minden készülék ugyanúgy kiszámolja, és örökre. A D14 így rá is kivétel nélkül igaz.
-2. **Az őrzés — a koinon darabjai:** egy egyezmény az azonosítója szerint egy darabba esik. Minden készülék a kulcsa szerinti darabot
+2. **Az őrzés — a koinon darabjai:** egy általános egyezmény az azonosítója szerint egy darabba esik. Minden készülék a kulcsa szerinti darabot
    vállalja egy olyan mélységen, hogy minden darabnak ~`r` tartója legyen (a készülékek számából becsülve), és a szomszéd szintet is
    (átfedés — ha egy darab tartói megfogynak, a durvább szint tartói még őrzik). Egy készülék terhe így ~`egyezmények × r / készülékek`
    — a koino növekedésével nem nő egy készülékre.
-3. **Mit őriznek:** az egyezmény tényét és a hatályát — a javaslatot, a döntés tömör bizonyítékát (a lezárási összegzést), és az
+3. **Mit őriznek:** az általános egyezmény tényét és a hatályát — az általános javaslatot, a döntés tömör bizonyítékát (a lezárási összegzést), és az
    állásfoglalásokat (csatlakozik / tiltakozik / ütközik — e-emberenként az utolsó, tehát a tagok számával korlátos). A nyers szavazatok
    nem kellenek (a lezárási összegzés bizonyít helyettük); kis döntésnél a teljes esemény-készlet is lehet.
 4. **A fenntartó kör:** az őrjárat ritkán (órás ütemben) megnézi, hány tartója van a darabjainak; ha kevés, a szomszéd szint
@@ -46,22 +46,22 @@ mivel kicsi, mindenki tartja. Ez a dokumentum a 2. lépés: **a koinon az által
 ## 3. A kérdések (Csabáé)
 
 - **KO1 — mi kap koinon-pontot?** (A) csak az elfogadott általános egyezmény ⭐ — a szerkesztési egyezmény hatása a gondolaton él (a
-  gondolat a saját pontjaival marad meg), az elvetett javaslat nem egyezmény; (B) minden lezárt javaslat (az elvetett is — „a nem is
+  gondolat a saját pontjaival marad meg), az elvetett általános javaslat nem általános egyezmény; (B) minden lezárt általános javaslat (az elvetett is — „a nem is
   tény”).
 - **KO2 — ki őrzi?** (A) a koinon darabjai, a készülékek kulcsa szerint, ~`r` tartóval és a szomszéd szint átfedésével ⭐; (B) mindenki
-  mindet (egyszerű, de egymillió egyezménynél nem fér el egy telefonon); (C) csak a „hely” tartói (akik az egyezmény feletti gondolaton
+  mindet (egyszerű, de egymillió általános egyezménynél nem fér el egy telefonon); (C) csak a „hely” tartói (akik az általános egyezmény feletti gondolaton
   pontot tartanak) — nem garantált, ha ők is elmennek.
-- **KO3 — mit őriznek?** (A) a tényt és a hatályt tömören: a javaslat, a lezárási összegzés, az állásfoglalások ⭐; (B) a döntés minden
+- **KO3 — mit őriznek?** (A) a tényt és a hatályt tömören: az általános javaslat, a lezárási összegzés, az állásfoglalások ⭐; (B) a döntés minden
   eseményét (a szavazatokkal együtt — nagy döntésnél százezres).
 - **KO4 — mennyi a példányszám (`r`)?** A skálázási terv szerint közösségi paraméter (D13/c — a koino születésében, mint a többi
   szabály), az alapértéke mérésből: ha egy készülék az idő 30%-ában elérhető, 10 példánynál 97% az esély, hogy legalább egy válaszol,
-  20-nál 99,9%. ⭐ Javaslat: alapból 20, a koino születése mondja ki.
+  20-nál 99,9%. ⭐ Ajánlás: alapból 20, a koino születése mondja ki.
 - **KO5 — a kézikönyv?** Most mindenki tartja (kicsi). (A) maradjon így ⭐ — ha egyszer nagy lesz, ugyanide költözhet; (B) már most a
   koinon darabjaiba.
 
 ## 4. Amit az építés előtt mérni kell („mérj, ne saccolj”)
 
-1. Egy általános egyezmény tömör alakjának mérete (a javaslat + a lezárási összegzés + az állásfoglalások) — kicsi és nagy döntésnél.
+1. Egy általános egyezmény tömör alakjának mérete (az általános javaslat + a lezárási összegzés + az állásfoglalások) — kicsi és nagy döntésnél.
 2. A darab-mélység becslése a készülékek számából: honnan tudja egy készülék, hány készülék van (a tagság, a címjegyzék, a raj)? Egy
    szimuláció: a becslés hibája mellett hány darab marad `r`-nél kevesebb tartóval.
 3. A fenntartó kör terhe: hány üzenet/óra egy készülékre, egymillió tagnál.
@@ -70,7 +70,7 @@ mivel kicsi, mindenki tartja. Ez a dokumentum a 2. lépés: **a koinon az által
 
 **A mérés** (`meres/eredmenyek.md` 95.): a tömör alak 20–26 KB (a teljes döntés 1000 szavazónál 2,3 MB); a darabok tartói átfedés NÉLKÜL
 is 13–31 a legrosszabb esetben (r = 20, kétszeres–négyszeres becslési hibával), átfedéssel a teher 3–6-szoros. Két lelet:
-- ⛔ **a minta helyei a tömör alak saját lenyomatából** (a javaslat és a fák gyökerei — semmi szabadon választható mező): különben egy
+- ⛔ **a minta helyei a tömör alak saját lenyomatából** (az általános javaslat és a fák gyökerei — semmi szabadon választható mező): különben egy
   később érkező tartó a nyers szavazatok nélkül nem ellenőrizhetné; így az építő sem sorsolhat újra kedvezőbb helyeket;
 - ⚠️ **a készülékszám becslése az ismert tagokból**: azt alá lehet becsülni (az csak terhet hoz), túl nem — a túlbecslés a veszélyes oldal.
 
@@ -78,11 +78,11 @@ is 13–31 a legrosszabb esetben (r = 20, kétszeres–négyszeres becslési hib
 darabnak 13+ tartója marad, az átfedés pedig háromszoros terhet hoz; (B) marad (a legrosszabb darab 47+ tartó, 4–6-szoros teher).
 
 **Az építés:**
-1. **A koinon-pont az egyezményen** (a mag): az elfogadott általános egyezmény a lezárásától 1 passzív koinon-pontot kap. ⚠️ A sorrend
-   csapdája: a D14 az első fázisban fut, a döntés a másodikban — a 0 pontú egyezményt az első fázis már elfelejtené. A harmadik fázis
+1. **A koinon-pont az általános egyezményen** (a mag): az elfogadott általános egyezmény a lezárásától 1 passzív koinon-pontot kap. ⚠️ A sorrend
+   csapdája: a D14 az első fázisban fut, a döntés a másodikban — a 0 pontú általános egyezményt az első fázis már elfelejtené. A harmadik fázis
    (a végrehajtás) ezért a születéséből visszaveszi.
-2. **A tömör alak**: a lezárási összegzés a saját lenyomatából kijelölt mintával (`lezarasiOsszegzes.js`), és a koinon-csomag (a
-   javaslat, az összegzés, a minta, az állásfoglalások).
+2. **A tömör alak**: a lezárási összegzés a saját lenyomatából kijelölt mintával (`lezarasiOsszegzes.js`), és a koinon-csomag (az
+   általános javaslat, az összegzés, a minta, az állásfoglalások).
 3. **A koinon darabjai**: a mélység az ismert tagokból (`floor(log2(tagok / r))`, r a születésből — KO4), a készülék a kulcsa szerinti
    darabot vállalja (`vallalas.js`), a csere a darab szeletét egyezteti (mint a gyökér-darabét); a kézikönyv is ide költözik (KO5 (B)).
 4. **A fenntartó kör**: a darab hirdetése és a tartóinak megszámlálása a címjegyzéken, órás ütemben.
@@ -98,15 +98,15 @@ program átenged és tárol, csak nem érti — nem törés.
 
 **A terv:**
 1. **A darab:** `keszulekDarabjai('koinon', aláíró, bitek)`, `bitek = floor(log2(ismert tagok / r))` (r a születésből — KO4; a régi
-   születésben nincs: 20). Egy egyezmény a javaslata azonosítója szerint esik egy darabba (ugyanaz a lenyomat, mint a gyökér-darabé).
-   ⚠️ *Az építéskor pontosítva (③c):* ugyanaz a számítás, a koinon SAJÁT sójával (a készüléké és az egyezményé is) — így a koinon
+   születésben nincs: 20). Egy általános egyezmény a javaslata azonosítója szerint esik egy darabba (ugyanaz a lenyomat, mint a gyökér-darabé).
+   ⚠️ *Az építéskor pontosítva (③c):* ugyanaz a számítás, a koinon SAJÁT sójával (a készüléké és az általános egyezményé is) — így a koinon
    tartói nem ugyanazok, mint a gyökér-darabé; és a cserében a két mélység közül a mélyebbik darab a közös (a napló).
-2. **Mi van benne:** az elfogadott általános egyezmény tömör alakjának eseményei — a javaslat, a döntés tömör alakja (lásd KO7), az
+2. **Mi van benne:** az elfogadott általános egyezmény tömör alakjának eseményei — az általános javaslat, a döntés tömör alakja (lásd KO7), az
    állásfoglalások, a minták eseményei. A darab a vonalon SZELETKÉNT megy (a gyökér-darab mintájára — felismerhető kulcs).
-   ⚠️ *Az építéskor pontosítva (③c, a napló 2026-11-20):* a javaslat és a minták eseményei a `KoinonOsszegzes`-be BEÁGYAZVA utaznak,
+   ⚠️ *Az építéskor pontosítva (③c, a napló 2026-11-20):* az általános javaslat és a minták eseményei a `KoinonOsszegzes`-be BEÁGYAZVA utaznak,
    így a darab két fajtát hord: a `KoinonOsszegzes`-t és az állásfoglalásokat.
 3. **A tartó döntése:** az ellenőrzött tömör alak a meglévő úton (D95/1 `osszegzesek`) adja a döntést — így a darab tartója a teljes
-   szelet nélkül is tudja: elfogadva → a koinon pontja (①) → az egyezmény él.
+   szelet nélkül is tudja: elfogadva → a koinon pontja (①) → az általános egyezmény él.
 4. **A kézikönyv** (KO5 (B)): a bejegyzései a darabokba, az azonosítójuk szerint (a „mindenki tartja” helyett).
 
 **A kérdések (Csabáé):**
@@ -124,33 +124,33 @@ program átenged és tárol, csak nem érti — nem törés.
 
 ## 8. A ③d terve — a tartó döntése (2026-11-20, kód előtt)
 
-**Ami a kódból látszik:** a darab tartója a ③c óta megkapja a `KoinonOsszegzes`-t és az állásfoglalásokat, de a képe az egyezményt
-még nem ismeri: a javaslat eseménye csak a `KoinonOsszegzes` belsejében van (beágyazva), a tárban nincs.
+**Ami a kódból látszik:** a darab tartója a ③c óta megkapja a `KoinonOsszegzes`-t és az állásfoglalásokat, de a képe az általános egyezményt
+még nem ismeri: az általános javaslat eseménye csak a `KoinonOsszegzes` belsejében van (beágyazva), a tárban nincs.
 
 **A terv (ehhez nem kell döntés — a 7. szakasz 3. pontja):** a tartó a tárában lévő `KoinonOsszegzes`-t ellenőrzi (önmagából), és ha
-rendben: (1) a beágyazott javaslat eseményét a tárba menti (mint a két fokú tartás a lezárási összegzés javaslatát — D95/1); (2) a
+rendben: (1) a beágyazott általános javaslat eseményét a tárba menti (mint a két fokú tartás a lezárási összegzés szerkesztési vagy általános javaslatát — D95/1); (2) a
 részek ellenőrzött összegzését a döntés kapja (`osszegzesek`, ugyanaz az út, mint a D95/1-é), ott, ahol az érintett szeletét nem
-tartom egészében. Így a tartónál a javaslat elfogadva → a koinon pontja (①) → az egyezmény él — a helye (a gondolat, ami alatt áll)
+tartom egészében. Így a tartónál az általános javaslat elfogadva → a koinon pontja (①) → az általános egyezmény él — a helye (a gondolat, ami alatt áll)
 nélkül is: a sosem látott szülőt a számítás nem bántja („hiány, nem tény” — D19). Az eredmény egy kis tárolóba kerül (ne kelljen
-minden körben újra ellenőrizni), és a tömörítés a megmentett javaslatot megtartja. Ha egy javaslathoz több érvényes tömör alak van,
+minden körben újra ellenőrizni), és a tömörítés a megmentett általános javaslatot megtartja. Ha egy általános javaslathoz több érvényes tömör alak van,
 a legkisebb azonosítójú számít (KO8 (A)).
 
-**⛔ A lelet (a kódból — `szabalyok.js`, az állásfoglalás joga):** állást az foglalhat, akinek pontja van az egyezmény helyén vagy
-alatta (D27/4); a szabály ezt a szerző LÁNCÁBÓL és a FÁBÓL nézi. A darab tartója a hely ágát nem tartja: ma, amíg az egyezményt sem
-ismeri, az állásfoglalás „nem ellenőrizhető” (számít, de jelölve — D19). ⚠️ A ③d után viszont az egyezményt ismerné, a helyét nem —
+**⛔ A lelet (a kódból — `szabalyok.js`, az állásfoglalás joga):** állást az foglalhat, akinek pontja van az általános egyezmény helyén vagy
+alatta (D27/4); a szabály ezt a szerző LÁNCÁBÓL és a FÁBÓL nézi. A darab tartója a hely ágát nem tartja: ma, amíg az általános egyezményt sem
+ismeri, az állásfoglalás „nem ellenőrizhető” (számít, de jelölve — D19). ⚠️ A ③d után viszont az általános egyezményt ismerné, a helyét nem —
 és a szabály ezt „nincs tudatpontod ezen az ágon” KIVÉTELNEK olvasná: egy hamis ítélet (a hiány tényként). Ugyanez a csapda, amit a
-D85 T3 a javaslatnál és a szavazatnál a lánc-gyökeres önbizonyítással oldott meg — az állásfoglalás ezt sosem kapta meg. (A
+D85 T3 a szerkesztési javaslatnál és a szavazatnál a lánc-gyökeres önbizonyítással oldott meg — az állásfoglalás ezt sosem kapta meg. (A
 szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ágat nem, ahol a szerző pontja van.)
 
 **A kérdés (Csabáé):**
 - **KO10 — hogyan ítéljen a tartó az állásfoglalás jogáról, ha a hely ágát nem ismeri?** (A) ⭐ **nem ítél:** ha a helyet magát sem
-  ismeri, az állásfoglalás „nem ellenőrizhető” (számít, de jelölve — a D19 szabálya, ugyanúgy, mint ma az ismeretlen egyezménynél).
+  ismeri, az állásfoglalás „nem ellenőrizhető” (számít, de jelölve — a D19 szabálya, ugyanúgy, mint ma az ismeretlen általános egyezménynél).
   Kicsi (egy feltétel a szabályban, a mag része), a hatályt a tartó így mondja: „ennyien, ellenőrizetlenül” — a teljes ítélet annál,
   aki az ágat tartja; a szigorú (b) mélyebb-ág esetét nem javítja. (B) **az állásfoglalás maga bizonyítja a jogát** (a D85 T3
   mintája): a lánc-gyökeres állásfoglalás a szerző kiosztás-fájából hozza a pontját, és hogy az az entitás a hely alatt van — bárki
   ellenőrzi az ág nélkül. Teljes megoldás (a (b) esetét is javítja), de nagy: a „hely alatt van” bizonyítása az áthelyezések miatt
   nem egy születés-esemény, hanem egy út a fában; új mező, a kapu is nézi. (C) **a tartó a hatályt nem számolja** (csak a tényt
-  őrzi: az egyezmény él, a hatály „nem ismert”) — az állásfoglalásokat csak továbbadja annak, aki ítélni tud.
+  őrzi: az általános egyezmény él, a hatály „nem ismert”) — az állásfoglalásokat csak továbbadja annak, aki ítélni tud.
 
 ## 6. Napló
 
@@ -165,21 +165,21 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
 - **2026-11-20** — ✅ **az ① kész: a koinon pontja az elfogadott általános egyezményen** (a mag — Csaba: „rendben, mehetünk tovább”).
   `allapotSzamitas.js` `koinonPontokRa` (EGY forrás: 1 passzív pont, kétszer nem; a tagok pontjai után — a hozzájárulók sorrendje
   mindkét úton ugyanaz) és az első fázis `koinonEgyezmenyek` beállítása (a pont a D14 ELŐTT); `ketReteg.js` `haromFazis` (most
-  exportálva): a döntés után az elfogadott általános egyezmények entitásai (a javaslaté, több érintettnél a töredékeké; a múlt
+  exportálva): a döntés után az elfogadott általános egyezmények entitásai (az általános javaslaté, több érintettnél a töredékeké; a múlt
   rögzített döntései is) — ha egyiket sem felejtette el az első kör, a pont HELYBEN kerül rá; ha igen (mindenki levette a pontját), az
-  első két fázis ÚJRA fut a halmazzal, így az egyezmény a helyén marad a gyerekeivel (a sorrend csapdája — 5. szakasz). A koinon nem
+  első két fázis ÚJRA fut a halmazzal, így az általános egyezmény a helyén marad a gyerekeivel (a sorrend csapdája — 5. szakasz). A koinon nem
   szavaz, a nevezőbe nem számít; a lezárt döntés nem változik. Próba: +2 (`egyezmenyProba.js` — a lezárás után, csak az elfogadott
   általános; a pont nélküli megmarad a helyén és a gyerekével, az elvetett elfelejtődik), 6 rontás mind bukik; az `allapot` csoport
   389/389, a D123 mag-próbái 6/6. ⚠️ A mag változott (D123: más számítás — a mostani teszt koinokban a lap kimondja). ⏭️ ② a tömör alak.
-- **2026-11-20** — ✅ **a ② kész: az egyezmény tömör alakja** (`js/allapot/koinonCsomag.js` — NEM a mag része): a javaslat, érintettenként
+- **2026-11-20** — ✅ **a ② kész: az általános egyezmény tömör alakja** (`js/allapot/koinonCsomag.js` — NEM a mag része): az általános javaslat, érintettenként
   a lezárási összegzés és a mintái, az állásfoglalások (e-emberenként az utolsó — ugyanaz a szabály, mint a hatálynál). ⭐ A minta
   helyei az összegzés SAJÁT lenyomatából (`lezarasiOsszegzes.js` `onalloMintaHelyek` — UGYANAZ a sorsoló, csak a véletlen forrása a
   lenyomat-lánc; a 95. mérés lelete): bárki ugyanazokat számolja, az építő nem választhat helyet, és az ellenőrző a helyeket MAGA
   számolja. ⛔ **Lelet (a méret mérése):** a beágyazott alak 13 szavazónál 83 KB — 66 KB-ja ismétlés (52 mintában 17–32 különböző
-  esemény, mindegyik a kísérő tanúsítványával); ⭐ most minden esemény és tanúsítvány EGYSZER (táblában), a minták, a javaslat és az
+  esemény, mindegyik a kísérő tanúsítványával); ⭐ most minden esemény és tanúsítvány EGYSZER (táblában), a minták, az általános javaslat és az
   állásfoglalások hivatkoznak: 13 szavazónál ~35–44 KB, 301-nél ~91 KB (a 95. mérés becslése — 20–26 KB — kihagyta a négy küszöb-napló
   mintáit és a tanúsítványokat: helyesbítve az `eredmenyek.md`-ben). Próba: +4 (`koinonCsomagProba.js`, az `allapot` csoportban — az
-  építés és az ellenőrzés a nyers szavazatok és az építő nélkül; a helyek önállósága; kilenc hamisítás; az elvetett egyezmény), 8 rontás
+  építés és az ellenőrzés a nyers szavazatok és az építő nélkül; a helyek önállósága; kilenc hamisítás; az elvetett általános egyezmény), 8 rontás
   mind bukik; a lezárási összegzés próbái 12/12, a D123 mag-próbái 6/6. ⏭️ ③ a koinon darabjai.
 - **2026-11-20** — a ③ terve (7. szakasz); ✅ **Csaba: „elfogadom, a javaslataidat, mehetünk tovább”** — KO7 (A) a tömör alak egy új
   aláírt eseményben (`KoinonOsszegzes`), KO8 (A) bárki írja, aki a teljes bemenetet tartja, KO9 (A) a kézikönyv a darabokban (kérésre
@@ -188,14 +188,14 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
 - **2026-11-20** — ✅ **a ③a kész: a `KoinonOsszegzes` esemény.** `koinonCsomag.js`: az ellenőrzés közös MAGJA
   (`tomorAlakEllenorzese` — a csomagé a tábláiból, az eseményé a tárból kapja a hivatkozott eseményeket, a kísérővel; az ellenőrzött
   összegzéseket is visszaadja a ③d-nek), `koinonOsszegzesAdata` (a csomag döntés-része — ⛔ az állásfoglalások NEM: a hatály él),
-  `koinonOsszegzesEllenorzese` (a tartalom — az aláírást a kapu nézi; a javaslat szeletében kell élnie); `muveletek.js`
+  `koinonOsszegzesEllenorzese` (a tartalom — az aláírást a kapu nézi; az általános javaslat szeletében kell élnie); `muveletek.js`
   `koinonOsszegzesKiadasa`; `esemeny.js` `bejelentesHelyei` (az érintettjeinél is hír, mint a `LezarasiOsszegzes`, legfeljebb 64);
   `koinoLanc.js` (a múlt rétegéé — a gyermek jelenébe nem jön át). A kapu átengedi (az ismeretlen típust nem tiltja, méret-korlátja
   nincs). Próba: +1 (`koinonCsomagProba.js`), 3 rontás mind bukik.
 - **2026-11-20** — ✅ **a ③b kész: ki és mikor adja ki** (KO8 (A)). `koino.js` `koinonOsszegzesekKiadasa` (a koino-példány része, a
-  lezárási összegzés kiadásának mintájára): a jelen réteg elfogadott általános egyezményei közül ott, ahol a javaslat szeletét és
+  lezárási összegzés kiadásának mintájára): a jelen réteg elfogadott általános egyezményei közül ott, ahol az általános javaslat szeletét és
   minden érintettjéét EGÉSZÉBEN tartom (a vállalásomban, nem összegezve — ⛔ egy hiányzó szavazattal hamis összegzés születne);
-  kihagyja, ahol már én kiadtam, vagy ahol a javaslat szeletében már van érvényes (bárkitől); a kiadás előtt a saját csomagját is
+  kihagyja, ahol már én kiadtam, vagy ahol az általános javaslat szeletében már van érvényes (bárkitől); a kiadás előtt a saját csomagját is
   ellenőrzi. Az őrjárat háztartása hívja (a lezárási összegzés után), és kézzel a `koinon` parancs (listáz is: van-e érvényes tömör
   alak). Próba: +1 parancssor (a teljes tartó kiadja, a második kör nem), 1 rontás bukik. ⚠️ Próba nélkül: a „teljes bemenet”
   feltétele (ahhoz két készülék kell, egy részleges tartással) — a terepen.
@@ -203,7 +203,7 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
   csere-úton). ⛔ **Lelet (a darab tervezésekor, a kódból):** a fogadó egy eseményről MAGÁBÓL dönti el, hogy átveszi-e
   (`szeletEgyeztetes.js` `szeletbeTartozik` — a vonal ezzel szűr). A minták eseményei (egy tudatpont-rendezés, egy érték javaslat)
   a saját szeletükben laknak, magukról nem mondják meg, hogy egy koinon-darab részei — hivatkozva a darab tartója nem kapná meg
-  őket, és a tömör alak nála ellenőrizhetetlen maradna. ⭐ Ezért az esemény a csomag tábláit is hordja (a javaslat és a minták
+  őket, és a tömör alak nála ellenőrizhetetlen maradna. ⭐ Ezért az esemény a csomag tábláit is hordja (az általános javaslat és a minták
   eseményei egyszer, a tanúsítványaik készülékenként egyszer — a döntési és a tagsági csomag mintájára), és **önmagából
   ellenőrizhető, tár nélkül**. Az állásfoglalások továbbra sem (a hatály él — D27), és a táblából is kimaradnak a csak általuk
   használt események és tanúsítványok. Mérve: 13 szavazónál az esemény 33,0 KB (15 esemény, 9 tanúsítvány) — a csomag 34,4 KB; a
@@ -220,36 +220,36 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
   mellett a két FELE lenyomatát viszi (a gyökéré a ±1 szintet): a szomszéd mélységű társ így pontosan a közös részt látja.
   `esemeny.js`: a `KOINON_KULCS` (virtuális tár-kulcs, mint a gyökéré a '' — nem darab-kulcs); a `KoinonOsszegzes` és az
   `Allasfoglalas` oda is bejelentődik (⚠️ a mag változott — D123; a régi tár pillanatképe az első olvasáskor újraépül, mint a
-  D129-nél). `szeletEgyeztetes.js`: a darab halmaza a koinon kulcsához bejelentettek közül azok, amelyeknek az EGYEZMÉNYE (a
-  szelet-kulcsuk) a darabba esik — egy egyezmény minden eseménye egy darabban —, a változat-jele és a fogadó szűrője. `vonal.js`: a
+  D129-nél). `szeletEgyeztetes.js`: a darab halmaza a koinon kulcsához bejelentettek közül azok, amelyeknek az ÁLTALÁNOS EGYEZMÉNYE (a
+  szelet-kulcsuk) a darabba esik — egy általános egyezmény minden eseménye egy darabban —, a változat-jele és a fogadó szűrője. `vonal.js`: a
   `knd` jel, a közös eltérő darab, a részvétel; ⛔ a koinon kulcsa egészében sosem cserélődik („mindent” módban sem), a régi program
   (jel nélkül) semmit nem lát belőle, és a csere nem drágul. `koino.js`: `koinonMelysegem` (az ismert tagok — a horgonyok szerzői —,
   a tár eseményszáma szerint gyorsítótárazva; `r` = 20 a ③f-ig), a csere beállítása, a tömörítés megtartja a darabom eseményeit, a
-  csak küldő út a saját koinon-eseményemet az egyezménye darabja alatt is felajánlja, és a `vallalas` kimondja (a mélység, az ismert
-  tagok, a darab egyezményei és eseményei). ⚠️ A `vallalas.js` nem változott: a darab — mint a gyökéré — a csere, a tömörítés és a
+  csak küldő út a saját koinon-eseményemet az általános egyezménye darabja alatt is felajánlja, és a `vallalas` kimondja (a mélység, az ismert
+  tagok, a darab általános egyezményei és eseményei). ⚠️ A `vallalas.js` nem változott: a darab — mint a gyökéré — a csere, a tömörítés és a
   csak küldő út szintjén él. ⛔ A zárt koino nem tagja nem kap belőle (a vonal korlátja, mint a gyökérnél) — a parancssori próba
   első futása ezen bukott (a vendég egy alapból zárt koinoba csak csatlakozott, nem lépett be): a kód helyes volt, a próba nyílt
   koinoval fut. Próba: +11 (`koinonDarabProba.js`, a `csere` csoportban), 12 rontás mind bukik; +1 parancssor (a szigorú vendég az
-  egyezmény szelete nélkül megkapja a tömör alakot és az állásfoglalást, a `vallalas` kimondja, a tömörítés után is megvan), 2 rontás
+  általános egyezmény szelete nélkül megkapja a tömör alakot és az állásfoglalást, a `vallalas` kimondja, a tömörítés után is megvan), 2 rontás
   bukik; a `csere` csoport 488/488 + 2 ismert (a fél-jel előtt); ⭐ a TELJES sor (a mag és a csere változott): 1556/1556 + 2 ismert
   (a D124 két „valódi régi program” próbája). ⚠️ Próba nélkül: a `koino.js` csak küldő ágának koinon-kulcsa (a
   mechanizmust a darab-próba a saját kulcsaival méri; a valódi programban 1+ mélység kell hozzá — 2r tag —, és a darab helye a
   készülékkulcson múlik) — a terepen. ⏭️ ③d a tartó döntése (a D95/1 útján), ④ a darab hirdetése a címjegyzéken.
-- **2026-11-20** — a ③d terve (8. szakasz). ⛔ Lelet: a ③d után a tartó az egyezményt ismerné, a helyét nem — és az állásfoglalás
+- **2026-11-20** — a ③d terve (8. szakasz). ⛔ Lelet: a ③d után a tartó az általános egyezményt ismerné, a helyét nem — és az állásfoglalás
   jogát a szabály hamis kivételnek olvasná. ⏸️ **KO10** (a tartó ítélete az állásfoglalás jogáról) Csabánál.
 - **2026-11-21** — ✅ **Csaba: „rendben”** — **KO10 (A): a tartó nem ítél.** ✅ **A ③d kész: a tartó döntése.** `koinonCsomag.js`: az
-  ellenőrzés részenként a döntést (az összegzés és a számaiból számolt állás) és a javaslat eseményét (a kísérőjével) is visszaadja;
+  ellenőrzés részenként a döntést (az összegzés és a számaiból számolt állás) és az általános javaslat eseményét (a kísérőjével) is visszaadja;
   `fajlTar.js` `koinonTarolo` (a koino mappájában `koinon.json` — a már ellenőrzött tömör alakok, hogy ne kelljen körönként újra);
   `koino.js` `koinonOsszegzesekFelvetele` (az őrjárat háztartása és a `koinon` parancs hívja; körönként legfeljebb 16): a tárban lévő
-  `KoinonOsszegzes`-t önmagából ellenőrzi, a javaslatot a tárba menti, a részek döntését a jegyzékbe; `ellenorzottOsszegzesek` (EGY
+  `KoinonOsszegzes`-t önmagából ellenőrzi, az általános javaslatot a tárba menti, a részek döntését a jegyzékbe; `ellenorzottOsszegzesek` (EGY
   út a parancssornak és a lapnak — D95/1) onnan adja a döntésnek, ott, ahol a rész szeletét nem tartom egészében (ha több érvényes
-  van, a legkisebb azonosítójú — KO8 (A)); a tömörítés megtartja a megmentett javaslatot. Így a darab tartójánál: elfogadva → a koinon
+  van, a legkisebb azonosítójú — KO8 (A)); a tömörítés megtartja a megmentett általános javaslatot. Így a darab tartójánál: elfogadva → a koinon
   pontja (①) → az általános egyezmény ott áll a képében, a helye nélkül is. ⛔ **Lelet (a parancssori próba első futása):** a tartó a
   HELYET ismerte (a legfelső szintű gondolat születését a gyökér-darabja hozta), csak a pontjait nem — a KO10 első alakja („ha a
   helyet sem ismeri”) itt nem fogott, és a szabály az állásfoglalást mégis hamis kivételnek olvasta. ⭐ **A KO10 (A) végleges alakja**
   (`szabalyok.js`): a „nincs pontja ezen az ágon” csak HÉZAGTALANUL ismert láncról állítható — ha a szerző láncát hézagosan látjuk
   (a pont-eseménye a hely szeletében maradt), „nem ellenőrizhető” (számít, jelölve — D19); ugyanaz a mérce, mint a keret-szabályé
   (`folytonos`). Ha a helyet sem ismerjük, szintén. Ez a szigorú (b) régi esetét is megoldja (aki a helyet tartja, de a mélyebb ágat
-  nem). A parancssor a művelet nevét magyarul írja (a nyers „Allaspont” helyett „Álláspont”). Próba: +1 egyezmény (a KO10 három
+  nem). A parancssor a művelet nevét magyarul írja (a nyers „Allaspont” helyett „Álláspont”). Próba: +1 `egyezmenyProba` (a KO10 három
   esete: ismeretlen hely, hézagos lánc, hézagtalan lánc), +1 parancssor (a szigorú vendég a `koinon` után a képében látja az általános
   egyezményt, a hatályával), 4 rontás mind bukik. ⏭️ ③e a kézikönyv a darabokba, ③f az `r` a születésben, ④ a fenntartó kör.

@@ -7,8 +7,8 @@ döntésként, a nyitott kérdések itt válnak tervezési feladattá.*
 ## A két fázis
 
 - **Fázis 1 — központi szerveres koino** (a jelenlegi koino_1.1: Node/Express/MongoDB,
-  vanilla JS frontend). Célja: a döntéshozatali mechanika (gondolat → javaslat →
-  szavazás → egyezmény; tudatpont; küszöbértékek; bizonyossági mutató) kifejlesztése és
+  vanilla JS frontend). Célja: a döntéshozatali mechanika (gondolat → szerkesztési javaslat →
+  szavazás → szerkesztési egyezmény; tudatpont; küszöbértékek; bizonyossági mutató) kifejlesztése és
   élesben bizonyítása az első közösséggel. Fejlesztését a
   [fejlesztesi_terv.md](fejlesztesi_terv.md) vezeti.
 - **Fázis 2 — P2P koino**: elosztott, központi szereplő nélküli működés. A koino
@@ -101,7 +101,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 >
 > **Terv: [`skalazas_terv.md`](skalazas_terv.md)** — a milliárdos lépték szerkezete. *A cél
 > eddig három helyen szerepelt (N11, D21, D22), de a koino **nagy része** — gondolat,
-> tudatpont, szavazás, egyezmény — sosem kapott skálázási szerkezetet.*
+> tudatpont, szavazás, szerkesztési vagy általános egyezmény — sosem kapott skálázási szerkezetet.*
 >
 > **A terv első változata megbukott, és Csaba buktatta le:** *„az 5 percenkénti egyeztetés
 > nem jó, mivel böngészés közben az összes entitásnak elérhetőnek kell lennie… és legalább
@@ -110,7 +110,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > a késleltetést. Hiába ér körbe minden esemény öt perc alatt, ha egy nem tárolt entitást
 > akarok megnyitni.
 >
-> ⭐ **CSABA JAVASLATA, AMI AZ ÚJ TERVET ADTA:** *„mi lenne, ha az entitások tárolnák a
+> ⭐ **CSABA AJÁNLÁSA, AMI AZ ÚJ TERVET ADTA:** *„mi lenne, ha az entitások tárolnák a
 > tudatpont-tulajdonosaik címét, amit frissítünk?"* — és ez **nem új gépezet**: a `vonal.js`
 > `CIMEK` üzenete (D. lépés) ma **koino-szinten** kulcsolt címjegyzék; ez ugyanaz
 > **entitás-szinten**. *Ugyanaz a gépezet, egy szinttel odébb.*
@@ -150,7 +150,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 >   D18/2), de a társas gráf **nem jó útvonal-szerkezet magától**, a magánélet **romlik**
 >   (ismerőseid látják a kérdéseidet), a terhelés a **hubokra torlódik**, és összeragasztja
 >   az identitás-réteget a hálózati réteggel.
-> - ⭐ **Javaslat: középút** — a bizalmi háló adja a **társakat**, a szelet-kiosztás maradjon
+> - ⭐ **Ajánlás: középút** — a bizalmi háló adja a **társakat**, a szelet-kiosztás maradjon
 >   **hash szerint**. És ez a döntés **ráér**: a kereső-réteg elhagyható, tehát semmit nem
 >   blokkol, és **méréssel** dőljön el (D17 módszertani figyelmeztetése).
 >
@@ -190,7 +190,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > mutató-bejegyzés **teljes egészében SZÁMÍTOTT** (az entitás saját aláírt eseményeiből),
 > tehát **senki nem írja, nincs mit hamisítani, és nincs mit teleszemetelni**. A javasolt
 > címke-gépezet (kulcsszó-kapcsolatok, amikre tudatpontot lehet tenni) **elesett** — nem
-> kell. ⭐ *Ugyanaz a mozdulat, mint az egyezménynél: számítva, nem kimondva.*
+> kell. ⭐ *Ugyanaz a mozdulat, mint a szerkesztési vagy általános egyezménynél: számítva, nem kimondva.*
 > **És a szemetelés magától korlátozott:** az entitás létezéséhez tudatpont kell (D14),
 > tudatpontból pedig **10 000 van, összesen** — aki csali-címekkel árasztana el, **a saját
 > keretét éli fel.** Beépített ár, moderálás és pénz nélkül.
@@ -498,7 +498,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > nem csak apró szinkron — Csaba vetette fel: „ha valaki tudatpont-tulajdonos lesz egy
 > entitáson, akkor azt le kell töltenie a hálózatról, mert ő tárolja onnantól kezdve."
 > Erre azt javasoltam, hogy a tömeges letöltés menjen TCP-n, ahol a másik fogadóképes.
-> Csaba ezt elutasította — és a javaslatom tényleg visszahozta azt a függést, amit a
+> Csaba ezt elutasította — és az ajánlásom tényleg visszahozta azt a függést, amit a
 > D31–D33 ki akar zárni.*
 >
 > > „Minimalizálni akarom a fogadóképes (postaláda) függést, annyira amennyire csak lehet,
@@ -806,7 +806,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > A tanúsítás nem **teremt** jogot, hanem **továbbít**: aki ad, elkölti; aki kap,
 > gyarapszik. **A frissen felvett kerete nulla.**
 >
-> ⛔ **Amit megöl: a „fizess egyszer, arass örökké" támadást.** A korábbi javaslat (*„`k`
+> ⛔ **Amit megöl: a „fizess egyszer, arass örökké" támadást.** A korábbi ajánlás (*„`k`
 > csúcs-diszjunkt út már felvett tagoktól"*) megkerülhető volt, mert a diszjunktság **egy
 > bizonyításon belül** tilt közös embert, a bizonyítások **között** nem: öt megvett ember
 > hat körben korlátlan hamis azonosságot enged be. A kerettel a 6. kör **meg sem születik**
@@ -854,7 +854,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 >
 > #### ⛔ D48 — ELVETVE, MÉG AZNAP (a bukás oka megőrizve)
 >
-> **A javaslat ez volt:** *az elismerés (egy már felvett tag tanúsítása) ne fogyasszon
+> **Az ajánlás ez volt:** *az elismerés (egy már felvett tag tanúsítása) ne fogyasszon
 > keretet, ha a tanúnak magának van pozitív kerete.* ⛔ **De a gát nem lejtő, hanem
 > SZIKLA:** öt korrumpált, megállapodott ember elismeri Hamis #1-et → annak kerete pozitív
 > → ettől kezdve **az ő elismerése is számít, ingyen**, és az egész sziget kerete felszalad.
@@ -924,7 +924,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 
 > ### ⭐⭐⭐ A SATU, ÉS D50 (2026-09-05): A BEMUTATKOZÁSOK TENGERE — TÉRKÉP NÉLKÜL
 >
-> **Csaba javaslata („BEMUTATKOZÁS"):** a tanúsítás mellé egy **olcsó, sűrű** réteg — akik
+> **Csaba ajánlása („BEMUTATKOZÁS"):** a tanúsítás mellé egy **olcsó, sűrű** réteg — akik
 > találkoztak, jelzik egymásnak. A jelzés pedig **véletlen séta**: *összeérünk-e?*
 >
 > ⭐⭐⭐ **És ezzel a satu bezárul, mert a két jelzés-család pontosan egymás hiányát fedi:**
@@ -1000,7 +1000,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 > #### ⭐⭐⭐ D56 — A KÉT LÉPCSŐ
 >
 > - **1. lépcső, a tagság:** **egy meghívó**, és **minden mehet** — gondolat, tudatpont,
->   javaslat, szavazat. ⭐ Nincs kapu, mert a kapu úgysem véd.
+>   szerkesztési vagy általános javaslat, szavazat. ⭐ Nincs kapu, mert a kapu úgysem véd.
 > - **2. lépcső, a pénztárca:** **három tanúsítás** felhatalmazott tanúsítótól. ⭐ Ez a
 >   **D11** szó szerinti megvalósulása: *a pénz csak bizonyított identitás után* — eddig
 >   elvi mondat volt, most szerkezet.
@@ -1020,7 +1020,7 @@ verzió pótolja, és ha vita van róla, **kétfelé válik, és mindkettő kipr
 >
 > ⭐⭐ **És `N`-t a közösség így is mediánnal állítja**, mert a **D13/c** szerint a
 > koino-paraméter maga is **entitás**: az értéke az *arra az entitásra* adott érték
-> javaslatok mediánja — javaslatot pedig csak **2. lépcsős** tehet.
+> javaslatok mediánja — érték javaslatot pedig csak **2. lépcsős** tehet.
 >
 > ⭐ *Csaba kérdésére, hogy gond-e a medián milliárdos léptékben:* **nem a medián a gond,
 > hanem a sokaság, amin fut.** A mai küszöbök az **entitás tulajdonosain** futnak
@@ -1215,7 +1215,7 @@ egész-aritmetika, amit már használunk (legrosszabb és legjobb eset, kereszt-
 megállíthatna bármit. A maximum döntési idő (D4) ezt már lefedi.
 
 **3. 🆕 A „nem tudunk róla" halmaz szűkítése az események `ido` mezője alapján.**
-Aki nem szavazott, de a javaslat óta **más eseményt tett**, arról tudjuk, hogy aktív volt.
+Aki nem szavazott, de a szerkesztési vagy általános javaslat óta **más eseményt tett**, arról tudjuk, hogy aktív volt.
 ⚠️ **Korábban tévesen azt írtam, hogy ez nem lehet determinisztikus** — de igen: az `ido`
 az **aláírt eseményben** van, tehát mindenki ugyanazt látja. *(Ami NEM használható: a
 „mikor kaptam meg" — az helyi megfigyelés, sehol nincs rögzítve.)*
@@ -1380,18 +1380,18 @@ működő közösség adja majd.*
 | D5 | Lánc szerepe | Csak a tartós mag őrzése és szabály-érvényesítése; a védelem rétegzett, minden támadásnak saját gazdája. |
 | D6 | Adatvédelem | A láncra személyes adat soha — csak kriptográfiai bizonyíték; a név a tartalmi rétegben él. |
 | D7 | Konszenzus | Személy-alapú (egy ember = egy érvényesítő hang) — vállalt kutatási terep. |
-| D8 | Egyezmény | A TÉNY a láncon örök; a HATÁLY a tartalmi rétegben elavulhat — a lánc a levéltár, a tartalmi réteg az élő jog. |
+| D8 | Szerkesztési vagy általános egyezmény | A TÉNY a láncon örök; a HATÁLY a tartalmi rétegben elavulhat — a lánc a levéltár, a tartalmi réteg az élő jog. |
 | D9 | Kód | Konszenzuális önfrissítés (egyezmény-vezérelt, időzáras, hash-ellenőrzött) + a visszautasítás/fork joga. *(A „vésznyílás" keret a D13-ban felülírva: normál üzemmód.)* |
 | D10 | Pénz | Alkotmányos kibocsátási szabály + egyenlő osztalék minden e-embernél; hozam-ígéret nincs; vagyon ≠ hatalom. |
 | D11 | Pénz-ütemezés | Pénz csak az identitás-réteg éles bizonyítása után (az osztalék a hamis regisztrációt pénznyomtatóvá tenné). |
 | D12 | Kód-kormányzás | Három szint: a verzió-entitás a koino-n BELÜL él (önalkalmazás, nincs regresszus), a koinok sokasága fölött pedig NINCS kormányzat — ott nincs mit eldönteni. A térkép nem kormányzat. |
 | D13 | A koino mint eszköz | Bárki indíthat koinot; a fork normál üzemmód, nem vésznyílás; az egység az ADATBÁZIS. A skálázás nem opcionális — a legfőbb koino evolúciósan jön létre. **D13/b:** a paramétereket nem eltaláljuk, hanem koinonként szétosztjuk. |
-| D14 | Tartós mag | A csalás-elleni CSONTVÁZRA szűkül (azonosság-egyszeriség, később pénz); minden más — az **egyezmény is** — a tudatpontot követi és elfelejthető. → **N2 (GDPR) megoldva.** |
+| D14 | Tartós mag | A csalás-elleni CSONTVÁZRA szűkül (azonosság-egyszeriség, később pénz); minden más — a **szerkesztési vagy általános egyezmény is** — a tudatpontot követi és elfelejthető. → **N2 (GDPR) megoldva.** |
 | D15 | Kulcs | A kulcs HITELESÍT, nem titkol — a lopás minden kára visszafordítható, kivéve a pénzt. A helyreállítás TÖBB FÜGGETLEN TANÚBÓL áll (háló + opcionálisan EUDI + opcionálisan választott bizottság); a bizottság **tanú, nem hatóság**. |
 | D16 | Pénz-tempó | Az irreverzibilitás DÖNTÉS, nem törvény: a nagyobb átutalás késleltetve, nyilvánosan, az ablakban megtámadhatóan megy — értesítéssel, **külön csatornán**. A kulcslopás így túlélhető. |
 | D17 | Konszenzus | A globális egyetértés hatóköre = a tartós mag (D14), semmi más; minden egyéb saját lánc-következetesség + determinisztikus számítás. **A konszenzus biztonsága = az identitás-réteg biztonsága** → az identitás a gerinc, elsőként kell állnia. |
 | D18 | Identitás | **Pozíció, nem darabszám** (távolság-szabály, Duniter-precedens) + **folytonos igazolás** (kockázati korlát, SOHA nem hang). Megújítás helyett **tevékenység = életjel**; a halál megtámadható tanúsítás. ⚠️ Az aláírás a KULCS használatát bizonyítja, nem az EMBER életét (kulcs-öröklés) → a védelem a D20 ösztönző-szerkezete. **Osztalék csak hitelesítettnek** — birtoklás, keresés, befektetés mindenkinek. |
-| D19 | Rendszer-gondolat | A program **BEJELENTŐ, nem BÍRÓ**: ellentmondásnál gondolatot hoz létre, a közösség dönt, egyezmény zárja. Ez adja meg a D15/D16/D18 hiányzó „hol"-ját. Zárt lista, felismerhető, gazdát kap, határidőre alapértelmezett kimenet. A **vita** a tartalmi rétegben marad, csak a **kimenet** megy a magba. |
+| D19 | Rendszer-gondolat | A program **BEJELENTŐ, nem BÍRÓ**: ellentmondásnál gondolatot hoz létre, a közösség dönt, általános egyezmény zárja. Ez adja meg a D15/D16/D18 hiányzó „hol"-ját. Zárt lista, felismerhető, gazdát kap, határidőre alapértelmezett kimenet. A **vita** a tartalmi rétegben marad, csak a **kimenet** megy a magba. |
 | D20 | Öröklés | **Pénz igen; tudatpont és azonosság soha.** Nem csak méltányosság: **ösztönző-védelem a kulcs-öröklés ellen** — a családot cinkosból egymás őrzőjévé alakítja. Az egyenlő osztalék miatt a dinasztikus koncentráció magától gyengül. |
 | D21 | Mag-replikáció | **Ujjlenyomat + bizonyíték** (a tároló nem tud hazudni → bizalmi helyett elérhetőségi probléma). **Három réteg:** önkéntesek · **mindenki tárolja a saját lapját** (~1 KB — az újjáépítés magja) · szeletelés később. **Napi kötegelés** → évi ~365 konszenzus-esemény, bármekkora koinonál. |
 
@@ -1440,7 +1440,7 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
 - KÉT ADATOSZTÁLY:
   - **Tartalmi réteg** — tudatpont-replikált, elveszhet, közösségi felejtés.
   - **Tartós mag** — NEM veszhet el: regisztrációk (duplikátum-védelem), szavazási
-    eredmények, EGYEZMÉNYEK (az egyezmény attól egyezmény, hogy kötelez). Mindig,
+    eredmények, SZERKESZTÉSI ÉS ÁLTALÁNOS EGYEZMÉNYEK (a szerkesztési vagy általános egyezmény attól egyezmény, hogy kötelez). Mindig,
     mindenhol replikált — lényegében a blokklánc-szerű réteg. (Pontos gondolata és
     működése NYITOTT — lásd N1.)
 - Törlés-szemantika P2P-ben: BEST-EFFORT — „nem szolgáljuk ki és nem replikáljuk tovább,
@@ -1463,7 +1463,7 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
 
 - A blokklánc/DAG szerepe a koinoban: a tartós mag őrzése (megmásíthatatlanság) és
   szabály-érvényesítése (a csomópontok csak protokoll-szabályos bejegyzést fogadnak el,
-  pl. „egy e-ember egy javaslatra egyszer szavaz") + bárki általi ellenőrizhetőség.
+  pl. „egy e-ember egy szerkesztési vagy általános javaslatra egyszer szavaz") + bárki általi ellenőrizhetőség.
 - A tartalmi réteget a tudatpont-replikáció viszi (D3) — annak NEM kell lánc.
 - A „manipuláció ellen véd" állítás rétegzett védelemmé bontva: kamu emberek → D1;
   szavazat-kényszer → D2; múlt-átírás + szabálysértő bejegyzés → lánc; szabályok
@@ -1486,15 +1486,15 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
   építve. Vállaltan kutatási terep („az egész koino projekt kutatási terep" — Csaba).
 - Kidolgozása: N8.
 
-### D8. Egyezmény: TÉNY ↔ HATÁLY szétválasztása (vita 5. pont — Csaba megerősítette 2026-07-16)
+### D8. Szerkesztési vagy általános egyezmény: TÉNY ↔ HATÁLY szétválasztása (vita 5. pont — Csaba megerősítette 2026-07-16)
 
-- A TÉNY („az egyezmény akkor, ott, érvényesen megszületett") a láncon, örökre.
+- A TÉNY („a szerkesztési vagy általános egyezmény akkor, ott, érvényesen megszületett") a láncon, örökre.
 - A HATÁLY (érvényben van-e, mennyire él) a tartalmi rétegben, tudatpont-vezérelten:
-  elavulhat, felülírhatja új egyezmény, elsorvadhat. Egy egyezmény lehet hatályát
+  elavulhat, felülírhatja új szerkesztési vagy általános egyezmény, elsorvadhat. Egy szerkesztési vagy általános egyezmény lehet hatályát
   vesztett, de soha nem meg-nem-történt. A lánc a levéltár, a tartalmi réteg az élő jog.
 - Feloldja: az egyezmény-elavulás (közösségi felejtés) ↔ tartós mag (nem veszhet el)
   feszültséget.
-- Kivétel-jegyzet: a kassza-mozgató egyezmény végrehajtása a láncon KIKÉNYSZERÍTHETŐ
+- Kivétel-jegyzet: a kassza-mozgató szerkesztési egyezmény végrehajtása a láncon KIKÉNYSZERÍTHETŐ
   (a pénz a láncon él) — az egyetlen automatizálható való-világ-kar; a forráskód-egyezmény
   TELJESÜLÉSE ellenőrizhető (elfogadott kód hash-e vs. futó kód); minden más való-világi
   teljesülést az emberek ellenőriznek.
@@ -1505,7 +1505,7 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
 
 - **N1. A tartós mag megtervezése** — 🟡 **KÉTHARMADA LEZÁRVA (2026-08-25).**
   - ✅ **MI kerül bele:** a **D14** megválaszolta — a csalás-elleni csontváz és semmi más
-    (azonosság-egyszeriség, később pénz). Az egyezmények **kikerültek** belőle: azok is a
+    (azonosság-egyszeriség, később pénz). A szerkesztési és általános egyezmények **kikerültek** belőle: azok is a
     tudatpontot követik.
   - ✅ **HOGYAN írható:** a **D17** vázolja — személy-alapú érvényesítés, lassú
     véglegességgel (D16); a hatókör olyan kicsi, hogy a konszenzus ritkán fut.
@@ -1726,7 +1726,7 @@ Az 1. fázisra háruló feladatok: [fejlesztesi_terv.md](fejlesztesi_terv.md) V1
 
 - **A koino-verzió entitásként él a fában**, a gyökér-entitások felett — de AZON A KOINON
   BELÜL, amit leír. Ezért a teljes meglévő gépezet magától vonatkozik rá: tudatpont,
-  küszöb, javaslat, szavazás, **különválás**. A forráskód-kormányzás nem új mechanizmus,
+  küszöb, szerkesztési vagy általános javaslat, szavazás, **különválás**. A forráskód-kormányzás nem új mechanizmus,
   hanem **ugyanaz a mechanizmus, magasabb magasságban**.
 - **Nincs végtelen regresszus**, mert a verzió-szint nem a rendszer FELETT van, hanem
   BENNE: a program a saját módosítását a saját eszközeivel dönti el (**önalkalmazás** —
@@ -1840,16 +1840,16 @@ A D5 határa **rossz helyen volt**. Nem „tartalmi réteg vs. tartós mag" a t�
 
 | | Amit valaki **fontosnak tart** | Amit senki nem tart fontosnak, de nélküle a rendszer **csalható** |
 |---|---|---|
-| Példa | gondolat, javaslat, **egyezmény** | „ez az ember már regisztrált"; „ez a pénz már el lett költve" |
+| Példa | gondolat, szerkesztési vagy általános javaslat, **szerkesztési vagy általános egyezmény** | „ez az ember már regisztrált"; „ez a pénz már el lett költve" |
 | Ki tenne rá tudatpontot? | akit érdekel | **senki** — ez nem gondolat, hanem csontváz |
 | Elfelejthető? | ✅ igen | ❌ nem — **a felejtés maga a csalás** |
 
 - **A tartós mag tehát az azonosság egyszeriségére és (később) a pénzre szűkül.** Minden
-  más — az **egyezményeket is beleértve** — a tudatpontot követi.
+  más — a **szerkesztési és általános egyezményeket is beleértve** — a tudatpontot követi.
 - **Egybevág egy MÁR MEGLÉVŐ invariánssal:** a `tudatpontService` ma is törli az entitást,
   ha 0 pontra csökken („aminek nincs gazdája, az nem létezik"). A D14 ennek időbeli
   változata.
-- **A D8 pontosítása:** az egyezmény TÉNYE nem magától örök, hanem **addig, amíg valaki
+- **A D8 pontosítása:** a szerkesztési vagy általános egyezmény TÉNYE nem magától örök, hanem **addig, amíg valaki
   tartja**. A tény ↔ hatály szétválasztás érvényes marad, de az „örök" feltételessé válik.
 
 **→ Ezzel az N2 (GDPR-törlés ↔ megmásíthatatlanság) MEGOLDÓDIK:** ha semmi nem marad
@@ -1873,7 +1873,7 @@ munkából alig marad valami (egyedül a szavazat, D2).
 | **Elviszi a pénzedet** | ❌ **soha** *(→ D16 oldja meg)* |
 | Átrendezi a tudatpontjaidat | 🟡 újra kiosztható |
 | Szavaz a nevedben | ✅ a szavazat módosítható |
-| Javaslatot tesz a nevedben | ✅ visszavonható |
+| Szerkesztési vagy általános javaslatot tesz a nevedben | ✅ visszavonható |
 | Gondolatot ír a nevedben | 🟡 törölhető, de olvasták |
 
 **Egyetlen visszafordíthatatlan sor van, és az a pénz.** Minden más feljegyzés, amit a
@@ -1922,7 +1922,7 @@ ettől lett a kulcslopás végzetes. A koino minden más döntésnél az ellenke
 
 > „A döntést nem elvesszük, hanem **lelassítjuk és megdrágítjuk**." — D10
 
-Minden javaslatnak van minimum döntési ideje, nyilvános, és amíg tart, bárki reagálhat.
+Minden szerkesztési vagy általános javaslatnak van minimum döntési ideje, nyilvános, és amíg tart, bárki reagálhat.
 **A pénz ne legyen kivétel.** A nagyobb átutalások örököljék a koino tempóját:
 **késleltetve, nyilvánosan, a várakozási ablakban megtámadhatóan.**
 
@@ -1988,7 +1988,7 @@ arra egyetlen működő út van: **helyben marad a meghívónál, és nem kerül
 
 *Eddig a pénzről elvek voltak (D10: alkotmányos kibocsátás + egyenlő osztalék; D11: csak
 bizonyított identitás után; D16: lassú, nyilvános, megtámadható; D20: örökölhető). Csaba a
-pihenőidő alatt írt füzetében megírta az első **konkrét** változatot. ⚠️ **Ez javaslat, nem
+pihenőidő alatt írt füzetében megírta az első **konkrét** változatot. ⚠️ **Ez ajánlás, nem
 lezárt döntés — de a szerkezete egybevág a meglévő döntésekkel.***
 
 **A belső piac.** A koino-n belül legyen piac, ahol a pénzzel kereskedni lehet, akár készpénzért
@@ -2056,7 +2056,7 @@ egész függőségi sorhoz, aminek minden kapuőrét megörökölnénk (2. szab�
 | Gondolat létrehozása | ❌ | senki nem ütközik senkivel |
 | Tudatpont-hozzárendelés | ❌ | **saját lánc-következetesség** — a saját keretedből osztasz, bárki utánaszámolhat |
 | Szavazás | ❌ | ugyanaz — a kettős szavazás a SAJÁT láncod ellentmondása |
-| Egy javaslat eredménye | ❌ | **determinisztikus számítás** — ugyanabból a bemenetből mindenki ugyanazt kapja |
+| Egy szerkesztési vagy általános javaslat eredménye | ❌ | **determinisztikus számítás** — ugyanabból a bemenetből mindenki ugyanazt kapja |
 | **Azonosság egyszerisége** | ✅ | — |
 | **Pénz** (később) | ✅ | — |
 
@@ -2194,7 +2194,7 @@ előállítani, az a valódi hálóban elfoglalt helyzet.
 
 #### 3. FOLYTONOS IGAZOLÁS (Csaba ötlete, 2026-08-25) — a hitelesség fokozat, nem kapcsoló
 
-A mai kép kétállapotú: be vagy engedve, vagy nem. Csaba javaslata folytonossá teszi: az
+A mai kép kétállapotú: be vagy engedve, vagy nem. Csaba ajánlása folytonossá teszi: az
 e-emberek a belépés UTÁN is igazolhatják egymás valódiságát, és **több igazolás nagyobb
 pénzügyi mozgásteret ad** (pl. az egyszerre utalható összeg).
 
@@ -2263,7 +2263,7 @@ lazábban indulhat, és a tét növekedésével szigorodhat.**
 
 **Két megoldást is elvetettünk**, és a második az enyém volt:
 - ❌ a Duniter **2 éves lejárata** — folyamatos házimunkát ró mindenkire
-- ❌ Claude javaslata, az **elhalványulás** (a tanúsítás súlya csökken az idővel) — szintén
+- ❌ Claude ajánlása, az **elhalványulás** (a tanúsítás súlya csökken az idővel) — szintén
   elvetve, és Csaba érve jobb volt: **ez az összes felhasználót terhelte volna egy ritka
   támadás miatt** (klasszikus biztonsági hiba), és filozófiailag is téves: **hogy valaki
   valódi ember, az TÉNY, nem előfizetés.** Nem jár le.
@@ -2360,7 +2360,7 @@ halálra: csak a D14, alkalmazva.
 
 #### 8. A PÉNZ-HOZZÁFÉRÉS FOKOZATAI — és a Sybil-lyuk befoltozása
 
-Csaba javaslata: a nem (vagy még nem teljesen) hitelesített e-ember is részt vehessen a
+Csaba ajánlása: a nem (vagy még nem teljesen) hitelesített e-ember is részt vehessen a
 gazdaságban, amíg az EUDI nem elérhető.
 
 **A lyuk, amit meg kellett találni:** a D10 szerint a pénz **egyenlő osztalékként
@@ -2434,7 +2434,7 @@ Hol látja meg bárki? Hol tiltakozik? Hol vitatkoznak róla?
 
 > **A válasz: a koinoban magában.** Ellentmondás vagy döntést igénylő kivétel esetén **a
 > program létrehoz egy GONDOLATOT**, ami jelzi a helyzetet; a közösség megvitatja, és
-> **egyezmény zárja le.**
+> **általános egyezmény zárja le.**
 
 Ettől a koino olyat csinál, amit kevés rendszer: **nem eldönti a kivételes eseteket, hanem
 megkérdezi.** A program nem bíró, hanem bejelentő.
@@ -2453,13 +2453,13 @@ megkérdezi.** A program nem bíró, hanem bejelentő.
 | Mi | Hova | Miért |
 |---|---|---|
 | **A vita** (a gondolat, a hozzászólások, az érvek) | ❌ **normál tartalmi réteg** | ha lezárult és senkit nem érdekel, elfelejthető (D14) |
-| **A kimenet** („ez az azonosság halott") | ✅ **a magba** | de **nem új adatfajtaként**: néhány mező az azonosság-rekordon, ami eddig is a magban élt (állapot, mikor változott, kik tanúsították, a lezáró egyezmény azonosítója) |
+| **A kimenet** („ez az azonosság halott") | ✅ **a magba** | de **nem új adatfajtaként**: néhány mező az azonosság-rekordon, ami eddig is a magban élt (állapot, mikor változott, kik tanúsították, a lezáró általános egyezmény azonosítója) |
 
 *(Nagyságrend: egy vitatott halál kimenete ~100 bájt. Halál ritka, vitatott halál még
 ritkább — elhanyagolható.)*
 
 **Ez ma nem létezik:** a koino ma értesítést tud létrehozni, és a cron le tud zárni
-javaslatokat — de **gondolatot semmi nem hoz létre magától**. Valódi új képesség.
+szerkesztési javaslatokat — de **gondolatot semmi nem hoz létre magától**. Valódi új képesség.
 
 **Alkalmazási esetek (a zárt lista jelöltjei):** vitatott halál-bejelentés (D18),
 kulcs-helyreállítási kérelem (D15), megtámadott pénzmozgás (D16). További jelöltek később
@@ -2734,7 +2734,7 @@ minősítést viselte, mert a meglévő adat átmentését szolgálta. A D24 ezt
 | **A régi kódbázis szerepe** | nem forrás, hanem **örökség**: domain-logika + felület (D22) |
 
 > ⚠️ **Ki kell mondani a veszteséget is:** a mai koino gondolata (kategóriák, gondolatok,
-> javaslatok, egyezmények, tudatpont-elrendezések) ezzel **elvész**. Ez vállalt ár —
+> szerkesztési javaslatok és egyezmények, tudatpont-elrendezések) ezzel **elvész**. Ez vállalt ár —
 > pontosan azért tartottuk kicsiben a közösséget, hogy ez az ár alacsony maradjon.
 
 ### D25. A BELÉPŐ TÉR — a koinok családfája (2026-08-26, Csaba)
@@ -2825,7 +2825,7 @@ tér** alakot használja.)*
 | **A hitelesítettség KÜSZÖBE** | | ✅ |
 | **Belépési szabály** | | ✅ |
 | **Szabályrendszer, paraméterek** | | ✅ |
-| **Gondolat, javaslatok, egyezmények** | | ✅ |
+| **Gondolat, szerkesztési és általános javaslatok és egyezmények** | | ✅ |
 | **Pénz** | | ✅ (de **átvihető** — lásd lentebb) |
 | **Tudatpont** | | ⚠️ *feltehetően koinonként — megerősítendő* |
 
@@ -2982,9 +2982,9 @@ gépüket. **Ez pontatlan volt**, és Csaba kijavította:*
 
 | | |
 |---|---|
-| Hogyan nőhet egy entitás? | **csak elfogadott módosítási javaslattal** |
+| Hogyan nőhet egy entitás? | **csak elfogadott szerkesztési javaslattal (módosítás)** |
 | Ki dönt róla? | a **tudatpont-tulajdonosok** — akiknek a gépét terhelné |
-| Látják-e előre? | **igen**: a javaslat maga hordozza az új méretet, tehát **a szavazás előtt látszik** |
+| Látják-e előre? | **igen**: a szerkesztési javaslat maga hordozza az új méretet, tehát **a szavazás előtt látszik** |
 | Új gyerek-entitás? | **nem terheli** a szülő vállalóit — a D26/4 szerint a vállalás csak arra az egy entitásra szól |
 
 **Ami valóban nyitva marad: a PASSZÍV tulajdonos.** Aki nem szavaz, annak a döntés
@@ -3032,7 +3032,7 @@ illeszkedik a D13/b paraméter-pluralizmusához is.
 | | **Szerkesztési** | **Általános** |
 |---|---|---|
 | Miről szól | egy entitás **megváltoztatása** (módosítás, áthelyezés, törlés, egyesítés) | a közösség **álláspontja** („fogadjuk el ezt az elvet", „szervezzünk találkozót") |
-| Mi történik elfogadáskor | a rendszer **végrehajtja** | **semmi automatikus** — az egyezmény maga az álláspont |
+| Mi történik elfogadáskor | a rendszer **végrehajtja** | **semmi automatikus** — az általános egyezmény maga az álláspont |
 | Az egyezmény élete | **egyszeri**: eldőlt, végrehajtódott, kész | **ÉLŐ**: csatlakozni, tiltakozni, ütközést jelölni lehet |
 | Teljesítés | a koino végzi | **emberi** (D8: a hatály a tartalmi rétegben él) |
 
@@ -3045,7 +3045,7 @@ Nem a semmiből indul: **egy gondolat alatt keletkezik**, és onnan örökli a k
 a szavazók köre a gondolat tudatpont-tulajdonosai, a küszöbök az ő értékei.
 
 > **Az induló küszöbök a szülő gondolattól öröklődnek, utána viszont SAJÁT érték
-> javaslatokkal formálhatók** (Csaba). Vagyis az egyezmény idővel önálló életet él,
+> javaslatokkal formálhatók** (Csaba). Vagyis az általános egyezmény idővel önálló életet él,
 > ahogy kialakul a saját tulajdonosi köre.
 
 #### 2. ⭐ AZ ÁLTALÁNOS EGYEZMÉNY ÉLŐ — csatlakozás, tiltakozás, ütközés
@@ -3058,7 +3058,7 @@ Ez az, ami a mai koinoban nincs, és ami a **D8-at gyakorlattá teszi**:
 | **Tiltakozás** | *„én már nem"* — a támogatás visszavonása, ellenkezés |
 | **Ütközés-jelölés** | *„ez a kettő ellentmond egymásnak"* |
 
-> **A TÉNY örök** (ez az egyezmény akkor, ott, érvényesen megszületett), **a HATÁLY
+> **A TÉNY örök** (ez az általános egyezmény akkor, ott, érvényesen megszületett), **a HATÁLY
 > viszont él**: hányan állnak mögötte MOST.
 
 **Két dolgot old meg, amit eddig nem tudtunk:**
@@ -3066,7 +3066,7 @@ Ez az, ami a mai koinoban nincs, és ami a **D8-at gyakorlattá teszi**:
 - **A bootstrap-problémát.** Ha egy tízfős koino hoz egy megállapodást, és később ezren
   lesznek, az újak **csatlakozhatnak** — nem kell újraszavazni, és nem marad „tíz ember
   döntése" egy ezerfős közösségen.
-- **Az elavulást.** Egy egyezmény, ami mögül elfogynak az emberek, **magától elsorvad** —
+- **Az elavulást.** Egy általános egyezmény, ami mögül elfogynak az emberek, **magától elsorvad** —
   nem kell „hatályon kívül helyezni". Ugyanaz a minta, mint a tudatpontnál (D14).
 
 #### 3. A csatlakozó AKTÍV résztvevő — és ez old meg egy feszültséget
@@ -3075,14 +3075,14 @@ Ez az, ami a mai koinoban nincs, és ami a **D8-at gyakorlattá teszi**:
 > passzívként, az már eleve **aktív résztvevője**, és számít a részvételi aránynál." — Csaba
 
 **Ez old meg egy problémát, ami elsőre feloldhatatlannak látszott:** mi történik a
-csatlakozókkal, ha az egyezményt később **módosítják**? Ötven ember csatlakozott egy
+csatlakozókkal, ha az általános egyezményt később **módosítják**? Ötven ember csatlakozott egy
 szöveghez, aztán a szöveg megváltozik — más szöveghez csatlakoztak?
 
 > **Nem. Mert aki csatlakozott, az aktív résztvevő — tehát ŐK SZAVAZNAK arról a
 > módosításról.** Nem kell se nullázni a csatlakozásokat, se változatokhoz kötni őket.
 
 *(Ugyanaz a minta, amit Csaba a **D26/5**-ben a méretnövekedésre mondott ki: nem
-történhet a hátuk mögött, mert javaslat és szavazás vezet oda.)*
+történhet a hátuk mögött, mert szerkesztési javaslat és szavazás vezet oda.)*
 
 #### 4. ⭐ A HELY HATÁROZZA MEG A HATÓKÖRT — és lefelé terjed
 
@@ -3090,13 +3090,13 @@ történhet a hátuk mögött, mert javaslat és szavazás vezet oda.)*
 > **az adott ágazat** tudatpont-tulajdonosai." — Csaba
 
 **A hatókör LEFELÉ terjed, nem felfelé** *(a felmenő ág értelmetlen lenne: akkor a gyökér
-tulajdonosai minden egyezményben benne lennének, és a pozíció nem jelentene semmit —
+tulajdonosai minden általános egyezményben benne lennének, és a pozíció nem jelentene semmit —
 Csaba jogosan javította ki ezt a felvetést)*:
 
-> Egy egyezmény hatóköre azok köre, akik tudatpontot tettek **arra az entitásra, ami alatt
-> az egyezmény áll — vagy annak bármely leszármazottjára.**
+> Egy általános egyezmény hatóköre azok köre, akik tudatpontot tettek **arra az entitásra, ami alatt
+> az általános egyezmény áll — vagy annak bármely leszármazottjára.**
 
-| Hol áll az egyezmény | Kik foglalhatnak állást |
+| Hol áll az általános egyezmény | Kik foglalhatnak állást |
 |---|---|
 | egy mély gondolat alatt | az a kis ág — néhány ember |
 | egy nagy témakör alatt | az egész témakör tulajdonosai |
@@ -3107,7 +3107,7 @@ Csaba jogosan javította ki ezt a felvetést)*:
 - a *„gyökérben bárki"* nem külön szabály, hanem **ugyanannak a szabálynak a széle**;
 - a **pozíciónak valódi jelentése van**: minél feljebb viszik, annál többen szólhatnak
   hozzá;
-- a feljebb vitel maga is javaslat → **a hatókör tágítása is közösségi döntés**.
+- a feljebb vitel maga is szerkesztési javaslat → **a hatókör tágítása is közösségi döntés**.
 
 **És ehhez már van gépezet:** a *hierarchikus tudatpont* (a saját + az összes
 leszármazott pontja) pontosan ezt a lefelé terjedő kört méri. Eddig a **fontosság**
@@ -3122,7 +3122,7 @@ meglévő, egy szinttel feljebb.
 
 Vagyis nem kell külön „egyezmény-kezelés": **egy entitás a többi között** — tudatpontot
 lehet rá tenni, küszöbei vannak, gyerekei lehetnek, és mind a négy szerkesztési művelet
-vonatkozik rá. *(A mai prototípus szűkebb: ott az egyezményre csak áthelyezési javaslatot
+vonatkozik rá. *(A mai prototípus szűkebb: ott a szerkesztési egyezményre csak szerkesztési javaslatot (áthelyezés)
 lehet indítani — ez tehát bővítés, nem átalakítás.)*
 
 #### 6. NINCS automatikus következmény (D19)
@@ -3132,7 +3132,7 @@ lehet indítani — ez tehát bővítés, nem átalakítás.)*
 > „Az ütközés is csak láthatóvá teszi, hogy két egyezmény ellentmond egymásnak." — Csaba
 
 Sem a tiltakozók többsége, sem az ütközés-jelölés **nem érvénytelenít** semmit magától. A
-rendszer **bejelent, nem bíró** (D19) — a vita helye pedig az egyezmény alatti gyerek-
+rendszer **bejelent, nem bíró** (D19) — a vita helye pedig az általános egyezmény alatti gyerek-
 gondolatokban van.
 
 #### Ami a megvalósításból még nyitott
@@ -3273,10 +3273,10 @@ küszöbe medián lenne, a közösség **leszállíthatná a saját alkotmány-k
   átírás, a lezárás ideje szerint sorba rakva). Ha határidős marad, **egy gépezetben két mérce**
   lesz. *Ez a legnehezebb nyitott pont.*
 - **Mi ér véget egy alkotmányi javaslattal, amit senki nem akar?** A korábbi „>1/3 ellenzés →
-  eltűnik" a 2. pont után tárgytalan. ⭐ Javaslat: **a D14** — ha senki nem tart rajta
+  eltűnik" a 2. pont után tárgytalan. ⭐ Ajánlás: **a D14** — ha senki nem tart rajta
   tudatpontot, elfelejtődik; nem kell új szabály, és **nem termel elakadt pontot** (amit lezárás
   híján nem is tudnánk lánc-bizonyítékkal felszabadítani).
-- **Áthelyezés utáni visszaesésnél a HELY is visszaugrik?** Javaslat: nem.
+- **Áthelyezés utáni visszaesésnél a HELY is visszaugrik?** Ajánlás: nem.
 - **A kör dönt — de mire vonatkozik az alkotmány?** A leszármazottak tulajdonosaira is szól-e.
 - **`Tartozkodik` szavazat egy alkotmányra:** kivétel, vagy néma nem?
 - **Az ütközés-jelölés iránya:** kölcsönös vagy irányított.
@@ -3343,7 +3343,7 @@ egyszerre mindenki ugyanazon a verzión**. Tehát a verzió-eltérés nem kivét
 **alapállapot** — és ezért a **láthatóvá tétele szerkezeti kérdés**, nem funkció. *(Az
 alkotmány elhalasztható volt, mert additív; ez nem ugyanaz a fajta.)*
 
-⭐ **Javaslat, és van hozzá kész hely:** a csere már ma egy 43 karakteres `LENYOMAT`-tal
+⭐ **Ajánlás, és van hozzá kész hely:** a csere már ma egy 43 karakteres `LENYOMAT`-tal
 kezdődik (a koino azonossága, D35). Ugyanoda elfér egy **szabály-lenyomat** is: *ugyanazokkal
 az állandókkal számolunk-e?* Eltérésnél **jelzés, nem vád** (D19) — de **látszik**, mielőtt
 két készülék hetekig más igazságot számolna. Az ára néhány tíz bájt körönként.
@@ -3367,7 +3367,7 @@ alkotmányról épp az ellenkezője áll — *„egy alkotmánynak akkor lesz s�
 is beleszámolódnak"*, ott a hallgatás **NEM**-et jelent; globálisan viszont a passzivitás
 **kilépés a nevezőből**. A kettő megfér, de **ki kell mondani, melyik hol érvényes**.
 
-⭐ **Egy javaslat a koino meglévő gépezetéből:** a néma készülék ugyanaz a probléma, mint a
+⭐ **Egy ajánlás a koino meglévő gépezetéből:** a néma készülék ugyanaz a probléma, mint a
 felszabadításnál — és ott **már megoldottuk** (`allapot.lancVegek`). A globális nevező tehát
 lehetne: *tag **ÉS** nem nyilvánította magát passzívvá ebben a témában **ÉS** a lánca él.*
 Nem hit, hanem a saját láncából olvasható.
@@ -3652,7 +3652,7 @@ hajtanánk, épp azt a kárt okoznánk, amit most megmértünk — csak jó lelk
 3. ⏸️ **Több forrásból egy fájl: „ahogy logikusabb, nekem mindegy."** ⚠️ **Az ára kimondva:**
    ma a folytatás alapja, hogy **a részleges fájl MÉRETE maga az állapot** — ez **sorrendben
    érkező** szeleteket feltételez. Több forráshoz **szelet-nyilvántartás** kellene, és ezzel
-   egy mai szerkezeti egyszerűség veszne el. ⭐ **A javaslat ezért: KÜLÖN munka, később** —
+   egy mai szerkezeti egyszerűség veszne el. ⭐ **Az ajánlás ezért: KÜLÖN munka, később** —
    a 2. pont (gyors társ-váltás) a haszon nagy részét **szelet-nyilvántartás nélkül** megadja.
 
 #### ⏸️ Ami nyitva marad (a következő session feladata)
@@ -4190,7 +4190,7 @@ saját szeleteiben szereplő szerzők legutóbbi gyökerét. **A koino mérete s
 #### 2. KI HORGONYOZZA A GYÖKERET?
 
 ⭐⭐ **Aláírással csak a SZERZŐ horgonyoz, és csak a SAJÁT dolgait; minden más gyökér SZÁMÍTOTT,
-nem kimondott** (mint az egyezmény, D17):
+nem kimondott** (mint a szerkesztési vagy általános egyezmény, D17):
 
 - **a szerző lánca és kiosztása** — a szerző írja alá, a saját eseményében utazik;
 - **a szelet halmaza (a csere)** — mindkét fél maga számolja, horgony nem kell;
@@ -4356,7 +4356,7 @@ mert két offline készülék ártatlanul is elágaztat. A szeletelt világban v
 #### A DÖNTÉS
 
 1. ⭐ **A KISZOLGÁLÁS (a D75/3 pontosítása):** egy készülék **alapból csak azt adja tovább, amire
-   tudatpontot tett**, és — a javaslat szerint — **a saját eseményeit mindig** (különben egy szavazata
+   tudatpontot tett**, és — az ajánlás szerint — **a saját eseményeit mindig** (különben egy szavazata
    ki sem jutna a készülékéről). Beállíthatja, hogy azt is kiszolgálja, amit csak megnézett.
 2. ⭐ **A beállítás KÉSZÜLÉKENKÉNT él** (a PC-n „mindent, ami megvan", a telefonon „csak a
    tudatpontosat") — helyi beállítás, nem esemény, nem terjed.
@@ -4395,7 +4395,7 @@ pedig közben azt mondta, hogy addig „minden szelet mozog". A kettő kétféle
    („mindent kiszolgál, a törzs kivételével") megerősítése.
 2. ⭐⭐ **A „MI KINÉL VAN" METAADATA TÖBB HELYEN ÉL**, és a hálózat vagy tudja, vagy ki tudja
    számolni, ki tudhatja. Ennek a terve a skálázási tervben áll — 4.2 (a címjegyzék az entitáson,
-   Csaba javaslata, név nélkül — SK2) és 5.2–5.3 (a kereső-réteg: elosztva, replikálva; a
+   Csaba ajánlása, név nélkül — SK2) és 5.2–5.3 (a kereső-réteg: elosztva, replikálva; a
    hash-elhelyezés épp azt adja, hogy bárki kiszámolja, ki tudhatja) —, de az alappillérek között
    eddig NEM szerepelt; ⭐ mostantól pillér: [`alappillerek.md`](alappillerek.md) **G**. Ma csak egy
    HELYI, nem terjedő szelet-címjegyzék van (`tarsak.js`, a `hozd` használja). Az alakja nyitott.
@@ -4408,7 +4408,7 @@ pedig közben azt mondta, hogy addig „minden szelet mozog". A kettő kétféle
    alapértéket, „a nem vállalt az átmenetibe" útvonalat) nem építünk. Az új sorrend:
    [`alappillerek.md`](alappillerek.md) 4.
 
-### D85. A JAVASLAT ÉS AZ EGYEZMÉNY: ugyanolyan entitás, mint a gondolat (2026-10-02, Csaba)
+### D85. A SZERKESZTÉSI ÉS ÁLTALÁNOS JAVASLAT ÉS EGYEZMÉNY: ugyanolyan entitás, mint a gondolat (2026-10-02, Csaba)
 
 > *„a szavazás feltételét, kiegészíthetjük úgy, hogy nem csak az érintett gondolaton, kell hogy legyen
 > tudatpontja, hanem a javaslaton is, amire szavazni akar. így a javaslat is több helyen lessz
@@ -4417,41 +4417,41 @@ pedig közben azt mondta, hogy addig „minden szelet mozog". A kettő kétféle
 > *„gondolnunk kell, a töredék javaslatokra, is ami akkór jön létre, ha több gondolatot is érint egy
 > javaslat, és ezért több gondolat gyermekeként, is meg kell jelennie."* — Csaba
 
-**Amiből jött:** az adatkezelés rétegenkénti átbeszélése (2026-10-02). A javaslat a SZÁMÍTÁSBAN entitás
+**Amiből jött:** az adatkezelés rétegenkénti átbeszélése (2026-10-02). A szerkesztési vagy általános javaslat a SZÁMÍTÁSBAN entitás
 (cím, szöveg, szülő = az első érintett, saját tudatpont, D14), a TÁROLÁSBAN viszont két szeletben élt:
 a létrehozása és a szavazatai az első érintett szeletében (`muveletek.js`: „a szeletnek egyetlen gazdája
-lehet"), a rá tett pont és az állásfoglalás a saját azonosítója alatt. Az egyezmény nem volt entitás (a
+lehet"), a rá tett pont és az állásfoglalás a saját azonosítója alatt. A szerkesztési vagy általános egyezmény nem volt entitás (a
 döntés kiszámolt mezője). A töredékek (a 2026-09-07 óta számított RÉSZEK) csak az első érintett alatt
 jelentek meg. A szigorú (b) alatt ebből az lett volna, hogy a második érintett tartói nem látják, hogy
-róluk döntenek, és a javaslat élete elszakad a döntéstől. A prototípus mindhármat entitásként kezeli
+róluk döntenek, és a szerkesztési javaslat élete elszakad a döntéstől. A prototípus mindhármat entitásként kezeli
 (`backend/models/`: `Javaslat`, `Egyezmeny`, a töredékek `toredekCsoportId`-val).
 
 #### A DÖNTÉS
 
-1. ⭐ **A javaslat a SAJÁT szeletében él, mindenestül** (létrehozás, szavazatok, a rá tett pontok,
+1. ⭐ **A szerkesztési vagy általános javaslat a SAJÁT szeletében él, mindenestül** (létrehozás, szavazatok, a rá tett pontok,
    állásfoglalások), ahogy egy gondolat. A `Szavazat` esemény marad (nem entitás, nincs pontja), csak a
-   javaslat szeletébe kerül, mert arról szól.
-2. ⭐ **A szavazati jog: a szavazás pillanatában pont az érintett gondolaton ÉS a javaslaton** (töredéknél:
-   a töredékén). Így minden szavazó tudatponttal tartja a javaslatot (D3), külön vállalási szabály nélkül.
-   Következmények: a javaslattevő lépése *létrehozás → pont a javaslatra → támogató szavazat*, egy
+   szerkesztési vagy általános javaslat szeletébe kerül, mert arról szól.
+2. ⭐ **A szavazati jog: a szavazás pillanatában pont az érintett gondolaton ÉS a szerkesztési vagy általános javaslaton** (töredéknél:
+   a töredékén). Így minden szavazó tudatponttal tartja a szerkesztési vagy általános javaslatot (D3), külön vállalási szabály nélkül.
+   Következmények: a javaslattevő lépése *létrehozás → pont a szerkesztési vagy általános javaslatra → támogató szavazat*, egy
    lépésben (ma a pont a szavazat UTÁN jön); a részvételi arány nevezője MARAD az érintett aktív
    tulajdonosai (különben a részvétel mindig 100% lenne); a jog a leadáskor dől el, ahogy ma.
-3. ⭐ **A döntés bemenete bejelentésként minden érintett szeletébe is bekerül** (a javaslat létrehozása és a
+3. ⭐ **A döntés bemenete bejelentésként minden érintett szeletébe is bekerül** (a szerkesztési vagy általános javaslat létrehozása és a
    szavazatok), a gyerek-bejelentés mintájára — mert a gondolat NEM szavazó tartóinak is ki kell tudniuk
    számolni, megváltozik-e a gondolatuk (D17). ⛔ Ez nem az elvetett „aki a gondolatot tartja, a
-   javaslatait is tartja" szabály: a javaslat saját élete (a rá tett pontok, az állásfoglalások, az
-   egyezmény-fázis) csak a javaslat szeletében van.
-4. ⭐ **Az egyezmény entitás — ugyanaz az entitás, mint a javaslat, új fázisban:** ugyanaz az azonosító, a
+   javaslatait is tartja" szabály: a szerkesztési vagy általános javaslat saját élete (a rá tett pontok, az állásfoglalások, az
+   egyezmény-fázis) csak a szerkesztési vagy általános javaslat szeletében van.
+4. ⭐ **A szerkesztési vagy általános egyezmény entitás — ugyanaz az entitás, mint a szerkesztési vagy általános javaslat, új fázisban:** ugyanaz az azonosító, a
    pontjai rajta maradnak (így a születésekor nem felejtődik el, D14), szülője az első érintett. A
-   prototípus tárhely-szabályából a törlés magától így alakul: a törölt gondolat gyerekei — köztük az
-   egyezmény — a nagyszülőhöz kerülnek fel. Kaphat pontot, vonatkozhat rá javaslat (D8: a hatály a
+   prototípus tárhely-szabályából a törlés magától így alakul: a törölt gondolat gyerekei — köztük a
+   szerkesztési vagy általános egyezmény — a nagyszülőhöz kerülnek fel. Kaphat pontot, vonatkozhat rá szerkesztési javaslat (D8: a hatály a
    tudatpontot követi).
 5. ⭐ **Töredékek:** több érintettnél érintettenként egy SZÁMÍTOTT entitás, levezetett azonosítóval (mint a
    különvált ág), mindegyik a SAJÁT érintettje gyereke — ez jelenik meg minden érintett gondolat alatt, és
-   erre kerül a pont. Egy érintettnél nincs töredék. A csoport maga a javaslat; elfogadás után az az
-   egyezmény. A döntés változatlan (2026-09-07): töredékenként a saját küszöbök, közös lezárás, ÉS.
+   erre kerül a pont. Egy érintettnél nincs töredék. A csoport maga a szerkesztési javaslat; elfogadás után az a
+   szerkesztési egyezmény. A döntés változatlan (2026-09-07): töredékenként a saját küszöbök, közös lezárás, ÉS.
 6. ⭐ **Az ÉS-szabály a szeletelt világban:** a többi érintett nevezője (a pont-eseményeik a lezárásig)
-   bejelentésként a javaslat szeletébe is bekerül — a terhe a döntés méretével arányos, nem a koinoéval.
+   bejelentésként a szerkesztési javaslat szeletébe is bekerül — a terhe a döntés méretével arányos, nem a koinoéval.
 
 ⏸️ **A megépítéskor eldöntendő:** a beadó kezdő pontjának szétosztása a töredékek között (a prototípusban
 mindegyikre legalább 1) · a csomag-javaslat (a prototípusban a létrehozó választ tárhelyet; a P2P-ben még
@@ -4461,13 +4461,13 @@ nincs). **Helye a sorban:** a B-ben, a szigorú (b) bekapcsolása (B/3) előtt.
 
 - ⭐ **T1 (a D85/5 helyett):** több érintettnél a CSOPORTNAK NINCS saját entitása — a töredékek az
   entitások, és elfogadáskor MINDEGYIK a saját gondolata alatt lép egyezmény-fázisba (mint egy
-  érintettnél maga a javaslat). *Miért:* a szavazók a töredékekre tesznek pontot, így a csoport-entitás
-  pont nélkül születne, és a D14 azonnal elfelejtené az egyezményt. A csoport döntése (az ÉS) számított
-  marad, a javaslat azonosítója alatt. ⚠️ Eltérés a prototípustól: ott egy egyezmény-dokumentum született
+  érintettnél maga a szerkesztési javaslat). *Miért:* a szavazók a töredékekre tesznek pontot, így a csoport-entitás
+  pont nélkül születne, és a D14 azonnal elfelejtené a szerkesztési egyezményt. A csoport döntése (az ÉS) számított
+  marad, a szerkesztési javaslat azonosítója alatt. ⚠️ Eltérés a prototípustól: ott egy egyezmény-dokumentum született
   a tárhelyen.
 - ⭐ **T2 (a D85/2 kiegészítése): a szavazat maga hozza a szavazati jog bizonyítékát** (a D81 mintája):
   a szavazó kiosztás-fájából rövid bizonyíték, hogy a szavazás pillanatában pontja volt az érintett
-  gondolaton és a javaslaton (töredékén); a kapu ellenőrzi. *Miért:* különben a javaslat pontjai a
+  gondolaton és a szerkesztési vagy általános javaslaton (töredékén); a kapu ellenőrzi. *Miért:* különben a szerkesztési vagy általános javaslat pontjai a
   döntés bemenetévé válnának, és a gondolat nem szavazó tartóinak tartaniuk kellene őket.
 - ⭐ **T3 (a D85/6 helyett — Csaba, 2026-10-03: „1. igen 2. (a2)”):** a közös lezárás és az ÉS miatt a G1
   sorsához a G2-es rész MINDEN bemenete kell (a G2 tulajdonosai és küszöbei a lezárásig) — a G1 nem szavazó
@@ -4487,13 +4487,13 @@ nincs). **Helye a sorban:** a B-ben, a szigorú (b) bekapcsolása (B/3) előtt.
   csomag a rész TÖREDÉKÉNEK szeletébe kerül (`entitas` = a töredék azonosítója), nem a gondolatéba — a rész
   szavazói (pontjuk van a töredéken, D85/2) a cserével magától kapják; **(2)** a gondolat nem szavazó tartója
   csak akkor kéri el a töredék szeletét, ha a gondolata SAJÁT része valamikor igent mondott — ha egyszer sem,
-  az ÉS miatt a gondolat nem változhatott (ezt a saját adatából tudja), csak a javaslat címkéje „nem ismert”
+  az ÉS miatt a gondolat nem változhatott (ezt a saját adatából tudja), csak a szerkesztési javaslat címkéje „nem ismert”
   nála (D19); **(3)** minden csomag csak azt hozza, ami a cél-szeletből hiányzik (a nagy gondolat tartói nem
   kapják vissza a saját adatukat). Az elkérést a készülék a kiszámolt állapotából indítja (mint a `hozd`-ot) —
   a csere réteg nem számol döntést. ⭐ **Az előfeltétele (2026-10-03, a (B) építése közben):** a javaslattevő
   jogosultságát a szabály-réteg a láncából olvasta — a csak-G1-tartónál hézagos láncból, ami a G2-es pontot
-  „nincs”-nek látta; ezért **a javaslat is hozza a jogának bizonyítékát** (érintettenként, a T2 mintája; a
-  kapu ellenőrzi, a lánc-gyökeres javaslatnál csak ez dönt) — ára érintettenként +0,5–1,2 KB (56. mérés).
+  „nincs”-nek látta; ezért **a szerkesztési javaslat is hozza a jogának bizonyítékát** (érintettenként, a T2 mintája; a
+  kapu ellenőrzi, a lánc-gyökeres szerkesztési javaslatnál csak ez dönt) — ára érintettenként +0,5–1,2 KB (56. mérés).
   ⭐ **A megépült csomag (2026-10-03):** `DontesiCsomag` esemény, `entitas` = a cél töredéke, `adat` =
   `{ javaslat, cel, esemenyek: [a javaslat, …ami a cél szeletéből hiányzik] }`; a kapu a tartalmát is
   ellenőrzi (minden belső esemény ugyanazon a próbán, csak a döntés bemenete, a cél saját eseménye nem;
@@ -4506,16 +4506,16 @@ nincs). **Helye a sorban:** a B-ben, a szigorú (b) bekapcsolása (B/3) előtt.
 - **A megépítés állása:** D85/4 (az egyezmény-fázis a kártyán) ✅ `cbb6f19` · a töredékek mint entitások,
   a pakli töredék-kártyája, a szavazás töredék → csoport fordítása, a javaslattevő lépése (létrehozás →
   pont → szavazat a művelet-rétegben; a pont a prototípus szerint oszlik: mindegyikre legalább 1, a
-  maradék körbe) ✅ `ee624d6` · **a szavazati jog** (pont az érintetten ÉS a javaslaton / a töredékén, a
+  maradék körbe) ✅ `ee624d6` · **a szavazati jog** (pont az érintetten ÉS a szerkesztési vagy általános javaslaton / a töredékén, a
   leadás pillanatában; a nevező változatlan) ✅ a számításban (`javaslatSzamitas.js`), és a `szavaz`
-  magától 1 pontot tesz a javaslatra, ha még nincs rajta ✅ · **a különválás csak a gondolatokat osztja
-  szét** (a prototípus `kulonvalasService.js`-e szerint) — az elfogadott egyezmény a főágon marad ✅ ·
+  magától 1 pontot tesz a szerkesztési vagy általános javaslatra, ha még nincs rajta ✅ · **a különválás csak a gondolatokat osztja
+  szét** (a prototípus `kulonvalasService.js`-e szerint) — az elfogadott szerkesztési egyezmény a főágon marad ✅ ·
   **a T2 bizonyítéka** ✅ — a szavazat a lánc-gyökere mellé részenként két bizonyítékot hoz a saját
   kiosztás-fájából (az érintettre és a javaslat-entitásra); a kapu ellenőrzi (`szavazatOnbizonyitasa`),
   a számítás lánc-gyökeres szavazatnál CSAK ebből dönt a jogról (a régi szavazatnál a pont-eseményekből);
   ára +0,9–2,4 KB szavazatonként (54. mérés) · **a szelet-kulcsok és a bejelentés (D85/1, /3)** ✅ — a
-  `Javaslat` a saját szeletében (`entitas` üres), a `Szavazat` a javaslatéban; egy eseményből olvasható,
-  hova jelentjük be (`esemeny.js`: `bejelentesHelyei` — a születés a szülőnél, a javaslat minden
+  `Javaslat` a saját szeletében (`entitas` üres), a `Szavazat` a szerkesztési vagy általános javaslatéban; egy eseményből olvasható,
+  hova jelentjük be (`esemeny.js`: `bejelentesHelyei` — a születés a szülőnél, a szerkesztési vagy általános javaslat minden
   érintettnél, a lánc-gyökeres szavazat a bizonyítéka kulcsainál, legfeljebb 64); a tár mutatója listát
   tart (`mutato.json` 3. változat), a csere halmaza és a fogadó szűrője ebből dolgozik; ⚠️ a szelet-kérés
   (`hozd`) kiszolgálója eddig csak a szelet saját eseményeit küldte — mostantól a csere halmazát (a
@@ -4530,7 +4530,7 @@ tárba, holott ugyanez a pont kimondja, hogy átkerül.
 #### A DÖNTÉS
 
 1. ⭐ **A tartós tár: a tudatpontos szeleteim és a saját azonosság-szeletem.** (A D85 óta a megszavazott
-   javaslat is tudatpontos szelet.)
+   szerkesztési vagy általános javaslat is tudatpontos szelet.)
 2. ⭐ **A máshová írt saját eseményeimet mindig megtartom és kiszolgálom — ESEMÉNYKÉNT, nem az egész
    szeletet** (a D83/1 szövege). Ilyen: a visszavett pontú entitás régi eseményei, a meghívás /
    felhatalmazás / tanúsítás (a MÁSIK azonosság-szeletében), az ellentmondás-bejelentés.
@@ -4658,7 +4658,7 @@ a lista ahhoz kell, hogy valaki felülről böngészhesse a koinot (pl. egy új 
    koino méretével nőne (a „végtelen” ellen); és *ami dönt, ne kívánjon élő lekérdezést — csak a megtalálás
    kívánhat*: a gyökér semmiről nem dönt.
 2. **A koino születését (`KoinoLetrehozas`) mindenki tartja** — egyetlen esemény (név, alapítók, zárt/nyílt),
-   nélküle a program el sem indul a koinoval, és nem nő a koino méretével. *(Claude javaslata; Csaba a
+   nélküle a program el sem indul a koinoval, és nem nő a koino méretével. *(Claude ajánlása; Csaba a
    gyökér-kérdéssel együtt kapta, külön nem vitatta — visszafordítható.)*
 
 ### D91. A CÍMJEGYZÉK (G): A FA ÉS A RAJ, A HASH-ELHELYEZÉS CSAK KÉT HELYEN (2026-10-03, Csaba: „1. igen 2. igen”)
@@ -4741,7 +4741,7 @@ lineáris; és egy régi rés: a szabály-réteg nem kérdezett tagságot (bárk
 
 #### A DÖNTÉS
 
-1. ⭐ **A döntésben csak az ELLENŐRZÖTT TAG számít (E1):** a pont, a javaslat, a szavazat (és az állásfoglalás) csak
+1. ⭐ **A döntésben csak az ELLENŐRZÖTT TAG számít (E1):** a pont, a szerkesztési vagy általános javaslat, a szavazat (és az állásfoglalás) csak
    akkor, ha a szerző tagsága a számítás bemenetéből bizonyítható; a nem ellenőrizhető szerző eseménye nem számít, de
    nem tűnik el — kimondjuk (`nemEllenorizhetok`, D19), és amint a bizonyíték megérkezik, számít. ⚠️ A döntési
    csomagnak (D85 T3) ezért a résztvevők tagsági bizonyítékát is hoznia kell (mérendő — 64.).
@@ -4765,8 +4765,8 @@ lineáris; és egy régi rés: a szabály-réteg nem kérdezett tagságot (bárk
 
 #### MEGÉPÜLT (2026-10-04): mind a hat pont (a 4. a D94 alakjában)
 
-- **Az 1.:** a szabály-réteg (`szabalyok.js`, `TAGSAG_KELL`) a pontot, a javaslatot, a szavazatot, az állásfoglalást ÉS
-  az érték javaslatot csak tagtól számolja — ⚠️ az érték javaslat a döntés pontosítása: a küszöb a javaslatok mediánja,
+- **Az 1.:** a szabály-réteg (`szabalyok.js`, `TAGSAG_KELL`) a pontot, a szerkesztési vagy általános javaslatot, a szavazatot, az állásfoglalást ÉS
+  az érték javaslatot csak tagtól számolja — ⚠️ az érték javaslat a döntés pontosítása: a küszöb a érték javaslatok mediánja,
   tehát a kulcs-gyártó azzal is döntést mozdítana. A nem tag eseménye a külön `tagsagFuggoben` listába kerül (az okával;
   nem a `nemEllenorizhetok`-be, mert az a lánc hézagáé) — és ⭐ akkor is függőben van, ha a szerző biztosan nem tag (pl.
   belépett, de még senki nem hívta meg): P2P-n a „nem tag” és a „még nem láttam a meghívását” ugyanaz. A döntési csomag a
@@ -4858,7 +4858,7 @@ bekapcsolás).
 A 67. mérés után (a lezárási összegzés ~60–70 KB döntésenként, logaritmikus): **(a)** a lezárási összegzés és a szúrópróbája
 (`lezarasiOsszegzes.js` — a végső számok, a küszöbök, a lezárás, és három fa: a beszámított szavazatok, a lezáráskori aktív
 tulajdonosok, az érték javaslatok érték szerint; a medián helye mindig a minták közt; az elhallgatott szavazat a szavazó
-panaszából kiderül) · **(b)** az összegzés eseményként (`LezarasiOsszegzes`, a javaslat szeletébe, az érintetthez
+panaszából kiderül) · **(b)** az összegzés eseményként (`LezarasiOsszegzes`, a szerkesztési vagy általános javaslat szeletébe, az érintetthez
 bejelentve; a kapu az alakját ellenőrzi), és a döntés-számítás: a nagy szeletű rész az ellenőrzött összegzésből, a többi a
 közös lezáráshoz igazítva · **(c)** a két fok (`ketFok.js`: 1000 esemény fölött összegzett, vissza 800 alatt; az
 azonosság-szelet és a koino születése mindig teljes; a „mindent” beállítás — `kiszolgalas mindent` — mindent egészében
@@ -4962,8 +4962,8 @@ mérés kiegészítése): az első találkozás 2,9 / 7,0 / 28,3 KB 50 / 200 / 1
 #### ✅ MEGÉPÜLT — a részvétel a vállalásból (2026-10-08)
 
 **A szigorú (b) élesítve** (`koino.js` `reszvetelHalmazom`): az „alap” készülék csak abban vesz részt, amit vállal — a
-pozitív pontú szeleteiben (a javaslatok és a töredékek is), az azonosság-szeletében; a koino születésének szeletében csak
-az alapító (D96); az összegzett nagy szeletben nem; a töredék-részvétel (D85 T3) a javaslatok állapotából, a tár
+pozitív pontú szeleteiben (a szerkesztési és általános javaslatok és a töredékek is), az azonosság-szeletében; a koino születésének szeletében csak
+az alapító (D96); az összegzett nagy szeletben nem; a töredék-részvétel (D85 T3) a szerkesztési javaslatok állapotából, a tár
 eseményszáma szerint gyorsítótárazva. A „mindent” beállítás (D83/2) a mai módban cserél. A nyitó lenyomat a közös
 halmazon fut (D97/1). ⭐ **A koino születése mint ESEMÉNY** (D96): egy virtuális kulcs (`KOINO_SZULETES_KULCS`) mindenki
 részvételében, amelynek halmaza egyedül a `KoinoLetrehozas` — mindenkihez eljut, a zárt koino nem tagjához is, az alapító
@@ -5197,12 +5197,12 @@ prototípuséi; a koinos többlet (a tudás határa a modál alján) a prototíp
 105.).
 
 ⛔⛔ **Egy régi hiba, amit a bekötés mért (109.):** a prototípusban a küszöbnek KÉT alakja van — a medián az időket
-`aktualMinimumDontesiIdo` néven mondja, egy e-ember javaslata (amit a modálok küldenek és visszaolvasnak)
+`aktualMinimumDontesiIdo` néven mondja, egy e-ember érték javaslata (amit a modálok küldenek és visszaolvasnak)
 `minimumDontesiIdo` néven. A koino egyetlen táblával, a medián nevein fordított, ezért 2026-09-06/12 óta a lapról jött
 küszöb nem fordult le: a gondolat létrehozásakor némán elveszett, az érték javaslatban (fordítás nélkül írva) az
 elfogadási és a részvételi küszöb elveszett (a döntés az alapértéken maradt — nem romlott el, `kuszobokItt`). A régi
 „oda-vissza” próba önmagával volt következetes, a valódi hívóval nem — és négy további próba a hibás alakra épült (a
-saját javaslatot a medián nevével várta; három lap-próba a medián nevével küldte a küszöböt, amit a valódi modál soha nem
+saját érték javaslatot a medián nevével várta; három lap-próba a medián nevével küldte a küszöböt, amit a valódi modál soha nem
 küld): a teljes sor ezeket fogta meg, mind a valódi hívó alakjára igazítva. Javítva: egy tábla két oszloppal, az
 `/api/ertekJavaslat` a fordítón át ír, a hiányos négyest elutasítja; a már kiírt események olvasata nem változik (D66).
 
@@ -5289,9 +5289,9 @@ megjegyzés a lista alatt.
 
 ⭐ **A postafiók a készüléken, két pillanatkép különbségéből** (`js/allapot/ertesites.js` — tiszta számítás): a prototípusban
 a szerver írta az értesítést, amikor valami történt; itt a készülék SZÁMOLJA. A pillanatkép a TARTOTT entitásokról (a saját
-és az ágazati pont, az én pontom, a gyerekek, a küszöbök) és a javaslataikról (állapot, lezárás, érintettek, a mások
+és az ágazati pont, az én pontom, a gyerekek, a küszöbök) és a szerkesztési vagy általános javaslataikról (állapot, lezárás, érintettek, a mások
 szavazóinak száma) szól (`pakli.js` `ertesitesiKep`); a nyolc fajta a két kép különbségéből jön (új gyerek, mások
-pont-változása a négy küszöbbel, küszöbváltozás a modál alakjában, új javaslat, elfogadás / elvetés, a határidő egyszer, új
+pont-változása a négy küszöbbel, küszöbváltozás a modál alakjában, új szerkesztési vagy általános javaslat, elfogadás / elvetés, a határidő egyszer, új
 szavazat). Az első kép ALAPVONAL (semmit nem jelez), egy most tartani kezdett entitás szintén; a saját cselekvésem nem jelez
 (a prototípus „a cselekvőt nem értesítjük”); a nem tartott entitás nem jelez (M3/A — csak a részvételi szeletekből; ami
 csak most jött meg, az nem „új”). Egy készülék terhe a saját szeleteitől függ, nem a koino méretétől. ⭐ **A beállítások**
@@ -5311,7 +5311,7 @@ számolódik a postafiók, és a globális beállításnál, hogy a koinoban nin
 ⛔⛔ **Egy lelet a bekötésből — a csak küldő út rése (D95/3):** a `kuldoKulcsai` egy saját eseményt csak a saját szeletén
 (és a legfelső szintű születést a gyökér-darabján) ajánlott fel, a BEJELENTÉSI HELYEIN nem. Ha valaki egy olyan gondolat alá
 írt, amelynek a szeletét nem tartja, a gyerek születése a szülő tartójához soha nem ért el — a szigorú (b) alatt egy válasz
-nem jutott el ahhoz, akinek szólt (és ugyanígy a javaslat az érintett tartójához). Javítva: a `bejelentesHelyei` is a
+nem jutott el ahhoz, akinek szólt (és ugyanígy a szerkesztési vagy általános javaslat az érintett tartójához). Javítva: a `bejelentesHelyei` is a
 kulcsok közé kerül (a gyökér kivételével). Elágazás 139–143. Próbák: nyolc modul-próba (`ertesitesProba.js` — új próba-fájl
 az „allapot” csoportban) és a bekötés (`parancssorProba.js`: két készülék, „alap” — a beállítás a lapról, az alapvonal, a
 másik készülék gyereke a postafiókban, a kártya számlálója, az öröklődés, az olvasottnak jelölés, a saját gyerek nem jelez)
@@ -5540,9 +5540,9 @@ készülékkel kipróbálva (a gyerek a csere után kézi frissítés nélkül m
 
 **A lelet (a telefon + laptop kézi próbája, 2026-10-14):** *„a módosítási egyezményt a telefonról nem tudtam eltüntetni,
 pedig levettem róla az összes tudatpontot.”* Az események szerint a telefon 16:58-kor vette le a pontját, a laptop 16:59-kor.
-A laptopon az egyezmény helyesen eltűnt (D14). A telefon viszont a szigorú (b) alatt a levétele PILLANATÁBAN elengedte a
+A laptopon a szerkesztési egyezmény helyesen eltűnt (D14). A telefon viszont a szigorú (b) alatt a levétele PILLANATÁBAN elengedte a
 szeletet (a vállalás a pozitív pontú szeletekből számolódott — D75/1), ezért a cserében már nem vett részt benne, a laptop
-egy perccel későbbi levételéről soha nem értesült, és a régi 1 pontját látta — az egyezmény nála életben maradt. ⛔ *Aki
+egy perccel későbbi levételéről soha nem értesült, és a régi 1 pontját látta — a szerkesztési egyezmény nála életben maradt. ⛔ *Aki
 elengedi a szeletet, az az utolsó állapotáról lemarad.*
 
 **A három lehetőség:** (A) kifutás — a pont levétele után a készülék még egy ideig tartja a szeletet · (B) egyszeri
@@ -5598,7 +5598,7 @@ végtelen).« ezt leszámítva, addig, ameddig át nem pontosítjuk, a gyakorlat
   tartják, a fiók gazdája kimondja); a gyakori szóra minta, a ritkára teljes válasz; a több szavas kérdés a legritkább
   szava fiókjához megy, és a tartó a többi szóra helyben szűr (a bejegyzés a teljes címet hordozza).
 - ⏸️ **K8 NYITVA** — a darab-szám szélessége a „végtelen” pontos mércéjén múlik, amit Csaba előbb pontosítani akar. A
-  kérdés és a három lehetőség (belső mérce · levezetett mérce kimondott tartalékkal · a kettő együtt — javaslat) az
+  kérdés és a három lehetőség (belső mérce · levezetett mérce kimondott tartalékkal · a kettő együtt — ajánlás) az
   átvizsgálás 8. szakaszában.
 
 **A sorrend:** ① a 75. mérés → ② a szó és az index-darab (a K8 után) → ③ a tartás és a hirdetés → ④ a felajánlás → ⑤ a
@@ -5630,11 +5630,11 @@ Elágazás 156.
 ✅ **K9 — A MÓDOSÍTOTT CÍM (2026-10-16, Csaba: „A módosított címre legyen az (A): a tulajdonos a születést a címet adó javaslattal ajánlja fel, a kérdező a találat után ellenőriz.”)** A bejegyzés a születés
 (aláírt, a címmel); ha egy elfogadott szerkesztési egyezmény átírja a címet, a tulajdonosok készülékén a cím a lezárás után
 az új (a szerkesztési végrehajtás rávezeti — új esemény nélkül), de a kereső TARTÓJA (egy véletlen készülék a szó régiójában)
-a döntés bemenetei nélkül ezt nem tudja kiszámolni. Ezért: a bejegyzés a születés + a címet adó módosítási javaslat
+a döntés bemenetei nélkül ezt nem tudja kiszámolni. Ezért: a bejegyzés a születés + a címet adó szerkesztési javaslat (módosítás)
 (aláírt); a felajánló és a megújító a tulajdonos (K4–K5), aki a mai, számított címet ismeri; a tartó az aláírásokat, a
-javaslat célját (erre a gondolatra szól) és a cím szavát ellenőrzi — az elfogadást nem; a kérdező a találat után a gondolatot
+szerkesztési javaslat célját (erre a gondolatra szól) és a cím szavát ellenőrzi — az elfogadást nem; a kérdező a találat után a gondolatot
 a tartóitól elkéri, és a valódi címével szűr (a kereső a megtalálás rétege, nem dönt — 5.7). A régi cím bejegyzését a
-tulajdonos többé nem újítja: 30 nap alatt elhalványul. Ára: egy el nem fogadott javaslat címe is felkerülhet, ha valaki
+tulajdonos többé nem újítja: 30 nap alatt elhalványul. Ára: egy el nem fogadott szerkesztési javaslat címe is felkerülhet, ha valaki
 felajánlja — a K3 (két tag-tulajdonos) és a kérdező szűrője fogja meg. Elágazás 157.
 
 ### D106. A „VÉGTELEN” MÉRCÉJE: A KOINO SAJÁT HATÁRA, ÉS A KIMONDOTT KIVÉTEL (2026-10-15, Csaba: „A (C)-t választom”)
@@ -5698,7 +5698,7 @@ hosszabb), de ⚠️ állapotot befolyásoló állandó (D66 — a tagság a dö
 
 **Az alap:** a ③–④ átvizsgálása ([`kereso_reteg_atvizsgalas.md`](kereso_reteg_atvizsgalas.md) 11. szakasz). A kódból: a csak
 küldő út csak a saját eseményeket ajánlja fel, a kereső-bejegyzés viszont a TULAJDONOS csomagja (a születés + a címadó
-javaslat — K9 — + két tag-tulajdonos pont-eseménye — K3); a csomag pont-eseményei a tartós tárban a saját állapotot torzítanák;
+szerkesztési javaslat — K9 — + két tag-tulajdonos pont-eseménye — K3); a csomag pont-eseményei a tartós tárban a saját állapotot torzítanák;
 a K5 és a raj együtt rést nyit (a lejárt bejegyzés egy másik tartótól visszajöhet).
 
 **Csaba döntései — mind (A):**
@@ -5852,7 +5852,7 @@ mélyebb társsal cserél, és a régióját utána a mediánjuk − 1 mélység
 
 **A rés** (a ⑦ böngészős próbájának lelete — [`kereso_reteg_atvizsgalas.md`](kereso_reteg_atvizsgalas.md) 16. szakasz): a
 keresés a gondolat bejegyzését hozza (a születés, a tulajdonosok pontjai), a kártya megnyílik — de a többi része (a szöveg, a
-gyerekek, a javaslatok) a gondolat SZELETÉNEK tartójától jönne, és egy friss készülék alapbeállítással nem éri el: a raj
+gyerekek, a szerkesztési és általános javaslatok) a gondolat SZELETÉNEK tartójától jönne, és egy friss készülék alapbeállítással nem éri el: a raj
 semmit nem tud róla, a szelet DHT-témáját alapból senki nem hirdeti (D91/3), a lap függő kérelmének kopogtatója pedig a
 szelet témájának párja, amit csak a hirdetők figyelnek.
 
@@ -5983,7 +5983,7 @@ válasz-korlát 512 · nincs bájt-korlát · a vonal 512 · a felajánlás 512 
 közös munkán dolgozni, de az élő út (a randevú) nem ad neki közöset — és mivel a kapu munkái párhuzamosak, két egyidejű munka
 ugyanarra a fájlra minden szeletet kétszer hozott (×1,0 a közös munka ×1,6-ja helyett), és a lezárásért versenyzett.
 
-**A javaslat:** T1 közös munka lenyomatonként (a hiba javítása és a több forrás alapja) · T2 a források gyűjtése · T3 a rossz
+**Az ajánlás:** T1 közös munka lenyomatonként (a hiba javítása és a több forrás alapja) · T2 a források gyűjtése · T3 a rossz
 szelet helyi tanulsága a UDP-n (a 29/c, Csaba 2026-09-15-i jóváhagyása) · T4 a türelem a forrásokból (D68/2) · T5 a jegyzet
 a tábla-aláíróval. **Csaba döntése a T2-re — (B) aktívan, korlátosan:** a befejezetlen (több szeletes) hiányzó fájlok további
 ismert tartói a kör céljai közé — körönként legfeljebb kettő, egy fájlhoz a körben lévőkkel együtt legfeljebb három, a
@@ -6044,7 +6044,7 @@ mintájára; a jel **a ház kártyáin, a testvér-jelzőben, a Struktúra és a
   kérdező a gyökérhez köti (o[1] = `ad`, o[2] = `gy`). ⭐ **A szúrópróba a darabra is**: a DARAB szerinti minta (a nagy ágra nagyobb
   eséllyel esik) a darabot hordozó szerzői levelet és a kitalált gyereket fogja meg, a GYEREK szerinti (egyenletes a gyerekek közt)
   a gyerekszámot felfújó levelet — az eltalált gyerek aláírt születése a válaszban jön (ha nincs a listában), és a szülője X (ha
-  nem, az egyezmény helyezte át — kimondott korlát). A minta-számok (81. mérés): a kiválasztott 2 + 1, a legfelső 3 testvér 1 + 1.
+  nem, a szerkesztési egyezmény helyezte át — kimondott korlát). A minta-számok (81. mérés): a kiválasztott 2 + 1, a legfelső 3 testvér 1 + 1.
 - **A kérő** (`koino.js`): a bemondásba az alatta (és az ellenőrzött darab-minták száma), a fejléc-tudásba a kérdezett alatta;
   ⛔ a minták születései NEM kerülnek a tárba (bizonyíték, nem tudás — különben a gyerek „ismert” lenne pont és fejléc nélkül, és
   a D102 bejárója egy csomópontot teljesnek venne; a bekötés-próba mérte).
@@ -6091,14 +6091,14 @@ költözik.
 3. **A tagság (és a 2. lépcső) a vágáskor öröklődik**, csak a költözőnek ad súlyt, utána csak az új koino meghívásai — a D25
    kivétele (*„születéskor örökölhet, utána soha”*). ⚠️ A tanúsításokat (a D25 nyitott kérdését) az „elfogadom mind”
    szerint igennek vettük.
-4. **A vágáskor nyitott javaslatok a költözőkkel folytatódnak** (az új szabályokkal).
+4. **A vágáskor nyitott szerkesztési és általános javaslatok a költözőkkel folytatódnak** (az új szabályokkal).
 5. **A zártság öröklődik:** zárt szülőnek csak zárt gyermeke lehet.
 6. **A költözés két esemény:** kiköltözés a szülőben (a saját azonosság-szeletemben — a szülő ebből tudja meg, hogy
    született gyermeke; itt lesz a pénz kivezetése, D66/6) és beköltözés az újban (egy aláírás: a láncom a vágásig, a hozott
    kiosztás, a tagsági csomag).
 
 ⏸️ Elhalasztva: a vágáskor lezárt döntések lezárási összegzése (D95/1), mérés után. ✅ **KZ1–KZ5** (Csaba, 2026-10-24:
-*„miden javaslatodat elfogadom, kezdheted az elsővel”*) — mind a javaslat szerint: **KZ1** a paraméterek besorolása (a)–(e) ·
+*„miden javaslatodat elfogadom, kezdheted az elsővel”*) — mind az ajánlás szerint: **KZ1** a paraméterek besorolása (a)–(e) ·
 **KZ2** gyermeket a szülő vágáskori tagja hozhat létre (különben önálló új koino, szülő nélkül) · **KZ3** ha a hozott pontok nem
 férnek az új keretbe, a beköltöző maga választ (elhagyni lehet, növelni nem) · **KZ4** az eredményt változtató hibajavítás is
 költözés · **KZ5** a protokoll-törés szabálya külön átvizsgálás a költözés után. ✅ **Az ① (2026-10-24):** a koino neve a
@@ -6107,7 +6107,7 @@ születés lenyomata (elágazás 193), és a szabályai a születésében — a 
 meghívó-szám nem szabály, hanem a modell része, rögzítve 1 (Csaba, 2026-10-24: *„igen, maradjon 1 egyenlőre”*). ✅ **A ②a (2026-10-24):** a gyermek születése (`szulo` + a létrehozó tagsági bizonyítéka a szülőben — KZ2; zárt szülőnek
 csak zárt gyermeke; a szülő szabályait örökli; a létrehozó szülőbeli láncát folytatja), a születések lánca a gyökértől a
 cserében és a kézi úton (elágazás 195). ✅ **A ②b:** a kapu koino-szabálya — az ős vágás előtti eseményei a gyermek tárában
-és cseréjében (a létrehozóé a lánc-pont, mindenki másé az óra szerint; elágazás 196). ✅ **KZ6** (Csaba, 2026-10-24: *„elfogadom a javaslataidat, mehetünk tovább”*): a vágáskor nyitott javaslat, amit nem költöző tett, a gyermekben NEM folytatódik (a javaslattétel is súly — D118/1); a költözők nyitott javaslatai a szavazataikkal és a gyermek küszöbeivel folytatódnak. ✅ **A ③ (2026-10-24):** a koino képe két rétegben — a múlt az ős szabályaival, a lezárt döntések rögzítve; a jelenben a
+és cseréjében (a létrehozóé a lánc-pont, mindenki másé az óra szerint; elágazás 196). ✅ **KZ6** (Csaba, 2026-10-24: *„elfogadom a javaslataidat, mehetünk tovább”*): a vágáskor nyitott szerkesztési vagy általános javaslat, amit nem költöző tett, a gyermekben NEM folytatódik (a javaslattétel is súly — D118/1); a költözők nyitott szerkesztési vagy általános javaslatai a szavazataikkal és a gyermek küszöbeivel folytatódnak. ✅ **A ③ (2026-10-24):** a koino képe két rétegben — a múlt az ős szabályaival, a lezárt döntések rögzítve; a jelenben a
 súly csak a költözőké (a létrehozó a születésével költözik); elágazás 197, 83. mérés. ✅ **A ④a:** a ki- és a beköltözés eseménye (a beköltözés a szülőbeli láncot a vágás előtti utolsó esemény után folytatja, a
 vágáskori tagsági bizonyítékkal), a tagság öröklése (a beköltözés tagsági horgony), a költözők a képben a beköltözésekből
 (KZ3 (A): az elhagyott pontok); elágazás 198. ✅ **A ④b:** a `koltozes` parancs (a kiköltözés, az első kitöltés, a beköltözés,
@@ -6204,7 +6204,7 @@ rugjuk fel. maradjon a termux.” (a telefonra a program egy bemásolt sorral ke
 ### D122. A MEGHÍVÓ KULCS: „EGY BEMÁSOLÁS, ÉS A KÖVETKEZŐ CSERE UTÁN BENT VAGY” (2026-11-03)
 
 *Csaba (a D121 terepi próbája után): „a meghívó a belépők menüpontban látja a meghívási kérelmet (ez nekem nem tetszik, hogy a
-meghívott kéri a meghívót, hogy hívja meg)” — és a javaslata: a meghívó két üzenetet küld (a telepítő sort és a meghívót), a
+meghívott kéri a meghívót, hogy hívja meg)” — és az ajánlása: a meghívó két üzenetet küld (a telepítő sort és a meghívót), a
 meghívott a lapon beilleszti, és a csere után bent van. Az átbeszélés: [`meghivas_atvizsgalas.md`](meghivas_atvizsgalas.md) 8.*
 
 **A döntés** (Csaba, 2026-11-03: *„minden javaslatodat elfogadom, kezdhetsz kódot írni. ha lehet, nézzen ki úgy mint a
@@ -6234,7 +6234,7 @@ lapjának függő kérelmei is kérelem-munkákat hoznak; ha a bizonyíték csak
 módozatok közül, amiket a közösség »feltölt«, szabadon lehet használni, költözés nélkül … ami meglévő számításokat is módosítja, az
 már költözést igényel.” Az átvizsgálás: [`program_retegek_atvizsgalas.md`](program_retegek_atvizsgalas.md).*
 
-**A döntés** (Csaba, 2026-11-06: *„Mindet elfogadom”* — PR1–PR7 a javaslat szerint, a sorrend PR1–3 → PR7 → PR6 → PR5 → PR4):
+**A döntés** (Csaba, 2026-11-06: *„Mindet elfogadom”* — PR1–PR7 az ajánlás szerint, a sorrend PR1–3 → PR7 → PR6 → PR5 → PR4):
 1. **PR1 — a koino a számítás MAGJÁT nevezi meg.** A mag (R1) a koino képe és a kapu; ennek kell egy koino-n belül mindenkinél
    azonosnak lennie. A protokoll (R2), a helyi viselkedés (R3) és a felület (R4) szabadon változhat.
 2. **PR2 — a mag számítva:** a két belépő (`ketReteg.js`, `esemenyTar.js`) import-zárványa; egy próba őrzi, hogy a mag nem kap
@@ -6489,9 +6489,9 @@ elfogadom. mehetünk tovább.”** — KU1–KU7 mind ⭐.*
     állítása számít (az érték javaslat, az állásfoglalás, a profil), ott — mint a szavazatnál — az IDŐ dönt (holtversenyben az
     azonosító); két készülék láncának sorszáma nem összevethető. Egy rosszul járó óra csak a saját két állításod sorrendjét keverheti
     meg — a lap figyelmeztet, ha a készülékeid órái eltérnek.
-12. **A szavazat és a javaslat joga készülékenként** (Csaba, 2026-11-14 — (A)): a jogot az esemény a SAJÁT láncából bizonyítja (D85 — egy
+12. **A szavazat és a szerkesztési vagy általános javaslat joga készülékenként** (Csaba, 2026-11-14 — (A)): a jogot az esemény a SAJÁT láncából bizonyítja (D85 — egy
     eseményből); ha a telefon szavazna egy gondolatról, amin csak a laptopnak van pontja, előbb magától 1 pontot tesz rá a saját
-    részéből (ahogy ma a javaslatra), és azzal szavaz. *(A (B) — az azonosság bármelyik láncára hivatkozni — elavult bizonyítékot
+    részéből (ahogy ma a szerkesztési vagy általános javaslatra), és azzal szavaz. *(A (B) — az azonosság bármelyik láncára hivatkozni — elavult bizonyítékot
     adna: a laptop közben levehette a pontot.)*
 13. **A név a születés lenyomata** (Csaba, 2026-11-15 — KC1 (A)): az azonosság születése az első kulcsot, a csere-kulcs lenyomatát és
     a fizetési kulcsot együtt köti, és a NÉV ebből a lenyomatból jön (a KERI „önmagát címző” azonosítója) — ugyanarra a névre más
@@ -6578,12 +6578,12 @@ fejlesztést.”*
    (egy érintéssel bezárul, nem takarja el az ablakot), alján egy gomb az entitáshoz.
 2. **A hang** (MA2 (B)): részletes — mi ez, mire jó, mit tehetsz itt, és HOGYAN MŰKÖDIK; példával, belső kódok (D-számok,
    kulcs-darabok) nélkül.
-3. **A fogalomtár** (MA3 (A)): minden koinos fogalom egy helyen (e-ember, tudatpont, gondolat, javaslat, egyezmény, küszöb, bizonyossági
+3. **A fogalomtár** (MA3 (A)): minden koinos fogalom egy helyen (e-ember, tudatpont, gondolat, szerkesztési és általános javaslat, szerkesztési és általános egyezmény, küszöb, bizonyossági
    mutató, társ, csere, őrjárat, készülék, kezelő, papír…), a menüből és a buborékokból elérhetően.
 4. **A RENDSZER-ENTITÁS — a kézikönyv.** A program egy fájlban hozza az **alap-tartalmat**: minden ⓘ magyarázatát és a fogalmakat, a
    struktúrájukkal. Ez minden (kézikönyves) koinoban megvan, ahogy a program szabályai: nem esemény, senki nem írja alá, nem utazik a
    hálózaton. Minden darabnak állandó NEVE van (pl. „menü / Keresés”), és az azonosítója a koinoból és ebből a névből számolódik —
-   mindenkinél ugyanaz, így bárki tehet rá tudatpontot és javaslatot, mint egy e-ember gondolatára. A hálózaton csak a közösség
+   mindenkinél ugyanaz, így bárki tehet rá tudatpontot és szerkesztési javaslatot, mint egy e-ember gondolatára. A hálózaton csak a közösség
    módosításai utaznak.
 5. **Nem felejtődik el** (MA4 (B)): a rendszer-entitás megmarad, és a közösség módosítása pont nélkül is megmarad. ⭐ Ebből
    következik: a kézikönyv szeleteit **minden tag tartja** (mint a koino születését) — különben egy pont nélküli módosítást senki nem
@@ -6597,10 +6597,10 @@ fejlesztést.”*
    ugyanaz — pont szerint, holtversenyben az azonosító; nincs külön szabály.
 6. **Az új programverzió** (MA5 (A)): az új név (pl. egy új menüpont magyarázata) magától megjelenik; a közösség által nem módosított
    szöveg magától a program új szövegére vált; ahol a közösség módosított, ott a program nem ír felül — az új szöveg **a program által
-   megírt javaslatként** érkezik, amit egy e-ember elindíthat (Csaba 2026-09-11-i ötlete — `jegyzetek.md`).
+   megírt szerkesztési javaslatként** érkezik, amit egy e-ember elindíthat (Csaba 2026-09-11-i ötlete — `jegyzetek.md`).
 7. **A helye** (MA6 (A)): a pakliban, egy gyökér-gondolat („A koino kézikönyve”) alatt, struktúrában (Menü, Ablakok — ablakonként a
    részei —, Alsó sáv, Fejléc, Kártyák, Fogalomtár) — **egy új koino első témái**; a struktúra és a síkidom nézet is mutatja.
-8. **A javaslatok** (MA7 (A)): a hétköznapi szabály (aki tudatpontot tett rá, javasolhat); csak **módosítás** és **áthelyezés a
+8. **A szerkesztési javaslatok** (MA7 (A)): a hétköznapi szabály (aki tudatpontot tett rá, javasolhat); csak **módosítás** és **áthelyezés a
    kézikönyvön belül** — törlés és egyesítés nem (amíg a gomb a felületen van, az ⓘ-jének tartalma legyen).
 9. **A küszöb** (MA8 (B)): ugyanaz a szabály (a pont-tartók döntenek), de a kézikönyv **saját, óvatosabb alap-küszöbbel** születik —
    legalább 3 nap döntési idő, hogy mások észrevehessék és csatlakozhassanak (ma 1 ponttal, egyedül, 1 mp alatt át lehetne írni);
@@ -6620,8 +6620,8 @@ fejlesztést.”*
     felületeken az ⓘ ténylegesen kikerül, a buborék a program szövegével nyílik, és az ⓘ a gombját nem indítja el.
 
 **Az építés sorrendje:** ① **a mag** — az alap-tartalom fájlja (név, szülő, cím, szöveg, típus), az azonosító (koino + név), az
-entitás születési esemény nélkül, a D14 kivétele, a kapu (pont és javaslat a rendszer-entitásra), a vállalás (mindenki tartja), a
-születés szabálya és a küszöb; ② **a javaslatok** — a módosítás és a kézikönyvön belüli áthelyezés, a tiltások (`szabalyok.js`
+entitás születési esemény nélkül, a D14 kivétele, a kapu (pont és szerkesztési javaslat a rendszer-entitásra), a vállalás (mindenki tartja), a
+születés szabálya és a küszöb; ② **a szerkesztési javaslatok** — a módosítás és a kézikönyvön belüli áthelyezés, a tiltások (`szabalyok.js`
 `TILTOTT_MUVELETEK` mintájára), és az új programverzió belépése (MA5 (A)); ③ **a felület** — az ⓘ réteg (az örökölt, bájtra azonos
 fájlokhoz nem nyúl: a kirajzolás után teszi a helyére, mint a `koinoModalok.js` a koinos többletet), a buborék az entitás gombjával,
 a kézikönyv a pakliban, a struktúrában és a síkidomban; ④ **a szövegek** területenként (Készülékeim, alsó sáv, fejléc, menü, ablakok,
@@ -6641,7 +6641,7 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
    nem írja alá: minden készülék ugyanúgy kiszámolja. A kézikönyvnél (D129) már megépült.
 2. **Mi kap koinon-pontot** (KO1 (A)): a kézikönyv bejegyzései (D129) és az **elfogadott általános egyezmény**, a lezárása pillanatától,
    örökre — így a D27 „a tény örök” mondata a D14 mellett is igaz. A szerkesztési egyezmény nem (a hatása a gondolaton él), az elvetett
-   javaslat sem.
+   általános javaslat sem.
 3. **Ki őrzi** (KO2 (A)): **a koinon darabjai** — egy koinon-entitás az azonosítója szerint egy darabba esik; minden készülék a kulcsa
    szerinti darabot vállalja egy olyan mélységen, hogy minden darabnak ~`r` tartója legyen (a készülékek számából becsülve, óvatosan —
    az ismert tagokból: azt alá lehet becsülni, túl nem). ⭐ KO6 (A) (Csaba: „ko6: (A)”): **átfedés nélkül** — a 95. mérés szerint nélküle
@@ -6650,7 +6650,7 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
    ütemben) figyeli a darabok tartóit (a skálázási terv 5.2 „külön munkája”). ✅ *A darab a cserében megépült (③c, 2026-11-20 —
    `koinon_atvizsgalas.md` napló):* `n` jelű darab-kulcs, a mélység `floor(log2(ismert tagok / r))`; a szomszéd mélységű társsal a
    mélyebb darab a közös (az átfedés nélkül is mindkettőnél megvan).
-4. **Mit őriznek** (KO3 (A)): tömören — a javaslatot, a döntés ellenőrizhető bizonyítékát (a lezárási összegzés — D95/1) és az
+4. **Mit őriznek** (KO3 (A)): tömören — az általános javaslatot, a döntés ellenőrizhető bizonyítékát (a lezárási összegzés — D95/1) és az
    állásfoglalásokat (a hatály); a nyers szavazatokat nem.
 5. **A példányszám** (KO4 (A)): közösségi paraméter a koino születésében (D118/2), alapból **`r` = 20** (30%-os elérhetőségnél 99,9%,
    hogy legalább egy tartó válaszol).
@@ -6694,7 +6694,7 @@ elosztott adat-alapot.*
 - **git** *(2026-08-25)* — nem adat-jelölt, hanem **működő precedens** és a KÓD-terjesztés
   jelöltje: gondolat-címzett objektum-DAG, natív merge, teljes replikáció, hash-ellenőrzött
   történet — mindez központi hatóság nélkül, világméretben bizonyítva. A D9 ellenőrzési
-  fele gyakorlatilag kész technológia (az egyezmény megnevez egy commit-hasht). **Nem ad
+  fele gyakorlatilag kész technológia (a szerkesztési egyezmény megnevez egy commit-hasht). **Nem ad
   konszenzust, identitást és jogosultságot** — a nehéz felét nem. Részletes elemzés lentebb:
   „A git mint minta". ⚠️ A **GitHub** ≠ git: a GitHub a Microsoft tulajdona, arra
   kormányzást építeni a D12-t érvénytelenítené.
@@ -6748,7 +6748,7 @@ hatóság nélkül — évekkel a blokklánc divatja előtt.
 
 **1. A D9 ellenőrzési fele gyakorlatilag kész technológia.** A D9 szerint a kliens az
 elfogadott kód-egyezmény alapján, **hash-ellenőrzéssel** áll át. De a git-commit MAGA egy
-hash. Vagyis: **az egyezmény megnevez egy commit-azonosítót; a kliens klónozza — bárhonnan
+hash. Vagyis: **a szerkesztési egyezmény megnevez egy commit-azonosítót; a kliens klónozza — bárhonnan
 —, és ellenőrzi, hogy azt kapta.** Nem kell hozzá letöltő-szerver, sem GitHub; a git
 peer-to-peer is működik.
 
@@ -6793,7 +6793,7 @@ megoldani; a D9 tervezésekor ez az első kérdés.
 ### Amire NE támaszkodjunk
 
 A GitHub **kormányzási** felületére (pull request, issue, jogosultság, moderálás): ezek egy
-cég fiókrendszerén és szabályzatán állnak. **A kód-módosítási javaslat helye a koino
+cég fiókrendszerén és szabályzatán állnak. **A kód módosítására tett szerkesztési javaslat helye a koino
 fája** — a GitHub legfeljebb a bájtokat szállítja. → új híd-feladat: **H8**.
 
 ---
@@ -6908,7 +6908,7 @@ Hálózat nélkül, szerver nélkül — és ez nem játék-üzemmód, hanem a v
 
 | | |
 |---|---|
-| Mit tud a végén? | egy ember, egy készülék: teljes koino — gondolat, javaslat, szavazás, egyezmény, **aláírva** |
+| Mit tud a végén? | egy ember, egy készülék: teljes koino — gondolat, szerkesztési javaslat, szavazás, szerkesztési egyezmény, **aláírva** |
 | Miért ELSŐ? | mert minden más ezen áll, és mert **egyedül is kipróbálható** — nem kell hozzá se hálózat, se másik ember |
 | Kockázat | 🟠 ez a legnagyobb építés (az esemény-modell + a felület ráültetése), de **ismert terep**, és minden darabja kipróbálható |
 
@@ -7187,7 +7187,7 @@ hanem egymást.*
   pontja ✅ lezárult (felelősség-elv + küszöbváltozás-értesítés).
 - **2026-07-16 (2)** — A vita 5. pontja ✅ lezárult → **D5** (lánc = tartós mag, rétegzett
   védelem), **D6** (személyes adat soha a láncra), **D7** (személy-alapú konszenzus);
-  **D8-jelölt** (egyezmény tény↔hatály — Csaba megerősítésére vár); N7 lezárva, **N8**
+  **D8-jelölt** (szerkesztési vagy általános egyezmény tény↔hatály — Csaba megerősítésére vár); N7 lezárva, **N8**
   (személy-alapú konszenzus + entitás-láncok) felvéve. Következő vita-téma: N5 /
   vita 9. pont (forráskód-kormányzás).
 - **2026-07-16 (3)** — Vita 9. pont ✅ → **D8 megerősítve**, **D9** (konszenzuális
@@ -7208,7 +7208,7 @@ hanem egymást.*
   pénz szétváláskor nem duplázódik** (külön név, 0 értékről). A repó **nyilvános lett**
   (AGPL-3.0 licenccel, `0b9c996`). Csaba kérdésére új szakasz: **„A git mint minta"** — a
   git nem analógia, hanem működő precedens (gondolat-címzett DAG, natív merge, teljes
-  replikáció); a **D9 ellenőrzési fele gyakorlatilag kész technológia** (az egyezmény
+  replikáció); a **D9 ellenőrzési fele gyakorlatilag kész technológia** (a szerkesztési egyezmény
   megnevez egy commit-hasht), a különvált ágak újraegyesítéséhez pedig **a merge base már
   rögzítve van** a `kulonvalasResz`-ben. De a git **nem ad konszenzust, identitást és
   jogosultságot** — a nehéz felét nem. ⚠️ A **GitHub ≠ git** (Microsoft-tulajdon) → új
@@ -7402,8 +7402,8 @@ hanem egymást.*
     így a teher **kiszámítható** — az „egész ág" változatban bárki új gyereket tehetne egy
     népszerű szülő alá, és azzal **mások gépét terhelné**.
   - ⚠️ **Csaba helyesbítése egy pontatlanságomra:** azt írtam, a méretnövekedés „a vállalók
-    beleegyezése nélkül" terhel. Nem: **egy entitás mérete csak elfogadott MÓDOSÍTÁSI
-    JAVASLAT mentén nőhet**, amiről a tudatpont-tulajdonosok szavaznak, és a javaslat maga
+    beleegyezése nélkül" terhel. Nem: **egy entitás mérete csak elfogadott SZERKESZTÉSI
+    JAVASLAT (MÓDOSÍTÁS) mentén nőhet**, amiről a tudatpont-tulajdonosok szavaznak, és a szerkesztési javaslat maga
     hordozza az új méretet — tehát **a szavazás előtt látszik**. A rendes eset védve van a
     koino saját gépezetével.
   - 💡 **Ami nyitva marad: a PASSZÍV tulajdonos**, akinek a döntés meglepetés. Csaba ötlete
@@ -7416,24 +7416,24 @@ hanem egymást.*
   azért fontos, hogy **helyet tartson** a közösség általános megállapodásainak.
   - **A szavazás gépezete mindkét fajtánál ugyanaz**; csak a KÖVETKEZMÉNYE más: a
     szerkesztési javaslat elfogadása **végrehajtódik**, az általánosé **nem csinál semmit
-    automatikusan** — ott az egyezmény maga az álláspont, a teljesítése emberi (D8).
+    automatikusan** — ott az általános egyezmény maga az álláspont, a teljesítése emberi (D8).
   - **Az általános javaslat GONDOLATBÓL ágazik ki**, és onnan örökli az induló küszöböket;
     utána **saját érték javaslatokkal** formálható.
   - ⭐ **AZ ÁLTALÁNOS EGYEZMÉNY ÉLŐ:** lehet hozzá **csatlakozni**, ellene **tiltakozni**,
-    és **ütközést jelölni** két egyezmény között. Ez teszi a **D8-at gyakorlattá**: a TÉNY
+    és **ütközést jelölni** két általános egyezmény között. Ez teszi a **D8-at gyakorlattá**: a TÉNY
     örök, a HATÁLY él. Két dolgot old meg: a **bootstrapet** (a később érkezők
     csatlakozhatnak, nem marad „tíz ember döntése" egy ezerfős közösségen) és az
     **elavulást** (ami mögül elfogynak az emberek, magától elsorvad — D14).
   - **A csatlakozó AKTÍV résztvevő** (Csaba) — és ez old meg egy feszültséget, amit
-    feloldhatatlannak hittem: ha az egyezményt később módosítják, a csatlakozók nem
+    feloldhatatlannak hittem: ha az általános egyezményt később módosítják, a csatlakozók nem
     „más szöveghez csatlakoztak", mert **ŐK SZAVAZNAK a módosításról**. Ugyanaz a minta,
     mint a D26/5-ben a méretnövekedésnél.
-  - ⭐ **A HELY HATÁROZZA MEG A HATÓKÖRT, és LEFELÉ terjed:** az egyezmény hatóköre azok
+  - ⭐ **A HELY HATÁROZZA MEG A HATÓKÖRT, és LEFELÉ terjed:** az általános egyezmény hatóköre azok
     köre, akik az adott entitásra **vagy annak bármely leszármazottjára** tettek
     tudatpontot. Így a „gyökérben bárki" nem külön szabály, hanem ugyanannak a **széle** —
-    és a pozíciónak valódi jelentése van. A feljebb vitel maga is javaslat, tehát **a
+    és a pozíciónak valódi jelentése van. A feljebb vitel maga is szerkesztési javaslat, tehát **a
     hatókör tágítása is közösségi döntés**. *(Az első felvetésem a FELMENŐ ágra szólt —
-    Csaba jogosan javította ki: az értelmetlen lenne, mert akkor minden egyezmény a
+    Csaba jogosan javította ki: az értelmetlen lenne, mert akkor minden általános egyezmény a
     gyökérig érne.)* **Gépezet már van rá:** a hierarchikus tudatpont pontosan ezt a
     lefelé terjedő kört méri — eddig a fontosság mutatója volt, itt jogosultsággá válik.
   - **Az általános egyezmény TELJES ÉRTÉKŰ ENTITÁS:** módosítható, áthelyezhető,
@@ -7466,4 +7466,4 @@ hanem egymást.*
   kártya-hamburger az adott koino opcióival + alsó sáv a tér opcióival).
   **A Szakasz 1 (A HELYI KOINO) ELKÉSZÜLT:** 7/7 lépés, 82 önpróba zölden, és a teljes kör
   végigjátszva — a döntési idő egyetlen támogató szavazattól **168 óráról 24-re rövidült**
-  (a D4 bizonyossági mutatója élőben), majd az **egyezmény megszületett**.
+  (a D4 bizonyossági mutatója élőben), majd a **szerkesztési egyezmény megszületett**.
