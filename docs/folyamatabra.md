@@ -7,7 +7,7 @@
 > hogyan találják meg egymást, mi az e-ember útja, mi a koino családja — és a tervezéshez: **mi kész,
 > mi nyitott, mi nincs még** (8. ábra).
 >
-> A [`gepezet.md`](gepezet.md) testvére: az a **döntés-gépezet** képei (javaslat → egyezmény, a
+> A [`gepezet.md`](gepezet.md) testvére: az a **döntés-gépezet** képei (szerkesztési vagy általános javaslat → szerkesztési vagy általános egyezmény, a
 > tudatpont útja), ez a **program** egésze. A képek `mermaid` alakban vannak, mint ott: a GitHub és a
 > legtöbb szerkesztő rendereli, a nyers szöveg olvasható marad — nulla függőség (6. szabály).
 >
@@ -47,7 +47,7 @@ flowchart TB
         MUV["✍️ MŰVELET — muveletek.js<br/>a lánc vége → ALÁÍRT ESEMÉNY<br/>a kulcs maga a személy — Ed25519"]
         GATE{{"⛔ AZ EGYETLEN KAPU — esemenyMentese<br/>alak · aláírás · koino · lánc · bizonyíték"}}
         TAR["🗄️ A TÁRAK — az író fűz hozzájuk, koinonként egy<br/>tartós: amit VÁLLALOK · átmeneti: amit csak LÁTTAM<br/>kereső-tár: a régióm · fájl-tár: szöveg, kép, kód"]
-        SZ["🧮 SZÁMÍTÁS — koinoKepe<br/>szabályok → entitások → döntések → végrehajtás<br/>az egyezmény is itt születik — D17"]
+        SZ["🧮 SZÁMÍTÁS — koinoKepe<br/>szabályok → entitások → döntések → végrehajtás<br/>a szerkesztési vagy általános egyezmény is itt születik — D17"]
         ORJ["🔁 AZ ŐRJÁRAT — percenként, a fal órájához<br/>állandó UDP-kapu: postaláda, titkosított rés<br/>a háztartás a háttérben"]
     end
 
@@ -131,7 +131,7 @@ sequenceDiagram
   törzs — D92), és a válasz az **átmeneti tárba** kerül.
 - A hálózaton minden titkosítva megy (D89/1), de **a bizalom nem a csatornából jön**: Béla gépe az
   aláírást, a láncot és a bizonyítékot maga ellenőrzi.
-- A tudatpont, a javaslat és a szavazat ugyanígy utazik; a döntés mindkét gépen ugyanabból az
+- A tudatpont, a szerkesztési vagy általános javaslat és a szavazat ugyanígy utazik; a döntés mindkét gépen ugyanabból az
   eseményhalmazból **számolódik** — senki nem „hirdeti ki” (D17).
 
 ---
@@ -275,7 +275,7 @@ flowchart TB
 
 ---
 
-## 6. AZ E-EMBER ÚTJA — a meghívótól az egyezményig
+## 6. AZ E-EMBER ÚTJA — a meghívótól a szerkesztési vagy általános egyezményig
 
 ```mermaid
 %%{init: {"flowchart": {"wrappingWidth": 300}}}%%
@@ -292,9 +292,9 @@ flowchart TD
         direction TB
         B1["💡 gondolat — kategória, gondolattípus, szülő"]
         B2["🎯 tudatpont — mindenkinek ugyanannyi, 10 000<br/>nem elkölthető: szétosztható, bármikor átrendezhető"]
-        B3["📝 javaslat — csak aki pontot tett a gondolatra<br/>szerkesztési: módosítás · áthelyezés · törlés · egyesítés<br/>általános: a közösség álláspontja — D27"]
+        B3["📝 szerkesztési vagy általános javaslat — csak aki pontot tett a gondolatra<br/>szerkesztési: módosítás · áthelyezés · törlés · egyesítés<br/>általános: a közösség álláspontja — D27"]
         B4["🗳️ szavazás — aki pontot tett rá, egyenlő súllyal<br/>+ érték javaslat a küszöbökre"]
-        B5["🤝 EGYEZMÉNY — nem esemény, hanem SZÁMÍTÁS, D17<br/>a bizonyossági mutató szerint, a min/max döntési idő között"]
+        B5["🤝 SZERKESZTÉSI VAGY ÁLTALÁNOS EGYEZMÉNY — nem esemény, hanem SZÁMÍTÁS, D17<br/>a bizonyossági mutató szerint, a min/max döntési idő között"]
         B1 --> B2 --> B3 --> B4 --> B5
     end
     subgraph LEP["3. A 2. LÉPCSŐ"]
@@ -320,11 +320,11 @@ flowchart TD
 ```
 
 - **Egy meghívó elég az 1. lépcsőhöz (D56):** a tagsággal minden mehet — gondolat, tudatpont,
-  javaslat, szavazat. A nem tag eseménye nem vész el, csak „függőben” van, amíg a tagsága nem
+  szerkesztési vagy általános javaslat, szavazat. A nem tag eseménye nem vész el, csak „függőben” van, amíg a tagsága nem
   bizonyítható (D19, D93/1).
 - **A 2. lépcső drága, mert ott a zsákmány:** három tanúsítás felhatalmazott tanúsítótól. A számítása
   kész (szúrópróbával is — D94), a **pénz maga még nincs** a programban.
-- **A sorrend a tudatpont felől:** javaslatot csak az tesz, akinek pontja van a gondolaton; a döntés a
+- **A sorrend a tudatpont felől:** szerkesztési vagy általános javaslatot csak az tesz, akinek pontja van a gondolaton; a döntés a
   pontosok köréből, a küszöbök a tulajdonosok érték javaslatainak mediánjából jönnek (a részletek a
   [`gepezet.md`](gepezet.md) 1–4. ábráján).
 
@@ -375,7 +375,7 @@ szakaszában és az [`alappillerek.md`](alappillerek.md)-ben.
 %%{init: {"flowchart": {"wrappingWidth": 460}}}%%
 flowchart TB
     ALAP["🧱 AZ ALAP<br/>aláírt esemény · kanonikus alak · a kulcs — D15<br/>az egyetlen kapu · a tár és a mutató · az író — D70, D73<br/>összegző Merkle-fa · lánc-gyökér · lánc-ellenőrzés — D78–D82, D98"]
-    SZAM["🧮 A SZÁMÍTÁS<br/>szabályok · entitások · döntés → egyezmény · végrehajtás<br/>— D17, D85<br/>identitás: tagság · 2. lépcső szúrópróbával · kontraszt-jelzés<br/>— D56–D62, D93–D94<br/>a koino szabályai a születésben · a két réteg — D118"]
+    SZAM["🧮 A SZÁMÍTÁS<br/>szabályok · entitások · döntés → szerkesztési vagy általános egyezmény · végrehajtás<br/>— D17, D85<br/>identitás: tagság · 2. lépcső szúrópróbával · kontraszt-jelzés<br/>— D56–D62, D93–D94<br/>a koino szabályai a születésben · a két réteg — D118"]
     HAL["🌐 A HÁLÓZAT<br/>UDP-kapu · lyukfúrás · titkosítás — D69, D89<br/>szeletenkénti csere · szigorú (b) · közös halmaz<br/>· társ-emlékezet — D74, D97, D98<br/>kötések · hirdetőtábla · DHT-címjegyzék · raj — D71, D91<br/>kérelem · függő kérelem · továbbadás · kiszolgálási keret<br/>— D92, D109<br/>kereső-réteg · felderítés · törzs-határ · több forrás<br/>— D105–D114, D120<br/>családi őrjárat és csere — D119"]
     FEL["🖥️ A FELÜLET<br/>pakli · modálok · alsó sáv · értesítések — D100–D104<br/>tér · csatlakozás · társak · költözés · koino-verzió — D118–D119<br/>meghívás a lapon: Meghívóim + profil — D121–D122<br/>a belépő megtalálása: a meghívó rekesze a BEP 44-en — M8,<br/>terepen igazolva mobilneten (11-05)<br/>telepítés egy bemásolt sorral — a Termux marad, D30; Windowson is (232.)<br/>a program rétegei: a koino a számítás MAGJÁT nevezi meg,<br/>a lap két szinten szól — D123 ①; a telepítő sor frissít is — ②"]
     NY["⏸️ NYITOTT — Csabánál, vagy a terepen mérendő<br/>a program rétegei: D123 ③ a protokoll nyelvváltozata (D124) —<br/>①–⑤ kész (a jel, a kopogásé, az emlékezet és a kimondás, a fordító-szél, a kiírt alakok) · ④ telepítés a kártyáról — építve (D125), a terepen próbálandó ·<br/>⑤ feltöltött nézetek — építve (D126), a telefonon kipróbálva · D127 a bekapcsolódás (a régi költözés)<br/>a BEP 5 utak (BP1–BP4) — átvizsgálva<br/>az őrjárat egyszeri megállása a terepen (11-05) — mérjük<br/>gyökér-koino a lapról nem hozható létre<br/>a családi őrjárat terepi leletei — 18. szakasz<br/>a meghívás mellékes megfigyelései<br/>a 🅱️ terep: két mobilnet — kihagyva · IPv6<br/>régebbi kérdések: véletlen séta · olcsóbb tábla-kulcs ·<br/>a fájl-bájtok kézi útja · a hívás ötlete"]

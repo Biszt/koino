@@ -263,7 +263,7 @@ tartónál jelentkeztem”), és percenként kopogott a meghívó címeire. A la
   témáját (egy keresés ~3 KB; ~2 MB/nap ez idő alatt).
 - **(B) Kiszűri a zajt:** amelyik kopogtató címen néhány próba után sem nyílik rés, azt egy ideig nem hívja (a ⑦ 1. lelete).
 - **(C) Marad így** (a 20 perces keresés előbb-utóbb talál — ma este fél óra alatt nem).
-- ⭐ Javaslat: **(A) + (B)**.
+- ⭐ Ajánlás: **(A) + (B)**.
 
 ✅ Csaba: *„elfogadom a javaslataidat, és igen szeretném hogy kidólgozd a tervet, még kódírás elött.”* → a terv:
 [`belepo_megtalalasa_atvizsgalas.md`](belepo_megtalalasa_atvizsgalas.md) (az (A), a (B) és a megbízhatóbb keresés; előbb a 87. mérés).

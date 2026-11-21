@@ -33,8 +33,8 @@ egy már meglévő, végiggondolt címkézés végrehajtása.
 | **D3** | két adatosztály: tartalmi réteg (tudatpont-replikált, elveszhet) és tartós mag | a kiinduló kettéosztás |
 | **D5** | a lánc hatóköre CSAK a tartós mag | a tartalmi rétegnek nem kell lánc |
 | **D6** | **személyes adat SOHA a láncra** | kell egy **második dimenzió**, a rétegtől függetlenül |
-| **D14** | a tartós mag **az azonosság egyszeriségére és (később) a pénzre szűkül** — az egyezményeket is beleértve minden más a tudatpontot követi | **a mag drámaian kicsi lett** |
-| **D17** | a gondolat, a tudatpont-hozzárendelés és a szavazás NEM igényel globális egyetértést — elég a **saját lánc-következetesség**; egy javaslat eredménye **determinisztikus számítás** | ezért kell a **LÁNC** és a **SZÁMÍTOTT** réteg |
+| **D14** | a tartós mag **az azonosság egyszeriségére és (később) a pénzre szűkül** — a szerkesztési egyezményeket is beleértve minden más a tudatpontot követi | **a mag drámaian kicsi lett** |
+| **D17** | a gondolat, a tudatpont-hozzárendelés és a szavazás NEM igényel globális egyetértést — elég a **saját lánc-következetesség**; egy szerkesztési javaslat eredménye **determinisztikus számítás** | ezért kell a **LÁNC** és a **SZÁMÍTOTT** réteg |
 | **D21** | a mag Merkle-fa: mindenki tárolja a saját lapját, ~1 KB | a MAG-ba sorolt mezők mérete **valódi korlát** |
 
 **A D14 a legfontosabb, mert visszamenőleg átrendezte a D3-at:** a törésvonal nem
@@ -84,7 +84,7 @@ lekérdezés gyorsabb — de **eldobhatók, és ez a lényeg**.
 > **Rendelhet hozzá valaki tudatpontot?**
 
 Ha igen: tudatpont-replikált, és **elfelejthető** — ha senki nem tart rá pontot, eltűnik
-(D3/D14). Ez a koino érdemi része: gondolat, javaslat, **egyezmény**, kategória.
+(D3/D14). Ez a koino érdemi része: gondolat, szerkesztési javaslat, **szerkesztési egyezmény**, kategória.
 
 ### 5. kérdés → `helyi`
 
@@ -170,7 +170,7 @@ láncra**, és a törlésének kezelhetőnek kell maradnia.
 
 | Mező | Réteg | Megjegyzés |
 |---|---|---|
-| `javaslatTipus`, `erintettEntitasok`, `szuloId`, `szuloTipus`, `indoklas`, `egyesitesAdatok.*`, `egyezmenyTarhelyId`, `egyezmenyTarhelyTipus`, `toredek*` | gondolat | a javaslat érdemi törzse |
+| `javaslatTipus`, `erintettEntitasok`, `szuloId`, `szuloTipus`, `indoklas`, `egyesitesAdatok.*`, `egyezmenyTarhelyId`, `egyezmenyTarhelyTipus`, `toredek*` | gondolat | a szerkesztési javaslat érdemi törzse |
 | `letrehozo`, `letrehozva` | **lanc** | a létrehozás eseménye |
 | `statusz`, `hatalybaLepesIdeje`, `dontesiIdo`, `reszveteliArany`, `tamogatotsagiArany`, `ellenzoiArany`, `tartozkodoiArany`, `bizonyossagiMutato`, `javaslat*Szama`, `*TudatpontTulajdonosokSzama`, `utolsoSzamitas`, `ertekekElavultak` | szamitott | **a szavazatokból + küszöbökből újraszámolható** (D17) |
 | `hataridoErtesitesElkuldve` | helyi | üzemi jelző (ne küldjünk kétszer) |
@@ -179,8 +179,8 @@ láncra**, és a törlésének kezelhetőnek kell maradnia.
 
 | Mező | Réteg | Megjegyzés |
 |---|---|---|
-| `javaslatId`, `szuloId`, `szuloTipus`, `javaslatTipus`, `erintettEntitasok`, `indoklas`, `egyesitesAdatok.*`, `modositasAdatok` | gondolat | **D14: az egyezmény is a tudatpontot követi** |
-| `letrehozo` | lanc | átvett a javaslatból |
+| `javaslatId`, `szuloId`, `szuloTipus`, `javaslatTipus`, `erintettEntitasok`, `indoklas`, `egyesitesAdatok.*`, `modositasAdatok` | gondolat | **D14: a szerkesztési egyezmény is a tudatpontot követi** |
+| `letrehozo` | lanc | átvett a szerkesztési javaslatból |
 | `tamogatokSzama`, `ellenzokSzama`, `tartozkodokSzama`, az arányok, `bizonyossagiMutato` | gondolat | ⚠️ **PILLANATKÉP, nem számított** — lásd a határeseteket |
 | `vegrehajtva`, `vegrehajatasEredmeny` | szamitott | a rendszer determinisztikus lépése, nem egy e-ember cselekvése |
 
@@ -206,14 +206,14 @@ láncra**, és a törlésének kezelhetőnek kell maradnia.
 
 ## Határesetek — ahol a besorolás nem magától értetődő
 
-### 1. Az egyezmény számlálói: pillanatkép, nem számított érték
+### 1. A szerkesztési egyezmény számlálói: pillanatkép, nem számított érték
 
 A `javaslat` arányai **újraszámolhatók** (a szavazatok megvannak). Az `egyezmeny`-é
-**nem** — mert a D14 óta a szavazatok maguk is elfelejtődhetnek alóluk, ha a javaslatot
+**nem** — mert a D14 óta a szavazatok maguk is elfelejtődhetnek alóluk, ha a szerkesztési javaslatot
 senki nem tartja tudatponttal.
 
-**Döntés: `gondolat`, nem `szamitott`.** Ezek az egyezmény elidegeníthetetlen részei — a
-„hogyan született" bizonyítéka. Ha az egyezmény megmarad (mert valaki tartja), a
+**Döntés: `gondolat`, nem `szamitott`.** Ezek a szerkesztési egyezmény elidegeníthetetlen részei — a
+„hogyan született" bizonyítéka. Ha a szerkesztési egyezmény megmarad (mert valaki tartja), a
 születésének körülményei is vele maradnak.
 
 > Ez a D8 („tény ↔ hatály") gyakorlati következménye: a **tény** részévé válik az is,
@@ -286,7 +286,7 @@ A magba a Fázis 2-ben ezek kerülnek, és ma **egyik sem létezik**:
   gyakran változó `gondolat` **73** — nem a programot kell nyelvre választani, legfeljebb
   a magot.
 - **A tartalmi réteg érintetlen marad** — ez a besorolás legjobb híre: a koino érdemi
-  anyaga (gondolat, javaslat, egyezmény, kategória) **nem kerül lánc-kényszer alá**.
+  anyaga (gondolat, szerkesztési javaslat és egyezmény, kategória) **nem kerül lánc-kényszer alá**.
 
 ---
 

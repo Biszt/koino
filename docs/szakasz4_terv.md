@@ -30,7 +30,7 @@
 > rossz tanúsító elveszíti a szerepét.*
 >
 > - **1. lépcső — a tagság:** **egy meghívó**, és minden mehet (gondolat, tudatpont,
->   javaslat, szavazat). **D56**
+>   szerkesztési vagy általános javaslat, szavazat). **D56**
 > - **2. lépcső — a pénztárca:** **három tanúsítás** felhatalmazott tanúsítótól — a **D11**
 >   megvalósulása. **D56**
 > - **A felhatalmazás:** 2. lépcsősök adják, **emberenként egyet**; a küszöb `N` **kimondott
@@ -151,11 +151,11 @@ használhatatlan.
 >
 > `keret(X) = kapott(X) − k − eddig_adott(X)`, nullára padlózva.
 
-Ez a szabály önmagában megoldja azt, amin a korábbi javaslat elbukott.
+Ez a szabály önmagában megoldja azt, amin a korábbi ajánlás elbukott.
 
 ### 4.1 Mi bukott el korábban
 
-A javaslat ez volt: *„legalább `k` csúcs-diszjunkt út vezessen hozzád **már felvett
+Az ajánlás ez volt: *„legalább `k` csúcs-diszjunkt út vezessen hozzád **már felvett
 e-emberektől**."* A támadó ezt így kerüli meg (`k = 5`):
 
 - **1. kör:** öt valódi ember tanúsítja Hamis #1-et. Bejut. **És ettől ő maga is felvett tag.**
@@ -255,7 +255,7 @@ elismerve keretet gyárt, abból újakat vesz fel — négyzetesen elszáll).
 
 > ### ⛔ D48 (javasolt volt) — ELVETVE, MÉG AZNAP
 >
-> **A javaslat ez volt:** *az elismerés (egy már felvett tag tanúsítása) nem fogyaszt
+> **Az ajánlás ez volt:** *az elismerés (egy már felvett tag tanúsítása) nem fogyaszt
 > keretet — de csak akkor számít bele a tanúsított keretébe, ha a tanúnak magának is van
 > pozitív kerete.* A becsületes oldalon működik: Béla `k = 5`-tel jön be nulla kerettel,
 > egy találkozón ötven megállapodott tag elismeri → a kerete 50 lesz.
@@ -628,7 +628,7 @@ amit bárki a láncból is kiszámolhat.
 
 Ha valaki mintát lát: **bizonytalanra jelöl**, és **létrehoz egy gondolatot**, amivel a
 felelősséget megosztja a közösséggel (**D46**). Onnan a rendes koino-út következik —
-javaslat, vita, egyezmény —, és a megjelölt események kihagyása a **szabály-rétegen**
+általános javaslat, vita, általános egyezmény —, és a megjelölt események kihagyása a **szabály-rétegen**
 történik, ahogy a D19-ben. ⚠️ **A maradék kockázat** ugyanaz, mint mindenhol: a többség
 így elvileg kizárhat egy kisebbséget. Az ellensúly is ugyanaz: **lassú, nyilvános,
 megtámadható.**
@@ -868,7 +868,7 @@ munkával** felel arra, amire a teljes gráf bejárása csak globálisan tudna (
 támadás kifizetődik, és sehova máshova.*
 
 > **1. lépcső — a tagság.** **Egy meghívó**, és kész. Ezzel **minden mehet**: gondolat,
-> tudatpont, javaslat, szavazat. ⭐ **Nincs kapu, mert a mérés szerint a kapu úgysem véd**
+> tudatpont, szerkesztési vagy általános javaslat, szavazat. ⭐ **Nincs kapu, mert a mérés szerint a kapu úgysem véd**
 > (11.1: a meghívási szám nem védelem, hanem árcédula — a támadó egyszer megveszi a kellő
 > embereket, és onnantól korlátlan).
 >
@@ -880,7 +880,7 @@ támadás kifizetődik, és sehova máshova.*
 > akar — **de emberenként csak egyet**. Aki elér egy küszöböt, **tanúsíthat**. ⭐ Ez
 > **szerep, nem rang**: bármikor visszavonható, mert az emberek újraosztják.
 >
-> ⭐⭐ **A választótestület: CSAK aki már átment a 2. lépcsőn** *(Claude javaslata, Csaba:
+> ⭐⭐ **A választótestület: CSAK aki már átment a 2. lépcsőn** *(Claude ajánlása, Csaba:
 > „igen, igazad van, ez tetszik")*. ⚠️ **Enélkül a szerkezet megbukna**, és ezt mérve
 > tudjuk: ha bárki oszthat felhatalmazást, akkor a támadó 880 hamis azonossága **egymást
 > hatalmazza fel**, mind bekerül a küszöb fölé, saját tanúsítókat állít, és a pénztárcák
@@ -905,10 +905,10 @@ támadás kifizetődik, és sehova máshova.*
 > ([`javaslatSzamitas.js`](../js/allapot/javaslatSzamitas.js) `kuszobokMost`), ami
 > szelet-korlátos, és azt a szeletet a szavazatszámláláshoz úgyis végigolvassuk.
 
-> ### ⭐⭐ D57/b (Csaba, 2026-09-06) — A KÜSZÖB A 2. LÉPCSŐSÖK JAVASLATAINAK MEDIÁNJA
+> ### ⭐⭐ D57/b (Csaba, 2026-09-06) — A KÜSZÖB A 2. LÉPCSŐSÖK ÉRTÉK JAVASLATAINAK MEDIÁNJA
 >
 > `N` **nem mért érték, hanem kimondott**: a paraméter-entitásra adott **érték javaslatok
-> mediánja** — és javaslatot is **csak 2. lépcsős** e-ember tehet.
+> mediánja** — és érték javaslatot is **csak 2. lépcsős** e-ember tehet.
 >
 > ⚠️ **Claude tévedésének javítása:** azt írtam, hogy „a hitelesítettek köre jóval kisebb",
 > ezért ott a globális medián megoldható. **Nem igaz** — *(Csaba: „reményeim szerint több
@@ -1267,7 +1267,7 @@ nevezi keménynek. **A kettő között a D53 választ** — és ez Csaba dönté
 
 **Új darab:** `js/allapot/identitas.js` — *„ki e-ember ebben a koinoban?"*, tisztán a
 szeletekből számítva. ⚠️ **Nem esemény:** senki nem mondja ki, hogy valaki tag — ugyanúgy
-**számítás**, ahogy az egyezmény (D17).
+**számítás**, ahogy a szerkesztési egyezmény (D17).
 
 **És a `BizonytalanraJeloles` esemény (D46):** a tanú nem vonhat vissza, hanem jelölhet — az
 esemény **ugyanabba a szeletbe** kerül, mint a tanúsítás, és **létrehozhat mellé egy
@@ -1349,7 +1349,7 @@ szerkezet pontosan ehhez való.
 A kiinduló megtudja a **végpontokat**; a közbenső látja, **kitől kapta és kinek adta**.
 Ez sokkal kevesebb egy térképnél, de **nem nulla**.
 
-**Javaslat, amit mérni kell:** a séta **ne vigye a kiinduló kilétét** — csak egy egyszer
+**Ajánlás, amit mérni kell:** a séta **ne vigye a kiinduló kilétét** — csak egy egyszer
 használatos jelet —, és a végpont **arra a jelre** feleljen. Így a *„hány ponton érünk
 össze"* kiszámolható úgy, hogy a nevek egyik oldalon se álljanak össze.
 
@@ -1473,7 +1473,7 @@ Ezért a program dolga **az ÉSZREVÉTEL gyorsítása**, nem a döntés:
 
 - ✅ **a program azonnal MUTASSA** a jelzést;
 - ⛔ **a program SOHA ne vonjon vissza magától** — az út a **D46**: bizonytalanra jelölés,
-  gondolat, javaslat, egyezmény. A felhatalmazás visszavonása **emberi döntés**;
+  gondolat, általános javaslat és egyezmény. A felhatalmazás visszavonása **emberi döntés**;
 - ⭐ mérve: a visszacsatolás **880 → 120**-ra viszi a kárt, és **egyetlen becsületes**
   tanúsító sem veszíti el a szerepét.
 
@@ -1695,7 +1695,7 @@ a pénz is.
 | ⏸️ ~~**AK17**~~ | ~~A séta üzenet-alakja~~ | ⏸️ **LEMINŐSÍTVE (2026-09-06):** a séta **nem védelem** (11.12–11.13), tehát az üzenet-alakja már nem sürgős. **9/c, 4.7** — utolsóként, ha egyáltalán |
 | ⏸️ ~~**AK18**~~ | ~~Mi szivárog ki egy séta közben?~~ | ⏸️ **A AK17-tel együtt leminősítve.** ⚠️ A kérdés viszont **áthelyeződött**: a **D55** nyíltság-döntés után nem a séta szivárgása a kérdés, hanem hogy a **nyilvános bemutatkozás** lánc-esemény legyen-e vagy nyilvános-de-helyi (lásd D55 zárómondata) |
 | ~~**AK16**~~ | ~~Hogyan indul el a horgony-kör?~~ | ⛔ **TÁRGYTALAN** — nincs horgony-kör (AK12). *A kérdés maga hasznos maradt: ő buktatta ki, hogy a „több független körből" feltétel a tudatos hálózatépítőt jutalmazza.* |
-| ~~**AK14**~~ | ~~Mekkora méret fölött **kapcsoljon be** a szabály?~~ | ⛔ **A KÉRDÉS ROSSZ VOLT** (9/b, 4.0): a *„mekkora méret"* maga is **globális szám** (`N`), és ugyanazon a 9. szabályon bukna el, mint a Duniter-alak. ▶️ **Javaslat helyette (D51):** a `k` **paraméter**, a kis koino `k = 0`-val futtatja **ugyanazt a kódot** — nem külön üzemmód. ⛔ **A D51 azóta TÁRGYTALAN** (nincs `k`); a kérdés valódi válasza a **D56 két lépcsője**: a kis koino ugyanazt a kódot futtatja, csak nincs pénztárcája. ⚠️ A 🔴 közepes zóna így sem szűnik meg, csak láthatóvá válik — *Csaba ezt vállalta (2026-09-03)* |
+| ~~**AK14**~~ | ~~Mekkora méret fölött **kapcsoljon be** a szabály?~~ | ⛔ **A KÉRDÉS ROSSZ VOLT** (9/b, 4.0): a *„mekkora méret"* maga is **globális szám** (`N`), és ugyanazon a 9. szabályon bukna el, mint a Duniter-alak. ▶️ **Ajánlás helyette (D51):** a `k` **paraméter**, a kis koino `k = 0`-val futtatja **ugyanazt a kódot** — nem külön üzemmód. ⛔ **A D51 azóta TÁRGYTALAN** (nincs `k`); a kérdés valódi válasza a **D56 két lépcsője**: a kis koino ugyanazt a kódot futtatja, csak nincs pénztárcája. ⚠️ A 🔴 közepes zóna így sem szűnik meg, csak láthatóvá válik — *Csaba ezt vállalta (2026-09-03)* |
 | **AK15** | Milyen **pótutak** legyenek a találkozó mellett, és mennyivel gyengébbek? | 4. szabály: legyen mindig kézi út — de ezt nem szabad letagadni |
 
 ---
@@ -1736,7 +1736,7 @@ a D50). ⭐ Három meglévő döntés kapott ott jelzést a felülírásról: **
 
 - **2026-09-04** — A dokumentum létrejött, egy több körös tervezési beszélgetésből.
   A menete: a Duniter-szabály elbukott a 9. szabályon → az alsó korlát alakja → a
-  diszjunkt-út javaslat, amiről kiderült, hogy **megkerülhető** (az ár egyszer fizetendő,
+  diszjunkt-út ajánlás, amiről kiderült, hogy **megkerülhető** (az ár egyszer fizetendő,
   a haszon korlátlan) → ⭐⭐ **Csaba keret-szabálya**, amiből az `f ≤ g/k` korlát
   levezethető → a tanúsító találkozó mint gyakorlat → a visszavonás helyett bizonytalanra
   jelölés. **Kód még nincs; a következő lépés a 10. szakasz rontás-próbái.**
@@ -1792,13 +1792,13 @@ a D50). ⭐ Három meglévő döntés kapott ott jelzést a felülírásról: **
   ⚠️ **A tervezés közben három dolog derült ki, ami eddig nem látszott:**
   **(1)** a **AK14 kérdése rossz volt** — a *„mekkora méret fölött kapcsoljon be"* maga is
   globális szám, tehát ugyanazon a 9. szabályon bukna el, mint a Duniter-alak; helyette a
-  `k` legyen paraméter, `k = 0`-val a kis koinoban (**D51 javaslat**);
+  `k` legyen paraméter, `k = 0`-val a kis koinoban (**D51 ajánlás**);
   **(2)** a keret *kapott* fele csak akkor korlátos lekérdezés, ha a tanúsítás **a
-  tanúsított szeletébe** kerül, nem a tanúéba (**D52 javaslat**) — és ezzel a `szabalyok.js`
+  tanúsított szeletébe** kerül, nem a tanúéba (**D52 ajánlás**) — és ezzel a `szabalyok.js`
   **illesztése is változik**, mert ma egyetlen tömböt kap és szerzőnként csoportosít;
   **(3)** ⚠️ a keret ellenőrzése **rekurzióhoz vezet** (a tanú kerete a tanúi keretén
   múlna), és a feloldás nem lehet „több számítás": a keret **a kiadás oldalán kemény, a
-  befogadás oldalán jelzés** (**D53 javaslat**). ⛔ **Ez a szakasz legfontosabb eldöntetlen
+  befogadás oldalán jelzés** (**D53 ajánlás**). ⛔ **Ez a szakasz legfontosabb eldöntetlen
   pontja**, mert a HOL TARTUNK a keretet a kemény magban sorolja (D44), a D49/a viszont csak
   a `k` tanúsítást és a befagyasztást nevezi keménynek. **Kód addig nem készül.**
 - **2026-09-06** — ⭐⭐⭐ **A SZAKASZ ÁTÉPÜLT, ÉS CSABA LEZÁRTA.** Csaba két mondata indította:

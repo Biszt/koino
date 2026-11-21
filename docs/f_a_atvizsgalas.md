@@ -64,7 +64,7 @@ csere `RESZVETEL`-je ma is bemondja, hogy a készülék X azonosság-szeletét v
 valaki), a zárt koino kapuja pedig a személyt ismeretlen társtól kifejezetten kéri (D93/3). Aki ezt nem akarja, hallgathat
 — a lánca nálam „nem ellenőrizhető” marad.
 
-## 4. A kérdések — javaslattal (D-szintűek, Csabáéi)
+## 4. A kérdések — ajánlással (D-szintűek, Csabáéi)
 
 **F1. Hogyan spóroljunk az első szinten?** (a 70. mérés szerint a változott közös szeleteknél ez a nyílt forgalom 25–62%-a)
 
@@ -117,8 +117,8 @@ után mindhárom ugyanazt számolja.
 ## 6. ✅ Megépült (2026-10-09) — D98 (Csaba: „elfogadom a javaslataidat”): F1/A, A1/A, A2/A
 
 - ✅ **① F — a társankénti emlékezet** (`tarsEmlekezet.js`): a változott közös szelet az első szint nélkül jön; a 70. mérés
-  kiegészítése szerint egy változás 3,8 KB 50, 1000 és 5000 szeletnél is (nélküle 5,3 · 6,5 · 8,0 KB). Két eltérés a
-  javaslattól (elágazás 88–89): a közös alap nem a NYITÁS-ban egyeztetődik, és az ellenőrzés a második szint előtt van
+  kiegészítése szerint egy változás 3,8 KB 50, 1000 és 5000 szeletnél is (nélküle 5,3 · 6,5 · 8,0 KB). Két eltérés az
+  ajánlástól (elágazás 88–89): a közös alap nem a NYITÁS-ban egyeztetődik, és az ellenőrzés a második szint előtt van
   (a U-n kívüli párok lenyomata); a maradék a feljegyzés része.
 - ✅ **②–④ Az A hátralévői** (`lancEllenorzes.js`, a napló-fa következetessége és részfa-gyorsítótára, a vonal lánc-köre):
   a 71. mérés szerint egy kérdezett eseményre ~0,6–0,8 KB válasz, a szerző a gyorsítótárral 9–42 ms; a parancssor-próba

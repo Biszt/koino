@@ -13,7 +13,7 @@ egy gondolkodó ember **komolyan vehesse** — a víziót és a korlátait egyar
 ## 1. A koino egy mondatban
 
 **Közösségi tér, amit a közösség irányít, központi szereplő nélkül** — ahol a
-gondolatokból javaslatok, a javaslatokból közös döntéssel egyezmények születnek,
+gondolatokból szerkesztési és általános javaslatok, a szerkesztési és általános javaslatokból közös döntéssel szerkesztési és általános egyezmények születnek,
 és ahol a részvétel jutalma soha nem sűrűsödhet kevesek hatalmává.
 
 ## 2. A probléma, amit megold — egy 2400 éves bug
@@ -48,9 +48,9 @@ magva.
 - **tudatpont** — mindenkinek ugyanannyi; nem elkölthető, csak szétosztható és
   bármikor átrendezhető. Azt fejezi ki, *mi fontos* egy embernek — **prioritás,
   NEM szavazaterő**.
-- **gondolat → javaslat → egyezmény** — a gondolat az alapegység; aki tudatpontot
-  rendel hozzá, javaslatot tehet (módosítás, áthelyezés, törlés, egyesítés); az
-  elfogadott javaslatból egyezmény lesz.
+- **gondolat → szerkesztési vagy általános javaslat → szerkesztési vagy általános egyezmény** — a gondolat az alapegység; aki tudatpontot
+  rendel hozzá, szerkesztési javaslatot tehet (módosítás, áthelyezés, törlés, egyesítés); az
+  elfogadott szerkesztési javaslatból szerkesztési egyezmény lesz.
 - **küszöbértékek + bizonyossági mutató** — gondolatonként meghatározzák, mekkora
   támogatottság és részvétel kell az elfogadáshoz; minél tisztább az állás és
   magasabb a részvétel, annál hamarabb zárul a döntés (a min/max döntési idő közt).
@@ -66,7 +66,7 @@ részesedés jár. Ez a méltóság alapállapota: senki nem esik a padló alá.
 Fontos azonban a **kétféle teremtés** megkülönböztetése, mert ezen áll vagy bukik
 a bőség hitele:
 
-- **A teremtés valóban korlátlan** — gondolatból, tudásból, egyezményből,
+- **A teremtés valóban korlátlan** — gondolatból, tudásból, szerkesztési vagy általános egyezményből,
   kultúrából, együttműködésből **végtelen sok** születhet. Itt nincs plafon: minél
   többen alkotnak, annál gazdagabb a közös.
 - **A pénzkibocsátás viszont fegyelmezett** — épp azért, hogy a bőség ne forduljon
@@ -172,7 +172,7 @@ bizonyított** — különben minden hamis fiók pénznyomtató gép lenne.
 
 **„Ki irányítja a koinot? Mi van, ha az alapító rossz irányba viszi?”**
 Senki nem sajátíthatja ki. Az alapító a rendszer indulása után **egy e-ember a
-sok közül**: javaslatot tehet, szavaz, vitázik — de az irányt a közösség többsége
+sok közül**: szerkesztési vagy általános javaslatot tehet, szavaz, vitázik — de az irányt a közösség többsége
 adja. Végső biztosíték a **fork joga**: bármely csoport kiválhat, megőrizve a közös
 múltat.
 

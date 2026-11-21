@@ -48,7 +48,7 @@ A vita 9. pontjának szerkezete: a „közösség hat a forráskódra" öt kül�
 
 | # | Lépcső | Megoldás | Hol |
 |---|---|---|---|
-| 1 | **Javaslat** — a kód-módosítás javaslatként él a fában | a meglévő gépezet | ez a dokumentum |
+| 1 | **Szerkesztési javaslat** — a kód-módosítás szerkesztési javaslatként él a fában | a meglévő gépezet | ez a dokumentum |
 | 2 | **Értékelés** — ki ítéli meg hozzáértően? | **elismerés**: tájékoztat, nem jogosít | N9 |
 | 3 | **Döntés** — szavazás | a meglévő gépezet | — |
 | 4 | **Bevezetés/kikényszerítés** | **konszenzuális önfrissítés** + fork-jog | D9 |
@@ -61,7 +61,7 @@ irány közül kellene választani: vak szavazás a kódról, vagy szakértői k
 
 > **A 4. lépcső ellenőrzési fele már létező technológia.** A D9 szerint a kliens
 > hash-ellenőrzéssel áll át az elfogadott kódra — de a **git-commit maga egy hash**.
-> Vagyis az egyezmény megnevezhet egy commit-azonosítót, a kliens pedig bárhonnan
+> Vagyis a szerkesztési egyezmény megnevezhet egy commit-azonosítót, a kliens pedig bárhonnan
 > klónozhat és ellenőrizhet. Nem kell hozzá letöltő-szerver, sem GitHub.
 > ⚠️ **GitHub ≠ git:** a GitHub a Microsoft tulajdona — arra kormányzást építeni a D12-t
 > érvénytelenítené. Részletes elemzés (átfedések, korlátok, SHA-1 csapda):
@@ -86,7 +86,7 @@ A dokumentum további része ezt a táblázatot vezeti le.
 belül, amit leír.**
 
 Ebből következik, hogy a teljes meglévő gépezet magától vonatkozik rá: van tudatpontja,
-vannak tulajdonosai, vannak küszöbei, lehet rá módosítási javaslatot tenni, és — ami a
+vannak tulajdonosai, vannak küszöbei, lehet rá szerkesztési javaslatot (módosítást) tenni, és — ami a
 legfontosabb — **különválhat**.
 
 Vagyis a forráskód-kormányzás **nem új mechanizmus, amit meg kell építeni.** Ugyanaz a
@@ -270,7 +270,7 @@ Ez a dokumentum legkevésbé lezárt kérdése, és érdemes pontosan látni, mi
 változatot is, ami **megtartja a nevet és a látszatot, de elárulja a lényeget**:
 
 - a tudatpont **szavazaterővé** válik benne (a „mindenki egyenlő" elv kiiktatva),
-- javaslatot csak kinevezettek tehetnek,
+- szerkesztési vagy általános javaslatot csak kinevezettek tehetnek,
 - vagy minden marad, csak közben megfigyeli és eladja az adatokat.
 
 Az AGPL miatt a forrás **látható** lesz. De a láthatóság nem akadály: attól, hogy látom,

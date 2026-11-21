@@ -1,10 +1,10 @@
-# A javaslat → egyezmény logika átültetése a prototípusból
+# A szerkesztési javaslat → egyezmény logika átültetése a prototípusból
 
 *Létrehozva: 2026-09-07, Csaba kérésére: „nézd meg a koino_1.1-et. Azt kell lemásolni, azokat
 a részeket módosítani, amiket kell, de a **logikai kapcsolatoknak pontosan át kell hogy
 legyenek ültetve**."*
 
-> **Mi ez a dokumentum?** Egy **leltár**: mit tud a prototípus javaslat–egyezmény
+> **Mi ez a dokumentum?** Egy **leltár**: mit tud a prototípus szerkesztési javaslat–egyezmény
 > gépezete, és ebből mi van már át a P2P koinoban. Nem terv és nem döntés — a hiányok
 > listája, hogy ne találgatásból épüljön tovább.
 >
@@ -15,17 +15,17 @@ legyenek ültetve**."*
 
 ## 0. Amit Csaba eldöntött (2026-09-07)
 
-> **Az egyezmény azonosítója AZONOS a javaslatéval — csak a státusz más.**
+> **A szerkesztési vagy általános egyezmény azonosítója AZONOS a javaslatéval — csak a státusz más.**
 > *(„ha ez alatt azt érted, hogy azonos id-jük lesz, csak más státusszal, akkor rendben van.")*
 
 ⚠️ **Ez ELTÉR a prototípustól, és ez rendben van.** Ott az `Egyezmeny` **külön dokumentum**,
 saját `_id`-vel és `javaslatId` hivatkozással (`backend/models/egyezmeny.js`). A koinoban
-viszont az egyezmény **számítás** (D17) — nem születik esemény, ami új azonosítót adhatna.
+viszont a szerkesztési vagy általános egyezmény **számítás** (D17) — nem születik esemény, ami új azonosítót adhatna.
 Az azonos azonosító tehát nem kényelmi rövidítés, hanem az egyetlen mód, hogy a **D17 és a
 D27/5 („az egyezmény teljes értékű entitás") egyszerre álljon**.
 
 ⭐ **De egy logikai kapcsolatot ez nem tehet zárójelbe** — lásd a 3. pontot: a prototípusban
-az egyezmény **NEM ott jön létre, ahol a javaslat áll**.
+a szerkesztési egyezmény **NEM ott jön létre, ahol a szerkesztési javaslat áll**.
 
 ---
 
@@ -33,19 +33,19 @@ az egyezmény **NEM ott jön létre, ahol a javaslat áll**.
 
 | Logikai kapcsolat | A prototípus forrása | A koinoban |
 |---|---|---|
-| **A javaslat az érintett entitás GYEREKE** | `javaslat.js`: *„A javaslat MINDIG az érintett entitás gyereke… ezért kötelező"* | ✅ `allapotSzamitas.js`: `szulo = adat.erintett` (2026-09-06) |
-| **A javaslat entitás** — tudatpont, küszöb, gyerekek | `javaslat.js` séma + a pakli kártyái | ✅ 2026-09-06 |
+| **A szerkesztési javaslat az érintett entitás GYEREKE** | `javaslat.js`: *„A javaslat MINDIG az érintett entitás gyereke… ezért kötelező"* | ✅ `allapotSzamitas.js`: `szulo = adat.erintett` (2026-09-06) |
+| **A szerkesztési javaslat entitás** — tudatpont, küszöb, gyerekek | `javaslat.js` séma + a pakli kártyái | ✅ 2026-09-06 |
 | Négy szerkesztési művelet | `javaslatTipus` enum | ✅ **mind a négynek van végrehajtója** (2026-09-07) |
 | A törlés = **tudatpont-visszaosztás**, az entitás 0 pontnál szűnik meg | `torlesiVegrehajto.js` | ✅ `szerkesztesiVegrehajtas.js`: `torles` (2.6) |
 | A törölt entitás gyerekei **FELKERÜLNEK** a szülőjéhez | `entitasTorleseEllenorzese` kaszkádja | ✅ `allapotSzamitas.js`: `arvakFelkerulese` (2.2/b) |
 | Egyesítés: pontok emberenként, gyerekek az egyesítetthez, közös ős | `egyesitesiVegrehajto.js` | ✅ `szerkesztesiVegrehajtas.js`: `egyesites` (2.6) |
 | A döntés gépezete (küszöb, medián, részvétel, bizonyosság) | `javaslatSzamitasService.js` | ✅ `javaslatSzamitas.js` |
-| Az egyezmény a **pillanatképet** viszi magával | `egyezmeny.js`: `tamogatokSzama`, arányok, `bizonyossagiMutato` | ✅ `javaslatSzamitas.js` → `egyezmeny.pillanatkep` |
-| Az egyezmény **végrehajtódik** | `vegrehajtok/` | ✅ `szerkesztesiVegrehajtas.js` (2026-09-06) |
+| A szerkesztési egyezmény a **pillanatképet** viszi magával | `egyezmeny.js`: `tamogatokSzama`, arányok, `bizonyossagiMutato` | ✅ `javaslatSzamitas.js` → `egyezmeny.pillanatkep` |
+| A szerkesztési egyezmény **végrehajtódik** | `vegrehajtok/` | ✅ `szerkesztesiVegrehajtas.js` (2026-09-06) |
 | **Az érintettek TÖMBJE**, entitásonkénti művelettel | `javaslat.js`: `erintettEntitasok` | ✅ 2026-09-07 (2.3) |
 | **A jogosultság metszet a beadásnál** | `javaslatJogosultsagService.js` | ✅ `szabalyok.js` (2026-09-07) |
 | **A döntés érintettenként, ÉS-sel** (töredék-modell) | `javaslatService` + `javaslatIdozitesService` | ✅ `javaslatSzamitas.js`: `reszekSzamitasa` (2026-09-07, 2.3/c) |
-| **Típus-alapú tiltások** (egyezmény/kategória/gondolattípus) | `javaslatService.js:87–113` | ✅ `szabalyok.js`: `TILTOTT_MUVELETEK` (2026-09-07) |
+| **Típus-alapú tiltások** (szerkesztési egyezmény/kategória/gondolattípus) | `javaslatService.js:87–113` | ✅ `szabalyok.js`: `TILTOTT_MUVELETEK` (2026-09-07) |
 | **Az egyesítés nem keverhető** más művelettel | `javaslat.js` Csomag-validátor | ✅ `szabalyok.js` (2026-09-07) |
 
 ---
@@ -63,8 +63,8 @@ fogalma — a koinoban nincs megfelelője"). Valójában **teljes, kidolgozott m
 
 | A szavazás vége | Ki válhat külön | Mit visz magával |
 |---|---|---|
-| a javaslat **elfogadva** | az **ellenzők** | a **régi**, módosítás előtti gondolatot |
-| a javaslat **elvetve** | a **támogatók** | a **módosított** gondolatot |
+| a szerkesztési javaslat **elfogadva** | az **ellenzők** | a **régi**, módosítás előtti gondolatot |
+| a szerkesztési javaslat **elvetve** | a **támogatók** | a **módosított** gondolatot |
 
 - ⭐ **Szavazáskor kérdezik meg** (a `kulonvalasIgeny` mező): *„Ha a döntés nem a te
   álláspontodat követi, szeretnél külön ágat?"* — tartózkodásnál a kérdés meg sem jelenik.
@@ -83,7 +83,7 @@ meglévők átrendezése. De egyetlen sora sincs meg a koinoban.*
 ### ✅ 2.1/b MEGÉPÍTVE: a MÓDOSÍTÁSI különválás (2026-09-08)
 
 A prototípus `_kulonvalasokVegrehajtasa` + `kulonvalasService` első köre átjött — a **hatóköre
-is ugyanaz**: `Modositas`, elfogadott javaslat, az **ellenzők** viszik a **régi** változatot.
+is ugyanaz**: `Modositas`, elfogadott szerkesztési javaslat, az **ellenzők** viszik a **régi** változatot.
 
 | Lépés | A koinoban |
 |---|---|
@@ -100,7 +100,7 @@ is ugyanaz**: `Modositas`, elfogadott javaslat, az **ellenzők** viszik a **rég
 szétválás **nem történik meg** — különben a főág gazdátlanul eltűnne (D14), vagyis a
 „szétválás" valójában elvinné az egészet. ⭐ A kihagyás **látszik** (`kihagyottak`, D19).
 
-⚠️⚠️ **És ezt a próbát először VAKRA írtam:** elvetett javaslattal, ami el sem jut az őrig —
+⚠️⚠️ **És ezt a próbát először VAKRA írtam:** elvetett szerkesztési javaslattal, ami el sem jut az őrig —
 a rontás-próba buktatta le (az őrt kikapcsolva semmi nem bukott). A valódi eset ravaszabb: a
 **támogatók a szavazás UTÁN veszik el a pontjaikat**, tehát a döntés elfogadva marad (a
 lezárás pillanata szerint), de a végrehajtáskor már csak a különválni akaró ellenző a gazda.
@@ -144,8 +144,8 @@ szülőre mutatna, ami már a másik ágon van.
 | **elfogadva** | az **ellenzők** (akik kérték) | a **régi** cím/szöveg | a módosított |
 | **elvetve** | a **támogatók** (akik kérték) | a **módosított** cím/szöveg | ⛔ **változatlan** |
 
-⚠️ **Ez MÁSIK BELÉPÉSI PONT, nem elágazás a meglévőben:** az elvetett javaslatnak **nincs
-egyezménye**, tehát a végrehajtás nem indulhat abból. ⭐ A megoldás: a végrehajtás sora
+⚠️ **Ez MÁSIK BELÉPÉSI PONT, nem elágazás a meglévőben:** az elvetett szerkesztési javaslatnak **nincs
+szerkesztési egyezménye**, tehát a végrehajtás nem indulhat abból. ⭐ A megoldás: a végrehajtás sora
 mostantól **az elvetett szerkesztési javaslatokat is** tartalmazza — ha van támogató, aki
 külön ágat kért. A sorrend közös: a **lezárás ideje** szerint, elfogadott és elvetett
 egyformán. *Ami korábban dőlt el, előbb hat.*
@@ -209,29 +209,29 @@ azonosító-modell**.
 - ✅ **Az érték javaslatok átvándorlása** — **KÉSZ (2026-09-08)**, lásd 2.1/d.
 - ✅ **Az egyesítés-változat** — **KÉSZ (2026-09-08)**, lásd 2.1/e. ⭐ **A különválás ezzel teljes.**
 
-### 2.2 ⛔ Az egyezmény HELYE — `egyezmenyTarhelyId`
+### 2.2 ⛔ A szerkesztési egyezmény HELYE — `egyezmenyTarhelyId`
 
 `javaslat.js`: *„Hol jön létre az EGYEZMÉNY, ha a javaslatot elfogadják **(nem a javaslat
 helye!)**. Típusonként a service vezeti le:"*
 
-| Művelet | Hova kerül az egyezmény |
+| Művelet | Hova kerül a szerkesztési egyezmény |
 |---|---|
 | **Törlés** | az érintett **szülője** |
 | **Módosítás / Áthelyezés** | maga az **érintett entitás** |
 | **Egyesítés** | placeholder → a végrehajtáskor az **új entitás** |
 
-⭐⭐ **És itt van, amit az azonos-azonosítós megoldás miatt külön kezelni kell.** Ha az
-egyezmény ugyanaz az entitás, mint a javaslat, akkor a helye a javaslat helye — vagyis az
+⭐⭐ **És itt van, amit az azonos-azonosítós megoldás miatt külön kezelni kell.** Ha a
+szerkesztési egyezmény ugyanaz az entitás, mint a szerkesztési javaslat, akkor a helye a szerkesztési javaslat helye — vagyis az
 érintett entitás alatt van. Ez:
 
 - ✅ **Módosításnál és áthelyezésnél PONTOSAN a prototípus válasza** — nincs teendő;
 - ✅ **Törlésnél MEGOLDVA (2026-09-07), és külön szabály NÉLKÜL.** Az érintett megszűnik,
-  tehát az egyezmény árva lesz — az **árva-szabály** pedig felviszi a legközelebbi élő
+  tehát a szerkesztési egyezmény árva lesz — az **árva-szabály** pedig felviszi a legközelebbi élő
   felmenőhöz, ami épp a törölt entitás szülője. *Pontosan a prototípus válasza, csak nem
   külön eset, hanem egy általánosabb szabály következménye.*
 - ✅ **Egyesítésnél is MEGOLDVA (2026-09-07), szintén külön szabály nélkül.** Csaba döntése
-  szerint nem születik új entitás: az **első érintett olvasztja be a többit** — és a javaslat
-  szülője úgyis az első érintett, tehát az egyezmény pontosan ott van, ahol lennie kell. ⭐ A
+  szerint nem születik új entitás: az **első érintett olvasztja be a többit** — és a szerkesztési javaslat
+  szülője úgyis az első érintett, tehát a szerkesztési egyezmény pontosan ott van, ahol lennie kell. ⭐ A
   prototípusnak ehhez placeholder-feloldás kellett (2.6).
 
 ### 2.2/b ⭐⭐ ÉS AMI EBBŐL KIDERÜLT: az árvák felkerülése (2026-09-07)
@@ -259,7 +259,7 @@ mutatna ugyanarról.
 `['Gondolat','Kategoria','GondolatTipus','Egyezmeny']`.
 
 Eddig a koinoban **egy** `erintett` string volt. ⚠️ Az **egyesítéshez** legalább kettő kell
-(a két forrás), és a **D27/5** szerint egy **egyezmény is lehet érintett**.
+(a két forrás), és a **D27/5** szerint egy **szerkesztési vagy általános egyezmény is lehet érintett**.
 
 ⭐ **Amit a prototípus alakja megmondott, és amit ebből átvettünk:**
 
@@ -297,7 +297,7 @@ köze. **Javítva** — de a javítás első változata **túllőtt a prototípu
 ### 2.3/c ⭐⭐⭐ A TÖREDÉK-MODELL — a tömb átültetésének MÁSODIK fele (2026-09-07)
 
 Az első átültetés a metszetet a **döntésre** is ráhúzta: egy szavazás, aminek a választóköre
-az érintettek metszete. ⛔ **Ez nem a prototípus.** Ott egy több entitást érintő javaslat
+az érintettek metszete. ⛔ **Ez nem a prototípus.** Ott egy több entitást érintő szerkesztési javaslat
 `javaslatService.js:519` szerint **töredékekre bomlik — érintettenként egyre**, és onnantól:
 
 - a töredék `javaslatTipus`-a **az adott entitás művelete**, a `szuloId`-ja **az adott entitás**;
@@ -313,7 +313,7 @@ az érintettek metszete. ⛔ **Ez nem a prototípus.** Ott egy több entitást �
 
 ⭐ **A metszet tehát CSAK A BEADÁSRA vonatkozik** (`javaslatJogosultsagService` a teljes
 listával, `javaslatService.js:494`) — a **döntés** entitásonként dől el, és **ÉS**-sel áll
-össze. *Aki a gondolatot tartja, az dönt a sorsáról — akkor is, ha a javaslat egy másikat is
+össze. *Aki a gondolatot tartja, az dönt a sorsáról — akkor is, ha a szerkesztési javaslat egy másikat is
 érint.*
 
 ⚠️ **Amit át kellett alakítani:** a koinoban nincs N tárolt töredék, mert **egy aláírt
@@ -345,10 +345,10 @@ gép más sorrendet kap ugyanabból a halmazból**, ami épp a D17-et dönti meg
 sorrend `ido → szerzo → sorszam → azonosito`; így a saját lánc sorrendje érvényesül (azt csak a
 szerző írhatja alá), és a reláció totális. Próba őrzi: 30 kevert bemenet, azonos eredmény.
 
-### 2.4 ⛔ `Csomag` javaslat és a TÖREDÉKEK
+### 2.4 ⛔ `Csomag` szerkesztési javaslat és a TÖREDÉKEK
 
 Az ötödik javaslat-típus: `['Torles', 'Modositas', 'Egyesites', 'Athelyezes', **'Csomag'**]`,
-a `toredekCsoportId` / `toredekSorszam` / `toredekDarab` mezőkkel. Egy összetett javaslat
+a `toredekCsoportId` / `toredekSorszam` / `toredekDarab` mezőkkel. Egy összetett szerkesztési javaslat
 **töredékekre bomlik**, amik együtt élnek és együtt dőlnek el
 (`vegrehajtok/csomagVegrehajto.js`, 10 KB).
 
@@ -374,7 +374,7 @@ A koino három státusza tehát **pontosan azt tudja, amit a prototípus valój�
 a kódban is — különben olyat „ültetünk át", ami ott sincs.*
 
 ⏸️ Ami viszont **valódi kérdés** marad: ma az `szerkesztesiVegrehajtas.js` a végre nem hajtható
-egyezményt a `kihagyottak` listába teszi, a javaslat státusza pedig „elfogadva" marad. Ez a
+szerkesztési egyezményt a `kihagyottak` listába teszi, a szerkesztési javaslat státusza pedig „elfogadva" marad. Ez a
 prototípussal **egyezik** — de érdemes lehet többet mutatni, mint amennyit ő tudott.
 
 ### 2.6 ✅ TÖRLÉS — megépítve (2026-09-07) · ⏸️ EGYESÍTÉS — hátravan
@@ -392,7 +392,7 @@ gazdájuk keretében maradnak, amíg vissza nem veszi őket.
 
 ### 2.6/b ⛔⛔ Csaba kérdése: *„ha nem veszi vissza, akkor az entitás hogyan törlődik?"*
 
-⭐ **Törlődik.** Az eltűnés **számítás az egyezményből**, nem a pontok nullázódásának
+⭐ **Törlődik.** Az eltűnés **számítás a szerkesztési egyezményből**, nem a pontok nullázódásának
 következménye — minden készülék ugyanazt számolja, tehát a gondolat annak a paklijából is
 eltűnik, aki 100 pontot tart rajta. Amit „lekötve marad"-nak neveztem, az **csak a keret
 könyvelése**.
@@ -426,7 +426,7 @@ de az idő múlása **semmit nem bizonyít**: egy hétvégén kikapcsolt készü
 alatt sem érkezik semmi, egy sűrűn cserélő mellett viszont öt perc alatt körbeér minden. ⭐
 Amit mérni akarunk, az nem idő, hanem **egyeztetés**: hányszor beszéltem azóta másokkal úgy,
 hogy nem hoztak semmi újat erről a döntésről. ⛔ **A néma kör nem buli** — csak az számít,
-amiben legalább egy társ felelt. ⚠️ És mellé kell a **döntés jele** (egyezmény + lezárás + a
+amiben legalább egy társ felelt. ⚠️ És mellé kell a **döntés jele** (szerkesztési egyezmény + lezárás + a
 szavazás állása): ha az változik, a számláló nulláról indul. *Nem a bulik gyűlnek, hanem a
 MOSTANI döntés melletti bulik.* ⚠️⚠️ **A szám (ma 3) még nincs megmérve** — Csaba kérése:
 *„mégjobb lenne ezt az értéket méréssel meghatározni."*
@@ -453,7 +453,7 @@ EGYETLEN művelet, ami entitásokat von össze. A prototípus `egyesitesiVegreha
 (19,9 KB) hét lépésben: összesíti emberenként a pontokat MINDEN forrásról → kiüríti a
 forrásokat (azok eltűnnek) → **létrehoz egy új entitást** → ráteszi az összesített pontokat →
 a források gyerekeit **az ÚJ entitás alá köti** (⭐ szándékosan NEM a nagyszülőhöz — ezért
-gyűjti össze őket a törlés ELŐTT, Csaba döntése 2026-07-22) → és az egyezmény
+gyűjti össze őket a törlés ELŐTT, Csaba döntése 2026-07-22) → és a szerkesztési egyezmény
 placeholder-tárhelyét az új entitásra oldja fel. A hely alapból a források
 **legközelebbi közös őse** (`_legkozelebbiKozosSzulo`).
 
@@ -462,14 +462,14 @@ a többit.**
 
 A kérdés az volt, hogy az új entitás honnan kapjon azonosítót: a koinoban **minden azonosító
 egy aláírt esemény lenyomata**, és ezen áll az egész ellenőrizhetőség. Az egyesítettnek nem
-tartozna eseménye (a javaslaté már foglalt — az az egyezményé), tehát egy **második
+tartozna eseménye (a szerkesztési javaslaté már foglalt — az a szerkesztési egyezményé), tehát egy **második
 származtatott azonosítót** kellett volna bevezetni, amit senki nem írt alá.
 
 ⭐ Az elnyelés ezt elkerüli, és **több logikai kapcsolatot old meg magától**:
 
 - a rá mutató **régi hivatkozások megmaradnak** — ugyanaz az elv, mint a különválásnál:
   *„a főág tartja meg az azonosítót"*;
-- **az egyezmény helye is jó lesz külön szabály nélkül** (a javaslat szülője úgyis az első
+- **a szerkesztési egyezmény helye is jó lesz külön szabály nélkül** (a szerkesztési javaslat szülője úgyis az első
   érintett), pedig a prototípusban ehhez placeholder-feloldás kellett — a 2.2 utolsó nyitott
   pontja is ezzel zárult;
 - és a **közös ős** számítása is átjött: ha a források külön ágban vannak, az egyesített
@@ -524,7 +524,7 @@ tiltakozás számít. *Ettől lesz a hatály élő — külön visszavonás-mech
 ahogy a tudatpontnál. **A tényt a `pillanatkep` őrzi, a hatályt ez.**
 
 ⛔⛔ **A HATÓKÖR A HELYBŐL (D27/4).** Állást az foglalhat, akinek tudatpontja van azon az
-entitáson, ami alatt az egyezmény áll — **vagy annak bármely leszármazottján**. A gyökérben:
+entitáson, ami alatt az általános egyezmény áll — **vagy annak bármely leszármazottján**. A gyökérben:
 **bárki**, és ez nem külön szabály, hanem ugyanennek a széle.
 
 ⭐⭐ **És itt a hierarchikus tudatpont JOGOSULTSÁGGÁ válik**: eddig a *fontosság* mutatója
@@ -541,13 +541,13 @@ Kézi út: `allast <egyezmény> csatlakozik|tiltakozik|utkozik [másik] [indokl�
 ### ⏸️ Ami az általánosból még hátravan
 
 - **A csatlakozó mint AKTÍV résztvevő** (D27/3): aki csatlakozott, az döntés-alakító tettet
-  tett, tehát számítson a részvételi arányban — és **ő szavazzon** az egyezmény későbbi
+  tett, tehát számítson a részvételi arányban — és **ő szavazzon** az általános egyezmény későbbi
   módosításáról. *Ma a hatály kiszámolódik, de a döntés-réteg még nem veszi be.*
 - **Az örökölt küszöbök** (D27/1): ha egy entitásnak nincs saját érték javaslata, a
   **szülőjéé** legyen érvényes, és csak azon túl az alapérték. ⭐ Ez minden entitásra jó
-  általánosítás, nem csak az egyezményre.
-- **A felfelé vitel** (Csaba, 2026-09-07): áthelyezési javaslattal egy felmenő alá, ahol
-  **újra javaslat lesz belőle**, és a tágabb kör **a saját küszöbeivel** szavaz róla.
+  általánosítás, nem csak az általános egyezményre.
+- **A felfelé vitel** (Csaba, 2026-09-07): szerkesztési javaslattal (áthelyezés) egy felmenő alá, ahol
+  **újra általános javaslat lesz belőle**, és a tágabb kör **a saját küszöbeivel** szavaz róla.
 - **Az ütközés iránya**: ma **irányított állítás** („szerintem ez a kettő ellentmond").
   Kölcsönösnek vegyük-e, még eldöntendő.
 
@@ -562,14 +562,14 @@ Kézi út: `allast <egyezmény> csatlakozik|tiltakozik|utkozik [másik] [indokl�
    sem fogalmazható, és a D27/5 („egyezmény is lehet érintett") sem. A régi, egy-`erintett`-es
    események **változatlanul érvényesek**. ⭐ Mellékesen **két valódi hibát** is kihozott: a
    szavazat jogosultsága csak a felületen élt (2.3/b), és a rendezés nem volt tranzitív (2.3/d).
-   ⏸️ *Ami tudatosan kimaradt:* a többérintettes javaslat **kézi útja** (4. szabály) — a
+   ⏸️ *Ami tudatosan kimaradt:* a többérintettes szerkesztési javaslat **kézi útja** (4. szabály) — a
    `javaslat` parancs ma egy entitást vesz. A csomag-alak a **Csomag/töredék** (2.4) lépéssel
    együtt kap parancssori arcot, mert ott dől el, hogyan írja le az ember egy mondatban.
-2. **Az egyezmény helyének igazítása** törlésnél és egyesítésnél (2.2) — ez teszi az
+2. **A szerkesztési egyezmény helyének igazítása** törlésnél és egyesítésnél (2.2) — ez teszi az
    azonos-azonosítós döntést teljessé. *Csak a hozzájuk tartozó végrehajtóval együtt van
    értelme.*
-3. ✅ **`Torles` és `Egyesites` végrehajtó** (2.6) — **KÉSZ (2026-09-07)**, és velük az
-   egyezmény helye is (2.), meg az árvák felkerülése (2.2/b). ⭐ Mind a négy művelethez van
+3. ✅ **`Torles` és `Egyesites` végrehajtó** (2.6) — **KÉSZ (2026-09-07)**, és velük a
+   szerkesztési egyezmény helye is (2.), meg az árvák felkerülése (2.2/b). ⭐ Mind a négy művelethez van
    **kézi út** is: `javaslat` · `torol` · `athelyez` · `egyesit`.
 4. **Különválás** (2.1) — a legnagyobb, és a legszebb; a 1–3. után áll össze, mert
    tudatpont- és érték javaslat-mozgatásra épül.

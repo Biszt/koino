@@ -54,7 +54,7 @@ jött. A „ki tartja X-et” kérdésnél viszont sok tartó van, és a kérdez
 - **(iii) A vállalt szeletek hirdetése (2.):** alapból ki van kapcsolva (0), a raj fedezi — elég kimondani a dokumentációban, hogy
   a DHT-n talált tartó bizonytalan, és az M3 (a)-hoz hasonló szűrés vonatkozzon rá is.
 
-## 5. Előbb a mérés (88. javaslat)
+## 5. Előbb a mérés (88. ajánlás)
 
 - **(a) sok hirdető egy témán:** a valódi DHT-n N = 1, 5, 20 kliens hirdeti ugyanazt a témát (külön portról); egy friss kereső hányszor
   és hány valódi hirdetőt kap vissza, és mennyi a zaj — ebből dől el, hogy a gyökér-darab és a kereső-régió BEP 5-ön maradhat-e;
@@ -69,7 +69,7 @@ jött. A „ki tartja X-et” kérdésnél viszont sok tartó van, és a kérdez
   a BEP 5 + az M3 (a) szűrője.
 - **BP3 — a hideg indulás:** (A) a mérés (88/a) dönti el: ha sok hirdetőnél megbízható, marad; ha nem, (ii)(b); (B) ⭐ mellette a
   meghívó is hozza az első tartókat (ii)(c) — olcsó, és a zárt koinoban a belépő úgyis a meghívóval kezd.
-- **BP4 — a sorrend a többi munkához képest:** a terepi próba (egy mobilnetes telefon) előtt vagy után? Javaslat: **után** — a terep
+- **BP4 — a sorrend a többi munkához képest:** a terepi próba (egy mobilnetes telefon) előtt vagy után? Ajánlás: **után** — a terep
   megmutatja, a belépő mennyire jut be az M5–M8-cal, és hogy a BEP 5 hiánya a gyakorlatban hol fáj.
 
 *Kapcsolódik:* `belepo_megtalalasa_atvizsgalas.md` (7–8.), `meres/eredmenyek.md` 58. (a BEP 5 a valódi DHT-n), 87. (a cetli

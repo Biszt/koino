@@ -62,7 +62,7 @@ gyermek ③ után magától jelenik meg.
 ## 4. A döntési pontok (Csabánál)
 
 - **CS1 — a család határa:** a közös gyökér (a születések lánca legfelső eleme) — egy családba tartozik minden koino, ami a
-  készüléken ebből a gyökérből ered (a testvérek is: két gyermek ugyanabból a szülőből). ⭐ Javaslat: így.
+  készüléken ebből a gyökérből ered (a testvérek is: két gyermek ugyanabból a szülőből). ⭐ Ajánlás: így.
 - **CS2 — a családi csere alakja:** (A) ⭐ egy munka egy társsal, a közös koinok SORBAN ugyanazon a résen · (B) koinonként
   külön munka ugyanazzal a társsal, egymás után (több kézfogás, több kopogás — egyszerűbb, drágább).
 - **CS3 — a gyermekek híre:** (a) a nyitásban (élő út) · (b) ⭐ a szülőben bejelentett születés (szelet — a csere és a kézi
@@ -89,11 +89,11 @@ gyermek ③ után magától jelenik meg.
 
 - **CS1:** a család a közös gyökérből eredő koinok (a testvérek is).
 - **CS2 (A):** egy társsal egy munka — a közös koinok cseréje sorban, ugyanazon a résen.
-- **CS3 — Csaba ötlete, a javaslatok helyett:** *„A gyermek születésének is egy entitásnak kéne lennie, amit a „feltöltő”
+- **CS3 — Csaba ötlete, az ajánlások helyett:** *„A gyermek születésének is egy entitásnak kéne lennie, amit a „feltöltő”
   hoz létre, űrlap kitöltése után, amit a főmenüből nyitott meg. Tudatpontot kell hogy rendeljen hozzá. Ezen a programverzió
   típusú kártyán, az egyik fülben ott kéne hogy legyen a teljes kód, hogy mindenki le tudja ellenőrizni.”* A pontosítások
-  (Csaba, mind a javaslat szerint): ⭐ **ez a [`kormanyzas.md`](kormanyzas.md) „koino-verzió entitása”** (a fában, a
-  gyökér-entitások fölött, tudatponttal, javaslattal, különválással — a forráskód-kormányzás 1–3. lépcsője ugyanazzal a
+  (Csaba, mind az ajánlás szerint): ⭐ **ez a [`kormanyzas.md`](kormanyzas.md) „koino-verzió entitása”** (a fában, a
+  gyökér-entitások fölött, tudatponttal, szerkesztési javaslattal, különválással — a forráskód-kormányzás 1–3. lépcsője ugyanazzal a
   gépezettel, a 4. a költözés); **minden gyermek ilyen kártyával születik** (a gyermek leírása: a neve, a szabályai, a
   programja); és **a kód köti a gyermeket** (a teljes program tartalom-címzett fájlokként a kártya fülén; a gyermek
   születése megnevezi a kód lenyomatát; a lap kimondja, ha a készülék más verziót futtat — nem tiltja, jelzi).
@@ -105,7 +105,7 @@ gyermek ③ után magától jelenik meg.
 - **Az entitás a szülőben:** a koino-verzió egy legfelső szintű entitás a szülő fájában (`GondolatLetrehozas`, `tipus:
   'KoinoVerzio'` — a kategória és a gondolattípus mintájára), a címe a gyermek neve, a szövege a leírása, és megnevezi a
   gyermeket (a születése azonosítója) és a kódot (a kód-csomag lenyomata). A feltöltő pontot rendel hozzá (D14 — enélkül
-  nincs), a többiek ugyanúgy, mint bármire; javaslat, különválás ugyanúgy. ⭐ **Ez a gyermek HÍRE** (a 2. (B)): a szülő
+  nincs), a többiek ugyanúgy, mint bármire; szerkesztési javaslat, különválás ugyanúgy. ⭐ **Ez a gyermek HÍRE** (a 2. (B)): a szülő
   rendes cseréje (a gyökér darabjai) és a kézi út viszi — a tér és a „Költözés…” ablak ebből tudja, hogy van gyermek, akkor is,
   ha a születése még nincs a készüléken (azt a családi csere hozza).
 - **A kód-csomag:** a teljes program (a `koino/` mappa, sorvég nélkül — a 6. szabály mércéje) egy jegyzékkel (útvonal →
@@ -517,7 +517,7 @@ a kártyát a telefonra vitte. 14:06-kor a telefon **a lapján beköltözött** 
 
 **⏸️ Még nyitott leletek (döntésre vagy mérésre — Csabával átbeszélendő):**
 1. A DHT-n a vakított témáinkon IDEGEN címek is jelentkeznek (egy kopogtató téma más hirdetője), és a kör percenként kopog rájuk
-   (~0,9 MB/nap) — javaslat: a rést soha nem nyitó cím negatív jegyzéke.
+   (~0,9 MB/nap) — ajánlás: a rést soha nem nyitó cím negatív jegyzéke.
 2. A jegyzetlen becenévvel (`KOINO_AZONOSITO`) a program csendben egy üres, régi alakú (szabad nevű) koinot indít — ki kell mondania.
 3. Egy ismeretlen koinonak szóló kérelmet a nyitott koino szolgál ki (vagy vesz át) — a `vonal.js` „régi út”-ja.
 4. A lap egy elavult entitásra (a böngésző tárolójából) örökös függő kérelmet írt, ami minden ismeretlen bekopogót kérelemre
@@ -536,7 +536,7 @@ a kártyát a telefonra vitte. 14:06-kor a telefon **a lapján beköltözött** 
    vesz fel kérelmet a család egy MÁSIK koinojának ismert entitására.
 10. **„⚠ más programverzió” minden frissítés után** — a gyermek a születése programjával (`42bfa68`) jött létre, a két gép a
    javítás után a `dfda545`-öt futtatja: a lap (mindkét gépen) igazat mond, de a KZ besorolását (az eredményt nem érintő javítás
-   egyszerű programfrissítés, nem költözés) nem tudja megkülönböztetni. Javaslat: a jelzés marad, de ne hibának hangozzék („ez a
+   egyszerű programfrissítés, nem költözés) nem tudja megkülönböztetni. Ajánlás: a jelzés marad, de ne hibának hangozzék („ez a
    készülék újabb programot futtat, mint amivel a koino született”), a kártyán magyarázattal; hogy egy változás a számítást
    érinti-e, azt a program nem tudja megbízhatóan eldönteni — a forráskód-kormányzás kérdése. ⏸️ Csabánál. ✅ **D123 ① (2026-11-06)
    zárja:** a koino a számítás MAGJÁT nevezi meg (a kép és a kapu import-zárványa), és a lap csak a mag eltérésére figyelmeztet

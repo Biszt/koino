@@ -36,7 +36,7 @@ társsal a közös vállalt szeletek várható száma nagyjából n²/S (n a vá
 szeletnél egymillió között ~0,09. ⛔ **A vállalt szeleteim tehát a kötés-társakkal szinte soha nem frissülnének** — a mai
 módban ez nem látszik, mert ott mindenki mindent egyeztet.
 
-## 4. A kérdések — javaslattal (D-szintűek, Csabáéi)
+## 4. A kérdések — ajánlással (D-szintűek, Csabáéi)
 
 **K1. Honnan tudja a két fél a KÖZÖS halmazt?** (hogy a nyitó lenyomat csak azon fusson — a 68. mérés szerint ettől
 függ, hogy a hétköznapi csere 0,7 KB vagy több tíz KB)
@@ -84,7 +84,7 @@ vállalás és a tár tömörítése (a részletek: a fázis-2 terv D97, „MEG�
 A részvétel a vállalásból (a töredék-részvétellel és a D96-tal), a törzs korlátja, a kérelem az átmenetiből és a
 kísérői, a visszavett vállalás és a tár tömörítése, a B2–B4 parancssor-próbái — az 1. pont szerint.
 
-## 6. A javasolt sorrend (ha a javaslatok szerint dől el)
+## 6. A javasolt sorrend (ha az ajánlások szerint dől el)
 
 1. **A közös halmaz** (K1/A) — mert nélküle a bekapcsolás minden cserét drágít (68. mérés); a mai módban is kipróbálható
    (a részvételi halmaz ma „minden”, a metszet így ma is pontos).
@@ -95,10 +95,10 @@ kísérői, a visszavett vállalás és a tár tömörítése, a B2–B4 parancs
 
 ## 7. ⭐ A RÉSZVÉTEL MŰSZAKI TERVE (a D97 keretén belül, 2026-10-08)
 
-1. **A részvételi halmaz (P)** a vállalásból: a pozitív pontú szeleteim (a javaslatok és a töredékek is), az
+1. **A részvételi halmaz (P)** a vállalásból: a pozitív pontú szeleteim (a szerkesztési és általános javaslatok és a töredékek is), az
    azonosság-szeletem; ⛔ a koino születésének SZELETE csak az alapítónál (D96); a két fokú vállalás összegzett (nagy)
    szelete nem; a töredék-részvétel (D85 T3): a töredék-szelet, amelyik érintettjét vállalom, és amelyik saját része
-   valamikor igent mondott — a javaslatok állapotából, a tár változata szerint gyorsítótárazva. A gyökér a darabjaival
+   valamikor igent mondott — a szerkesztési és általános javaslatok állapotából, a tár változata szerint gyorsítótárazva. A gyökér a darabjaival
    (B4) megy. A „mindent” beállítású készülék (D83/2) P-je „minden” — ő a mai módban cserél.
 2. **A koino születése mint ESEMÉNY (D96):** egy virtuális kulcs (mint a gyökér-darabé) mindenki részvételében, amelynek
    halmaza egyedül a `KoinoLetrehozas` (a bejelentései nélkül) — így mindenkihez eljut, a zárt koino nem tagjához is (a

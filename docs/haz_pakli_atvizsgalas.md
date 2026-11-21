@@ -44,7 +44,7 @@ egy oldalnyi, nem az egész (9. szabály).
 4. **Próbák**: a lekérdezés modul-próbái (szigorú (b) alatt is: ami nincs meg, azt kéri, és ami megjön, az látszik), és a
    bekötés parancssor-próbája (két készülék: az egyik „alap”, a lapon kért kártyák a másikból jönnek).
 
-## 4. A kérdések — javaslattal (D-szintűek, Csabáéi)
+## 4. A kérdések — ajánlással (D-szintűek, Csabáéi)
 
 **H1. Ki kérdez a hálózaton, amikor a lapon valami hiányzik?**
 

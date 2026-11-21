@@ -3,7 +3,7 @@
 *Létrehozva: 2026-09-07, Csaba kérésére: „elég összetett rendszer ez ahhoz, hogy készítsünk
 egy infografikus dokumentációt."*
 
-> **Mi ez a dokumentum?** A koino **döntés-gépezetének** képei: mi történik egy javaslattal
+> **Mi ez a dokumentum?** A koino **döntés-gépezetének** képei: mi történik egy szerkesztési javaslattal
 > a beadástól a végrehajtásig, mi lesz egy entitással, és mi lesz a tudatponttal.
 >
 > ⚠️ **Két külön része van, és a különbség fontos:**
@@ -30,7 +30,7 @@ három lépésben megy, és **a sorrend nem cserélhető fel**.
 flowchart LR
     E["aláírt események<br/>(esemenyek.jsonl)"] --> SZ["szabalyok.js<br/>MI SZÁMÍT?"]
     SZ --> F1["1. allapotSzamitas.js<br/>AZ ENTITÁSOK<br/>ahogy létrejöttek"]
-    F1 --> F2["2. javaslatSzamitas.js<br/>A DÖNTÉSEK<br/>és belőlük az EGYEZMÉNY"]
+    F1 --> F2["2. javaslatSzamitas.js<br/>A DÖNTÉSEK<br/>és belőlük a SZERKESZTÉSI VAGY ÁLTALÁNOS EGYEZMÉNY"]
     F2 --> F3["3. szerkesztesiVegrehajtas.js<br/>A RÁVEZETÉS<br/>az entitás mai alakja"]
     F3 --> A["ÁLLAPOT<br/>ezt látja a pakli és a parancssor"]
 ```
@@ -39,25 +39,25 @@ flowchart LR
 
 - a **döntéshez** kell az állapot — a küszöbök a tulajdonosok érték javaslatainak mediánja,
   a részvételi arány nevezője az aktív tulajdonosok köre;
-- az **entitás végleges alakjához** kell a döntés — az elfogadott egyezmény írja át a címet,
+- az **entitás végleges alakjához** kell a döntés — az elfogadott szerkesztési egyezmény írja át a címet,
   helyezi át, tünteti el vagy olvasztja be.
 
 ⭐ **A `koino.js` és a `pakli.js` UGYANEZT a hármat futtatja** — ezért mond ugyanazt a
 parancssor és a lap. *Ha a felület „javítaná ki" a címet, két igazság lenne.*
 
-⚠️ Ez a három fázis **egy valódi rést zárt be** (2026-09-06, mérve): a javaslat elfogadódott,
-az egyezmény megszületett — a gondolat címe mégis a régi maradt, mert a 3. fázis hiányzott.
+⚠️ Ez a három fázis **egy valódi rést zárt be** (2026-09-06, mérve): a szerkesztési javaslat elfogadódott,
+a szerkesztési egyezmény megszületett — a gondolat címe mégis a régi maradt, mert a 3. fázis hiányzott.
 
 ---
 
-## 2. A TÖREDÉK-MODELL — egy javaslat, N döntés, ÉS
+## 2. A TÖREDÉK-MODELL — egy szerkesztési javaslat, N döntés, ÉS
 
-Egy javaslat **több entitást is érinthet**, és ilyenkor **nem egy szavazás van**. A
+Egy szerkesztési javaslat **több entitást is érinthet**, és ilyenkor **nem egy szavazás van**. A
 prototípus töredékekre bontja; a koinoban ugyanez **számítás** (`reszekSzamitasa`).
 
 ```mermaid
 flowchart TD
-    J["JAVASLAT<br/>egy aláírt esemény<br/>erintettek: A, B"]
+    J["SZERKESZTÉSI JAVASLAT<br/>egy aláírt esemény<br/>erintettek: A, B"]
 
     J --> RA["RÉSZ: A gondolat<br/>saját szavazói kör<br/>saját küszöbök<br/>saját döntési idő"]
     J --> RB["RÉSZ: B gondolat<br/>saját szavazói kör<br/>saját küszöbök<br/>saját döntési idő"]
@@ -68,7 +68,7 @@ flowchart TD
     RA --> ES{"ÉS<br/>MINDEN rész<br/>teljesíti a SAJÁTJÁT?"}
     RB --> ES
 
-    ES -->|igen| EL["ELFOGADVA<br/>egy egyezmény"]
+    ES -->|igen| EL["ELFOGADVA<br/>egy szerkesztési egyezmény"]
     ES -->|nem| EV["ELVETVE<br/>az egész"]
 ```
 
@@ -79,9 +79,9 @@ flowchart TD
 | **A beadáshoz** metszet kell | *„tudatpont MINDEN érintett entitáson"* — enélkül egy egyesítést be lehetne adni úgy, hogy a másik gondolathoz semmi közöd |
 | **A szavazáshoz** nem | egy szavazat **abban a részben** számít, ahol a szavazónak van pontja; a többi rész **átugorva** |
 | **A lezárás közös** | a leghosszabb rész-döntési idő — a csoport egyben dől el |
-| **Az elfogadás ÉS** | egyetlen elbukó rész az egész javaslatot elveti |
+| **Az elfogadás ÉS** | egyetlen elbukó rész az egész szerkesztési javaslatot elveti |
 
-⭐ *Aki a gondolatot tartja, az dönt a sorsáról — akkor is, ha a javaslat egy másikat is
+⭐ *Aki a gondolatot tartja, az dönt a sorsáról — akkor is, ha a szerkesztési javaslat egy másikat is
 érint.*
 
 ---
@@ -92,8 +92,8 @@ flowchart TD
 stateDiagram-v2
     state "LÉTEZIK — van rajta tudatpont" as L
     state "ELFELEJTVE — magától, D14" as EF
-    state "TÖRÖLVE — törlési egyezmény" as TO
-    state "BEOLVADT — egyesítési egyezmény" as BE
+    state "TÖRÖLVE — szerkesztési egyezmény (törlés)" as TO
+    state "BEOLVADT — szerkesztési egyezmény (egyesítés)" as BE
 
     [*] --> L: létrehozás + tudatpont
     L --> L: Modositas vagy Athelyezes
@@ -140,8 +140,8 @@ flowchart TD
     G -->|"kézzel bármikor"| FEL
 ```
 
-**Miért van egyáltalán elakadás?** Mert a gondolat **törlődik** (az eltűnés számítás az
-egyezményből, minden készüléken ugyanaz), a pontot viszont csak a **gazdája** veheti le —
+**Miért van egyáltalán elakadás?** Mert a gondolat **törlődik** (az eltűnés számítás a
+szerkesztési egyezményből, minden készüléken ugyanaz), a pontot viszont csak a **gazdája** veheti le —
 a tudatpont-rendezés aláírt esemény, és senki nem írhat alá helyettem (D15).
 
 ⭐ **De a készülékem igen** — az az én kulcsom, az én gépem: nem más ír alá helyettem, hanem
@@ -167,7 +167,7 @@ flowchart LR
 mellett három nap alatt sem érkezik semmi, egy sűrűn cserélő mellett viszont öt perc alatt
 körbeér minden. A buli **azt méri, ami történik**: hogy beszéltem másokkal, és nem hoztak újat.
 
-⚠️ **A döntés jele** = az egyezmény + a lezárás ideje + **a szavazás állása**. Az utolsó tag
+⚠️ **A döntés jele** = a szerkesztési egyezmény + a lezárás ideje + **a szavazás állása**. Az utolsó tag
 egy próbából jött: egy késve érkező szavazat, ami a bizonyosságot nem mozdítja, **nem
 változtatja meg a lezárás idejét** — pedig épp azt jelzi, hogy még mindig érkeznek késői
 események. *Amit mérni akarunk, az nem a döntés stabilitása, hanem a CSEND.*
@@ -202,9 +202,9 @@ buli-szám csak **jel a hálózatról**. Ezért a terv megmondja, melyik alapjá
 
 ```mermaid
 flowchart TD
-    J["EGYESÍTÉSI javaslat<br/>A és B gondolat"] --> D{"elfogadva?"}
+    J["SZERKESZTÉSI javaslat (egyesítés)<br/>A és B gondolat"] --> D{"elfogadva?"}
     D -->|"nem"| X["marad minden"]
-    D -->|"igen"| GY["GYŐZTES = akinek a legnagyobb<br/>az ÁGAZATI tudatpontja<br/>az egyezmény születésekor"]
+    D -->|"igen"| GY["GYŐZTES = akinek a legnagyobb<br/>az ÁGAZATI tudatpontja<br/>a szerkesztési egyezmény születésekor"]
 
     GY --> V{"van RADIKÁLIS ellenző?<br/>(ellenez + külön ágat kér)"}
 
@@ -224,7 +224,7 @@ flowchart TD
     R -->|"nincs"| CSAK["csak a vesztes ágon van<br/>tartja az azonosítóját"]
     R -->|"van"| DUP{"DUPLÁZÓDIK<br/>melyik ág tartja<br/>az EREDETI azonosítót?"}
     DUP -->|"az erősebb oldal ITT"| ID["az kapja az eredetit<br/>a másik ág MÁSOLAT<br/>SZÁMÍTOTT azonosítóval"]
-    ID --> SZE["mindkét ág JEGYZI a szétválást:<br/>melyik egyezményből,<br/>és hol a testvér-ága"]
+    ID --> SZE["mindkét ág JEGYZI a szétválást:<br/>melyik szerkesztési egyezményből,<br/>és hol a testvér-ága"]
 ```
 
 ### ⭐ „A láncok tudnak ennyire rugalmasak lenni?" — igen, és megnéztem, miért
@@ -247,11 +247,11 @@ entitásra anélkül, hogy bárki láncát átírnánk — a láncod továbbra i
 
 1. **Az azonosító a TÖRTÉNETET is hozza.** Aki az eredeti azonosítót kapja, az örökli az
    összes már aláírt hivatkozást: a tudatpontokat, az érték javaslatokat, a rá mutató
-   gyerekeket, a róla szóló javaslatokat. A másolat **üresen indul**, és csak azt kapja, amit
+   gyerekeket, a róla szóló szerkesztési és általános javaslatokat. A másolat **üresen indul**, és csak azt kapja, amit
    a számítás kifejezetten átad neki.
 2. ⛔ **Az eredeti azonosító ELHOZHATÓ, a számított nem.** A `hozd <azonosító>` a társaktól
    kéri el az *eseményt* — az eredeti azonosítóhoz tartozik ilyen, a számítotthoz nem. A
-   másolathoz **a forrásokat és az egyezményt** kell elhozni, és utána kiszámolni. *A `hozd`-nak
+   másolathoz **a forrásokat és a szerkesztési egyezményt** kell elhozni, és utána kiszámolni. *A `hozd`-nak
    ezt meg kell tanulnia; ez nem akadály, hanem feladat.*
 
 ### ⭐⭐ És a kérdés, ami emiatt NEM technikai, hanem jelentésbeli
@@ -260,9 +260,9 @@ Ha valaki egy éve hivatkozott `X`-re, és ma `X` a **radikális ellenzők** vá
 akkor a régi hivatkozás némán az ellenvéleményhez visz — anélkül, hogy a hivatkozó bármit
 tett volna. Fordítva ugyanez igaz.
 
-⭐ **A javaslatom, ami mindkét utat biztonságossá teszi:** ne azon múljon a folytonosság,
+⭐ **Az ajánlásom, ami mindkét utat biztonságossá teszi:** ne azon múljon a folytonosság,
 hogy eltaláljuk, ki „érdemli" az azonosítót, hanem azon, hogy **a szétválás LÁTSZIK**. Mindkét
-ág jegyezze, hogy szétválásból származik: **melyik egyezményből**, és **hol a testvér-ága**.
+ág jegyezze, hogy szétválásból származik: **melyik szerkesztési egyezményből**, és **hol a testvér-ága**.
 Akkor a régi hivatkozás odaér, és ott azt látja: *„ez a szétválás egyik ága, a másik itt van."*
 Ugyanaz a minta, mint a `kihagyottak` listánál: **bejelent, nem hallgat** (D19).
 
@@ -305,7 +305,7 @@ levelein nem más.
   előforduló **KÜLÖNBÖZŐ emberek száma** — pontosan az „ágazati tudatpont" megfelelője, csak
   pont helyett fővel. *(Ez az én olvasatom; ha az entitásra magára gondoltál, az egyszerűbb.)*
 
-⏸️ **Holtverseny**: ha a két oldal egyenlő, kell egy döntő. Javaslat: az azonosító szerint
+⏸️ **Holtverseny**: ha a két oldal egyenlő, kell egy döntő. Ajánlás: az azonosító szerint
 kisebb kapja az eredetit — ugyanaz a mintázat, mint az elágazás-feloldásnál. *Determinisztikus,
 és nem jutalmaz senkit.*
 
@@ -316,13 +316,13 @@ kisebb kapja az eredetit — ugyanaz a mintázat, mint az elágazás-feloldásn�
 ### A három döntés, amit ez a kép rögzít (Csaba, 2026-09-07)
 
 1. **A győztes az ágazati (hierarchikus) tudatpont szerint dől el** — nem a felsorolás
-   sorrendje szerint —, és **az egyezmény születésének pillanatában** érvényes érték számít
+   sorrendje szerint —, és **a szerkesztési egyezmény születésének pillanatában** érvényes érték számít
    (minden gépen ugyanaz, és később nem mozdul).
 2. **A „radikális ellenző" = aki ellenzett ÉS külön ágat kért.** Ez a prototípus
    `kulonvalasIgeny` mezője: szavazáskor kérdezik meg, *„ha a döntés nem a te álláspontodat
    követi, kérsz-e külön ágat?"* — tartózkodásnál a kérdés meg sem jelenik. ⚠️ Ehhez a
    `Szavazat` eseménynek **új mezőt kell kapnia**.
-3. **A másolat azonosítója SZÁMÍTOTT** — az eredetiéből és az egyezményéből származik.
+3. **A másolat azonosítója SZÁMÍTOTT** — az eredetiéből és a szerkesztési egyezményéből származik.
 
 ### ⭐ És amivel ez a harmadik pont NEM megy szembe
 
@@ -340,8 +340,8 @@ egyszersmind egy *esemény* azonosítója is. A javasolt kimondás:
 **Két helyen van gyakorlati következménye, és mindkettőre van válasz:**
 
 - az `allapotSzamitas.js` ma az entitás azonosítójával keresi meg a **létrehozó eseményt** —
-  a másolatnál nincs ilyen, tehát a másolatot a végrehajtás **állítja elő** (ahogy az
-  egyezményt is);
+  a másolatnál nincs ilyen, tehát a másolatot a végrehajtás **állítja elő** (ahogy a
+  szerkesztési egyezményt is);
 - a `hozd <azonosító>` böngésző-lekérés ma a **társaktól kéri el** az eseményt — egy
   számított azonosítóra ez nem működik, viszont nem is kell: aki a forrás-eseményeket
   ismeri, az **kiszámolja**. A `hozd`-nak ezt tudnia kell.
@@ -384,7 +384,7 @@ ezért írjuk le, ne csússzon be észrevétlenül.*
 > Felmerült, hogy *„az értékjavaslatokkal bármelyik entitást statikussá lehet tenni"* —
 > **a kód szerint nem.** A küszöb a tulajdonosok érték javaslatainak **mediánja**, minden
 > számításnál újra (`javaslatSzamitas.js`, `kuszobokItt`), és az `ErtekJavaslat` **nem
-> javaslat**: nincs mögötte szavazás, küszöb vagy döntési idő. Vagyis a 67%-os küszöb
+> szerkesztési vagy általános javaslat**: nincs mögötte szavazás, küszöb vagy döntési idő. Vagyis a 67%-os küszöb
 > **felállításához** semmi nem kell, és a **visszavételéhez sem** — elég, ha a medián
 > arrébb csúszik. ⛔ Sőt: a küszöb választóköre **önmagát választja**, mert a `kuszobokItt`
 > azokat veszi be, akiknek van tudatpontjuk az entitáson — tudatpontot pedig **bárki tehet
@@ -396,7 +396,7 @@ ezért írjuk le, ne csússzon be észrevétlenül.*
 > ⚠️ **És amiért a pénzhez az alkotmány NEM is lett volna jó eszköz:** a **D27/6** a
 > D64-ben is áll — *az alkotmány szövegéből semmi nem következik automatikusan*. Egy
 > „alkotmány a pénzről" nem korlátozta volna a pénz-kiállítást, csak **látszott** volna
-> mellette. A helyes eszköz ott a **kötött mezőkészletű javaslat**, amit a **számítás**
+> mellette. A helyes eszköz ott a **kötött mezőkészletű szerkesztési javaslat**, amit a **számítás**
 > tud ellenőrizni (Csaba: *„nem olyan szabad formában, hanem megírt forma szerint, amiben
 > az értékeket kell meghatároznia"*) — erre a `KATEGORIA_KORLAT` a precedens: a korlát a
 > **számításban** van, nem a mediánban.
@@ -516,7 +516,7 @@ következménye, nem külön döntés.
 
 ```mermaid
 flowchart TD
-    A["ALKOTMÁNY<br/>egy mély gondolat alatt"] --> AJ["ÁTHELYEZÉSI javaslat<br/>alkotmány-státuszban 2/3<br/>javaslat-státuszban 51 százalék"]
+    A["ALKOTMÁNY<br/>egy mély gondolat alatt"] --> AJ["SZERKESZTÉSI javaslat (áthelyezés)<br/>alkotmány-státuszban 2/3<br/>javaslat-státuszban 51 százalék"]
     AJ --> UJ["ÚJ SZÜLŐ<br/>akár a gyökér"]
     UJ --> NEV["a NEVEZŐ kicserélődik:<br/>az új szülő tulajdonosai"]
     NEV --> KOV{"a régi támogatók közül<br/>hányan tulajdonosok ITT?"}
@@ -579,10 +579,10 @@ Ez a lista a legfőbb érv mellette — **több gépezetet vesz el, mint amennyi
   határidős marad, **egy gépezetben két mérce lesz**. *Ez a legnehezebb nyitott pont.*
 - **Mi ér véget egy alkotmányi javaslattal, amit senki nem akar?** A korábbi „>1/3 ellenzés →
   eltűnik" szabály a B) pont után **tárgytalan** (az ellenzés nem szerepel a számításban).
-  ⭐ Javaslat: **a D14** — ha senki nem tart rajta tudatpontot, elfelejtődik. Nem kell hozzá új
+  ⭐ Ajánlás: **a D14** — ha senki nem tart rajta tudatpontot, elfelejtődik. Nem kell hozzá új
   szabály, és **nem termel elakadt pontot** (amit lezárás híján nem is tudnánk bizonyítékkal
   felszabadítani).
-- **Ha áthelyezés után visszaesik javaslatba, a helye is visszaugrik?** Javaslat: **nem** —
+- **Ha áthelyezés után visszaesik alkotmányi javaslatba, a helye is visszaugrik?** Ajánlás: **nem** —
   marad, ahova vitték, csak a státusza esett vissza. *Egy eseménynek egy következménye legyen.*
 - **A kör dönt, de mire vonatkozik az alkotmány?** Ha csak a szülő saját tulajdonosai
   szavaznak, a leszármazottak tulajdonosaira is szól-e. *(A D27/6 szerint semmi nem következik

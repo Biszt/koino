@@ -1,6 +1,6 @@
 # A program rétegei szerinti verziók — átvizsgálás (2026-11-05, kód nélkül)
 
-> **Állapot:** ✅ **D123** (Csaba, 2026-11-06: *„Mindet elfogadom”* — PR1–PR7 a javaslat szerint, a 4. szakasz ⭐ jelű válaszai). 🚧
+> **Állapot:** ✅ **D123** (Csaba, 2026-11-06: *„Mindet elfogadom”* — PR1–PR7 az ajánlás szerint, a 4. szakasz ⭐ jelű válaszai). 🚧
 > Az építés: ✅ ① PR1–PR3 (a 6. szakasz) → ✅ ② PR7 (a 7. szakasz) → ✅ ③ PR6 (D124 — `protokoll_valtozat_atvizsgalas.md`) →
 > ✅ ④ PR5 (D125 — `kartya_telepites_atvizsgalas.md`; építve, ⏭️ a terepi próba) → ✅ ⑤ PR4 (D126 — `nezetek_atvizsgalas.md`,
 > 92. mérés; építve, ⏭️ a terepi próba). ✅ **A D123 sorrendje végigment.**
@@ -42,7 +42,7 @@ A gond tehát nem az elv, hanem hogy **a program ma nem rétegzett**: egyetlen c
 - **A protokoll-törésre nincs szabály** (KZ5). A fejlesztés közben „tiszta törésekkel” mentünk (`REGI-PROTOKOLL`), a telefont pedig
   a terepkor frissítettük.
 
-## 3. A rétegek — javaslat
+## 3. A rétegek — ajánlás
 
 - **R1 — a számítás magja:** a koino képe és a kapu (a fenti 17 fájl). Egy koino-n belül **mindenkinél azonos** kell legyen →
   a változása költözés (D118). Ezt nevezze meg a gyermek születése.
@@ -66,7 +66,7 @@ A gond tehát nem az elv, hanem hogy **a program ma nem rétegzett**: egyetlen c
 - **PR3 — Mit mondjon a lap az eltérésről?** (A) ⭐ **két szint:** a mag eltérése piros („más számítás — ebben a koinoban mást
   látnál, mint a többiek”), a többi réteg eltérése csak tájékoztatás („újabb felület érhető el”); (B) csak a mag eltérését mondja.
 - **PR4 — A közösség feltöltött nézetei (felület-bővítmények).** Egy nézet a te kulcsoddal futna: a lap a helyi kapun át pontot
-  tehet, javaslatot írhat, szavazhat a nevedben. A koinot nem veszélyezteti (a számítás nem változik), téged igen. (A) nincs ilyen,
+  tehet, szerkesztési vagy általános javaslatot írhat, szavazhat a nevedben. A koinot nem veszélyezteti (a számítás nem változik), téged igen. (A) nincs ilyen,
   a felület a programmal jön (ma); (B) ⭐ **olvasó nézetek elsőként:** egy nézet egy kártya (mint a koino-verzió kártya — a kódja
   rajta, a pont rá a közösség jelzése), a lap elszigetelten futtatja (külön keretben, a kapu csak olvasó végpontokat ad neki), és te
   kapcsolod be a saját készülékeden; (C) cselekvő nézetek is, műveletenkénti megerősítéssel (egy nézet „kér”, a lap a saját

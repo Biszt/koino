@@ -15,7 +15,7 @@
 átmásolunk az új koino verzióba. És ezt nem automatikusan, hanem az e-ember utasítására.”*
 
 **A költözés helye a kormányzásban** (Csaba kérdése: *„a költözés a forráskód-kormányzás, vagy csak annak a része?”*): a
-[`kormanyzas.md`](kormanyzas.md) öt lépcsőjéből (javaslat · értékelés · döntés · bevezetés · sürgősségi út) a **negyedik**, a
+[`kormanyzas.md`](kormanyzas.md) öt lépcsőjéből (szerkesztési javaslat · értékelés · döntés · bevezetés · sürgősségi út) a **negyedik**, a
 bevezetés — ott eredetileg a D9 önfrissítése állt, ezt a D66 vetette el. ⭐ És a D66 óta a **súlypontja** is: elosztott
 rendszerben senki nem kényszeríthet senkit az elfogadott kód futtatására, ezért a kódról szóló szavazás legfeljebb jelzés (⛔ elavult —
 Csaba, 2026-11-08: *„nem kell szavazás a kódról.”*), a
@@ -36,7 +36,7 @@ kíván költözést — 4.1).
    utána csak az új koino meghívásai számítanak. ⚠️ *A kérdés két része („és a tanúsítások is?”) közül a másodikat — amit
    Csaba a D25-nél nyitva hagyott — az „elfogadom mind” szerint IGEN-nek vettük: a 2. lépcső (tanúsítások, felhatalmazások)
    is a vágáskori állapotból öröklődik, ugyanígy. Ha nem így gondolta, ez az egy pont visszanyitandó.*
-4. **A vágáskor nyitott javaslatok a költözőkkel folytatódnak** az új koinoban (a szavazatukkal, az új szabályokkal).
+4. **A vágáskor nyitott szerkesztési és általános javaslatok a költözőkkel folytatódnak** az új koinoban (a szavazatukkal, az új szabályokkal).
 5. **A zártság öröklődik:** zárt szülőnek csak zárt gyermeke lehet (a nyílt szülő gyermeke lehet zárt).
 6. **A költözés két esemény:** **kiköltözés** a szülőben (a saját azonosság-szeletemben: hova mentem) és **beköltözés** az
    újban (ez köti meg a láncomat, és megnevezi a kiköltözést); a kiköltözés már most, pénz nélkül is — ebből tudja meg a
@@ -135,7 +135,7 @@ ugyanazt számolják). Ettől:
   gyermek születésének ideje.** Egy gyermeknek egy szülője van (koinok egyesítése nem cél); egy szülőnek több gyermeke is
   lehet, és egy e-ember több gyermekbe is költözhet (D13: „mindkét ágon létezik”).
 - **A zártság öröklődik** (D118/5): zárt szülő gyermekének a születése csak zárt lehet — a kapu a nyíltat elveti.
-- **Ki hozhat létre gyermeket?** — ⏸️ KZ2 (javaslat: aki a vágáskor a szülő tagja).
+- **Ki hozhat létre gyermeket?** — ⏸️ KZ2 (ajánlás: aki a vágáskor a szülő tagja).
 - ⭐ **Az alapító nem kap hatalmat:** a gyermek tagsága a szülőé (4.6) — a gyermek létrehozója maga is örökölt tag, nem a
   fa gyökere. *(A szülő alapítója marad a gyökér a múlt rétegében; a jelenben a fa a költözőkkel és az új meghívásokkal
   él.)*
@@ -150,7 +150,7 @@ helyre, mert mostantól érvényességi kérdés. Egy esemény akkor tartozik eg
 - egy költöző **kiköltözése**, amit a saját beköltözése megnevez (ez a vágás utáni, mégis kell — 4.5).
 
 Minden más ős-esemény (a szülő vágás utáni jelene) kívül marad. ⚠️ **A vágást a szerzők órája jelöli ki** (globális óra
-nincs) — ugyanakkora bizalom, mint amivel a szülő a saját lezárásait számolja (`javaslatSzamitas.js`: a lezárás a javaslat
+nincs) — ugyanakkora bizalom, mint amivel a szülő a saját lezárásait számolja (`javaslatSzamitas.js`: a lezárás a szerkesztési vagy általános javaslat
 `ido`-jából, a szavazat a saját `ido`-ja szerint). A költözőknél viszont óra nem kell (a beköltözés a lánc egy pontját
 nevezi meg), a nem költözők tartalmánál a visszadátumozás ártalmatlan (súly nélkül a D14 elfelejti), a lezárt döntéseknél
 pedig a szülő számítása dönt — egy visszadátumozott szavazat a szülőben is ugyanúgy fordítana. A szigorítás (az összegzés)
@@ -163,8 +163,8 @@ elhalasztva.
   és 2. lépcső. Rekurzív: a szülő múltja a nagyszülőre épül — a mélysége a nemzedékek száma, a terhe egy szeleten belül
   marad (⏸️ 6. szakasz, M2).
 - **A jelen rétege:** a költözők súlya (az átvett láncuk + a gyermekben írt eseményeik) és az új tagok, **a gyermek
-  szabályaival** — a pontok (a D14 itt ítél), a nyitott javaslatok folytatása (D118/4: a költözők szavazatával, a gyermek
-  küszöbeivel), az új javaslatok, meghívások.
+  szabályaival** — a pontok (a D14 itt ítél), a nyitott szerkesztési és általános javaslatok folytatása (D118/4: a költözők szavazatával, a gyermek
+  küszöbeivel), az új szerkesztési és általános javaslatok, meghívások.
 - ⭐ Ugyanaz a kód fut mindkét rétegben, más paraméterekkel. Csak a ritka **számítás-változásnál** kell az új programnak a
   régi számítást megtartania.
 
@@ -208,22 +208,22 @@ A kiköltözés a kivezetés helye: a pénznél majd kimondja az összeget, a sz
 költhető, a beköltözés erre hivatkozva kapja meg az újban. ⛔ A D66/6 korlátja áll (a szülő programjának kell betartania).
 Most csak a két fél szerkezete épül; a pénz mezői később hozzáadhatók, mert egyetlen meglévő eseményt sem érintenek.
 
-## 5. A kérdések — ✅ eldőltek (Csaba, 2026-10-24: *„miden javaslatodat elfogadom, kezdheted az elsővel”* — mind a javaslat szerint)
+## 5. A kérdések — ✅ eldőltek (Csaba, 2026-10-24: *„miden javaslatodat elfogadom, kezdheted az elsővel”* — mind az ajánlás szerint)
 
-- **KZ1 — a paraméterek besorolása** (4.1 (a)–(e)). Javaslat: ahogy fent; a (b)-nél a medián bekötése külön lépés.
-- **KZ2 — ki hozhat létre gyermeket?** (A) aki a vágáskor a szülő tagja — ⭐ javaslat: ő ismeri a szülő múltját, és a
+- **KZ1 — a paraméterek besorolása** (4.1 (a)–(e)). Ajánlás: ahogy fent; a (b)-nél a medián bekötése külön lépés.
+- **KZ2 — ki hozhat létre gyermeket?** (A) aki a vágáskor a szülő tagja — ⭐ ajánlás: ő ismeri a szülő múltját, és a
   családfát nem szemetelheti tele egy kívülálló; ha nem tag, a születése önálló új koino, szülő nélkül. (B) bárki (D13:
   „bárki indíthat”) — az alapító úgysem kap hatalmat, de a belépő térben bárki „gyermeket” mutathatna bármely koinonak.
 - **KZ3 — ha a hozott pontok nem férnek a gyermek keretébe** (kisebb `TUDATPONT_KERET`). (A) a beköltöző maga választ:
-  elhagyni lehet, növelni nem, és a program felajánlja, mit hagyjon el — ⭐ javaslat („az e-ember utasítására”). (B)
+  elhagyni lehet, növelni nem, és a program felajánlja, mit hagyjon el — ⭐ ajánlás („az e-ember utasítására”). (B)
   arányosan csökken — ehhez új számítás kellene, és nem az ő döntése. (C) a beköltözés érvénytelen, amíg nem fér.
 - **KZ4 — a hibajavítás, ami egy számítás eredményét változtatja** (amilyen a 133. elágazás össz-pontos javítása volt).
-  (A) mindig költözés — ⭐ javaslat: ez következik a D118/2-ből és a 9. szabályból (különben a régi és az új program
+  (A) mindig költözés — ⭐ ajánlás: ez következik a D118/2-ből és a 9. szabályból (különben a régi és az új program
   ugyanabból más állapotot számol — a 15. mérés néma kettéhasadása); az ára, hogy egy élő koinoban minden ilyen javítás
   költözés — ezért a javításokat érdemes gyűjteni, és a költözés olcsó (egy aláírás fejenként). (B) programfrissítés,
   kimondott eltéréssel — amíg mindenki frissít, a koino kettéhasadva számol. (C) a születés egy „számítás-változatot” is
   megnevez, amit a koino-n belül lehet emelni — ez visszahozná a D9-et (ki emeli?), ezért nem javaslom.
-- **KZ5 — a protokoll-törés szabálya.** Javaslat: nem a költözés része — a költözés után külön átvizsgálás (pl. az új
+- **KZ5 — a protokoll-törés szabálya.** Ajánlás: nem a költözés része — a költözés után külön átvizsgálás (pl. az új
   program egy ideig a régi protokollt is beszéli).
 
 ## 6. Mérések — az építés előtt és közben
@@ -344,11 +344,11 @@ ezt EGY függvénybe foglalja (a koino képe), ami a koino-szabály (②b) szeri
   vágás pillanatára számolva (és az ős saját múltjával, rekurzívan). Ebből a gyermekbe a **lezárt döntések** kerülnek át,
   rögzítve (elfogadva / elvetve, az egyezménnyel — mindenki szavazatával, a szülő küszöbeivel; D118/3: nem fordulhatnak
   meg). ⚠️ A hiányos tudás ugyanaz, mint ma (D85 T3): ami nem ismert, az `nemIsmert`.
-- **A jelen rétege:** a gyermek eseményei, és az ősökéből a **szerkezet** — a létrehozások (gondolat, kategória, javaslat
+- **A jelen rétege:** a gyermek eseményei, és az ősökéből a **szerkezet** — a létrehozások (gondolat, kategória, szerkesztési vagy általános javaslat
   mint entitás) — mindenkié; a **súly** (pont, szavazat, érték javaslat, állásfoglalás) az ősökéből CSAK a költözőké, a
   lánc-pontjukig (D118/1: súlyt csak a költöző hoz). A gyermek szabályaival; a D14 itt ítél (amire egyetlen költöző sem
   tett pontot, az a gyermekben nem él — a múltja attól még a tárban van, és egy pont visszahozza).
-- **A végrehajtás:** a múlt rögzített és a jelen elfogadott egyezményei egy sorban (a lejárat szerint), ugyanazzal a kóddal
+- **A végrehajtás:** a múlt rögzített és a jelen elfogadott szerkesztési egyezményei egy sorban (a lejárat szerint), ugyanazzal a kóddal
   — így az entitások a vágáskori alakjukat kapják, és a jelen változásai arra épülnek.
 - **A költözők** a ③-ban paraméter (`koltozok`: szerző → lánc-pont; a létrehozóé a születéséből); a beköltözés eseménye,
   a hozott kiosztás (KZ3) és a tagság öröklése a ④ — ezért a ③ modul-próbákkal mérhető, a teljes út (parancssor) a ④-gyel.
@@ -356,13 +356,13 @@ ezt EGY függvénybe foglalja (a koino képe), ami a koino-szabály (②b) szeri
   76. mérés); a múlt nem változik, csak bővül (a csere hozza a késve érkezőt) → a talaj gyorsítótárban, a múlt
   változata szerint. A 83. mérés a megépült kódon méri (a teljes képet nemzedékenként).
 
-✅ **KZ6 (Csaba, 2026-10-24: *„elfogadom a javaslataidat”* — az (A)): a vágáskor NYITOTT javaslat, amit NEM költöző tett.** A javaslattétel ma is súly (a nem tag
-javaslata nem számít — D93/1), és a D118/1 szerint súlyt csak a költöző hoz; a D118/4 szerint viszont „a nyitott
-javaslatok a költözőkkel folytatódnak”. (A) ⭐ javaslat: **nem folytatódik** — a nyitott ügy azé, aki beadta; ha nem jött
-át, a javaslata a szülőben dől el (ott a múlt része marad), és ha egy költöző fontosnak tartja, a gyermekben újra beadja
-(egy esemény). Ez következik a D118/1-ből, és nem kell külön szabály. (B) folytatódik: a javaslat a vágáskori tagságával
-számít, a költözők szavaznak róla — a gyermekben egy olyan ember javaslata dőlne el, aki ott nincs jelen (a D118/1 kivétele
-kellene hozzá). A költözők nyitott javaslatai mindkét esetben folytatódnak, a szavazataikkal és a gyermek küszöbeivel.
+✅ **KZ6 (Csaba, 2026-10-24: *„elfogadom a javaslataidat”* — az (A)): a vágáskor NYITOTT szerkesztési vagy általános javaslat, amit NEM költöző tett.** A javaslattétel ma is súly (a nem tag
+szerkesztési vagy általános javaslata nem számít — D93/1), és a D118/1 szerint súlyt csak a költöző hoz; a D118/4 szerint viszont „a nyitott
+szerkesztési és általános javaslatok a költözőkkel folytatódnak”. (A) ⭐ ajánlás: **nem folytatódik** — a nyitott ügy azé, aki beadta; ha nem jött
+át, a szerkesztési vagy általános javaslata a szülőben dől el (ott a múlt része marad), és ha egy költöző fontosnak tartja, a gyermekben újra beadja
+(egy esemény). Ez következik a D118/1-ből, és nem kell külön szabály. (B) folytatódik: a szerkesztési vagy általános javaslat a vágáskori tagságával
+számít, a költözők szavaznak róla — a gyermekben egy olyan ember szerkesztési vagy általános javaslata dőlne el, aki ott nincs jelen (a D118/1 kivétele
+kellene hozzá). A költözők nyitott szerkesztési vagy általános javaslatai mindkét esetben folytatódnak, a szavazataikkal és a gyermek küszöbeivel.
 
 ## 10. A ④ építési alakja — a ki- és a beköltözés (2026-10-24)
 

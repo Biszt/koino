@@ -2,7 +2,7 @@
 
 *2026-10-03 · a végleges sor ④ lépése · a skálázási terv S10 (előbb irodalmi átvizsgálás) és SK7 (hash-DHT, bizalmi
 háló vagy középút) pontja. Ez a dokumentum a DÖNTÉS ELŐTTI átvizsgálás: a követelmények, a terep valósága, az
-irodalom, a jelöltek, egy javaslat, és a mérések, amik a döntés után az építést megalapozzák.*
+irodalom, a jelöltek, egy ajánlás, és a mérések, amik a döntés után az építést megalapozzák.*
 
 > *„a meta adatok, amik megmutatják, hogy mi kinél található, azt több helyen kell tárolni, és biztosítani, hogy
 > az egész hálózat tudja, vagy tudja azt, hogy ki tudhatja."* — Csaba, 2026-10-01 (D84/2)
@@ -75,7 +75,7 @@ háló nem a miénk (a 2. szabály szerint ezért cserélhető és elhagyható k
 
 **C4 — KÖZÉPÚT (5.3):** a társak a bizalmi hálóból, a kiosztás hash szerint — a C2 az E-ből vett azonosítókkal.
 
-## 5. A javaslat
+## 5. Az ajánlás
 
 ⭐ **A „mi kinél van” FŐ ÚTJA a C1 (a fa és a raj)** — mert a koino fája maga az útvonal-gráf (4.2), a hirdetés a
 cserén belül marad (a zárt koino is biztonságban), és a terhe a saját vállalással nő. ⭐ **A hash-elhelyezés CSAK két

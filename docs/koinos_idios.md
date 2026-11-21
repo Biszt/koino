@@ -151,7 +151,7 @@ szabadidő —, az itt gyakorlatilag nulla.
 
 **De legyünk pontosak: az ár nem tűnt el, csak valutát váltott.** Utazás helyett
 ma figyelem, idő, kitartás és digitális jártasság kell. Aki heti órákat tud a
-tudatpontjaira és a javaslatokra fordítani, jobban alakítja a közös napirendet,
+tudatpontjaira és a szerkesztési és általános javaslatokra fordítani, jobban alakítja a közös napirendet,
 mint aki heti perceket. Ez is szűrő — csak nagyságrendekkel olcsóbb, és sokkal
 egyenletesebben oszlik el, mint a földbirtok.
 
@@ -159,7 +159,7 @@ egyenletesebben oszlik el, mint a földbirtok.
 
 A **tudatpont** a modern megfelelője annak, hogy megjelensz a gyűlésen: azt
 mutatja meg, mi fontos neked, mire fordítod az odafigyelésedet. És mint a
-gyűlésen való megjelenés, ez is kaput nyit — javaslatot csak arra a gondolatra
+gyűlésen való megjelenés, ez is kaput nyit — szerkesztési javaslatot csak arra a gondolatra
 tehetsz, ahová tudatpontot rendeltél.
 
 De itt jön a két különbség, ami az egészet eldönti:

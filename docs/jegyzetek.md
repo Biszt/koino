@@ -108,7 +108,7 @@ NEM akarunk azonnal megcsinálni, de elveszíteni sem.
   passzívak is beleszámolódnak"*, ott a hallgatás **NEM**-et jelent. Globálisan viszont a
   passzivitás **kilépés a nevezőből**. A kettő megfér egymás mellett, de **ki kell
   mondani, melyik hol érvényes** — különben két mérce lesz egy gépezetben.
-  ⭐ **Egy javaslat hozzá, a koino meglévő gépezetéből:** a globális nevezőnél a néma
+  ⭐ **Egy ajánlás hozzá, a koino meglévő gépezetéből:** a globális nevezőnél a néma
   készülék ugyanaz a probléma, mint a felszabadításnál — és ott **már megoldottuk**
   (`allapot.lancVegek`: aki évek óta nem írt alá semmit, arról nem állítunk semmit).
   Vagyis a globális nevező lehetne: *tag ÉS nem nyilvánította magát passzívvá ebben a
@@ -225,8 +225,8 @@ NEM akarunk azonnal megcsinálni, de elveszíteni sem.
   pre-hook check törölve); a template `*` helyett „(opcionális)".
   → **VISSZAVONVA (2026-07-14, Csaba kérése):** az indoklás ismét KÖTELEZŐ, de
   MINIMUM karakterszám NÉLKÜL (nem lehet üres, de 1 karakter is elég). Ok: az
-  `egyezmeny.indoklas` kötelező, így az opcionális javaslat-indoklás elfogadáskor
-  egyezmény-hibát okozott. `javaslat` modell `required:true`; `javaslatService`
+  `egyezmeny.indoklas` kötelező, így a szerkesztési javaslat opcionális indoklása elfogadáskor
+  a szerkesztési egyezményben hibát okozott. `javaslat` modell `required:true`; `javaslatService`
   `indoklasUres()` + dobás; `JavaslatModal._indoklasUres` + `_validalas`; template
   „(opcionális)" → „*". Curl-igazolt.
 
@@ -258,7 +258,7 @@ NEM akarunk azonnal megcsinálni, de elveszíteni sem.
   `gondolatRepository` (`findAll` + `findBySzuloId` szűrés/param), `gondolatController`
   (query-param), `tools/teszt.js`. Frontend: `gondolatModal.html` (legördülő),
   `GondolatModal.js` (kiolvasás/kitöltés), `JavaslatModal.js` (egyesítés
-  `statusz:'Lathato'`). A **javaslat** statusz-a (Aktiv/…) érintetlen.
+  `statusz:'Lathato'`). A **szerkesztési javaslat** statusz-a (Aktiv/…) érintetlen.
 
 - 🆕 „[fejlécnek, mutatnia kéne majd az eember, saját tudatpontját is, az
   entitáson, ha van neki rajta]"

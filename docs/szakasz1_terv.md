@@ -20,13 +20,13 @@
 > | szerkesztési javaslat | folyamatban, döntési idő **168 óra** |
 > | egy támogató szavazat | bizonyosság 100% → a döntési idő **24 órára rövidült** |
 > | idő +3 nap | **ELFOGADVA** |
-> | **egyezmény** | megszületett, a pillanatképpel |
+> | **szerkesztési egyezmény** | megszületett, a pillanatképpel |
 >
 > A **döntési idő 168 → 24 óra rövidülése** a bizonyossági mutató (D4) működése élőben:
 > minél egyértelműbb az eredmény, annál hamarabb zárul a döntés.
 
 **Épít:** egy működő koinot **egyetlen készüléken, hálózat nélkül**. A végén egy ember
-gondolatot hoz létre, tudatpontot rendez, javaslatot tesz, szavaz — és az egyezmény
+gondolatot hoz létre, tudatpontot rendez, szerkesztési javaslatot tesz, szavaz — és a szerkesztési egyezmény
 megszületik. **Minden művelet aláírva**, az adat a készüléken.
 
 **Nem épít:** hálózatot. Két készülék még nem talál egymásra — az a Szakasz 2.
@@ -35,7 +35,7 @@ megszületik. **Minden művelet aláírva**, az adat a készüléken.
 
 | Ami kimarad | Miért |
 |---|---|
-| **Az elfogadott szerkesztési javaslat VÉGREHAJTÁSA** (a cím tényleg megváltozzon) | A szakasz vizsgája az volt, hogy **az egyezmény megszülessen** aláírt eseményekből — nem az, hogy a koino végre is hajtsa. A D27 szerinti végrehajtás külön lépés: ahhoz a javaslat-számítás eredményének **vissza kell hatnia** az entitásra, ami új szerkezet, nem új szabály. |
+| **Az elfogadott szerkesztési javaslat VÉGREHAJTÁSA** (a cím tényleg megváltozzon) | A szakasz vizsgája az volt, hogy **a szerkesztési egyezmény megszülessen** aláírt eseményekből — nem az, hogy a koino végre is hajtsa. A D27 szerinti végrehajtás külön lépés: ahhoz a javaslat-számítás eredményének **vissza kell hatnia** az entitásra, ami új szerkezet, nem új szabály. |
 | **Az érték javaslat felülete** | A küszöb-medián (D4) számítása kész és próbázott, de a fejlesztői nézetből nem hívható — a kártyák ezért „alapértelmezett" küszöböt mutatnak. |
 | ~~**A szabályok kikényszerítése a SZÁMÍTÁSBAN**~~ | ✅ **Megépült** (2026-08-28, Csaba döntése: még a hálózat előtt) — lásd a 9. szakaszt. |
 
@@ -77,7 +77,7 @@ objektumait (lásd a fázis 2 terv „A git mint minta" szakaszát). Ennek háro
 
 - két gép **ugyanarra az eseményre ugyanazt a nevet** adja → az összefésülés triviális;
 - ha egy bájt megváltozik, **más lesz a neve** → a hamisítás nem rejthető el;
-- a hivatkozás (pl. „erre a javaslatra szavaztam") **önmagát ellenőrzi**.
+- a hivatkozás (pl. „erre a szerkesztési javaslatra szavaztam") **önmagát ellenőrzi**.
 
 ### ⚠️ A kanonikus alak — ahol a determinizmus eldől
 
@@ -107,7 +107,7 @@ Anna:    [1]───▶[2]───▶[3]
 ```
 
 **Amit ez megold, konszenzus nélkül:** a kettős cselekvés. Ha valaki két különböző
-szavazatot ír alá ugyanarra a javaslatra, akkor vagy
+szavazatot ír alá ugyanarra a szerkesztési javaslatra, akkor vagy
 
 - **ugyanazt a láncot folytatja** (2. szavazat felülírja az elsőt) → **ez megengedett**, a
   szavazat módosítható, ahogy ma is; vagy
@@ -132,10 +132,10 @@ tulajdonsága: **a műveletek túlnyomó része „e-emberenként az utolsó nye
 | Művelet | Ütközhet? | Miért nem |
 |---|---|---|
 | Tudatpont-rendezés | ❌ | (e-ember, entitás) párra **a saját láncod utolsója** érvényes — a sorszám dönt, nem a beérkezés |
-| Szavazat | ❌ | ugyanígy: (e-ember, javaslat) párra az utolsó |
+| Szavazat | ❌ | ugyanígy: (e-ember, szerkesztési javaslat) párra az utolsó |
 | Érték javaslat | ❌ | ugyanígy: (e-ember, entitás) párra az utolsó |
 | Gondolat létrehozása | ❌ | egyszeri esemény, saját azonosítóval |
-| Javaslat, egyezmény | ❌ | az eredmény **számítás** a szavazatokból (D17), nem külön állítás |
+| Szerkesztési javaslat és egyezmény | ❌ | az eredmény **számítás** a szavazatokból (D17), nem külön állítás |
 
 > **Vagyis nincs szükség globális sorrendre, és nincs szükség ütközés-feloldó könyvtárra
 > (CRDT) sem.** Az „utolsó" mindig **a saját láncban** egyértelmű — és a saját láncot csak
@@ -169,23 +169,23 @@ determinisztikusnak kell lennie** — különben két gép két különböző er
 
 A döntési idő a bizonyossági mutatóból számítódik, a bizonyosság a szavazatokból — a
 szavazatok viszont a határidő UTÁN is megérkezhetnek. Ettől a határidő **visszamenőleg
-mozgott**. Mérve: egy elvetett javaslat egy utólagos szavazattól **elfogadva** lett, majd
-egy továbbitól újra elvetve. **Az egyezmény megszületett, aztán megszűnt létezni.**
+mozgott**. Mérve: egy elvetett szerkesztési javaslat egy utólagos szavazattól **elfogadva** lett, majd
+egy továbbitól újra elvetve. **A szerkesztési egyezmény megszületett, aztán megszűnt létezni.**
 
 **A megvalósított szabály:**
 
-> A javaslatot érintő eseményeket **idő szerint** (azonos időnél **azonosító szerint**)
+> A szerkesztési javaslatot érintő eseményeket **idő szerint** (azonos időnél **azonosító szerint**)
 > sorba rendezzük, és lépésenként újraszámoljuk a határidőt az addigi állásból. Az első
 > esemény, aminek az ideje **túl van** az akkor érvényes határidőn, **már nem számít
 > bele** — és a lezárás ideje az a határidő.
 
 | Melyik esemény tartozik ide? | **Mindegyik, ami a határidőt mozdítja** — nem csak a szavazat: · **szavazat** → a részvétel számlálója · **tudatpont-rendezés** az érintett entitáson → a nevezője (és **az aktív ↔ passzív váltás** is, mert azt is ez az esemény hordozza) · **érték javaslat** az érintett entitáson → a küszöbök, köztük a **min/max döntési idő**. *A tudatpontot az önpróba buktatta le (a szavazatot már kizártuk, de egy utólagos tudatpont-rendezés még mindig újranyitotta a döntést); az érték javaslatot és a szerep-váltást **Csaba vette észre** — mindkettő ugyanaz a lyuk volt.* |
 |---|---|
-| **Mit jelent ez a küszöbökre?** | A javaslatra azok a küszöbök érvényesek, amik a **lezárás pillanatáig** kialakultak (a tulajdonosok akkori mediánja, D4) — nem az entitás **mai** mediánja. A kártyán látható „mai" küszöb ettől eltérhet: az a jelenlegi állapot, nem az, ami a döntést eldöntötte. |
+| **Mit jelent ez a küszöbökre?** | A szerkesztési javaslatra azok a küszöbök érvényesek, amik a **lezárás pillanatáig** kialakultak (a tulajdonosok akkori mediánja, D4) — nem az entitás **mai** mediánja. A kártyán látható „mai" küszöb ettől eltérhet: az a jelenlegi állapot, nem az, ami a döntést eldöntötte. |
 | **A visszadátumozás ellen** | A saját láncban az **idő legyen monoton**: ha egy nagyobb sorszámú eseményed korábbi időt visel, az **ellentmondás** — ugyanúgy, mint az elágazás, és ugyanúgy a saját aláírásoddal bizonyítva. |
 | **⚠️ Mennyit ér ez?** | Csak a **saját előző eseményedhez** képest köt. Aki friss kulccsal jön (`sorszam: 1`), vagy régóta nem tett semmit, az szabadon visszadátumoz. **Drágítja a csalást, nem zárja ki** — a teljes válasz a kötegelés (D21, Szakasz 4). Ezt így kell számon tartani, hogy később ne higgyük megoldottnak. |
 | **És ami NEM hiba** | Egy késve **megérkező**, de a határidőn belüli időbélyegű szavazat jogosan módosítja az eredményt. A követelmény nem az, hogy az eredmény soha ne változzon, hanem hogy **ugyanabból az eseményhalmazból mindenki ugyanazt kapja** (D17). |
-| **És a felelősség?** | Az ellentmondás **látható marad**: a lezárás után érkezett szavazatok száma a javaslaton, a visszafelé lépő idő pedig az állapotsávon. **A koino bejelent, nem büntet** (D19). |
+| **És a felelősség?** | Az ellentmondás **látható marad**: a lezárás után érkezett szavazatok száma a szerkesztési javaslaton, a visszafelé lépő idő pedig az állapotsávon. **A koino bejelent, nem büntet** (D19). |
 
 ## 4. A TÁROLÁS — mi kerül a készülékre
 
@@ -264,15 +264,15 @@ Minden lépés végén **legyen valami, ami megnézhető**. A sorrend a függős
 | **3** ✅ | **Esemény-réteg** — aláírás, ellenőrzés | hamisíthatatlan esemény | [`esemenyProba.js`](../meres/esemenyProba.js) — **13/13 rendben** |
 | **4** ✅ | **Tár-réteg** — a saját lánc | az események megmaradnak | [`tarProba.js`](../meres/tarProba.js) — **13/13 rendben**; a megmaradást a tár-objektum eldobása és a fájl újranyitása igazolja |
 | **5** ✅ | **Állapot-réteg** — események → entitások | *„van egy gondolatom"* | [`allapotProba.js`](../meres/allapotProba.js) — **16/16 rendben** |
-| **6** ✅ | **A döntéshozatal** — javaslat, szavazat, és az **egyezmény mint számítás** | az egyezmény megszületik | [`javaslatProba.js`](../meres/javaslatProba.js) — **22/22 rendben** |
+| **6** ✅ | **A döntéshozatal** — szerkesztési javaslat, szavazat, és a **szerkesztési egyezmény mint számítás** | a szerkesztési egyezmény megszületik | [`javaslatProba.js`](../meres/javaslatProba.js) — **22/22 rendben** |
 | **7** ✅ | **A koino arca** — a kép a helyi adatból | végigjátszható magadnak | `node koino.js` — **a teljes kör lefutott** *(a D29 előtt böngészőben, utána parancssorban)* |
 
 > ⚠️ **A 6. és 7. lépés helyet cserélt** (2026-08-27, Csaba jóváhagyásával). Indok: a
 > döntéshozatal logikája próbaoldalon **felület nélkül is végigjátszható**; fordított
 > sorrendben viszont a felületet **kétszer** kellene megírni — egyszer a szűkebb modellre,
-> aztán újra, amikor a javaslat és a szavazás is bekerül.
+> aztán újra, amikor a szerkesztési javaslat és a szavazás is bekerül.
 
-**A 7. lépés a szakasz vizsgája.** Ha az egyezmény megszületik pusztán aláírt eseményekből,
+**A 7. lépés a szakasz vizsgája.** Ha a szerkesztési egyezmény megszületik pusztán aláírt eseményekből,
 szerver nélkül — akkor a Fázis 2 gerince áll.
 
 ---
@@ -283,7 +283,7 @@ szerver nélkül — akkor a Fázis 2 gerince áll.
 |---|---|
 | **Domain-logika**: küszöb-medián (D4), bizonyossági mutató, javaslat-életciklus, különválás | **átemelhető** — ezek tiszta számítások, nem függenek a szervertől. A `services/` mappa érdemi része. |
 | **Felület**: kártyák, pakli, szövegszerkesztő, struktúra/síkidom nézet | **átemelhető** — vanilla JS, build nélkül, ahogy ma is |
-| **Fogalmak és nevek**: e-ember, tudatpont, gondolat, javaslat, egyezmény | változatlan |
+| **Fogalmak és nevek**: e-ember, tudatpont, gondolat, szerkesztési javaslat és egyezmény | változatlan |
 | **Konvenciók**: magyar nevek, fájl-fejléc komment, bőséges magyarázat | változatlan |
 
 | Amit NEM viszünk | Miért |
@@ -305,7 +305,7 @@ semmitől. Mérve (2026-08-28), kézzel aláírt eseményekkel:
 
 | Szabály | Mi történt a javítás előtt |
 |---|---|
-| „Csak az tehet javaslatot, aki tudatpontot rendelt a gondolathoz" | Egy **teljesen idegen kulcs** javaslatot tehetett más gondolatára, megszavazhatta magának, és **az egyezmény megszületett** (1/1 = 100%). |
+| „Csak az tehet szerkesztési javaslatot, aki tudatpontot rendelt a gondolathoz" | Egy **teljesen idegen kulcs** szerkesztési javaslatot tehetett más gondolatára, megszavazhatta magának, és **a szerkesztési egyezmény megszületett** (1/1 = 100%). |
 | „Mindenkinek ugyanannyi tudatpontja van" (keret: 10 000) | Kézzel aláírva **999 999 pont** is átment. |
 
 **Ez nem két hiba volt, hanem egy hiányzó réteg** — ma a
@@ -321,7 +321,7 @@ már valódi támadási felület, nem elméleti.
    hogy elveszítjük.
 2. **A döntés a SAJÁT LÁNCBAN dől el, nem az órán.** A keret a szerző eseményeit sorszám
    szerint követi; a javaslat-jogosultság pedig azt nézi, volt-e a javaslattevőnek pontja
-   az érintett gondolaton **a saját láncában a javaslat előtt**. Így nem hamisítható, és
+   az érintett gondolaton **a saját láncában a szerkesztési javaslat előtt**. Így nem hamisítható, és
    utólag nem írható át — ahogy a lezárási szabálynál is.
 
 **Amit a keret helyesen NEM tilt:** az **átrendezést**. A tudatpont nem elkölthető, hanem
@@ -353,7 +353,7 @@ kézzel aláírt eseményekkel (vagyis pontosan úgy, ahogy egy rosszindulatú m
 | más nevében aláírni | Ed25519 — 7 hamisítási próba (gondolat, szerző, idő, sorszám, azonosító, aláírás, idegen kulcs), mind bukik |
 | **kétszer szavazni egy kulccsal** | láncfolytatásnál **felülírás** (1 szavazat); elágazásnál a számítás **determinisztikusan egyet vesz**, és az ellentmondást kiírja |
 | keretet túllépő tudatpont | kizárva (mérve: 999 999 → nem számít) |
-| idegen (0 pontos) javaslata | kizárva |
+| idegen (0 pontos) szerkesztési javaslata | kizárva |
 | határidő utáni szavazat / tudatpont / érték javaslat | nem számít bele |
 
 **Három rés, amit NEM fog meg:**
@@ -414,7 +414,7 @@ kézzel aláírt eseményekkel (vagyis pontosan úgy, ahogy egy rosszindulatú m
    Indok: a mérés szerint a böngésző kiürítheti a tárat, tehát a kulcsvesztés **valós,
    hétköznapi** kockázat; a mentés egy kattintás, a D15 több-tanús helyreállítása lassabb.
    *Vállalt ára: egy rosszindulatú kód elvileg ellophatná a mentett fájlt.*
-3. **Mi az esemény-típusok első köre?** Javaslat a legszűkebb, ami a 7. lépéshez elég:
+3. **Mi az esemény-típusok első köre?** Ajánlás a legszűkebb, ami a 7. lépéshez elég:
    `GondolatLetrehozas`, `TudatpontRendezes`, `ErtekJavaslat`, `JavaslatLetrehozas`,
    `Szavazat`. *(Kategória és gondolattípus később — azok is „gondolat" típusúak.)*
 4. **Hogyan születik meg maga a koino?** A D25 szerint a koino entitás a térben. A Szakasz

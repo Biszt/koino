@@ -36,7 +36,7 @@ node koino.js
 
 | Parancs | Mit csinál |
 |---|---|
-| `node koino.js` | mi az állapot (gondolatok, javaslatok, egyezmények) |
+| `node koino.js` | mi az állapot (gondolatok, szerkesztési és általános javaslatok és egyezmények) |
 | `node koino.js allapot 3` | **mi lesz 3 nap múlva** — a döntési idő napokban mérhető |
 | `node koino.js kulcs` | ki vagyok, hol a kulcsom és az adatom |
 | `node koino.js mentes kulcs.json` | a kulcs kimentése (ez te vagy — mentsd el) |
@@ -202,7 +202,7 @@ Az eredmények: [`meres/eredmenyek.md`](meres/eredmenyek.md).
 | `js/kulcs/kulcsTar.js` | a kulcs = a személyazonosság (D15) — kimentés **és visszatöltés**; ⛔ az egyetlen művelet a koinoban, ami ELDOB valamit, ezért kimondott engedély kell hozzá |
 | `js/allapot/szabalyok.js` | mely események **számítanak** (keret, jogosultság) |
 | `js/allapot/allapotSzamitas.js` | események → entitások |
-| `js/allapot/javaslatSzamitas.js` | a döntéshozatal; **az egyezmény mint számítás** |
+| `js/allapot/javaslatSzamitas.js` | a döntéshozatal; **a szerkesztési vagy általános egyezmény mint számítás** |
 | `js/allapot/osszehasonlitas.js` | **„ugyanazt látjuk-e?"** — az állapot ujjlenyomata, és hol tér el |
 | `js/csere/csere.js` | a csere-protokoll **logikája, hálózat nélkül** (`ALLAS` → `KEREK` → `ESEMENY`) |
 | `js/csere/szeletEgyeztetes.js` | ⭐ **mit egyeztetünk szeletenként** (a C 7–8. pontja): egy szelet halmaza = az érvényes eseményei + a gyerekei **születése** (a gyerek-bejelentés); a „szelet:lenyomat” párok; a fogadó szűrője |
@@ -248,7 +248,7 @@ rádió) anélkül, hogy a csere-protokollhoz hozzá kellene nyúlni.
 > *mit építünk, milyen sorrendben, és miért*. Ez itt csak a rövid leltár.
 
 **Szakasz 1 — A HELYI MODELL** *(egy készülék, hálózat nélkül)*: ✅ **kész**. A teljes kör
-végigjátszható: koino → gondolat → tudatpont → javaslat → szavazat → **egyezmény**.
+végigjátszható: koino → gondolat → tudatpont → szerkesztési javaslat → szavazat → **szerkesztési egyezmény**.
 
 **Szakasz 2 — A SZÁLLÍTÁS** *(hogy két készülék egyáltalán összeérjen)*: ✅ **kész**
 — terv: [`../docs/szakasz2_terv.md`](../docs/szakasz2_terv.md).
@@ -295,7 +295,7 @@ egyszerű: ma memóriában tartott mutató, és a hívók egyike sem tud róla.
 
 - ✅ **Szakasz 4 — AZ IDENTITÁS: kész** (2026-09-06): két lépcső, kontraszt-jelzés, visszavonás.
 - 🚧 **Szakasz 5 — A FELÜLET: folyik** (5.1–5.8): helyi kapu · kérdezhető pakli · kártyák ·
-  belépő tér · szövegszerkesztő · javaslat-modal · fájl-réteg és fájl-szállítás.
+  belépő tér · szövegszerkesztő · szerkesztési javaslat-modal · fájl-réteg és fájl-szállítás.
 - ✅ **A BULI MÁSODIK FELE és a D69 (UDP mindenhol) KÉSZ** (2026-09-20 – 09-26): az őrjárat, a
   postaláda (`figyel`) és a kézi parancsok is az **állandó UDP-kapun** mennek, ugyanazzal a
   munkával; hirdetőtábla (DHT) és kötések tartják egyben a hálót. ⛔ **Nincs TCP a készülékek

@@ -33,7 +33,7 @@ Ez nem remény: a mentés **már ma is idempotens** — ha egy esemény megvan, 
 saját eseményünkkel.
 
 **Amit ebből igazolni kell:** ha két készülék kicseréli, amit tud, akkor **ugyanazt az
-állapotot számolják** — ugyanazokat az entitásokat, ugyanazokat a javaslat-eredményeket,
+állapotot számolják** — ugyanazokat az entitásokat, ugyanazokat a szerkesztési vagy általános javaslat-eredményeket,
 ugyanazokat az ellentmondás-jelzéseket. Ez a Szakasz 1 „a sorrend nem számít" próbájának
 hálózati megfelelője, és ez a szakasz **vizsgája**.
 
@@ -145,7 +145,7 @@ kiszámolni a keretét, és **átmegy nekik a keret-túllépés**. A csalás nyo
 mindig van. Az „óvatos" szabály ára tehát attól függ, **milyen gyorsan érnek körbe az
 események**. Ezért előbb mérünk (5. lépés), és utána döntünk.
 
-*Javaslat a mérés után: óvatosak legyünk (a koino máshol is a „nem tudjuk" felé téved, nem
+*Ajánlás a mérés után: óvatosak legyünk (a koino máshol is a „nem tudjuk" felé téved, nem
 az „elhisszük" felé), de a jelzés legyen megkülönböztethető — „még nem tudom igazolni" nem
 ugyanaz, mint „szabálysértő".*
 
@@ -822,7 +822,7 @@ postás, nem szolgáltató — és a mérés érvényességét nem rontja, mert 
 - **2026-08-28 (a vizsga)** — **A 2. LÉPÉS KÉSZ: a jóslat igazolva.** Két készülék,
   **váltakozva szétosztott** események (tehát mindkét lánc lyukas), csere — és utána
   **azonos az állapot**: ugyanazok az entitások, tudatpontok, küszöbök, ugyanaz a
-  javaslat-eredmény, ugyanaz az egyezmény, ugyanazok a jelzések. 10 önpróba.
+  szerkesztési vagy általános javaslat-eredmény, ugyanaz a szerkesztési vagy általános egyezmény, ugyanazok a jelzések. 10 önpróba.
   **A mérőeszköz:** az [állapot ujjlenyomata](../js/allapot/osszehasonlitas.js) —
   egyetlen 43 karakteres szöveg, ami mindent lefed, ami döntés. Ebből lett az
   `ujjlenyomat` parancs is: a 4. lépésnél két készülék **szemmel** összeolvasható.
@@ -1232,7 +1232,7 @@ Három válasz lehetséges, és mindegyiknek ára van:
    megváltozna — ⛔⛔ **és ez visszamenőleg minden meglévő hivatkozást érvénytelenítene**,
    hacsak nem tartunk meg kétféle lenyomatot. *Ez nem apró döntés.*
 
-⭐ **A javaslatom az 1-es**, egy kiegészítéssel: ha a lezárás elbukik, **jegyezzük fel, kik
+⭐ **Az ajánlásom az 1-es**, egy kiegészítéssel: ha a lezárás elbukik, **jegyezzük fel, kik
 adtak szeletet** ehhez a próbálkozáshoz, és a következő körben **más forrásokkal** próbáljuk.
 ⛔ *Ez nem rangsor és nem „ki mennyit adott" mérleg (D18/2, D48)* — csak egyetlen bukott
 letöltés helyi tanulsága, ami a következő buli után el is felejthető.
@@ -1240,7 +1240,7 @@ letöltés helyi tanulsága, ami a következő buli után el is felejthető.
 ### ⏸️ Amit el kell dönteni, mielőtt kód születik
 
 1. **Megéri-e egyáltalán?** → előbb a mérés (fent).
-2. **A rossz szelet válasza** → 1., 2. vagy 3. (a javaslat: 1.).
+2. **A rossz szelet válasza** → 1., 2. vagy 3. (az ajánlás: 1.).
 3. **Hány forrás egy fájlhoz?** A mai `TARSANKENT = 1` társanként egy átvitelt enged; a
    fájlonkénti korlát (ma szintén egy) lazulna. ⚠️ A 9. szabály kérdése: *„mit csinál
    egymilliárdnál?"* — a szeletszám fájlonként korlátos (2 MB / 64 KB = 32), de a **források
@@ -1320,11 +1320,11 @@ előbb megépíteni.*
 
 ### ⏸️ Nyitott döntések (mind Csabáé)
 
-1. ⛔ **Mérjünk-e előbb két port-átíró NAT között?** *(A javaslat: igen — ez a 19. mérés
+1. ⛔ **Mérjünk-e előbb két port-átíró NAT között?** *(Az ajánlás: igen — ez a 19. mérés
    kimondott hiánya, és egy elvi falnak nem érdemes építeni.)*
 2. **Hol utazzon a UDP-cím?** A `CIMEK` üzenetben új mezőként, vagy a `LENYOMAT` `latlak`-ja
    mellett? ⚠️ A 6. szabály szerint ez **új adat a vonalon** — meg kell nézni a bájtokat.
-3. **Mikor váltson át az őrjárat UDP-re?** Mindig, vagy csak ha a TCP nem megy? *(A javaslat:
+3. **Mikor váltson át az őrjárat UDP-re?** Mindig, vagy csak ha a TCP nem megy? *(Az ajánlás:
    a TCP marad az első próbálkozás, mert olcsóbb — a rés a tartalék. Az 1. szabály miatt ez
    nem kerül kódba: a `parbeszed` mindkét szállításon változatlanul fut.)*
 4. **Az adat-ár**: a kopogás minden társra, minden ablakban — mennyi? *(Számolni kell, a D35
@@ -1580,7 +1580,7 @@ tesz**. ⭐ A cím-szám (K) ezen **nem segít**: K=0 és K=10 között nincs m�
 1. ⏸️ **CSABA DÖNTÉSE ELŐSZÖR:** mi legyen a horgony? *(a) a postaláda-szerep kimondása
    (aki kaput tart, azt hirdetjük horgonyként) · (b) levezetett éjjeli őrség · (c) mindkettő.*
    ⚠️ Ez nem stílus-kérdés: e nélkül a 2. lépés megépülhet, de üresben jár.
-2. **A cím-korlát olcsóbbra vétele** (a 34. mérés javaslata): a SAJÁT cím mindig menjen
+2. **A cím-korlát olcsóbbra vétele** (a 34. mérés ajánlása): a SAJÁT cím mindig menjen
    (+94 bájt/kör), mások címéből 10 helyett 3 vagy 0. *Egy sor, mérhető haszon.*
 3. **AZ ŐRJÁRAT UDP-RE ÁLLÍTÁSA** — az ablak elején kopogás a friss címekre, majd csere a
    résen. ⭐ A darabok készen állnak (`pajzsfuras`, `csereUdpResen`, `fajlRandevu`), tehát ez

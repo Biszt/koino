@@ -15,7 +15,7 @@ program összerakható**: a 367 fájl fél másodperc alatt kiíródik, mind a l
 ugyanazzal a maggal. A telepítéshez tehát nem kell új adat — a munka a **csere** (a futó program leállítása, a mappák cseréje, az
 újraindulás) és az, amit a lap **előtte** kimond.
 
-⭐ A javaslat (4.): a kártya kódja egy `koino-uj` mappába kerül (ellenőrizve), és onnan a **mai frissítés lánca** fut tovább — ugyanaz,
+⭐ Az ajánlás (4.): a kártya kódja egy `koino-uj` mappába kerül (ellenőrizve), és onnan a **mai frissítés lánca** fut tovább — ugyanaz,
 amit a telepítő sor indít (PR7): az új telepítő leállítja a régit, a régit `koino-regi`-be teszi, az újat a helyére, és indít. A lap
 előtte megmutatja a szerzőt, a pontot, rétegenként a változást, és ⚠️ hogy melyik koinodban lesz „más számítás”.
 
@@ -53,7 +53,7 @@ a mérés (c)-je és (e)-je: 367 fájl, a név ugyanaz.
   programmal, tehát ugyanazzal a MAGGAL. A lap koinonként kimondja, ha a futó mag nem a koinoé (D123 ①).
 - **A kártyát bárki feltöltheti**, aki tag (a D14 pontjával). A kártya pontja a közösség jelzése, nem engedély.
 
-## 4. A javaslat — a menet
+## 4. Az ajánlás — a menet
 
 1. **A lap a kártyán** („🧬 Kód” fül mellett): „⬇ Telepítés erre a készülékre…” — és a kézi út, egy parancs (`telepit <kártya>`;
    4. szabály).
@@ -75,7 +75,7 @@ a mérés (c)-je és (e)-je: 367 fájl, a név ugyanaz.
 
 - **TK1 — Hol és hogyan cseréljen?** (A) ⭐ **a mai frissítés láncán:** a kód a `koino-uj`-ba, és onnan az új telepítő cserél
   (leállítás, `koino-regi`, az új a helyére, indítás) — a Windowson ez ma is így megy (PR7); a telefonon a csere új (ma a git
-  frissít helyben), és ⚠️ a `~/koino` git-tár: a javaslat, hogy a `.git` mappa az új programmal MEGY (a munkakönyvtár a kártyáé, a
+  frissít helyben), és ⚠️ a `~/koino` git-tár: az ajánlás, hogy a `.git` mappa az új programmal MEGY (a munkakönyvtár a kártyáé, a
   git-tár marad) — így a telepítő sor később is frissít (a `git reset` a GitHub legújabbjára állítja; a kártya kódját felülírja,
   ahogy ma is); (B) verziónként külön mappa és egy mutató az adat-mappában, melyik fut (több visszaút, de az indítók, a telepítő sor
   és a lap is a mutatót követné — több új rész).

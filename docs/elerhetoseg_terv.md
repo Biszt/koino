@@ -78,7 +78,7 @@ döntés) — így egy friss telepítés az első buli után független a közis
 ⛔ A tábla **nyilvános hely**: a DHT-n bárki kiolvassa azt a rekeszt, akinek megvan a kulcsa,
 és a bejegyzés **a készülék IP-címe** — vagyis a tartózkodási helyed nyoma.
 
-**A javaslatom (három réteg, mind olcsó):**
+**Az ajánlásom (három réteg, mind olcsó):**
 
 1. **Külön kulcs, nem az azonosságod.** A tábla-kulcs **nem** a koino-kulcsod: ha valaki figyeli
    a táblát, ne tudja hozzákötni a személyedhez. *(Ugyanaz az elv, mint mindenhol: két kérdés,
@@ -121,7 +121,7 @@ ezt a (d) döntéssel együtt kell nézni.
 
 Ma **10 idegen cím** utazik körönként (~96 bájt darabja; a „nincs újdonság" kör 386 → 1346
 bájt). ⛔ A 34. mérés szerint **a szám nem számít** (K=0 és K=10 között nincs mérhető
-különbség), mert a találkozás maga is címcsere. ⭐ **A javaslatom: a saját cím mindig menjen,
+különbség), mert a találkozás maga is címcsere. ⭐ **Az ajánlásom: a saját cím mindig menjen,
 másoké 10 → 3.** *(Nullára is vihető, de a 3 olcsó, és a kötésen kívüli véletlen találkozásokat
 segíti.)* ✅ **CSABA: rendben — 3.**
 

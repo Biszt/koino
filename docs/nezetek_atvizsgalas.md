@@ -102,7 +102,7 @@ szövegében (92. (a)).
 gondolatot és kategóriát lehet, a helyi keresés csak a gondolatokat, a kategóriákat és a gondolattípusokat nézi — mint a
 koino-verzió kártyánál.
 
-## 4. A javaslat — a menet
+## 4. Az ajánlás — a menet
 
 1. **A feltöltés:** a fő menü „🧩 Új nézet…” — egy HTML-fájl, egy cím, egy leírás és a pont (D14: pont nélkül nincs). Ebből egy
    `Nezet` típusú kártya lesz, a szövegében a leírás és a fájl-blokk. Parancssorból: `nezet uj <fájl> "<cím>" [pont=N]`
@@ -115,14 +115,14 @@ koino-verzió kártyánál.
    - mit nem: a kulcsodat nem kapja, írni nem tud, kifelé nem szólhat (a mért utak);
    - és *„egy feltöltött nézet hamis rajzot is adhat — a döntés a lap saját kártyáin van”*.
 
-   A bekapcsolás **koinonként** és **a kód lenyomatához kötve** kerül az adat-mappába (`<adat>/nezetek.json`). Ha egy egyezmény
+   A bekapcsolás **koinonként** és **a kód lenyomatához kötve** kerül az adat-mappába (`<adat>/nezetek.json`). Ha egy szerkesztési egyezmény
    új kódot hoz (a szöveg módosítása), a nézet kikapcsol, és a lap megmondja, mi változott.
 4. **A futtatás:** a fő menü „🧩 Nézetek…” — a koino nézet-kártyái pont szerint, a bekapcsoltak elöl. A nézet a pakli helyén fut
    (NZ5), egy felirattal (*„🧩 <cím> — feltöltött nézet: olvas, nem ír”*) és egy bezáró gombbal.
 5. **A nézet-felület** — a nézet és a lap közötti beszéd, `postMessage`-en. A lap csak a saját keretének üzenetére felel
    (`e.source`), és csak ezekre a kérdésekre:
    - `koino` — a név és a szabályok;
-   - `entitasok` — a közös kép: azonosító, típus, cím, szülő, besorolás, pontok, szerző, idő, a javaslat állapota;
+   - `entitasok` — a közös kép: azonosító, típus, cím, szülő, besorolás, pontok, szerző, idő, a szerkesztési vagy általános javaslat állapota;
    - `szoveg(azonosító)`;
    - `fajl(lenyomat)` — bájtokban: a nézet `blob:`-ot csinál belőle, mert a CSP csak ezt engedi;
    - `en` — a saját pontjaim (NZ3);
@@ -167,7 +167,7 @@ koino-verzió kártyánál.
   - (B) kártyánként egy fülként (egy nézet egy kártyát mutat — a „Kód” fül mintájára). Később, a nézet-felület egy
     `kartya` kérdésével.
 - **NZ6 — Mit tehet a nézet a lapon?**
-  - (A) ⭐ **olvas, és „megnyit”:** kérheti, hogy a lap megnyisson egy kártyát. A cselekvés (pont, javaslat, szavazat) a lap
+  - (A) ⭐ **olvas, és „megnyit”:** kérheti, hogy a lap megnyisson egy kártyát. A cselekvés (pont, szerkesztési vagy általános javaslat, szavazat) a lap
     saját ablakában marad, a te kezeddel — így egy térkép-szerű nézetből is lehet dolgozni.
   - (B) csak olvas (a nézet egy kép, nem navigátor).
   - (C) cselekvés megerősítéssel — a PR4 (C), később.
@@ -179,7 +179,7 @@ koino-verzió kártyánál.
   Ami ezen túl kimehetne: hogy (és mikor) használod a nézetét. A DNS-előtöltést a mérés nem nézte.
 - **A böngészőket.** A mérés Chrome 156-é (Windows, fej nélkül). A telefon Chrome-ja a terepen próbálandó; a Firefox és a
   Safari nem mérve. A `webrtc 'block'` CSP-t a Chrome nem ismeri — ezért az őr-szkript.
-- **A rajz igazságát.** A nézet hamis számokat is mutathat (egy javaslatot nyertesnek rajzolhat). Ez ellen a felirat véd
+- **A rajz igazságát.** A nézet hamis számokat is mutathat (egy szerkesztési vagy általános javaslatot nyertesnek rajzolhat). Ez ellen a felirat véd
   (*„feltöltött nézet”*), és hogy a döntés a lap saját kártyáin van — a lenyomat itt is csak azt bizonyítja, hogy ez az a kód
   (mint a PR5-nél).
 - **A teljesítményt.** Egy nagy koino képe `postMessage`-en — nem mérve; az építéskor mérendő.
@@ -196,7 +196,7 @@ kívánó próbák. → ⑤ **terepi próba** (a telefon böngészője).
 ## 8. Az építés (D126, 2026-11-08)
 
 **A kártya:** egy `Nezet` típusú legfelső szintű entitás (`muveletek.js` `nezetLetrehozasa`); a szövege a leírás és a kód fájl-blokkja
-(`nezetKartya.js` `nezetSzovegBlokkjai`). A kód a szöveg ELSŐ fájl-blokkja (`nezetKodja`) — így egy egyezmény, ami a szöveget módosítja,
+(`nezetKartya.js` `nezetSzovegBlokkjai`). A kód a szöveg ELSŐ fájl-blokkja (`nezetKodja`) — így egy szerkesztési egyezmény, ami a szöveget módosítja,
 a kódot is cserélheti. A törzs mérete (D120) a kódot is mondja, a tárolási vállalás (D26) is.
 
 **A bekapcsolás:** `<adat>/nezetek.json` — koinonként (NZ2), kártyánként a kód lenyomatával (NZ1); legfeljebb 64 nézet egy koinoban, 256
@@ -211,7 +211,7 @@ a lap CSP-je `frame-src 'none'` (a kapu minden válaszán).
 - `koino` → a név, a szabályok, a felület száma, és a nézet saját kártyája;
 - `en` → az én kulcsom;
 - `entitasok` `{ kurzor?, darab ≤ 100, rendezes?, irany? }` → egy oldal a közös képből (`kovetkezo` kurzorral), mezőnként kimondva
-  (azonosító, típus, cím, szülő, besorolás, pontok, a saját pontom, szerző, idő, a javaslat állása);
+  (azonosító, típus, cím, szülő, besorolás, pontok, a saját pontom, szerző, idő, a szerkesztési vagy általános javaslat állása);
 - `szoveg` `{ azonosito }` → a szöveg (blokkok vagy sima szöveg);
 - `fajl` `{ lenyomat }` → a bájtok (`ArrayBuffer`) — a nézet `blob:`-ot vagy `data:`-t csinál belőle (mindkettő mérve a valódi lapon);
 - `megnyit` `{ azonosito }` → a lap a pakliban megnyitja a kártyát, és egy gomb visz vissza a nézethez.

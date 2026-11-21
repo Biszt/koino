@@ -111,7 +111,7 @@ Mindhárom **ugyanaz az öt végpont** (`/api/gondolat`, `/api/kategoria`, `/api
 >
 > **(b) A `PATCH /:id` alighanem NEM közvetlen írás.** A koino domain-logikája szerint egy
 > gondolat módosítása **szerkesztési javaslat** → szavazás → egyezmény (D27), és
-> *„csak az tehet javaslatot, aki tudatpontot rendelt a gondolathoz."* A prototípusban volt
+> *„csak az tehet szerkesztési javaslatot, aki tudatpontot rendelt a gondolathoz."* A prototípusban volt
 > közvetlen `PATCH` — **tisztázandó, hogy az mikor jogos** (a létrehozó a saját, még
 > érintetlen gondolatán?), vagy a P2P-ben teljesen a javaslat-út váltja ki.
 > ⭐ *Ez nem felület-kérdés, hanem domain-kérdés — és jobb most feltenni, mint a kártya
@@ -119,18 +119,18 @@ Mindhárom **ugyanaz az öt végpont** (`/api/gondolat`, `/api/kategoria`, `/api
 
 ---
 
-## 3. A JAVASLAT ÉS AZ EGYEZMÉNY
+## 3. A SZERKESZTÉSI ÉS ÁLTALÁNOS JAVASLAT ÉS EGYEZMÉNY
 
 | Végpont | Mit csinál a program | Művelet |
 |---|---|---|
 | `POST /api/javaslat` | új szerkesztési javaslat | ✅ `javaslatLetrehozasa` |
 | `GET /api/javaslat/` | lista | ⛔ lapozható |
-| `GET /api/javaslat/:id` · `/:id/reszletek` | egy javaslat | ✅ szelet |
+| `GET /api/javaslat/:id` · `/:id/reszletek` | egy szerkesztési vagy általános javaslat | ✅ szelet |
 | `GET /api/javaslat/:id/statisztika` | támogatás, részvétel, bizonyossági mutató | ✅ **`javaslatSzamitas.js`** — egész aritmetikával, ahogy ma |
 | `GET /api/javaslat/:id/sajat-szavazat` | szavaztam-e már | ✅ a saját láncomból |
 | `POST /api/javaslat/szavazat` | szavazat | ✅ `szavazas` |
 | `DELETE /api/javaslat/szavazat` | szavazat visszavonása | ⚠️ **nincs művelet** — de lehet, hogy nem is kell: „az utolsó nyer" · *tisztázandó, van-e „nem szavazok" állapot* |
-| `GET /api/egyezmeny/` · `/:id` · `/:id/reszletek` · `/javaslat/:javaslatId` | egyezmények | ✅ ⭐ **számítás, nem tárolt sor** (D17) — az egyezmény sosem volt esemény |
+| `GET /api/egyezmeny/` · `/:id` · `/:id/reszletek` · `/javaslat/:javaslatId` | szerkesztési és általános egyezmények | ✅ ⭐ **számítás, nem tárolt sor** (D17) — a szerkesztési vagy általános egyezmény sosem volt esemény |
 
 ---
 
@@ -145,7 +145,7 @@ Mindhárom **ugyanaz az öt végpont** (`/api/gondolat`, `/api/kategoria`, `/api
 | `GET /api/tudatpont/hozzarendelesek?limit&skip` | a saját hozzárendeléseim | ✅ a saját láncom — ⭐ **szintén lapozott** |
 | `GET /api/tudatpont/aktiv-hozzarendelesek?limit&skip` | ugyanaz, aktívra szűrve | ✅ |
 | `GET /api/tudatpont/hianyzo-felmenok/:tipus/:id` | hány felmenőre kell még pont | ✅ számítás |
-| `GET /api/tudatpont/jogosultsag/:tipus/:id` | tehetek-e javaslatot | ✅ **`szabalyok.js`** — ez ma is szabály-kérdés |
+| `GET /api/tudatpont/jogosultsag/:tipus/:id` | tehetek-e szerkesztési vagy általános javaslatot | ✅ **`szabalyok.js`** — ez ma is szabály-kérdés |
 
 ⭐ **Ez a legkönnyebb csoport:** nyolcból hat már ma is szeletre vagy saját láncra kérdez, és
 kettő már a prototípusban is lapozott. *A tudatpont-réteg készen áll.*
@@ -158,8 +158,8 @@ kettő már a prototípusban is lapozott. *A tudatpont-réteg készen áll.*
 |---|---|---|
 | `POST /api/ertekJavaslat` | küszöb-javaslat | ✅ `ertekJavaslat` |
 | `GET /api/ertekJavaslat/aktualis/:tipus/:id` | a hatályos küszöbök | ✅ **medián-számítás** (`median`) |
-| `GET /api/ertekJavaslat/eloszlas/:tipus/:id` | érték → hány javaslat | ✅ szelet + számítás |
-| `GET /api/ertekJavaslat/sajat/:tipus/:id` | a saját javaslatom | ✅ a saját láncomból |
+| `GET /api/ertekJavaslat/eloszlas/:tipus/:id` | érték → hány érték javaslat | ✅ szelet + számítás |
+| `GET /api/ertekJavaslat/sajat/:tipus/:id` | a saját érték javaslatom | ✅ a saját láncomból |
 | `GET /api/ertekJavaslat/reszletek/:tipus/:id` | részletes értékek | ✅ |
 
 ---
@@ -182,7 +182,7 @@ meghívás **aláírt esemény** (`Meghivas`), ami a **meghívott szeletébe** k
 ### Értesítések (5 végpont) — helyben számolva
 
 Nincs e-mail és nincs szerver, ami küldene. Ami marad: **helyben kiszámolt** értesítés
-(új javaslat abban, amiben pontom van; lezárult szavazás; a „MÉG NEM ÉRTÜNK ÖSSZE" jelzés).
+(új szerkesztési vagy általános javaslat abban, amiben pontom van; lezárult szavazás; a „MÉG NEM ÉRTÜNK ÖSSZE" jelzés).
 Az „olvasott" állapot **helyi feljegyzés**, nem esemény — mint a `tarsak.js` `utoljara` mezője:
 nem terjed, és semmit nem dönt el.
 
@@ -193,14 +193,14 @@ nem terjed, és semmit nem dönt el.
 *A kártyák megírása helyett előbb megnéztük, mire épülnének. Három dolog derült ki, és
 mind a három **a kártyák ALATT** van — vagyis a felületen „megjavítani" őket hiba volna.*
 
-### ✅⛔ 1. AZ EGYEZMÉNYT SEMMI NEM ALKALMAZZA — mérve, és 2026-09-06-án MEGÉPÍTVE
+### ✅⛔ 1. A SZERKESZTÉSI EGYEZMÉNYT SEMMI NEM ALKALMAZZA — mérve, és 2026-09-06-án MEGÉPÍTVE
 
 ```
 javaslat: „MEGVALTOZTATOTT CIM"  →  ELFOGADVA  →  📜 EGYEZMÉNY megszületett
 a gondolat viszont továbbra is:      tiFKe5ig  EREDETI CIM
 ```
 
-A `javaslatSzamitas.js` kiszámolja az egyezményt és megőrzi benne a `valtozas`-t — de az
+A `javaslatSzamitas.js` kiszámolja a szerkesztési egyezményt és megőrzi benne a `valtozas`-t — de az
 `allapotSzamitas.js` **soha nem olvassa**: a `valtozas` és az `egyezmeny` szó elő sem fordul
 benne. A sorrend is ezt mutatja: előbb `allapotSzamitasa`, utána `javaslatokSzamitasa` — a
 javaslat-réteg nem tud visszahatni az entitásra.
@@ -210,7 +210,7 @@ javaslat-réteg nem tud visszahatni az entitásra.
 koinoban ez a réteg nincs megépítve.**
 
 ⭐ **Miért blokkolja a kártyákat?** Mert a kártya a címet és a szöveget mutatja. Elfogadott
-egyezmény után a **régit** mutatná — és a legrosszabb kimenet az volna, ha ezt a felületen
+szerkesztési egyezmény után a **régit** mutatná — és a legrosszabb kimenet az volna, ha ezt a felületen
 „javítanánk ki". *Ami DÖNT valamiről, az a számítás, nem a rajzolás.*
 
 > ### ✅ MEGÉPÍTVE: `js/allapot/szerkesztesiVegrehajtas.js` (2026-09-06, **16 önpróba**)
@@ -221,11 +221,11 @@ egyezmény után a **régit** mutatná — és a legrosszabb kimenet az volna, h
 > **A három fázis**, és a sorrend nem cserélhető fel:
 >
 > 1. `allapotSzamitasa` → az entitások **úgy, ahogy létrejöttek**
-> 2. `javaslatokSzamitasa` → a döntések, és belőlük az **egyezmények** (D17)
-> 3. ⭐ **`egyezmenyekAlkalmazasa`** → az egyezmények **rávezetése** az entitásokra
+> 2. `javaslatokSzamitasa` → a döntések, és belőlük a **szerkesztési és általános egyezmények** (D17)
+> 3. ⭐ **`egyezmenyekAlkalmazasa`** → a szerkesztési egyezmények **rávezetése** az entitásokra
 >
 > *A döntéshez kell az állapot (küszöbök, tudatpontok), az entitás végleges alakjához pedig
-> kell a döntés.* ⭐ Ez a **D8** gyakorlati alakja: az egyezmény a **TÉNY** (örök,
+> kell a döntés.* ⭐ Ez a **D8** gyakorlati alakja: a szerkesztési egyezmény a **TÉNY** (örök,
 > pillanatképpel), az entitás mai alakja a **HATÁLY** — ez a fájl a kettő között a nyíl.
 >
 > **Mérve, a parancssoron:**
@@ -250,9 +250,9 @@ egyezmény után a **régit** mutatná — és a legrosszabb kimenet az volna, h
 >   azt adja). ⚠️ **A hiány LÁTSZIK**, nem néma: a `kihagyottak` listába kerülnek,
 >   indoklással — ugyanaz a minta, mint a `szabalyok.js` szabálysértő eseményeinél (D19).
 >
-> ⭐⭐ **És a determinizmus, ami nélkül két gép mást mutatna:** ha két egyezmény ugyanazt az
+> ⭐⭐ **És a determinizmus, ami nélkül két gép mást mutatna:** ha két szerkesztési egyezmény ugyanazt az
 > entitást írja át, a sorrend eldönti, melyik marad felül. **A lejárat (`megszuletett`)
-> szerint rendezünk**, holtversenynél a javaslat azonosítója dönt — *nem* a térkép bejárási
+> szerint rendezünk**, holtversenynél a szerkesztési javaslat azonosítója dönt — *nem* a térkép bejárási
 > sorrendje szerint, mert az a beszúrás sorrendje, ami két gépen eltérhet. *Ugyanaz a
 > hiba-fajta, amit az `allapotSzamitas.js` `rendezettBemenet`-je zárt ki.*
 
@@ -290,7 +290,7 @@ helye. *A „vékony lap" a SZÁMÍTÁSRÓL szól, nem az elnevezésekről.*
 
 *Ez a dokumentum haszna: nem az derült ki, mit kell átrajzolni, hanem **mi hiányzik**.*
 
-0. ✅ **AZ EGYEZMÉNY VÉGREHAJTÁSA** — *mérve hiányzónak, majd megépítve 2026-09-06 (6/b.
+0. ✅ **A SZERKESZTÉSI EGYEZMÉNY VÉGREHAJTÁSA** — *mérve hiányzónak, majd megépítve 2026-09-06 (6/b.
    szakasz)*. `js/allapot/szerkesztesiVegrehajtas.js`, **16 önpróba**; a `koino.js` és a
    `pakli.js` is a három fázist futtatja. ⏸️ Nyitva: a `Torles` és az `Egyesites`
    végrehajtója — de azokat ma **egyetlen művelet sem tudja előállítani**.
@@ -298,7 +298,7 @@ helye. *A „vékony lap" a SZÁMÍTÁSRÓL szól, nem az elnevezésekről.*
    `betolt()`-alakú út; ha elrontottuk volna, a felület bebetonozza.
 2. ✅ **A kategória és a gondolattípus** — *megépítve az 5.4-ben* (12. szakasz).
 3. ✅ **A `PATCH` értelme** — *eldőlt (5.4):* nincs közvetlen módosítás. A koinoban a
-   szerkesztés **javaslat → szavazás → egyezmény** (D27), és az egyezményt azóta rá is
+   szerkesztés **szerkesztési javaslat → szavazás → szerkesztési egyezmény** (D27), és a szerkesztési egyezményt azóta rá is
    vezetjük az entitásra. ⭐ A prototípus `PATCH`-ének tehát **nincs megfelelője, és nem is
    lesz** — ez nem hiány, hanem a modell.
 4. ✅ **A szavazat visszavonása** — *eldőlt (5.4):* nem kell külön művelet. A meggondolást az
@@ -525,7 +525,7 @@ három esemény, ugyanazon az `esemenyMentese` kapun.
 
 ⛔⛔ **ÉS AMI NEM JÖTT ÁT: a kÖZVETLEN SZERKESZTÉS.** A prototípusban a szerző egyszerűen
 átírhatta a gondolatát (`PATCH /api/gondolat/:id`). A koinoban egy létrejött entitást
-**csak egyezmény** változtathat meg (D8/D27) — tehát a végpont **őszinte 400-at ad**, és
+**csak szerkesztési egyezmény** változtathat meg (D8/D27) — tehát a végpont **őszinte 400-at ad**, és
 megmondja, mit tegyen helyette. *(Ugyanaz a minta, mint a szavazat visszavonásánál.)*
 
 ### ⛔⛔ AMI NYITVA MARADT: A KÉPEK ÉS FÁJLOK HELYE (D3)
@@ -592,7 +592,7 @@ megszakadás után · ki kezdeményezi (a kérő vagy a birtokló) · hány pár
 vállal egy készülék · és a **felső mérethatár** (a 6. szabály az eseményre kemény, de egy
 videóra is kell egy „eddig és ne tovább").
 
-⏸️ **A javaslat, ha majd eldől:** a koino saját mintája — a fájlt a **lenyomata** nevezi
+⏸️ **Az ajánlás, ha majd eldől:** a koino saját mintája — a fájlt a **lenyomata** nevezi
 meg (mint mindent a koinoban), az esemény csak ezt a ~100 bájtos hivatkozást hordozza, a
 bájtok pedig a tartalmi rétegben utaznak. Az ellenőrzés ingyen van: újra-lenyomatolni és
 összevetni — *a csatornát nem kell megbízhatóvá tenni* (3. szabály).
@@ -695,8 +695,8 @@ mondja meg.*
 
 ### ⭐ Miért ÖNÁLLÓ ENTITÁS, és miért `cim` a neve
 
-**Önálló entitás**, mert így ugyanaz jár neki, mint bármely másnak: tudatpont, javaslat,
-küszöbök, egyezmény. ⭐ *Egy kategória neve is közösségi döntéssel változik — nem egy mező
+**Önálló entitás**, mert így ugyanaz jár neki, mint bármely másnak: tudatpont, szerkesztési vagy általános javaslat,
+küszöbök, szerkesztési vagy általános egyezmény. ⭐ *Egy kategória neve is közösségi döntéssel változik — nem egy mező
 átírásával.* (És mivel az egyezmény-végrehajtás az 5.3 előtt elkészült, ez már működik is.)
 
 A név a **`cim` mezőbe** kerül, nem egy külön `nev`-be: a koinoban minden entitásnak `cim`-e
@@ -795,16 +795,16 @@ események állnak, aláírással.
 születik, és az állapot azonnal átfordul (1000‰ ellenzés → 1000‰ támogatás). A tárban három
 `Szavazat` esemény áll egymás után: `Tamogat` → `Ellenez` → `Tamogat` — *az utolsó nyer.*
 
-⭐ **Ezzel a koino fő köre a lapon is teljes:** javaslat → **szavazás** → egyezmény →
-az egyezmény rávezetése az entitásra.
+⭐ **Ezzel a koino fő köre a lapon is teljes:** szerkesztési javaslat → **szavazás** → szerkesztési egyezmény →
+a szerkesztési egyezmény rávezetése az entitásra.
 
-### A javaslat mint KÁRTYA
+### A szerkesztési vagy általános javaslat mint KÁRTYA
 
-A javaslatok eddig nem szerepeltek a pakliban (csak az entitások). Most igen — ahogy a
+A szerkesztési és általános javaslatok eddig nem szerepeltek a pakliban (csak az entitások). Most igen — ahogy a
 prototípus paklija is együtt mutatja őket.
 
-⚠️ **A rendezési értékük az ÉRINTETT entitásé.** A javaslatnak magának nincs tudatpontja
-(nem is lehet: nem entitás, hanem döntés). Ha nullát adnánk, minden javaslat a lista végére
+⚠️ **A rendezési értékük az ÉRINTETT entitásé.** A szerkesztési vagy általános javaslatnak magának nincs tudatpontja
+(nem is lehet: nem entitás, hanem döntés). Ha nullát adnánk, minden szerkesztési vagy általános javaslat a lista végére
 süllyedne, **elszakadva attól a gondolattól, amiről szól**. ⭐ Így viszont a gondolata mellé
 kerül — próbával igazolva, hogy **szomszédosak**.
 
@@ -833,7 +833,7 @@ kivenni nem).
 
 ---
 
-## 15. ⭐⭐ A JAVASLAT IS ENTITÁS (Csaba, 2026-09-06) — és ez javított egy hibás modellt
+## 15. ⭐⭐ A SZERKESZTÉSI VAGY ÁLTALÁNOS JAVASLAT IS ENTITÁS (Csaba, 2026-09-06) — és ez javított egy hibás modellt
 
 > *„Kell neki tudatpont, akárcsak a többi entitásnak. Az egyezmény is entitás. És még annyi,
 > hogy hívjuk szerkesztési javaslatnak, és szerkesztési egyezménynek."* — Csaba
@@ -845,17 +845,17 @@ tenni, küszöbei vannak, gyerekei lehetnek."*
 
 ### KÉT RÉTEG, EGY AZONOSÍTÓ
 
-A javaslat mostantól **egyszerre** kettő, ugyanazon az azonosítón:
+A szerkesztési vagy általános javaslat mostantól **egyszerre** kettő, ugyanazon az azonosítón:
 
 | Réteg | Ki számolja | Mit ad |
 |---|---|---|
 | **entitás** | `allapotSzamitas.js` | tudatpont, küszöbök, szülő, gyerekek, cím |
-| **döntés** | `javaslatSzamitas.js` | szavazatok, státusz, egyezmény |
+| **döntés** | `javaslatSzamitas.js` | szavazatok, státusz, szerkesztési vagy általános egyezmény |
 
 ⭐⭐ **És a szülője az ÉRINTETT entitás** — ez a **D27/1** („az általános javaslat
 gondolatból ágazik ki") szerkezeti megvalósítása. Három dolgot old meg egyszerre:
 
-1. **Megszüntetett egy kényszer-megoldást.** Előtte a javaslat rendezési értékét *kézzel*
+1. **Megszüntetett egy kényszer-megoldást.** Előtte a szerkesztési vagy általános javaslat rendezési értékét *kézzel*
    kölcsönöztük az érintettétől, hogy ne süllyedjen a lista végére. Most nem kell: a
    hierarchikus rendezés amúgy is a szülő után teszi. ⭐ *A jó szerkezet elvette a szabály
    dolgát.*
@@ -865,7 +865,7 @@ gondolatból ágazik ki") szerkezeti megvalósítása. Három dolgot old meg egy
 
 ### ⚠️ ÉS EGY KÖVETKEZMÉNY, AMIT A PRÓBA FORDÍTOTT MEG
 
-Amíg a javaslat nem volt entitás, az érintettjével **együtt tűnt el**. Mióta saját
+Amíg a szerkesztési vagy általános javaslat nem volt entitás, az érintettjével **együtt tűnt el**. Mióta saját
 tudatpontja van, a **D14 rá is külön vonatkozik**: attól létezik, hogy valaki áll mögötte —
 nem attól, hogy a tárgya még megvan.
 
@@ -874,7 +874,7 @@ fa-bejárások átugorják (gyökér-szintű kártya lesz), az egyezmény-végre
 is tudta kezelni — *„az érintett entitás nem létezik"*, kihagyva, indoklással (D19).
 
 ⚠️ **A parancssor is változott:** a `javaslat` parancs mostantól **tudatpontot is rendel**
-a javaslathoz — enélkül a D14 szerint meg sem születne. Ugyanaz a lépés, mint a gondolatnál.
+a szerkesztési vagy általános javaslathoz — enélkül a D14 szerint meg sem születne. Ugyanaz a lépés, mint a gondolatnál.
 
 ### Az elnevezés
 
@@ -896,7 +896,7 @@ bizonyossági mutató, döntési idő. **Csak a következménye más:**
 | | Szerkesztési | Általános |
 |---|---|---|
 | Miről szól | egy entitás megváltoztatása | a közösség **álláspontja** |
-| Elfogadáskor | a rendszer **végrehajtja** | **semmi automatikus** — az egyezmény maga az álláspont |
+| Elfogadáskor | a rendszer **végrehajtja** | **semmi automatikus** — az általános egyezmény maga az álláspont |
 | Az egyezmény élete | egyszeri: eldőlt, kész | ⭐ **ÉLŐ**: csatlakozni, tiltakozni, ütközést jelölni lehet |
 
 ### Mi van már meg belőle
@@ -904,12 +904,12 @@ bizonyossági mutató, döntési idő. **Csak a következménye más:**
 - ✅ a `fajta` mező (`'szerkesztesi' \| 'altalanos'`) a `muveletek.js`-ben és a döntés-rétegben;
 - ✅ az egyezmény-végrehajtás **kizárja** az általánost (*„az általánosból nem következik
   entitás-változás"*) — próbával igazolva;
-- ✅ **a javaslat entitás** (15. szakasz) — a D27/5 alapja;
+- ✅ **a szerkesztési vagy általános javaslat entitás** (15. szakasz) — a D27/5 alapja;
 - ✅ a **hierarchikus tudatpont**, amit a D27/4 hatókörré emel.
 
 ### ⛔ Mi hiányzik
 
-1. **Az élő egyezmény három művelete:** `Csatlakozas`, `Tiltakozas`, `UtkozesJeloles`.
+1. **Az élő általános egyezmény három művelete:** `Csatlakozas`, `Tiltakozas`, `UtkozesJeloles`.
    ⭐ *A TÉNY örök, a HATÁLY él: hányan állnak mögötte MOST.*
 2. **A csatlakozó mint aktív résztvevő** — a D27/3 szerint számít a részvételi arányban, és
    ezért ő szavaz a későbbi módosításokról is. *(Ez old meg egy feszültséget: nem kell se
@@ -917,15 +917,15 @@ bizonyossági mutató, döntési idő. **Csak a következménye más:**
 3. **A hatókör a HELYBŐL** (D27/4): aki az entitásra **vagy annak bármely leszármazottjára**
    tett pontot. A gyökérben ez „mindenki". ⚠️ *A hierarchikus tudatpont eddig a fontosság
    mutatója volt — itt jogosultsággá válik.*
-4. **Az egyezmény mint önálló entitás.** ⚠️⚠️ **És itt van egy VALÓDI FESZÜLTSÉG, amit el
-   kell dönteni:** a **D17** szerint az egyezmény **számítás, nem esemény** — de egy
+4. **Az általános egyezmény mint önálló entitás.** ⚠️⚠️ **És itt van egy VALÓDI FESZÜLTSÉG, amit el
+   kell dönteni:** a **D17** szerint a szerkesztési vagy általános egyezmény **számítás, nem esemény** — de egy
    entitásnak azonosító kell, amire tudatpontot lehet tenni. Két út:
-   - **(a)** az egyezmény azonosítója **származtatott** (a javaslatéból) — a számítás marad,
+   - **(a)** az általános egyezmény azonosítója **származtatott** (az általános javaslatéból) — a számítás marad,
      de lesz stabil neve, amire lehet pontot tenni;
    - **(b)** az elfogadáskor **születik egy esemény** — ez viszont felülírná a D17-et, és
      kellene valaki, aki „kimondja".
    ⭐ *Az (a) őrzi meg a D17-et; ezt javaslom, de ez Csaba döntése.*
-5. **A négy szerkesztési művelet az egyezményre** (módosítás, áthelyezés, egyesítés,
+5. **A négy szerkesztési művelet az általános egyezményre** (módosítás, áthelyezés, egyesítés,
    törlés) — ehhez a `Torles` és az `Egyesites` végrehajtója is kell (ma nincs).
 
 ⏸️ **A D27 maga is nyitva hagyott kettőt:** az egyesítéskor összeadódnak-e a csatlakozók, és

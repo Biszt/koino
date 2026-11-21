@@ -2,7 +2,7 @@
 
 *2026-10-03 · a végleges sor ⑥ lépése: az identitás a szeletelt világban, vele a zárt koino betartatása (D89/2) és a
 Profil (D28 a D88 alakjában). A G és a D mintájára: a követelmények, ami ma megvan, a 63. mérés, a nyitott kérdések
-javaslattal.*
+ajánlással.*
 
 ## 1. Mit kell tudnia — a követelmények (a meglévő döntésekből)
 
@@ -47,24 +47,24 @@ számít (a meghívás ingyenes); a D59 mélység-korlátja (`D`, „elhagyható
 mélyebben van, az „nem ellenőrizhető”, amíg egy közelebbi tagtól nem kap meghívást. Így a bizonyíték felülről
 korlátos (D × 1,24 KB), és a becsületes, mély tag egyetlen ingyenes meghívással rövidít.
 
-## 4. A nyitott kérdések — javaslattal
+## 4. A nyitott kérdések — ajánlással
 
-**E1. Kérdezzen-e a szabály-réteg tagságot?** ⛔ Ma nem — és ez Sybil-rés: a kulcs ingyen van. ⭐ Javaslat: **igen —
-a döntésben (pont, javaslat, szavazat) csak az ellenőrzött tag számít**; a nem ellenőrizhető szerző eseménye nem
+**E1. Kérdezzen-e a szabály-réteg tagságot?** ⛔ Ma nem — és ez Sybil-rés: a kulcs ingyen van. ⭐ Ajánlás: **igen —
+a döntésben (pont, szerkesztési vagy általános javaslat, szavazat) csak az ellenőrzött tag számít**; a nem ellenőrizhető szerző eseménye nem
 számít bele, de nem is tűnik el: a kivételek közt kimondjuk (`nemEllenorizhetok`, D19), és amint a bizonyíték
 megérkezik, számít. ⚠️ A következménye: a döntési csomagnak (D85 T3) a résztvevők tagsági bizonyítékát is hoznia kell
 (vagy a tartónál már ismertnek kell lennie) — ez a csomag méretét növeli (~16 KB résztvevőnként, a gyorsítótárral
 kevesebb); mérni kell.
 
-**E2. A tagsági bizonyíték formája.** ⭐ Javaslat — (A) **TAGSÁGI CSOMAG a saját azonosság-szeletben**: amikor valaki
+**E2. A tagsági bizonyíték formája.** ⭐ Ajánlás — (A) **TAGSÁGI CSOMAG a saját azonosság-szeletben**: amikor valaki
 taggá válik (megkapta a meghívást), egy aláírt csomagot tesz a saját azonosság-szeletébe a lánca eseményeinek
 másolatával az alapítóig (a D85 T3 döntési csomag mintája: a kapu ellenőrzi, a számítás a bemenetébe bontja). Aki az
 azonosság-szeletét elkéri (egy szelet-kérelem — D), megkapja vele a teljes bizonyítékot; az ellenőrzött tagokat a
-készülék megjegyzi. A mélység-korlát (`D`, javaslat: 64) a „végtelent” őrzi, és egy rövidebb láncú meghívás után új
+készülék megjegyzi. A mélység-korlát (`D`, ajánlás: 64) a „végtelent” őrzi, és egy rövidebb láncú meghívás után új
 csomag (rövidebb) váltja a régit. *(Elvetendő jelöltek: (B) egy koino-szintű tagsági gyökér — a tartós maggal és a
 pénzzel együtt jön, D66; (C) ősönként külön kérelem — sok kör, a NAT mögött lassú.)*
 
-**E3. A zárt koino a kézfogásban.** ⭐ Javaslat: zárt koinoban a csere `CIMEK`-jében a társ (a tábla-kulcs aláírása
+**E3. A zárt koino a kézfogásban.** ⭐ Ajánlás: zárt koinoban a csere `CIMEK`-jében a társ (a tábla-kulcs aláírása
 mellett) a SZEMÉLYES kulcsával is aláírja a kézfogás átiratát, és megnevezi a horgonyát (a `Belepes`-ét); ha a tagsága
 nálunk még nem ellenőrzött, az első üzenetváltásban a tagsági csomagját is elküldi. Aki nem tag (vagy nem
 ellenőrizhető), annak a zárt koinoból csak ennyi jár: a koino születése és a SAJÁT azonosság-szelete (különben a
@@ -72,18 +72,18 @@ frissen meghívott soha nem jutna hozzá a meghívásához). Nyílt koinoban nin
 témái már vakítottak (D91, D92).
 
 **E4. A 2. lépcső bizonyítéka.** A 2. lépcső (a pénztárca) bizonyítéka nagyobb (a tanúsítók felhatalmazásai, a
-mérésben 17–40 ős). ⭐ Javaslat: **ugyanaz a csomag-forma**, a tanúsítások és a felhatalmazások láncával — de csak
+mérésben 17–40 ős). ⭐ Ajánlás: **ugyanaz a csomag-forma**, a tanúsítások és a felhatalmazások láncával — de csak
 akkor kerül a csomagba, ha valaki 2. lépcsős; előbb a mérés (a csomag mérete a 12. mérés modelljén). *(Alternatíva: a
 pénzzel együtt — D66 —, mert ma a 2. lépcsőnek a felhatalmazási küszöbön kívül nincs fogyasztója.)*
 
-**E5. A Profil.** ⭐ Javaslat: a koino a létrehozásakor megmondja a kötelező mezőit (`KoinoLetrehozas.profil`, pl.
+**E5. A Profil.** ⭐ Ajánlás: a koino a létrehozásakor megmondja a kötelező mezőit (`KoinoLetrehozas.profil`, pl.
 `['nev', 'telepules']`; üres = nincs); a `Profil` esemény az azonosság-szeletben a darab sózott lenyomatát hordozza
 (D88), a darab a fájl-tárban; ⭐ **a meghívás megnevezi a profil lenyomatát** (a meghívó ezzel tanúsítja a nevet —
 D28/2); ahol a koino mezőket vár el, ott a meghívás csak profil-lenyomattal érvényes. A törlés: a darabot senki nem
 szolgálja ki tovább (D88/2), a lenyomat marad.
 
 **E6. A kontraszt-jelzés a szeletelt világban.** A jelzés („hány olyan embert tanúsítottál, akinek nincs önálló
-élete?”) a tanúsított emberek tevékenységét kívánja — az az ő szeleteikben van. ⭐ Javaslat: a jelzést az számolja,
+élete?”) a tanúsított emberek tevékenységét kívánja — az az ő szeleteikben van. ⭐ Ajánlás: a jelzést az számolja,
 aki a tanúsító felhatalmazásáról dönt (a felhatalmazók), a tanúsítottak azonosság-szeletéből és a láncuk összegzéséből
 (az A pillér: a lánc-gyökér darabszáma mutatja, van-e önálló élete) — kérésre, gyorsítótárral; a jelzés nem dönt
 (D46), tehát a hiánya nem vád. Ez a B/3 után válik élessé; az E-ben a számítás bemenete készül el.
@@ -106,7 +106,7 @@ tanúsítónként N felhatalmazást kíván — a teljes bizonyíték az ős-há
 
 **A lehetőségek:**
 
-- **(A) ⭐ Szúrópróba — a javaslatom.** A 2. lépcső igazolása két részből áll: a HELYI rész teljesen (X 3 tanúsítása, a
+- **(A) ⭐ Szúrópróba — az ajánlásom.** A 2. lépcső igazolása két részből áll: a HELYI rész teljesen (X 3 tanúsítása, a
   tanúsítók bemondott N felhatalmazása — mind aláírva, különböző emberektől; ~37 esemény), és k = 8 VÉLETLEN ÚT az alapító
   körig: minden lépésen az aktuális ember egy véletlen tanúsítója, és annak egy véletlen kötelezettsége (a saját 2.
   lépcsője vagy egy felhatalmazója). Az utakat az ELLENŐRZŐ választja, és a lépések eseményeit az azonosság-szeletekből

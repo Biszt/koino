@@ -166,7 +166,7 @@ mérés tanulsága: amit a kapu nem enged be, azt nem hirdetjük) **+ a közvetl
 eseményei** (7. pont: a `GondolatLetrehozas`, aminek `szulo`-ja ez a szelet). A legfelső szintű
 gondolatok születése a **gyökérben** (a `''` szülő) hangzik el — ez a koino „címlapja", és
 természeténél fogva tömeges entitás (4.6). ⚠️ Csak a SZÜLETÉS hangzik el a szülőnél; az áthelyezés
-(egyezmény) az új szülőnél még nem — ⏸️ későbbi lépés. A mutató ehhez eseményenként a születés
+(szerkesztési egyezmény) az új szülőnél még nem — ⏸️ későbbi lépés. A mutató ehhez eseményenként a születés
 szülőjét is tartja (a pillanatkép 2. változata).
 
 **Egy kör, mindkét oldalon ugyanaz a függvény:**
@@ -242,7 +242,7 @@ elhagyta — javítva.)
 ## 7. ⭐ DÖNTÉSI KÉRDÉSEK (Csabáéi)
 
 ✅ **Döntve (D72, 2026-09-26 éjjel):** az **1.** → **(b)**, az **5.** → **igen** (a szöveg külön darab),
-és a **2–4.** → a javaslatok szerint (Csaba: *„elfogadom a javaslataidat"*).
+és a **2–4.** → az ajánlások szerint (Csaba: *„elfogadom a javaslataidat"*).
 
 1. **Mit tartson egy készülék az első változatban?**
    - **(a) mindent, amit a társai kínálnak** — a mai viselkedés, de már szeletes szerkezetben: a
@@ -254,23 +254,23 @@ elhagyta — javítva.)
      gyerekeit"), különben senki nem tud róla; (2) **a böngészés útja a felületen** (a `hozd`
      megvan, S6), hogy amit nem tartok, azt meg lehessen nyitni. És a (b)-vel jön a kettős lánc
      gyengülése (3. szakasz vége), tehát a D63 is.
-   - ⭐ **Javaslatom: a szerkezet (1–4. lépés) az (a)-val épül meg, és KÖZVETLENÜL utána a (b)** a
+   - ⭐ **Ajánlásom: a szerkezet (1–4. lépés) az (a)-val épül meg, és KÖZVETLENÜL utána a (b)** a
      gyerek-bejelentéssel és a D63-mal — nem „egyszer majd", hanem a következő lépésként. ⚠️ Az
      őszinte ár: az (a) még nem állja ki a „végtelen" próbáját (mindent tart); a SZERKEZET igen,
      a szabály az, ami utána szűkül.
-2. **Mit cseréljünk a véletlen kötésekkel, akikkel nincs közös szeletünk?** Javaslatom: az
+2. **Mit cseréljünk a véletlen kötésekkel, akikkel nincs közös szeletünk?** Ajánlásom: az
    érdeklődési halmazok lenyomatát (hogy észrevegyük, ha közös szelet keletkezik), a
    gyerek-bejelentéseket (ha a (b) megépül), és később a lánc-gyökereket (D63) — ettől marad a
    háló „kis világ", és ettől találkozik két ellentmondó ág.
 3. **A régi protokollú társ:** tiszta törés (a régi programmal a csere megnevezetten leáll, a
-   telefont frissíteni kell), vagy egy átmeneti időre mindkét protokoll? ⭐ Javaslatom: **tiszta
+   telefont frissíteni kell), vagy egy átmeneti időre mindkét protokoll? ⭐ Ajánlásom: **tiszta
    törés** — a koino még nincs élesben, két készüléken fut, és a kettős protokoll kettős hibahely
    (ez volt a TCP-kivezetés tanulsága, D69).
 4. **A szelet-egyeztetés módja:** tartomány-alapú halmaz-egyeztetés (4.2), vagy a mai ÁLLÁS szeletre
-   szűkítve? ⭐ Javaslatom: **a tartomány-alapú** — a szeletre szűkített ÁLLÁS a tömeges entitásnál
+   szűkítve? ⭐ Ajánlásom: **a tartomány-alapú** — a szeletre szűkített ÁLLÁS a tömeges entitásnál
    ugyanazt a falat hozná vissza, egy szinttel lejjebb.
 5. **A gondolat szövege külön darab legyen-e, lenyomattal hivatkozva — ahogy a képek?** (3/b) ⭐
-   Javaslatom: **igen** — ettől terjedhet a metaadat a szülő körében a szöveg nélkül, és ettől lesz
+   Ajánlásom: **igen** — ettől terjedhet a metaadat a szülő körében a szöveg nélkül, és ettől lesz
    a (b) tiszta. ⚠️ Két dolgot meg kell nézni előtte: (1) a régi (szöveget hordozó) események
    érvényesek maradnak, tehát a számításnak mindkét alakot értenie kell; (2) kell-e hozzá új koino
    (D66)? Valószínűleg nem, mert az állapot (entitás, tudatpont, döntés) nem a szövegből számítódik

@@ -72,7 +72,7 @@
 **A szintetikus tár valódi:** valódi Ed25519 kulcsok, valódi aláírások, valódi kanonikus
 alak, valódi lánc, betartott tudatpont-keret (**a kivételek száma minden méretnél 0** —
 tehát valódi terhelést mérünk, nem egy szűrő sebességét). ⚠️ **Feltevés benne:** az
-esemény-keverék (60% tudatpont · 25% gondolat · 10% szavazat · 5% javaslat/érték) és a
+esemény-keverék (60% tudatpont · 25% gondolat · 10% szavazat · 5% szerkesztési javaslat/érték) és a
 200 esemény/fő. Ha a valódi használat más, ezt kell először átírni.
 
 ## Az eredmény *(a skála-mérésé — az ébredés-mérés lentebb)*
@@ -266,7 +266,7 @@ még hátravan** — az „app standby" korlátai hosszabb tétlenség után lé
 *Mérve: 2026-09-05. Eszköz: [`szigetMeres.js`](szigetMeres.js). Terv:
 [`docs/szakasz4_terv.md`](../../docs/szakasz4_terv.md).*
 
-> **Miért mérünk?** Mert a Szakasz 4 tervezésében három nap alatt KÉT javaslat bukott meg,
+> **Miért mérünk?** Mert a Szakasz 4 tervezésében három nap alatt KÉT ajánlás bukott meg,
 > és mindkettőt a **számolás** buktatta ki, nem a megérzés. A harmadik irány (horgony,
 > táguló kör, jelzések) már túl összetett a fejben-ellenőrzéshez.
 
@@ -1088,7 +1088,7 @@ korlátos** — a gyorsítótár és a láncok összefutása elvégzi a munkát.
 - **A korlát haszna más lett:** ha valakinek **hiányoznak szeletek**, kevesebbet kell
   látnia. Vagyis **adat-elérhetőségi tartalék**, nem számítási szükség.
 
-▶ **Javaslat:** menjen az ellenőrzés a **gyökérig** (Csaba ösztöne), és a `D` maradjon
+▶ **Ajánlás:** menjen az ellenőrzés a **gyökérig** (Csaba ösztöne), és a `D` maradjon
 **elhagyható biztonsági szelep**. ⚠️ *A döntés Csabáé: a korlát BIZTOSAN olcsó, a mérés
 csak VALÓSZÍNŰSÍTI, hogy nem kell.*
 
@@ -1208,7 +1208,7 @@ hozzánk. *(A késői nem hiba: addig csak a keretből hiányzik a pont.)*
 kockázat nem „a hálózat lassú", hanem *„van, aki még nem szólalt meg, pedig még
 megszólalhat."*
 
-### ⭐⭐ AMIT EHELYETT ÉRDEMES MÉRNI — javaslat
+### ⭐⭐ AMIT EHELYETT ÉRDEMES MÉRNI — ajánlás
 
 A döntés választóköre **ismert** (az érintett entitás tulajdonosai — a saját eseményeinkből
 kiszámoljuk). A megülepedés akkor teljes, ha **minden jogosult szavazó láncát ismerjük a
@@ -1271,7 +1271,7 @@ az `ALAP_KUSZOBOK`-kal). ⛔ **Nem ez a terv.** Csaba pontosítása:
 > megírt javaslatok** lennének, amit egy e-ember indít, és rak is rá tudatpontot."*
 
 ⭐ Vagyis a változás **nem a küszöb-rendszeré, hanem EGY JAVASLAT-FAJTÁÉ**: a hétköznapi
-entitás marad, ahogy van, és csak a **sablonból született, program- vagy pénz-ügyű** javaslat
+entitás marad, ahogy van, és csak a **sablonból született, program- vagy pénz-ügyű** szerkesztési javaslat
 viszi magával a saját döntési keretét — úgy, hogy **mindenki alapból 67/67-et tart**, amit
 egyenként felül lehet írni saját érték javaslattal.
 
@@ -1288,7 +1288,7 @@ tényleg bead egy másik értéket.** *A menekülőút pontosan olyan nehéz, mi
 ### ⚠️ Amit el kell dönteni, mielőtt kód lesz belőle
 
 - ⚠️⚠️ **„Mindenkitől" — kitől pontosan?** A koino **minden tagjától** (`identitas.js`), vagy
-  annak az entitásnak a tulajdonosaitól, ahol a javaslat áll? Program- és pénz-ügynél a
+  annak az entitásnak a tulajdonosaitól, ahol a szerkesztési javaslat áll? Program- és pénz-ügynél a
   „mindenki" a természetes olvasat — és ⭐ **akkor ez ugyanaz a globális választókör, amit a
   D65 és a globális passzív/aktív ötlet is kíván**. *Három oldalról ugyanaz a mechanizmus.*
 - ⛔⛔ **67% RÉSZVÉTEL egymilliárdnál = 670 millió szavazó.** A 9. szabály próbája: a
@@ -2307,7 +2307,7 @@ a jel **élesben ki volt kapcsolva**, és a `sor:` oszlop 14–16 maradt a remé
 ### ✅ 3. lépés: a szétválasztás — a fájl enged, a csere nem
 
 ⭐ A jel **nem a hívó dolga**: a fájl-út magával hozza (`fajlUdpResen`, `fajlRandevu` →
-`vegas`), a csere szintén (`csereUdpResen` → `nincs`). *Ugyanaz az érv, mint a javaslathoz
+`vegas`), a csere szintén (`csereUdpResen` → `nincs`). *Ugyanaz az érv, mint a szerkesztési vagy általános javaslathoz
 tartozó szavazatnál: ha a hívóra bíznánk, az egyik út megtenné, a másik elfelejtené.*
 
 ⭐⭐ **És mérhetővé is tettük:** a használt jel **visszakerül az eredménybe** (`torlodasJel`),
@@ -2975,7 +2975,7 @@ valami, ami ugyanezt adja: **postaláda, nyitott kapu, vagy olyan vonal, amin a 
 túléli a csendet**. *(A laptop ilyen volt, a telefon nem — 31. mérés.)* ⛔ És a **kis koino**
 itt is a kritikus eset: három társnál még 20% horgony mellett is csak 62%.
 
-### ⏸️ A JAVASLAT, ami ebből adódik (Csaba döntése)
+### ⏸️ AZ AJÁNLÁS, ami ebből adódik (Csaba döntése)
 
 ⭐ **A SAJÁT friss címünk menjen mindig** (ez EGY bejegyzés: +94 bájt körönként) — ettől leszünk
 megtalálhatók. ⏸️ **Mások címének továbbítása viszont a mérés szerint alig ad hozzá**, és
@@ -4187,8 +4187,8 @@ tábláról megtudta a telefon új címét, és ő is kikopogott. A laptop küls
   táblán"*) — ugyanaz, mint a 43. mérésen; a 3 célból így percenként egy sikeres.
 
 ### ⏭️ A KÖVETKEZŐ
-- ✅ ~~A 3. lépés: a (i)–(iii) döntési kérdések Csabának~~ — döntve: **D71** (Csaba elfogadta a
-  javaslatokat); az (i) és a (ii) megépült, lásd a 46.-ot.
+- ✅ ~~A 3. lépés: a (i)–(iii) döntési kérdések Csabának~~ — döntve: **D71** (Csaba elfogadta az
+  ajánlásokat); az (i) és a (ii) megépült, lásd a 46.-ot.
 - ✅ ~~A telefon naplója~~ — megjött, fent a 2. pontban (a hazaérkezéssel együtt).
 
 ---
@@ -4470,7 +4470,7 @@ elbukik.
 ## 54. ⭐ A SZAVAZAT MÉRETE A JOGÁNAK BIZONYÍTÉKÁVAL — a D85/2 (T2) ára (2026-10-02, a laptopon)
 
 *A D85/2 T2 után (a szavazat a saját kiosztás-fájából bizonyítja, hogy a leadás pillanatában pontja
-volt az érintett gondolaton ÉS a javaslaton): `esemenyMeretMeres.js` (az 53. mellé). Egy érintettnél két
+volt az érintett gondolaton ÉS a szerkesztési vagy általános javaslaton): `esemenyMeretMeres.js` (az 53. mellé). Egy érintettnél két
 bizonyíték; valódi aláírt események, 20 kulcspár átlaga.*
 
 ```
@@ -4488,7 +4488,7 @@ két bizonyíték).
 
 ⚠️ **A becslés alatta maradt:** a T2 döntésekor „kb. 1 KB-tal nagyobb” szavazatot mondtam; a mérés
 100 kiosztott entitásnál +1,4 KB, a keret szélén +2,4 KB. ⭐ Az ára annak, hogy a szavazati jog a
-javaslat pont-eseményei nélkül is eldönthető (a szigorú (b) alatt a gondolat nem szavazó tartóinál), és
+szerkesztési vagy általános javaslat pont-eseményei nélkül is eldönthető (a szigorú (b) alatt a gondolat nem szavazó tartóinál), és
 mindenhol ugyanaz. ⏸️ Ha szűkös lesz: a két bizonyíték közös felső szakasza összevonható (több-kulcsos
 bizonyíték) — ma nem kell.
 
@@ -4528,11 +4528,11 @@ csak akkor kéri el, ha a SAJÁT része valamikor igent mondott (különben az �
 változhatott, és ezt a saját adatából tudja). És minden csomag csak azt hozza, ami a cél-szeletből hiányzik
 (a nagy gondolat tartói nem kapják vissza a saját adatukat).
 
-## 56. ⭐ A JAVASLAT MÉRETE A JOGÁNAK BIZONYÍTÉKÁVAL — a (B) előfeltétele (2026-10-03, a laptopon)
+## 56. ⭐ A SZERKESZTÉSI JAVASLAT MÉRETE A JOGÁNAK BIZONYÍTÉKÁVAL — a (B) előfeltétele (2026-10-03, a laptopon)
 
 *A (B) építése közben derült ki: a javaslattevő jogosultságát (minden érintetten van pontja) a szabály-réteg
 a javaslattevő láncából olvasta — a csak-G1-tartónál ez a lánc hézagos (a G2-es pont a G2 szeletében van),
-és a javaslat tévesen kiesett volna. A T2 mintájára a javaslat is hozza a bizonyítékát, érintettenként egyet
+és a szerkesztési javaslat tévesen kiesett volna. A T2 mintájára a szerkesztési javaslat is hozza a bizonyítékát, érintettenként egyet
 a saját kiosztás-fájából: `esemenyMeretMeres.js`, egy kételemű egyesítés.*
 
 ```
@@ -4544,7 +4544,7 @@ Kiosztás 10000 entitáson:   javaslat átlag        3236 B
 ```
 
 ⭐ **A lelet:** érintettenként +0,5–1,2 KB (a lánc-gyökér ~150 B egyszer), logaritmikusan a javaslattevő
-kiosztásával — ugyanaz az ár, mint a szavazat egy bizonyítékáé (54.). A javaslat ritka esemény (egy
+kiosztásával — ugyanaz az ár, mint a szavazat egy bizonyítékáé (54.). A szerkesztési vagy általános javaslat ritka esemény (egy
 döntéshez egy), ezért ez a 6. szabály mércéjén elhanyagolható; cserébe a jogosultság hézagos láncnál is
 eldönthető, mindenhol ugyanúgy.
 
@@ -5199,7 +5199,7 @@ terheli legjobban, nem a bájtokkal. ⭐ A becsületes használat ehhez képest 
 ~50–100 KB (képek nélkül), egy felderítés (3 szint × legjobb 10) ~0,5 MB a szövegekkel. A döntési kérdések (KK1–KK6):
 [`kiszolgalasi_keret_atvizsgalas.md`](../../docs/kiszolgalasi_keret_atvizsgalas.md).
 
-⚠️ A határai: a koino szintetikus (egyenletes szerzők, egy-két pont gondolatonként, javaslatok nélkül — a döntés-számítás
+⚠️ A határai: a koino szintetikus (egyenletes szerzők, egy-két pont gondolatonként, szerkesztési és általános javaslatok nélkül — a döntés-számítás
 itt olcsó); a beolvasás és a vonal (titkosítás, UDP) nincs benne; a képek mérete a koinotól függ.
 
 ⭐⭐ **A KK1 UTÁN (D109 ①, 2026-10-17 — ugyanaz a mérés, a kiszolgáló képével):** a kiszolgáló a képét (az állapot, a
@@ -5248,7 +5248,7 @@ minden percekre rövidül; ⚠️ ott a KISZOLGÁLÁSI KERET szab határt (a szi
 kérés és ≤ 25 MB (KK5) — egy 1000-es törzses felderítés így legalább 80 perc. (4) A bájt: a fejléc-fázis ~8–30 KB
 csomópontonként (a minták), a törzs a tartalomtól függ (szöveg ~1–5 KB, egy fájl ≤ 2 MB). ⚠️ A modell egyszerűsít: a törzs a
 fejlécek UTÁN indul (a valóságban mehet egyszerre), a tartók 1 + Poisson(2) készülék, és a tartó-tippet (D111) nem ismeri.
-⭐ A javaslat (a felderítés átvizsgálása, F4): K = 200 alapból, csak fejléc, a törzs bekapcsolható.
+⭐ Az ajánlás (a felderítés átvizsgálása, F4): K = 200 alapból, csak fejléc, a törzs bekapcsolható.
 
 ## 78. ⭐⭐ A TAGSÁGI LÁNC FARKA — a legmélyebb tag, nem az átlag (a D106 (A) a `MELYSEG_KORLAT`-ra, 2026-10-19)
 
@@ -5374,8 +5374,8 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ## 95. ⭐ A KOINON — a közös tények tömör alakja és a darabok tartói (D130, 2026-11-19, a laptopon)
 
-`meres/koinonMeres.js`. **A) A tömör alak** — egy elfogadott általános egyezmény: a teljes döntés-eseménykészlet (a javaslat, a pontok,
-az érték javaslat, a szavazatok) 10 szavazónál 25,2 KB, 100-nál 234,9 KB, 1000-nél 2332 KB — lineárisan nő; a tömör alak (a javaslat
+`meres/koinonMeres.js`. **A) A tömör alak** — egy elfogadott általános egyezmény: a teljes döntés-eseménykészlet (az általános javaslat, a pontok,
+az érték javaslat, a szavazatok) 10 szavazónál 25,2 KB, 100-nál 234,9 KB, 1000-nél 2332 KB — lineárisan nő; a tömör alak (az általános javaslat
 0,7 KB + a lezárási összegzés 0,9 KB + a minta) 19,8 / 22,9 / 26,0 KB — alig nő (a minta: 8 levél × 3 fa × egy aláírt esemény és a fa-útja,
 felső becslés). Egy állásfoglalás ~0,6 KB. ⭐ A tömör alak ~10 szavazó fölött kisebb, 1000-nél kilencvenszer.
 
@@ -5450,7 +5450,7 @@ eldől”*) venné el; a készülékenként osztott keret megtartja. A készül�
 független tanúsítvány, koinonként egyszer — nem eseményenként). A hálózati darabolt mentés nem mag, és a kriptográfiája saját
 számolást kíván.
 
-**Kiegészítés (2026-11-13, (g) — a tervező ág javaslatára: a keret magától átfolyik a készülékek között, a több szabad ponttal
+**Kiegészítés (2026-11-13, (g) — a tervező ág ajánlására: a keret magától átfolyik a készülékek között, a több szabad ponttal
 rendelkező ad):** egy modell (a mag kódja még nincs): a keret 10 000, a laptop 5000 elhelyezve + 4000 szabad, a telefon 1000 szabad;
 találkozáskor a különbség fele megy át.
 - **Ellopott telefon, ami minden szabad pontját azonnal elhelyezi — határ nélkül:** a tolvajnál 1 találkozás után 3000, 2 után 4000, 5
@@ -5712,7 +5712,7 @@ D84/1 törzs-útja). ⏸️ A fájlonkénti tömörítés a kétharmadát spóro
 számoltunk: egy állapot-számítás ~9 µs eseményenként; a múlt rétege egy ilyen a múlt eseményein, és a múlt csak bővül → a
 talaj gyorsítótárban. Ez a mérés azt nézi, igaz-e.)*
 
-**A bemenet:** egy szülő N eseménnyel (4 tag, gondolatok ponttal, minden 20. gondolaton egy lezárt javaslat); a gyermek a
+**A bemenet:** egy szülő N eseménnyel (4 tag, gondolatok ponttal, minden 20. gondolaton egy lezárt szerkesztési javaslat); a gyermek a
 létrehozó (egy a négyből) költözésével, ~1% saját eseménnyel. A nemzedék-sorban ugyanannyi múlt-esemény 1, 2, 4 ősre osztva.
 
 - **N = 1000:** szülő nélkül 14 ms · a gyermek először 12 ms (24 rögzített döntés) · másodszor 6 ms · 1/2/4 ős: 11 / 14 / 16 ms.

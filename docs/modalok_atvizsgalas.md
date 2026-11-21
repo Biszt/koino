@@ -45,7 +45,7 @@ A lista a saját tevékenységemmel nő (legfeljebb a keret, 10 000 tétel), nem
 **Kategória és gondolattípus létrehozása** (a `KategoriaModal` 467 sor, a fő menü `GondolatTipusModal`-ja 447 sor). A
 művelet kész, csak a kapu írási útja hiányzik (a kezdő tudatponttal és a küszöbökkel, ahogy a `/api/gondolat`-nál). ⚠️
 A modál a képet `FormData`-ban küldi, a kapu viszont csak JSON-t fogad (5.5, a harmadik őr) — a fordítás a lapé: előbb a
-meglévő `/api/feltoltes/kep`, aztán JSON (vagy emoji-ikon, feltöltés nélkül). A szerkesztés a P2P-ben javaslat (a
+meglévő `/api/feltoltes/kep`, aztán JSON (vagy emoji-ikon, feltöltés nélkül). A szerkesztés a P2P-ben szerkesztési javaslat (a
 `JavaslatModal` útja); a kártyák a `KategoriaModal`-t ma amúgy is csak létrehozásra nyitják.
 
 **Rendezés** (147 sor). Maga a modál semmi: módot és irányt választ, és a `Pakli.js` `rendezesBeallitasa`-ját hívja — a
@@ -94,14 +94,14 @@ hogy *„ide kereső kell, nem nagyobb lista”*) és a szövegszerkesztő entit
 `EntitasHivatkozasPanel`). A szigorú (b) alatt egy friss tag mindhárom helyen csak azt látja, amit véletlenül már ismer.
 
 **Értesítések** (383 sor) **és Értesítési beállítások** (639 sor). A prototípusban a szerver írja az értesítést, amikor
-valami történik — nyolc fajta: új javaslat, elfogadás, elvetés, szavazat, közeledő határidő, tudatpont-változás (négy
+valami történik — nyolc fajta: új szerkesztési vagy általános javaslat, elfogadás, elvetés, szavazat, közeledő határidő, tudatpont-változás (négy
 küszöbbel), új gyerek, küszöb-változás —, az entitás ős-láncával (a részfa-szűréshez és a kártya számlálójához); a
 beállítás entitásonként szól (fajtánként feliratkozás, küszöbök, „csak ahol pontom van”, csend), és **lefelé öröklődik
 az ágon**. Minden mezője `helyi` réteg (H6). Itt nincs szerver, ami írna: az értesítést **a készülék számolja abból, ami
 hozzá megérkezik** (szakasz5_terv 6.: „helyben számolva”; az olvasott jel helyi feljegyzés).
 
 ⛔ És itt a döntő kérdés: a szigorú (b) alatt a készülékhez CSAK a részvételi szeletek eseményei érkeznek (a pozitív
-pontú szeletek és az azonosság-szelet). Ami ott van, arról minden fajta kiszámolható — az új javaslat az érintettnél
+pontú szeletek és az azonosság-szelet). Ami ott van, arról minden fajta kiszámolható — az új szerkesztési vagy általános javaslat az érintettnél
 bejelentve (D85/1), a gyerek születése a szülőnél, a döntés a lezárás után a számításból (D17), a határidő az óra szerint.
 Ami a tartott ágon **mélyebben** történik, az nem érkezik meg: a prototípus „(és leszármazottain)” öröklődése csak a
 tartott leszármazottakra teljesíthető. ⭐ A domain itt segít: a prototípus „passzív” szerepe épp a **figyelő** — *„csak
@@ -140,7 +140,7 @@ bemondás + minták), de ma semmi nem dönt rajta — a prototípusban egy figye
 részfa-szűrése mind ezt kérdezi. A felmenő-láncon dől el (a ház `pakliHierarchia`-ja már bejárja, ≤ 64), és ahol egy
 felmenő nincs meg, ott „nem eldönthető” (D19) — egy helyen kell megírni.
 
-## 4. A kérdések — javaslattal (D-szintűek, Csabáéi)
+## 4. A kérdések — ajánlással (D-szintűek, Csabáéi)
 
 **M1. A fa bejárása — a Rendezés ágazati módja, a Struktúra és a Síkidom közös alapja.**
 

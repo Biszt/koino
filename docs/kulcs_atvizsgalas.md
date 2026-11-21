@@ -81,10 +81,10 @@ nélkül 77% marad meg, **havi újraosztással 99,99%**; 70%-nál 97%, illetve ~
   `udpVonal.js` ellenőrzi) és a `keresoMegujitas.js`-ben (a tulajdonos személyes aláírása). ⭐ A hirdetőtábla NEM ezzel ír: a
   `tablaKulcs.js` a készülék saját kulcsa (*„EZ SOHA NEM AZ AZONOSSÁGOD”* — D6); a `meghivoRekesz.js` a meghívóból számolt
   kulcspárral; a `dht.js` csak a kapott kulcspárt használja.
-- **A szavazat:** a javaslatonkénti szavazatok időrendben (`javaslatSzamitas.js`) — az e-ember utolsó szavazata számít.
+- **A szavazat:** a szerkesztési vagy általános javaslatonkénti szavazatok időrendben (`javaslatSzamitas.js`) — az e-ember utolsó szavazata számít.
 - **A mentés:** `mentes` / `visszatolt` (a parancssor; a lapon nincs).
 
-## 4. A javaslat — a menet
+## 4. Az ajánlás — a menet
 
 1. **Az esemény alakja:** a `szerzo` marad az AZONOSSÁG (a név nem változik), és jön egy új aláírt mező: **`keszulek`** — a
    készülékkulcs nyilvános része; az aláírás a készülékkulccsal. A lánc (sorszám, előző, lánc-gyökér) a **(szerző, készülék)** páré.
@@ -303,7 +303,7 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
 - **Az építés — (3) az azonosság pontja a készülékei összege** (2026-11-14): a pont a LÁNCÉ (láncónként az utolsó), az azonosság
   pontja egy entitáson a láncai összege — `allapotSzamitas.js` (a hozzájárulók, a kiosztási főkönyv; a szerep aktív, ha bármely
   pozitív lánca aktív), `javaslatSzamitas.js` (a tulajdonos, a javaslat-entitás pontja; a nevező bizonyítéka a legkisebb azonosítójú
-  pozitív aktív láncé). Az össz-pont levele a szerzőé marad (az egyezmény átvitele szerzőnként visz pontot), és a láncai
+  pozitív aktív láncé). Az össz-pont levele a szerzőé marad (a szerkesztési egyezmény átvitele szerzőnként visz pontot), és a láncai
   pont-eseményeinek ÖSSZEGE: egy készüléknél egy azonosító (semmi nem változik), többnél a lista — a kérdező mindet ellenőrzi
   (különböző láncok, mind a szerzőé, az összegük a levél; legfeljebb 16), a tartó mindet elküldi (`osszegzoTartas.js`).
   ⭐ Közben kiderült: a döntés számításában az érték javaslat még a sorszámot nézte két készülék között is (a ①b (1) kimaradt
@@ -313,7 +313,7 @@ kézfogás a készülékkulccsal) a ③–④ lépéssel jön — addig a háló
 - **Az építés — (4) a szavazás és a javaslattétel joga készülékenként** (12. pont, Csaba: (A)): ahol ennek a készüléknek nincs
   pontja, de az azonosságnak (egy másik készüléknek) van, a művelet előbb magától 1 pontot tesz rá a saját részéből
   (`muveletek.js` `keszulekPontjaHaAzonossagome`) — a jog így a saját láncából bizonyítható (D85). Ha a készüléknek nincs szabad
-  pontja, a pont-rendezés kimondja (a keret az átadással jön). A próba: „A SZAVAZÁS ÉS A JAVASLAT JOGA KÉSZÜLÉKENKÉNT” (a javaslat,
+  pontja, a pont-rendezés kimondja (a keret az átadással jön). A próba: „A SZAVAZÁS ÉS A JAVASLAT JOGA KÉSZÜLÉKENKÉNT” (a szerkesztési vagy általános javaslat,
   a szavazat, és az idegen gondolat, ahol nem tesz pontot — 5 rontás).
 
 **9.10 A kizárás és az örökös — a pontos alak** (az ①d terve, 2026-11-14 — a 9.4 és a KU7 (A) megvalósítása):
@@ -642,7 +642,7 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
     `HelyreallitasJovahagyas { kit, sajatBelepes, javaslat, szerep, fazis }` (a `javaslat`: az új kezelő kulcs, az új készülék, az
     új fizetési kulcs, az 1. lépcsőn az új papír lekötése, a kör, a 2. körben a megállított 1. kör jele; a `fazis`: kezdés,
     véglegesítés, visszavonás), és `HelyreallitasMegallitas { javaslat }` — X egy meglévő készülékéé. Az új készüléknek még nincs
-    azonossága (nem írhat): a javaslatot a kódjából (a D121 mintája) az első segítő teszi be a jóváhagyásával.
+    azonossága (nem írhat): a helyreállítási kérelmet a kódjából (a D121 mintája) az első segítő teszi be a jóváhagyásával.
   · **A szerepek** (az A eseményeiből): régi ismerős = X meghívója vagy tanúsítója (az ő `Meghivas`/`Tanusitas` eseménye X
     szeletében); bemutatkozó = `Bemutatkozas` X-ről (D62); élő tanúsító = `tanusithatE` (a felhatalmazása él). A szabály: (1. kör)
     1 régi ismerős + 2 élő tanúsító, vagy 10 bemutatkozó + 2 élő tanúsító — három (ill. tizenkét) KÜLÖNBÖZŐ azonosság; (2. kör) +2
@@ -662,12 +662,12 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
     koinoban, a tárból) → **②e2** a lánc bejegyzése és a bizonyíték (a csomag, a kapu, a kezelő kulcs, az erő, a kizárás, a kézfogás)
     → **②e3** a segítők készülékei (a várakozás utáni magától véglegesítés; az értesítés X készülékein) → **②f** a parancsok (az új
     készüléken a kérelem kódja és a befejezés; a segítés, a visszavonás, a megállítás).
-- ✅ **Az építés — ②e1 az események és a szerepek** (2026-11-15): `azonossag.js` — a javaslat alakja
+- ✅ **Az építés — ②e1 az események és a szerepek** (2026-11-15): `azonossag.js` — a helyreállítási kérelem alakja
   (`helyreallitasJavaslatAlakiHibaja`: az új kezelő kulcs, az új készülék(ek), az új fizetési kulcs, a papír lekötése vagy `null`,
   a kör és az előzmény, a lánc helye — sorszám és az előző bejegyzés jele) és a JELE (`helyreallitasJele` — a tartalom lenyomata).
   `esemeny.js`: a `HelyreallitasJovahagyas` (állítás másról, a helyreállítandó szeletébe — a segítő a saját szeletében is látja:
-  `AZONOSSAG_ALLITASOK`) és a `HelyreallitasMegallitas` (a saját szeletbe, a javaslat jelével) alakja. `allapot/helyreallitas.js`:
-  `helyreallitasokAllapota` — javaslatonként a kezdők és a véglegesítők (`segitoAllasa`: a visszavonás a kezdést törli, a véglegesítés
+  `AZONOSSAG_ALLITASOK`) és a `HelyreallitasMegallitas` (a saját szeletbe, a helyreállítási kérelem jelével) alakja. `allapot/helyreallitas.js`:
+  `helyreallitasokAllapota` — kérelmenként a kezdők és a véglegesítők (`segitoAllasa`: a visszavonás a kezdést törli, a véglegesítés
   után semmi nem számít), a megállítás (X érvényes — nem kizárt, a kulcscsere által nem kiejtett — készülékéről), az út
   (`elegendoUt`: egy ember egy hely; a tanúsítót előbb a nem-bemutatkozók közül), a 2. kör feltétele (a megállított 1. kör), a
   várakozás napjai. A szerepek: a régi ismerős a meghívás és a tanúsítás érvényes állítójából, a bemutatkozó a KÖLCSÖNÖS
@@ -697,21 +697,21 @@ visszavonása) → **③** (a 9.12 — a terjesztés a helyreállítással és a
 - ✅ **Az építés — ②e3 a segítők készülékei** (2026-11-16 — Csaba: „a segítők EGYSZER cselekszenek”): `muveletek.js`
   `helyreallitasokGondozasa` — minden helyreállításnál, amit az azonosságom jóváhagyott (és nem vont vissza, nem véglegesített): ha a
   SAJÁT ÓRÁM szerint letelt a várakozás a kezdésemtől (az út és a kör napjai), és nem jött megállítás, VÉGLEGESÍT; ha a helyreállítás
-  így (vagy már korábban) TELJES, és a koinoban még nincs bent, a láncot (a tárból, a javaslat helyéig — `allapot/helyreallitas.js`
+  így (vagy már korábban) TELJES, és a koinoban még nincs bent, a láncot (a tárból, a helyreállítási kérelem helyéig — `allapot/helyreallitas.js`
   `azonossagLancaTarbol`, `javaslatElotagja`) a bejegyzéssel és a bizonyítékokkal (a lánc-elejében álló korábbi helyreállításokéval is)
   egy `Kulcscsere` eseményben BEVISZI — egyszer. A koino idő nélkül dönt (D17); a várakozást a segítő készüléke méri. `koino.js`:
   minden parancs elején és az őrjárat minden körében (a hibája nem akaszt meg semmit); az állapot SZÓL, ha valaki az én
   helyreállításomat kezdte (a segítők száma, az út, a várakozás, és a `megallit <jel>` parancs); a `megallit` csak az én
-  azonosságomról szóló javaslatot fogadja el. A próba: „A SEGÍTŐ KÉSZÜLÉKE” (a várakozás előtt nem, utána igen; a harmadik véglegesítő
+  azonosságomról szóló helyreállítási kérelmet fogadja el. A próba: „A SEGÍTŐ KÉSZÜLÉKE” (a várakozás előtt nem, utána igen; a harmadik véglegesítő
   beviszi — egyszer; megállítás után senki) — 5 rontás. ⏭️ ②f: a parancsok (az új készüléken a kérelem és a befejezés; a segítés, a
   visszavonás), a parancssor-próba a megállítással és az értesítéssel.
 - ✅ **Az építés — ②f a parancsok** (2026-11-16): `kulcs/helyreallitasKerelem.js` — a KÉRELEM (az új kezelő, fizetési és papír-kulcs —
   a titkok az új készüléken maradnak —, és a megtartandó régi készülékek): egy sor szöveg (`koino-helyreallitas.1.…`) és QR, mellette
   az ELLENŐRZŐ KÓD (6 jel, a kérelem lenyomatából — a két ember szóban összeveti, a D121 mintája; a segítő be is írja, és a gépe csak
   egyezőnél hagy jóvá: egy kicserélt kérelem nem csúszik át). `allapot/helyreallitas.js` `javaslatKerelembol` — ha egy másik segítő
-  már kezdte, a MEGLÉVŐ javaslatot adja (mindenki ugyanazt hagyja jóvá), különben újat (a lánc helye a tárból; a 2. lépcsőn papír
+  már kezdte, a MEGLÉVŐ helyreállítási kérelmet adja (mindenki ugyanazt hagyja jóvá), különben újat (a lánc helye a tárból; a 2. lépcsőn papír
   nélkül). `kulcsTar.js` `helyreallitasBefejezese` — a lánc végén az én kulcsom és fizetési kulcsom áll → ez a gép az azonosság
-  kezelője (meglévő azonosságot csak `felulir`-ral; az 1. lépcsőn az új papír a `csere-kulcs.json`-ba). A javaslat készülék-listája
+  kezelője (meglévő azonosságot csak `felulir`-ral; az 1. lépcsőn az új papír a `csere-kulcs.json`-ba). A helyreállítási kérelem készülék-listája
   üres is lehet (ha minden elveszett). `koino.js`: `helyreallitas kerelem` és `helyreallitas befejez <fájl>` (a kulcs-biztosítás
   ELŐTT — mint a visszatöltés; folyamatban lévő kérelem mellett, azonosság nélkül más parancs nem fut), `segit <horgony> <kérelem>
   <ellenőrző kód> [masodik <jel>]`, `segit visszavon <horgony> <jel>`, `segit kiad <horgony> <fájl>`; a gondozás órája a
@@ -822,7 +822,7 @@ papír kell). A ③ próbái is így állították fel a két készüléket. A �
   `kezelo: false`, a laptopé `true`) és a D122 lap-próbája (a belépett készülék kezelő) — 1 rontás.
 - ⏸️ **Nyitott — a legutóbbi profil két készüléknél.** A program a „legutóbbi” profilt a lánc SORSZÁMA szerint választja
   (`profilomAllapota`, `meghivottProfilja`) — egy készüléken ez jó, de a két készülék két külön lánc: ha a telefon (rövidebb lánc)
-  később ad meg profilt, a laptop régebbije maradhat érvényben. Javaslat: az aláírt idő szerint (`ido`), egyezésnél a sorszám.
+  később ad meg profilt, a laptop régebbije maradhat érvényben. Ajánlás: az aláírt idő szerint (`ido`), egyezésnél a sorszám.
 
 **9.7 Az ①a építése — ami közben kiderült** (2026-11-13/14):
 - **A tanúsítvány a láncán kívül utazó eseménnyel is utazik.** A 9.2 szerint a lánc első eseménye hozza — de egy esemény sokszor

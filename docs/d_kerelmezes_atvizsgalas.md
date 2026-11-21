@@ -3,7 +3,7 @@
 *2026-10-03 · a végleges sor ⑤ lépése · a D76 (a nézet kérdez, a kérelem továbbadható), a D83/3 (a kérő először a
 tudatpont-tartóktól), a D84/1 (a kiszolgálás korlátja csak a törzsé) és a D87 (a törzs a kérelem útján, a közvetítő
 nem ismeri a kérdezőt) megépítése előtt. A G mintájára: a követelmények, ami már megvan, a terep valósága a 60.
-mérés számaival, a nyitott kérdések javaslattal, és a következő mérések.*
+mérés számaival, a nyitott kérdések ajánlással, és a következő mérések.*
 
 > *„azt kell szem előtt tartani, hogy a böngészés közben a felhasználó lássa a címeket, fejléceket adatokkal. […] ezt
 > a nézet mondja meg."* — Csaba (D76)
@@ -59,9 +59,9 @@ otthon ↔ mobil között terepen mérve működik). A szimulációban a **kopog
 fogadóképes gép nélkül is 72%; ha 80%-uk, 93%. ⚠️ **Hogy a valóságban mennyi a fúrható pár, az terepmérés** — az
 otthon ↔ mobil rés megy, a két mobil közötti (a 🅱️ változat) még nincs mérve.
 
-## 4. A nyitott kérdések — javaslattal
+## 4. A nyitott kérdések — ajánlással
 
-**K1. Az út.** ⭐ Javaslat — három út, ebben a sorrendben, egyszerre indítva:
+**K1. Az út.** ⭐ Ajánlás — három út, ebben a sorrendben, egyszerre indítva:
 (a) **közvetlenül** a G-ből ismert tartóhoz, ha a kötésem vagy fogadóképes (mint a mai `hozd`);
 (b) ⭐ **kopogtatás**: a kérő a BEP 5-tel bejelenti a címét a tartó kopogtató témáján — `H(koino ‖ „kopogtató” ‖ a
 tartó tábla-aláírója)`, vakítva, mint a D91 témái; minden készülék ~20 percenként ránéz a sajátjára (~3 KB, ~0,2
@@ -74,16 +74,16 @@ kopogás marad); és aki ismeri a koinot és a tartó aláíróját, az látja, 
 kér).
 
 **K2. A közvetítő átmeneti tartása.** A továbbítónak a kérelmet a következő találkozásig meg kell őriznie, a választ
-pedig addig, amíg a kérőhöz vissza nem ér (5. szabály: nincs egyidejű kapcsolat). ⭐ Javaslat: csak a memóriában,
+pedig addig, amíg a kérőhöz vissza nem ér (5. szabály: nincs egyidejű kapcsolat). ⭐ Ajánlás: csak a memóriában,
 időkorláttal (két ablak) és darabkorláttal; nem kerül a tárba, nem szolgálja ki — ez a D87/1 „nem tartja meg”
 értelmezése.
 
-**K3. Az ugrás-számláló.** ⭐ Javaslat — a Freenet mintája: a kérő 3-at küld, aki 3-at kap, fele eséllyel csökkenti
+**K3. Az ugrás-számláló.** ⭐ Ajánlás — a Freenet mintája: a kérő 3-at küld, aki 3-at kap, fele eséllyel csökkenti
 (így az első továbbító nem tudja, hogy a szomszédja maga a kérdező-e); a 60. mérés szerint 2 ugrás után nincs több
 nyereség, tehát ez nem drága (~14 üzenet).
 
-**K4. A fejléc és a törzs határa.** ⭐ Javaslat: a **fejléc** = a létrehozó esemény (cím, típus, szülő) + az
-össz-pont; a **szelet eseményei** (pontok, javaslatok) bárkitől jöhetnek (D84/1); a **törzs** = a szöveg-darab
+**K4. A fejléc és a törzs határa.** ⭐ Ajánlás: a **fejléc** = a létrehozó esemény (cím, típus, szülő) + az
+össz-pont; a **szelet eseményei** (pontok, szerkesztési és általános javaslatok) bárkitől jöhetnek (D84/1); a **törzs** = a szöveg-darab
 (D72) és a fájlok — csak a vállalótól.
 
 **K5. Az össz-pont a szeletelt világban.** ⚠️ Ez a legnehezebb: az össz-pont a leszármazottak pontjait is tartalmazza,
@@ -91,10 +91,10 @@ azokat viszont a leszármazottak szeleteiben tartják — **senki nem látja egy
 láthatja). Két út: (i) **felfelé összegződik** — minden szelet tartója a saját pontokból és a gyerekek bemondott
 össz-pontjából számol, és a válasz a részletezést is hozza, amit a kérő súlyozott szúrópróbával ellenőriz (a
 szerzők aláírt lánc-gyökereivel, D78, D81: a felfújás f arányát k mintából 1 − (1 − f)^k eséllyel kapja el);
-(ii) **első körben csak a saját pont** szerint rendez a pakli. ⭐ Javaslat: az (i), de előbb a mérés (a bizonyíték
+(ii) **első körben csak a saját pont** szerint rendez a pakli. ⭐ Ajánlás: az (i), de előbb a mérés (a bizonyíték
 mérete k mintánál, és az összegzés terhe).
 
-**K6. A kérdés alakja.** ⭐ Javaslat: a protokoll **nézet-független alapkérdéseket** ismer — *fejlécek* (X gyerekei
+**K6. A kérdés alakja.** ⭐ Ajánlás: a protokoll **nézet-független alapkérdéseket** ismer — *fejlécek* (X gyerekei
 össz-pont szerint, legfeljebb n, és ha a válaszoló tartja, a legjobb ág d szintig), *szelet* (X eseményei), *törzs*
 (X szöveg-darabja, fájljai) —, és a pakli első betöltése ezekből áll össze. Így a síkidom és a térkép később
 ugyanazt használja, és a válaszolónak nem kell az egész utat tartania. (A D76/2 egyetlen válaszra gondolt.)

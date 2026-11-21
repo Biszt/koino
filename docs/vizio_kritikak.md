@@ -29,7 +29,7 @@ Súlyossági szintek:
 - 🟡 **KÖZEPES** — távlati elem, most nem blokkol, de átgondolást igényel.
 - 🟢 **KOMMUNIKÁCIÓS** — nem a rendszert, hanem a bemutatás módját érinti.
 
-Státuszok: 🆕 NYITOTT → 🔄 MEGBESZÉLÉS ALATT (van javaslat, vannak nyitott alkérdések) →
+Státuszok: 🆕 NYITOTT → 🔄 MEGBESZÉLÉS ALATT (van ajánlás, vannak nyitott alkérdések) →
 ✅ MEGOLDVA.
 
 ---
@@ -58,7 +58,7 @@ Európai Digitális Személyazonossági Tárca (bevezetés ~2026-tól), amely ú
 bizonyítani, hogy a regisztráló valódi, egyedi ember, hogy közben a személyes adatait
 nem kell átadnia a platformnak. Pártsemleges és nem függ attól, ki van kormányon.
 
-**Csaba megoldása (2026-07-15):** kétrészes javaslat.
+**Csaba megoldása (2026-07-15):** kétrészes ajánlás.
 1. **Meghívásos hitelesítés (bizalmi háló):** már regisztrált e-emberek tanúsítják a
    meghívott új belépőt — kizárólag azt, hogy valódi személy és még nem regisztrált.
    Lassabb tágulás, de kormánytól független indulást ad.
@@ -135,9 +135,9 @@ részvételi arány) biztosítják a legitim döntést.
   — az önkiválasztás megmarad, a számok valódiak. A mechanizmus nem növeli a részvételt,
   hanem az ALACSONY részvételt teszi legitimmé és kezelhetővé — így kell kommunikálni.
 - **KÉT TÁMADÁSI FELÜLET a medián-mechanizmusban** (mindkét irány):
-  (a) *küszöb-összeomlasztás:* létrehozó 60%-os javaslata mellé 3 összejátszó tulajdonos
-  5%-os javaslata → medián[60,5,5,5]=5% → kis csoport átnyomja a javaslatát, mielőtt a
-  passzívak észbe kapnak; (b) *befagyasztás:* 100%-os javaslatok → medián=100% → az
+  (a) *küszöb-összeomlasztás:* létrehozó 60%-os érték javaslata mellé 3 összejátszó tulajdonos
+  5%-os érték javaslata → medián[60,5,5,5]=5% → kis csoport átnyomja a szerkesztési javaslatát, mielőtt a
+  passzívak észbe kapnak; (b) *befagyasztás:* 100%-os érték javaslatok → medián=100% → az
   entitáson soha semmi nem fogadható el.
 - **Meglévő természetes fékek** (nevén nevezve): a támadás tudatpontba kerül (véges keret
   + felmenő-szabály); a támadás nyilvános (tudatpont és érték javaslat is látszik —
@@ -168,7 +168,7 @@ szóhasználat („a részt vevők hitelesített szándéka") a 8. pont levél-�
 javaslatok mind nyilvánosak, ez biztosítja az átláthatóságot."
 
 **A kritika:**
-- Gondolatoknál és javaslatoknál a nyilvánosság rendben van. A NÉV SZERINT nyilvános
+- Gondolatoknál és szerkesztési és általános javaslatoknál a nyilvánosság rendben van. A NÉV SZERINT nyilvános
   szavazat politikai/érzékeny témákban viszont súlyos probléma: nyomásgyakorlást,
   szavazatvásárlást, munkahelyi/családi megfélemlítést tesz lehetővé — a titkos
   szavazást pontosan ezért vezették be ~150 éve.
@@ -272,7 +272,7 @@ DE három réteg kritika:
 2. **Két adatosztály következik a modellből** (Csaba utolsó mondata maga mondja ki):
    (a) TARTALMI réteg — tudatpont-replikált, elveszhet, közösségi felejtés → erre a
    modell jól működik; (b) TARTÓS MAG — regisztrációk (duplikátum-védelemhez),
-   szavazás-eredmények és az EGYEZMÉNYEK (egy elfogadott egyezmény nem veszhet el
+   szavazás-eredmények és a SZERKESZTÉSI ÉS ÁLTALÁNOS EGYEZMÉNYEK (egy elfogadott szerkesztési vagy általános egyezmény nem veszhet el
    készülékhibától — pont attól egyezmény, hogy kötelez) → mindig, mindenhol replikált,
    lényegében ez a blokklánc-szerű rész. **A jogi ütközés a tartós magban él tovább:**
    a regisztráció (név, település) személyes adat, ami soha nem veszhet el. ÚJ NYITOTT
@@ -315,7 +315,7 @@ engedelmeskedik".
 
 *Amit a lánc TÉNYLEG tud:* (1) a múlt megmásíthatatlansága; (2) **szabály-kikényszerítés**
 — a csomópontok csak protokoll-szabályos bejegyzést fogadnak el (pl. „egy e-ember egy
-javaslatra egyszer szavaz") — ez valódi decentralizált védelem, az eredeti kritika ezt
+szerkesztési vagy általános javaslatra egyszer szavaz") — ez valódi decentralizált védelem, az eredeti kritika ezt
 alulhangsúlyozta; (3) bárki általi ellenőrizhetőség.
 
 *A hat manipuláció, ami ellen NEM véd:*
@@ -349,7 +349,7 @@ konszenzus csak a tartós maghoz" — az N1-nél megvizsgálandó.
 
 *Az újrafogalmazott kérdés (a D3 után):* nem „véd-e a blokklánc", hanem **MIRE KELL lánc
 a koinoban?** Claude javasolt válasza: CSAK A TARTÓS MAGRA (regisztráció-bizonyítékok,
-szavazás-eredmények bizonyítékokkal, egyezmények); a tartalmi réteget a
+szavazás-eredmények bizonyítékokkal, szerkesztési és általános egyezmények); a tartalmi réteget a
 tudatpont-replikáció viszi. A levélbeli állítás rétegzett védelemmé bontandó
 (támadás→védő réteg táblázat a vita-naplóban hivatkozott körben).
 
@@ -370,15 +370,15 @@ folytatódjon.
 **További tisztázások (2026-07-16):**
 - **Valóság-probléma:** Csaba — a forráskód esetében a teljesülés ellenőrizhető és
   automatizálható (Claude: igen — az elfogadott kód hash-e összevethető a futóval);
-  a való világot az emberek ellenőrzik, nem a program; kassza-mozgató egyezmény
+  a való világot az emberek ellenőrzik, nem a program; kassza-mozgató szerkesztési egyezmény
   végrehajtása a láncon kikényszeríthető (a pénz a láncon él) — ez az egyetlen
   automatizálható való-világ-kar.
-- **Egyezmény-elavulás ↔ tartós mag feszültség** (Csaba: az egyezmény elavulhat,
-  tudatpontja csökken, törlődhet — DE a D3 szerint az egyezmény nem veszhet el).
+- **Egyezmény-elavulás ↔ tartós mag feszültség** (Csaba: az általános egyezmény elavulhat,
+  tudatpontja csökken, törlődhet — DE a D3 szerint az általános egyezmény nem veszhet el).
   **Claude javasolt feloldása (D8-jelölt, Csaba megerősítésére vár): TÉNY ↔ HATÁLY
   szétválasztása** — a tény („akkor, ott, érvényesen megszületett") a láncon örökre;
   a hatály (érvényben van-e, mennyire él) a tartalmi rétegben, tudatpont-vezérelten
-  elavulhat/felülíródhat. Egy egyezmény lehet hatályát vesztett, de soha nem
+  elavulhat/felülíródhat. Egy általános egyezmény lehet hatályát vesztett, de soha nem
   meg-nem-történt. A lánc a levéltár, a tartalmi réteg az élő jog.
 
 **Státusz:** ✅ MEGOLDVA (2026-07-16) — a „manipuláció ellen véd" állítás rétegzett
@@ -465,7 +465,7 @@ valódi külső pénz ambíció (ez dönti el a tervezés irányát és a jogi �
   elengedése — az érték ne az árfolyam legyen, hanem hogy egyre több mindent lehet vele
   csinálni.
 - **(2) SORREND-VITA:** Csaba sorrendje (befektetés → feladatok → fiat-leváltás) helyett
-  Claude javaslata: **belső feladat-gazdaság ELŐSZÖR** (a pénz fedezete a közösség
+  Claude ajánlása: **belső feladat-gazdaság ELŐSZÖR** (a pénz fedezete a közösség
   munkája — a feladatvállalásért kapott pénz a legőszintébb fedezet) → külső elfogadás →
   (talán) fiat-alternatíva. A „befektetési szakasz" kihagyandó.
 - **(3) ÚJ SÚLYOS KOCKÁZAT — a pénz felfegyverzi a Sybil-támadást:** egyenlő osztalék
@@ -535,7 +535,7 @@ identitás-réteg éles bizonyítása után?
 de nincs pénze befektetni, az a MUNKÁJÁVAL fektet be, és felelősen vállalja a
 kockázatot — az emberek elég tájékozottak a kriptovilágról; idővel a koino
 stabilizálódik, az évi százalék alkotmánymódosítással felülírható, és addigra a
-koino „önfejlesztő" jellege (egyezmények mentén) fejlettebb döntési rendszert adhat.
+koino „önfejlesztő" jellege (szerkesztési és általános egyezmények mentén) fejlettebb döntési rendszert adhat.
 (2) A hozam-ígéretről: „nem tervezem ígérni." (3) Világpénz: sosem mondta ki —
 „szinte minden logikai levezetésem »ha ez, ha az« előtaggal indul."
 
@@ -579,7 +579,7 @@ Trump-féle béketanács".
   írva kockázatos (előre kiosztott szerep).
 - Helyesírási hibák (pl. „tettszik", „kőrben", „tőrtényen", „ugyan annyi") rontják az
   első benyomást — átnézés javasolt küldés előtt.
-- Claude javaslata a következő lépésre: nem pártot célozni, hanem a civil-tech és
+- Claude ajánlása a következő lépésre: nem pártot célozni, hanem a civil-tech és
   kutatói közeget (a Decidim/Polis-féle rendszereket ismerő szakemberek érdemi
   visszajelzést adnak, és egy későbbi intézményi megkeresés is erősebb lesz velük).
 
@@ -624,14 +624,14 @@ világbéke-bekezdés/Trump/Brüsszel a tervezetből kimaradt — Csaba dönt a 
 FORRÁSKÓDRA közvetlenül kell tudnia hatni — ezt a kérdést külön vitatjuk meg.
 
 **Claude előzetes jegyzete:** ez lesz az egyik legnehezebb kérdés — elosztott rendszerben
-a „ki futtatja milyen kódot" maga az alkotmányossági probléma (kód-módosítási javaslatok
+a „ki futtatja milyen kódot" maga az alkotmányossági probléma (a kód módosítására tett szerkesztési javaslatok
 elfogadása ↔ ki kényszeríti ki, hogy a csomópontok az elfogadott kódot futtassák; forkok
 kezelése; hibás/rosszindulatú frissítés elleni védelem). A blokklánc-világban ez a
 „governance/hard fork" problémakör, sok tanulsággal.
 
 **Claude kifejtése (2026-07-16):** a „közösség hat a forráskódra" öt lépcsőre bomlik,
 és mindegyiknek más a nehézsége:
-1. **Javaslat** — a kód-módosítás javaslatként él a fában → a koino meglévő mechanizmusa
+1. **Szerkesztési javaslat** — a kód-módosítás szerkesztési javaslatként él a fában → a koino meglévő mechanizmusa
    kezeli. ✔ (Elegáns lehetőség: a kód-entitások NAGYON magas küszöbértékekkel =
    természetes „alkotmányosság" — a koino küszöb-rendszere ezt már tudja.)
 2. **Értékelés** — KI TUD hozzáértően megítélni egy kód-módosítást? A nem-programozó
@@ -690,12 +690,12 @@ a kód feletti döntést a közösségnek?
    kezdetben mindkét ágon létezik. **Társadalmi gravitáció:** a koino értéke az emberek,
    nem a kód → fork ritka és drága, a közösség zöme egy ágon marad; a fork-jog mint
    sztrájkjog — az ereje a létezése, nem a gyakorlása. A „minden nap újraválasztott
-   entitás" a gyakorlatban: az e-emberek 99,9%-a csak futtatja az egyezmények szerint
+   entitás" a gyakorlatban: az e-emberek 99,9%-a csak futtatja a szerkesztési egyezmények szerint
    frissülő klienst.
 4. **Bootstrap:** már az 1. fázisban is mindent egyeztet a közösséggel, csak támogatás
    esetén vezet be, és az ellenjavaslata ellenére kért fejlesztést is megcsinálja —
    „ezt nem tudom garantálni, csak ígérni"; a P2P-nek technikailag is függetlenednie
-   kell a többlet-jogaitól. Claude javaslata: az ígéret NYILVÁNOS DOKUMENTUMKÉNT
+   kell a többlet-jogaitól. Claude ajánlása: az ígéret NYILVÁNOS DOKUMENTUMKÉNT
    (kormányzási ígéret — mit dönt egyedül / mihez kell támogatás / mi történik
    ellenjavaslat esetén) → számonkérhetővé válik; az átláthatóság pótolja a garanciát
    a P2P-ig.
@@ -744,7 +744,7 @@ eszmecserét/gondolkodást".
    Egészség/Etika/Politika alá?); a koinoban a besorolást a többség dönti el → a fa a
    TÖBBSÉG világképét tükrözi, a kisebbségi keretezések rosszul férnek bele. Őszinte
    megfogalmazás: nem „igazságosan rendezhető", hanem „a többség által, átlátható
-   eljárásban rendezett". (Enyhítők: áthelyezés/egyesítés javaslatok mint javító-eszközök;
+   eljárásban rendezett". (Enyhítők: áthelyezés/egyesítés szerkesztési javaslatok mint javító-eszközök;
    az entitás-hivatkozás a fát csendben gráffá tágítja — jó, mert a gondolkodás gráf.)
 2. **A struktúra súrlódás, a súrlódás részvételt öl** — precedens: a Kialo évek óta
    fa-struktúrában rendez érveket, és nem emelte új szintre a közbeszédet; az emberek
@@ -753,7 +753,7 @@ eszmecserét/gondolkodást".
 
 **Ami állva marad:** a Kialo-féle elődöknek volt struktúrája, de NEM volt: hitelesített
 ember (nem bot vitázik) + tét (véges tudatpont — a figyelem-gazdaságot prioritás-gazdaság
-váltja) + LEZÁRÁS (a vita egyezményben végződhet). **A fa önmagában nem emel új szintre
+váltja) + LEZÁRÁS (a vita általános egyezményben végződhet). **A fa önmagában nem emel új szintre
 semmit — a kombináció (fa + identitás + tét + lezárás) viszont olyan kísérlet, amit még
 senki nem futtatott le.** A GYENGE változat („megalapozott hipotézis, a koino a
 kísérlet") védhető és a kutatási tervbe való; az ERŐS változat a levelekbe nem való.
@@ -775,7 +775,7 @@ megalapozott:
    prioritás-keret, ami NEM szavazaterő) — rokon irányokat komoly kutatási közösségek
    vizsgálnak (conviction voting, kvadratikus szavazás, RadicalxChange). Valódi, saját
    hozzájárulás; tudatos válasz a platformok aktivitás-jutalmazó torzítására.
-2. **A javaslat → küszöbérték → egyezmény folyamat és a bizonyossági mutató** — értelmes,
+2. **A (szerkesztési vagy általános) javaslat → küszöbérték → egyezmény folyamat és a bizonyossági mutató** — értelmes,
    védhető mechanizmus.
 3. **Az alapállítás bizonyítottan megvalósítható:** közösségek központi szereplő nélkül,
    szoftveres támogatással egyezségre tudnak jutni — működő példák: Decidim (Barcelona),
@@ -830,7 +830,7 @@ előtt is vállalható. A 8. pont (levelek átdolgozása) közvetlen alapanyaga.
 
 - **2026-07-15** — A fájl létrejött Claude elemzése alapján. Mind a 8 pont 🆕 NYITOTT.
   A kódírás felfüggesztve, amíg a 🔴 pontokra nincs megoldás.
-- **2026-07-15 (2. kör)** — Csaba megoldási javaslatai az 1. és 3. ponthoz:
+- **2026-07-15 (2. kör)** — Csaba megoldási ajánlásai az 1. és 3. ponthoz:
   **1. pont** → meghívásos bizalmi háló + közösség által felhatalmazott
   meghívó-kibocsátók (kormánynál nincs többlet-adat) — Claude: életképes irány
   (Duniter-előzmény), 2 nyitott alkérdés (összejátszás-szabályok,
@@ -850,11 +850,11 @@ előtt is vállalható. A 8. pont (levelek átdolgozása) közvetlen alapanyaga.
   entitás annyi helyen él, ahány tulajdonosa; közösségi felejtés) — Claude: elegáns,
   részleges válasz a skálázásra, DE (1) a GDPR-törlés egyéni jog, a replikáció pont a
   védett gondolatoknál áll ellen; (2) két adatosztály következik: tartalmi réteg (jól
-  működik) + TARTÓS MAG (regisztrációk, eredmények, egyezmények — itt él tovább a jogi
+  működik) + TARTÓS MAG (regisztrációk, eredmények, szerkesztési és általános egyezmények — itt él tovább a jogi
   ütközés; ÚJ alkérdés: kilépési jog kontra örök elszámoltathatóság); (3) a P2P-törlés
   kikényszeríthetetlen — becsületes ígéret: „nem replikáljuk tovább", nem „megsemmisült".
 - **2026-07-16 (4. kör)** — **2. pont: Csaba válasza** — (1) adaptív küszöbök: a medián
-  alapból csak a létrehozó érték javaslatát tartalmazza, az aktívak új javaslatokkal
+  alapból csak a létrehozó érték javaslatát tartalmazza, az aktívak új érték javaslatokkal
   csökkenthetik az alvó entitás küszöbét; a kinyilvánított-de-passzív preferencia
   tudatos gátlás, indokolt; (2) hatókör-szűkítés: a koino egyelőre szándék-JELZŐ, nem
   döntésbe kötött. Claude: az elv elegáns (tudatpont=tartós prioritás, érték
@@ -881,14 +881,14 @@ előtt is vállalható. A 8. pont (levelek átdolgozása) közvetlen alapanyaga.
   **D5** (lánc = tartós mag), **D6** (személyes adat soha a láncra), **D7** (személy-alapú
   konszenzus mint kutatási irány) a Fázis 2 tervbe. Claude pontosítás: a lánc-szintű
   GDPR-ütközés megoldva, az N2 (kilépés) normál tervezési feladatként nyitva. ÚJ
-  D8-JELÖLT (megerősítésre vár): egyezménynél TÉNY (láncon, örök) ↔ HATÁLY (tartalmi
+  D8-JELÖLT (megerősítésre vár): általános egyezménynél TÉNY (láncon, örök) ↔ HATÁLY (tartalmi
   rétegben, elavulhat) szétválasztása — feloldja az egyezmény-elavulás ↔ tartós mag
   feszültséget. ÚJ **10. pont**: Csaba állítása a fa-struktúrás kommunikációról → Claude
   részleges cáfolata (fa=keretezési hatalom; struktúra-súrlódás; Kialo-precedens) + a
   védhető gyenge változat (a KOMBINÁCIÓ — fa+identitás+tét+lezárás — le nem futtatott
   kísérlet). **9. pont 🔜 KÖVETKEZŐ** (Csaba kérése; Claude egyetért: nyitottabb probléma,
   mint az identitás).
-- **2026-07-16 (8. kör)** — **9. pont: Claude kifejtése** (öt lépcső: javaslat ✔ /
+- **2026-07-16 (8. kör)** — **9. pont: Claude kifejtése** (öt lépcső: szerkesztési javaslat ✔ /
   értékelés-aszimmetria / döntés ✔ / bevezetés=fork-probléma, a legnehezebb / sürgősségi
   út + bootstrap; részmegoldások: időzár, őrök, Tezos-tanulságok, reprodukálható build;
   elegáns lehetőség: kód-entitások magas küszöbbel = alkotmányosság). 4 kérdés Csabához:
@@ -897,15 +897,15 @@ előtt is vállalható. A 8. pont (levelek átdolgozása) közvetlen alapanyaga.
   ELISMERÉS entitástípus (beleegyezéssel aggatható — az értékelés-középút és a
   kinevezési rendszer alapja), kinevezési rendszer a vészhelyzeti úthoz. Claude
   magyarázatai: **konszenzuális önfrissítés (D9-JELÖLT)** — a program IGENIS frissíti
-  magát az egyezmény szerint (alapértelmezett, hash-ellenőrzött, időzáras), a korlát
+  magát a szerkesztési egyezmény szerint (alapértelmezett, hash-ellenőrzött, időzáras), a korlát
   tulajdonjogi, nem technikai, és ez biztonsági szelep; **fork-mechanika** — a történelem
   lemásolódik, nem oszlik meg; társadalmi gravitáció (a fork-jog mint sztrájkjog).
-  Bootstrap: Csaba ígéret-alapú átmenete + Claude javaslata: NYILVÁNOS kormányzási
+  Bootstrap: Csaba ígéret-alapú átmenete + Claude ajánlása: NYILVÁNOS kormányzási
   ígéret dokumentum. Zárásra vár: Csaba megerősítése + D9-döntés.
 - **2026-07-16 (10. kör)** — **9. pont ✅ MEGOLDVA (elvi szinten):** Csaba megerősítette
   a magyarázatokat, D9 ELFOGADVA, kormányzási ígéret → H7 (későbbre feljegyezve).
   A „megoldva" háromszintű tisztázása a státuszban (vita-szint: igen / tervezés: félig
-  / bizonyítás: csak élesben). Claude javaslata: az 1. és 3. pont is zárható lenne
+  / bizonyítás: csak élesben). Claude ajánlása: az 1. és 3. pont is zárható lenne
   ugyanígy — a maradék részfeladatok N4/N3-ba és a 8. pontba átvezetve (Csaba döntésére
   vár).
 - **2026-07-16 (11. kör)** — Csaba három IGEN-je: **D8 MEGERŐSÍTVE** (tény↔hatály),

@@ -16,7 +16,7 @@
 > entitás-modell, a titkosított csere, a két tár, a címjegyzék, a kérelem, az identitás a szeletelt világban, a
 > szigorú (b) és a társankénti emlékezet a lánc-körrel. ✅ **A terep** (72–73. mérés, D99): PC és mobil két külön
 > címen. ✅ **A ház (D100)**: a felület paklija a prototípus láncos-testvéres nézete, a kérelemből töltve.
-> **1056 önpróba.** ⏭️ **A következő Csabáé:** a maradék modálok (5.8 — javaslat: előbb átvizsgálás; a Keresés a
+> **1056 önpróba.** ⏭️ **A következő Csabáé:** a maradék modálok (5.8 — ajánlás: előbb átvizsgálás; a Keresés a
 > kereső-rétegre épül, ami még nincs), a terep két mobillal (a 🅱️), vagy az „UTÁNA” lista. A részletek a
 > [`CLAUDE.md`](../CLAUDE.md) „SESSION-VÁLTÁS (2026-10-11)" blokkjában.
 >
@@ -111,7 +111,7 @@
 > a 2. lépcső drága, mert ott a zsákmány; és a védelem egyikben sem a kapu, hanem hogy a
 > rossz tanúsító elveszíti a szerepét.*
 >
-> - **1. lépcső:** egy meghívó → tag, és **minden mehet** (gondolat, tudatpont, javaslat,
+> - **1. lépcső:** egy meghívó → tag, és **minden mehet** (gondolat, tudatpont, szerkesztési vagy általános javaslat,
 >   szavazat).
 > - **2. lépcső:** három tanúsítás felhatalmazott tanúsítótól → **pénztárca**. Ez a **D11**.
 > - **A felhatalmazást csak 2. lépcsősök adják**, emberenként egyet; a küszöb **kimondott
@@ -203,7 +203,7 @@ két táblázattal lejjebb „megépítve". Aki szakaszt zár, ezt a szakaszt is
 
 | Mi | Állapot |
 |---|---|
-| **A domain-logika** — tudatpont, javaslat, szavazás, küszöbök, egyezmény mint **számítás** | ✅ kész, és **nem változik** |
+| **A domain-logika** — tudatpont, szerkesztési vagy általános javaslat, szavazás, küszöbök, szerkesztési vagy általános egyezmény mint **számítás** | ✅ kész, és **nem változik** |
 | **A szabály-réteg** (`szabalyok.js`), a determinizmus, az egész aritmetika | ✅ kész |
 | **A szállítás** — TCP, UDP, **pajzsfúrás CGNAT-on át**, kapunyitás, postaláda, helyi felfedezés, társ-lista | ✅ kész, **és érintetlen maradt** |
 | **A szerkezet** (Szakasz 3) — kanonikus alak 4 mezővel, **kérdezhető tár-illesztő**, böngésző-lekérés | ✅ kész (2026-09-03) |
@@ -248,7 +248,7 @@ alapján jön)
 
 | # | Szakasz | Állapot | Mire jó |
 |---|---|---|---|
-| **1** | **A helyi modell** — esemény, lánc, állapot, szabály, javaslat | ✅ **kész** | a koino gondolkodása |
+| **1** | **A helyi modell** — esemény, lánc, állapot, szabály, szerkesztési vagy általános javaslat | ✅ **kész** | a koino gondolkodása |
 | **2** | **A szállítás** — hogy két készülék egyáltalán összeérjen | ✅ **kész** | ⭐ *(A neve eddig „csere" volt; a munka valójában a szállításról szólt, és az elkészült.)* |
 | **3** | **A SZERKEZET** — az esemény alakja, a tár illesztése, az elérés | ✅ **kész** (2026-09-03) | ettől lett a koino skálázható **szerkezetében** |
 | **4** | **AZ IDENTITÁS** — ⭐ **két lépcsős beléptetés**, kontraszt-jelzés, visszavonás, bemutatkozás ([terv](szakasz4_terv.md) 9/c) | ✅ **megépítve** (2026-09-06) | ettől lesz **hiteles** |

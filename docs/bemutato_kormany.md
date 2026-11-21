@@ -49,11 +49,11 @@ párbeszéd.
   történjen a program fejlesztése.
 
 Amint elkészült a kezdeti verzió, és létrejött az első közösség, én sem leszek több,
-mint bárki más. Én is tehetek javaslatot, én is fogok szavazni, de az irányt nem én
+mint bárki más. Én is tehetek szerkesztési vagy általános javaslatot, én is fogok szavazni, de az irányt nem én
 határozom meg.
 
 - **Önkormányzás.** A koino szabályait — hosszú távon magát a forráskódját is — a
-  közössége alakítja, javaslatok és egyezmények útján. A demokráciát három területre
+  közössége alakítja, szerkesztési és általános javaslatok és egyezmények útján. A demokráciát három területre
   szeretné elvinni: a közéleti párbeszédbe (hiteles szándék-jelzésként), az online
   térbe (közösen irányított felületként), és — távlatban, szigorú feltételekkel —
   a pénzügybe.
@@ -69,15 +69,15 @@ létrehozott gondolattípusok adnak, mint például kérdés, válasz, témakör
 feladat, feladatvállalás. A regisztráció meghívásos alapon működik.
 
 A létrehozott gondolatok felett azok rendelkeznek, akik tudatpontot rendeltek hozzájuk.
-Ők képesek javaslatot tenni módosításra, áthelyezésre, törlésre vagy több gondolat
+Ők képesek szerkesztési javaslatot tenni módosításra, áthelyezésre, törlésre vagy több gondolat
 egyesítésére, például hasonlóság miatt. Minden gondolatnak vannak küszöbértékei,
 amelyek meghatározzák, mekkora támogatottság és mekkora részvételi arány szükséges
-ahhoz, hogy egy javaslat elfogadásra kerüljön, és egyezmény legyen belőle. Továbbá
+ahhoz, hogy egy szerkesztési vagy általános javaslat elfogadásra kerüljön, és szerkesztési vagy általános egyezmény legyen belőle. Továbbá
 minimum és maximum döntési idővel is rendelkeznek — ezek az értékek határolják be egy
-javaslat döntési idejét.
+szerkesztési vagy általános javaslat döntési idejét.
 
 Azt, hogy a minimum vagy a maximum időhöz közelít-e a döntés, a bizonyossági mutató
-határozza meg. Ha egy javaslatnak jóval nagyobb a támogatottsági aránya, mint az
+határozza meg. Ha egy szerkesztési vagy általános javaslatnak jóval nagyobb a támogatottsági aránya, mint az
 ellenzői aránya (vagy fordítva), és a részvételi arány is magas, akkor hamarabb eljön
 a döntés ideje. Ha viszont közel egyenlő a támogatás és az ellenzés, és a részvétel is
 alacsony, akkor tovább tart a döntés. Az értékeket is közösen határozzák meg a
@@ -92,8 +92,8 @@ kutatás-fejlesztési feladat — részletes terve elkészült, a legfontosabb e
 - **A tudatpont tárolási vállalás is.** Minden entitást azok a készülékek tárolnak,
   amelyek tulajdonosai tudatpontot rendeltek hozzá. Amivel senki nem törődik, az
   elenyészik; ami sokaknak fontos, azt sokan őrzik — központi archívum nélkül.
-- **Tartós mag:** a regisztráció-bizonyítékok, a szavazási eredmények és az
-  egyezmények külön, mindig és mindenhol replikált rétegben élnek — a megszületett
+- **Tartós mag:** a regisztráció-bizonyítékok, a szavazási eredmények és a
+  szerkesztési és általános egyezmények külön, mindig és mindenhol replikált rétegben élnek — a megszületett
   megállapodás nem veszhet el és nem hamisítható meg. Ebbe a rétegbe személyes adat
   soha nem kerül, csak olyan kriptográfiai bizonyíték, amelyből az adat nem
   állítható vissza.
@@ -107,7 +107,7 @@ kutatás-fejlesztési feladat — részletes terve elkészült, a legfontosabb e
   megőrzik, és a jövőjükről külön-külön döntenek. Ez nem hiba, hanem a végső
   biztosíték arra, hogy a koinot senki — én sem — sajátíthatja ki.
 
-A koino nem kriptovalutával kezdődik: először döntéshozatalt építünk és egyezményeket
+A koino nem kriptovalutával kezdődik: először döntéshozatalt építünk és szerkesztési és általános egyezményeket
 hozunk létre — de ha a közösség úgy dönt, létrejöhet az első olyan pénz, amelyet a
 közössége felügyel.
 

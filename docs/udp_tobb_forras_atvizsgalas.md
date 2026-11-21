@@ -49,7 +49,7 @@ a mai kóddal is áll: a forrás a szűk ×1,6 / ×2,0 (2 / 3 forrás), a saját
 
 ⭐ A közös munkamegosztás ezt magától zárja ki: egy eltolást egyszerre egy ág kér, a lezárást egy ág végzi.
 
-## 4. A javaslat
+## 4. Az ajánlás
 
 - **T1 — ⭐ KÖZÖS MUNKA LENYOMATONKÉNT, a folyamaton belül** (a hiba javítása és a több forrás alapja): egy jegyzék
   (`lenyomat → { munka, ágak, adók }`), amit minden fájl-hozatal megkap — a randevú, a kérelem törzse (a felderítésé is);

@@ -18,7 +18,7 @@ a `KESZ` + `kesobb`). ⛔ Az ismeretlen ÜZENET viszont a párbeszéd közepén 
 látszik — a másik csak annyit tud, hogy „a társ nem válaszol” (90. mérés). Ami a legveszélyesebb: ha egy **közös számítás**
 változik (a szelet-halmaz, egy lenyomat, egy DHT-téma), arra semmilyen hiba nem jön — a két program csendben mást hasonlít össze.
 
-⭐ A javaslat (5.): **minden munka első üzenete kimondja a nyelvváltozatot** (`ny`: a legrégebbi és a legújabb, amit a program
+⭐ Az ajánlás (5.): **minden munka első üzenete kimondja a nyelvváltozatot** (`ny`: a legrégebbi és a legújabb, amit a program
 beszél), mindkét fél ugyanabból a két számból ugyanazt a közöset számolja (új üzenet nélkül), és ha nincs közös, **mindkét fél
 megnevezett hibával áll meg**, és a lap kimondja, ki a régebbi. Új változat csak valódi törésnél kell (a bővítés jellel megy, mint
 eddig); a régit a program a **szélén fordítja**, a régi közös számításokat egy jegyzékben tartja, egy kimondott dátumig.
@@ -81,7 +81,7 @@ Két mai program cserél a védett UDP-résen (mint az őrjáratban); az egyik a
 ⭐ Ebből: **a jel bevezetése maga nem törés** — a mai program elviseli; a jövőbeli programnak viszont tudnia kell, kivel beszél,
 MIELŐTT új lépést tesz, különben a hiba az ő oldalán néma.
 
-## 5. A javaslat
+## 5. Az ajánlás
 
 **① A jel.** A program egy helyen mondja ki, melyik nyelvváltozatokat beszéli: a legrégebbit és a legújabbat (`ny: [1, 1]` — a mai
 nyelv az **1-es**; aki nem küld jelet, az is 1-es, vagyis a mai és a régebbi programok mind). A jel **minden munka első üzenetében**

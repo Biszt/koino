@@ -53,7 +53,7 @@ legalább egy gép eltárolta a bejelentést (`koino.js` — a `bejelentve` a t�
 - ⚠️ *Nem e terv tárgya:* a kifelé látszó port a STUN-é — egy cél-függő (szimmetrikus) NAT mögött más porton megy ki a csomag, és a
   résfúrás így nem sikerülne. Ennél a szolgáltatónál működött; a két mobil közötti eset (🅱️) változatlanul nyitott.
 
-## 4. A javaslatok (Csaba elfogadta az irányt: a gyakoribb keresést, a zaj szűrését és a megbízhatóbb keresést)
+## 4. Az ajánlások (Csaba elfogadta az irányt: a gyakoribb keresést, a zaj szűrését és a megbízhatóbb keresést)
 
 - **M1 — a keresés megbízhatóbb (F1):** egy körben ugyanazt a rekeszt **többször** kérdezzük (pl. 3×, rövid szünettel, más-más
   belépési pontról indulva), és az eredményeket **egyesítjük**; a bejelentő pedig a bejelentés után **egy ellenőrző kereséssel** nézi,

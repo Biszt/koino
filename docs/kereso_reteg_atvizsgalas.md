@@ -2,7 +2,7 @@
 
 > A D101 (M4) szerint a Keresés modálja a **helyi aljára** épült (⑤ — a készüléken ismert entitások címében), a hálózati
 > **megtalálás** pedig külön alappillér, saját átvizsgálással. Ez az átvizsgálás. Építés nincs benne; a végén a kérdések
-> (D-szintűek, Csabáéi), javaslattal.
+> (D-szintűek, Csabáéi), ajánlással.
 
 ## 1. A kérdés
 
@@ -73,7 +73,7 @@ A kérdés: ~3 KB DHT + egy kérelem (a válasz méretével). ⚠️ **A késés
 kopogtatás percekig tart (74. mérés) — a kereső-réteg ezért nem lesz „gépelés közbeni” kereső, hanem *„kérd, és jön”*
 (a lap ezt kimondja, mint a pakli: „keresem”).
 
-## 5. A kérdések — javaslattal (D-szintűek, Csabáéi)
+## 5. A kérdések — ajánlással (D-szintűek, Csabáéi)
 
 **K1. A szelet-megtalálás: hash vagy bizalmi háló? (SK7)**
 - **(A) ⭐ Hash szerinti elhelyezés a meglévő DHT-n (a gyökér-darab mintája), a társak a bizalmi hálóból — ezt
@@ -172,7 +172,7 @@ mérje.
 > Csaba: *„minden javaslatodat elfogadom, »Javaslatom: (A), most tágítsuk, például 48 bitre (ez gyakorlatilag
 > végtelen).« ezt leszámítva, addig, ameddig át nem pontosítjuk, a gyakorlatilag végtelen fogalmat.”*
 
-A K1–K7 a javaslat szerint — az átbeszélés két új szempontjával:
+A K1–K7 az ajánlás szerint — az átbeszélés két új szempontjával:
 - **K1 (A)** — hash szerinti elhelyezés a meglévő DHT-n, több tartó, egyesítés.
 - **K2 (C)** 🆕 — minden szó KÉT kulcs alatt: az egész szó és az első négy betűje (a négynél rövidebb szó csak egészében).
   A kérdés a szóeleje-fiókot (az őrző a címekben a kérdezett szóelejére szűr) és a pontos alak fiókját kérdezi. ⭐ Az ok: a
@@ -253,23 +253,23 @@ háttérben; előtte a 10. szakasz kérdése) → ⑤ a kérdés → ⑥ a halv�
 
 **A kérdés.** A bejegyzés a gondolat születése (`GondolatLetrehozas` — aláírt, a címmel): a tartó maga ellenőrzi, hogy a
 cím tartalmazza a szót. De a címet egy elfogadott szerkesztési egyezmény (módosítás, egyesítés) átírhatja
-(`szerkesztesiVegrehajtas.js`), és az új cím nem a születésben áll: a módosítási javaslat hordozza (aláírva), az
-ELFOGADÁSA viszont számított (D17) — egyetlen aláírt esemény sem mondja ki, hogy a javaslat nyert.
+(`szerkesztesiVegrehajtas.js`), és az új cím nem a születésben áll: a szerkesztési javaslat (módosítás) hordozza (aláírva), az
+ELFOGADÁSA viszont számított (D17) — egyetlen aláírt esemény sem mondja ki, hogy a szerkesztési javaslat nyert.
 
 ⭐ **Pontosítás (Csaba kérdésére, 2026-10-16):** a TULAJDONOSOK készülékén a gondolat címe a lezárás után az új — a
 számítás (a szerkesztési végrehajtás) rávezeti az entitásra, mert náluk megvan a döntés minden bemenete (a gondolat és a
-javaslat szelete, a szavazatok). Új esemény nem születik (a tár csak hozzáfűz — a cím a számításból jön). A kérdés tehát nem
+szerkesztési javaslat szelete, a szavazatok). Új esemény nem születik (a tár csak hozzáfűz — a cím a számításból jön). A kérdés tehát nem
 az, hogy KI tudja az új címet — a tulajdonosok tudják —, hanem hogy a kereső TARTÓJA (egy véletlen készülék a szó régiójában,
 ami a gondolat szeletét nem tartja) hogyan ellenőrizze. Kiszámolni nem tudja (ahhoz a döntés összes bemenete kellene),
 csak az aláírásokat látja. ⭐ Ezért illik ide az (A): a felajánló és a 30 naponkénti megújító a tulajdonos (K4–K5), aki a
-mai, számított címet ismeri — ő ajánlja fel a születést a címet adó javaslattal; a régi cím bejegyzését többé nem újítja,
+mai, számított címet ismeri — ő ajánlja fel a születést a címet adó szerkesztési javaslattal; a régi cím bejegyzését többé nem újítja,
 így az 30 nap alatt elhalványul.
 
-- **(A) ⭐ A bejegyzés a születés + a címet adó javaslat; a tartó az elfogadást NEM ellenőrzi, a kérdező a találat után igen
-  — ezt javaslom.** A tartó ellenőrzi az aláírásokat, hogy a javaslat erre a gondolatra szól, és hogy a (javasolt) cím
+- **(A) ⭐ A bejegyzés a születés + a címet adó szerkesztési javaslat; a tartó az elfogadást NEM ellenőrzi, a kérdező a találat után igen
+  — ezt javaslom.** A tartó ellenőrzi az aláírásokat, hogy a szerkesztési javaslat erre a gondolatra szól, és hogy a (javasolt) cím
   tartalmazza a szót; a kérdező a találatot elkéri, és a gondolat VALÓDI, számított címével szűr (a kereső a MEGTALÁLÁS
   rétege, nem dönt semmiről — D105, 5.7). A régi cím a megújításkor kiesik (K5: a tartók a MAI címet újítják, 30 nap). Ára:
-  egy el nem fogadott javaslat címe is felkerülhet, ha valaki felajánlja — a K3 (két tag-tulajdonos) és a kérdező szűrője
+  egy el nem fogadott szerkesztési javaslat címe is felkerülhet, ha valaki felajánlja — a K3 (két tag-tulajdonos) és a kérdező szűrője
   fogja meg.
 - **(B) Csak a születés címe** — egyszerű, de az átnevezett gondolat az új nevén soha nem található meg.
 - **(C) A bejegyzés mellé a döntés bizonyítéka** (a lezárási összegzés — D95/1) — pontos, de drága (60–70 KB döntésenként,
@@ -284,7 +284,7 @@ mai, számított címet ismeri — ő ajánlja fel a születést a címet adó j
 
 **Ami a kódból kiderült.** (1) A csak küldő út (`osszegzoTartas.js` `sajatKuldo`) ma csak a SAJÁT eseményeimet ajánlja fel
 — a kereső-bejegyzést viszont a gondolat TULAJDONOSA ajánlja fel (K9), aki nem feltétlenül a szerző, és nem egy eseményt,
-hanem egy CSOMAGOT: a születés + a címet adó javaslat (K9) + két tag-tulajdonos pont-eseménye (K3). (2) A gyökér-darab
+hanem egy CSOMAGOT: a születés + a címet adó szerkesztési javaslat (K9) + két tag-tulajdonos pont-eseménye (K3). (2) A gyökér-darab
 (D95/4) születései a tartós tárban élnek (a tömörítés megtartja őket) — de ott csak születések vannak, pont-események nem. Ha
 a kereső-csomag pont-eseményei a tartós tárba kerülnének, a saját állapotom egy NEM tartott gondolatra részleges össz-pontot
 számolna (két tulajdonos pontját látná, a többit nem). (3) A régió tartói a DHT-n a régió témáján találhatják meg egymást, és
@@ -320,7 +320,7 @@ tartótól visszajöhet — a „temető” (5.7) a hátsó ajtón.
 
 **L4. A felajánlás útja (④)**
 - **(A) ⭐ A kérelem gépén, egy új fajtával — ezt javaslom** (`FELAJANLAS`): a tulajdonos a régió tartóit a DHT-n keresi és
-  bekopogtat (a függő kérelem gépe — D92/1, K4), és átadja a csomagot (a születés, a címadó javaslat, a két pont-esemény, a
+  bekopogtat (a függő kérelem gépe — D92/1, K4), és átadja a csomagot (a születés, a címadó szerkesztési javaslat, a két pont-esemény, a
   megújítás; a tagsági kísérőket a tartó kéri, ha kell — D95/2). A tartó mindent ugyanazon a kapun ellenőriz, és a
   kereső-tárába teszi; ha a fiók osztódott (K7), ezt kimondja, és a felajánló a darab régiójába viszi.
 - **(B) A csak küldő út kiterjesztése** a mások eseményeire: a csere minden körében utazna egy újabb lista — a „nincs
@@ -347,7 +347,7 @@ tartó gondolatonként és fiókonként a legfrissebbet tartja, a régi kiesik �
 tábla-aláírómból számolja); a legsekélyebb közös eltérő régió az eltérők közé kerül, a tartomány-egyeztetés a
 bejegyzés-azonosítókon fut, az átadás `BEJEGYZES` üzenettel (a teljes bejegyzés, a keret maradékáig — D109). A fogadó a
 KERESŐ-TÁRBA teszi: minden esemény ugyanazon a kapun (`esemenyMentese` a kereső-tár három műveletével — 3. szabály), és a
-bejegyzés alakja ellenőrizve (a `k` a cím kulcsa — a születésé, vagy a javaslaté —, a hely a közös régióba esik, a
+bejegyzés alakja ellenőrizve (a `k` a cím kulcsa — a születésé, vagy a szerkesztési javaslaté —, a hely a közös régióba esik, a
 pont-események erre a gondolatra szólnak, pozitívak, különböző szerzőktől). ⏸️ A tagság (K3) a ④-ben, a tagsági kísérők
 gépével (gyorsítótárral — 75. mérés: 4096 szerző).
 
@@ -521,7 +521,7 @@ NAT-os esetben a nyitott ablak magától frissült, amikor az őrjárat a talál
 
 **A lelet** (a ⑦ böngészős próbájában): a találat egy bejegyzés — a születés (a címmel) és legalább két tulajdonos
 pont-eseménye. A kártya megnyílik (a cím, a tulajdonosok, a pontok), de a többi része — a szöveg (a szöveg-darab), a
-gyerekek, a javaslatok — a gondolat SZELETÉNEK tartójától jönne, és egy friss készülék ma nem éri el: a raj-jegyzéke semmit
+gyerekek, a szerkesztési és általános javaslatok — a gondolat SZELETÉNEK tartójától jönne, és egy friss készülék ma nem éri el: a raj-jegyzéke semmit
 nem tud róla; a szelet DHT-témáját csak az hirdeti, aki ezt beállította (`cimjegyzek hirdetes <n>` — a D91/3 szerint
 **alapból 0**, mert egy telefonon 100 szelet ~65 MB/nap volna); a lap függő kérelmének kopogtatója a szelet témájának párja,
 amit csak a hirdetők figyelnek. A felület ki is mondja: *„a hiányzó részek tartóit még keresem (nincs ismert társ, aki
@@ -549,7 +549,7 @@ gondolattal, amelynek a tartóit a raj nem ismeri — a keresés teszi gyakoriv�
 - **(D) Semmi:** a keresés a kártyát adja (cím, tulajdonosok, pontok), a részletek csak akkor, ha a készülék máshonnan
   eléri a tartót. A keresés így alapbeállítással félkarú marad.
 
-**A javaslat (A)**, mert a D92 fő útjára (a kopogtatásra) illik, az ára találatonként néhány bájt, és a bizalmi modell nem
+**Az ajánlás (A)**, mert a D92 fő útjára (a kopogtatásra) illik, az ára találatonként néhány bájt, és a bizalmi modell nem
 változik; a (C) a magánszféra szempontjából erősebb, de drágább és törékenyebb.
 
 ✅ **D111 — az (A) megépült (2026-10-18).** A kereső tartó a felajánlás kérelmének ELLENŐRZÖTT tábla-kulcsát jegyzi a

@@ -6,7 +6,7 @@
 ## 1. Mit kell tudnia — a meglévő döntésekből
 
 - **D72/1 (b):** egy készülék a SAJÁT érdeklődését tartja. *Nem köztes állapot: a szerkezet és a szabály együtt épül.*
-- **D75 + D86:** a TARTÓS tár = a tudatpontos szeleteim (a megszavazott javaslat is) + a saját azonosság-szeletem; a
+- **D75 + D86:** a TARTÓS tár = a tudatpontos szeleteim (a megszavazott szerkesztési vagy általános javaslat is) + a saját azonosság-szeletem; a
   máshová írt saját eseményeimet eseményként megtartom és kiszolgálom (D86/2); a visszavett pontú szelet átkerül az
   átmenetibe (D75/1); az ÁTMENETI tár mindent kiszolgál a törzs kivételével (D75/3); a D14 csak a tartósra (kész).
 - **D83/2 + D84/1:** a TÖRZSET (szöveg-darab, fájlok) alapból csak a vállaló szolgálja ki, készülékenként „mindent” is
@@ -46,7 +46,7 @@ pont-tartó csak a születést, a saját eseményeit, a szelet összegző gyöke
 koino méretétől függetlenül ~2 300–2 800 esemény és ~2 300 szerző tagsága a 95%-nál, mert a nagy szeletnél a minták
 szerzőinek tagsága kell csak.
 
-## 4. A kérdések — javaslattal (D-szintűek, Csabáéi)
+## 4. A kérdések — ajánlással (D-szintűek, Csabáéi)
 
 **B1. A tömeges entitás: két fokú vállalás a B/3-ban?**
 
@@ -54,7 +54,7 @@ szerzőinek tagsága kell csak.
   helyi mennyiség, mint a D94 kerete) a pont-tartó egészében tartja; a NAGY szeletből csak a születést, a saját eseményeit,
   a szelet összegző gyökerét (a pont-tartók és pontjaik állapot-fája — az A pillér fája, a D92/5 össz-pontjának szelet
   szintű párja) és k mintát (a minta szerzőjének tagságával). A teljes nagy szeletet az ÖNKÉNTES tartja (a „mindent”
-  beállítás, D83/2) és a szerzői a saját eseményeiket. A nagy szelet döntéseit (a javaslat támogatottsága, a részvétel) a
+  beállítás, D83/2) és a szerzői a saját eseményeiket. A nagy szelet döntéseit (a szerkesztési vagy általános javaslat támogatottsága, a részvétel) a
   pont-tartó az ellenőrzött összegzésből számolja — a gyökér és a minták a cserében érkeznek, és tárolva maradnak, tehát
   a döntés pillanatában nincs élő lekérdezés. Ha senki nem tartja egészében, a döntés „nem ellenőrizhető” (D19). ⚠️ Ez a
   B/3 legnagyobb új része: a nagy szelet csere-alakja (gyökér + minták a halmaz helyett) és a döntés számítása
@@ -91,7 +91,7 @@ meghívotthoz, a tanúsítás, az ellentmondás-bejelentés — a címzett szele
 - **(B) A gyökér nem cserélődik**, a darab tartója kérelemmel frissít a raj többi tartójától — de akkor egy új legfelső
   szintű gondolat születése csak a szerzőjénél van meg, amíg valaki nem kérdez.
 
-✅ **ELDŐLT — D95 (Csaba, 2026-10-05: „igen, elfogadom a javaslataidat”):** mind a négy a javaslat szerint (B1/A, B2/A,
+✅ **ELDŐLT — D95 (Csaba, 2026-10-05: „igen, elfogadom a javaslataidat”):** mind a négy az ajánlás szerint (B1/A, B2/A,
 B3/A, B4/A).
 
 ## 5. Ami nem igényel döntést (a megépítés része)
@@ -106,7 +106,7 @@ B3/A, B4/A).
 - **A megnézett frissítése** kérésre (a kártya megnyitásakor a D kérelme).
 - **A telefon frissítése** — újabb tiszta törés (a részvétel és a két fokú csere-alak).
 
-## 6. A javasolt sorrend (ha a javaslatok szerint dől el)
+## 6. A javasolt sorrend (ha az ajánlások szerint dől el)
 
 1. **A két fokú vállalás** (B1/A) — a nagy szelet összegző gyökere és mintái, a csere-alakja, és a döntés számítása
    összegzésből (előbb mérés: a gyökér és a minták ára a cserében, és a küszöb).
@@ -118,14 +118,14 @@ B3/A, B4/A).
 ## 7. ⭐ A B1 MŰSZAKI TERVE — a két fokú vállalás (a D95/1 keretén belül, 2026-10-05)
 
 A nagy szelet összegző tartójának két dolgot kell tudnia a nyers események nélkül: (1) a szelet MOSTANI állapotát (a
-pont-tartók és pontjaik — a D14, az össz-pont, a pakli), és (2) a szeletet érintő DÖNTÉSEK eredményét (a javaslat-rész
+pont-tartók és pontjaik — a D14, az össz-pont, a pakli), és (2) a szeletet érintő DÖNTÉSEK eredményét (a szerkesztési vagy általános javaslat-rész
 állása a lezáráskor). Mindkettőre ugyanaz a minta, mint az össz-pontnál (D92/5) és a 2. lépcsőnél (D94): aki a teljes
 halmazt tartja, összegző fát épít; a kérdező a gyökér bemondása UTÁN mintát kér, és ellenőriz.
 
 1. **A szelet összegzése** (a mostani állapot): állapot-fa a szelet pont-tartóiról (`'p:' + szerző` → a legutóbbi aláírt
    pont-esemény; az összegek: a pont és az aktív jel) — a D92/5 részfa-fájának szelet szintű párja. A gyökér, a darab és
    az összegek adják a pont-tartók számát, az össz-pontot és az aktív tulajdonosok számát; a minták aláírt pont-események.
-2. **A lezárási összegzés** (a döntés — a döntési csomag nagy bemenetű változata, D85 T3 mintája): ha egy javaslat egy
+2. **A lezárási összegzés** (a döntés — a döntési csomag nagy bemenetű változata, D85 T3 mintája): ha egy szerkesztési vagy általános javaslat egy
    NAGY szeletű érintettet érint, a teljes tartó a lezáráskor (a pontos, időrendi számításból) összegzést ad ki a részről:
    a végső számok (támogatók, ellenzők, tartózkodók, nevező), a küszöbök és a lezárás ideje, és három fa gyökere — a
    beszámított szavazatok, a lezáráskori aktív tulajdonosok, és az érték javaslatok érték szerint rendezve (a medián

@@ -234,7 +234,7 @@ szűnne meg, amikor a legnagyobb szükség lenne rá.** Entitás-szintű lenyoma
 ⚠️ Ez öt fájlt érint: `fajlTar.js`, `esemenyTar.js`, `csere.js`, `allapotSzamitas.js`,
 `osszehasonlitas.js`. **Ezért kell mérés előtte** (S1).
 
-## 4.2 ⭐ A címjegyzék az entitáson (Csaba javaslata)
+## 4.2 ⭐ A címjegyzék az entitáson (Csaba ajánlása)
 
 > **Az entitás tulajdonosi köre EGYBEN a replikáló köre.** Nem kell kitalálni, ki tárolja
 > E-t — a **D14** miatt a tudatpont már megmondta. *(„Aminek nincs gazdája, az nem
@@ -370,7 +370,7 @@ megint lesz teteje** (D12 bukása).
 
 ## 4.6 ⭐ A TÖMEGES ENTITÁS — a D21 szerkezete másodszor
 
-*(2026-08-31. Ez a szakasz egy korábbi „nincs javaslatom" helyére került.)*
+*(2026-08-31. Ez a szakasz egy korábbi „nincs ajánlásom" helyére került.)*
 
 **A probléma:** egy entitás, amire tízmillióan tesznek tudatpontot, ~**4,3 GB** eseményt
 gyűjt (10⁷ × 435 B). A 4.1 szelet-elve ezen megbukna: a tulajdonosa nem tudja tárolni.
@@ -576,12 +576,12 @@ elvével feszül.
 | Ami eltűnik | Miért |
 |---|---|
 | ❌ a **címke-mechanizmus** (téma szerinti keresés) | nem kell **értelmezni**, csak **levezetni** |
-| ❌ „ki írja a bejegyzést?" | ⭐ **senki** — a bejegyzés **számított**, mint az egyezmény |
+| ❌ „ki írja a bejegyzést?" | ⭐ **senki** — a bejegyzés **számított**, mint a szerkesztési vagy általános egyezmény |
 | ❌ a szemetelés a mutatóban | nincs mit beleírni |
 | ❌ moderálás, hírnév, súlyozás | fel sem merül |
 
 > ⭐⭐ **A bejegyzés az entitás saját aláírt eseményeiből SZÁMÍTÓDIK** — aki ismeri az
-> entitást, ugyanazt a bejegyzést kapja. Ugyanaz a mozdulat, mint az egyezménynél (D17) és a
+> entitást, ugyanazt a bejegyzést kapja. Ugyanaz a mozdulat, mint a szerkesztési vagy általános egyezménynél (D17) és a
 > köteg-gyökérnél: **számítva, nem kimondva.** Nincs is mit hamisítani.
 
 **És a szemetelés magától korlátozott marad:** egy entitás létezéséhez tudatpontnak kell
@@ -661,7 +661,7 @@ MIT ~2010: Sybil-ellenálló DHT a társas gráfon, véletlen sétákkal; a Free
 | Terhelés | egyenletes | ⚠️ **a társas hubokra torlódik** — lágy „teteje" (D12 más ruhában) |
 | Csatolás | két réteg külön romolhat el | ⚠️ **az identitás-réteg zavara azonnal hálózati zavar** |
 
-> ⭐ **A javaslatom: középút.** A bizalmi háló adja a **társakat** (5.4) — nincs
+> ⭐ **Az ajánlásom: középút.** A bizalmi háló adja a **társakat** (5.4) — nincs
 > bootstrap-szolgáltatás, és a társ-halmaz Sybil-ellenálló —, de a **szelet-kiosztás maradjon
 > hash szerint**. Így megvan a bootstrap- és a pozicionálás-védelem, a bonyolult
 > társas-útvonalválasztás nélkül.
@@ -863,7 +863,7 @@ indexelni.
 > nyitva állt, miközben az azonosság-terv „K12"-je tárgytalan — így úgy nézett ki, mintha
 > mindkettő le volna zárva.*
 
-| # | Kérdés | A javaslatom |
+| # | Kérdés | Az ajánlásom |
 |---|---|---|
 | **SK1** | Elfogadjuk a határvonalat: **„ami dönt, az offline is megy; csak a megtalálás kíván hálózatot"**? (5. szabály pontosítása) | ⭐ **igen** |
 | **SK2** | A címjegyzék **név nélküli** legyen (csak címek)? | ⭐ **igen** — ugyanolyan hasznos, és nem épít profilt (D6) |
@@ -876,7 +876,7 @@ indexelni.
 | **SK10** | **Láthatósági küszöb** a keresőn (Csaba felvetése, 5.8): 2 független tulajdonos kelljen a keresőben való megjelenéshez? | ⭐ **igen, de KIZÁRÓLAG a kereső-rétegen** — a létezésen soha. ⚠️ **Új szabály, nem pontosítás** — a te döntésed, és a küszöb **ne legyen felfelé tolható** közösségi paraméter (cenzúra-kockázat). 🔁 **Bővült (2026-09-02):** Csaba szerint a **síkidom nézet** ténylegesen használni fogja a láthatósági paramétereket, mert **az dönti el, mikről megy kérelem** — vagyis a küszöb nem csak „mi bukkan fel a keresőben", hanem **mit tölt be egy nézet**. Ez több, mint amiről az 5.8 szól. |
 | ~~**SK11**~~ | ~~A csak megnézett entitások helyi tára: meddig tartsuk meg?~~ | ✅ **LEZÁRVA (Csaba, 2026-09-02): tartsa meg nyugodtan.** Claude aggálya (korlátlan hízás) túlzott volt: egy ember véges sokat böngészik, és ⭐ **a megtartott másolat épp az elérhetőséget javítja** (4.5). Az egyetlen valódi követelmény, hogy **eldobható** legyen — ha kell a hely, a legrégebbi megy, és ez semmit nem ront el, mert a gondolat újra lekérhető és ellenőrizhető. |
 | **SK12** | Ki tartja egy e-ember **teljes láncát**, ha a tár szeletelt? (4.8 — enélkül a kettős lánc szerkezetileg leleplezhetetlen) | ⭐⭐ **VÁLASZ-IRÁNY: a D63** (2026-09-06). A `lancGyoker` épp azt oldja meg, hogy **senkinek ne kelljen a teljes láncot tartania**: minden esemény elkötelezi magát a szerző egész addigi láncára, tehát a **kettős lánc bizonyítéka túléli a szeletelést**. ⏸️ A jelentése rögzítve, a megvalósítás mérés alapján jön. *(A régi jelölt — „a tanúsítói tartják" — ezzel szükségtelenné válhat.)* |
-| **SK13** | A **kérelmezések adatcsoportja** (utiterv 6/c): terjedjen-e a kérelmező kiléte? | ✅ **Csaba álláspontja:** *„a koino nem a magánéletről szól; azt kell megosztani, amit fel is vállalnak."* — a **kimondott** tettekre (pont, szavazat, javaslat) ez így is van. ⚠️ **De a KÉRELEM más kategória:** az olvasás még nem állásfoglalás (a képviselő szavazata nyilvános, a könyvtári olvasmánylistája nem), és a kockázat nem a kellemetlenség, hanem a **célzás** — ez az a lista, amit egy becstelen kormány kérne (D15). ⭐ **És ingyen megoldható:** a fúráshoz a **cím** kell, nem a név, tehát elég annyi, hogy „valaki kéri E-t". ✅ **ELDÖNTVE (Csaba, 2026-09-02): a név NE menjen vele.** |
+| **SK13** | A **kérelmezések adatcsoportja** (utiterv 6/c): terjedjen-e a kérelmező kiléte? | ✅ **Csaba álláspontja:** *„a koino nem a magánéletről szól; azt kell megosztani, amit fel is vállalnak."* — a **kimondott** tettekre (pont, szavazat, szerkesztési vagy általános javaslat) ez így is van. ⚠️ **De a KÉRELEM más kategória:** az olvasás még nem állásfoglalás (a képviselő szavazata nyilvános, a könyvtári olvasmánylistája nem), és a kockázat nem a kellemetlenség, hanem a **célzás** — ez az a lista, amit egy becstelen kormány kérne (D15). ⭐ **És ingyen megoldható:** a fúráshoz a **cím** kell, nem a név, tehát elég annyi, hogy „valaki kéri E-t". ✅ **ELDÖNTVE (Csaba, 2026-09-02): a név NE menjen vele.** |
 | ~~**SK14**~~ | ~~Hova kerüljön a **lánc-gyökér** (4.9)? A tartós magba (mindenki 32 B-ból ellenőriz bárkit), vagy külön?~~ | ✅ **LEZÁRVA (D78, Csaba, 2026-09-27): az ESEMÉNYBEN lakik**, nem a magban — mindenkinél annyi van belőle, ahány szerző eseményét ténylegesen számolja, és a mag nem válik állandóan változóvá. Egy `lancGyoker` a szerző naplóját ÉS a kiosztását köti el (a 4.9 csontváza). *(Korábban: „a magban a legszebb, de állandóan változóvá teszi — ez a D63 hiányzó fele".)* |
 | **SK9** | Vállaljuk az `esemenyek.jsonl` átszervezését (4.1), vagy előbb csak mérünk? | ⭐ **előbb S1** — öt fájlt érint |
 
