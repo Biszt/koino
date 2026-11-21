@@ -265,6 +265,115 @@ proba('⭐⭐ D129 ⑤ (MA10 (C)) a valódi lapon (fej nélküli Chrome): az ⓘ
     }
   });
 
+// ===================================
+// 3. ⛔ A BETÖLTÉSRE VÁRÓ PAKLI — az ⓘ és az ütem (Csaba, 2026-11-21: „5 másodpercenként, rángatozik egyet a felület, amikor a pakli
+//    tetején vagyok, és látszódnak ezek: … ⏳ betöltés: a hiányzó részeket az őrjárat hozza el”)
+// ===================================
+//
+// Mérve a lapon (a két őrjárat állt, a hiányzó rész nem jöhetett meg): a csendes újrakérdezés SAJÁT válasza a kezdő 4 mp-re állította
+// vissza az ütemet (az időzítő épp üres volt), tehát a lap örökké 6 mp-enként kérdezett; és minden körben újraírta az állapot-sort, a
+// `textContent` pedig az ⓘ-t is levette — a figyelő 30 ms múlva tette vissza, a sor addig elugrott.
+
+/** A lap betöltése ELŐTT (CDP): a fa-szelet válasza `betoltes`-t mond, mintha egy rész még úton volna (a program maga nem változik). */
+const BETOLTES_CSOMAGOLO = `(() => {
+  const eredeti = window.fetch.bind(window);
+  window.fetch = async (cim, ...tobbi) => {
+    const v = await eredeti(cim, ...tobbi);
+    if (!String(cim).includes('pakli/hierarchikus')) return v;
+    const adat = await v.clone().json();
+    adat.betoltes = true;
+    adat.kitolKerni = 1;
+    return new Response(JSON.stringify(adat), { status: v.status, headers: { 'Content-Type': 'application/json' } });
+  };
+})()`;
+
+/**
+ * A lapon: megvárjuk az állapot-sor ⓘ-jét, leállítjuk a lap saját időzítőjét (és ami épp úton volt, lefut), majd két csendes
+ * újrakérdezés kézzel — közben figyeljük, lekerül-e a jel. Végül egy MÁS szöveg: az új szöveg kint, a jel ugyanaz az elem.
+ */
+const BETOLTES_PROBA = `(async () => {
+  const varj = (ms) => new Promise((r) => setTimeout(r, ms));
+  const p = window.aktivPakli;
+  const sor = document.querySelector('#allapot');
+  const jelE = () => sor?.querySelector(':scope > .koino-magyarazat__jel') ?? null;
+  for (let i = 0; i < 60 && !(jelE() && p?.megjelenitettKulcs && sor.textContent.includes('betöltés')); i++) await varj(250);
+  const jel = jelE();
+  const ki = { vanJel: !!jel, szoveg: sor?.textContent ?? '' };
+  if (!jel || !p) return JSON.stringify(ki);
+  p._ujrakerdezesLeallitasa();
+  for (let i = 0; i < 20 && p.ujrakerdezesFut; i++) await varj(100);
+  await varj(300);
+  p._ujrakerdezesLeallitasa();
+  let levette = 0;
+  new MutationObserver((m) => { for (const x of m) for (const n of x.removedNodes) if (n === jel) levette++; })
+    .observe(sor, { childList: true });
+  ki.koz0 = p.ujrakerdezesKoz;
+  await p._ujrakerdezes();
+  ki.koz1 = p.ujrakerdezesKoz;
+  await p._ujrakerdezes();
+  ki.koz2 = p.ujrakerdezesKoz;
+  p._ujrakerdezesLeallitasa();
+  await varj(100);
+  ki.levette = levette;
+  p._allapot('Más szöveg — a próba írta', 'betoltes');
+  ki.ujSzoveg = sor.textContent;
+  ki.ugyanazAJel = jelE() === jel;
+  await varj(100);
+  ki.levetteVegul = levette;
+  return JSON.stringify(ki);
+})()`;
+
+// Rontás: (a) a pakli-válasz jelzése az újrakérdezés alatt is újraindítja az ütemet (a `ujrakerdezesFut` feltétel nélkül) → a köz nem
+// nő → bukik; (b) az állapot-sor ismét `textContent`-tel íródik → a jel lekerül → bukik; (c) a más szöveg a jel nélkül íródik ki →
+// a jel lekerül, nem ugyanaz → bukik.
+proba('⛔ (Csaba, 2026-11-21: „5 másodpercenként rángatozik”) a betöltésre váró pakli a valódi lapon: a csendes újrakérdezés egyre ritkább (a saját válasza nem állítja vissza a kezdő 4 mp-re), és az állapot-sor ⓘ-je közben egyszer sem kerül le — más szövegnél sem',
+  async () => {
+    const chrome = chromeHelye();
+    if (!chrome) { process.stdout.write('    (nincs Chrome a gépen — a böngészős próba kihagyva; KOINO_CHROME=<út>)\n'); return true; }
+    if (typeof WebSocket !== 'function') { process.stdout.write('    (a Node-ban nincs WebSocket — a böngészős próba kihagyva)\n'); return true; }
+    const otthon = await ujMappa('koino-betoltes-');
+    const adat = join(otthon, 'adat');
+    await parancs(adat, ['koino', 'Betöltés-próba']);
+    await parancs(adat, ['gondolat', 'Egy gondolat', 'a gondolat szövege']);
+    const f = await felulete(adat, 8096);
+    const profil = await ujMappa('koino-betoltes-profil-');
+    const b = spawn(chrome, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0',
+      '--remote-allow-origins=*', '--user-data-dir=' + profil, 'about:blank'], { stdio: 'ignore', windowsHide: true });
+    let cdp = null;
+    try {
+      let port = null;
+      for (let i = 0; i < 100 && !port; i++) {
+        await varj(200);
+        port = (await readFile(join(profil, 'DevToolsActivePort'), 'utf8').catch(() => '')).split('\n')[0].trim() || null;
+      }
+      if (!port) throw new Error('a Chrome nem nyitott DevTools-portot');
+      const lapok = await (await fetch('http://127.0.0.1:' + port + '/json/list')).json();
+      cdp = await cdpKapcsolat(lapok.find((l) => l.type === 'page').webSocketDebuggerUrl);
+      await cdp.kuld('Page.enable');
+      await cdp.kuld('Runtime.enable');
+      await cdp.kuld('Page.addScriptToEvaluateOnNewDocument', { source: BETOLTES_CSOMAGOLO });
+      await cdp.kuld('Page.navigate', { url: 'http://127.0.0.1:' + f.port + '/?kulcs=' + f.kulcs });
+      for (let i = 0; i < 100 && !cdp.esemenyek.some((e) => e.method === 'Page.loadEventFired'); i++) await varj(200);
+      const ki = JSON.parse(await ertekel(cdp, BETOLTES_PROBA));
+      const r = {
+        betoltesLatszik: ki.vanJel && ki.szoveg.includes('⏳ betöltés'),
+        ritkul: ki.koz1 > ki.koz0 && ki.koz2 > ki.koz1,
+        jelMaradt: ki.levette === 0 && ki.levetteVegul === 0,
+        masSzoveg: String(ki.ujSzoveg ?? '').endsWith('Más szöveg — a próba írta') && ki.ugyanazAJel === true
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (' + JSON.stringify({ r, ki }).slice(0, 1200) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      cdp?.zar();
+      b.kill();
+      f.folyamat.kill();
+      await varj(800);
+    }
+  });
+
 export default async function (csendes) {
   const eredmeny = await futtatas(csendes);
   for (const m of mappak) await rm(m, { recursive: true, force: true }).catch(() => {});

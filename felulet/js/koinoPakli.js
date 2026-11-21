@@ -31,6 +31,7 @@ import { eemberMentese, aktivEntitasMentese, aktivEntitasLekerese } from './util
 import { oldalAdatta, LAPOS_OLDAL } from './kartyaAdat.js';
 import { kartyaSzamokJelolese, testverHianyJelzo, testverHianyEltavolitasa } from './koinoFelderitetlen.js';
 import { torzsMeretJelolese } from './koinoTorzs.js';   // ⭐ D120: a törzs mérete a kártyán
+import { JEL_OSZTALY as MAGYARAZAT_JEL } from './koinoMagyarazat.js';   // az állapot-sor ⓘ-je (az átíráskor marad)
 
 // ===================================
 // A CSENDES ÚJRAKÉRDEZÉS ÜTEME
@@ -75,6 +76,7 @@ export class KoinoPakli extends Pakli {
     this.utolsoLapos = null;           // a lapos nézet legutóbbi oldala (kurzor, összes)
     this.ujrakerdezesIdozito = null;
     this.ujrakerdezesKoz = UJRAKERDEZES_KEZDO;
+    this.ujrakerdezesFut = false;      // egy csendes újrakérdezés úton van (a saját válasza ne indítsa újra az ütemet)
     this.megjelenitettKulcs = null;    // melyik entitás fa-szelete van kirajzolva
     this.kertEntitas = null;           // amit az utolsó `init` kért (ha a program még nem ismeri, ezt várjuk)
     this.initKulcs = null;             // amire az utolsó `init` megérkezett (ha a néző azóta elmozdult, nem várunk tovább)
@@ -336,8 +338,11 @@ export class KoinoPakli extends Pakli {
     // ⭐ A láncon belül kinyitott kártya fa-szelete a háttérben jön (a `Pakli.kartyaKivalasztasa`): ha annak hiányzik
     // valamije (a szövege, a gyerekei), és az újrakérdezés már leállt, újraindul.
     // (A rendes betöltés — `init`, testvérváltás — alatt nem: ott a kirajzolás ütemez.)
-    if (jel.betoltes && !this.ujrakerdezesIdozito && this.rendezesMod === 'hierarchikus' && !this.allapot.betoltesFolyamatban
-      && (jel.kivalasztott ?? '') === (this.allapot.kivalasztottEntitasId ?? '')) {
+    // ⛔ (Csaba, 2026-11-21: „5 másodpercenként, rángatozik egyet a felület”): a csendes újrakérdezés SAJÁT válasza alatt sem — az
+    // időzítő akkor épp üres (lefutott), és ez a jelzés a kezdő 4 mp-re állította vissza az ütemet: a várakozás sosem nőtt, a lap
+    // örökké 6 mp-enként kérdezett (mérve a lapon). Az újrakérdezés maga ütemez tovább, a növekvő közzel.
+    if (jel.betoltes && !this.ujrakerdezesIdozito && !this.ujrakerdezesFut && this.rendezesMod === 'hierarchikus'
+      && !this.allapot.betoltesFolyamatban && (jel.kivalasztott ?? '') === (this.allapot.kivalasztottEntitasId ?? '')) {
       this.ujrakerdezesKoz = UJRAKERDEZES_KEZDO;
       this._ujrakerdezesUtemezese();
     }
@@ -379,6 +384,7 @@ export class KoinoPakli extends Pakli {
     const v = this._varakozas();
     console.log('KoinoPakli._ujrakerdezes - KEZDÉS', { mire: v.fajta, kulcs: v.kulcs });
 
+    this.ujrakerdezesFut = true;
     try {
       // ----- A kért entitás: ha már megvan, betöltjük (ez a néző kérése volt) -----
       if (v.fajta === 'kert') {
@@ -434,6 +440,8 @@ export class KoinoPakli extends Pakli {
     } catch (hiba) {
       console.warn('KoinoPakli._ujrakerdezes - nem sikerült', { hiba: hiba.message });
       this._ujrakerdezesUtemezese();
+    } finally {
+      this.ujrakerdezesFut = false;
     }
   }
 
@@ -558,10 +566,25 @@ export class KoinoPakli extends Pakli {
     this.elemek.tovabbGomb.hidden = !(this.rendezesMod !== 'hierarchikus' && this.utolsoLapos?.kovetkezoKurzor);
   }
 
+  /**
+   * Az állapot-sor szövege. ⛔ (Csaba, 2026-11-21: „5 másodpercenként, rángatozik egyet a felület, amikor a pakli tetején vagyok”):
+   * a `textContent` a sor elejéről az ⓘ-t is levette (a magyarázat-réteg jele — `koinoMagyarazat.js`), a figyelő 30 ms múlva tette
+   * vissza, és a sor addig elugrott — minden csendes újrakérdezéskor, akkor is, ha a szöveg ugyanaz maradt. Ezért: ha semmi nem
+   * változott, nem nyúlunk hozzá; ha igen, csak a szöveget cseréljük, a jel a helyén marad.
+   */
   _allapot(szoveg, osztaly = '') {
-    if (!this.elemek.allapotElem) return;
-    this.elemek.allapotElem.textContent = szoveg;
-    this.elemek.allapotElem.className = 'allapot ' + osztaly;
+    const elem = this.elemek.allapotElem;
+    if (!elem) return;
+    const ujOsztaly = 'allapot ' + osztaly;
+    const jelek = [...elem.children].filter((c) => c.classList.contains(MAGYARAZAT_JEL));
+    const mostani = [...elem.childNodes].filter((n) => !jelek.includes(n)).map((n) => n.textContent).join('');
+    if (mostani === szoveg && elem.className === ujOsztaly) return;
+    // a jelet egy pillanatra sem vesszük le (a `replaceChildren` le- és visszatenné): csak a szöveg-részek cserélődnek
+    if (mostani !== szoveg) {
+      for (const n of [...elem.childNodes]) if (!jelek.includes(n)) n.remove();
+      elem.append(szoveg);
+    }
+    elem.className = ujOsztaly;
   }
 }
 

@@ -140,7 +140,8 @@ export const MAGYARAZAT_HELYEK = Object.freeze([
   { hely: '.koino-keszulekek h4', felirat: 'A papír', nev: 'kezikonyv/ablak/keszulekeim/papir', mod: 'vegere' }
 ]);
 
-const JEL_OSZTALY = 'koino-magyarazat__jel';
+// ⭐ Kifelé is: a lap egy része (a pakli állapot-sora — `koinoPakli.js`) a saját szövegét a jel MEGHAGYÁSÁVAL írja át.
+export const JEL_OSZTALY = 'koino-magyarazat__jel';
 
 const html = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
