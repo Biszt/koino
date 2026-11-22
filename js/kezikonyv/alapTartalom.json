@@ -569,7 +569,7 @@
     {
       "nev": "kezikonyv/fogalom/koinon",
       "cim": "koinon",
-      "szoveg": "A közösség közös tárhelye. Ma a kézikönyv minden bejegyzésén tart egy passzív tudatpontot — ezért a kézikönyv akkor sem felejtődik el, ha senki nem tart rajta pontot. Az elfogadott általános egyezményeken is tart egy passzív pontot (a lezárásuktól): így egy általános egyezmény akkor sem felejtődik el, ha mindenki levette róla a pontját, és a tömör alakját (a döntés bizonyítékát és az állásfoglalásokat) a koinon darabjai őrzik, sok készüléken. A koinon nem szavaz, és nem javasol."
+      "szoveg": "A közösség közös tárhelye. Ma a kézikönyv minden bejegyzésén tart egy passzív tudatpontot — ezért a kézikönyv akkor sem felejtődik el, ha senki nem tart rajta pontot. Az elfogadott általános egyezményeken is tart egy passzív pontot (a lezárásuktól): így egy általános egyezmény akkor sem felejtődik el, ha mindenki levette róla a pontját, és a tömör alakját (a döntés bizonyítékát és az állásfoglalásokat) a koinon darabjai őrzik, sok készüléken. A kézikönyv bejegyzéseit is a darabok őrzik: amelyik bejegyzés nem a te készüléked darabjába esik, annak a közösségi módosítását a készüléked kérésre hozza el (a buborék megmondja, amíg úton van; addig a program szövegét látod). Kis koinoban egyetlen darab van, és azt mindenki tartja. A koinon nem szavaz, és nem javasol."
     },
     {
       "nev": "kezikonyv/fogalom/mag",

@@ -31,11 +31,12 @@
 //
 // Ugyanígy a koinon darabjai (`cimjegyzek.js` `koinonDarabKulcsa`): a halmazuk a koinon kulcsához (`KOINON_KULCS`) bejelentett
 // események (a döntés tömör alakja, az állásfoglalások) közül azok, amelyeknek az EGYEZMÉNYE (a szelet-kulcsuk — a javaslat
-// azonosítója) a darabba esik. Egy egyezmény minden koinon-eseménye így ugyanabba a darabba kerül.
+// azonosítója) a darabba esik. Egy egyezmény minden koinon-eseménye így ugyanabba a darabba kerül. ⭐⭐ D130 (③e): a kézikönyv-
+// esemény is — a bejegyzése (a neve azonosítója) szerint; mindkettőt az `esemeny.js` `koinonHelyei` mondja (egy helyen).
 //
 // Használja: csere/vonal.js (a párbeszéd), a próbák.
 
-import { alakiHiba, szelet, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, KOINON_KULCS } from '../esemeny/esemeny.js';
+import { alakiHiba, szelet, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, KOINON_KULCS, koinonHelyei } from '../esemeny/esemeny.js';
 import { koinoNezete } from '../allapot/koinoLanc.js';   // ⭐ D118 (②b): a koino-szabály
 import { rendezettHalmaz, halmazLenyomata } from '../esemeny/halmaz.js';
 import { gyokerDarabBol, gyokerLenyomata, darabbaEsik, koinonDarabBol, koinonLenyomata } from './cimjegyzek.js';
@@ -84,7 +85,7 @@ export async function egyeztetettEsemenyek(tar, koino, kulcs) {
   const kd = koinonDarabBol(kulcs);
   if (kd) {
     return (await egyeztetettEsemenyek(tar, koino, KOINON_KULCS))
-      .filter((e) => darabbaEsik(koinonLenyomata(szelet(e)), kd.melyseg, kd.darab));
+      .filter((e) => koinonHelyei(e).some((x) => darabbaEsik(koinonLenyomata(x), kd.melyseg, kd.darab)));
   }
   const s = tarKulcsa(kulcs);
   const sajat = s === '' ? [] : await tar.szeletEsemenyei(s);
@@ -193,12 +194,13 @@ export function szeletbeTartozik(e, kulcsok) {
       if (d && darabbaEsik(h, d.melyseg, d.darab)) return true;
     }
   }
-  // ⭐⭐ D130 (③c): a koinon kulcsához bejelentett esemény abba a koinon-darabba is tartozik, amelyikbe az egyezménye esik.
+  // ⭐⭐ D130 (③c, ③e): a koinon kulcsához bejelentett esemény abba a koinon-darabba is tartozik, amelyikbe az egyezménye (a
+  // kézikönyv-esemény: valamelyik bejegyzése) esik.
   if (helyek.includes(KOINON_KULCS)) {
-    const h = koinonLenyomata(szelet(e));
+    const hk = koinonHelyei(e).map(koinonLenyomata);
     for (const k of kulcsok) {
       const d = koinonDarabBol(k);
-      if (d && darabbaEsik(h, d.melyseg, d.darab)) return true;
+      if (d && hk.some((h) => darabbaEsik(h, d.melyseg, d.darab))) return true;
     }
   }
   return false;

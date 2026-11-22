@@ -39,6 +39,7 @@ import { sajatMag } from '../js/tar/kodCsomag.js';
 // ⭐⭐ D129: egy új koino kézikönyves — a lap fájában (struktúra, síkidom, bejáró) a kézikönyv is ott van (MA6 (A)); a próbák a
 // valódi gondolatokat ugyanúgy mérik, és mellettük a kézikönyvet a méretével
 import { programAlapTartalma } from '../js/kezikonyv/kezikonyv.js';
+import { koinonDarabBol } from '../js/csere/cimjegyzek.js';   // ⭐⭐ D130 (③e): a kézikönyv-darab kérelmének kulcsa
 import { ALAP_SZABALYOK } from '../js/esemeny/koinoSzabalyok.js';   // ⭐⭐ D129 MA9 (B): a koino alap-küszöbei
 const KEZIKONYV_DB = programAlapTartalma().bejegyzesek.length;
 const KEZIKONYV_AZONOSITOK = new Set(programAlapTartalma().azonositoSzerint.keys());
@@ -5162,6 +5163,85 @@ proba('⭐ (Csaba, 2026-11-20) a RÉSZLETES ADATOK a nem tartott gondolatnál: m
         utana: { b: utana?.betoltes, m: utana?.koinoMegjegyzes, h: utana?.data?.hozzajarulokSzama, p: utana?.data?.osszesPont },
         kuszob: [kuszobElotte?.aktualisErtekek?.javaslatElfogadasiKuszob, kuszobUtana?.aktualisErtekek?.javaslatElfogadasiKuszob],
         fuggo: (kerelmek.fuggo ?? []).map((x) => [x.fajta, String(x.kulcs).slice(0, 6)]) }).slice(0, 900) + ')\n');
+    }
+    return Object.values(ki).every(Boolean);
+  } finally {
+    for (const p of futok) p.kill();
+    await varj(1000);
+    await rm(a, { recursive: true, force: true });
+    await rm(b, { recursive: true, force: true });
+  }
+});
+
+// ⭐⭐ D130 (③e, KO5 (B), KO9 (A)): a kézikönyv a koinon darabjaiban — két ismert tag és r = 1 (`KOINO_KOINON_PELDANY`) mellett két darab
+// van: A vállalása a bejegyzéseknek csak egy részét tartja (nem mindet, nem semmit), és a buborék a darabján KÍVÜLI bejegyzésnél a
+// darabot kéri el (a kérelem a darab-kulcsra szól), és kimondja („⏳ … az őrjárat hozza”); a darabjába esőnél nem kér, és nem szól. Egy
+// darabnál (r = 20) mindet tartja. Rontás: a vállalás az egész kézikönyvet tartja (a darab-szűrés nélkül) → nincs kívüli → bukik; a
+// buborék a bejegyzés szeletét kéri (nem a darabját) → a kérelem kulcsa nem darab-kulcs → bukik.
+proba('⭐⭐ D130 (③e): a KÉZIKÖNYV A DARABOKBAN — két darabnál a vállalás a bejegyzések egy részét tartja; a darabon kívüli bejegyzés buboréka a darabot kéri el, és kimondja; egy darabnál mindet tartja', async () => {
+  const a = await ujKeszulek();
+  const b = await ujKeszulek();
+  const ketDarab = { KOINO_KISZOLGALAS: 'alap', KOINO_KOINON_PELDANY: '1' };
+  const futok = [];
+  try {
+    await fut(a, 'koino', 'Darabos kézikönyv', 'próba', 'nyilt');
+    await fut(b, 'csatlakoz', await koinoNeve(a));
+    // B belép (a tagsága ezzel az eseménnyel születik — a koinon mélysége az ismert tagokból számol), és ír is valamit
+    await fut(b, 'belep');
+    await fut(b, 'gondolat', 'B gondolata');
+    await fut(b, 'tars', '127.0.0.1', '7996', 'A');
+    // „mindent” módban cserélünk: a szigorú (b) alatt A nem tartja B azonosság-szeletét, a belépése nem jönne át
+    await csereKor(a, b, 7996, { KOINO_KISZOLGALAS: 'mindent' });
+    // A a cserén megismerte B belépését (két ismert tag) — r = 1 mellett ez két darab
+    const egyDarabV = await fut(a, 'vallalas', { KOINO_KISZOLGALAS: 'alap' });
+    const ketDarabV = await fut(a, 'vallalas', ketDarab);
+    const szam = (ki) => Number((/· (\d+) kézikönyv-bejegyzés,/.exec(ki) ?? [])[1] ?? NaN);
+    const osszes = programAlapTartalma().azonositoSzerint.size;
+    await fut(a, 'tars', '127.0.0.1', '7998', 'B');
+    const felulet = spawn(process.execPath, [KOINO_JS, 'felulet', '7962'], {
+      env: { ...process.env, KOINO_ADAT: a, KOINO_NAPLO: '', ...ketDarab }, stdio: ['ignore', 'pipe', 'pipe'] });
+    futok.push(felulet);
+    let kimenet = '';
+    const kulcs = await new Promise((teljesul, elakad) => {
+      const ido = setTimeout(() => elakad(new Error('a felület nem indult el: ' + kimenet)), 15000);
+      felulet.stdout.on('data', (d) => {
+        kimenet += d;
+        const t = kimenet.match(/kulcs=([A-Za-z0-9_-]+)/);
+        if (t) { clearTimeout(ido); teljesul(t[1]); }
+      });
+    });
+    const buborek = async (nev) => (await fetch('http://127.0.0.1:7962/api/kezikonyv/bejegyzes?nev=' + encodeURIComponent(nev),
+      { headers: { 'X-Koino-Kulcs': kulcs } })).json();
+    const kerelmekNow = async () => JSON.parse(await readFile(join(await koinoMappa(a), 'kerelmek.json'), 'utf8').catch(() => '{}'));
+    let tartott = 0, kivul = null, belul = null, buborekKerelmek = null;
+    for (const [nev] of programAlapTartalma().nevSzerint) {
+      const v = await buborek(nev);
+      if (v.koinoMegjegyzes) {
+        // az ELSŐ kívüli buborék kérelme rögtön (a többi kérés később kiszoríthatja a korai kérelmeket)
+        if (!kivul) { kivul = v; buborekKerelmek = await kerelmekNow(); }
+      } else { tartott++; belul ??= v; }
+    }
+    const buborekDarabKerelem = (buborekKerelmek?.fuggo ?? []).find((x) => x.fajta === 'szelet' && koinonDarabBol(x.kulcs));
+    // a Részletes adatok ugyanerre a bejegyzésre: a darabját kéri (nem a bejegyzés szeletét — abban a szavazatok nincsenek)
+    const reszletek = kivul ? await (await fetch('http://127.0.0.1:7962/api/gondolat/' + kivul.azonosito + '/reszletek',
+      { headers: { 'X-Koino-Kulcs': kulcs } })).json() : null;
+    const kerelmek = JSON.parse(await readFile(join(await koinoMappa(a), 'kerelmek.json'), 'utf8').catch(() => '{}'));
+    const darabKerelem = (kerelmek.fuggo ?? []).find((x) => x.fajta === 'szelet' && koinonDarabBol(x.kulcs));
+    const ki = {
+      egyDarab: /0\. mélység/.test(egyDarabV) && szam(egyDarabV) === osszes,
+      ketDarab: /1\. mélység/.test(ketDarabV) && szam(ketDarabV) > 0 && szam(ketDarabV) < osszes,
+      buborekTart: tartott === szam(ketDarabV) && !!belul && belul.betoltes === false,
+      buborekKer: !!kivul && kivul.betoltes === true && String(kivul.koinoMegjegyzes).startsWith('⏳') && !!buborekDarabKerelem
+        && koinonDarabBol(buborekDarabKerelem.kulcs).melyseg === 1
+        && !(buborekKerelmek?.fuggo ?? []).some((x) => x.fajta === 'szelet' && x.kulcs === kivul.azonosito)
+        && !!darabKerelem,
+      reszletek: reszletek?.betoltes === true && !(kerelmek.fuggo ?? []).some((x) => x.fajta === 'szelet' && x.kulcs === kivul?.azonosito)
+    };
+    if (!Object.values(ki).every(Boolean)) {
+      process.stdout.write('    (kézikönyv-darab — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ' · ' + JSON.stringify({
+        egy: szam(egyDarabV), ket: szam(ketDarabV), osszes, tartott, kivul: kivul?.koinoMegjegyzes ?? null,
+        fuggo: (kerelmek.fuggo ?? []).map((x) => [x.fajta, String(x.kulcs).slice(-6)]),
+        sor: (ketDarabV.match(/a koinon darabja:[^\n]*/) ?? [''])[0] }).slice(0, 900) + ')\n');
     }
     return Object.values(ki).every(Boolean);
   } finally {

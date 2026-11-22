@@ -201,6 +201,7 @@ let nyitott = null;   // { buborek, jel }
 /** A nyitott buborék bezárása. */
 function buborekBezarasa() {
   if (!nyitott) return;
+  clearTimeout(nyitott.ora);
   nyitott.buborek.remove();
   nyitott = null;
 }
@@ -266,6 +267,9 @@ async function buborekNyitasa(jel, nev, elozok = []) {
     nyitott = { buborek, jel };
   }
   const { buborek } = nyitott;
+  // egy másik bejegyzésre lépve (a „Részei” vagy a vissza) az előző újrakérdezése leáll
+  clearTimeout(nyitott.ora);
+  nyitott.nev = null;
   buborek.innerHTML = '<p class="koino-magyarazat__betoltes">Betöltés…</p>';
   buborekHelyezese(buborek, jel);
   let b;
@@ -278,6 +282,40 @@ async function buborekNyitasa(jel, nev, elozok = []) {
     return;
   }
   if (!nyitott || nyitott.buborek !== buborek) return;   // közben bezárták
+  nyitott.nev = nev;
+  buborekRajzolasa(buborek, jel, nev, elozok, b);
+  buborekUjrakerdezese(jel, nev, elozok, b, BUBOREK_UJRA_KEZDO, 1);
+  console.log('koinoMagyarazat.buborekNyitasa - VÉGE', { nev, forras: b.forras });
+}
+
+// ⭐⭐ D130 (③e, KO9 (A)): ha a bejegyzés nem a koinon-darabomba esik, a program a közösségi módosításait elkéri, és kimondja
+// (`koinoMegjegyzes`, `betoltes`); a buborék a megjegyzést a lába fölé írja, és amíg úton van, csendben újrakérdez (4 mp-től egyre
+// ritkábban, legfeljebb percenként, legfeljebb ~1 óráig — a Részletes adatok mintájára). Újra csak akkor rajzol, ha a válasz más lett;
+// ha a buborék bezárult vagy másik bejegyzésé, leáll.
+const BUBOREK_UJRA_KEZDO = 4000;
+const BUBOREK_UJRA_MAX = 60000;
+const BUBOREK_UJRA_PROBA = 60;
+
+function buborekUjrakerdezese(jel, nev, elozok, b, koz, proba) {
+  if (!nyitott || nyitott.jel !== jel || nyitott.nev !== nev) return;
+  clearTimeout(nyitott.ora);
+  if (b?.betoltes !== true || proba > BUBOREK_UJRA_PROBA) return;
+  nyitott.ora = setTimeout(async () => {
+    if (!nyitott || nyitott.jel !== jel || nyitott.nev !== nev) return;
+    let uj = null;
+    try {
+      uj = await apiGet('kezikonyv/bejegyzes?nev=' + encodeURIComponent(nev));
+    } catch (hiba) {
+      console.warn('koinoMagyarazat.buborekUjrakerdezese - nem sikerült', { hiba: hiba.message });
+    }
+    if (!nyitott || nyitott.jel !== jel || nyitott.nev !== nev) return;
+    if (uj && JSON.stringify(uj) !== JSON.stringify(b)) buborekRajzolasa(nyitott.buborek, jel, nev, elozok, uj);
+    buborekUjrakerdezese(jel, nev, elozok, uj ?? b, Math.min(BUBOREK_UJRA_MAX, Math.round(koz * 1.5)), proba + 1);
+  }, koz);
+}
+
+/** A buborék tartalma egy bejegyzésből (a megnyitáskor és az újrakérdezéskor ugyanez). */
+function buborekRajzolasa(buborek, jel, nev, elozok, b) {
   const forras = !b.ismert ? 'Ezt a programod nem ismeri — a közösség hozta létre.'
     : b.forras === 'kozosseg' ? '✍️ A közösség módosította.' : '📦 A program szövege.';
   // ⭐⭐ a koinon pontja (mindig 1 — a közösség közös tárhelye őrzi) külön: a közösség pontjait mondjuk
@@ -297,6 +335,8 @@ async function buborekNyitasa(jel, nev, elozok = []) {
     + '<div class="koino-magyarazat__szoveg"></div>'
     + reszek
     + (b.programJavaslat ? '<p class="koino-magyarazat__ajanlat">⭐ A program új szöveget javasol ehhez — a kézikönyvben elindíthatod.</p>' : '')
+    // ⭐⭐ D130 (③e): a program megjegyzése (a nem a darabomba eső bejegyzés közösségi módosításairól)
+    + (b.koinoMegjegyzes ? '<p class="koino-magyarazat__megjegyzes">' + html(b.koinoMegjegyzes) + '</p>' : '')
     + '<div class="koino-magyarazat__lab"><span>' + html(forras + pont) + '</span>'
     + '<button type="button" class="koino-magyarazat__gomb" title="A pakliban: tudatpontot tehetsz rá, és jobbat javasolhatsz">'
     + '📖 A kézikönyvben</button></div>';
@@ -308,7 +348,6 @@ async function buborekNyitasa(jel, nev, elozok = []) {
   }
   buborek.querySelector('.koino-magyarazat__gomb').addEventListener('click', () => kezikonyvbenMegnyitas(b.azonosito));
   buborekHelyezese(buborek, jel);
-  console.log('koinoMagyarazat.buborekNyitasa - VÉGE', { nev, forras: b.forras });
 }
 
 /** A bejegyzés a pakliban: a nyitott ablakok bezárulnak, a pakli a bejegyzéshez ugrik. */

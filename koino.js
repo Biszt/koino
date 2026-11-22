@@ -184,7 +184,7 @@ import { helyreallitasokAllapota, helyreallitasBizonyitekEllenorzese, javaslatKe
 // ⭐ B/2: a szelet-kulcs (az előléptetéshez).
 import {
   szelet, esemenyEllenorzese, tanusitvanyKereso, bejelentesHelyei, azonositoAlaku, esemenyKoinoja, koinoSzuleteseE, koinoSzuleteseListabol,
-  KOINO_VERZIO, koinoVerzioE, lancKulcsa, KOINON_KULCS, KOINON_TIPUSOK
+  KOINO_VERZIO, koinoVerzioE, lancKulcsa, KOINON_KULCS, KOINON_TIPUSOK, koinonHelyei
 } from './js/esemeny/esemeny.js';
 // ⭐⭐ D119 (①a): a kód-csomag — a futó program kódja a koino-verzió kártyájára, és a koino programjával összevetve.
 import { sajatKodCsomag, kodCsomagTarolasa, kodJegyzekOlvasasa, sajatMag, magJegyzeke } from './js/tar/kodCsomag.js';
@@ -192,7 +192,7 @@ import { sajatKodCsomag, kodCsomagTarolasa, kodJegyzekOlvasasa, sajatMag, magJeg
 import { kodKiirasa, telepitesHelye, valtozasRetegei } from './js/tar/programTelepites.js';
 import { szabalyokAlakiHibaja, ALAP_SZABALYOK, koinoSzabalyai, teljesSzabalyok, kezikonyvesE } from './js/esemeny/koinoSzabalyok.js';
 // ⭐⭐ D129: a kézikönyv — a nevek (a mag része) és az alap-tartalom (NEM a mag része: a szövegek a programé)
-import { rendszerNevE, rendszerAzonosito, KOINON } from './js/esemeny/rendszerEntitas.js';
+import { rendszerNevE, rendszerAzonosito, esemenyRendszerNevei, KOINON } from './js/esemeny/rendszerEntitas.js';
 import { programAlapTartalma, kezikonyvSzovege, programJavaslatai } from './js/kezikonyv/kezikonyv.js';
 import { szuletesLanc, szuloTagsagaEpitese, bekapcsolodasokEllenorzese, koinoNezete, lancNezete } from './js/allapot/koinoLanc.js';
 import { koinoKepe } from './js/allapot/ketReteg.js';
@@ -2596,7 +2596,6 @@ async function sajatVallalasa(allapot) {
   const szabalyok = await koinomSzabalyai(kornyezet);
   return vallalasSzamitasa(lanc, { koinoSzuletes: allapot?.koino?.azonosito ?? null, ...kifutasBeallitas(),
     azonossagHorgonyai: horgony ? [horgony] : [],
-    kezikonyv: kezikonyvesE(szabalyok),   // ⭐⭐ D129 (MA4 (B)): a kézikönyv szelete mindenkié
     tudatpontKeret: szabalyok.tudatpontKeret, koino: KOINO, szamit });   // ⭐ D118/2: a koino kerete
 }
 
@@ -4131,10 +4130,36 @@ async function koinonMelysegem() {
   const reszvetel = new Set(kulcsok);
   const darab = kulcsok[0];
   const d = koinonDarabBol(darab);
-  const tartja = (e) => bejelentesHelyei(e).includes(KOINON_KULCS) && darabbaEsik(koinonLenyomata(szelet(e)), d.melyseg, d.darab);
-  const b = { melyseg, tagok, alairo, darab, reszvetel, tartja };
+  // ⭐⭐ D130 (③e): a kézikönyv-esemény a bejegyzése szerint (`koinonHelyei` — egy helyen); a `bejegyzesTartja`: egy kézikönyv-bejegyzés
+  // (vagy általános egyezmény) a darabomba esik-e; a `darabja`: melyik darab-kulcs alatt kérhető (a mélységem szerint — KO9 (A))
+  const bejegyzesTartja = (az) => darabbaEsik(koinonLenyomata(az), d.melyseg, d.darab);
+  const tartja = (e) => bejelentesHelyei(e).includes(KOINON_KULCS) && koinonHelyei(e).some(bejegyzesTartja);
+  const darabja = (az) => egyezmenyKoinonDarabKulcsa(az, melyseg);
+  const b = { melyseg, tagok, alairo, darab, reszvetel, tartja, bejegyzesTartja, darabja };
   koinonBecslesEmlek = { valtozat, b };
   return b;
+}
+
+let kezikonyvDarabEmlek = null;
+/**
+ * ⭐⭐ D130 (③e, KO5 (B)): a kézikönyv bejegyzései, amelyek a koinon-DARABOMBA esnek — a vállalásom részei (a többit a darab tartói
+ * őrzik, és kérésre jön — KO9 (A)). A nevek: a program alap-tartalma, és amit az események hoznak (egy régebbi vagy újabb program
+ * bejegyzései). Kis koinoban (egy darab: az egész koinon) mind. A kézikönyv nélküli (a D129 előtti) koinoban üres.
+ * @returns {Promise<Array<string>>} a bejegyzések azonosítói (rendezve)
+ */
+async function kezikonyvBejegyzeseim() {
+  if (!kezikonyvesE(await koinomSzabalyai(kornyezet))) return [];
+  const kn = await koinonMelysegem();
+  const valtozat = (tar.mutatoAllapota?.()?.esemeny ?? 0) + '|' + kn.darab;
+  if (kezikonyvDarabEmlek?.valtozat === valtozat) return kezikonyvDarabEmlek.lista;
+  const azok = new Set(programAlapTartalma().azonositoSzerint.keys());
+  for (const e of await tar.bejelentesek(KOINON_KULCS)) {
+    if (esemenyKoinoja(e) !== KOINO) continue;
+    for (const nev of esemenyRendszerNevei(e)) azok.add(rendszerAzonosito(nev));
+  }
+  const lista = [...azok].filter(kn.bejegyzesTartja).sort();
+  kezikonyvDarabEmlek = { valtozat, lista };
+  return lista;
 }
 
 /**
@@ -4151,7 +4176,8 @@ function kuldoKulcsai(gy, kn = null) {
     if (e.tipus === 'GondolatLetrehozas' && !e.adat?.szulo) ki.push(gyokerDarabKulcsa(gy.melyseg, gyokerDarabja(e.azonosito, gy.melyseg)));
     // ⭐⭐ D130 (③c): a koinon eseménye (a döntés tömör alakja, az állásfoglalás) az egyezménye koinon-darabja alatt is (a
     // mélységem szerint) — ha nem a saját darabomba esik, csak így jut el a darab tartóihoz.
-    if (kn && KOINON_TIPUSOK.has(e.tipus)) ki.push(egyezmenyKoinonDarabKulcsa(szelet(e), kn.melyseg));
+    // ⭐⭐ D130 (③e): a kézikönyv-esemény a bejegyzése(i) darabja alatt (`koinonHelyei`)
+    if (kn) for (const az of koinonHelyei(e)) { const k = egyezmenyKoinonDarabKulcsa(az, kn.melyseg); if (!ki.includes(k)) ki.push(k); }
     // a gyökér ('') és a koinon kulcsa nem szelet: oda a darabjuk viszi (fent)
     for (const h of bejelentesHelyei(e)) if (h !== '' && h !== KOINON_KULCS && !ki.includes(h)) ki.push(h);
     return ki;
@@ -4668,10 +4694,9 @@ async function tartottSzeleteim() {
   try {
     if ((await kiszolgalasBeallitas()).mindent) return null;
     const v = (await ketFokAllapota()).vallalas;
-    // ⭐⭐ D129 (③): a kézikönyv-entitások eseményei mind a kézikönyv gyökerének szeletében vannak (a bejelentés — `esemeny.js`),
-    // amit mindenki tart: a pontjaik tehát ismertek — a pakli ne mutasson „?”-et rajtuk.
-    if (!v.kezikonyv) return v.szeletek;
-    return new Set([...v.szeletek, ...programAlapTartalma().azonositoSzerint.keys()]);
+    // ⭐⭐ D129 (③): a kézikönyv-bejegyzések pontjai a koinon darabjában ismertek — a pakli ne mutasson „?”-et rajtuk. ⭐⭐ D130 (③e):
+    // csak a darabomba esőkön (`kezikonyvBejegyzeseim`); a többi nem tartott (a közösség módosítása kérésre jön — KO9 (A))
+    return new Set([...v.szeletek, ...(await kezikonyvBejegyzeseim())]);
   } catch {
     return null;
   }
@@ -5159,6 +5184,25 @@ function reszletekMegjegyzes(nemTartom, keres) {
         + 'a készüléken ismert rész.';
   }
   return 'Ennek az entitásnak a szeletét nem tartom — amit látsz, a tartójától nemrég elkért másolat.';
+}
+
+/**
+ * ⭐⭐ D130 (③e, KO9 (A)) a kézikönyv-bejegyzés megjegyzése (a buborék alá): ha a bejegyzés nem a koinon-darabomba esik, a közösség
+ * módosításait a darab tartói őrzik — amit a buborék mutat, az a program szövege (vagy ami már megjött), és ha elkértem, ki hozza.
+ * @param {boolean} nemTartom - a bejegyzés nem a darabomba esik (a szigorú (b) alatt)
+ * @param {{fuggo: number, celos: number}} keres - a `lapHianyzoinakElkerese` válasza
+ * @returns {string|null} null, ha a darabomba esik (a közösség szövegét magam őrzöm)
+ */
+function kezikonyvMegjegyzes(nemTartom, keres) {
+  if (!nemTartom) return null;
+  if (keres.fuggo > 0) {
+    return keres.celos > 0
+      ? '⏳ Ennek a bejegyzésnek a közösségi módosításait nem a készüléked őrzi (a koinon egy másik darabjában vannak). Elkértem — az '
+        + 'őrjárat hozza, és a buborék magától frissül. Addig a program szövegét látod.'
+      : '🔎 Ennek a bejegyzésnek a közösségi módosításait nem a készüléked őrzi, és nem ismerek társat, aki tartaná — elkértem, a '
+        + 'tartóit keresem. Addig a program szövegét látod.';
+  }
+  return 'Ennek a bejegyzésnek a közösségi módosításait nem a készüléked őrzi — amit látsz, a tartójától nemrég elkért másolat.';
 }
 
 // ⭐ Amit a kérelem nemrég elhozott, azt ennyi ideig nem kérjük újra (a nem tartott ág gyerekeit a lekérdezés soha nem
@@ -6035,7 +6079,6 @@ async function ketFokAllapota(allapot = null) {
   const vallalas = vallalasSzamitasa(sajatLancom.lanc,
     { koinoSzuletes: szuletes, ...kifutasBeallitas(), tudatpontKeret: szabalyok.tudatpontKeret,
       azonossagHorgonyai: horgony ? [horgony] : [],
-      kezikonyv: kezikonyvesE(szabalyok),   // ⭐⭐ D129 (MA4 (B)): a kézikönyv szelete mindenkié
       koino: KOINO, szamit: sajatLancom.szamit });   // ⭐ D118 (⑤a): a hozott pontjaimmal
   const tarolo = osszegzesTarolo(KOINO);
   const t = await tarolo.olvas();
@@ -6045,8 +6088,7 @@ async function ketFokAllapota(allapot = null) {
     meretek.set(k, Math.max(jegyzek.get(k) ?? 0, t.szeletek[k]?.fok === 'osszegzo' ? (t.szeletek[k].darab ?? 0) : 0));
   }
   const fokok = szeletFokai({ szeletek: vallalas.szeletek, meretek,
-    // ⭐⭐ D129: a kézikönyv szelete is mindig egészében (a pont nélkül megmaradó módosítás eseményei nem összegezhetők el)
-    mindigTeljes: [...vallalas.azonossag, vallalas.koinoSzuletes, vallalas.kezikonyv].filter(Boolean),
+    mindigTeljes: [...vallalas.azonossag, vallalas.koinoSzuletes].filter(Boolean),
     elozo: new Map(Object.entries(t.szeletek).map(([k, x]) => [k, x?.fok])),
     mindent: (await kiszolgalasBeallitas()).mindent, kuszob: KETFOK.kuszob, vissza: KETFOK.vissza });
   let valtozott = false;
@@ -7812,7 +7854,7 @@ return {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, kezikonyvBejegyzeseim, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -7856,7 +7898,7 @@ const {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, kezikonyvBejegyzeseim, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -10738,7 +10780,11 @@ try {
       const koinonbol = (await tar.bejelentesek(KOINON_KULCS)).filter((e) => esemenyKoinoja(e) === KOINO && knV.tartja(e));
       kiir(SZIN.halvany + '  a koinon darabja: ' + knV.melyseg + '. mélység (' + knV.tagok + ' ismert tag, r = ' + KOINON_R
         + (knV.melyseg ? ' — 2^' + knV.melyseg + ' darabból egy' : ' — egy darab: az egész koinon') + ') · '
-        + new Set(koinonbol.map((e) => szelet(e))).size + ' általános egyezmény, ' + koinonbol.length + ' esemény (D130)' + SZIN.vege);
+        + new Set(koinonbol.filter((e) => KOINON_TIPUSOK.has(e.tipus)).map((e) => szelet(e))).size + ' általános egyezmény, '
+        + koinonbol.filter((e) => KOINON_TIPUSOK.has(e.tipus)).length + ' esemény · '
+        // ⭐⭐ D130 (③e): a kézikönyv is a darabokban — a darabomba eső bejegyzések és az eseményeik
+        + (await kezikonyvBejegyzeseim()).length + ' kézikönyv-bejegyzés, ' + koinonbol.filter((e) => !KOINON_TIPUSOK.has(e.tipus)).length
+        + ' kézikönyv-esemény (D130)' + SZIN.vege);
       for (const [az, p] of pontosak.sort((a, b) => b[1] - a[1])) {
         const o = kf.fokok.get(az) === 'osszegzo' ? osszT.szeletek[az] : null;
         kiir('  ' + SZIN.halvany + az.slice(0, 8) + SZIN.vege + '  ' + (allapot.entitasok.get(az)?.cim ?? '(ismeretlen)')
@@ -12074,7 +12120,7 @@ try {
         const pakliNezet = aktiv.pakliNezet;
         const {
           tar, kornyezet, atmeneti, bemondasok, csereAllapota, dontesAzonositoja, fejlecTudas, felderitesJegyzekIrasa,
-          felderitesJegyzekOlvasasa, felderitesKor, fuggoKerelmekAllasa, halozatiKereses, hozzarendelesMegjegyzes, reszletekMegjegyzes, kepetKeszit,
+          felderitesJegyzekOlvasasa, felderitesKor, fuggoKerelmekAllasa, halozatiKereses, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes, kepetKeszit,
           keresesFuggoAllasa, keresesMegjegyzes, kiszolgalasBeallitas, koinoVerzioElonezete, koinoVerzioKeszitese,
           bekapcsolodasElonezete, bekapcsolodasVegrehajtasa, lapHianyzoinakElkerese, laposMegjegyzes, postafiokFrissitese,
           postafiokMegjegyzes, postafiokModositasa, programVerzioja, sikidomMegjegyzes, strukturaMegjegyzes, torzsElemKerese,
@@ -12083,7 +12129,9 @@ try {
           // ⭐⭐ D126: a közösség feltöltött nézetei (a belépett koinoé — NZ2)
           nezetFeltoltese, nezetKartyai, nezetKartyaja, nezetBekapcsolasaKeszuleken, nezetKikapcsolasaKeszuleken, nezetKerete, koinoSzuletese,
           // ⭐⭐ D129 MA9 (B)
-          letrehozoKuszobJavaslata
+          letrehozoKuszobJavaslata,
+          // ⭐⭐ D130 (③e, KO9 (A)): a kézikönyv-bejegyzés koinon-darabja (a nem tartott bejegyzés közösségi módosításának kéréséhez)
+          koinonMelysegem
         } = aktiv.peldany;
         // ⭐ B/2: az olvasók (a pakli) a két tár nézetét kapják — FL1 óta minden koinoban (a koino átmeneti tára is látszik).
         const olvasoTar = ketTarNezet(tar, atmeneti);
@@ -13046,7 +13094,16 @@ try {
           const b = await kezikonyvBejegyzese(olvasoTar, KOINO, { nev: kereses.get('nev') ?? '', szerzo, nezet: pakliNezet,
             darabOlvas: (lenyomat) => fajlBlobTarolo(KOINO).olvas(lenyomat) });
           if (!b) return { allapot: 404, adat: { hiba: 'nincs ilyen kézikönyv-bejegyzés (vagy ennek a koinonak nincs kézikönyve)' } };
-          return { adat: b };
+          // ⭐⭐ D130 (③e, KO9 (A)): ha a bejegyzés nem a koinon-darabomba esik, a közösség módosításait a darab tartói őrzik — elkérjük
+          // (a DARABOT: a döntés minden eseményét hordja), a megjegyzés kimondja, és a buborék újrakérdez, amíg úton van.
+          const tartottSzeletek = typeof pakliNezet.tartott === 'function' ? await pakliNezet.tartott() : null;
+          const nemTartom = !!tartottSzeletek && !tartottSzeletek.has(b.azonosito);
+          const keres = nemTartom
+            ? await lapHianyzoinakElkerese([{ fajta: 'szelet', kulcs: (await koinonMelysegem()).darabja(b.azonosito),
+              ok: 'a kézikönyv-bejegyzés közösségi módosításaihoz' }])
+            : { kert: 0, fuggo: 0, celos: 0 };
+          return { adat: { ...b, betoltes: keres.fuggo > 0, kitolKerni: keres.celos,
+            koinoMegjegyzes: kezikonyvMegjegyzes(nemTartom, keres) } };
         }
         // ⭐⭐ D121 (②): A TAGSÁGOM — a belépő lapja ebből mondja: „várakozás a meghívásra — a kódod: …”, vagy „✅ tag vagy”.
         if (utvonal === '/api/tagsagom') {
@@ -13549,8 +13606,11 @@ try {
           // amíg úton van. A nemrég megjött szeletet 10 percig nem kérjük újra (`lapHianyzoinakElkerese`).
           const tartottSzeletek = typeof pakliNezet.tartott === 'function' ? await pakliNezet.tartott() : null;
           const nemTartom = !!tartottSzeletek && !tartottSzeletek.has(decodeURIComponent(azonosito));
+          // ⭐⭐ D130 (③e, KO9 (A)): a kézikönyv-bejegyzés döntése (a szavazatokkal) a koinon-DARABJÁBAN él — azt kérjük, nem a szeletét
+          const kerendo = talalat.data?.rendszer
+            ? (await koinonMelysegem()).darabja(decodeURIComponent(azonosito)) : decodeURIComponent(azonosito);
           const keres = nemTartom
-            ? await lapHianyzoinakElkerese([{ fajta: 'szelet', kulcs: decodeURIComponent(azonosito), ok: 'a részletes adataihoz' }])
+            ? await lapHianyzoinakElkerese([{ fajta: 'szelet', kulcs: kerendo, ok: 'a részletes adataihoz' }])
             : { kert: 0, fuggo: 0, celos: 0 };
           return { adat: { ...talalat, betoltes: keres.fuggo > 0, kitolKerni: keres.celos,
             koinoMegjegyzes: reszletekMegjegyzes(nemTartom, keres) } };

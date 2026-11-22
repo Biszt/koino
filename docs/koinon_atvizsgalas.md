@@ -152,6 +152,28 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
   nem egy születés-esemény, hanem egy út a fában; új mező, a kapu is nézi. (C) **a tartó a hatályt nem számolja** (csak a tényt
   őrzi: az általános egyezmény él, a hatály „nem ismert”) — az állásfoglalásokat csak továbbadja annak, aki ítélni tud.
 
+## 9. A ③e terve — a kézikönyv a darabokban (2026-11-22, kód előtt)
+
+**Ami ma van (a kódból):** minden kézikönyv-esemény (ami egy bejegyzés nevét hordja: a pont, az érték javaslat, a szerkesztési javaslat,
+a szavazat, a lezárási összegzés — D129 ②) a kézikönyv GYÖKERÉNEK szeletébe is bejelentődik (`esemeny.js`), és ezt a szeletet mindenki
+vállalja (`vallalas.js` — MA4 (B)). A koinon darabjai (③c) a koinon kulcsához bejelentett eseményeket az általános egyezményük (a
+szeletük) szerint osztják el.
+
+**A terv (döntés nem kell — a KO5 (B) és a KO9 (A) eldöntötte):**
+1. **A bejelentés:** a kézikönyv-esemény a koinon kulcsához jelentődik be (a gyökér-szelet helyett). A darabját a bejegyzés NEVE adja (az
+   azonosítója — `rendszerAzonosito`); több névnél (áthelyezés: a bejegyzés és a cél) mindegyiké. Egy helyen (`esemeny.js`
+   `koinonHelyei`), és ezt nézi a darab halmaza (`szeletEgyeztetes.js`), a tartás és a tömörítés (`koinonMelysegem`), és a csak küldő út.
+2. **A vállalás:** a kézikönyv gyökér-szelete helyett a darabomba eső bejegyzések (a program alap-tartalmának nevei és az eseményekben
+   látott nevek) — így ezek kártyája „tartott”, a többié nem.
+   ⚠️ *Az építéskor pontosítva (a napló 2026-11-22):* a vállalás a kézikönyvet nem tartja — csak a lap „tartott” jele kapja meg a darabom
+   bejegyzéseit (a vállalásban 116 külön szelet volna: minden cserében ennyivel több egyeztetés, pedig az eseményeiket a darab hordja).
+3. **A kérés (KO9 (A)):** a nem a darabomba eső bejegyzés közösségi módosítását a buborék és a Részletes adatok kéri. A kérelem a
+   bejegyzés koinon-DARABJÁRA szól (a darab a döntés minden eseményét hordja, a szavazatokat is — a bejegyzés saját szelete nem), a
+   megjegyzés kimondja, és a lap újrakérdez (a Részletes adatok mintájára).
+4. **A régi gyökér-bejelentés megszűnik** — nem marad átmenetnek: a végleges alak ismert, és a koinok teszt koinok. ⚠️ A következménye: a
+   régebbi programú készülék (pl. a telefon) a közösség új kézikönyv-módosításait a frissítéséig nem kapja meg (a régi gyökér-szeletben
+   keresi). Kis koinoban (40 ismert tag alatt: egy darab — az egész koinon) minden készülék mindent tart: a változás a darabolás után látszik.
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
@@ -253,3 +275,19 @@ szigorú (b) alatt ma is előfordul: aki a helyet tartja, de azt a mélyebb ága
   nem). A parancssor a művelet nevét magyarul írja (a nyers „Allaspont” helyett „Álláspont”). Próba: +1 `egyezmenyProba` (a KO10 három
   esete: ismeretlen hely, hézagos lánc, hézagtalan lánc), +1 parancssor (a szigorú vendég a `koinon` után a képében látja az általános
   egyezményt, a hatályával), 4 rontás mind bukik. ⏭️ ③e a kézikönyv a darabokba, ③f az `r` a születésben, ④ a fenntartó kör.
+- **2026-11-22** — ✅ **A ③e kész: a kézikönyv a koinon darabjaiban** (KO5 (B), KO9 (A); a terv a 9. szakaszban). `esemeny.js`
+  `koinonHelyei` (EGY helyen: melyik koinon-darabba esik egy esemény — a koinon eseményénél az általános egyezménye, a kézikönyv-eseménynél
+  a bejegyzése NEVE, több névnél mindegyiké), és a kézikönyv-esemény a koinon kulcsához jelentődik be (a gyökér-szelet helyett);
+  `szeletEgyeztetes.js` (a darab halmaza és a fogadó szűrője), `koino.js` (a tartás, a tömörítés, a csak küldő út) ugyanezt kérdezi. ⛔
+  **Építés közbeni lelet:** a terv a vállalásba tette volna a darabom bejegyzéseit — de az 116 külön szeletet adott volna a cserének
+  (minden körben 116 szelettel több egyeztetés), pedig az eseményeiket a koinon-darab már hordja. Ezért a vállalás a kézikönyvet nem
+  tartja (`vallalas.js`), csak a lap „tartott” jele kapja meg a darabom bejegyzéseit (`tartottSzeleteim` → `kezikonyvBejegyzeseim`: a
+  program alap-tartalmának nevei és az eseményekben látott nevek, a darabomra szűrve). A nem a darabomba eső bejegyzésnél a buborék és a
+  Részletes adatok a bejegyzés koinon-DARABJÁT kéri (abban a szavazatok is ott vannak — a bejegyzés saját szeletében nem), a megjegyzés
+  kimondja (`kezikonyvMegjegyzes`), és a buborék csendben újrakérdez (4 mp-től egyre ritkábban, bezáráskor leáll). A `vallalas` parancs
+  sora: „… · N kézikönyv-bejegyzés, M kézikönyv-esemény”. Kis koinoban (40 ismert tag alatt) egy darab van: minden készülék mindet tartja,
+  a viselkedés nem változik. Próba: +2 `koinonDarabProba` (a darab halmaza a név szerint — a két-nevű esemény mindkét darabban; a
+  kézikönyv a cserében — a javaslat-szeletű döntés-esemény is a neve szerint), 2 `kezikonyvProba` az új szabályra, +1 parancssor (két
+  ismert tag és r = 1: két darab — a vállalás a bejegyzések egy részét tartja, a kívüli buboréka és Részletes adatai a darabot kéri), +1
+  `magyarazatProba` (fej nélküli Chrome: a buborék megjegyzése, újrakérdezés, bezárás után leáll); 10 rontás mind bukik. ⏭️ ③f az `r` a
+  születésben (KO4), ④ a fenntartó kör (a darab hirdetése — addig a darab kérelme az ismert társakhoz megy).

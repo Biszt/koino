@@ -487,6 +487,96 @@ proba('⭐ (Csaba, 2026-11-20) a RÉSZLETES ADATOK a valódi lapon: a sorok a ko
     }
   });
 
+// ===================================
+// 5. ⭐⭐ D130 (③e, KO9 (A)): A BUBORÉK, ha a bejegyzés nem a koinon-darabomba esik
+// ===================================
+//
+// A program a darabot elkéri, és kimondja (`koinoMegjegyzes`, `betoltes`) — itt egy `fetch`-csomagoló mondja (egy darabos koinoban
+// minden bejegyzés a darabomba esik). A buborék a megjegyzést kiírja, csendben újrakérdez (4 mp után), és a bezárása után leáll.
+
+const BUBOREK_CSOMAGOLO = `(() => {
+  const eredeti = window.fetch.bind(window);
+  window.__buborekKeres = 0;
+  window.fetch = async (cim, ...tobbi) => {
+    const v = await eredeti(cim, ...tobbi);
+    if (!String(cim).includes('/api/kezikonyv/bejegyzes')) return v;
+    window.__buborekKeres += 1;
+    const adat = await v.clone().json();
+    adat.betoltes = true;
+    adat.kitolKerni = 1;
+    adat.koinoMegjegyzes = '⏳ próba: a bejegyzés darabját az őrjárat hozza';
+    return new Response(JSON.stringify(adat), { status: v.status, headers: { 'Content-Type': 'application/json' } });
+  };
+})()`;
+
+const BUBOREK_PROBA = `(async () => {
+  const varj = (ms) => new Promise((r) => setTimeout(r, ms));
+  let jel = null;
+  for (let i = 0; i < 60 && !jel; i++) { jel = document.querySelector('#allapot > .koino-magyarazat__jel'); if (!jel) await varj(250); }
+  if (!jel) return JSON.stringify({ nincsJel: true });
+  jel.click();
+  for (let i = 0; i < 40 && !document.querySelector('.koino-magyarazat__buborek .koino-magyarazat__cim'); i++) await varj(150);
+  const ki = { megj: document.querySelector('.koino-magyarazat__buborek .koino-magyarazat__megjegyzes')?.textContent ?? null,
+    keresElotte: window.__buborekKeres };
+  await varj(4600);
+  ki.keresUjra = window.__buborekKeres;
+  ki.cimUtana = document.querySelector('.koino-magyarazat__buborek .koino-magyarazat__cim')?.textContent ?? null;
+  document.querySelector('.koino-magyarazat__bezar')?.click();
+  const zaraskor = window.__buborekKeres;
+  await varj(7000);
+  ki.keresZarasUtan = window.__buborekKeres - zaraskor;
+  ki.buborekMaradt = !!document.querySelector('.koino-magyarazat__buborek');
+  return JSON.stringify(ki);
+})()`;
+
+// Rontás: (a) a buborék a megjegyzést nem írja ki → bukik; (b) a bezárás az újrakérdezést nem állítja le → bukik.
+proba('⭐⭐ D130 (③e, KO9 (A)) a BUBORÉK a valódi lapon, ha a bejegyzés nem a darabomba esik: a program megjegyzése kint, csendes újrakérdezés — és a bezárása után leáll',
+  async () => {
+    const chrome = chromeHelye();
+    if (!chrome) { process.stdout.write('    (nincs Chrome a gépen — a böngészős próba kihagyva; KOINO_CHROME=<út>)\n'); return true; }
+    if (typeof WebSocket !== 'function') { process.stdout.write('    (a Node-ban nincs WebSocket — a böngészős próba kihagyva)\n'); return true; }
+    const otthon = await ujMappa('koino-buborek-');
+    const adat = join(otthon, 'adat');
+    await parancs(adat, ['koino', 'Buborék-próba']);
+    await parancs(adat, ['gondolat', 'Egy gondolat', 'a gondolat szövege']);
+    const f = await felulete(adat, 8093);
+    const profil = await ujMappa('koino-buborek-profil-');
+    const b = spawn(chrome, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0',
+      '--remote-allow-origins=*', '--user-data-dir=' + profil, 'about:blank'], { stdio: 'ignore', windowsHide: true });
+    let cdp = null;
+    try {
+      let port = null;
+      for (let i = 0; i < 100 && !port; i++) {
+        await varj(200);
+        port = (await readFile(join(profil, 'DevToolsActivePort'), 'utf8').catch(() => '')).split('\n')[0].trim() || null;
+      }
+      if (!port) throw new Error('a Chrome nem nyitott DevTools-portot');
+      const lapok = await (await fetch('http://127.0.0.1:' + port + '/json/list')).json();
+      cdp = await cdpKapcsolat(lapok.find((l) => l.type === 'page').webSocketDebuggerUrl);
+      await cdp.kuld('Page.enable');
+      await cdp.kuld('Runtime.enable');
+      await cdp.kuld('Page.addScriptToEvaluateOnNewDocument', { source: BUBOREK_CSOMAGOLO });
+      await cdp.kuld('Page.navigate', { url: 'http://127.0.0.1:' + f.port + '/?kulcs=' + f.kulcs });
+      for (let i = 0; i < 100 && !cdp.esemenyek.some((e) => e.method === 'Page.loadEventFired'); i++) await varj(200);
+      const ki = JSON.parse(await ertekel(cdp, BUBOREK_PROBA));
+      const r = {
+        megjegyzes: ki.megj === '⏳ próba: a bejegyzés darabját az őrjárat hozza',
+        ujrakerdez: ki.keresUjra > ki.keresElotte && !!ki.cimUtana,
+        leall: ki.keresZarasUtan === 0 && ki.buborekMaradt === false
+      };
+      if (!Object.values(r).every(Boolean)) {
+        process.stderr.write('    (' + JSON.stringify({ r, ki }).slice(0, 900) + ')\n');
+        return false;
+      }
+      return true;
+    } finally {
+      cdp?.zar();
+      b.kill();
+      f.folyamat.kill();
+      await varj(800);
+    }
+  });
+
 export default async function (csendes) {
   const eredmeny = await futtatas(csendes);
   for (const m of mappak) await rm(m, { recursive: true, force: true }).catch(() => {});

@@ -23,7 +23,8 @@ import { csereUdpResen } from '../js/csere/udpVonal.js';
 import { ujTablaKulcs, nyilvanosResz } from '../js/csere/tablaKulcs.js';
 import { kezfogasAlairasa } from '../js/csere/titkositas.js';
 import { egyeztetettEsemenyek, ervenyesKulcs, GYOKER_KULCS, KOINO_SZULETES_KULCS } from '../js/csere/szeletEgyeztetes.js';
-import { bejelentesHelyei, szelet, KOINON_KULCS } from '../js/esemeny/esemeny.js';
+import { bejelentesHelyei, szelet, KOINON_KULCS, koinonHelyei } from '../js/esemeny/esemeny.js';
+import { rendszerAzonosito } from '../js/esemeny/rendszerEntitas.js';
 import {
   koinonDarabKulcsa, koinonDarabBol, koinonDarabKulcsai, koinonLenyomata, koinonMelysege, kozosKoinonDarab,
   egyezmenyKoinonDarabKulcsa, darabbaEsik, gyokerDarabKulcsa, gyokerDarabBol, DARAB_MAX_MELYSEG
@@ -167,6 +168,54 @@ proba('⭐⭐ a darab halmaza a koinon kulcsához bejelentettek közül azok, am
     && benne.includes(a[0].azonosito) === benne.includes(masodik.azonosito) && egeszKoinon === a.length + 1;
 });
 
+// ===================================
+// ⭐⭐ D130 (③e, KO5 (B)): A KÉZIKÖNYV A DARABOKBAN
+// ===================================
+
+/** Egy alapító és `n` pont-eseménye `n` kézikönyv-bejegyzésen (a nevük a darabjukat adja). */
+async function kezikonyvPontok(n, jel = 'k') {
+  const f = await ujEember(KOINO);
+  const letrehozas = await f.tesz('KoinoLetrehozas', { nev: 'Kézikönyves', leiras: null, alapitok: [], zart: false });
+  const k = [];
+  for (let i = 0; i < n; i++) {
+    const nev = 'kezikonyv/proba-' + jel + '-' + i;
+    k.push(await f.tesz('TudatpontRendezes', { entitas: rendszerAzonosito(nev), pont: 1, szerep: 'aktiv', rendszer: [nev] }));
+  }
+  return { f, letrehozas, k };
+}
+/** A kézikönyv-esemény (valamelyik bejegyzése) a kulcs darabjába esik-e. */
+const nevSzerintEsik = (e, kulcs) => {
+  const d = koinonDarabBol(kulcs);
+  return koinonHelyei(e).some((x) => darabbaEsik(koinonLenyomata(x), d.melyseg, d.darab));
+};
+
+// Rontás: a darab halmaza a szeletből szűr (nem a névből) → a pont-esemény szelete a bejegyzés, de a két-nevű esemény a második
+// darabból kimarad → bukik; a bejelentés a régi gyökér-szeletbe megy (a koinon kulcsához nem) → a halmaz üres → bukik.
+proba('⭐⭐ D130 (③e, KO5 (B)): a kézikönyv-esemény a koinon kulcsához jelentődik be, és a bejegyzése NEVE szerinti darabba esik — egy két-nevű esemény (az áthelyezés: a bejegyzés és a cél) mindkét darabban; a hétköznapi esemény egyikben sem', async () => {
+  const { f, letrehozas, k } = await kezikonyvPontok(40);
+  const kulcs0 = koinonDarabKulcsa(1, 0);
+  const kulcs1 = koinonDarabKulcsa(1, 1);
+  // két bejegyzés, amelyik a két külön darabba esik — egy esemény mindkettő nevével
+  const n0 = k.find((e) => nevSzerintEsik(e, kulcs0));
+  const n1 = k.find((e) => nevSzerintEsik(e, kulcs1));
+  const ketNevu = await f.tesz('TudatpontRendezes', { entitas: n0.entitas, pont: 2, szerep: 'aktiv',
+    rendszer: [...n0.adat.rendszer, ...n1.adat.rendszer] });
+  const g = await f.tesz('GondolatLetrehozas', { cim: 'G', meret: 10 });
+  const t = await tar([letrehozas, ...k, ketNevu, g]);
+  const halmaz = async (kulcs) => (await egyeztetettEsemenyek(t, KOINO, kulcs)).map((e) => e.azonosito);
+  const h0 = await halmaz(kulcs0);
+  const h1 = await halmaz(kulcs1);
+  const r = {
+    bejelentes: k.every((e) => bejelentesHelyei(e).includes(KOINON_KULCS)) && !bejelentesHelyei(g).includes(KOINON_KULCS),
+    nevSzerint: k.every((e) => h0.includes(e.azonosito) === nevSzerintEsik(e, kulcs0) && h1.includes(e.azonosito) === nevSzerintEsik(e, kulcs1)),
+    ketDarabban: h0.includes(ketNevu.azonosito) && h1.includes(ketNevu.azonosito),
+    hetkoznapi: !h0.includes(g.azonosito) && !h1.includes(g.azonosito),
+    egesz: (await halmaz(koinonDarabKulcsa(0, 0))).length === k.length + 1
+  };
+  if (!Object.values(r).every(Boolean)) console.log('    (' + JSON.stringify({ r, h0: h0.length, h1: h1.length }) + ')');
+  return Object.values(r).every(Boolean);
+});
+
 proba('⭐⭐ KO6 (A): a KÖZÖS darab két készülék közt — egy mélységen a közös darab; szomszéd mélységen a MÉLYEBB (a sekélyebbnek a fele), a lenyomata a sekélyebb jeléből; nem egymásba esőnél és két szint távolságnál nincs', () => {
   const l = (x) => ['L' + x + '0', 'L' + x + '1', 'L' + x + '2'];
   let azonos = null, nemAzonos = null, beagyazott = null, nemBeagyazott = null;
@@ -237,6 +286,35 @@ proba('⭐⭐ KO6 (A): SZOMSZÉD mélységű társak — a mélyebbik darabja j�
     masikFel: masikFel.length > 0 && (await megvan(tarB, masikFel)) === 0,
     kint: (await megvan(tarB, kint)) === 0,
     masodik: r2.b.egyeztetoUzenetek === 0 && r2.b.uj === 0
+  };
+  if (!Object.values(ki).every(Boolean)) console.log('    (ami bukott: ' + Object.keys(ki).filter((x) => !ki[x]).join(', ') + ')');
+  return Object.values(ki).every(Boolean);
+});
+
+// Rontás: a fogadó szűrője (`szeletbeTartozik`) a kézikönyv-eseményt nem a neve szerint sorolja → a közös darab eseményei nem jönnek át
+// → bukik.
+proba('⭐⭐ D130 (③e): a KÉZIKÖNYV a cserében — a közös darabba eső bejegyzések eseményei átjönnek, a másik darabéi nem (a nem tartott bejegyzés közösségi módosítása kérésre jön — KO9 (A))', async () => {
+  const m = 1;
+  const { f, letrehozas, k: pontok } = await kezikonyvPontok(40, 'cs');
+  // ⚠️ egy döntés-esemény is (mint a pont egy kézikönyv-bejegyzés szerkesztési javaslatán): a SZELETE a javaslat, a NEVE a bejegyzés —
+  // a darabját a neve adja (a szeletéből nem jönne ki ugyanaz)
+  const javaslaton = [];
+  for (let i = 0; i < 20; i++) {
+    const nev = pontok[i].adat.rendszer[0];
+    javaslaton.push(await f.tesz('TudatpontRendezes', { entitas: egyezmenyAz('jv' + i), pont: 1, szerep: 'aktiv', rendszer: [nev] }));
+  }
+  const k = [...pontok, ...javaslaton];
+  const [tA, tB] = await kulcsPar((x, y) => darabKulcsa(x, m) === darabKulcsa(y, m));
+  const kozos = darabKulcsa(tA, m);
+  const tarA = await tar([letrehozas, ...k]);
+  const tarB = await tar([letrehozas]);
+  const r1 = await csere(tarA, tarB, tA, tB, { mA: m, mB: m });
+  const bent = k.filter((e) => nevSzerintEsik(e, kozos));
+  const kint = k.filter((e) => !nevSzerintEsik(e, kozos));
+  const ki = {
+    bent: bent.length > 0 && (await megvan(tarB, bent)) === bent.length && r1.b.uj === bent.length,
+    kint: kint.length > 0 && (await megvan(tarB, kint)) === 0,
+    javaslaton: javaslaton.some((e) => nevSzerintEsik(e, kozos)) && javaslaton.some((e) => !nevSzerintEsik(e, kozos))
   };
   if (!Object.values(ki).every(Boolean)) console.log('    (ami bukott: ' + Object.keys(ki).filter((x) => !ki[x]).join(', ') + ')');
   return Object.values(ki).every(Boolean);

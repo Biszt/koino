@@ -88,7 +88,8 @@ export function rendszerAzonosito(nev) {
   return lenyomatSzinkron({ fajta: 'kezikonyv', nev });
 }
 
-/** A kézikönyv gyökerének azonosítója (ennek a szeletébe jelentődik be minden kézikönyv-esemény, és ezt tartja mindenki). */
+/** A kézikönyv gyökerének azonosítója. ⭐⭐ D130 (③e): a kézikönyv-események már nem ide jelentődnek be, hanem a koinon kulcsához
+ * (a bejegyzésük darabjába — `esemeny.js` `koinonHelyei`). */
 export const KEZIKONYV_GYOKER_AZONOSITO = rendszerAzonosito(KEZIKONYV_GYOKER);
 
 // ===================================

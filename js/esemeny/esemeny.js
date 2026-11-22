@@ -29,8 +29,9 @@ import { szovegHivatkozasE } from './szovegDarab.js';
 import { tanusitvanyAlakiHibaja, tanusitvanyEllenorzese, kizarasAlakiHibaja } from '../kulcs/keszulek.js';
 import { szuletesAlakiHibaja, lancBejegyzesAlakiHibaja, KULCSCSERE_KORLAT, helyreallitasJavaslatAlakiHibaja, HELYREALLITAS_BEJEGYZES }
   from '../kulcs/azonossag.js';
-// ⭐⭐ D129: a rendszer-entitások (a kézikönyv) nevei — a kapu az alakjukat nézi, a bejelentés a kézikönyv gyökeréhez is viszi.
-import { rendszerNevekAlakiHibaja, esemenyRendszerNevei, KEZIKONYV_GYOKER_AZONOSITO } from './rendszerEntitas.js';
+// ⭐⭐ D129: a rendszer-entitások (a kézikönyv) nevei — a kapu az alakjukat nézi; ⭐⭐ D130 (③e): a bejelentés a koinon kulcsához viszi,
+// a darabot a nevük azonosítója adja.
+import { rendszerNevekAlakiHibaja, esemenyRendszerNevei, rendszerAzonosito } from './rendszerEntitas.js';
 
 const ALGORITMUS = 'Ed25519';
 
@@ -233,6 +234,23 @@ export const KOINON_KULCS = '0'.repeat(42) + 'n';
 /** ⭐ D130 (③c): a koinon eseménytípusai — a koinon kulcsához bejelentődnek. */
 export const KOINON_TIPUSOK = new Set(['KoinonOsszegzes', 'Allasfoglalas']);
 
+/**
+ * ⭐⭐ D130 (③c, ③e): MELYIK KOINON-DARABBA esik egy esemény — EGY helyen (a darab halmaza, a tartás, a tömörítés és a csak küldő út
+ * is ezt kérdezi). A koinon eseményénél az általános egyezménye (a szelete); a kézikönyv-eseménynél (KO5 (B)) a bejegyzés NEVE — az
+ * azonosítója —, több névnél (az áthelyezés: a bejegyzés és a cél) mindegyiké: az esemény mindegyik darabba tartozik.
+ * @param {Object} e
+ * @returns {Array<string>} az azonosítók, amelyeknek a koinon-lenyomata a darabot adja (üres: nem koinon-esemény)
+ */
+export function koinonHelyei(e) {
+  const helyek = [];
+  if (KOINON_TIPUSOK.has(e?.tipus)) helyek.push(szelet(e));
+  for (const nev of esemenyRendszerNevei(e)) {
+    const az = rendszerAzonosito(nev);
+    if (!helyek.includes(az)) helyek.push(az);
+  }
+  return helyek;
+}
+
 export function bejelentesHelyei(e) {
   const helyek = new Set();
   const sajat = szelet(e);
@@ -266,11 +284,10 @@ export function bejelentesHelyei(e) {
     const reszek = Array.isArray(e.adat?.reszek) ? e.adat.reszek.slice(0, 64) : [];
     for (const r of reszek) hozza(r?.osszegzes?.entitas);
   }
-  // ⭐⭐ D130 (③c): a koinon eseményei a koinon kulcsánál is (a darabjaik ebből szűrnek).
-  if (KOINON_TIPUSOK.has(e?.tipus)) hozza(KOINON_KULCS);
-  // ⭐⭐ D129: ami kézikönyv-entitásra mutat (a nevét hozza), az a kézikönyv GYÖKERÉNEK szeletébe is bejelentődik — EGY szelet
-  // hordja az egész kézikönyvet, és azt mindenki tartja (MA4 (B): a pont nélkül megmaradó módosítást is őrizni kell).
-  if (esemenyRendszerNevei(e).length) hozza(KEZIKONYV_GYOKER_AZONOSITO);
+  // ⭐⭐ D130 (③c): a koinon eseményei a koinon kulcsánál is (a darabjaik ebből szűrnek — `koinonHelyei`). ⭐⭐ D130 (③e, KO5 (B)):
+  // a kézikönyv-esemény is (ami egy bejegyzés nevét hozza) — eddig a kézikönyv GYÖKERÉNEK szeletébe ment, és azt mindenki tartotta
+  // (MA4 (B)); most a bejegyzés koinon-darabjába, és azt a darab tartói őrzik (a koinon pontja a bejegyzést pont nélkül is megtartja).
+  if (koinonHelyei(e).length) hozza(KOINON_KULCS);
   return [...helyek].sort();
 }
 

@@ -13,7 +13,7 @@ import { probaGyujtemeny, ujEember, tagokkal } from './probaFuttato.js';
 import { allapotSzamitasa } from '../js/allapot/allapotSzamitas.js';
 import { javaslatokSzamitasa } from '../js/allapot/javaslatSzamitas.js';
 import { vallalasSzamitasa } from '../js/allapot/vallalas.js';
-import { alakiHiba, bejelentesHelyei } from '../js/esemeny/esemeny.js';
+import { alakiHiba, bejelentesHelyei, koinonHelyei, KOINON_KULCS } from '../js/esemeny/esemeny.js';
 import { koinoSzabalyai, teljesSzabalyok, szabalyokAlakiHibaja, kezikonyvesE, KEZIKONYV_ALAP_KUSZOBOK, ALAP_SZABALYOK }
   from '../js/esemeny/koinoSzabalyok.js';
 import { rendszerNevE, rendszerAzonosito, szuloNeve, nevEsFelmenoi, rendszerNevekAlakiHibaja, KEZIKONYV_GYOKER, KOINON, KOINON_PONT,
@@ -114,7 +114,10 @@ proba('⭐⭐ D129 (①): a kézikönyv a koino szabálya — az új születésb
 // 3. A KAPU ÉS A BEJELENTÉS
 // ===================================
 
-proba('⭐⭐ D129 (①): a kapu az adat.rendszer alakját nézi; a kézikönyv-esemény a kézikönyv GYÖKERÉNEK szeletébe is bejelentődik',
+// ⭐⭐ D130 (③e, KO5 (B)): a kézikönyv-esemény a koinon kulcsához jelentődik be (eddig — D129 — a kézikönyv gyökér-szeletébe, amit
+// mindenki tartott), a darabját a bejegyzés neve adja (`koinonHelyei`); a hétköznapi esemény nem. Rontás: a bejelentés a régi
+// gyökér-szeletbe megy → bukik.
+proba('⭐⭐ D129 (①), D130 (③e): a kapu az adat.rendszer alakját nézi; a kézikönyv-esemény a koinon kulcsához jelentődik be (a kézikönyv gyökér-szeletébe nem), a darabját a bejegyzés neve adja',
   async () => {
     const { a, K, esemenyek } = await eset();
     const pontK = esemenyek[1];
@@ -122,8 +125,9 @@ proba('⭐⭐ D129 (①): a kapu az adat.rendszer alakját nézi; a kézikönyv-
     const ures = await a.tesz('TudatpontRendezes', { entitas: K, pont: 5, szerep: 'aktiv', rendszer: [] }, KEZDET + 6000);
     const r = {
       jo: alakiHiba(pontK) === null, rossz: !!alakiHiba(rossz), ures: !!alakiHiba(ures),
-      bejelentes: bejelentesHelyei(pontK).includes(KEZIKONYV_GYOKER_AZONOSITO),
-      hetkoznapi: !bejelentesHelyei(esemenyek[3]).includes(KEZIKONYV_GYOKER_AZONOSITO)
+      bejelentes: bejelentesHelyei(pontK).includes(KOINON_KULCS) && !bejelentesHelyei(pontK).includes(KEZIKONYV_GYOKER_AZONOSITO),
+      darab: koinonHelyei(pontK).length === 1 && koinonHelyei(pontK)[0] === K,
+      hetkoznapi: !bejelentesHelyei(esemenyek[3]).includes(KOINON_KULCS) && koinonHelyei(esemenyek[3]).length === 0
     };
     if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify(r) + ')\n'); return false; }
     return true;
@@ -208,13 +212,16 @@ proba('⭐⭐ D129 (①, MA8 (B)): a kézikönyv-entitás javaslata a kéziköny
 // 6. A VÁLLALÁS
 // ===================================
 
-proba('⭐⭐ D129 (①, MA4 (B)): a kézikönyves koinoban mindenki tartja a kézikönyv szeletét (pont nélkül is); a kézikönyv nélküliben nem',
+// ⭐⭐ D130 (③e, KO5 (B)): a vállalás a kézikönyvet NEM tartja külön szeletként (eddig — D129 MA4 (B) — a gyökér-szeletét mindenki
+// vállalta): a bejegyzések eseményei a koinon darabjaiban vannak — a darabomba esőket a koinon-darab cseréje hozza, és a tömörítés a
+// koinon szabálya szerint tartja meg (a darabon belüli tartást a parancssor-próba méri). Rontás: a régi sor (a gyökér-szelet a
+// vállalásban) → bukik.
+proba('⭐⭐ D129 (①), D130 (③e): a vállalás a kézikönyvet nem tartja külön szeletként — a bejegyzéseit a koinon darabjai hordják',
   async () => {
-    const igen = vallalasSzamitasa([], { kezikonyv: true });
-    const nem = vallalasSzamitasa([], {});
+    const v = vallalasSzamitasa([], { kezikonyv: true, kezikonyvBejegyzesek: [rendszerAzonosito('kezikonyv/menu')] });
     const r = {
-      igen: igen.szeletek.has(KEZIKONYV_GYOKER_AZONOSITO) && igen.kezikonyv === KEZIKONYV_GYOKER_AZONOSITO,
-      nem: !nem.szeletek.has(KEZIKONYV_GYOKER_AZONOSITO) && nem.kezikonyv === null
+      nemKulon: !v.szeletek.has(KEZIKONYV_GYOKER_AZONOSITO) && !v.szeletek.has(rendszerAzonosito('kezikonyv/menu'))
+        && v.szeletek.size === 0 && !('kezikonyv' in v)
     };
     if (!Object.values(r).every(Boolean)) { process.stderr.write('    (' + JSON.stringify(r) + ')\n'); return false; }
     return true;

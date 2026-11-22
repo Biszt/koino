@@ -110,6 +110,13 @@
   font-size: 0.86rem;
 }
 
+/* ⭐⭐ D130 (③e): a program megjegyzése (a nem a darabomba eső bejegyzés közösségi módosításairól) — halvány, nem figyelmeztetés (D19) */
+.koino-magyarazat__megjegyzes {
+  margin: 0.3rem 0 0;
+  font-size: 0.82rem;
+  opacity: 0.85;
+}
+
 .koino-magyarazat__lab {
   display: flex;
   flex-wrap: wrap;

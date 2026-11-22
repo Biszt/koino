@@ -6657,6 +6657,10 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
 6. **A kézikönyv is** (KO5 (B)): már most a koinon darabjaiba kerül — nem tartja mindenki (a D129 „mindenki tartja” helyett).
    ⭐ KO9 (A) (Csaba, 2026-11-20: „elfogadom, a javaslataidat”): a következményével együtt — a közösség módosításait az a készülék,
    amelyik a bejegyzés darabját nem tartja, KÉRÉSRE látja (mint bármely nem tartott kártyát; a program szövege mindenkinél ott van).
+   ✅ *Megépült a ③e-vel (2026-11-22 — `koinon_atvizsgalas.md` 9. és napló):* a kézikönyv-esemény a bejegyzése NEVE szerinti
+   koinon-darabba esik (`koinonHelyei`); a vállalás a kézikönyvet nem tartja külön (az eseményeit a darab hordja); a nem a darabomba eső
+   bejegyzés buboréka és Részletes adatai a darabot kéri el, és kimondja. A régi gyökér-bejelentés megszűnt (a régebbi programú készülék
+   a közösség új kézikönyv-módosításait a frissítéséig nem kapja meg).
 7. **Hogyan utazik a döntés tömör alakja** (KO7 (A), 2026-11-20): egy új ALÁÍRT eseményben (`KoinonOsszegzes` — a lezárási
    összegzések és a mintáik), a meglévő csere-úton: a kapu az ismeretlen eseménytípust nem tiltja, a régi program átengedi
    (nem protokoll-törés); bárki ellenőrzi (a minták önállók), az aláíró csak a nevét adja. ⚠️ *Az építéskor pontosítva (③c előtt):*

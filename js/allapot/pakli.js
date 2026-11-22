@@ -1143,6 +1143,8 @@ export async function entitasReszletei(tar, koino, azonosito, beallitas = {}) {
       entitasTipus: e.tipus,
       // ⭐ D85/4: a kártya típusa (az elfogadott javaslat egyezmény) — a felület ebből tudja, melyik alakra fordítson
       kartyaTipus: kartyaTipusa(e, dontes),
+      // ⭐⭐ D130 (③e): a kézikönyv-bejegyzés neve (a program ebből tudja, hogy a koinon-darabját kell kérni, ha nem tartom)
+      rendszer: e.rendszer ?? null,
       javaslat,
       szerkesztok,
       modositva: utolso?.lezarasIdeje ?? null,
