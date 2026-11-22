@@ -140,7 +140,7 @@ pont a koinoné — a D14 kivétel nélkül igaz; a kézikönyv kártyáira ugya
 ⏭️ ④ a szövegek → ⑤ a próba. 🔍 **D130 — a koinon az általános egyezményekhez** (a darabokra osztott, replikált őrzés): ÁTVIZSGÁLVA
 ([`koinon_atvizsgalas.md`](docs/koinon_atvizsgalas.md)), ⏸️ a KO1–KO5 Csabánál.
 
-**Az állapot:** **1569 önpróba** (75 próba-fájl; a legutóbbi teljes soron 1567/1567 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-22, a Részletes adatok után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba, a csere „CSOMAGVESZTÉS (30%)”, „lezárás 5×” és D109 (KK4) „keret maradékáig” próbája, magukban zöldek) · 410 fájl / 8508,1 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1573 önpróba** (75 próba-fájl; a legutóbbi teljes soron 1571/1571 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-22, a D130 ③e után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba, a csere „CSOMAGVESZTÉS (30%)”, „lezárás 5×” és D109 (KK4) „keret maradékáig” próbája, magukban zöldek) · 410 fájl / 8532,6 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8
