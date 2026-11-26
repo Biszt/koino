@@ -227,6 +227,30 @@ készülékek valódi elérhetőségén múlik, amit a koino még sosem mért (a
   95. mérés alap-becslése marad), egy elnémított DHT pedig csak terhet hoz. (B) **csak kimondja** (a `vallalas`, a napló) — a beavatkozás a
   terepi adatok után; addig a halott tagok miatti fogyás csak látszik, nem javul.
 
+**A 96. mérés (2026-11-26, a KO11 (A) és a KO12 (A) után — `meres/eredmenyek.md` 96.):**
+- ⭐ *Pontosítás (a mérés tervezésekor):* a KO12 (A) „ha a darabjának kevés tartója látszik” mondata így nem működne — aki sekélyebbre lép, a
+  TESTVÉR-darabot kapja meg, a sajátjának nem lesz több tartója. A segítség a szomszédtól jön (a 2. szakasz 4. pontja: „a szomszéd szint
+  tartóitól átveszi”): mindenki a testvér-darabja hirdetőit számolja, és ha kevés, a testvért is tartja.
+- ⛔ **A lelet:** a DHT-n látott hirdetők száma főleg a SZÁMLÁLÓ saját elérhetőségét méri, nem a tartókét: egy 24 órás ablak a valódi tartók
+  mediánban 53 / 27 / 11%-át mutatja (gépes / telefonos / borúlátó minta — feltevések), a ritkán fent lévő számlálónál 4–6%-ot. Egy küszöb
+  rajta egy egészséges koinoban is a készülékek 62–100%-át küldené segíteni (24 órás ablak; 7 napossal 26–85%) — kétszeres teher, és a
+  megfogyott darabot nem választja külön. A viszonyszám (a testvér a saját darabomhoz mérve) a számláló elérhetőségét kiejti, de az
+  egyenletes fogyást ezért nem látja. Csak a sokat fent lévő készülék lát megbízhatóan (egészséges koinoban ~1% segít), de kevesen vannak:
+  a tagok felénél a medián 10 → 13 (gépes), 10 → 11 (telefonos), csupa-telefonos koinoban 10 marad.
+- ⛔ **És ami a KO12 mögött van:** az egy szinttel sekélyebb lépés legfeljebb kétszerez, és a szomszéd csak az EGYENLŐTLENSÉGET javíthatja.
+  Az elment tagok miatti EGYENLETES fogyás gyógyírja maga a mélység: hogy a készülék az ismert tagok helyett az ÉLŐ tagokból számoljon.
+  Ehhez viszont a valódi elérhetőséget kell ismerni — amit a koino még sosem mért.
+
+**A kérdés (Csabáé):**
+- **KO13 — mi legyen a ④ válaszával a 96. mérés után?** (A) **a sokat fent lévő készülékek segítenek** (v4: aki a héten az órák legalább
+  felében fent van, az számol, és ha a testvér-darabja kevés hirdetőt mutat, azt is tartja) — biztonságos és egészséges koinoban szinte
+  ingyen, de a segítsége kicsi, és az elment tagok gondját nem oldja meg. (B) ⭐ **most csak a hirdetés és a számlálás** (④a, ④b — a
+  kimondással és egy kis helyi naplóval a saját fent töltött óráimról): a terepen ez méri meg a valódi elérhetőséget, és a válasz — az
+  elment tagokkal együtt — a terepi adatokból, egy külön átvizsgálással. A hirdetés magában is hasznos: a darab kérelme már nem csak az
+  ismert társaimhoz jut el. (C) **az élő tagok becslése most** (a mélység az ismert tagok helyett az élőkből — pl. a sokat fent lévő
+  készülékek megfigyeléséből, a társak között terjesztve, mint a D110 tanult mélysége, de csak sekélyebbre): ez oldaná meg a gondot, de
+  új átvizsgálás és mérés kell hozzá — a valódi elérhetőség nélkül ugyanarra a feltevésre épülne.
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
@@ -363,3 +387,8 @@ készülékek valódi elérhetőségén múlik, amit a koino még sosem mért (a
   az ismert társaimhoz jut), és az ismert tagok becslése az elment tagokat is számolja — a darabok élő tartói az idővel fogynak, és ezt ma
   semmi nem látja. Egy órás pillanatkép a tartókról nem dönthet (30%-os elérhetőségnél a 13 és a 10 tartós darab alig különbözik): hosszabb
   ablak kell. ⏸️ **KO11** (mit hirdet a tartó) és **KO12** (mit tesz, ha kevés tartót lát) Csabánál; a KO12 (A)-nál a küszöb a 96. mérésből.
+- **2026-11-26** — ✅ **Csaba: „Igen, mindkettő (A)”** — **KO11 (A)**: csak a saját darabját hirdeti; **KO12 (A)**: eggyel sekélyebbre lép
+  (a fejlesztési terv D130 10–11. pontja). ⏭️ A 96. mérés (a küszöb, az ablak, a visszalépés), utána az építés (④a–④d).
+- **2026-11-26** — ⛔ **a 96. mérés** (`meres/koinonFenntartoMeres.js`): a látott hirdetők száma a számláló elérhetőségét méri, nem a
+  tartókét — egy küszöb rajta egészséges koinoban is a készülékek többségét segítésbe küldené; csak a sokat fent lévő lát megbízhatóan, és
+  az elment tagok gondját nem a szomszéd, hanem az élő tagokból számolt mélység oldaná meg (a 10. szakasz vége). ⏸️ **KO13** Csabánál.

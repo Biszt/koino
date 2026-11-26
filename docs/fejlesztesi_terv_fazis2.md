@@ -6675,6 +6675,17 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
    ha a helyet nem ismeri, vagy a szerző láncát hézagosan látja (a pontja a hely szeletében van), az állásfoglalás „nem
    ellenőrizhető” (számít, jelölve — D19), nem kivétel; a teljes ítélet annál, aki az ágat tartja. ✅ Megépült a ③d-vel
    (`koinon_atvizsgalas.md` napló, 2026-11-21) — a szigorú (b) régi esetét is megoldja.
+10. **Mit hirdet a tartó** (KO11 (A), Csaba, 2026-11-26: „Igen, mindkettő (A)”): csak a saját koinon-darabját (egy téma és a párja a
+    címjegyzék-körben — a két felét nem), és csak ha a koinon mélysége legalább 1. A kérő meglévő útja (a `szelet` téma és a párja) így
+    megtalálja.
+11. **Mit tesz, ha kevés tartót lát** (KO12 (A), ugyanakkor): eggyel sekélyebbre lép — a szülő-darabot tartja, vagyis a testvér-darabot
+    is —, amíg a tartók újra elegen nem lesznek; csak a biztonságos irányba (több tartó, több teher). A küszöb, az ablak (egy órás
+    pillanatkép nem dönthet — `koinon_atvizsgalas.md` 10.) és a visszalépés a 96. mérés szerint, az építés előtt. ⛔ A háttere (a ④ terve):
+    az ismert tagok becslése az elment tagokat is számolja, így a darabok élő tartói az idővel fogynak — ezt csak az élő tartók
+    számlálása látja. ⛔ *A 96. mérés (2026-11-26):* a DHT-n látott hirdetők száma főleg a számláló saját elérhetőségét méri — egy küszöb
+    rajta egészséges koinoban is a készülékek 26–100%-át segítésbe küldené; csak a sokat fent lévő készülék lát megbízhatóan, és az
+    egyenletes fogyást (az elment tagokat) nem a szomszéd, hanem az élő tagokból számolt mélység oldaná meg. ⏸️ **KO13** (mi legyen a
+    válasszal) Csabánál — `koinon_atvizsgalas.md` 10.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

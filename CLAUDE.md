@@ -142,9 +142,10 @@ osztott, replikált őrzése — [`koinon_atvizsgalas.md`](docs/koinon_atvizsgal
 elfogadott általános egyezményen · ✅ ② a tömör alak · ✅ ③a–③e a `KoinonOsszegzes`, a darab a cserében, a tartó döntése, a kézikönyv a
 darabokban · ✅ **③f a példányszám a születésben** (2026-11-26: `koinonPeldany`, alapból 20, a gyermek örökli) → 🔍 ④ a fenntartó kör (a
 darab hirdetése, a tartóinak megszámlálása és a válasz, ha kevés — a terve a 10. szakaszban; ⛔ lelet: az ismert tagok becslése az elment
-tagokat is számolja; ⏸️ **KO11, KO12 Csabánál**) → ⑤ a terep.
+tagokat is számolja; ✅ KO11 (A), KO12 (A); ⛔ a 96. mérés: a DHT-n látott hirdetők a számláló elérhetőségét mérik, nem a tartókét;
+⏸️ **KO13 Csabánál** — mi legyen a válasszal) → ⑤ a terep.
 
-**Az állapot:** **1574 önpróba** (75 próba-fájl; a legutóbbi teljes soron 1572/1572 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-26, a D130 ③f után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba, a csere „CSOMAGVESZTÉS (30%)”, „lezárás 5×” és D109 (KK4) „keret maradékáig” próbája, magukban zöldek) · 410 fájl / 8538,3 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1574 önpróba** (75 próba-fájl; a legutóbbi teljes soron 1572/1572 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-26, a D130 ③f után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba, a csere „CSOMAGVESZTÉS (30%)”, „lezárás 5×” és D109 (KK4) „keret maradékáig” próbája, magukban zöldek) · 411 fájl / 8552,7 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

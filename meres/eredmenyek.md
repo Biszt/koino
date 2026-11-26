@@ -5372,6 +5372,45 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 96. ⛔⭐ A KOINON FENNTARTÓ KÖRE — mit lát a számláló, és segít-e a szomszéd? (D130 ④, KO12 (A), 2026-11-26, a laptopon)
+
+`meres/koinonFenntartoMeres.js` — szimuláció (rögzített maggal): 640 ismert tag, r = 20 (5. mélység, 32 darab), 30 nap, óránkénti lépés; egy
+hirdetés abban az órában látszik, amikor a hirdető fent van, és a számláló csak akkor néz, amikor ő is fent van. Három elérhetőségi minta —
+⚠️ **feltevések, nem tények: a koino a készülékek elérhetőségét még sosem mérte** —: „gépes” (30% mindig fent, 50% naponta 2–6 órát, 20% a
+napok 2/7-én), „telefonos” (10 / 50 / 40%), „borúlátó” (0 / 40 / 60%); a napi alkalom kezdete készülékenként véletlen (óvatos: a valódi
+telefonok este sűrűsödnek).
+
+**A) Mit lát a számláló** (minden tag él): egy órás pillanatkép átlagosan 8,2 / 5,0 / 2,9 hirdetőt mutat ~20 tartóból; egy 24 órás ablak
+(a különböző hirdetők) a valódi tartók mediánban **53% / 27% / 11%-át**, a legalsó tizedben 4–6%-át. ⛔ **A lelet: a látott szám főleg a
+SZÁMLÁLÓ saját elérhetőségét méri, nem a tartókét** — aki ritkán van fent, szinte senkit nem lát, akkor sem, ha a darabja egészséges.
+
+**B) A válasz — a szomszéd segít** (⭐ a saját darab számlálása nem segítene: aki sekélyebbre lép, a TESTVÉR-darabot kapja meg; ezért a
+testvér hirdetőit számolja, és ha kevés, a testvért is tartja — a segítés valószínűsége a hiánnyal arányos, a kilépés küszöbe magasabb,
+mint a belépésé). A darabok valódi, élő tartói a 30. napon (szabály nélkül → a szabállyal), és hogy a készülékek hány százaléka segít:
+
+```
+                                            minden tag él          a tagok fele él        a 30%-a él
+v1 24 órás ablak, 10 alatt be, 30 fölött ki
+   gépes / telefonos / borúlátó    segít:   62% / 89% / 100%       88–100%                98–100%
+                                   medián:  20 → 33 / 37 / 40      10 → 20–22             6 → 12
+v2 7 napos ablak                   segít:   26% / 63% / 85%        74–100%                94–100%
+v3 viszonyszám (a testvér a saját  segít:   15% / 28% / 49%        28–65%                 29–85%
+   darabom látott hirdetőinek          medián:  20 → 23 / 26 / 29     10 → 13–16             6 → 8–12
+   fele alatt)
+v4 csak a sokat fent lévő (a héten segít:   1% / 2% / 0%           18% / 5% / 0%          29% / 6% / 0%
+   az órák ≥ 50%-ában)             medián:  20 → 20                10 → 13 / 11 / 10      6 → 8 / 7 / 6
+```
+
+⛔ **A következtetés:** (1) egy küszöb a látott hirdetőkön (v1, v2) egy EGÉSZSÉGES koinoban is a készülékek 26–100%-át segítésbe küldené
+(kétszeres teher), és a megfogyott darabot nem választja külön — egyik ablakkal sem. (2) A viszonyszám (v3) a számláló elérhetőségét kiejti,
+de az egyenletes fogyást (az elment tagokat — a ④ terve lelete) épp ezért nem látja; a darabok közti egyenlőtlenséget javítja. (3) Csak a
+sokat fent lévő készülék lát megbízhatóan (v4: egészséges koinoban ~1% segít) — de kevesen vannak, a segítségük kicsi (a tagok felénél a
+medián 10 → 13 a gépes, 10 → 11 a telefonos mintán), és csupa-telefonos koinoban senki nem számolhat. (4) Az egy szinttel sekélyebb lépés
+legfeljebb kétszerez: az egyenletes fogyás (az elment tagok) gyógyírja nem a szomszéd, hanem maga a mélység — az élő tagok becslése.
+→ ⏸️ KO13 (`koinon_atvizsgalas.md` 10.).
+
+---
+
 ## 95. ⭐ A KOINON — a közös tények tömör alakja és a darabok tartói (D130, 2026-11-19, a laptopon)
 
 `meres/koinonMeres.js`. **A) A tömör alak** — egy elfogadott általános egyezmény: a teljes döntés-eseménykészlet (az általános javaslat, a pontok,
