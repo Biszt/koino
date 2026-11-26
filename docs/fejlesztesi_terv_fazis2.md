@@ -6690,7 +6690,12 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     őrzőhöz. Így a 11. pont „eggyel sekélyebbre lép”-je helyett a pótlás. ✅ *A 97. mérés:* működik (egyik mintán sem volt kosár online tartó
     nélkül, a tartók száma magától áll be, a teher 7–34 MB); a legkevesebbet őrző néhány jelölt közül — mindenki közül torlódik.
 12. **A kézikönyvet mindenki tartja** (Csaba, 2026-11-26 — a 6. pont KO5 (B)-je visszakerül (A)-ra): a ③e egy része visszafordul.
-    ⏸️ **KO14** (a célszám) és **KO15** (ki legyen az új tartó) Csabánál — `koinon_atvizsgalas.md` 10.
+    ✅ **KO14 (A)** (Csaba, 2026-11-26): a célszám **T = 20 online**, ugyanaz a szám, mint a mélység `r`-je — a születés `koinonPeldany`
+    szabálya „a koinon online őrzői darabonként”. ✅ **KO15 (A)**: az új tartó **10 jelölt közül a legkevesebbet őrző** —
+    `koinon_atvizsgalas.md` 10. ⭐ *A ④c átvizsgálása és a 98. mérés (2026-11-26, kód előtt — a 11. szakasz):* a pótlót sorsolás
+    választja (1/n — nem árt); a DHT késése a látott számot növeli (a rosszabb esetben ~20%-kal kevesebb tartó, egy sincs online soha);
+    ⛔ a kötések nem jó jelölt-forrás, ⭐ a DHT-minta igen; a jelölt terhe a nyitó jelből (a tartott kosarak listája), a felkérést a jelölt
+    maga is ellenőrzi; a hamisítás egyik fajtája sem vesz el tartót. ⏸️ **KO16** (honnan a jelöltek) és **KO17** (a látott cél) Csabánál.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

@@ -5372,6 +5372,60 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 98. ⭐ A KOINON PÓTLÁSA A HÁLÓN — ki pótol, mit lát a DHT, és honnan jönnek a jelöltek (D130 ④c, 2026-11-26, a laptopon)
+
+A KO14 (A) (T = 20) és a KO15 (A) (10 jelölt) után, a pótlás kódja előtt (`koinon_atvizsgalas.md` 11.). A 97. mérés három dolgot
+„tudott”, amit a hálón máshogy kell megoldani. `meres/koinonOnlineMeres.js` E) szakasza (ugyanaz a szimulátor; az új kapcsolók
+alapértéke a 97. mérést bájtra visszaadja — ellenőrizve az A) és a D) szakaszon):
+- **ki pótol?** — a 97.-ben kosaranként óránként pontosan egy új tartó lépett be. A hálón a kosár minden online tartója látja a
+  hiányt, és egymásról nem tudnak: **sorsolás** — mindegyik 1/n eséllyel pótol (n: a látott tartók száma);
+- **a DHT késése** — a háló a lekapcsolt tartó hirdetését 30–60 percig még mutatja (58. mérés): a látott szám az ebben VAGY az előző
+  órában fent lévő tartóké (a **rosszabb eset** — a valóság a késés nélküli és ez között van);
+- **honnan a jelöltek?** — a 97.-ben a sorban következő online készülékek (bárkit elér). A hálón olcsón a **kötések** érhetők el (a 3
+  rendszeres társ, legfeljebb 5 — `kotesek.js`; velük úgyis cserél, és a nyitó jelükből tudja, mennyit őriznek), **továbbadással** a
+  kötések kötései is (10-ig); vagy egy **DHT-minta**: egy téma hirdetői — a most fent lévők véletlen mintája, de a nemrég
+  lekapcsoltak is benne vannak (ők elviszik a jelölt-helyek egy részét, és nem felelnek).
+
+```
+T = 20, 10 jelölt                gépes        telefonos     borúlátó      telefonos, esti   (stabil / fogyó koino)
+a 97. (pontosan egy pótló)
+  tartó / kosár (medián)         69 / 61      133 / 117     296 / 253     88 / 76
+  a legnagyobb teher / átlag     1,85 / 1,80  1,52 / 1,48   1,25 / 1,22   3,24 / 3,33
+sorsolás                         ugyanaz: a tartók 68 / 60 · 130 / 115 · 295 / 252 · 87 / 76, a legnagyobb 1,2–3,5×, T alatt
+                                 ugyanannyi óra (0,1–7,2%, a 97.-ben 0,1–7,3%)
+sorsolás + DHT-késés
+  tartó / kosár (medián)         55 / 51      106 / 96      233 / 200     74 / 65
+  a valóban online (átlag)       22 / 21      23 / 21       22 / 20       25 / 23
+  … a legalsó órában             22 / 21      22 / 20       22 / 19       21 / 20
+  T-nél kevesebb VALÓBAN online  10 / 24%     12 / 31%      22 / 46%      9 / 21%     (egy sincs online: mindenhol 0%)
+  a teher átlaga                 a 97.-nél 14–21%-kal kevesebb
+DHT-minta (10 látott cím)        a legnagyobb 2,22 / 1,99 · 1,86 / 1,64 · 1,40 / 1,34 · 3,56 / 3,61 (a 10 teljes jelölttel
+                                 2,21 / 1,91 · 1,61 / 1,57 · 1,34 / 1,27 · 3,29 / 3,48), a többi szám szinte ugyanaz
+kötések (≤ 5)
+  nem volt jelölt                25 / 25%     70 / 63%      88 / 82%      98 / 92%   a kísérletekben
+  a legnagyobb teher / átlag     5,5 / 5,1    10,3 / 8,7    7,8 / 10,4    15,0 / 16,2
+  az új tagok terhe / alapítóké  — / 0,64     — / 0,44      — / 0,27      — / 0,48
+kötések és továbbadás (10)       nem volt jelölt 12–98%, a legnagyobb 3,5–16,8×
+```
+
+**A DHT-késés kiegyenlítése:** ha a LÁTOTT cél 25 (a rosszabb esetű késéssel, DHT-mintával): a tartók 67 / 62 · 128 / 115 · 278 / 241
+· 87 / 76, a valóban online átlag 24–30, a legalsó órában 23–27, a teher nagyjából a 97.-é (136 / 177 · 257 / 329 · 556 / 685 · 176 /
+217 — a 97.-ben 137 / 177 · 265 / 334 · 590 / 721 · 177 / 217), a legnagyobb 1,3–2,0× (esti 3,5–3,6), egy sincs online: 0% — vagyis a
+97. mérés képe. Késés nélkül ugyanez a 97.-nél 17–21%-kal több tartót és terhet hoz (82 / 73 · 157 / 140 · 353 / 305 · 104 / 89; a
+legtöbb a borúlátó fogyó koinoban: 867 általános egyezmény, ~42 MB), a valóban online átlag 30–36.
+
+⭐ **A következtetés:** (1) **A sorsolás nem árt** — a tartók nem tudnak egymásról, és nem is kell: az 1/n esély átlagosan egy pótlót
+ad, és a kép a 97.-é. (2) **A DHT késése a látott számot növeli**: a rosszabb esetben a tartók ~20%-kal kevesebben vannak, a valóban
+online átlag 20–25 (a 97.-ben 25–30), és az órák 9–46%-ában 20 alatt — de egy sincs online soha (0%). Ha a cél a „valóban 20 online”,
+a látott célt 25-re kell tenni (a rosszabb esetben a 97. képe; késés nélkül 17–21%-kal több teher). (3) ⛔ **A kötések nem jó
+jelölt-forrás**: 3–5 társból egy adott órában kevés van fent (a gépesen kívüli mintákon a kísérletek 63–98%-ában egy sem), a teher a
+kevés fent lévő társra torlódik (5–16-szoros), és a pótlás lemarad (a borúlátó fogyó koinoban a 20 alatti órák 46 → 76%) — a
+továbbadás alig segít. ⭐ **A DHT-minta működik**: a lekapcsoltak címe ellenére szinte a 10 teljes jelölt képét adja. ⚠️ Nem mérte: hogy a minta címei közül hányat ér el a kopogás
+(a NAT — a 60. mérés: egy oldalról ~20%, a kopogtató úton ~76%), a mélység változását, és a valódi elérhetőséget (a terep). → KO16,
+KO17 (`koinon_atvizsgalas.md` 11.).
+
+---
+
 ## 97. ⭐⭐ A KOINON — MINDIG T TARTÓ ONLINE, és az új teher a legkevesebbet őrzőhöz (D130 ④, Csaba elképzelése, 2026-11-26, a laptopon)
 
 Csaba (a 96. után): *„20 - 50 online helyen … azt kéne számon tartani, hogy mennyien vannak online, egy adott egyezménynél. és ha ofline

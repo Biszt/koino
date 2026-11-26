@@ -303,6 +303,96 @@ esti telefonos; stabil és fogyó koino):
   mintán 3,2–3,3); (B) **3 jelölt közül** (1,6–2,5, esti 4,3–4,5); (C) **mindenki közül a legkevesebbet őrző** (a szabály szó szerint) — ⛔
   mérve torlódik (30–144-szeres, az új tagokra 3,6–7,2-szeres), nem ajánlott.
 
+✅ **Csaba (2026-11-26): „Igen, mindkettő (A)”** — **KO14 (A)**: a célszám T = 20 online, ugyanaz, mint a mélység `r`-je (a születés
+`koinonPeldany` szabálya: „a koinon online őrzői darabonként”); **KO15 (A)**: az új tartó 10 jelölt közül a legkevesebbet őrző.
+
+## 11. A ④c átvizsgálása — a pótlás a hálón (2026-11-26, kód előtt)
+
+A 97. mérés három dolgot „tudott”, amit a hálón meg kell oldani: hogy kosaranként óránként pontosan EGY tartó pótol, hogy a DHT az
+„online most”-ot mutatja, és hogy a pótló bárkit elér jelöltnek. A terv két kérdést is nyitva hagyott: hogyan kérdezi meg a jelölteket,
+és mit tesz a hamisítás. **Amit a kódban láttam:**
+- egy készülék 3 (legfeljebb 5) kötést tart (`kotesek.js` — a rendszeres társai), egy körben legfeljebb ~8 társra kopog
+  (`kopogasCeljai`). A társ a nyitó jel `knd` mezőjében a koinon-darabját mondja (a mélységet és három rövid lenyomatot); a darabot a
+  másik fél a tábla-aláírójából számolja (`koinonDarabKulcsai`). ⚠️ Egy SEGÍTŐ kosár (ami nem az aláírásból jön) ma nem fér a jelbe —
+  így a többi tartójával sem egyeztetődne;
+- egy DHT-keresés témánként legfeljebb 100 címet ad (`dht.js` `TARS_KORLAT`; IPv4, BEP 5), a hirdetés 20 percenként ismétlődik
+  (`HIRDETES_KOZ`), a háló 30–60 perc alatt felejt (58. mérés);
+- a kopogtató út (D92/1 — a randevú a DHT-n): a kérő a téma PÁRJÁN jelentkezik, a hirdetők a címjegyzék-körükben (~20 perc) meglátják,
+  és 30 percig (`KOPOGTATO_ELEVULES`) minden körben felé kopognak — így két NAT között is megnyílik a rés (60. mérés: ~20% → ~76%);
+- minden készülék a saját gyökér-darabját hirdeti (D91/3 — mit hirdet egy készülék): egy gyökér-darab témájának hirdetői a most (és a
+  nemrég) fent lévő készülékek EGYENLETES mintája, a koinon kosaraitól függetlenül.
+
+**A 98. mérés** (`meres/eredmenyek.md` 98. — a 97. szimulátora, három új kapcsolóval):
+1. ⭐ **Ki pótol? — sorsolással.** A kosár online tartói egymásról nem tudnak, és nem is kell: mindegyik 1/n eséllyel pótol (n: a
+   látott tartók száma) — átlagosan egy pótló, és a kép a 97.-é (a tartók, a teher, a 20 alatti órák ugyanazok). Kérdés nincs.
+2. **A DHT késése** (a lekapcsolt tartó 30–60 percig még látszik; a mérés a rosszabb esetet vette — a valóság a késés nélküli és ez
+   között van): a látott szám nagyobb a valóságosnál, ezért kevesebb a tartó (~20%-kal), a valóban online átlag 20–25 (a 97.-ben 25–30),
+   és az órák 9–46%-ában 20 alatt van — de egy sincs online soha (0%). Ha a látott cél 25, a rosszabb esetben a 97. képe jön vissza
+   (24–30 online, a legalsó órában 23–27, a teher a 97.-é); késés nélkül ez 17–21%-kal több terhet jelent (legfeljebb ~42 MB). → KO17.
+3. ⛔ **A kötések nem jó jelölt-forrás:** 3–5 társból egy adott órában kevés van fent — a gépesen kívüli mintákon a kísérletek 63–98%-ában
+   egy jelölt sincs, a teher a kevés fent lévő társra torlódik (5–16-szoros), és a pótlás lemarad. A továbbadás (a kötések kötései)
+   alig segít. ⭐ **A DHT-minta működik:** egy téma hirdetői (a nemrég lekapcsoltak címével együtt) szinte a 10 teljes jelölt képét adják.
+   → KO16.
+
+**A többi pont (a kódból és a mérésekből — kérdés nélkül, a ④ építésében):**
+4. **A jelöltek megkérdezése — a nyitó jelben.** A tartott kosaraknak (a saját és a segítő kosarak) úgyis a jelbe kell kerülniük,
+   különben a segítő kosár a többi tartójával nem egyeztetődik: a `knd` a tartott kosarak listáját viszi, felülről korlátosan (9.
+   szabály — a megtelt készülék nem vállal többet). Ebből a pótló a csere elején tudja a jelölt terhét: a kosarak összege, a mélységükkel
+   súlyozva, hogy egy kettéválás ne duplázza. A felkérés egy új kérelem-fajta (a kosár kulcsával). A jelölt három dolgot néz, mielőtt
+   elfogadja: nincs-e tele (a kerete); érvényes koinon-kosár-e a kulcs a mélységén; és maga is látja-e a hiányt (egy saját DHT-keresés,
+   ~3 KB). Az utolsó azt zárja ki, hogy egy idegen olyan kosarakkal terhelje, amelyeknek nincs rá szükségük. Ha elfogad, ugyanabban a
+   cserében letölti a kosarat a pótlótól (a meglévő szelet-úton), a szerepét helyben feljegyzi (helyi feljegyzés, nem esemény — 3.
+   szabály), és onnantól hirdet, számol és pótol.
+5. **Az elérés:** a minta címeire (egy keresés, legfeljebb 100 cím) közvetlenül kopog, és ha kevesebb mint 10 felelt, a minta
+   témájának párján a kopogtató úton jelentkezik. ⚠️ A kopogtató út a téma MINDEN fent lévő hirdetőjét hívja 30 percig, és egy kis
+   mélységű gyökér-darabnak száz fölötti hirdetője is lehet. Ezért egy felkérés legfeljebb 10 cserét folytat le, a többi a meglévő
+   „később” (D109 KK6 — a kiszolgálás kerete) választ kapja; ezt a ④d próbája méri meg. Az ára egy pótlásnak egy keresés (~3 KB) és
+   legfeljebb 10 rövid csere. Egy készülék a 97–98. mérésben naponta legfeljebb ~0,25 MB-ot tölt le pótlásként.
+6. **A hamisítás — négy fajta, egyik sem vesz el tartót:**
+   - *a bevallott teher* (a jel): aki többet mond, az potyázik (a terhét más viszi — csak az igazságosság romlik), aki kevesebbet, az
+     magára vesz többet;
+   - *a hamis hirdető* (a DHT): sok hamis cím egy kosár témáján a látott számot felviszi, és elnyomja a pótlást. Ekkor a kosár a
+     természetes tartóira esik vissza (a tábla-aláírásból — a ③ képe, ~r…2r tartó) és a meglévő segítőire, akik maradnak: soha nem
+     kevesebb, mint a ④ nélkül. Olcsó védelem: a látott számban egy IPv4-cím egynek számít, akárhány porton hirdet. Az alulszámolás a
+     biztonságos irány: két telefon egy router mögött egynek látszik, és ez egy fölösleges tartót hoz, nem kevesebbet. Egy valódi
+     támadáshoz annyi cím kell, amennyi a látott cél;
+   - *a hamis felkérő*: tartalmat nem hamisíthat (az események aláírtak, a `KoinonOsszegzes`-t a tartó ellenőrzi — ③d, a tartó
+     döntése), csak terhet adhatna — azt a jelölt saját hiány-keresése és a kerete korlátozza;
+   - *az elnémított téma* (a DHT-gépek semmit nem adnak vissza): minden tartó hiányt lát, és pótol — csak teher (a biztonságos irány).
+     Korlát: egy készülék óránként legfeljebb egy pótlást végez és egy új szerepet vállal, és a kerete fölött semmit.
+7. **A mélység változása** (a 97–98. nem mérte). A mélység csak nő, mert az ismert tagok száma csak nő. Kettéváláskor a tartó mindkét
+   felét megtartja, letöltés nélkül, és az adatban mért terhe nem változik: a saját fele természetes marad, a másik fél segítő szerep
+   lesz (ugyanaz a szabály: csak a megtelt készülék adja le). Az átmenetben a két mélység együtt él, és egy új tag is sekélyebben
+   kezd (kevesebb tagot ismer). A mélyebb számláló nem látja a sekélyebb tartókat, pedig azok az egész kosarát tartják — ez fölösleges
+   pótlást hozna. Ezért pótlás előtt egy második pillantás jön a szülő-kosár témájára: egy keresés, csak hiány esetén. A kérő
+   ugyanígy a saját mélységén és a szülőén keres (mint a gyökér a szomszéd mélységeken).
+8. **A leadás — csak a megtelt készülék ad le:** egy készülékenkénti keret (beállítás: mennyit adok a koinonnak). Fölötte nem vállal
+   új szerepet, és ha a keretet lejjebb veszik, a legújabb segítő szerepeit leadja: nem hirdeti tovább őket, a látott szám csökken, és
+   mások pótolnak. A mért teher 7–42 MB; az alapérték a ④c része, ennél jóval nagyobb.
+
+**A kérdések (Csabáé):**
+- **KO16 — honnan jöjjenek a jelöltek?** (A) ⭐ **a DHT-ről** (egy véletlen gyökér-darab témájának hirdetői — minden készülék egyet
+  hirdet, így a most fent lévők egyenletes mintája; elérni közvetlen kopogással és a kopogtató úton, legfeljebb 10-et): a 98. mérésben
+  szinte a 10 teljes jelölt képe (a legnagyobb teher az átlag 1,3–2,2-szerese, az esti mintán 3,6). (B) **a kötésekből** (és a
+  továbbadással a kötéseik közül): új út nem kell, de a kísérletek 12–98%-ában nincs jelölt, a teher 3,5–16,8-szoros, és a pótlás
+  lemarad.
+- **KO17 — a DHT késése: mennyi legyen a LÁTOTT cél?** (A) ⭐ **25 — a születés `koinonPeldany`-ja 20 marad** („ennyi legyen valóban
+  online”), a program a látott számra egy rögzített ráhagyást tesz (1,25×, a 98. mérés rosszabb esetéből). Így a rosszabb esetben is a
+  97. képe jön (valóban online átlag 24–30, a legalsó órában 23–27), késés nélkül viszont 17–21%-kal több teher (legfeljebb ~42 MB). A
+  ráhagyás a terepen mért késéssel később pontosítható. (B) **20 — a T = r szó szerint**: 14–21%-kal kevesebb teher, de a rosszabb
+  esetben a valóban online átlag 20–25, és az órák 9–46%-ában 20 alatt (egy sincs online: 0%).
+
+**A ④ terve a 98. mérés után** (a 10. szakasz „új terve” helyett):
+1. **④a A hirdetés:** a tartó a kosarait hirdeti (a sajátját és a segítő kosarait) a saját mélységén. A nyitó jel a tartott kosarakat
+   viszi (felülről korlátosan), a csere a közös kosarakat egyezteti, a kérő a mélységén és a szülőén keres.
+2. **④b A számlálás:** óránként, minden tartott kosárra: a téma különböző IPv4-címei (és saját maga). Ha a látott cél (KO17) alatt van,
+   egy második pillantás a szülő-kosárra. Kimondva a `vallalas` sorában és az őrjárat naplójában.
+3. **④c A pótlás:** 1/n eséllyel; a jelöltek a KO16 szerint, legfeljebb 10, a jelük szerint a legkevesebbet őrző; a felkérés és a jelölt
+   három ellenőrzése; óránként legfeljebb egy pótlás és egy új szerep; a szerep helyben feljegyezve; leadás csak a keret fölött.
+4. **④d A próba:** helyi DHT-hálóval (`halo.belepo`), rontásokkal: hamis hirdető, hamis felkérő, megtelt jelölt, mélység-váltás, a
+   kopogtató-vihar korlátja. Utána a kézikönyv mindenkinél (KO5 (A) — a ③e egy része visszafordul), majd a ⑤ terep (a valódi
+   elérhetőség és a DHT késése — ebből a ráhagyás).
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
@@ -450,3 +540,9 @@ esti telefonos; stabil és fogyó koino):
   mintán sem volt kosár online tartó nélkül, a tartók száma magától áll be (67–289 kosaranként), a teher 7–34 MB; a „mindenki közül a
   legkevesebbet őrző” szó szerint torlódik (30–144-szeres), 10 jelölt közül a legkevesebbet őrző teljesíti a szándékot (1,2–1,9-szeres).
   A KO12 (A) helyett a pótlás (a ④ új terve). ⏸️ **KO14** (a célszám) és **KO15** (ki legyen az új tartó) Csabánál.
+- **2026-11-26** — ✅ **Csaba: „Igen, mindkettő (A)”** — **KO14 (A)**: T = 20 online (ugyanaz, mint az `r`); **KO15 (A)**: 10 jelölt
+  közül a legkevesebbet őrző. ⭐ **A ④c átvizsgálása és a 98. mérés** (a 11. szakasz): a sorsolás (1/n) nem árt; a DHT késése a látott
+  számot növeli (a rosszabb esetben ~20%-kal kevesebb tartó, de egy sincs online soha); ⛔ a kötések nem jó jelölt-forrás (12–98%-ban
+  nincs jelölt), ⭐ a DHT-minta igen. A jelöltek a nyitó jelből (a tartott kosarak listája — úgyis kell), a felkérés a jelölt három
+  ellenőrzésével, a hamisítás négy fajtája (egyik sem vesz el tartót), a mélység-váltás második pillantása, a keret. ⏸️ **KO16**
+  (honnan a jelöltek) és **KO17** (a látott cél) Csabánál.

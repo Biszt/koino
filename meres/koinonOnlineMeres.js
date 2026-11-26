@@ -33,6 +33,20 @@
 // száma tagonként 2 (feltevés — a koino még nem mérte), egyenként ~50 KB (a ② mérése: 35–91 KB).
 //
 // Futtatás: `node meres/koinonOnlineMeres.js` (nem próba: számokat ír ki, a `meres/eredmenyek.md` 97. szakaszába).
+//
+// ⭐⭐ A 98. MÉRÉS (2026-11-26, a KO14 (A) és a KO15 (A) után — a ④c átvizsgálása, kód előtt): a 97. mérés három dolgot „tudott”, amit
+// a hálón máshogy kell megoldani — ez az E) szakasz méri meg, mit változtat rajta a háló:
+//   · KI PÓTOL? A 97.-ben kosaranként óránként pontosan egy új tartó lépett be. A hálón a kosár MINDEN online tartója látja a hiányt,
+//     és egymásról nem tudnak: a `sorsolas` szerint mindegyik 1/n eséllyel pótol (n: a látott tartók száma) — átlagosan egy, de néha
+//     nulla, néha kettő-három;
+//   · A DHT KÉSÉSE: a háló a lekapcsolt tartó hirdetését 30–60 percig még mutatja (58. mérés) — a `dhtKeses` szerint a látott szám az
+//     ebben VAGY az előző órában fent lévő tartóké (a rosszabb eset: többet lát, mint ami van);
+//   · HONNAN A JELÖLTEK? A 97.-ben a jelölt a kosár sorában következő online készülék volt (bárkit elér — ez egy DHT-ből vett véletlen
+//     mintának felel meg). A hálón a pótló tartó a TÁRSAIT éri el olcsón: a kötéseit (`kotesek.js` — 3 rendszeres társ, legfeljebb 5:
+//     itt a 3 sajátja és legfeljebb 2, aki őt kötötte meg), velük úgyis cserél, és a nyitó jelükből tudja, mennyit őriznek. A
+//     `jeloltForras`: `sor` (a 97.), `kotesek` (csak az online kötések), `kotesek2` (és ha kevés, a kötéseim online kötései — a
+//     kérdést a társam továbbadja). ⚠️ A kötések itt véletlenek (35. mérés), és az elment kötés helyett a készülék újat köt.
+// Az alapértékek a 97. mérést adják vissza (a 98. kapcsolói külön véletlen-forrásból húznak).
 
 // ===================================
 // A VÉLETLEN — rögzített maggal (a futás megismételhető)
@@ -99,10 +113,18 @@ function fentRacs(db, orak, { arany, esti }, v) {
  * @param {number} [b.melysegEltolas] - a kosarak mélysége a mai képlethez képest (−1: kétszer akkora kosarak)
  * @param {number} [b.napok] @param {number} [b.meresNapok] - az utolsó ennyi nap a mérés (előtte a beállás)
  * @param {number} [b.elmegy] - naponta a tagok ekkora része végleg elmegy @param {number} [b.csatlakozik] - N0 arányában naponta
+ * @param {'sor'|'kotesek'|'kotesek2'} [b.jeloltForras] - ⭐ 98.: honnan a jelöltek (a `sor` a 97.)
+ * @param {'egy'|'sorsolas'} [b.valasztas] - ⭐ 98.: óránként pontosan egy pótló (a 97.), vagy minden online tartó 1/n eséllyel
+ * @param {boolean} [b.dhtKeses] - ⭐ 98.: a látott tartók az ebben vagy az előző órában fent lévők
+ * @param {number} [b.kotesSzam] @param {number} [b.bejovoKorlat] - ⭐ 98.: a saját kötések, és legfeljebb ennyi, aki őt kötötte meg
+ * @param {boolean} [b.jeloltKeses] - ⭐ 98.: a `sor` jelöltjei a DHT-n látott címek (az előző órában fent lévők is — ők nem felelnek)
  */
 function szimulacio({ N0, minta, T = 20, szabaly = 'jelolt', jeloltSzam = 3, egyszerre = false, melysegEltolas = 0, napok = 90,
-  meresNapok = 30, elmegy = 0, csatlakozik = 0, egyezmenyPerTag = 2, r = 20, mag = 1 }) {
+  meresNapok = 30, elmegy = 0, csatlakozik = 0, egyezmenyPerTag = 2, r = 20, mag = 1,
+  jeloltForras = 'sor', valasztas = 'egy', dhtKeses = false, kotesSzam = 3, bejovoKorlat = 2, jeloltKeses = false }) {
   const v = veletlenForras(mag);
+  // ⭐ 98.: a háló véletlene külön forrásból — a 97. mérés futása így bájtra ugyanaz marad
+  const v2 = veletlenForras(mag + 98);
   const orak = napok * 24;
   const meresKezdet = (napok - meresNapok) * 24;
 
@@ -149,11 +171,40 @@ function szimulacio({ N0, minta, T = 20, szabaly = 'jelolt', jeloltSzam = 3, egy
   let kosarOra = 0, keves = 0, nulla = 0, onlineOssz = 0, potlas = 0, potlasMeret = 0, maxOraSzerep = 0;
   const oraOnline = new Float64Array(24), oraDarab = new Float64Array(24);
 
+  // ===== ⭐ 98.: A KÖTÉSEK — a 3 saját (a csatlakozáskor véletlen élő tagok), és akik őt kötötték meg =====
+  const kotesKell = jeloltForras !== 'sor';
+  const kotesKi = kotesKell ? new Int32Array(db * kotesSzam).fill(-1) : null;
+  const kotesBe = kotesKell ? Array.from({ length: db }, () => []) : null;
+  const ujKotes = (i, h, mar) => {
+    for (;;) {
+      const p = Math.floor(v2() * db);
+      if (p !== i && szuletes[p] <= h && halal[p] > h && !mar.includes(p)) { kotesBe[p].push(i); return p; }
+    }
+  };
+  /** Az i. készülék társai a h. órában: a saját kötései (az elment helyett új), és legfeljebb `bejovoKorlat`, aki őt kötötte meg. */
+  const tarsai = (i, h) => {
+    const ki = [];
+    for (let s = 0; s < kotesSzam; s++) {
+      let p = kotesKi[i * kotesSzam + s];
+      if (p < 0 || halal[p] <= h) { p = ujKotes(i, h, ki); kotesKi[i * kotesSzam + s] = p; }
+      ki.push(p);
+    }
+    let be = 0;
+    for (const p of kotesBe[i]) {
+      if (be >= bejovoKorlat) break;
+      if (halal[p] <= h || ki.includes(p)) continue;
+      ki.push(p); be++;
+    }
+    return ki;
+  };
+  let kiserlet = 0, ures = 0;
+
   // ===== AZ ÓRÁK =====
   for (let h = 0; h < orak; h++) {
     while (cs < db && szuletes[csatlakozasSorrend[cs]] <= h) {
       const i = csatlakozasSorrend[cs++];
       if (halal[i] > h) felvesz(sajat[i], i);
+      if (kotesKell && halal[i] > h) { const mar = []; for (let s = 0; s < kotesSzam; s++) mar.push(kotesKi[i * kotesSzam + s] = ujKotes(i, h, mar)); }
     }
     if (h % 24 === 0) hirTeher.set(teher);
     const online = [];
@@ -172,20 +223,49 @@ function szimulacio({ N0, minta, T = 20, szabaly = 'jelolt', jeloltSzam = 3, egy
       let legjobb = -1, talalt = 0;
       for (let p = 0; p < db && talalt < kell; p++) {
         const i = s[p];
-        if (!fentMost[i] || tartjaE[k * db + i]) continue;
+        if (tartjaE[k * db + i]) continue;
+        // ⭐ 98. (`jeloltKeses`): a DHT-ből vett minta a nemrég lekapcsoltak címét is adja — az a jelölt-helyek egyikét elviszi, de
+        // nem felel (nem lehet belőle tartó)
+        const lathato = fentMost[i] || (jeloltKeses && h > 0 && szuletes[i] <= h - 1 && halal[i] > h - 1 && fent[i * orak + h - 1] === 1);
+        if (!lathato) continue;
         talalt++;
-        if (legjobb < 0 || teher[i] < teher[legjobb]) legjobb = i;
+        if (fentMost[i] && (legjobb < 0 || teher[i] < teher[legjobb])) legjobb = i;
+      }
+      return legjobb;
+    };
+    // ⭐ 98.: a j. tartó jelöltjei a TÁRSAI közül (online, és még nem tartják): a kötései, és a `kotesek2`-nél a kötéseim online
+    // kötései is (a kérdést a társam továbbadja) — legfeljebb `jeloltSzam`; a legkevesebbet őrző lesz az új tartó.
+    const tarsValaszt = (k, j) => {
+      let legjobb = -1, talalt = 0;
+      const latta = new Set([j]);
+      const nez = (p) => {
+        if (latta.has(p)) return;
+        latta.add(p);
+        if (!fentMost[p] || tartjaE[k * db + p]) return;
+        talalt++;
+        if (legjobb < 0 || teher[p] < teher[legjobb]) legjobb = p;
+      };
+      const elso = tarsai(j, h);
+      for (const p of elso) { if (talalt >= jeloltSzam) break; nez(p); }
+      if (jeloltForras === 'kotesek2') {
+        for (const p of elso) {
+          if (talalt >= jeloltSzam) break;
+          if (!fentMost[p]) continue;
+          for (const q of tarsai(p, h)) { if (talalt >= jeloltSzam) break; nez(q); }
+        }
       }
       return legjobb;
     };
     const oraSzerep = new Map();
     for (let k = 0; k < K; k++) {
       const t = tarto[k];
-      let n = 0;
+      let n = 0, nElozo = 0;
       for (let j = t.length - 1; j >= 0; j--) {
         const i = t[j];
         if (halal[i] <= h) { t[j] = t[t.length - 1]; t.pop(); tartjaE[k * db + i] = 0; continue; }   // elment — nem jön vissza
         n += fentMost[i];
+        // ⭐ 98.: a DHT az előző órában fent lévő (most lekapcsolt) tartót még mutatja
+        if (dhtKeses && !fentMost[i] && h > 0 && szuletes[i] <= h - 1 && fent[i * orak + h - 1]) nElozo++;
       }
       if (t.length === 0) { elveszett[k] = 1; continue; }
       if (h >= meresKezdet) {
@@ -194,11 +274,23 @@ function szimulacio({ N0, minta, T = 20, szabaly = 'jelolt', jeloltSzam = 3, egy
         if (n === 0) nulla++;
         oraOnline[h % 24] += n; oraDarab[h % 24]++;
       }
-      if (n >= T || n === 0) continue;   // elég van — vagy nincs forrás, ahonnan letölthetné
-      const kell = egyszerre ? T - n : 1;
-      for (let x = 0; x < kell; x++) {
-        const c = valaszt(k);
-        if (c < 0) break;
+      const latott = n + nElozo;
+      if (latott >= T || n === 0) continue;   // elég látszik — vagy nincs forrás, ahonnan letölthetné
+      // ⭐ 98.: ki pótol? — `egy`: óránként pontosan egy (a 97.; a kötéseknél egy véletlen online tartó); `sorsolas`: minden online
+      // tartó 1/látott eséllyel (egymásról nem tudnak)
+      const potlok = [];
+      if (valasztas === 'sorsolas') {
+        for (const i of t) if (fentMost[i] && v2() < 1 / latott) potlok.push(i);
+      } else {
+        let egyik = -1;
+        if (kotesKell) { const on = t.filter((i) => fentMost[i]); egyik = on[Math.floor(v2() * on.length)]; }
+        const kell = egyszerre ? T - n : 1;
+        for (let x = 0; x < kell; x++) potlok.push(egyik);
+      }
+      for (const j of potlok) {
+        const c = kotesKell ? tarsValaszt(k, j) : valaszt(k);
+        if (kotesKell && h >= meresKezdet) { kiserlet++; if (c < 0) ures++; }
+        if (c < 0) { if (kotesKell) continue; break; }
         felvesz(k, c);
         if (h >= meresKezdet) {
           potlas++; potlasMeret += meret[k];
@@ -235,7 +327,9 @@ function szimulacio({ N0, minta, T = 20, szabaly = 'jelolt', jeloltSzam = 3, egy
     potlasNaponta: potlas / meresNapok,
     potlasMBKeszulekenkentNaponta: potlasMeret * 50 / 1024 / Math.max(1, elok.length) / meresNapok,
     maxOraSzerep,
-    elveszett: elveszett.reduce((a, b) => a + b, 0)
+    elveszett: elveszett.reduce((a, b) => a + b, 0),
+    // ⭐ 98.: a pótlási kísérletek hányadában nem volt egy jelölt sem a társak között
+    uresArany: kiserlet ? ures / kiserlet : null
   };
 }
 
@@ -250,7 +344,8 @@ const sor = (e) => 'tartó/kosár medián ' + e.tarto.median + ' (' + e.tarto.mi
   + ') · teher átlag ' + sz(e.teher.atlag, 0) + ' (' + MB(e.teher.atlag) + '), 99% ' + sz(e.teher.p99 / e.teher.atlag, 2)
   + '×, legnagyobb ' + sz(e.teher.max / e.teher.atlag, 2) + '×' + (e.ujArany === null ? '' : ', az új tagoké ' + sz(e.ujArany, 2) + '×')
   + ' · segítő teher ' + sz(e.segitoTeher * 100, 0) + '% · pótlás ' + sz(e.potlasMBKeszulekenkentNaponta, 2) + ' MB/készülék/nap'
-  + ' · egy órában legfeljebb ' + e.maxOraSzerep + ' új szerep egy készüléken' + (e.elveszett ? ' · ⛔ ELVESZETT kosár: ' + e.elveszett : '');
+  + ' · egy órában legfeljebb ' + e.maxOraSzerep + ' új szerep egy készüléken' + (e.elveszett ? ' · ⛔ ELVESZETT kosár: ' + e.elveszett : '')
+  + (e.uresArany === null ? '' : ' · a kísérletek ' + sz(e.uresArany * 100, 0) + '%-ában nem volt jelölt');
 
 const N0 = 10000;   // r = 20 mellett 8. mélység: 256 kosár, kosaranként átlagosan ~39 természetes tartó, ~78 általános egyezmény
 const KOINOK = {
@@ -302,6 +397,31 @@ if (!csak || csak === 'D') {
       const e = szimulacio({ N0: 640, minta, szabaly: 'jelolt', ...kb });
       console.log('  ' + nev.split(' (')[0] + ' · ' + knev.split(' (')[0] + ': ' + sor(e) + ' · egy kosarat a tagok '
         + sz(e.tarto.median / e.elok * 100, 0) + '%-a tart');
+    }
+  }
+}
+
+if (!csak || csak === 'E') {
+  // ⭐⭐ A 98. MÉRÉS — a háló három eltérése a 97.-től (KO14 (A): T = 20; KO15 (A): 10 jelölt)
+  const HALO = {
+    '97. (sor, pontosan egy)': { jeloltSzam: 10 },
+    'sorsolás': { jeloltSzam: 10, valasztas: 'sorsolas' },
+    'sorsolás + DHT-késés': { jeloltSzam: 10, valasztas: 'sorsolas', dhtKeses: true },
+    'DHT-minta (10 látott cím) + sorsolás + DHT-késés': { jeloltSzam: 10, valasztas: 'sorsolas', dhtKeses: true, jeloltKeses: true },
+    'kötések (≤5) + sorsolás + DHT-késés': { jeloltSzam: 10, valasztas: 'sorsolas', dhtKeses: true, jeloltForras: 'kotesek' },
+    'kötések és továbbadás (10) + sorsolás + DHT-késés': { jeloltSzam: 10, valasztas: 'sorsolas', dhtKeses: true, jeloltForras: 'kotesek2' },
+    // a DHT-késés kiegyenlítése: a LÁTOTT cél 25 — a rosszabb esetű késéssel, és késés nélkül (amennyibe a ráhagyás kerül)
+    'látott cél 25: DHT-minta + sorsolás + DHT-késés': { jeloltSzam: 10, valasztas: 'sorsolas', dhtKeses: true, jeloltKeses: true, T: 25 },
+    'látott cél 25: sorsolás, késés nélkül': { jeloltSzam: 10, valasztas: 'sorsolas', T: 25 }
+  };
+  console.log('E) A 98. MÉRÉS — A HÁLÓ (N0 = ' + N0 + ', T = 20, 10 jelölt)');
+  for (const [nev, minta] of Object.entries(MINTAK)) {
+    for (const [knev, kb] of Object.entries(KOINOK)) {
+      console.log('  ' + nev + ' · ' + knev);
+      for (const [hnev, hb] of Object.entries(HALO)) {
+        const e = szimulacio({ N0, minta, szabaly: 'jelolt', ...kb, ...hb });
+        console.log('    ' + hnev + ': ' + sor(e));
+      }
     }
   }
 }
