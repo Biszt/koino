@@ -143,9 +143,11 @@ elfogadott általános egyezményen · ✅ ② a tömör alak · ✅ ③a–③e
 darabokban · ✅ **③f a példányszám a születésben** (2026-11-26: `koinonPeldany`, alapból 20, a gyermek örökli) → 🔍 ④ a fenntartó kör (a
 darab hirdetése, a tartóinak megszámlálása és a válasz, ha kevés — a terve a 10. szakaszban; ⛔ lelet: az ismert tagok becslése az elment
 tagokat is számolja; ✅ KO11 (A), KO12 (A); ⛔ a 96. mérés: a DHT-n látott hirdetők a számláló elérhetőségét mérik, nem a tartókét;
-⏸️ **KO13 Csabánál** — mi legyen a válasszal) → ⑤ a terep.
+⭐ a KO13 helyett **Csaba elképzelése**: mindig T tartó ONLINE kosaranként, ha kevesebb, egy új készülék lesz tartó, aki visszajön, marad,
+az új teher a legkevesebbet őrzőhöz, a kézikönyvet mindenki tartja (KO5 vissza (A)-ra); ✅ a 97. mérés: működik, 10 jelölt közül a
+legkevesebbet őrző — mindenki közül torlódik; ⏸️ **KO14** (a célszám) **és KO15** (ki legyen az új tartó) **Csabánál**) → ⑤ a terep.
 
-**Az állapot:** **1574 önpróba** (75 próba-fájl; a legutóbbi teljes soron 1572/1572 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-26, a D130 ③f után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba, a csere „CSOMAGVESZTÉS (30%)”, „lezárás 5×” és D109 (KK4) „keret maradékáig” próbája, magukban zöldek) · 411 fájl / 8552,7 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1574 önpróba** (75 próba-fájl; a legutóbbi teljes soron 1572/1572 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-26, a D130 ③f után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba, a csere „CSOMAGVESZTÉS (30%)”, „lezárás 5×” és D109 (KK4) „keret maradékáig” próbája, magukban zöldek) · 412 fájl / 8575,6 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8

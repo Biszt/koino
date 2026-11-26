@@ -5372,6 +5372,78 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 97. ⭐⭐ A KOINON — MINDIG T TARTÓ ONLINE, és az új teher a legkevesebbet őrzőhöz (D130 ④, Csaba elképzelése, 2026-11-26, a laptopon)
+
+Csaba (a 96. után): *„20 - 50 online helyen … azt kéne számon tartani, hogy mennyien vannak online, egy adott egyezménynél. és ha ofline
+kerűl, az egyik tartó, akkor azt érzékelni kéne, és egy új eszköz lessz tartó”* — *„ne vándoróljon folyton, de a közös terhet, meg kell
+próbálnunk igazságossan szétosztani, úgy, hogy egy újabb általános egyezmény, azokhoz kerűljön, akik a legkevesebb általános egyezményt
+őrzik.”*
+
+`meres/koinonOnlineMeres.js` — szimuláció (rögzített maggal). A szabály: egy kosárnak (a koinon darabjának — benne az általános egyezmények
+egészben) MINDIG legyen **T tartója online**; ha kevesebb, egy új készülék lesz tartó (óránként kosaranként egy; a letöltéshez egy online
+tartó kell forrásnak); **aki visszajön, tartó marad** (az offline nem azonos az elmenttel — a Carbonite-minta, Chun és társai, 2006); a
+kosarat csak az elment tagok veszítik el. 10 000 alapító tag, a mai mélység (r = 20: 256 kosár, ~39 természetes tartó), T = 20, 90 nap
+(a mérés az utolsó 30-on), tagonként 2 általános egyezmény (feltevés), egyenként ~50 KB. A „stabil” koinoban senki nem megy el; a
+„fogyó”-ban naponta 0,75% végleg elmegy (90 nap alatt ~49%) és 0,3% csatlakozik. Az elérhetőség a 96. mérés három mintája (átlagosan
+~36 / 19 / 10% fent) és egy negyedik: a telefonos minta **esti** alkalmakkal (a napi alkalmak 80%-a 17–23 óra között). ⚠️ Feltevések, nem
+tények (a koino az elérhetőséget még sosem mérte).
+
+**Ki legyen az új tartó** — három szabály: **sor** (a kosár kulcs szerinti sorában a következő online készülék — a teherre nem néz);
+**jelölt** (a sorban következő 3, ill. 10 online készülék közül a legkevesebb általános egyezményt őrző — a „két választás ereje”, Azar
+és társai, 1994; a jelöltek a mostani terhüket mondják meg); **mindenki** (az összes online készülék közül a legkevesebbet őrző, a
+terhekről szóló hír naponta frissül — Csaba szabálya szó szerint).
+
+```
+stabil koino, T = 20             gépes        telefonos     borúlátó      telefonos, esti
+tartó / kosár (medián)           67           125           289           86
+T-nél kevesebb online            0,1%         0,4%          1,3%          0,1%
+egy sincs online                 0,00%        0,00%         0,00%         0,00%
+a teher átlaga                   134 (6,6 MB) 253 (12,4 MB) 578 (28,2 MB) 173 (8,4 MB)
+a segítő szerepek része          42%          69%           86%           55%
+a legnagyobb teher / az átlag:
+  sor                            4,08×        3,50×         2,46×         6,89×
+  jelölt (3)                     2,53×        2,10×         1,63×         4,28×
+  jelölt (10)                    1,85×        1,52×         1,25×         3,24×
+  mindenki (napi hír)            143,6×       59,2×         32,1×         105,6×
+  → egy órában egy készülékre    17           103           155           60  új szerep (a többi szabálynál 1–3)
+
+fogyó koino, T = 20 (jelölt)
+tartó / kosár (medián)           60           112           248           75
+T-nél kevesebb online            1,5%         3,1%          7,2%          1,6%
+egy sincs online                 0,00%        0,00%         0,00%         0,00%
+a teher átlaga                   172 (8,4 MB) 318 (15,5 MB) 705 (34,4 MB) 211 (10,3 MB)
+a legnagyobb / az átlag (10)     1,80×        1,48×         1,22×         3,33×
+  mindenki (napi hír)            125×         86×           30×           76×
+az új tagok terhe / az alapítóké 0,87×        0,81×         0,86×         0,81×   (mindenki: 3,6–7,2× — rájuk torlódik)
+a pótlás forgalma                0,05         0,10          0,24          0,05 MB / készülék / nap
+```
+
+**C) Változatok** (a jelölt (3) szabállyal): **a hiány egyszerre** (nem egyesével) — kevésbé igazságos (a legnagyobb 2,1–4,5× az
+egyesével pótlás 1,6–4,5×-e helyett), csak a fogyó koino „T alatt”-ja javul (1,0–4,0%). **Nagyobb kosarak** (7., 6. mélység) — kevesebb
+segítő szerep (a 6. mélységen 0–57%), de több össz-teher (a gépes mintán 134 → 313), a borúlátón alig változik. **T = 50** — a tartók
+és a teher a T = 20 2,2–2,4-szerese (154 / 297 / 638 / 195 tartó; 15–62 MB, a fogyóban 20–78 MB), és a fogyó koinoban az egyesével
+pótlás nem győzi: T alatt 3,7–16,7% (egy sincs online: továbbra is 0%).
+
+**D) A kis koino** (640 tag, 32 kosár, jelölt (3), T = 20): egy kosarat a tagok 11 / 23 / 46 / 12%-a tart (a fogyóban 13 / 28 / 55 / 15%),
+a teher 7–29 MB (a fogyóban 8–34 MB) — a borúlátó mintán ez közel a teljes replikáció, és ez rendben van: kevés az adat.
+
+⭐ **A következtetés:** (1) **Csaba szabálya működik**: egyik mintán, egyik koinoban sem volt olyan óra, amikor egy kosárnak egy tartója
+sem volt online, és egy kosár sem veszett el. A tartók száma magától áll be (az elérhetőség ismerete nélkül) ~1,2–1,4 × T / az átlagos
+elérhetőség értékre (a papíron számolt 55 / 105 / 210 helyett 67 / 125 / 289), és az elment tagok helyét magától pótolja. ⭐ A 96. mérés
+gondja itt nem jön elő: a számlálás az „online most” — pont az, amire a kérőnek szüksége van; a számláló saját elérhetősége nem torzít.
+(2) **A teher kicsi**: 10 000 tagnál átlagosan 7–34 MB, a pótlás legfeljebb 0,25 MB naponta. (3) ⛔ **A „mindenki közül a legkevesebbet
+őrző” szó szerint torlódik** (Mitzenmacher, 2000): a késő hírre mindenki ugyanazt választja — a legnagyobb teher az átlag 30–144-szerese,
+egy készülékre egy órában 242 új szerep jut, az új tagokra az átlag 3,6–7,2-szerese. ⭐ **A jelölt szabály teljesíti a szándékot:** 10
+jelölttel a legnagyobb teher az átlag 1,2–1,9-szerese (az esti mintán 3,2–3,3). (4) A maradék egyenlőtlenség oka: a hiány óráiban csak a
+bekapcsolva hagyott gépek vannak fent — nekik kell átvenniük (az esti mintán ~3× az átlag, ~28 MB); ezt csak a vándorlás simítaná el,
+az pedig Csaba szerint csak megtelt készüléknél kell. (5) A hiány egyszerre pótlása és a nagyobb kosár nem éri meg; a T = 50 a terhet
+2,2–2,4-szerezi, és a fogyó koinoban gyorsabb pótlás kellene hozzá. ⚠️ Nem mérte: a jelöltek megtalálását a hálón (a hiányt észlelő tartó
+itt „tudja”, ki a sorban következő online készülék — a ④c átvizsgálása), a DHT késését (az „online most” itt az abban az órában fent
+lévőket jelenti), a mélység változását (a futás alatt rögzített), és a valódi elérhetőséget (a terep). → KO14, KO15
+(`koinon_atvizsgalas.md` 10.).
+
+---
+
 ## 96. ⛔⭐ A KOINON FENNTARTÓ KÖRE — mit lát a számláló, és segít-e a szomszéd? (D130 ④, KO12 (A), 2026-11-26, a laptopon)
 
 `meres/koinonFenntartoMeres.js` — szimuláció (rögzített maggal): 640 ismert tag, r = 20 (5. mélység, 32 darab), 30 nap, óránkénti lépés; egy

@@ -6684,8 +6684,13 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     az ismert tagok becslése az elment tagokat is számolja, így a darabok élő tartói az idővel fogynak — ezt csak az élő tartók
     számlálása látja. ⛔ *A 96. mérés (2026-11-26):* a DHT-n látott hirdetők száma főleg a számláló saját elérhetőségét méri — egy küszöb
     rajta egészséges koinoban is a készülékek 26–100%-át segítésbe küldené; csak a sokat fent lévő készülék lát megbízhatóan, és az
-    egyenletes fogyást (az elment tagokat) nem a szomszéd, hanem az élő tagokból számolt mélység oldaná meg. ⏸️ **KO13** (mi legyen a
-    válasszal) Csabánál — `koinon_atvizsgalas.md` 10.
+    egyenletes fogyást (az elment tagokat) nem a szomszéd, hanem az élő tagokból számolt mélység oldaná meg. ~~⏸️ KO13 (mi legyen a
+    válasszal)~~ → ⭐ **a KO13 helyett Csaba elképzelése (2026-11-26):** mindig T tartó ONLINE kosaranként; ha kevesebb, egy új készülék
+    lesz tartó; aki visszajön, tartó marad (nem vándorol folyton — leadni csak a megtelt készülék ad le); az új teher a legkevesebbet
+    őrzőhöz. Így a 11. pont „eggyel sekélyebbre lép”-je helyett a pótlás. ✅ *A 97. mérés:* működik (egyik mintán sem volt kosár online tartó
+    nélkül, a tartók száma magától áll be, a teher 7–34 MB); a legkevesebbet őrző néhány jelölt közül — mindenki közül torlódik.
+12. **A kézikönyvet mindenki tartja** (Csaba, 2026-11-26 — a 6. pont KO5 (B)-je visszakerül (A)-ra): a ③e egy része visszafordul.
+    ⏸️ **KO14** (a célszám) és **KO15** (ki legyen az új tartó) Csabánál — `koinon_atvizsgalas.md` 10.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.
