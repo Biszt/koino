@@ -365,7 +365,9 @@ A 97. mérés három dolgot „tudott”, amit a hálón meg kell oldani: hogy k
    lesz (ugyanaz a szabály: csak a megtelt készülék adja le). Az átmenetben a két mélység együtt él, és egy új tag is sekélyebben
    kezd (kevesebb tagot ismer). A mélyebb számláló nem látja a sekélyebb tartókat, pedig azok az egész kosarát tartják — ez fölösleges
    pótlást hozna. Ezért pótlás előtt egy második pillantás jön a szülő-kosár témájára: egy keresés, csak hiány esetén. A kérő
-   ugyanígy a saját mélységén és a szülőén keres (mint a gyökér a szomszéd mélységeken).
+   ugyanígy a saját mélységén és a szülőén keres. ⭐ *Pontosítva (a ④a építésekor):* a gyökértől eltérően a gyermekekén NEM — a
+   mélyebb tartó a darabnak csak a felét tartja, és a fél válasz a kérelmet „megjött”-nek jelölné; a 0. mélységű szülőn sem (azt senki
+   nem hirdeti).
 8. **A leadás — csak a megtelt készülék ad le:** egy készülékenkénti keret (beállítás: mennyit adok a koinonnak). Fölötte nem vállal
    új szerepet, és ha a keretet lejjebb veszik, a legújabb segítő szerepeit leadja: nem hirdeti tovább őket, a látott szám csökken, és
    mások pótolnak. A mért teher 7–42 MB; az alapérték a ④c része, ennél jóval nagyobb.
@@ -382,11 +384,21 @@ A 97. mérés három dolgot „tudott”, amit a hálón meg kell oldani: hogy k
   ráhagyás a terepen mért késéssel később pontosítható. (B) **20 — a T = r szó szerint**: 14–21%-kal kevesebb teher, de a rosszabb
   esetben a valóban online átlag 20–25, és az órák 9–46%-ában 20 alatt (egy sincs online: 0%).
 
+✅ **Csaba (2026-11-26): „Igen, mindkettő (A)”** — **KO16 (A)**: a jelöltek a DHT-ről (egy véletlen gyökér-darab témájának hirdetői,
+legfeljebb 10); **KO17 (A)**: a látott cél 25 — a születés `koinonPeldany`-ja (20) a valóban online őrzők száma, a program a látott
+számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
+
 **A ④ terve a 98. mérés után** (a 10. szakasz „új terve” helyett):
 1. **④a A hirdetés:** a tartó a kosarait hirdeti (a sajátját és a segítő kosarait) a saját mélységén. A nyitó jel a tartott kosarakat
-   viszi (felülről korlátosan), a csere a közös kosarakat egyezteti, a kérő a mélységén és a szülőén keres.
+   viszi (felülről korlátosan), a csere a közös kosarakat egyezteti, a kérő a mélységén és a szülőén keres. ✅ **Kész (2026-11-26)** —
+   a hirdetés és a kérő útja: `cimjegyzek.js` `koinonHirdetendoTemak` (a `szelet` fajtán, a darab-kulcson; a 0. mélységen semmi) és
+   `koinonKeresoKulcsai` (a darab és a szülője); `koino.js` `koinonKosaraim` (ma a saját kosár — a ④c teszi mellé a segítő kosarakat),
+   a `sajatHirdetendoTemak` (a címjegyzék-kör), a `fuggoKerelemFelvetele` (a szülő témáján is jelentkezik és keres), a `vallalas` sora
+   („a koinon a DHT-n: …”) és a `cimjegyzek hirdet` („koinon-kosár m:d”). ⏭️ A nyitó jel a ④c-vel (addig nincs segítő kosár).
 2. **④b A számlálás:** óránként, minden tartott kosárra: a téma különböző IPv4-címei (és saját maga). Ha a látott cél (KO17) alatt van,
-   egy második pillantás a szülő-kosárra. Kimondva a `vallalas` sorában és az őrjárat naplójában.
+   egy második pillantás a szülő-kosárra. Kimondva a `vallalas` sorában és az őrjárat naplójában. ⭐ *A ④a építésekor a kódból:* a
+   hirdetés (`dht.js` `bejelent`) a bejelentés előtt úgyis lekéri a téma hirdetőit (`get_peers` — a válasz `kereses.tarsak`-ja), így a
+   számlálás a címjegyzék-kör saját találatából jöhet, többlet-forgalom nélkül, ~20 percenként.
 3. **④c A pótlás:** 1/n eséllyel; a jelöltek a KO16 szerint, legfeljebb 10, a jelük szerint a legkevesebbet őrző; a felkérés és a jelölt
    három ellenőrzése; óránként legfeljebb egy pótlás és egy új szerep; a szerep helyben feljegyezve; leadás csak a keret fölött.
 4. **④d A próba:** helyi DHT-hálóval (`halo.belepo`), rontásokkal: hamis hirdető, hamis felkérő, megtelt jelölt, mélység-váltás, a
@@ -546,3 +558,9 @@ A 97. mérés három dolgot „tudott”, amit a hálón meg kell oldani: hogy k
   nincs jelölt), ⭐ a DHT-minta igen. A jelöltek a nyitó jelből (a tartott kosarak listája — úgyis kell), a felkérés a jelölt három
   ellenőrzésével, a hamisítás négy fajtája (egyik sem vesz el tartót), a mélység-váltás második pillantása, a keret. ⏸️ **KO16**
   (honnan a jelöltek) és **KO17** (a látott cél) Csabánál.
+- **2026-11-26** — ✅ **Csaba: „Igen, mindkettő (A)”** — **KO16 (A)**: a jelöltek a DHT-ről; **KO17 (A)**: a látott cél 25 (1,25× a
+  `koinonPeldany`-ra). ⏭️ Az építés: ④a → ④b → ④c → ④d.
+- **2026-11-26** — ✅ **④a: a kosár a DHT-n** (a 11. szakasz terve, 1. pont): a tartó a kosarát a darab-kulcs `szelet` témáján hirdeti
+  (a 0. mélységen nem), a kérő a darab és a szülője témáján jelentkezik és keres (a gyermekekén nem — a fél válasz miatt). Három próba
+  (két tiszta a `koinonDarabProba`-ban, egy a parancssoron egy hamis DHT-vel: a társ nélküli kérő a szülő-kosár témáján megtalálja a
+  tartót), mindkét rontásra bukik. ⏭️ ④b a számlálás.

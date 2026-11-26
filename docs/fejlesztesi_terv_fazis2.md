@@ -6695,7 +6695,11 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     `koinon_atvizsgalas.md` 10. ⭐ *A ④c átvizsgálása és a 98. mérés (2026-11-26, kód előtt — a 11. szakasz):* a pótlót sorsolás
     választja (1/n — nem árt); a DHT késése a látott számot növeli (a rosszabb esetben ~20%-kal kevesebb tartó, egy sincs online soha);
     ⛔ a kötések nem jó jelölt-forrás, ⭐ a DHT-minta igen; a jelölt terhe a nyitó jelből (a tartott kosarak listája), a felkérést a jelölt
-    maga is ellenőrzi; a hamisítás egyik fajtája sem vesz el tartót. ⏸️ **KO16** (honnan a jelöltek) és **KO17** (a látott cél) Csabánál.
+    maga is ellenőrzi; a hamisítás egyik fajtája sem vesz el tartót. ✅ **KO16 (A)** (Csaba, 2026-11-26): a jelöltek **a DHT-ről** (egy
+    véletlen gyökér-darab témájának hirdetői, legfeljebb 10). ✅ **KO17 (A)**: a **látott cél 25** — a `koinonPeldany` (20) a valóban
+    online őrzők száma, a program a DHT-n látott számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható). ✅ **④a kész
+    (2026-11-26):** a tartó a kosarát a darab-kulcs `szelet` témáján hirdeti (a 0. mélységen nem), a kérő a darab és a szülője témáján
+    jelentkezik és keres. ⏭️ ④b a számlálás, ④c a pótlás, ④d a próba.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

@@ -459,6 +459,50 @@ export function kozosKoinonDarab(a, b) {
 }
 
 // ===================================
+// ⭐⭐ D130 (④a — KO11 (A), a 98. mérés után): A KOINON KOSARAI A DHT-N
+// ===================================
+//
+// A tartó a KOSARAIT hirdeti (a koinon darabja egy kosár — benne egész általános egyezmények): a sajátját, és a ④c-től a segítő
+// kosarait is. ⭐ A `szelet` fajtával, a darab-kulcson: így a kérő MEGLÉVŐ útja — a jelentkezés a téma párján (D92/1), a DHT-keresés
+// a téma hirdetőire — változtatás nélkül eléri, és a tartó a párt magától figyeli (`figyelendoKopogtatok` a `szelet` párokat nézi).
+// ⛔ A 0. mélységen nincs mit hirdetni: egy darab van — az egész koinon —, és azt minden tag tartja (a gyökér hirdetése elég).
+// Az ára kosaranként egy téma és a párja körönként (~6 KB, ~20 percenként — napi ~0,4 MB a fent töltött időre).
+
+/**
+ * A hirdetendő koinon-kosarak témái — a nem koinon-darab kulcsot, a 0. mélységűt és az ismétlést kihagyja.
+ * @param {Object} b
+ * @param {string} b.koino
+ * @param {Array<string>} b.kosarak - a tartott kosarak darab-kulcsai (elöl a saját)
+ * @param {number[]} [b.valtozatok] - ⭐ D124 ⑤: a témák élő változatai, a legújabbtól
+ * @returns {Array<{fajta: 'szelet', kulcs: string, tema: Buffer, temak: Buffer[]}>}
+ */
+export function koinonHirdetendoTemak({ koino, kosarak = [], valtozatok = [1] }) {
+  const ki = [];
+  for (const k of Array.isArray(kosarak) ? kosarak : []) {
+    const d = typeof k === 'string' ? koinonDarabBol(k) : null;
+    if (!d || d.melyseg === 0 || ki.some((t) => t.kulcs === k)) continue;
+    ki.push(temaValtozatokkal('szelet', k, (n) => cimjegyzekTema(koino, 'szelet', k, n), valtozatok));
+  }
+  return ki;
+}
+
+/**
+ * ⭐⭐ D130 (④a — `koinon_atvizsgalas.md` 11., 7. pont): HOL KERESI A KÉRŐ egy koinon-darab tartóit — a darab saját témáján, és a
+ * SZÜLŐJÉÉN: a sekélyebb tartó az egész szülőt tartja, benne a kért darabot is (a mélység csak nő, és egy új tag sekélyebben kezd —
+ * kevesebb tagot ismer). ⛔ A gyermekekén NEM (a gyökértől eltérően): a mélyebb tartó a darabnak csak a felét tartja, és a fél válasz
+ * a kérelmet „megjött”-nek jelölné. A 0. mélységű szülőt senki nem hirdeti (ott mindenki mindent tart), arra nem kell jelentkezni.
+ * @param {string} kulcs - egy koinon-darab kulcsa
+ * @returns {Array<string>} a darab-kulcsok, elöl a kért — nem koinon-darab kulcsra üres
+ */
+export function koinonKeresoKulcsai(kulcs) {
+  const d = typeof kulcs === 'string' ? koinonDarabBol(kulcs) : null;
+  if (!d) return [];
+  const ki = [kulcs];
+  if (d.melyseg >= 2) ki.push(koinonDarabKulcsa(d.melyseg - 1, d.darab >> 1n));
+  return ki;
+}
+
+// ===================================
 // ⭐⭐ D91/3 (Csaba, 2026-10-03, az 58. mérés után): MIT HIRDET EGY KÉSZÜLÉK
 // ===================================
 //

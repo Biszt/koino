@@ -27,7 +27,9 @@ import { bejelentesHelyei, szelet, KOINON_KULCS, koinonHelyei } from '../js/esem
 import { rendszerAzonosito } from '../js/esemeny/rendszerEntitas.js';
 import {
   koinonDarabKulcsa, koinonDarabBol, koinonDarabKulcsai, koinonLenyomata, koinonMelysege, kozosKoinonDarab,
-  egyezmenyKoinonDarabKulcsa, darabbaEsik, gyokerDarabKulcsa, gyokerDarabBol, DARAB_MAX_MELYSEG
+  egyezmenyKoinonDarabKulcsa, darabbaEsik, gyokerDarabKulcsa, gyokerDarabBol, DARAB_MAX_MELYSEG,
+  // ⭐⭐ D130 (④a): a kosarak a DHT-n
+  koinonHirdetendoTemak, koinonKeresoKulcsai, cimjegyzekTema, figyelendoKopogtatok, temaKopogtatoja
 } from '../js/csere/cimjegyzek.js';
 import { sajatKuldo, kuldoFogado } from '../js/allapot/osszegzoTartas.js';
 
@@ -372,6 +374,53 @@ proba('⛔ zárt koinoban a NEM TAGNAK nem jár a koinon — a közös darab kim
   const r = await csere(tarA, tarB, tA, tB, { mA: 0, mB: 0,
     a: { zartKapu: async () => ({ szabad: false, kell: false, ok: 'próba', szeletek: [letrehozas.azonosito] }) } });
   return r.a.tarsKorlatozva && (await megvan(tarB, a)) === 0;
+});
+
+// ===================================
+// ⭐⭐ D130 (④a — KO11 (A), a 98. mérés után): A KOSARAK A DHT-N
+// ===================================
+
+// A tartó a kosarait a `szelet` fajtán hirdeti, a darab-kulcson — a kérő meglévő útja (a téma párja, D92/1) így éri el, és a tartó a
+// párt magától figyeli. Rontás: a 0. mélységű kosarat is hirdeti → az `egy` bukik; más fajtán/kulcson hirdet → a `tema` vagy a `par`
+// bukik; az ismétlést vagy a nem darab-kulcsot nem szűri → a `szures` bukik.
+proba('⭐⭐ D130 (④a): a kosár témája a `szelet` fajtán, a darab-kulcson — a 0. mélységen nincs, az ismétlés és a nem darab-kulcs kimarad, és a párját a tartó figyeli', () => {
+  const k = koinonDarabKulcsa(3, 5);
+  const t = koinonHirdetendoTemak({ koino: KOINO, kosarak: [k, k, koinonDarabKulcsa(0, 0), gyokerDarabKulcsa(3, 5), 'nem-kulcs', null] });
+  const ket = koinonHirdetendoTemak({ koino: KOINO, kosarak: [k], valtozatok: [2, 1] });
+  const figyelt = figyelendoKopogtatok({ koino: KOINO, alairo: 'a1', hirdetett: t });
+  const ki = {
+    egy: koinonHirdetendoTemak({ koino: KOINO, kosarak: [koinonDarabKulcsa(0, 0)] }).length === 0,
+    szures: t.length === 1 && t[0].fajta === 'szelet' && t[0].kulcs === k,
+    tema: t[0].tema.equals(cimjegyzekTema(KOINO, 'szelet', k)),
+    valtozat: ket[0].temak.length === 2 && ket[0].temak[0].equals(cimjegyzekTema(KOINO, 'szelet', k, 2))
+      && ket[0].temak[1].equals(cimjegyzekTema(KOINO, 'szelet', k, 1)),
+    par: figyelt.some((f) => f.tema.equals(temaKopogtatoja(KOINO, 'szelet', k)))
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// A kérő a darab saját témáján és a SZÜLŐJÉÉN keres (a sekélyebb tartó az egészet tartja) — a gyermekekén nem (fél válasz), a 0.
+// mélységű szülőn nem (senki nem hirdeti). Rontás: a szülő helyett a gyermek → a `szulo` bukik; a 0. mélység is → az `elso` bukik.
+proba('⭐⭐ D130 (④a): a kérő a darab témáján és a szülőjéén keres — a szülő tartalmazza a darabot; a 0. mélységű szülőn és a gyermekeken nem', () => {
+  const k = koinonDarabKulcsa(4, 11);
+  const [sajat, szulo, ...tobb] = koinonKeresoKulcsai(k);
+  const sz = koinonDarabBol(szulo);
+  // a szülő az egészet tartja: egy egyezmény, ami a darabba esik, a szülőbe is
+  let tartalmazza = true;
+  for (let i = 0; i < 200; i++) {
+    const az = 'e' + i;
+    const l = koinonLenyomata(az);
+    if (darabbaEsik(l, 4, 11n) && !darabbaEsik(l, sz.melyseg, sz.darab)) tartalmazza = false;
+  }
+  const ki = {
+    sajat: sajat === k && tobb.length === 0,
+    szulo: sz?.melyseg === 3 && sz.darab === 5n && tartalmazza,
+    elso: koinonKeresoKulcsai(koinonDarabKulcsa(1, 1)).length === 1,
+    nemDarab: koinonKeresoKulcsai(gyokerDarabKulcsa(4, 11)).length === 0 && koinonKeresoKulcsai('x').length === 0
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
+  return Object.values(ki).every(Boolean);
 });
 
 export default async function () {

@@ -213,7 +213,9 @@ import {
   // ⭐ A kereső-réteg ⑤: a hely darabja a régió mélységén.
   lenyomatDarabja,
   // ⭐⭐ D130 (③c): a koinon darabjai.
-  koinonMelysege, koinonDarabBol, koinonDarabKulcsai, koinonLenyomata, egyezmenyKoinonDarabKulcsa
+  koinonMelysege, koinonDarabBol, koinonDarabKulcsai, koinonLenyomata, egyezmenyKoinonDarabKulcsa,
+  // ⭐⭐ D130 (④a): a koinon kosarai a DHT-n (a hirdetés, és hol keres a kérő).
+  koinonHirdetendoTemak, koinonKeresoKulcsai
 } from './js/csere/cimjegyzek.js';
 // ⭐⭐ D92/1: a függő kérelmek (a cím nélküli kérés — a kopogtatás).
 import {
@@ -4145,6 +4147,15 @@ async function koinonMelysegem() {
   return b;
 }
 
+/**
+ * ⭐⭐ D130 (④a): A TARTOTT KOSARAIM — a koinon darabjai, amelyeket ez a készülék tart és hirdet: a sajátom (a tábla-aláírásomból, a
+ * mélységemen — `koinonMelysegem`). ⏭️ A ④c-től a segítő kosaraim is ide kerülnek (a helyben feljegyzett szerepeim).
+ * @returns {Promise<Array<string>>} a darab-kulcsok, elöl a saját
+ */
+async function koinonKosaraim() {
+  return [(await koinonMelysegem()).darab];
+}
+
 let kezikonyvDarabEmlek = null;
 /**
  * ⭐⭐ D130 (③e, KO5 (B)): a kézikönyv bejegyzései, amelyek a koinon-DARABOMBA esnek — a vállalásom részei (a többit a darab tartói
@@ -4207,6 +4218,9 @@ async function sajatHirdetendoTemak() {
   const [kd] = sajatKeresoRegioi(tablaKulcs.alairoNyilvanos, kr.melyseg, 1);
   temak.push(temaValtozatokkal('kereso', kr.melyseg + ':' + kd.toString(16), (n) => keresoRegioTemaja(KOINO, kr.melyseg, kd, n),
     valtozatok));
+  // ⭐⭐ D130 (④a — KO11 (A)): a koinon kosaraim (a 0. mélységen nincs mit: egy darab van, azt minden tag tartja). A `szelet` fajtán —
+  // a párját a kör a többivel együtt figyeli, így a kosár kérője eléri a tartót.
+  temak.push(...koinonHirdetendoTemak({ koino: KOINO, kosarak: await koinonKosaraim(), valtozatok }));
   return { temak, legfelso: gy.becsles, melyseg: gy.melyseg, sajatMelyseg: gy.sajat, tanultMelyseg: gy.tanult, szeletHirdetes };
 }
 
@@ -4738,13 +4752,18 @@ async function fuggoKerelemFelvetele(k, { cimek = null, dht = false, kopogtatok:
     for (const a of await tartoTippjei(k.kulcs)) {
       if (a !== sajatTabla && !kopogtatok.some((x) => x.fajta === 'keszulek' && x.kulcs === a)) kopogtatok.push({ fajta: 'keszulek', kulcs: a });
     }
-    kopogtatok.push({ fajta: 'szelet', kulcs: k.kulcs });
+    // ⭐⭐ D130 (④a): egy koinon-darab kérelme a SZÜLŐ-darab témáján is (a sekélyebb tartó az egészet tartja — `koinonKeresoKulcsai`);
+    // minden más kulcs a saját témáján.
+    const keresoKulcsok = koinonDarabBol(k.kulcs) ? koinonKeresoKulcsai(k.kulcs) : [k.kulcs];
+    for (const kk of keresoKulcsok) kopogtatok.push({ fajta: 'szelet', kulcs: kk });
     if (dht) {
-      try {
-        for (const t of await cimjegyzekKeresese(temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', k.kulcs, n)))) {
-          celok.push({ hoszt: t.cim, port: t.port });
-        }
-      } catch { /* a DHT segédeszköz */ }
+      for (const kk of keresoKulcsok) {
+        try {
+          for (const t of await cimjegyzekKeresese(temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', kk, n)))) {
+            if (!celok.some((x) => x.hoszt === t.cim && Number(x.port) === Number(t.port))) celok.push({ hoszt: t.cim, port: t.port });
+          }
+        } catch { /* a DHT segédeszköz */ }
+      }
     }
   } else {
     // A gyökér: a darab a saját tudásomból (egy friss készüléknél 0), és a szomszédos mélységek (D91/3).
@@ -7859,7 +7878,7 @@ return {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -7903,7 +7922,7 @@ const {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -10466,8 +10485,11 @@ try {
         const h = await cimjegyzekHirdetese(port);
         kiir(SZIN.vastag + 'HIRDETÉS a DHT-n (port ' + port + ')' + SZIN.vege);
         for (const e of h.eredmeny) {
-          kiir('  ' + (e.tarolta > 0 ? SZIN.jo + '✓' : SZIN.nem + '✗') + SZIN.vege + ' ' + e.fajta + ' '
-            + (e.fajta === 'szelet' ? e.kulcs.slice(0, 12) + '…' : e.kulcs) + SZIN.halvany + '  · ' + e.tarolta
+          // ⭐⭐ D130 (④a): a koinon kosara a mélységével és a sorszámával (a kulcsa csupa nulla elöl — abból semmi nem látszana)
+          const kd = e.fajta === 'szelet' ? koinonDarabBol(e.kulcs) : null;
+          kiir('  ' + (e.tarolta > 0 ? SZIN.jo + '✓' : SZIN.nem + '✗') + SZIN.vege + ' '
+            + (kd ? 'koinon-kosár ' + kd.melyseg + ':' + kd.darab : e.fajta + ' '
+              + (e.fajta === 'szelet' ? e.kulcs.slice(0, 12) + '…' : e.kulcs)) + SZIN.halvany + '  · ' + e.tarolta
             + '/' + e.probalt + ' gép tárolta' + SZIN.vege);
         }
         if (!h.eredmeny.some((e) => e.probalt > 0)) {
@@ -10791,6 +10813,12 @@ try {
         // ⭐⭐ D130 (③e): a kézikönyv is a darabokban — a darabomba eső bejegyzések és az eseményeik
         + (await kezikonyvBejegyzeseim()).length + ' kézikönyv-bejegyzés, ' + koinonbol.filter((e) => !KOINON_TIPUSOK.has(e.tipus)).length
         + ' kézikönyv-esemény (D130)' + SZIN.vege);
+      // ⭐⭐ D130 (④a): a kosaraim a DHT-n — a kosár kérője így a társaim nélkül is eléri
+      const knHirdetes = koinonHirdetendoTemak({ koino: KOINO, kosarak: await koinonKosaraim() });
+      kiir(SZIN.halvany + '  a koinon a DHT-n: ' + (knHirdetes.length
+        ? knHirdetes.length + ' kosaramat hirdetem (' + knHirdetes.map((t) => { const d = koinonDarabBol(t.kulcs); return d.melyseg + ':' + d.darab; })
+          .join(', ') + ' — az őrjárat címjegyzék-körében, ~20 percenként; D130 ④a)'
+        : 'nem hirdetem — egy darab van (az egész koinon), azt minden tag tartja') + SZIN.vege);
       for (const [az, p] of pontosak.sort((a, b) => b[1] - a[1])) {
         const o = kf.fokok.get(az) === 'osszegzo' ? osszT.szeletek[az] : null;
         kiir('  ' + SZIN.halvany + az.slice(0, 8) + SZIN.vege + '  ' + (allapot.entitasok.get(az)?.cim ?? '(ismeretlen)')

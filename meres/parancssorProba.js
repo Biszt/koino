@@ -5258,6 +5258,71 @@ proba('⭐⭐ D130 (③e, ③f): a KÉZIKÖNYV A DARABOKBAN — a születés r =
   }
 });
 
+// ⭐⭐ D130 (④a — KO11 (A), `koinon_atvizsgalas.md` 11.): A KOSÁR A DHT-N. Egy hamis DHT-n (12 gép) A a koinon alapítója r = 1-gyel:
+// amíg csak magát ismeri (egy darab — az egész koinon), nem hirdeti a koinont (a `vallalas` kimondja, a `cimjegyzek hirdet` nem
+// mutat kosarat); B belépése után (két ismert tag → 1. mélység) a kosarát a darab-kulcs `szelet` témáján hirdeti, és a DHT-n ott a
+// címe. C — társ nélkül, A-t nem ismeri — egy MÉLYEBB (2. mélységű) darabot kér cím nélkül: a kérelem a szülő-darab (A kosara)
+// témáján is keres, a célja A címe lesz, és a kopogtató témái közt a szülőé is ott van. Rontás: a hirdetés kimarad → a DHT-n nincs
+// A címe → bukik; a 0. mélységen is hirdet → az `egyDarab` bukik; a kérő csak a saját témáján keres → C célja üres → bukik.
+proba('⭐⭐ D130 (④a): a koinon kosara a DHT-n — két ismert tag fölött (r = 1) A hirdeti a kosarát (egy darabnál nem), és a társ nélküli C egy mélyebb darab kérésénél a szülő-kosár témáján megtalálja', async () => {
+  const { hamisHalozat } = await import('./dhtProba.js');
+  const { dhtKliens } = await import('../js/csere/dht.js');
+  const { cimjegyzekTema, koinonDarabKulcsai, koinonDarabKulcsa, koinonDarabBol } = await import('../js/csere/cimjegyzek.js');
+  const a = await ujKeszulek();
+  const b = await ujKeszulek();
+  const c = await ujKeszulek();
+  const PA = 8081;
+  const halo = await hamisHalozat(12);
+  const dht = { KOINO_DHT_BELEPOK: halo.belepo(0), KOINO_TUKOR: '127.0.0.1:9', KOINO_KISZOLGALAS: 'alap' };
+  try {
+    await fut(a, 'koino', 'Kosár a DHT-n', 'próba', 'nyilt', 'koinonPeldany=1');
+    const K = await koinoNeve(a);
+    // egy darab (A csak magát ismeri): nincs mit hirdetni
+    const egyV = await fut(a, 'vallalas', dht);
+    const egyH = await fut(a, 'cimjegyzek', 'hirdet', String(PA), dht);
+    // B belép, és A a cserén megismeri (két ismert tag — r = 1 mellett 1. mélység: két darab)
+    await fut(b, 'csatlakoz', K);
+    await fut(b, 'belep');
+    await csereKor(a, b, 7996, { KOINO_KISZOLGALAS: 'mindent' });
+    const ketV = await fut(a, 'vallalas', dht);
+    const ketH = await fut(a, 'cimjegyzek', 'hirdet', String(PA), dht);
+    const alairo = JSON.parse(await readFile(join(a, 'tabla-kulcs.json'), 'utf8').catch(() => '{}')).alairoNyilvanos ?? null;
+    const kosar = alairo ? koinonDarabKulcsai(alairo, 1)[0] : null;
+    const d = kosar ? koinonDarabBol(kosar).darab : null;
+    // a DHT-n a kosár témáján A címe
+    let tarsak = [];
+    const kliens = await dhtKliens({ belepok: [halo.belepo(0)] });
+    try { if (kosar) tarsak = (await kliens.tarsakKeresese(cimjegyzekTema(K, 'szelet', kosar))).tarsak ?? []; } finally { kliens.bezar(); }
+    // C társ nélkül egy mélyebb darabot kér (a 2. mélységen A kosarának egyik fele) — cím nélkül: függő kérelem, a DHT-vel
+    await fut(c, 'csatlakoz', K);
+    const mely = koinonDarabKulcsa(2, 2n * (d ?? 0n));
+    const kerV = await fut(c, 'kerelem', 'szelet', mely, dht);
+    const ny = JSON.parse(await readFile(join(await koinoMappa(c), 'kerelmek.json'), 'utf8').catch(() => '{}'));
+    const f = (ny.fuggo ?? []).find((x) => x.fajta === 'szelet' && x.kulcs === mely);
+    const tiszta = (x) => x.replace(/\x1b\[[0-9;]*m/g, '');
+    const ki = {
+      egyDarab: /a koinon a DHT-n: nem hirdetem — egy darab van/.test(tiszta(egyV)) && !/koinon-kosár/.test(tiszta(egyH)),
+      ketDarab: new RegExp('a koinon a DHT-n: 1 kosaramat hirdetem \\(1:' + d + ' ').test(tiszta(ketV))
+        && new RegExp('✓ koinon-kosár 1:' + d + '  · [1-9]').test(tiszta(ketH)),
+      dhtn: tarsak.some((t) => Number(t.port) === PA),
+      kero: !!f && (f.celok ?? []).some((x) => Number(x.port) === PA)
+        && (f.kopogtatok ?? []).some((x) => x.fajta === 'szelet' && x.kulcs === kosar)
+        && (f.kopogtatok ?? []).some((x) => x.fajta === 'szelet' && x.kulcs === mely)
+    };
+    if (!Object.values(ki).every(Boolean)) {
+      process.stdout.write('    (④a — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ' · ' + JSON.stringify({
+        d: String(d), kosar, tarsak, f, egyV: (tiszta(egyV).match(/a koinon a DHT-n:[^\n]*/) ?? [''])[0],
+        ketV: (tiszta(ketV).match(/a koinon[^\n]*/g) ?? []).join(' | '), ketH: tiszta(ketH).slice(0, 400), kerV: tiszta(kerV).slice(0, 300) })
+        .slice(0, 1800) + ')\n');
+    }
+    return Object.values(ki).every(Boolean);
+  } finally {
+    halo.bezar();
+    await varj(500);
+    for (const h of [a, b, c]) await rm(h, { recursive: true, force: true });
+  }
+});
+
 // ===================================
 // ⭐ A HÁZ (D100): A CSATLAKOZÓ KÉSZÜLÉK KÉZI CSERÉJE CSERE MARAD, ha a gazdánál függő kérelem vár (2026-10-10)
 // ===================================
