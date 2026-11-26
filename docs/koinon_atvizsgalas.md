@@ -174,6 +174,59 @@ szeletük) szerint osztják el.
    régebbi programú készülék (pl. a telefon) a közösség új kézikönyv-módosításait a frissítéséig nem kapja meg (a régi gyökér-szeletben
    keresi). Kis koinoban (40 ismert tag alatt: egy darab — az egész koinon) minden készülék mindent tart: a változás a darabolás után látszik.
 
+## 10. A ④ terve — a fenntartó kör (2026-11-26, kód előtt)
+
+**Ami a kódból látszik:**
+- **A címjegyzék-kör** (`koino.js` `cimjegyzekKor` — az őrjárat ~20 percenként; a DHT 30–60 perc alatt felejt, 58. mérés): a gyökér-darabomat,
+  a kereső-régiómat és (a beállítás szerint, alapból 0) néhány vállalt szeletet hirdet a BitTorrent-DHT-n, vakított témán; minden hirdetett
+  téma kopogtató PÁRJÁT figyeli (`cimjegyzek.js` `figyelendoKopogtatok`) — aki ott jelentkezik, felé a következő körben kopog (D92/1, a
+  NAT mögött is). Egy téma ~3 KB (a `cimjegyzek.js` D92/1 megjegyzése).
+- ⛔ **A koinon darabját ma senki nem hirdeti.** A darab kérelme (a buborék és a Részletes adatok — ③e) a `szelet` úton megy
+  (`fuggoKerelemFelvetele`): a raj jegyzéke (a darab-kulcsot ott senki nem jelenti be), a kötéseim, az induló címek — és egy DHT-keresés a
+  `szelet:<darab-kulcs>` témán, meg egy jelentkezés a párján; de azon a témán senki nem hirdet, és a párját senki nem figyeli. Vagyis ma a
+  darabot csak az ismert társaim közül kaphatom meg.
+- A tartó a darabot a vonalon kiszolgálja, ha az a saját darabja vagy annak egyik fele (`koinonMelysegem` `reszvetel`).
+- Senki nem számolja, hány élő tartója van egy darabnak.
+
+**⛔ Lelet (a kódból — a 95. mérés feltevése):** a mélység `floor(log2(ismert tagok / r))`, és az ismert tagok a horgonyok szerzői — az is,
+aki évek óta nem nyitotta meg a koinot. A 95. mérés B) része a tartók számát úgy mérte, hogy minden ismert tag él. Ha a tagok fele elmegy,
+egy darabnak ~r/2 tartója marad, és ez az idővel csak romlik: az ismert tagok száma soha nem csökken. Ez pontosan a 95. mérés „veszélyes
+oldala” (a rendszeres túlbecslés) — csak nem a becslés hibájából, hanem abból, hogy a tagok elmennek. ⭐ A fenntartó kör ezért nem
+kényelmi funkció: ez az egyetlen, ami az ÉLŐ tartókat méri.
+
+**⛔ Lelet (számolva): egy órás pillanatkép nem dönthet.** A DHT csak az utolsó ~egy órában jelentkezett tartókat mutatja. Ha egy készülék az
+idő 30%-ában elérhető, egy egészséges, 20 tartós darabnál átlagosan 6 látszik, és az órák 24%-ában 5-nél kevesebb; a 95. mérés legrosszabb,
+13 tartós darabjánál átlagosan 3,9, és az órák 65%-ában 5-nél kevesebb — egy megfeleződött (10 tartós) darabnál 85%. A pillanatkép a kettőt
+nem tudja szétválasztani. Ezért a számlálás egy hosszabb ablak (pl. 24 óra) KÜLÖNBÖZŐ hirdetőit gyűjti — de hogy ez mennyire pontos, az a
+készülékek valódi elérhetőségén múlik, amit a koino még sosem mért (a skálázási terv 5.2 is „mérés kérdése”-nek mondja).
+
+**A terv:**
+1. **④a A hirdetés:** ha a koinon mélysége legalább 1 (különben egy darab van — az egész koinon —, és azt minden tag tartja: a gyökér
+   hirdetése elég), a címjegyzék-kör a koinon-darabomat is hirdeti, a `szelet` fajtával a darab-kulcson. Így a kérő MEGLÉVŐ útja (a
+   DHT-keresés és a jelentkezés a párján) változtatás nélkül megtalálja, és a tartó a párját magától figyeli (a `figyelendoKopogtatok` a
+   `szelet` párokat már nézi). Hogy mit hirdet (csak a darabját, vagy a két felét is): KO11.
+2. **④b A számlálás:** óránként egy keresés a saját darabom témáján — a hirdetők címei (magamon kívül) egy kis helyi jegyzékbe, időponttal;
+   a jegyzék egy ablak (pl. 24 óra) különböző címeit adja. ⚠️ A cím nem készülék (egy készülék két címen is jelentkezhet, egy hamis hirdető
+   sokon): a szám tájékoztató, nem bizonyíték (3. szabály). Kimondva: a `vallalas` sora („… · a darabomnak az utolsó 24 órában N tartója
+   látszott”) és az őrjárat naplója.
+3. **④c A válasz, ha kevés** (a 2. szakasz 4. pontja — „ha kevés, a szomszéd szint tartóitól átveszi”; a KO6 (A) óta átfedés nincs, így ez
+   azt jelenti: eggyel sekélyebbre lépek, a szülő-darabot tartom, vagyis a testvér-darabot is): KO12.
+4. **④d A próba:** a parancssoron, a születés kis `r`-jével (`koinonPeldany=1` — ③f) és egy helyi DHT-hálóval (a meglévő címjegyzék-próbák
+   mintájára — `halo.belepo`): a tartó hirdeti a darabját, a kérő az ismert társai NÉLKÜL, a DHT-ről találja meg, a `vallalas` kimondja a
+   látott tartókat; a válasz (KO12) a jegyzék adataival.
+
+**A kérdések (Csabáé):**
+- **KO11 — mit hirdessen a tartó?** (A) ⭐ **csak a saját darabját** (egy téma és a párja körönként — ~6 KB, napi ~0,5 MB a ~3 KB-os
+  témából számolva, csak a 40+ tagú koinoban). A mélységet mindenki ugyanabból számolja (az ismert tagokból), így a tartók többsége egy
+  mélységen van; egy kettes hatvány határán a fele eggyel mélyebben — ott a kérő a saját mélységű tartókat találja (a fele elég). (B) **a
+  darabját és a két felét** (három téma — napi ~1,4 MB): a szomszéd mélységű kérő is mindet megtalálja.
+- **KO12 — mit tegyen, ha a darabjának kevés tartója látszik?** (A) ⭐ **eggyel sekélyebbre lép** (a szülő-darabot tartja: kétszer annyi
+  teher neki, a testvér-darabnak egy új tartó), amíg a darab tartói újra elegen nem lesznek; a küszöb (pl. 24 óra alatt r/2 különböző
+  hirdető), az ablak és a visszalépés a **96. mérés** (szimuláció: elérhetőségi minták, elmenő tagok) szerint, az építés előtt. ⭐ Csak a
+  biztonságos irányba hat: több tartó, több teher — kevesebb soha. Egy hamis hirdető-sereg legfeljebb a lépést akadályozza meg (akkor a
+  95. mérés alap-becslése marad), egy elnémított DHT pedig csak terhet hoz. (B) **csak kimondja** (a `vallalas`, a napló) — a beavatkozás a
+  terepi adatok után; addig a halott tagok miatti fogyás csak látszik, nem javul.
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
@@ -306,3 +359,7 @@ szeletük) szerint osztják el.
   koinokat ez nem érinti. Próba: +1 `esemenyProba` (az alapérték, a kiírás, a felülírás, a régi alak, a kapu hat
   esete), a D118/2 (①b) parancssori próbája (a születés viszi, a sor kimondja), a D118 (②a) gyermek-próba (örököl), a ③e próba a
   születésből; 6 rontás mind bukik (8 ellenőrzésben). ⏭️ ④ a fenntartó kör (a darab hirdetése és a tartóinak megszámlálása), ⑤ a terep.
+- **2026-11-26** — a ④ terve (10. szakasz; Csaba: „Igen, jöhet a ④”). ⛔ Két lelet: a koinon darabját ma senki nem hirdeti (a kérelem csak
+  az ismert társaimhoz jut), és az ismert tagok becslése az elment tagokat is számolja — a darabok élő tartói az idővel fogynak, és ezt ma
+  semmi nem látja. Egy órás pillanatkép a tartókról nem dönthet (30%-os elérhetőségnél a 13 és a 10 tartós darab alig különbözik): hosszabb
+  ablak kell. ⏸️ **KO11** (mit hirdet a tartó) és **KO12** (mit tesz, ha kevés tartót lát) Csabánál; a KO12 (A)-nál a küszöb a 96. mérésből.
