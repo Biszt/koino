@@ -291,3 +291,18 @@ szeletük) szerint osztják el.
   ismert tag és r = 1: két darab — a vállalás a bejegyzések egy részét tartja, a kívüli buboréka és Részletes adatai a darabot kéri), +1
   `magyarazatProba` (fej nélküli Chrome: a buborék megjegyzése, újrakérdezés, bezárás után leáll); 10 rontás mind bukik. ⏭️ ③f az `r` a
   születésben (KO4), ④ a fenntartó kör (a darab hirdetése — addig a darab kérelme az ismert társakhoz megy).
+- **2026-11-26** — ✅ **A ③f kész: a példányszám (`r`) a koino születésében** (KO4 (A); Csaba: „Igen, jöhet a ③f”). `koinoSzabalyok.js`:
+  `koinonPeldany` az `ALAP_SZABALYOK`-ban (20 — a mező nélküli, a ③f előtti születés így pontosan azt kapja, amivel a program addig
+  számolt; a „mai értékek soha nem változnak” elve érintetlen: új kulcs, nem új érték) és a kapu határai között (1 – 1 000 000: legalább
+  egy tartó; a felső határ csak a szemét ellen — ennyinél 2 millió tag alatt egy darab van). Az új születésbe a `teljesSzabalyok` kiírja,
+  a gyermek a szülőétől örökli (a meg nem adottat), a `koino` parancs `koinonPeldany=N`-nel fogadja, a szabályok sora kimondja, a lap
+  koino-verzió ablaka „A koinon őrzői darabonként” mezővel mutatja. `cimjegyzek.js` `KOINON_PELDANY` = az alapérték innen (egy
+  forrás). `koino.js` `koinonMelysegem`: az `r` a koino szabályaiból (a még meg nem érkezett születésnél az alapérték — a születés
+  megérkezése az eseményszámmal a gyorsítótárat is frissíti); a `vallalas` sora a koino `r`-jét mondja. ⛔ A ③c–③e próbák környezeti
+  kapcsolója (`KOINO_KOINON_PELDANY`) megszűnt — a ③e parancssori próbája most a születésbe írja (`koinonPeldany=1`): amíg A csak magát
+  ismeri, egy darab; B belépése után kettő (a valódi úton). A kézikönyv „koinon” fogalma kimondja (alapból 20, a gyermek örökli). ⚠️ Egy
+  ③f előtti program az új kulcsot ismeretlen szabálynak látja, és az új születést (a koino-verzió kártyájába ágyazottat is) elveti — a
+  frissítéséig abba a koinoba nem jut be; ugyanígy járt a D129 előtti program a `kezikonyv` szabállyal. A régi (mező nélküli) születésű
+  koinokat ez nem érinti. Próba: +1 `esemenyProba` (az alapérték, a kiírás, a felülírás, a régi alak, a kapu hat
+  esete), a D118/2 (①b) parancssori próbája (a születés viszi, a sor kimondja), a D118 (②a) gyermek-próba (örököl), a ③e próba a
+  születésből; 6 rontás mind bukik (8 ellenőrzésben). ⏭️ ④ a fenntartó kör (a darab hirdetése és a tartóinak megszámlálása), ⑤ a terep.

@@ -137,10 +137,13 @@ bejelentés a kézikönyv gyökeréhez, a D14 kivétele, a ≥ 3 napos küszöb,
 az örökölt fájlok érintetlenül; a buborék; az első helyek: az alsó sáv és a „📱 Készülékeim”) →
 ✅ **a koinon** (Csaba: „hozzunk létre, egy koinon-t … minden entitást, 1 tudatpontal hozza létre”): a kézikönyv-entitásokon 1 passzív
 pont a koinoné — a D14 kivétel nélkül igaz; a kézikönyv kártyáira ugyanaz a sorrend, mint bármelyikre (Csaba) →
-⏭️ ④ a szövegek → ⑤ a próba. 🔍 **D130 — a koinon az általános egyezményekhez** (a darabokra osztott, replikált őrzés): ÁTVIZSGÁLVA
-([`koinon_atvizsgalas.md`](docs/koinon_atvizsgalas.md)), ⏸️ a KO1–KO5 Csabánál.
+✅ ④ a szövegek → ✅ ⑤ a próba — **a D129 kész**. 🚧 **D130 — a koinon: a közös tények őrzése** (az általános egyezmények darabokra
+osztott, replikált őrzése — [`koinon_atvizsgalas.md`](docs/koinon_atvizsgalas.md); KO1–KO10 eldöntve): ✅ ① a koinon pontja az
+elfogadott általános egyezményen · ✅ ② a tömör alak · ✅ ③a–③e a `KoinonOsszegzes`, a darab a cserében, a tartó döntése, a kézikönyv a
+darabokban · ✅ **③f a példányszám a születésben** (2026-11-26: `koinonPeldany`, alapból 20, a gyermek örökli) → ⏭️ ④ a fenntartó kör (a
+darab hirdetése és a tartóinak megszámlálása) → ⑤ a terep.
 
-**Az állapot:** **1573 önpróba** (75 próba-fájl; a legutóbbi teljes soron 1571/1571 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-22, a D130 ③e után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba, a csere „CSOMAGVESZTÉS (30%)”, „lezárás 5×” és D109 (KK4) „keret maradékáig” próbája, magukban zöldek) · 410 fájl / 8532,6 KB (⚠️ CR nélkül mérve —
+**Az állapot:** **1574 önpróba** (75 próba-fájl; a legutóbbi teljes soron 1572/1572 zöld + 2 ismert hiba — a D124 két „valódi régi program” próbája, más család — 2026-11-26, a D130 ③f után; ⚠️ terhelés alatt ismerten szeszélyes a ⑦b NAT-próba, a csere „CSOMAGVESZTÉS (30%)”, „lezárás 5×” és D109 (KK4) „keret maradékáig” próbája, magukban zöldek) · 410 fájl / 8538,3 KB (⚠️ CR nélkül mérve —
 lásd a 6. szabályt) · 0 npm-csomag · minden pusholva. ✅ **A telefon friss** (Csaba 2026-10-23-án a felderítés kézi
 próbájához és a három javításhoz frissítette — *„működik”*); a parancs lent, *„Ami nyitva maradt"*. A laptopon a próbához három
 fa: „Felderítés-próba” (60 gondolat), „Nagy felderítés-próba” és „Harmadik felderítés-próba” (400–400 gondolat, ≤ 8 szint, ≤ 8
@@ -823,8 +826,9 @@ node koino.js koino "név" [leírás] [nyilt] [profil=nev,telepules]  # ⭐ koin
                                  # ⭐⭐ D118/2: a koino NEVE a születése lenyomata (43 jel); a `KOINO_AZONOSITO` csak helyi
                                  # becenév (alapból `sajat`, a `becenevek.json` jegyzi); argumentum nélkül kiírja a nevet
                                  # ⭐ D118/2 (①b): a koino SZABÁLYAI `kulcs=egész` alakban (tudatpontKeret, kategoriaKorlat,
-                                 # tanusitasKell, felhatalmazasKell, elfogadasiKuszob, reszveteliKuszob, minimumDontesiIdo,
-                                 # maximumDontesiIdo) — a születésbe MIND bekerül, a meg nem adott a mai értékkel
+                                 # tanusitasKell, felhatalmazasKell, koinonPeldany, elfogadasiKuszob, reszveteliKuszob,
+                                 # minimumDontesiIdo, maximumDontesiIdo) — a születésbe MIND bekerül, a meg nem adott a mai értékkel
+                                 # (⭐⭐ D130 ③f: koinonPeldany = a koinon egy darabjának tartói, alapból 20)
                                  # ⭐⭐ D118 (②a): szulo=<a szülő neve vagy becenéve> — a GYERMEK születése (KZ2: a szülő
                                  # tagja hozhatja létre); a szülő szabályait (a meg nem adottakat) és zártságát örökli
 node koino.js koinoverzio "<név>" [leírás] [nyilt] [szabályok…] [pont=N] [becenev=<b>]  # ⭐⭐ D119 (①a): a GYERMEK a

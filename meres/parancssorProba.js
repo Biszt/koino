@@ -581,6 +581,8 @@ proba('⭐⭐ D118/2 (①b): a születés szabályai a parancssoron — 500-as k
         // nem írhatja át (a 15. mérés megismétlése).
         && szuletesB.adat.szabalyok.kategoriaKorlat === 3 && szuletesB.adat.szabalyok.felhatalmazasKell === 5
         && szuletesB.adat.szabalyok.alapKuszobok.maximumDontesiIdo === 604800
+        // ⭐⭐ D130 (③f): a koinon példányszáma is (a meg nem adott a mai értékkel — 20), és a szabályok sora kimondja
+        && szuletesB.adat.szabalyok.koinonPeldany === 20 && /koinonPeldany=20/.test(letrejott)
         && !!bSzerzo && !pontjai(bLemez, bSzerzo).includes(600) && pontjai(bLemez, bSzerzo).includes(450)
         && /tudatpontKeret=500/.test(nevKiiras)
         && /határon kívül/.test(rossz) && (await koinoNeve(c)) === null;
@@ -606,7 +608,8 @@ proba('⭐⭐ D118 (②a): a gyermek születése — a szülő szabályaival és
     const n = await ujKeszulek();
     const G = { KOINO_AZONOSITO: 'gyermek' };
     try {
-      await fut(a, 'koino', 'Szülő', 'tudatpontKeret=800');
+      // ⭐⭐ D130 (③f): a koinon példányszáma is a szülő szabálya — a gyermek örökli (lent)
+      await fut(a, 'koino', 'Szülő', 'tudatpontKeret=800', 'koinonPeldany=7');
       const P = await koinoNeve(a);
       // ⭐ A létrehozó lánca a szülőben a születésen túl is tart — a gyermek születése a VÉGÉT folytatja (4.5).
       await fut(a, 'gondolat', 'ELOTTE');
@@ -641,7 +644,7 @@ proba('⭐⭐ D118 (②a): a gyermek születése — a szülő szabályaival és
         .catch((h) => String(h?.message ?? h));
       const ok = /Zárt szülőnek csak zárt gyermeke/.test(nyiltHiba) && /A szülője: /.test(kiiras) && folytatja
         && cSzul?.adat?.szulo === P && cSzul.adat.zart === true && cSzul.adat.szabalyok?.tudatpontKeret === 800
-        && cSzul.adat.szabalyok?.alapKuszobok?.elfogadasiKuszob === 66
+        && cSzul.adat.szabalyok?.alapKuszobok?.elfogadasiKuszob === 66 && cSzul.adat.szabalyok?.koinonPeldany === 7
         && bSzuletesei === [P, C].join() && (await koinoNeve(d)) === C && dSzuletesei === [P, C].join()
         && (await koinoNeve(n)) === P && /szülő tagja hozhat létre/.test(nemTag) && (await koinoNeve(n, 'gy2')) === null;
       if (!ok) process.stderr.write('    (a kimenetek: ' + JSON.stringify({ nyiltHiba, kiiras: kiiras.slice(-300), szulo: cSzul?.adat?.szulo === P,
@@ -5173,18 +5176,22 @@ proba('⭐ (Csaba, 2026-11-20) a RÉSZLETES ADATOK a nem tartott gondolatnál: m
   }
 });
 
-// ⭐⭐ D130 (③e, KO5 (B), KO9 (A)): a kézikönyv a koinon darabjaiban — két ismert tag és r = 1 (`KOINO_KOINON_PELDANY`) mellett két darab
-// van: A vállalása a bejegyzéseknek csak egy részét tartja (nem mindet, nem semmit), és a buborék a darabján KÍVÜLI bejegyzésnél a
-// darabot kéri el (a kérelem a darab-kulcsra szól), és kimondja („⏳ … az őrjárat hozza”); a darabjába esőnél nem kér, és nem szól. Egy
-// darabnál (r = 20) mindet tartja. Rontás: a vállalás az egész kézikönyvet tartja (a darab-szűrés nélkül) → nincs kívüli → bukik; a
-// buborék a bejegyzés szeletét kéri (nem a darabját) → a kérelem kulcsa nem darab-kulcs → bukik.
-proba('⭐⭐ D130 (③e): a KÉZIKÖNYV A DARABOKBAN — két darabnál a vállalás a bejegyzések egy részét tartja; a darabon kívüli bejegyzés buboréka a darabot kéri el, és kimondja; egy darabnál mindet tartja', async () => {
+// ⭐⭐ D130 (③e, KO5 (B), KO9 (A)): a kézikönyv a koinon darabjaiban — két ismert tag és r = 1 mellett két darab van: A vállalása a
+// bejegyzéseknek csak egy részét tartja (nem mindet, nem semmit), és a buborék a darabján KÍVÜLI bejegyzésnél a darabot kéri el (a
+// kérelem a darab-kulcsra szól), és kimondja („⏳ … az őrjárat hozza”); a darabjába esőnél nem kér, és nem szól. Egy darabnál (amíg A csak
+// magát ismeri) mindet tartja. ⭐⭐ D130 (③f, KO4 (A)): az r = 1 a koino SZÜLETÉSÉBEN (`koinonPeldany=1`) — a valódi úton, környezeti
+// kapcsoló nélkül; a `vallalas` sora kimondja. Rontás: a vállalás az egész kézikönyvet tartja (a darab-szűrés nélkül) → nincs kívüli →
+// bukik; a buborék a bejegyzés szeletét kéri (nem a darabját) → a kérelem kulcsa nem darab-kulcs → bukik; ③f: a mélység a születés
+// helyett az alapértékkel (20) számol → két tagnál egy darab → bukik.
+proba('⭐⭐ D130 (③e, ③f): a KÉZIKÖNYV A DARABOKBAN — a születés r = 1-e mellett két darabnál a vállalás a bejegyzések egy részét tartja; a darabon kívüli bejegyzés buboréka a darabot kéri el, és kimondja; egy darabnál mindet tartja', async () => {
   const a = await ujKeszulek();
   const b = await ujKeszulek();
-  const ketDarab = { KOINO_KISZOLGALAS: 'alap', KOINO_KOINON_PELDANY: '1' };
+  const ketDarab = { KOINO_KISZOLGALAS: 'alap' };
   const futok = [];
   try {
-    await fut(a, 'koino', 'Darabos kézikönyv', 'próba', 'nyilt');
+    await fut(a, 'koino', 'Darabos kézikönyv', 'próba', 'nyilt', 'koinonPeldany=1');
+    // amíg A csak magát ismeri (egy tag < 2r): egy darab — az egész koinon
+    const egyDarabV = await fut(a, 'vallalas', { KOINO_KISZOLGALAS: 'alap' });
     await fut(b, 'csatlakoz', await koinoNeve(a));
     // B belép (a tagsága ezzel az eseménnyel születik — a koinon mélysége az ismert tagokból számol), és ír is valamit
     await fut(b, 'belep');
@@ -5193,7 +5200,6 @@ proba('⭐⭐ D130 (③e): a KÉZIKÖNYV A DARABOKBAN — két darabnál a váll
     // „mindent” módban cserélünk: a szigorú (b) alatt A nem tartja B azonosság-szeletét, a belépése nem jönne át
     await csereKor(a, b, 7996, { KOINO_KISZOLGALAS: 'mindent' });
     // A a cserén megismerte B belépését (két ismert tag) — r = 1 mellett ez két darab
-    const egyDarabV = await fut(a, 'vallalas', { KOINO_KISZOLGALAS: 'alap' });
     const ketDarabV = await fut(a, 'vallalas', ketDarab);
     const szam = (ki) => Number((/· (\d+) kézikönyv-bejegyzés,/.exec(ki) ?? [])[1] ?? NaN);
     const osszes = programAlapTartalma().azonositoSzerint.size;
@@ -5228,8 +5234,8 @@ proba('⭐⭐ D130 (③e): a KÉZIKÖNYV A DARABOKBAN — két darabnál a váll
     const kerelmek = JSON.parse(await readFile(join(await koinoMappa(a), 'kerelmek.json'), 'utf8').catch(() => '{}'));
     const darabKerelem = (kerelmek.fuggo ?? []).find((x) => x.fajta === 'szelet' && koinonDarabBol(x.kulcs));
     const ki = {
-      egyDarab: /0\. mélység/.test(egyDarabV) && szam(egyDarabV) === osszes,
-      ketDarab: /1\. mélység/.test(ketDarabV) && szam(ketDarabV) > 0 && szam(ketDarabV) < osszes,
+      egyDarab: /0\. mélység \(1 ismert tag, r = 1 — egy darab/.test(egyDarabV) && szam(egyDarabV) === osszes,
+      ketDarab: /1\. mélység \(2 ismert tag, r = 1 — /.test(ketDarabV) && szam(ketDarabV) > 0 && szam(ketDarabV) < osszes,
       buborekTart: tartott === szam(ketDarabV) && !!belul && belul.betoltes === false,
       buborekKer: !!kivul && kivul.betoltes === true && String(kivul.koinoMegjegyzes).startsWith('⏳') && !!buborekDarabKerelem
         && koinonDarabBol(buborekDarabKerelem.kulcs).melyseg === 1

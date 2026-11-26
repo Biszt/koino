@@ -8,6 +8,7 @@ import {
 } from '../js/esemeny/esemeny.js';
 import { probaGyujtemeny, tesztKeszulek } from './probaFuttato.js';
 import { koinoSzabalyai, ALAP_SZABALYOK, teljesSzabalyok, szabalyokAlakiHibaja } from '../js/esemeny/koinoSzabalyok.js';
+import { KOINON_PELDANY } from '../js/csere/cimjegyzek.js';   // ⭐⭐ D130 (③f): a címjegyzék alapértéke a koino szabályaiból
 
 const { proba, futtatas } = probaGyujtemeny('Az aláírt esemény próbája');
 
@@ -298,6 +299,41 @@ proba('⭐ D118/2 (①b): az új születésbe írt szabályok TELJESEK — a meg
       && ALAP_SZABALYOK.alapKuszobok.reszveteliKuszob === 0
       && (await esemenyEllenorzese(await esemenyLetrehozasa({ ...szuletesLeiras, adat: { ...szuletesLeiras.adat, szabalyok: t } },
         kulcspar))).rendben === true;
+  });
+
+// ===== ⭐⭐ D130 (③f, KO4 (A)): A KOINON PÉLDÁNYSZÁMA A SZÜLETÉSBEN =====
+//
+// A koinon egy darabjának ennyi tartója legyen (`r` — a darab-mélység ebből és az ismert tagokból). A koino születése mondja ki:
+// az új születésbe a program kiírja (alapból 20), a megadott felülírja, a mező nélküli (a ③f előtti) születés 20-at ad — pontosan
+// azt, amivel a program a ③f előtt minden koinoban számolt —, és a kapu a határon kívülit (0, egymillió fölött, nem egész) elveti.
+// A címjegyzék alapértéke ugyanez (egy forrás). Rontás: az `ALAP_SZABALYOK` nélküle → a régi születés `undefined`-ot ad → bukik;
+// a `HATAROK` nélküle → a kapu „ismeretlen szabály”-t mond a jóra → bukik; a `teljesSzabalyok` kihagyja → az új születés nem
+// mondja ki → bukik.
+proba('⭐⭐ D130 (③f): a koinon példányszáma a születésben — az új születés kiírja (20), a megadott felülírja, a régi (mező nélküli) születés 20, a kapu a határon kívülit elveti',
+  async () => {
+    const szuletesSzabalyokkal = (szabalyok) => esemenyLetrehozasa(
+      { ...szuletesLeiras, adat: { ...szuletesLeiras.adat, szabalyok } }, kulcspar);
+    const uj = teljesSzabalyok();
+    const megadott = teljesSzabalyok({ koinonPeldany: 5 });
+    const regiAlak = await szuletesSzabalyokkal({ tudatpontKeret: 500 });   // a ③f előtti alak: szabályok, de példányszám nélkül
+    const ki = {
+      alap: ALAP_SZABALYOK.koinonPeldany === 20 && KOINON_PELDANY === ALAP_SZABALYOK.koinonPeldany,
+      ujKiirja: uj.koinonPeldany === 20 && megadott.koinonPeldany === 5,
+      regi: koinoSzabalyai(regiAlak).koinonPeldany === 20 && koinoSzabalyai(regiAlak).tudatpontKeret === 500
+        && koinoSzabalyai(await esemenyLetrehozasa(szuletesLeiras, kulcspar)).koinonPeldany === 20
+        && koinoSzabalyai(null).koinonPeldany === 20,
+      szamol: koinoSzabalyai(await szuletesSzabalyokkal(megadott)).koinonPeldany === 5,
+      kapuJo: (await esemenyEllenorzese(await szuletesSzabalyokkal({ koinonPeldany: 1 }))).rendben === true
+        && (await esemenyEllenorzese(await szuletesSzabalyokkal({ koinonPeldany: 1000000 }))).rendben === true
+        && (await esemenyEllenorzese(await szuletesSzabalyokkal(megadott))).rendben === true,
+      kapuRossz: true
+    };
+    for (const v of [0, 1000001, -3, '20']) {
+      const e = await esemenyEllenorzese(await szuletesSzabalyokkal({ koinonPeldany: v }));
+      if (e.rendben || !/koinonPeldany szabály a határon kívül/.test(e.ok)) ki.kapuRossz = false;
+    }
+    if (!Object.values(ki).every(Boolean)) console.log('    (ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ')');
+    return Object.values(ki).every(Boolean);
   });
 
 // ===== TÁJÉKOZTATÓ MÉRÉS =====

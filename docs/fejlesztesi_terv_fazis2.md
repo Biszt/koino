@@ -6653,7 +6653,10 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
 4. **Mit őriznek** (KO3 (A)): tömören — az általános javaslatot, a döntés ellenőrizhető bizonyítékát (a lezárási összegzés — D95/1) és az
    állásfoglalásokat (a hatály); a nyers szavazatokat nem.
 5. **A példányszám** (KO4 (A)): közösségi paraméter a koino születésében (D118/2), alapból **`r` = 20** (30%-os elérhetőségnél 99,9%,
-   hogy legalább egy tartó válaszol).
+   hogy legalább egy tartó válaszol). ✅ *Megépült a ③f-fel (2026-11-26 — `koinon_atvizsgalas.md` napló):* a koino szabályai között
+   `koinonPeldany` (a kapu 1 és 1 000 000 között engedi); az új születés kiírja, a mező nélküli (a ③f előtti) születés 20 — pontosan az,
+   amivel a program addig minden koinoban számolt; a gyermek örökli, ha nem írják át; a `koino` parancsban `koinonPeldany=N`, a lapon a
+   koino-verzió ablakában „A koinon őrzői darabonként”. Az állapotot nem számolja, csak azt, ki mit őriz.
 6. **A kézikönyv is** (KO5 (B)): már most a koinon darabjaiba kerül — nem tartja mindenki (a D129 „mindenki tartja” helyett).
    ⭐ KO9 (A) (Csaba, 2026-11-20: „elfogadom, a javaslataidat”): a következményével együtt — a közösség módosításait az a készülék,
    amelyik a bejegyzés darabját nem tartja, KÉRÉSRE látja (mint bármely nem tartott kártyát; a program szövege mindenkinél ott van).

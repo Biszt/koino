@@ -3,7 +3,8 @@
 // Felelősség: ⭐⭐ D118/2 (a bekapcsolódás ①b, 2026-10-24) — A KOINO SZABÁLYAI A SZÜLETÉSÉBEN, nem a programban.
 //
 // Az állapotot befolyásoló számok (a tudatpont-keret, a kategória-korlát, a tanúsítás-szám, a felhatalmazás
-// alapértéke, a küszöbök alapértékei) a koino születésének (`KoinoLetrehozas`) `szabalyok` mezőjébe kerülnek. Ettől:
+// alapértéke, a küszöbök alapértékei) a koino születésének (`KoinoLetrehozas`) `szabalyok` mezőjébe kerülnek — és egy közösségi
+// szám, ami nem az állapotot, hanem az őrzést szabja: a koinon példányszáma (D130 ③f, KO4 (A)). Ettől:
 //   · egy szabály-változás nem programváltozás, hanem egy új koino születése ugyanazzal a programmal (D25 1. mód,
 //     D13/b paraméter-pluralizmus);
 //   · a szülő múltját (a bekapcsolódás) ugyanaz a kód számolja, a szülő szabályaival;
@@ -43,6 +44,11 @@ export const ALAP_SZABALYOK = Object.freeze({
   kategoriaKorlat: 3,
   tanusitasKell: 3,
   felhatalmazasKell: 5,
+  // ⭐⭐ D130 (③f, KO4 (A)): a koinon PÉLDÁNYSZÁMA — hány tartója legyen a koinon egy darabjának (a darab-mélység ebből és az
+  // ismert tagok számából: `cimjegyzek.js` `koinonMelysege`). Nem az állapotot számolja, hanem azt, ki mit őriz: a 95. mérés
+  // szerint ha egy készülék az idő 30%-ában elérhető, 20 tartónál 99,9% az esély, hogy egy válaszol. A mező nélküli (a ③f előtti)
+  // születés így 20 — pontosan az, amivel a program a ③f előtt minden koinoban számolt.
+  koinonPeldany: 20,
   alapKuszobok: Object.freeze({
     elfogadasiKuszob: 51,        // százalék: a támogatottság ekkora legyen a szavazók közt
     reszveteliKuszob: 0,         // százalék: ekkora részvétel kell (0 = nincs feltétel)
@@ -83,7 +89,10 @@ const HATAROK = {
   tudatpontKeret: [1, 10000],
   kategoriaKorlat: [0, 16],
   tanusitasKell: [1, 16],
-  felhatalmazasKell: [1, 1000]
+  felhatalmazasKell: [1, 1000],
+  // ⭐⭐ D130 (③f): legalább 1 tartó; a felső határ csak a szemét ellen — ennyi tartónál 2 millió tag alatt egyetlen darab van (az egész
+  // koinont mindenki tartja: a KO2 (B) alakja, ha egy koino ezt választja)
+  koinonPeldany: [1, 1000000]
 };
 const KUSZOB_HATAROK = {
   elfogadasiKuszob: [0, 100],
@@ -164,7 +173,7 @@ export function teljesSzabalyok(megadott = {}) {
  * ⭐⭐ D129: ha a születés a kézikönyv szabályát viszi, a `kezikonyv` mező (`{ alapKuszobok }`, a hiányzók a
  * `KEZIKONYV_ALAP_KUSZOBOK`-ból); ha nem, a mező NINCS — a koinoban nincs kézikönyv.
  * @returns {{tudatpontKeret: number, kategoriaKorlat: number, tanusitasKell: number, felhatalmazasKell: number,
- *   alapKuszobok: Object, kezikonyv?: {alapKuszobok: Object}}}
+ *   koinonPeldany: number, alapKuszobok: Object, kezikonyv?: {alapKuszobok: Object}}}
  */
 export function koinoSzabalyai(szuletes) {
   const sz = szuletes?.tipus === 'KoinoLetrehozas' ? szuletes.adat?.szabalyok : undefined;

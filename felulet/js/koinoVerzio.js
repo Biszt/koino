@@ -35,6 +35,8 @@ const SZABALY_NEVEK = {
   kategoriaKorlat: 'Kategóriák egy gondolaton (legfeljebb)',
   tanusitasKell: 'Tanúsítás a 2. lépcsőhöz',
   felhatalmazasKell: 'Felhatalmazás (az alapérték)',
+  // ⭐⭐ D130 (③f, KO4 (A)): a koinon példányszáma — hány készülék őrizze a koinon egy darabját
+  koinonPeldany: 'A koinon őrzői darabonként',
   elfogadasiKuszob: 'Elfogadási küszöb (%)',
   reszveteliKuszob: 'Részvételi küszöb (%)',
   minimumDontesiIdo: 'Legrövidebb döntési idő (mp)',

@@ -213,7 +213,7 @@ import {
   // ⭐ A kereső-réteg ⑤: a hely darabja a régió mélységén.
   lenyomatDarabja,
   // ⭐⭐ D130 (③c): a koinon darabjai.
-  koinonMelysege, koinonDarabBol, koinonDarabKulcsai, koinonLenyomata, egyezmenyKoinonDarabKulcsa, KOINON_PELDANY
+  koinonMelysege, koinonDarabBol, koinonDarabKulcsai, koinonLenyomata, egyezmenyKoinonDarabKulcsa
 } from './js/csere/cimjegyzek.js';
 // ⭐⭐ D92/1: a függő kérelmek (a cím nélküli kérés — a kopogtatás).
 import {
@@ -4109,15 +4109,17 @@ async function gyokerMelysegTanulva(b) {
 // koino születése, a belépések, a bekapcsolódások — a tömörítés ezeket mindig megtartja, és a tagsági kísérőkkel terjednek).
 // EGY forrás a cserének (a darab-részvétel), a tömörítésnek (mit tartok meg) és a csak küldő útnak (melyik darab alá ajánlom
 // fel a sajátomat). ⚠️ Alulbecslés: a koino a tagjaimnál csak nagyobb lehet — az csak terhet hoz (sekélyebb mélység,
-// nagyobb darab), tartót nem vesz el (95. mérés). A tár eseményszáma szerint gyorsítótárazva. ⚠️ Az `r` most az alap (20);
-// a koino születése a ③f-ben mondja ki. A próbák a környezetből kicsinyítik (`KOINO_KOINON_PELDANY`).
-const KOINON_R = Number(process.env.KOINO_KOINON_PELDANY) >= 1 ? Number(process.env.KOINO_KOINON_PELDANY) : KOINON_PELDANY;
+// nagyobb darab), tartót nem vesz el (95. mérés). A tár eseményszáma szerint gyorsítótárazva.
+// ⭐⭐ D130 (③f, KO4 (A)): az `r` (a példányszám — egy darab ennyi tartója) a koino SZÜLETÉSÉBŐL (`koinoSzabalyok.js`
+// `koinonPeldany`; a mező nélküli születésé 20, mint a ③f előtt). ⛔ A ③c–③e próbák környezeti kapcsolója
+// (`KOINO_KOINON_PELDANY`) megszűnt: a próba is a születésbe írja (a valódi úton), nem kerüli meg.
 let koinonBecslesEmlek = null;
 
 /**
- * @returns {Promise<{melyseg: number, tagok: number, alairo: string, darab: string, reszvetel: Set<string>,
- *   tartja: Function}>} `darab`: a saját darabom kulcsa; `reszvetel`: a darab-kulcsok, amelyekben a cserében részt veszek
- *   (a darabom és a két fele); `tartja(e)`: a koinon kulcsához bejelentett esemény a darabomba esik-e
+ * @returns {Promise<{melyseg: number, tagok: number, r: number, alairo: string, darab: string, reszvetel: Set<string>,
+ *   tartja: Function}>} `r`: a koino példányszáma (a születéséből); `darab`: a saját darabom kulcsa; `reszvetel`: a
+ *   darab-kulcsok, amelyekben a cserében részt veszek (a darabom és a két fele); `tartja(e)`: a koinon kulcsához bejelentett
+ *   esemény a darabomba esik-e
  */
 async function koinonMelysegem() {
   const alairo = (await tablaKulcsBiztositasa()).alairoNyilvanos;
@@ -4125,7 +4127,10 @@ async function koinonMelysegem() {
   if (koinonBecslesEmlek?.valtozat === valtozat) return koinonBecslesEmlek.b;
   const tagok = new Set((await koinoEsemenyei(tar, KOINO))
     .filter((e) => e.tipus === 'Belepes' || e.tipus === 'KoinoLetrehozas' || e.tipus === 'Bekapcsolodas').map((e) => e.szerzo)).size;
-  const melyseg = koinonMelysege(tagok, KOINON_R);
+  // ⚠️ A születés még nem érkezett meg (csak csatlakoztam): az alapérték — a születés egy esemény, a megérkezése a gyorsítótárat is
+  // frissíti (az eseményszám a kulcsa).
+  const r = (await koinomSzabalyai(kornyezet)).koinonPeldany;
+  const melyseg = koinonMelysege(tagok, r);
   const kulcsok = koinonDarabKulcsai(alairo, melyseg);
   const reszvetel = new Set(kulcsok);
   const darab = kulcsok[0];
@@ -4135,7 +4140,7 @@ async function koinonMelysegem() {
   const bejegyzesTartja = (az) => darabbaEsik(koinonLenyomata(az), d.melyseg, d.darab);
   const tartja = (e) => bejelentesHelyei(e).includes(KOINON_KULCS) && koinonHelyei(e).some(bejegyzesTartja);
   const darabja = (az) => egyezmenyKoinonDarabKulcsa(az, melyseg);
-  const b = { melyseg, tagok, alairo, darab, reszvetel, tartja, bejegyzesTartja, darabja };
+  const b = { melyseg, tagok, r, alairo, darab, reszvetel, tartja, bejegyzesTartja, darabja };
   koinonBecslesEmlek = { valtozat, b };
   return b;
 }
@@ -7854,7 +7859,7 @@ return {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, kezikonyvBejegyzeseim, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -7898,7 +7903,7 @@ const {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, kezikonyvBejegyzeseim, KOINON_R, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -10778,7 +10783,8 @@ try {
       // ⭐⭐ D130 (③c): a koinon darabom — a mélysége az ismert tagokból, és amit belőle tartok.
       const knV = await koinonMelysegem();
       const koinonbol = (await tar.bejelentesek(KOINON_KULCS)).filter((e) => esemenyKoinoja(e) === KOINO && knV.tartja(e));
-      kiir(SZIN.halvany + '  a koinon darabja: ' + knV.melyseg + '. mélység (' + knV.tagok + ' ismert tag, r = ' + KOINON_R
+      // ⭐⭐ D130 (③f): az `r` a koino születéséből (a szabályai között: koinonPeldany)
+      kiir(SZIN.halvany + '  a koinon darabja: ' + knV.melyseg + '. mélység (' + knV.tagok + ' ismert tag, r = ' + knV.r
         + (knV.melyseg ? ' — 2^' + knV.melyseg + ' darabból egy' : ' — egy darab: az egész koinon') + ') · '
         + new Set(koinonbol.filter((e) => KOINON_TIPUSOK.has(e.tipus)).map((e) => szelet(e))).size + ' általános egyezmény, '
         + koinonbol.filter((e) => KOINON_TIPUSOK.has(e.tipus)).length + ' esemény · '

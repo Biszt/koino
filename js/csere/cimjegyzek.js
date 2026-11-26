@@ -18,6 +18,8 @@
 // Használják: koino.js (a hirdetés és a keresés), a mérések, a próbák.
 
 import { createHash } from 'node:crypto';
+// ⭐⭐ D130 (③f): a koinon példányszámának alapértéke a koino szabályai közül (EGY forrás — a mező nélküli születésé is ez)
+import { ALAP_SZABALYOK } from '../esemeny/koinoSzabalyok.js';
 
 /** A téma fajtái: egy szelet közvetlen keresése, a gyökér egy darabja, a kopogtató, és a kereső-réteg régiója (D105). */
 export const TEMA_FAJTAK = ['szelet', 'gyoker', 'kopogtato', 'kereso'];
@@ -356,8 +358,11 @@ export function gyokerJelOlvasasa(szoveg) {
 //   viszi (a gyökéré a ±1 szintet).
 
 const KOINON_SO = 'koino-koinon-darab-1';
-/** ⭐ KO4: a koinon példányszáma (egy darab ennyi tartója) — alapból 20 (a koino születése mondja ki: ③f). */
-export const KOINON_PELDANY = 20;
+/**
+ * ⭐ KO4: a koinon példányszáma (egy darab ennyi tartója) — az ALAPÉRTÉK (20). ⭐⭐ D130 (③f): a koino a születésében mondja ki
+ * (`koinoSzabalyok.js` `koinonPeldany`); ez csak a mező nélküli születésé és a megadott nélküli hívásé.
+ */
+export const KOINON_PELDANY = ALAP_SZABALYOK.koinonPeldany;
 
 /**
  * Egy egyezmény (a javaslata azonosítója) KOINON-LENYOMATA — a darab-számítás lenyomata a koinon sójával.
