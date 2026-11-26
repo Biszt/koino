@@ -6699,7 +6699,9 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     véletlen gyökér-darab témájának hirdetői, legfeljebb 10). ✅ **KO17 (A)**: a **látott cél 25** — a `koinonPeldany` (20) a valóban
     online őrzők száma, a program a DHT-n látott számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható). ✅ **④a kész
     (2026-11-26):** a tartó a kosarát a darab-kulcs `szelet` témáján hirdeti (a 0. mélységen nem), a kérő a darab és a szülője témáján
-    jelentkezik és keres. ⏭️ ④b a számlálás, ④c a pótlás, ④d a próba.
+    jelentkezik és keres. ✅ **④b kész (2026-11-26):** a kosár látott tartói a hirdetés saját keresésének találatából (címenként egyszer,
+    a saját címeim nélkül; a látott cél alatt a szülő-kosárra is ránéz), kimondva a naplóban, a `cimjegyzek hirdet`-ben és a
+    `vallalas`-ban. ⏭️ ④c a pótlás, ④d a próba.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

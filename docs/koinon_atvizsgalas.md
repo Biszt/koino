@@ -398,7 +398,13 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
 2. **④b A számlálás:** óránként, minden tartott kosárra: a téma különböző IPv4-címei (és saját maga). Ha a látott cél (KO17) alatt van,
    egy második pillantás a szülő-kosárra. Kimondva a `vallalas` sorában és az őrjárat naplójában. ⭐ *A ④a építésekor a kódból:* a
    hirdetés (`dht.js` `bejelent`) a bejelentés előtt úgyis lekéri a téma hirdetőit (`get_peers` — a válasz `kereses.tarsak`-ja), így a
-   számlálás a címjegyzék-kör saját találatából jöhet, többlet-forgalom nélkül, ~20 percenként.
+   számlálás a címjegyzék-kör saját találatából jöhet, többlet-forgalom nélkül, ~20 percenként. ✅ **Kész (2026-11-26)** —
+   `cimjegyzek.js` `koinonLatottTartok` (címenként egyszer, a saját címeim — a gép címei és a mért külső — helyett egyszer én),
+   `koinonLatottCel` (a `koinonPeldany` 1,25-szöröse, felfelé — `KOINON_KESES_RAHAGYAS`, KO17 (A)) és `kosarSzamlalasSzovege`;
+   `koino.js` `kosaraimSzamlalasa` (a hirdetés találatából; a cél alatt a szülő-kosár témájára is ránéz; ha egyetlen DHT-gép sem felelt,
+   a régi szám marad) — a `cimjegyzek hirdet` és az őrjárat címjegyzék-köre hívja; a helyi jegyzék `<koino>/koinon-tartok.json`
+   (`fajlTar.js` `koinonTartokTarolo` — helyi megfigyelés, nem esemény); kimondva: az őrjárat naplójában („🧺 … a koinon-kosaram
+   (m:d): N tartó látszik a DHT-n, a cél C”, a cél alatt pirosan), a `cimjegyzek hirdet` kosár-sorában és a `vallalas`-ban (hány perce).
 3. **④c A pótlás:** 1/n eséllyel; a jelöltek a KO16 szerint, legfeljebb 10, a jelük szerint a legkevesebbet őrző; a felkérés és a jelölt
    három ellenőrzése; óránként legfeljebb egy pótlás és egy új szerep; a szerep helyben feljegyezve; leadás csak a keret fölött.
 4. **④d A próba:** helyi DHT-hálóval (`halo.belepo`), rontásokkal: hamis hirdető, hamis felkérő, megtelt jelölt, mélység-váltás, a
@@ -564,3 +570,8 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
   (a 0. mélységen nem), a kérő a darab és a szülője témáján jelentkezik és keres (a gyermekekén nem — a fél válasz miatt). Három próba
   (két tiszta a `koinonDarabProba`-ban, egy a parancssoron egy hamis DHT-vel: a társ nélküli kérő a szülő-kosár témáján megtalálja a
   tartót), mindkét rontásra bukik. ⏭️ ④b a számlálás.
+- **2026-11-26** — ✅ **④b: a kosár látott tartói** (Csaba: „Igen, jöhet a ④b”; a 11. szakasz terve, 2. pont): a címjegyzék-kör a
+  hirdetés saját keresésének találatából számol (többlet-forgalom nélkül), címenként egyszer, a saját címeim nélkül, egyszer magamat; a
+  látott cél (25 — r = 20-nál) alatt a szülő-kosárra is ránéz; a szám a helyi jegyzékbe, a naplóba, a `cimjegyzek hirdet`-be és a
+  `vallalas`-ba. Három próba (két tiszta, egy a parancssoron: hamis DHT idegen címekkel, négy ismert tag, és az őrjárat naplója),
+  mindhárom rontásra (a port is számít; nincs második pillantás; a saját címem is számít) bukik. ⏭️ ④c a pótlás.

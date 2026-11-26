@@ -5303,7 +5303,8 @@ proba('⭐⭐ D130 (④a): a koinon kosara a DHT-n — két ismert tag fölött 
     const ki = {
       egyDarab: /a koinon a DHT-n: nem hirdetem — egy darab van/.test(tiszta(egyV)) && !/koinon-kosár/.test(tiszta(egyH)),
       ketDarab: new RegExp('a koinon a DHT-n: 1 kosaramat hirdetem \\(1:' + d + ' ').test(tiszta(ketV))
-        && new RegExp('✓ koinon-kosár 1:' + d + '  · [1-9]').test(tiszta(ketH)),
+        // ⭐⭐ D130 (④b): a kosár sorában a látott tartók is (zárójelben) — itt csak magát látja: 1, a cél 2
+        && new RegExp('✓ koinon-kosár 1:' + d + ' \\(1 tartó látszik a DHT-n, a cél 2 — kevés\\)  · [1-9]').test(tiszta(ketH)),
       dhtn: tarsak.some((t) => Number(t.port) === PA),
       kero: !!f && (f.celok ?? []).some((x) => Number(x.port) === PA)
         && (f.kopogtatok ?? []).some((x) => x.fajta === 'szelet' && x.kulcs === kosar)
@@ -5320,6 +5321,83 @@ proba('⭐⭐ D130 (④a): a koinon kosara a DHT-n — két ismert tag fölött 
     halo.bezar();
     await varj(500);
     for (const h of [a, b, c]) await rm(h, { recursive: true, force: true });
+  }
+});
+
+// ⭐⭐ D130 (④b — KO14 (A), KO17 (A), `koinon_atvizsgalas.md` 11.): A KOSÁR LÁTOTT TARTÓI. Egy hamis DHT-n (12 gép) A egy r = 1-es
+// koino alapítója, és négy tagot ismer (2. mélység — a látott cél 2). A tartói még nincsenek megszámolva (a `vallalas` kimondja). A
+// próba a DHT gépeibe IDEGEN címeket ír (a helyi próbában minden a 127.0.0.1-ről jön — az A saját címe, az nem számít):
+// (1) a saját kosarán senki, a SZÜLŐ-kosáron két cím → a hirdetés kevesebbet lát a célnál, a második pillantás a szülőé: 3 tartó
+// (a szülő-kosáréval együtt); (2) a saját kosarán egy cím három porton → 2 tartó (címenként egyszer — magam és ő), eléri a célt,
+// szülő nélkül; a `vallalas` ugyanezt mondja; (3) az őrjárat címjegyzék-köre ugyanezt számolja, és a naplóba írja. Rontás: a port is
+// számít → a (2) 4-et lát → bukik; nincs második pillantás → az (1) 1-et lát → bukik; a saját címem is számít → mindkettő eggyel több.
+proba('⭐⭐ D130 (④b): a kosár látott tartói — címenként egyszer, a saját címem nélkül; a cél alatt a szülő-kosárra is ránéz; a `vallalas` és az őrjárat naplója kimondja', async () => {
+  const { hamisHalozat } = await import('./dhtProba.js');
+  const { cimjegyzekTema, koinonDarabKulcsai, koinonKeresoKulcsai, koinonDarabBol } = await import('../js/csere/cimjegyzek.js');
+  const a = await ujKeszulek();
+  const tagok = [await ujKeszulek(), await ujKeszulek(), await ujKeszulek()];
+  const PA = 8083, PO = 8085;
+  const halo = await hamisHalozat(12);
+  const dht = { KOINO_DHT_BELEPOK: halo.belepo(0), KOINO_TUKOR: '127.0.0.1:9', KOINO_KISZOLGALAS: 'alap' };
+  let oa = null;
+  let naplo = '';
+  // idegen hirdetők a DHT minden gépébe (mintha más hálózatról hirdetnék a kosarat)
+  const befecskendez = (tema, cimek) => {
+    for (const g of halo.gepek) {
+      g.hirdetok ??= new Map();
+      const l = g.hirdetok.get(tema.toString('hex')) ?? [];
+      for (const [cim, port] of cimek) l.push({ cim, port });
+      g.hirdetok.set(tema.toString('hex'), l);
+    }
+  };
+  const tiszta = (x) => x.replace(/\x1b\[[0-9;]*m/g, '');
+  try {
+    await fut(a, 'koino', 'Kosár tartói', 'próba', 'nyilt', 'koinonPeldany=1');
+    const K = await koinoNeve(a);
+    for (const t of tagok) {
+      await fut(t, 'csatlakoz', K);
+      await fut(t, 'belep');
+      await csereKor(a, t, 7996, { KOINO_KISZOLGALAS: 'mindent' });
+    }
+    const elotteV = tiszta(await fut(a, 'vallalas', dht));
+    const alairo = JSON.parse(await readFile(join(a, 'tabla-kulcs.json'), 'utf8').catch(() => '{}')).alairoNyilvanos ?? null;
+    const kosar = alairo ? koinonDarabKulcsai(alairo, 2)[0] : null;
+    const d = kosar ? koinonDarabBol(kosar) : null;
+    const szulo = kosar ? koinonKeresoKulcsai(kosar)[1] : null;
+    const jel = d ? d.melyseg + ':' + d.darab : '?';
+    // (1) a saját kosáron senki (csak A régi hirdetése), a szülőn két idegen cím
+    if (szulo) befecskendez(cimjegyzekTema(K, 'szelet', szulo), [['10.0.0.3', 1], ['10.0.0.4', 1]]);
+    const egyH = tiszta(await fut(a, 'cimjegyzek', 'hirdet', String(PA), dht));
+    // (2) a saját kosáron egy idegen cím három porton
+    if (kosar) befecskendez(cimjegyzekTema(K, 'szelet', kosar), [['10.0.0.1', 1], ['10.0.0.1', 2], ['10.0.0.1', 3]]);
+    const ketH = tiszta(await fut(a, 'cimjegyzek', 'hirdet', String(PA), dht));
+    const utanaV = tiszta(await fut(a, 'vallalas', dht));
+    // (3) az őrjárat címjegyzék-köre (az indulásakor fut)
+    oa = spawn(process.execPath, [KOINO_JS, 'orjarat', '0.05', String(PO)],
+      { env: { ...process.env, KOINO_ADAT: a, KOINO_NAPLO: '', ...dht }, stdio: ['ignore', 'pipe', 'pipe'] });
+    oa.stdout.on('data', (x) => { naplo += x; });
+    const minta = new RegExp('🧺 \\d\\d:\\d\\d(:\\d\\d)? a koinon-kosaram \\(' + jel + '\\): 2 tartó látszik a DHT-n, a cél 2');
+    for (let i = 0; i < 60 && !minta.test(tiszta(naplo)); i++) await varj(500);
+    const ki = {
+      melyseg: /a koinon darabja: 2\. mélység \(4 ismert tag, r = 1/.test(elotteV) && !!kosar && !!szulo,
+      nemSzamolt: new RegExp(jel + ': a tartóit még nem számoltam').test(elotteV),
+      szulovel: egyH.includes('koinon-kosár ' + jel + ' (3 tartó látszik a DHT-n (a szülő-kosáréval együtt), a cél 2)'),
+      cimenkent: ketH.includes('koinon-kosár ' + jel + ' (2 tartó látszik a DHT-n, a cél 2)'),
+      vallalas: new RegExp(jel + ': 2 tartó látszik a DHT-n, a cél 2 \\(\\d+ perce számoltam').test(utanaV),
+      orjarat: minta.test(tiszta(naplo))
+    };
+    if (!Object.values(ki).every(Boolean)) {
+      process.stdout.write('    (④b — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ' · ' + JSON.stringify({
+        jel, egyH: (egyH.match(/koinon-kosár[^\n]*/) ?? [''])[0], ketH: (ketH.match(/koinon-kosár[^\n]*/) ?? [''])[0],
+        elotte: (elotteV.match(/a koinon[^\n]*\n[^\n]*\n[^\n]*/) ?? [''])[0], utana: (utanaV.match(/a koinon a DHT-n[^\n]*\n[^\n]*/) ?? [''])[0],
+        naplo: (tiszta(naplo).match(/[^\n]*(📇|🧺)[^\n]*/g) ?? []).join(' | ') }).slice(0, 1800) + ')\n');
+    }
+    return Object.values(ki).every(Boolean);
+  } finally {
+    if (oa) oa.kill();
+    halo.bezar();
+    await varj(1000);
+    for (const h of [a, ...tagok]) await rm(h, { recursive: true, force: true });
   }
 });
 

@@ -105,6 +105,7 @@ import {
   // ⭐ D95/1: az összegzések helyi jegyzéke (a nagy szelet gyökere, a lezárási összegzések).
   osszegzesTarolo,
   koinonTarolo,   // ⭐⭐ D130 (③d): a koinon ellenőrzött tömör alakjai
+  koinonTartokTarolo,   // ⭐⭐ D130 (④b): a kosaraim látott tartói (a legutóbbi számlálás)
   // ⭐ D95/2: a függő tagságok helyi jegyzéke.
   tagsagFuggoTarolo,
   // ⭐ D95/3: a csak küldő út kézbesítési jegyzéke.
@@ -215,7 +216,9 @@ import {
   // ⭐⭐ D130 (③c): a koinon darabjai.
   koinonMelysege, koinonDarabBol, koinonDarabKulcsai, koinonLenyomata, egyezmenyKoinonDarabKulcsa,
   // ⭐⭐ D130 (④a): a koinon kosarai a DHT-n (a hirdetés, és hol keres a kérő).
-  koinonHirdetendoTemak, koinonKeresoKulcsai
+  koinonHirdetendoTemak, koinonKeresoKulcsai,
+  // ⭐⭐ D130 (④b): a kosár látott tartói és a látott cél (KO17 (A)).
+  koinonLatottTartok, koinonLatottCel, kosarSzamlalasSzovege
 } from './js/csere/cimjegyzek.js';
 // ⭐⭐ D92/1: a függő kérelmek (a cím nélküli kérés — a kopogtatás).
 import {
@@ -1275,12 +1278,16 @@ function temaValtozatai(kepzo) {
 /** Bejelentés egy téma minden élő változatán — a tárolók száma a legjobb változaté, a próbált gépeké összesen. */
 async function temakBejelentese(kliens, temak, port) {
   let tarolta = 0, probalt = 0;
+  // ⭐⭐ D130 (④b): a bejelentés előtt a kliens úgyis lekéri a téma hirdetőit (`get_peers`) — a találatot is visszaadjuk (címenként
+  // egyszer, minden változatból): a kosár tartóinak számlálása ebből jön, többlet-forgalom nélkül.
+  const tarsak = new Map();
   for (const t of temak) {
     const be = await kliens.bejelent(t, port);
     tarolta = Math.max(tarolta, be.tarolta ?? 0);
     probalt += be.probalt ?? 0;
+    for (const x of be.kereses?.tarsak ?? []) tarsak.set(x.cim + ':' + x.port, x);
   }
-  return { tarolta, probalt };
+  return { tarolta, probalt, tarsak: [...tarsak.values()] };
 }
 
 /** A téma hirdetői minden élő változatán — címenként egyszer (név nélkül; bizalom nem jár velük). */
@@ -4224,6 +4231,49 @@ async function sajatHirdetendoTemak() {
   return { temak, legfelso: gy.becsles, melyseg: gy.melyseg, sajatMelyseg: gy.sajat, tanultMelyseg: gy.tanult, szeletHirdetes };
 }
 
+/**
+ * ⭐⭐ D130 (④b — KO14 (A), KO17 (A)): A KOSARAIM TARTÓINAK SZÁMLÁLÁSA — a hirdetés saját keresésének találatából (`eredmeny[].tarsak`,
+ * többlet-forgalom nélkül): kosaranként a látott tartók (`koinonLatottTartok` — címenként egyszer, a saját címeim helyett egyszer
+ * én), és ha a látott cél (`koinonLatottCel` — a `koinonPeldany` 1,25-szöröse) alatt van, egy MÁSODIK PILLANTÁS a szülő-kosár témájára
+ * (egy keresés, csak hiány esetén — a sekélyebb tartó az enyémet is egészében tartja). Az eredmény a helyi jegyzékbe
+ * (`koinonTartokTarolo` — a `vallalas` ebből mondja ki; a ④c pótlása ebből indul). ⚠️ A szám tájékoztató, nem bizonyíték (3. szabály).
+ * @param {Object} kliens - a nyitott DHT-kliens
+ * @param {Array<{fajta: string, kulcs: string, tarsak?: Array}>} eredmeny - a hirdetés eredménye témánként
+ * @param {{kulso?: {cim: string}|null}} [b] - a mért külső címem (az is a sajátom)
+ * @returns {Promise<Array<{kulcs: string, latott: number, cel: number, szulovel: boolean, ido: number}>>}
+ */
+async function kosaraimSzamlalasa(kliens, eredmeny, { kulso = null } = {}) {
+  const kosarak = eredmeny.filter((e) => e.fajta === 'szelet' && koinonDarabBol(e.kulcs));
+  if (!kosarak.length) return [];
+  const cel = koinonLatottCel((await koinonMelysegem()).r);
+  const sajatCimek = [...(await sajatOsszesCim()), ...(kulso?.cim ? [kulso.cim] : [])];
+  const tarolo = koinonTartokTarolo(KOINO);
+  const regi = (await tarolo.olvas()).kosarak;
+  const jegyzek = {};
+  const ki = [];
+  for (const e of kosarak) {
+    // ⚠️ Ha egyetlen DHT-gép sem felelt, a szám semmit nem mondana (csak magamat látnám): a régi számlálás marad
+    if (!(e.probalt > 0)) { if (regi[e.kulcs]) jegyzek[e.kulcs] = regi[e.kulcs]; continue; }
+    let latott = koinonLatottTartok({ tarsak: e.tarsak, sajatCimek });
+    let szulovel = false;
+    const [, szulo] = koinonKeresoKulcsai(e.kulcs);
+    if (latott < cel && szulo) {
+      try {
+        const sz = await temakKeresese(kliens, temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', szulo, n)));
+        latott = koinonLatottTartok({ tarsak: e.tarsak, szuloTarsak: sz.tarsak, sajatCimek });
+        szulovel = true;
+      } catch { /* a DHT segédeszköz — a saját témám száma marad */ }
+    }
+    const x = { kulcs: e.kulcs, latott, cel, szulovel, ido: Date.now() };
+    jegyzek[e.kulcs] = x;
+    ki.push(x);
+  }
+  // a jegyzékben csak a mostani kosaraim (egy kettéválás után a régi kosár kiesik)
+  try { await tarolo.ir({ kosarak: jegyzek }); }
+  catch (hiba) { console.warn('a kosaraim tartóinak jegyzéke nem íródott', { ok: hiba.message }); }
+  return ki;
+}
+
 /** Hirdetés most — a megadott (külső) porttal. */
 async function cimjegyzekHirdetese(port) {
   const { temak } = await sajatHirdetendoTemak();
@@ -4232,10 +4282,12 @@ async function cimjegyzekHirdetese(port) {
     const eredmeny = [];
     for (const t of temak) {
       const be = await temakBejelentese(kliens, t.temak, port);
-      eredmeny.push({ fajta: t.fajta, kulcs: t.kulcs, tarolta: be.tarolta, probalt: be.probalt });
+      eredmeny.push({ fajta: t.fajta, kulcs: t.kulcs, tarolta: be.tarolta, probalt: be.probalt, tarsak: be.tarsak });
     }
+    // ⭐⭐ D130 (④b): a kosaraim tartói (a hirdetés találatából)
+    const kosarak = await kosaraimSzamlalasa(kliens, eredmeny);
     await dhtIsmertekMentese(kliens);
-    return { eredmeny, forgalom: kliens.forgalom() };
+    return { eredmeny, kosarak, forgalom: kliens.forgalom() };
   } finally {
     kliens.bezar();
   }
@@ -4264,8 +4316,12 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
     const eredmeny = [];
     for (const t of temak) {
       const be = await temakBejelentese(kliens, t.temak, port);
-      eredmeny.push({ fajta: t.fajta, kulcs: t.kulcs, tarolta: be.tarolta, probalt: be.probalt });
+      eredmeny.push({ fajta: t.fajta, kulcs: t.kulcs, tarolta: be.tarolta, probalt: be.probalt, tarsak: be.tarsak });
     }
+    // ⭐⭐ D130 (④b): a kosaraim tartói — a hirdetés találatából (és hiány esetén a szülő-kosáréból)
+    let kosarak = [];
+    try { kosarak = await kosaraimSzamlalasa(kliens, eredmeny, { kulso }); }
+    catch (hiba) { console.warn('a kosaraim tartóit most nem számoltam', { ok: hiba.message }); }
     const kopogtatok = new Map();
     for (const f of figyelendoKopogtatok({ koino: KOINO, alairo: tablaKulcs.alairoNyilvanos, hirdetett: temak,
       valtozatok: eloAlakok('tema') })) {
@@ -4297,7 +4353,7 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
     try { rekesz = await belepoRekeszKiirasa(kliens, { kulso, kapuPort }); }
     catch (hiba) { console.warn('a meghívó rekeszébe most nem írtam', { ok: hiba.message }); }
     await dhtIsmertekMentese(kliens);
-    return { eredmeny, kopogtatok: [...kopogtatok.values()], regioTarsak: [...regioTarsak.values()], bejelentve, bejelentett,
+    return { eredmeny, kosarak, kopogtatok: [...kopogtatok.values()], regioTarsak: [...regioTarsak.values()], bejelentve, bejelentett,
       bejelentesek, rekesz, felajanlas, forgalom: kliens.forgalom() };
   } finally {
     kliens.bezar();
@@ -6832,6 +6888,14 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
           ? tarolt + '/' + h.eredmeny.length + ' téma a DHT-n (' + ((h.forgalom.ki + h.forgalom.be) / 1024)
             .toFixed(1) + ' KB)'
           : 'a DHT most nem érhető el (egyetlen gép sem felelt) — a raj ettől még működik') + SZIN.vege);
+        // ⭐⭐ D130 (④b): a kosaraim tartói (csak ha a DHT felelt — különben a szám semmit nem mondana)
+        if (elerte) {
+          for (const x of h.kosarak ?? []) {
+            const d = koinonDarabBol(x.kulcs);
+            kiir((x.latott < x.cel ? SZIN.nem : SZIN.halvany) + '  🧺 ' + ora() + ' ' + kk + 'a koinon-kosaram (' + d.melyseg + ':'
+              + d.darab + '): ' + kosarSzamlalasSzovege(x) + SZIN.vege);
+          }
+        }
         // ⭐⭐ D92/1: akik a kopogtató témáimon jelezték, hogy tőlem kérnek — a következő körökben feléjük is
         // kopogok (30 percig). A saját címemet kihagyom.
         allapot.bejelentettKopogtatok = new Set(h.bejelentett);
@@ -10487,8 +10551,10 @@ try {
         for (const e of h.eredmeny) {
           // ⭐⭐ D130 (④a): a koinon kosara a mélységével és a sorszámával (a kulcsa csupa nulla elöl — abból semmi nem látszana)
           const kd = e.fajta === 'szelet' ? koinonDarabBol(e.kulcs) : null;
+          // ⭐⭐ D130 (④b): a kosár látott tartói (a hirdetés találatából)
+          const ksz = kd ? (h.kosarak ?? []).find((x) => x.kulcs === e.kulcs) : null;
           kiir('  ' + (e.tarolta > 0 ? SZIN.jo + '✓' : SZIN.nem + '✗') + SZIN.vege + ' '
-            + (kd ? 'koinon-kosár ' + kd.melyseg + ':' + kd.darab : e.fajta + ' '
+            + (kd ? 'koinon-kosár ' + kd.melyseg + ':' + kd.darab + (ksz ? ' (' + kosarSzamlalasSzovege(ksz) + ')' : '') : e.fajta + ' '
               + (e.fajta === 'szelet' ? e.kulcs.slice(0, 12) + '…' : e.kulcs)) + SZIN.halvany + '  · ' + e.tarolta
             + '/' + e.probalt + ' gép tárolta' + SZIN.vege);
         }
@@ -10819,6 +10885,17 @@ try {
         ? knHirdetes.length + ' kosaramat hirdetem (' + knHirdetes.map((t) => { const d = koinonDarabBol(t.kulcs); return d.melyseg + ':' + d.darab; })
           .join(', ') + ' — az őrjárat címjegyzék-körében, ~20 percenként; D130 ④a)'
         : 'nem hirdetem — egy darab van (az egész koinon), azt minden tag tartja') + SZIN.vege);
+      // ⭐⭐ D130 (④b): a kosaraim tartói — a legutóbbi számlálás (az őrjárat címjegyzék-köre, vagy a `cimjegyzek hirdet` írja)
+      if (knHirdetes.length) {
+        const szamlalt = (await koinonTartokTarolo(KOINO).olvas()).kosarak;
+        for (const t of knHirdetes) {
+          const d = koinonDarabBol(t.kulcs);
+          const x = szamlalt[t.kulcs];
+          kiir(SZIN.halvany + '    ' + d.melyseg + ':' + d.darab + ': ' + (x && Number.isFinite(x.latott) && Number.isFinite(x.cel)
+            ? kosarSzamlalasSzovege(x) + ' (' + Math.max(0, Math.round((Date.now() - (x.ido ?? 0)) / 60000)) + ' perce számoltam; D130 ④b)'
+            : 'a tartóit még nem számoltam — az őrjárat címjegyzék-köre számolja (D130 ④b)') + SZIN.vege);
+        }
+      }
       for (const [az, p] of pontosak.sort((a, b) => b[1] - a[1])) {
         const o = kf.fokok.get(az) === 'osszegzo' ? osszT.szeletek[az] : null;
         kiir('  ' + SZIN.halvany + az.slice(0, 8) + SZIN.vege + '  ' + (allapot.entitasok.get(az)?.cim ?? '(ismeretlen)')

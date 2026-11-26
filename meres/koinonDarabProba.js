@@ -29,7 +29,9 @@ import {
   koinonDarabKulcsa, koinonDarabBol, koinonDarabKulcsai, koinonLenyomata, koinonMelysege, kozosKoinonDarab,
   egyezmenyKoinonDarabKulcsa, darabbaEsik, gyokerDarabKulcsa, gyokerDarabBol, DARAB_MAX_MELYSEG,
   // ⭐⭐ D130 (④a): a kosarak a DHT-n
-  koinonHirdetendoTemak, koinonKeresoKulcsai, cimjegyzekTema, figyelendoKopogtatok, temaKopogtatoja
+  koinonHirdetendoTemak, koinonKeresoKulcsai, cimjegyzekTema, figyelendoKopogtatok, temaKopogtatoja,
+  // ⭐⭐ D130 (④b): a látott tartók és a látott cél
+  koinonLatottTartok, koinonLatottCel, kosarSzamlalasSzovege, KOINON_KESES_RAHAGYAS
 } from '../js/csere/cimjegyzek.js';
 import { sajatKuldo, kuldoFogado } from '../js/allapot/osszegzoTartas.js';
 
@@ -418,6 +420,34 @@ proba('⭐⭐ D130 (④a): a kérő a darab témáján és a szülőjéén keres
     szulo: sz?.melyseg === 3 && sz.darab === 5n && tartalmazza,
     elso: koinonKeresoKulcsai(koinonDarabKulcsa(1, 1)).length === 1,
     nemDarab: koinonKeresoKulcsai(gyokerDarabKulcsa(4, 11)).length === 0 && koinonKeresoKulcsai('x').length === 0
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// ===================================
+// ⭐⭐ D130 (④b — KO14 (A), KO17 (A)): A KOSÁR LÁTOTT TARTÓI
+// ===================================
+
+// A látott cél a példányszám 1,25-szöröse, felfelé kerekítve (KO17 (A) — a DHT késésének ráhagyása). Rontás: lefelé kerekít → az
+// r = 7 (8,75) 8 lesz → bukik; a ráhagyás nélkül → az r = 20 20 lesz → bukik.
+proba('⭐⭐ D130 (④b, KO17 (A)): a látott cél a példányszám 1,25-szöröse, felfelé kerekítve — 20 → 25, 1 → 2, 7 → 9', () =>
+  KOINON_KESES_RAHAGYAS === 1.25 && koinonLatottCel(20) === 25 && koinonLatottCel(1) === 2 && koinonLatottCel(7) === 9
+    && koinonLatottCel(4) === 5 && koinonLatottCel() === 25 && koinonLatottCel(0) === 25);
+
+// Címenként egyszer (a port nem számít), a saját címeim helyett egyszer én, a szülő-kosár hirdetői hozzáadódnak (ismétlés nélkül).
+// Rontás: a portot is számolja → a `port` bukik; a saját címemet is → a `sajat` bukik; magamat nem → az `ures` bukik.
+proba('⭐⭐ D130 (④b): a látott tartók címenként egyszer, a saját címeim nélkül, egyszer én — a szülő-kosár hirdetőivel együtt', () => {
+  const t = (cim, port = 1) => ({ cim, port });
+  const ki = {
+    ures: koinonLatottTartok() === 1 && koinonLatottTartok({ tarsak: [] }) === 1,
+    port: koinonLatottTartok({ tarsak: [t('10.0.0.1', 1), t('10.0.0.1', 2), t('10.0.0.1', 3), t('10.0.0.2')] }) === 3,
+    sajat: koinonLatottTartok({ tarsak: [t('127.0.0.1', 8081), t('203.0.113.5', 4000), t('10.0.0.1')],
+      sajatCimek: ['127.0.0.1', '203.0.113.5'] }) === 2,
+    alak: koinonLatottTartok({ tarsak: [t('::ffff:10.0.0.1'), t('10.0.0.1')] }) === 2,
+    szulo: koinonLatottTartok({ tarsak: [t('10.0.0.1')], szuloTarsak: [t('10.0.0.1', 9), t('10.0.0.3')] }) === 3,
+    szoveg: kosarSzamlalasSzovege({ latott: 3, cel: 25, szulovel: true }) === '3 tartó látszik a DHT-n (a szülő-kosáréval együtt), a cél 25 — kevés'
+      && kosarSzamlalasSzovege({ latott: 25, cel: 25 }) === '25 tartó látszik a DHT-n, a cél 25'
   };
   if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
   return Object.values(ki).every(Boolean);

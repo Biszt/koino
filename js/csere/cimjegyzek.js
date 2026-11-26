@@ -20,6 +20,8 @@
 import { createHash } from 'node:crypto';
 // ⭐⭐ D130 (③f): a koinon példányszámának alapértéke a koino szabályai közül (EGY forrás — a mező nélküli születésé is ez)
 import { ALAP_SZABALYOK } from '../esemeny/koinoSzabalyok.js';
+// ⭐⭐ D130 (④b): egy cím összehasonlítható alakja (a látott tartók címenként egyszer — hálózat nélküli, tiszta függvény)
+import { cimNormalizalasa } from './tarsak.js';
 
 /** A téma fajtái: egy szelet közvetlen keresése, a gyökér egy darabja, a kopogtató, és a kereső-réteg régiója (D105). */
 export const TEMA_FAJTAK = ['szelet', 'gyoker', 'kopogtato', 'kereso'];
@@ -500,6 +502,62 @@ export function koinonKeresoKulcsai(kulcs) {
   const ki = [kulcs];
   if (d.melyseg >= 2) ki.push(koinonDarabKulcsa(d.melyseg - 1, d.darab >> 1n));
   return ki;
+}
+
+// ===================================
+// ⭐⭐ D130 (④b — KO14 (A), KO17 (A), a 98. mérés): A KOSÁR LÁTOTT TARTÓI
+// ===================================
+//
+// Csaba (2026-11-26): „azt kéne számon tartani, hogy mennyien vannak online, egy adott egyezménynél”. A tartó a kosara témáján a
+// DHT-n látott hirdetőket számolja (a hirdetés saját keresésének találatából — többlet-forgalom nélkül), és ha kevés, a SZÜLŐ-kosár
+// hirdetőit is (a sekélyebb tartó az egész szülőt tartja — `koinonKeresoKulcsai`). Két szabály (`koinon_atvizsgalas.md` 11.):
+// - **egy IPv4-cím egynek számít**, akárhány porton hirdet (6. pont): egy hamis hirdető-sereghez így annyi cím kell, amennyi a cél. Az
+//   alulszámolás a biztonságos irány — két telefon egy router mögött egynek látszik, az egy fölösleges tartót hoz, nem kevesebbet;
+// - **a saját címeim nem számítanak** (a korábbi hirdetésem még a DHT-n van — a 30–60 perces felejtés): helyettük egyszer magamat. A
+//   velem egy router mögötti társ így szintén kimarad (alulszámolás — a biztonságos irány).
+// ⭐ KO17 (A): a LÁTOTT cél a koino `koinonPeldany`-jának (a valóban online őrzők száma) 1,25-szöröse — a DHT a lekapcsolt tartót még
+// 30–60 percig mutatja, és a 98. mérés rosszabb esetében ez a ráhagyás adja vissza a „valóban 20 online” képét.
+
+/** ⭐ KO17 (A): a DHT késésének ráhagyása — a látott cél a példányszám ennyiszerese (a 98. mérés rosszabb esetéből; terepen pontosítható). */
+export const KOINON_KESES_RAHAGYAS = 1.25;
+
+/**
+ * A látott cél: ennyi tartónak kell a DHT-n látszania egy kosáron (felfelé kerekítve — a több tartó felé).
+ * @param {number} r - a koino példányszáma (`koinonPeldany`)
+ * @returns {number}
+ */
+export function koinonLatottCel(r = KOINON_PELDANY) {
+  const p = Number.isFinite(r) && r >= 1 ? r : KOINON_PELDANY;
+  return Math.ceil(p * KOINON_KESES_RAHAGYAS);
+}
+
+/**
+ * A kosár LÁTOTT TARTÓI: a saját témája és (ha megnézte) a szülő-kosár hirdetőinek különböző címei — a saját címeim nélkül —, és
+ * egyszer én magam.
+ * @param {Object} b
+ * @param {Array<{cim: string, port: number}>} [b.tarsak] - a kosár témájának hirdetői
+ * @param {Array<{cim: string, port: number}>} [b.szuloTarsak] - a szülő-kosár témájának hirdetői (a második pillantás)
+ * @param {Array<string>} [b.sajatCimek] - a gépem címei és a mért külső címem
+ * @returns {number} legalább 1 (én)
+ */
+export function koinonLatottTartok({ tarsak = [], szuloTarsak = [], sajatCimek = [] } = {}) {
+  const sajat = new Set((Array.isArray(sajatCimek) ? sajatCimek : []).map(cimNormalizalasa));
+  const cimek = new Set();
+  for (const t of [...(Array.isArray(tarsak) ? tarsak : []), ...(Array.isArray(szuloTarsak) ? szuloTarsak : [])]) {
+    const c = cimNormalizalasa(t?.cim);
+    if (c && !sajat.has(c)) cimek.add(c);
+  }
+  return 1 + cimek.size;
+}
+
+/**
+ * Egy kosár számlálásának mondata — a napló, a `cimjegyzek hirdet` és a `vallalas` ugyanígy mondja (egy helyen).
+ * @param {{latott: number, cel: number, szulovel?: boolean}} x
+ * @returns {string}
+ */
+export function kosarSzamlalasSzovege(x) {
+  return x.latott + ' tartó látszik a DHT-n' + (x.szulovel ? ' (a szülő-kosáréval együtt)' : '') + ', a cél ' + x.cel
+    + (x.latott < x.cel ? ' — kevés' : '');
 }
 
 // ===================================

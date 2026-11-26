@@ -1198,6 +1198,40 @@ export function koinonTarolo(koino, hely = alapHely()) {
 }
 
 /**
+ * ⭐⭐ D130 (④b): A KOSARAIM LÁTOTT TARTÓI — a helyi jegyzék (`<koino>/koinon-tartok.json`): `{ kosarak: { <darab-kulcs>: { latott,
+ * cel, szulovel, ido } } }` — a legutóbbi számlálás kosaranként (az őrjárat címjegyzék-köre írja, a `vallalas` ebből mondja ki).
+ * ⚠️ HELYI megfigyelés (nem esemény, nem terjed — 3. szabály): a ④c pótlása ebből indul, de a szám tájékoztató, nem bizonyíték. Ha
+ * elveszik, a következő kör újraszámolja. Az írás átnevezéssel kerül a helyére.
+ * @returns {{olvas: Function, ir: Function, fajl: string}}
+ */
+export function koinonTartokTarolo(koino, hely = alapHely()) {
+  const fajl = join(hely, koino, 'koinon-tartok.json');
+  return {
+    fajl,
+    /** @returns {Promise<{kosarak: Object}>} */
+    async olvas() {
+      try {
+        const j = JSON.parse(await readFile(fajl, 'utf8'));
+        return { kosarak: j?.kosarak && typeof j.kosarak === 'object' && !Array.isArray(j.kosarak) ? j.kosarak : {} };
+      } catch {
+        return { kosarak: {} };
+      }
+    },
+    async ir(adat) {
+      await mkdir(dirname(fajl), { recursive: true });
+      const ideiglenes = fajl + '.' + process.pid + '-' + Math.random().toString(36).slice(2) + '.uj';
+      try {
+        await writeFile(ideiglenes, JSON.stringify(adat), 'utf8');
+        await rename(ideiglenes, fajl);
+      } catch (hiba) {
+        await rm(ideiglenes, { force: true }).catch(() => {});
+        throw hiba;
+      }
+    }
+  };
+}
+
+/**
  * ⭐ D95/2: a FÜGGŐ TAGSÁGOK helyi jegyzéke (`<koino>/tagsagfuggo.json`): akiknek a tagságát a vállalt szeleteimben nem
  * tudom, és a cserében kérdezem (`tagsagKisero.js`). Helyi feljegyzés, nem esemény, nem terjed; korlátos és lejár.
  * @param {string} koino
