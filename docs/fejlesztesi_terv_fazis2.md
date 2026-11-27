@@ -6702,8 +6702,9 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     jelentkezik és keres. ✅ **④b kész (2026-11-26):** a kosár látott tartói a hirdetés saját keresésének találatából (címenként egyszer,
     a saját címeim nélkül; a látott cél alatt a szülő-kosárra is ránéz), kimondva a naplóban, a `cimjegyzek hirdet`-ben és a
     `vallalas`-ban. ✅ **④c1 kész (2026-11-27):** a segítő szerepek — a helyi jegyzék, a `koinon kosarak | segit | lead`, a nyitó jel
-    `knk` mezője (a csere a két fél bármely tartott kosarából egyeztet), a tömörítés megtartja. ⏭️ ④c2 a felkérés, ④c3 a pótlás, ④c4 a
-    mélység változása (⏸️ KO18), ④d a próba.
+    `knk` mezője (a csere a két fél bármely tartott kosarából egyeztet), a tömörítés megtartja. ✅ **④c2 kész (2026-11-27):** a felkérés
+    — a `felkeres` kérelem, a jelölt gyors ellenőrzése és a hiány saját megnézése (a DHT-n), óránként egy új szerep, a keret (alapból
+    256 MB) és a leadás fölötte. ⏭️ ④c3 a pótlás, ④c4 a mélység változása (⏸️ KO18), ④d a próba.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

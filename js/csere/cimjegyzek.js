@@ -619,14 +619,67 @@ export function koinonLatottCel(r = KOINON_PELDANY) {
  * @param {Array<string>} [b.sajatCimek] - a gépem címei és a mért külső címem
  * @returns {number} legalább 1 (én)
  */
-export function koinonLatottTartok({ tarsak = [], szuloTarsak = [], sajatCimek = [] } = {}) {
+export function koinonLatottTartok({ tarsak = [], szuloTarsak = [], sajatCimek = [], sajatIs = true } = {}) {
   const sajat = new Set((Array.isArray(sajatCimek) ? sajatCimek : []).map(cimNormalizalasa));
   const cimek = new Set();
   for (const t of [...(Array.isArray(tarsak) ? tarsak : []), ...(Array.isArray(szuloTarsak) ? szuloTarsak : [])]) {
     const c = cimNormalizalasa(t?.cim);
     if (c && !sajat.has(c)) cimek.add(c);
   }
-  return 1 + cimek.size;
+  // ⭐⭐ D130 (④c2): a felkért jelölt még nem tartó — ő magát nem számolja (`sajatIs: false`)
+  return (sajatIs === false ? 0 : 1) + cimek.size;
+}
+
+// ===================================
+// ⭐⭐ D130 (④c2 — `koinon_atvizsgalas.md` 11., 4., 6., 8. pont): A FELKÉRÉS ÉS A KERET
+// ===================================
+//
+// A felkért jelölt maga dönt: a gyors ellenőrzés a kérelem kiszolgálásakor (a kerete, a kosár érvényes-e a mélységén, tartja-e már),
+// a hiány megnézése később, a saját címjegyzék-körében (egy DHT-keresés — a csere közben nem várhat rá). ⭐ A hiány saját megnézése
+// zárja ki, hogy egy idegen olyan kosarakkal terhelje, amelyeknek nincs rá szükségük (a 6. pont: a hamis felkérő csak terhet adhatna
+// — ezt a jelölt keresése és a kerete korlátozza). Az ütem: óránként legfeljebb egy új szerep felkérésre. A keret: amennyit a
+// készülék a koinonnak ad — fölötte nem vállal, és ha a keretet lejjebb veszik, a legújabb segítő szerepeit leadja (Csaba: „leadni
+// csak a megtelt készülék ad le”).
+
+/** A keret alapértéke (MB) — a 97–98. mérés terhe 7–42 MB; ennél jóval nagyobb (a 11. szakasz 8. pontja). */
+export const KOINON_KERET_ALAP_MB = 256;
+/** Óránként legfeljebb egy új szerep felkérésre (a 11. szakasz 6. pontja — az elnémított téma korlátja is). */
+export const KOINON_UJ_SZEREP_KOZ = 60 * 60 * 1000;
+/** Legfeljebb ennyi függő felkérés (9. szabály), és egy ennyi idő után elévül. */
+export const KOINON_FUGGO_KORLAT = 4;
+export const KOINON_FUGGO_ELEVULES = 60 * 60 * 1000;
+
+/**
+ * Tartalmazza-e a `kulso` kosár a `belso`-t (ugyanaz, vagy a belső a külső része: mélyebb, és az előtagja a külső darabja).
+ * @param {{melyseg: number, darab: bigint}} kulso
+ * @param {{melyseg: number, darab: bigint}} belso
+ * @returns {boolean}
+ */
+export function kosarTartalmazza(kulso, belso) {
+  if (!kulso || !belso || kulso.melyseg > belso.melyseg) return false;
+  return (belso.darab >> BigInt(belso.melyseg - kulso.melyseg)) === kulso.darab;
+}
+
+/**
+ * ⭐ A KERET FÖLÖTT: mely segítő szerepeket adja le a készülék — a legújabbakat, amíg a teher a keret alá nem kerül (a saját kosár
+ * soha: azt a tábla-aláírás adja). Az össz-teher egyszer számolja az eseményt (két tartott kosár átfedhet); a leadott kosár a SAJÁT
+ * terhét vonja le — átfedésnél ez több a valódi csökkenésnél, így a leadás inkább korábban áll meg (több tartó marad — a biztonságos
+ * irány).
+ * @param {Object} b
+ * @param {Array<{kulcs: string, ido: number, bajt: number}>} b.segitok
+ * @param {number} b.osszBajt - az össz-teher (minden tartott kosár, eseményenként egyszer)
+ * @param {number} b.keretBajt
+ * @returns {Array<string>} a leadandó kulcsok, a legújabbtól
+ */
+export function leadandoSegitok({ segitok = [], osszBajt = 0, keretBajt = Infinity } = {}) {
+  let ossz = Number.isFinite(osszBajt) ? osszBajt : 0;
+  const ki = [];
+  for (const s of [...segitok].sort((a, b) => (b.ido ?? 0) - (a.ido ?? 0))) {
+    if (ossz <= keretBajt) break;
+    ki.push(s.kulcs);
+    ossz -= Number.isFinite(s.bajt) ? s.bajt : 0;
+  }
+  return ki;
 }
 
 /**

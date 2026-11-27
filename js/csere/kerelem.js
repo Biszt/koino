@@ -47,6 +47,8 @@ import { szovegDarabbol } from '../esemeny/szovegDarab.js';
 // ⭐ D107 L4 (④c): a felajánlás kulcsa egy kereső-régió; a korlátok a felajánlás moduljáé.
 import { keresoRegioBol } from './keresoReteg.js';
 import { FELAJANLAS_KORLAT, FELAJANLAS_KISERO_KORLAT } from './felajanlas.js';
+// ⭐⭐ D130 (④c2): a felkérés kulcsa egy koinon-kosár (a darab-kulcs alakja)
+import { koinonDarabBol } from './cimjegyzek.js';
 
 /**
  * ⭐ D107 L4 (④c): a felajánlás válaszának alakja — hányat vett fel a tartó (és ebből hány függő), hány volt már meg, hányat
@@ -61,8 +63,22 @@ export function felajanlasValaszAlakja(u) {
   return { felvett: db(u?.felvett), fuggo: db(u?.fuggo), megvolt: db(u?.megvolt), elutasitott: db(u?.elutasitott), osztodott };
 }
 
-export const KERELEM_FAJTAK = ['szelet', 'fejlecek', 'torzs', 'felajanlas', 'kereses'];
-/** A továbbadható fajták (D92/1 (c)) — a felajánlás nem: a tulajdonos maga keresi a régió tartóit. */
+/**
+ * ⭐⭐ D130 (④c2): A FELKÉRÉS VÁLASZÁNAK ALAKJA — a megkérdezett készülék mondja: `megnezem` (a gyors ellenőrzésen átment, és
+ * feljegyezte: a következő címjegyzék-körében maga is megnézi a hiányt, és ha valódi, vállalja), `mar` (már tartja — a saját vagy egy
+ * segítő kosarában), vagy `elutasitva` (az `ok` mondja, miért: a kerete, a kosár nem érvényes a mélységén, túl sok szerep vagy
+ * függő felkérés). Korlátos.
+ * @returns {{allapot: 'megnezem'|'mar'|'elutasitva', ok: string|null}}
+ */
+export function felkeresValaszAlakja(u) {
+  const allapot = ['megnezem', 'mar', 'elutasitva'].includes(u?.allapot) ? u.allapot : 'elutasitva';
+  const ok = typeof u?.ok === 'string' && u.ok.trim() ? u.ok.trim().slice(0, 160) : null;
+  return { allapot, ok };
+}
+
+export const KERELEM_FAJTAK = ['szelet', 'fejlecek', 'torzs', 'felajanlas', 'kereses', 'felkeres'];
+/** A továbbadható fajták (D92/1 (c)) — a felajánlás nem: a tulajdonos maga keresi a régió tartóit; ⭐⭐ D130 (④c2) a felkérés sem:
+ * az a megkérdezett készüléknek szól (a terhét a pótló a nyitó jeléből látta). */
 export const TOVABBADHATO_FAJTAK = ['szelet', 'fejlecek', 'torzs'];
 
 /** Egy fejléc-listában legfeljebb ennyi kártya. */
@@ -126,6 +142,13 @@ export function kerelemAlakja(u) {
     const darab = typeof u.darab === 'string' && /^[0-9a-f]{1,40}$/.test(u.darab) ? u.darab : '0';
     const n = Number.isInteger(u.n) && u.n > 0 ? Math.min(u.n, 50) : 50;
     return { fajta: 'kereses', kulcs, k: u.k, s, darab, kerdes: u.kerdes, n };
+  }
+  // ⭐⭐ D130 (④c2): A FELKÉRÉS — „tartsd ezt a kosarat” (a ④c pótlása küldi): a kulcs egy koinon-kosár az 1. mélységtől (a 0. az
+  // egész koinon — azt mindenki tartja). Hogy vállalja-e, a megkérdezett maga dönti el (a kerete, a mélysége, és maga is megnézi a
+  // hiányt — `koino.js` `kerelemKiszolgaloja().felkeres`).
+  if (u.fajta === 'felkeres') {
+    const d = typeof kulcs === 'string' ? koinonDarabBol(kulcs) : null;
+    return d && d.melyseg >= 1 ? { fajta: 'felkeres', kulcs } : null;
   }
   if (u.fajta === 'felajanlas') {
     if (!gyokerE && !keresoRegioBol(kulcs)) return null;

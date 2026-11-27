@@ -1243,13 +1243,18 @@ export function koinonSzerepTarolo(koino, hely = alapHely()) {
   const fajl = join(hely, koino, 'koinon-szerepek.json');
   return {
     fajl,
-    /** @returns {Promise<{segito: Object}>} */
+    /**
+     * ⭐⭐ D130 (④c2): a `fuggo` — a még meg nem nézett felkérések (`{ <darab-kulcs>: { ido, honnan, tabla } }`): a jelölt a
+     * címjegyzék-körében maga is megnézi a hiányt, és csak utána vállal.
+     * @returns {Promise<{segito: Object, fuggo: Object}>}
+     */
     async olvas() {
+      const obj = (x) => (x && typeof x === 'object' && !Array.isArray(x) ? x : {});
       try {
         const j = JSON.parse(await readFile(fajl, 'utf8'));
-        return { segito: j?.segito && typeof j.segito === 'object' && !Array.isArray(j.segito) ? j.segito : {} };
+        return { segito: obj(j?.segito), fuggo: obj(j?.fuggo) };
       } catch {
-        return { segito: {} };
+        return { segito: {}, fuggo: {} };
       }
     },
     async ir(adat) {

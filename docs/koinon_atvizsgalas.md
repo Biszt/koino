@@ -416,8 +416,16 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
      program a mezőt nem nézi; a hirdetés és a számlálás a segítőkre is; a jelből a teher (`koinonTeher` — a ④c3 jelöltjeihez).
      ⚠️ *Mérve a próbán:* egy friss tag az első cseréjén még csak magát ismeri (0. mélység — az egész koinon az övé), és mindent felvesz
      (a ③ alulbecslése — a biztonságos irány, de egy nagy koinoban egy új tagnak egyszeri teher; a ④c4 része);
-   - ④c2 **a felkérés** — egy új kérelem-fajta a kosár kulcsával; a jelölt három ellenőrzése (a kerete; érvényes kosár a mélységén;
-     maga is látja a hiányt — egy saját DHT-keresés); óránként legfeljebb egy új szerep; a készülékenkénti keret és a leadás fölötte;
+   - ✅ **④c2 a felkérés** (2026-11-27) — egy új kérelem-fajta (`felkeres`, a kosár kulcsával — `kerelem.js`; nem adható tovább; a
+     válasz `megnezem` / `mar` / `elutasitva` + ok). A jelölt (`kerelemKiszolgaloja().felkeres`) a GYORS ellenőrzést a csere közben
+     végzi (a koinon egy darab-e; a kosár a mélységén ±1; tartja-e már — `kosarTartalmazza`; a jel határa; a kerete; legfeljebb 4 függő
+     felkérés), és feljegyzi (a `koinon-szerepek.json` `fuggo`-ja, a felkérő címével); a HIÁNYT a címjegyzék-körében maga is megnézi
+     (`koinonFelkeresekFeldolgozasa` — a kosár és ha kevés, a szülője témáján, magát nem számolva; ha egyetlen DHT-gép sem felelt,
+     vár), óránként legfeljebb egy új szerepet vállal, és a vállalt kosarat elkéri (függő kérelem a felkérő címével és a kosár témáin).
+     A keret: `<koino>/koinon-keret.json` (MB, alapból 256 — `koinon keret [MB]`); a teher a tartott kosaraimba eső koinon-események
+     mérete; a keret fölött a legújabb segítő szerepeim leadom (`leadandoSegitok`) — a címjegyzék-kör és a `koinon keret` is. Kézzel:
+     `koinon felker <m:d> <cím> <port>`, `koinon felkeresek`; a `koinon kosarak` a szerep eredetét, a váró felkéréseket és a keretet is
+     mutatja; az őrjárat naplója kimondja (🤝);
    - ④c3 **a pótlás** — a látott cél alatt 1/n eséllyel, óránként legfeljebb egy; a jelöltek egy véletlen gyökér-darab témájáról (KO16
      (A)), legfeljebb 10, közvetlen kopogással és a kopogtató úton; a nyitó jelükből a legkevesebbet őrző kapja a felkérést;
    - ④c4 **a mélység változása** (a 7. pont): mi legyen kettéváláskor a kosár másik felével — ⏸️ **KO18**, előtte mérés (a teher a
@@ -597,3 +605,8 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
   küldő úton annak is odaadja, aki a kosarat tartja, és egy friss tag az első cseréjén a 0. mélységen mindent felvesz; a végleges
   alakban (előbb mindenki megismeri egymást, az egyezmény utána születik, és a vendég nem a szerzővel cserél) mindhárom rontásra
   (a csere nem kapja meg a segítőket; a tömörítés csak a saját darabot tartja; a jel nem viszi) bukik. ⏭️ ④c2 a felkérés.
+- **2026-11-27** — ✅ **④c2: a felkérés** (Csaba: „Igen, jöhet a ④c2”): a `felkeres` kérelem, a jelölt gyors ellenőrzése a csere
+  közben és a hiány saját megnézése a címjegyzék-körében (magát nem számolva), óránként egy új szerep, a vállalt kosár elkérése, a
+  keret és a leadás fölötte; kézzel `koinon felker | felkeresek | keret`. Három próba (két tiszta, egy a parancssoron egy hamis DHT-vel:
+  már tartja, nem a mélységén, nincs hiány, vállalja, vár az ütem miatt, a keret betelt), mindhárom rontásra (nem nézi a hiányt; nincs
+  ütem; a gyors ellenőrzés nem nézi a már tartottat) bukik. ⏭️ ④c3 a pótlás.

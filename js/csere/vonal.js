@@ -92,7 +92,7 @@ import { ervenyesValtozat, halmazUzenet, halmazAlkalmazasa, kozosSzuro } from '.
 // mert a szelet-határokat ugyanúgy ő számolja.
 import { SZELET_MERET, szeletEllenorzes, ujMunkamegosztas } from './fajlAtvitel.js';
 // ⭐ D92/6: a kérelem alakja (a menet itt, a tartalom a `kerelem.js`-é — az nem importál hálózatot).
-import { kerelemAlakja, valaszAlakja, felajanlasValaszAlakja, SOROZAT_KORLAT, TORZS_KOD_KORLAT } from './kerelem.js';
+import { kerelemAlakja, valaszAlakja, felajanlasValaszAlakja, felkeresValaszAlakja, SOROZAT_KORLAT, TORZS_KOD_KORLAT } from './kerelem.js';
 // ⭐ A kereső-réteg ⑤: a kérdés válaszának alakja (a találatokat a kérdező maga ellenőrzi).
 import { keresesValaszAlakja } from './kereses.js';
 
@@ -805,6 +805,14 @@ export async function parbeszed(kapcsolat, tar, koino, beallitas = {}) {
         const v = await kiszolgalo.felajanlas(k, { tabla: kerelemTarsa.tabla });
         kuld({ uzenet: 'FELAJANLASVALASZ', ...felajanlasValaszAlakja(v) });
         kiszolgalva = 'felajanlas';
+      } else if (k?.fajta === 'felkeres' && kiszolgalo?.felkeres) {
+        // ⭐⭐ D130 (④c2): A FELKÉRÉS — egy kosár tartója (a ④c pótlása) megkér, hogy tartsam a kosarát. A kiszolgáló dönti el (a
+        // kerete, a mélysége, és a hiányt maga is megnézi — később, a címjegyzék-körében); a vonal csak továbbadja, a felkérő
+        // ELLENŐRZÖTT tábla-kulcsával és a címével (onnan kérheti el a kosarat, ha vállalja).
+        const v = await kiszolgalo.felkeres(k, { tabla: kerelemTarsa.tabla,
+          honnan: { cim: kapcsolat.remoteAddress ?? null, port: kapcsolat.remotePort ?? null } });
+        kuld({ uzenet: 'FELKERESVALASZ', ...felkeresValaszAlakja(v) });
+        kiszolgalva = 'felkeres';
       } else if (k?.fajta === 'torzs' && kiszolgalo?.torzs) {
         // ⛔ D84/1: a törzset csak a vállaló adja — a kiszolgáló üres listát mond, ha nem vállalja. ⚠️ És csak azt
         // sorolja fel, ami TÉNYLEG megvan nála: a fájl-hurok az első hiányzónál kilép (a kérő a következőre várna).
@@ -2139,7 +2147,7 @@ export async function kerelemKapcsolaton(kapcsolat, koino, kerelem, beallitas = 
       if (await kerelemUtkozes(sajatKerelem, u, { kapcsolat, sor, kuld, utkozesben: beallitas.utkozesben }) === 'elol') continue;
       return { kiszolgalta: false, utkozes: true, ...bajt() };
     }
-    if (['FEJLECEK', 'TORZS', 'KESZ', 'ATVESZEM', 'FELAJANLASVALASZ', 'KERESESVALASZ'].includes(u.uzenet)) break;
+    if (['FEJLECEK', 'TORZS', 'KESZ', 'ATVESZEM', 'FELAJANLASVALASZ', 'KERESESVALASZ', 'FELKERESVALASZ'].includes(u.uzenet)) break;
   }
   // ⭐ D92/1 (c): a társ nem tartja, de továbbadja — a válasz később, `VALASZ`-ként jön (lépésenként).
   if (u.uzenet === 'ATVESZEM') {
@@ -2156,6 +2164,11 @@ export async function kerelemKapcsolaton(kapcsolat, koino, kerelem, beallitas = 
   if (u.uzenet === 'KERESESVALASZ') {
     for (;;) { const v = await sor.kovetkezo(); if (v.uzenet === 'KESZ') break; }
     return { kiszolgalta: true, kereses: keresesValaszAlakja(u), ...bajt() };
+  }
+  // ⭐⭐ D130 (④c2): a felkérés válasza — utána a megkérdezett KESZ-t mond.
+  if (u.uzenet === 'FELKERESVALASZ') {
+    for (;;) { const v = await sor.kovetkezo(); if (v.uzenet === 'KESZ') break; }
+    return { kiszolgalta: true, felkeres: felkeresValaszAlakja(u), ...bajt() };
   }
   // ⭐ D107 L4 (④c): a felajánlás válasza — utána a tartó KESZ-t mond.
   if (u.uzenet === 'FELAJANLASVALASZ') {

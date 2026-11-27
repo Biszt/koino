@@ -33,8 +33,11 @@ import {
   // ⭐⭐ D130 (④b): a látott tartók és a látott cél
   koinonLatottTartok, koinonLatottCel, kosarSzamlalasSzovege, KOINON_KESES_RAHAGYAS,
   // ⭐⭐ D130 (④c1): a segítő kosarak a nyitó jelben
-  koinonKosarKulcsai, kosarJelSzovege, kosarJelOlvasasa, kozosKoinonKosarak, koinonTeher, KOINON_KOSAR_JEL_KORLAT
+  koinonKosarKulcsai, kosarJelSzovege, kosarJelOlvasasa, kozosKoinonKosarak, koinonTeher, KOINON_KOSAR_JEL_KORLAT,
+  // ⭐⭐ D130 (④c2): a felkérés és a keret
+  kosarTartalmazza, leadandoSegitok, KOINON_KERET_ALAP_MB, KOINON_UJ_SZEREP_KOZ, KOINON_FUGGO_KORLAT
 } from '../js/csere/cimjegyzek.js';
+import { kerelemAlakja, felkeresValaszAlakja, KERELEM_FAJTAK, TOVABBADHATO_FAJTAK } from '../js/csere/kerelem.js';
 import { sajatKuldo, kuldoFogado } from '../js/allapot/osszegzoTartas.js';
 
 const { proba, futtatas } = probaGyujtemeny('A koinon darabjai a cserében (D130 ③c)');
@@ -554,6 +557,48 @@ proba('⭐⭐ D130 (④c1): a SEGÍTŐ kosár a cserében — a nyitó jel viszi
   };
   if (!Object.values(ki).every(Boolean)) process.stdout.write('    (ami bukott: ' + Object.keys(ki).filter((x) => !ki[x]).join(', ')
     + ' · ' + JSON.stringify({ bentK: bentK.length, bentH: bentH.length, r1: r1.b.uj, r3: r3.b.uj, kiD }) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// ===================================
+// ⭐⭐ D130 (④c2): A FELKÉRÉS ÉS A KERET
+// ===================================
+
+// A kosár-tartalmazás (ugyanaz, vagy a belső a külső része), a felkért jelölt magát nem számolja, és a keret fölött a legújabb
+// szerepek esnek ki, amíg a teher a keret alá nem kerül. Rontás: a tartalmazás a mélységet nem nézi → a `tart` bukik; a leadás a
+// legrégebbit adja le → a `leadas` bukik; a jelölt magát is számolja → a `jelolt` bukik.
+proba('⭐⭐ D130 (④c2): a kosár-tartalmazás, a felkért jelölt magát nem számolja, és a keret fölött a LEGÚJABB segítő szerepek esnek ki — amíg a teher a keret alá nem kerül', () => {
+  const k = (melyseg, darab) => ({ melyseg, darab });
+  const ki = {
+    tart: kosarTartalmazza(k(1, 1n), k(1, 1n)) && kosarTartalmazza(k(1, 1n), k(3, 6n)) && kosarTartalmazza(k(1, 1n), k(3, 7n))
+      && !kosarTartalmazza(k(1, 1n), k(3, 3n)) && !kosarTartalmazza(k(3, 6n), k(1, 1n)) && !kosarTartalmazza(null, k(1, 1n)),
+    jelolt: koinonLatottTartok({ tarsak: [{ cim: '10.0.0.1', port: 1 }], sajatIs: false }) === 1
+      && koinonLatottTartok({ tarsak: [], sajatIs: false }) === 0 && koinonLatottTartok({ tarsak: [] }) === 1,
+    leadas: JSON.stringify(leadandoSegitok({ segitok: [{ kulcs: 'regi', ido: 1, bajt: 30 }, { kulcs: 'uj', ido: 3, bajt: 30 },
+      { kulcs: 'kozep', ido: 2, bajt: 30 }], osszBajt: 100, keretBajt: 50 })) === '["uj","kozep"]',
+    alatta: leadandoSegitok({ segitok: [{ kulcs: 'a', ido: 1, bajt: 30 }], osszBajt: 50, keretBajt: 50 }).length === 0,
+    allandok: KOINON_KERET_ALAP_MB === 256 && KOINON_UJ_SZEREP_KOZ === 3600000 && KOINON_FUGGO_KORLAT === 4
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// A felkérés kérelme: koinon-kosár az 1. mélységtől (a 0. és a nem darab-kulcs nem), nem adható tovább; a válasz három állapot,
+// minden más „elutasítva”. Rontás: a 0. mélységű kosarat is elfogadja → a `nulla` bukik; a felkérés továbbadható → a `tovabb` bukik.
+proba('⭐⭐ D130 (④c2): a felkérés kérelme egy koinon-kosár az 1. mélységtől, nem adható tovább; a válasz megnézem / már tartom / elutasítva', () => {
+  const ki = {
+    fajta: KERELEM_FAJTAK.includes('felkeres'),
+    jo: JSON.stringify(kerelemAlakja({ fajta: 'felkeres', kulcs: koinonDarabKulcsa(2, 3n), n: 5 }))
+      === JSON.stringify({ fajta: 'felkeres', kulcs: koinonDarabKulcsa(2, 3n) }),
+    nulla: kerelemAlakja({ fajta: 'felkeres', kulcs: koinonDarabKulcsa(0, 0n) }) === null,
+    nemDarab: kerelemAlakja({ fajta: 'felkeres', kulcs: gyokerDarabKulcsa(2, 3) }) === null
+      && kerelemAlakja({ fajta: 'felkeres', kulcs: egyezmenyAz('x') }) === null,
+    tovabb: !TOVABBADHATO_FAJTAK.includes('felkeres'),
+    valasz: felkeresValaszAlakja({ allapot: 'megnezem' }).allapot === 'megnezem' && felkeresValaszAlakja({ allapot: 'mar', ok: ' x ' }).ok === 'x'
+      && felkeresValaszAlakja({ allapot: 'akarmi' }).allapot === 'elutasitva' && felkeresValaszAlakja(null).allapot === 'elutasitva'
+      && felkeresValaszAlakja({ allapot: 'elutasitva', ok: 'y'.repeat(500) }).ok.length === 160
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
   return Object.values(ki).every(Boolean);
 });
 
