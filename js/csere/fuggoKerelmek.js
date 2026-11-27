@@ -30,7 +30,11 @@ export const MEDDIG_KORLAT = 31 * 24 * 60 * 60 * 1000;
 const KULCS_MINTA = /^[A-Za-z0-9_-]{43}$/;
 /** ⭐ D112 ③ (F6): a háttér-kérés ennyivel hátrébb áll a rangsorban (több, mint a célok száma — minden előtér előtte). */
 const HATTER_RANG = 1000;
-const FAJTAK = new Set(['fejlecek', 'torzs', 'szelet', 'felajanlas', 'kereses']);
+// ⭐⭐ D130 (④c3): a felkérés is — a pótló kérdezése (`kerdes`: a jelöltek próba-felkérése, a minta címeire és a kopogtató úton) és
+// az igazi felkérés (a kiválasztott jelöltnek — csak a pontos címén vagy a kötése szerint, egy azonos IP-jű másik készüléknek nem).
+const FAJTAK = new Set(['fejlecek', 'torzs', 'szelet', 'felajanlas', 'kereses', 'felkeres']);
+/** Az igazi felkérés (nem a kérdezés) — csak a kiválasztott jelöltnek szól. */
+const csakNeki = (x) => x.fajta === 'felkeres' && x.kerdes !== true;
 
 /** Üres nyilvántartás. */
 export function ujNyilvantartas() {
@@ -82,14 +86,15 @@ function kerelemAlakja(x) {
   const meddig = Number.isFinite(x.meddig) ? Math.min(x.meddig, ido + MEDDIG_KORLAT) : null;
   return { az: x.az, fajta: x.fajta, kulcs: x.kulcs, n: Number.isInteger(x.n) ? x.n : 20, m: x.m === true,
     ...(utan ? { utan } : {}), ...(ker ? { ker } : {}), ...(x.hatter === true ? { hatter: true } : {}),
+    ...(x.fajta === 'felkeres' && x.kerdes === true ? { kerdes: true } : {}),
     ido, probalt: Number.isInteger(x.probalt) ? x.probalt : 0, celok, kopogtatok, ...(meddig !== null ? { meddig } : {}) };
 }
 
 /** Ugyanaz a kérelem-e (fajta + kulcs + a folytatás helye + a kérdés) — egy folytatás, egy másik kérdés KÜLÖN kérelem. */
 const kerKulcs = (k) => (k ? k.k + '|' + k.s + '|' + k.darab + '|' + k.kerdes : null);
-function ugyanaz(x, fajta, kulcs, utan, ker = null) {
+function ugyanaz(x, fajta, kulcs, utan, ker = null, kerdes = false) {
   return x.fajta === fajta && x.kulcs === kulcs && (x.utan?.az ?? null) === (utan?.az ?? null) && (x.utan?.p ?? null) === (utan?.p ?? null)
-    && kerKulcs(x.ker) === kerKulcs(ker);
+    && kerKulcs(x.ker) === kerKulcs(ker) && (x.kerdes === true) === (kerdes === true);   // ⭐⭐ D130 (④c3): a kérdezés külön kérelem
 }
 
 /** Egy (lemezről olvasott) nyilvántartás alakja — a hibás bejegyzés kiesik, a lista korlátos. */
@@ -107,11 +112,11 @@ export function nyilvantartasAlakja(x) {
  * @returns {{nyilvantartas: Object, az: string, uj: boolean}}
  */
 export function kerelemFelvetele(ny, { fajta, kulcs, n = 20, m = false, utan = null, ker = null, hatter = false, celok = [],
-  kopogtatok = [], meddig = null }, most, azonosito) {
+  kopogtatok = [], meddig = null, kerdes = false }, most, azonosito) {
   const alap = nyilvantartasAlakja(ny);
   const utanJo = utanAlakja(utan);
   const kerJo = kerAlakja(ker);
-  const meglevo = alap.fuggo.find((x) => ugyanaz(x, fajta, kulcs, utanJo, kerJo));
+  const meglevo = alap.fuggo.find((x) => ugyanaz(x, fajta, kulcs, utanJo, kerJo, kerdes));
   if (meglevo) {
     const celKulcs = (c) => c.hoszt + ':' + c.port;
     const lattuk = new Set(meglevo.celok.map(celKulcs));
@@ -128,7 +133,8 @@ export function kerelemFelvetele(ny, { fajta, kulcs, n = 20, m = false, utan = n
     return { nyilvantartas: alap, az: meglevo.az, uj: false };
   }
   const uj = kerelemAlakja({ az: azonosito, fajta, kulcs, n, m, ...(utanJo ? { utan: utanJo } : {}), ...(kerJo ? { ker: kerJo } : {}),
-    ...(hatter ? { hatter: true } : {}), ido: most, probalt: 0, celok, kopogtatok, ...(Number.isFinite(meddig) ? { meddig } : {}) });
+    ...(hatter ? { hatter: true } : {}), ...(kerdes === true ? { kerdes: true } : {}), ido: most, probalt: 0, celok, kopogtatok,
+    ...(Number.isFinite(meddig) ? { meddig } : {}) });
   if (!uj) throw new Error('hibás kérelem: ' + fajta + ' ' + kulcs);
   alap.fuggo.push(uj);
   while (alap.fuggo.length > FUGGO_KORLAT) {
@@ -168,10 +174,10 @@ export function tarshozIllo(ny, cim, port, kiveve = () => false, kotes = null) {
   // ⭐ D102 (J4): a kérelmek céljai RANG szerint állnak (elöl az, aki az ágból a legtöbbet tartja) — egy társ azt viszi,
   // amelyiknek a listáján ő áll a legelöl; holtversenyben a legrégebbit.
   // ⭐ D112 ③ (F6): a háttér-kérés (a felderítés) rangja az előtér után — egy társnál a lap kérései előbb mennek.
-  const legjobb = (illik) => {
+  const legjobb = (illik, kihagy = () => false) => {
     let ki = null, rang = Infinity;
     for (const x of alap.fuggo) {
-      if (kiveve(x)) continue;
+      if (kiveve(x) || kihagy(x)) continue;
       const i = x.celok.findIndex(illik);
       const r = i + (x.hatter ? HATTER_RANG : 0);
       if (i >= 0 && r < rang) { ki = x; rang = r; }
@@ -179,8 +185,9 @@ export function tarshozIllo(ny, cim, port, kiveve = () => false, kotes = null) {
     return ki;
   };
   const kotesbe = kotesIlleszto(kotes);
+  // ⭐⭐ D130 (④c3): az igazi felkérés az azonos IP-n nem — egy router mögötti MÁSIK készülék nem a kiválasztott jelölt
   return legjobb((c) => c.hoszt === cim && c.port === Number(port)) ?? (kotesbe ? legjobb(kotesbe) : null)
-    ?? legjobb((c) => c.hoszt === cim);
+    ?? legjobb((c) => c.hoszt === cim, csakNeki);
 }
 
 /**
@@ -218,7 +225,18 @@ export function tarshozIllok(ny, cim, port, kiveve = () => false, korlat = 16, k
   // ⭐ A ⑦: a társ a kötése szerint (`kotesIlleszto`), csak aztán az azonos IP
   const kotesbe = kotesIlleszto(kotes);
   const kotesben = kotesbe ? rangos(kotesbe) : [];
-  return (kotesben.length ? kotesben : rangos((c) => c.hoszt === cim)).slice(0, korlat);
+  return (kotesben.length ? kotesben : rangos((c) => c.hoszt === cim).filter((x) => !csakNeki(x))).slice(0, korlat);
+}
+
+/**
+ * ⭐⭐ D130 (④c3): egy cél kivétele egy függő kérelemből — a pótló kérdezése egy jelöltnek egyszer szól (aki felelt, annak a címét
+ * nem kopogjuk tovább ezzel a kérelemmel).
+ */
+export function celKivetele(ny, az, cim, port) {
+  const alap = nyilvantartasAlakja(ny);
+  const x = alap.fuggo.find((f) => f.az === az);
+  if (x) x.celok = x.celok.filter((c) => !(c.hoszt === cim && c.port === Number(port)));
+  return alap;
 }
 
 /** Egy függő kérelem lezárása (megjött, vagy feladtuk) — a kész naplóba, rövid összegzéssel. */

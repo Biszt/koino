@@ -35,9 +35,13 @@ import {
   // ⭐⭐ D130 (④c1): a segítő kosarak a nyitó jelben
   koinonKosarKulcsai, kosarJelSzovege, kosarJelOlvasasa, kozosKoinonKosarak, koinonTeher, KOINON_KOSAR_JEL_KORLAT,
   // ⭐⭐ D130 (④c2): a felkérés és a keret
-  kosarTartalmazza, leadandoSegitok, KOINON_KERET_ALAP_MB, KOINON_UJ_SZEREP_KOZ, KOINON_FUGGO_KORLAT
+  kosarTartalmazza, leadandoSegitok, KOINON_KERET_ALAP_MB, KOINON_UJ_SZEREP_KOZ, KOINON_FUGGO_KORLAT,
+  // ⭐⭐ D130 (④c3): a pótlás
+  potlasSorsolasa, veletlenDarab, potlasJeloltjei, nyitasTerhe, potlasValasztasa, potlasDonthet, gyokerJelSzovege,
+  KOINON_JELOLT_KORLAT, KOINON_POTLAS_KOZ, KOINON_JELOLT_IDO
 } from '../js/csere/cimjegyzek.js';
 import { kerelemAlakja, felkeresValaszAlakja, KERELEM_FAJTAK, TOVABBADHATO_FAJTAK } from '../js/csere/kerelem.js';
+import { kerelemFelvetele, nyilvantartasAlakja, tarshozIllo, celKivetele, ujNyilvantartas } from '../js/csere/fuggoKerelmek.js';
 import { sajatKuldo, kuldoFogado } from '../js/allapot/osszegzoTartas.js';
 
 const { proba, futtatas } = probaGyujtemeny('A koinon darabjai a cserében (D130 ③c)');
@@ -599,6 +603,89 @@ proba('⭐⭐ D130 (④c2): a felkérés kérelme egy koinon-kosár az 1. mélys
       && felkeresValaszAlakja({ allapot: 'elutasitva', ok: 'y'.repeat(500) }).ok.length === 160
   };
   if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// ===================================
+// ⭐⭐ D130 (④c3): A PÓTLÁS
+// ===================================
+
+// A sorsolás (1/n), a minta véletlen darabja, a jelöltek a mintából (a saját cím+port és a kizártak nélkül — a velem egy IP-n, más
+// porton lévő jelölt marad), és a döntés feltétele (a minta kimerült, vagy letelt az idő). Rontás: a sorsolás n helyett 1/2 →
+// a `sorsolas` bukik; a saját címem csak IP szerint → az `egyIp` bukik; a döntés megvárja a 10-et a kis mintán is → a `kimerult` bukik.
+proba('⭐⭐ D130 (④c3): a sorsolás 1/n, a minta jelöltjei (a saját cím:port és a kizártak nélkül, címenként egyszer), és a döntés: a minta kimerült, vagy letelt az idő', () => {
+  const allando = (x) => () => x;
+  const sajat = [{ cim: '127.0.0.1', port: 7000 }];
+  const minta = [{ cim: '127.0.0.1', port: 7000 }, { cim: '127.0.0.1', port: 7001 }, { cim: '::ffff:10.0.0.1', port: 9 },
+    { cim: '10.0.0.1', port: 9 }, { cim: '10.0.0.2', port: 9 }, { cim: '10.0.0.3', port: 0 }, { cim: '', port: 5 }];
+  const j = potlasJeloltjei({ minta, sajat, kizart: [{ cim: '10.0.0.2', port: 9 }], veletlen: allando(0) });
+  const nagy = potlasJeloltjei({ minta: Array.from({ length: 30 }, (_, i) => ({ cim: '10.1.0.' + i, port: 1 })) });
+  const most = 1e12;
+  const ki = {
+    sorsolas: potlasSorsolasa(1, allando(0.999)) && potlasSorsolasa(4, allando(0.24)) && !potlasSorsolasa(4, allando(0.25))
+      && potlasSorsolasa(0, allando(0.999)) && potlasSorsolasa(NaN, allando(0.5)) && !potlasSorsolasa(25, allando(0.05)),
+    darab: veletlenDarab(0, [255]) === 0n && veletlenDarab(3, [255]) === 7n && veletlenDarab(9, [255, 255]) === 511n,
+    egyIp: j.length === 2 && j.some((x) => x.cim === '127.0.0.1' && x.port === 7001) && j.some((x) => x.cim === '10.0.0.1' && x.port === 9),
+    kizart: !j.some((x) => x.cim === '10.0.0.2'),
+    sorrend: nagy.length === 30 && new Set(nagy.map((x) => x.cim)).size === 30,
+    kimerult: potlasDonthet({ felelt: 2, minta: 2, kezdet: most, most }) && !potlasDonthet({ felelt: 1, minta: 2, kezdet: most, most })
+      && potlasDonthet({ felelt: 10, minta: 50, kezdet: most, most }) && !potlasDonthet({ felelt: 9, minta: 50, kezdet: most, most }),
+    ido: potlasDonthet({ felelt: 0, minta: 5, kezdet: most - KOINON_JELOLT_IDO, most })
+      && !potlasDonthet({ felelt: 0, minta: 5, kezdet: most - KOINON_JELOLT_IDO + 1, most }),
+    allandok: KOINON_JELOLT_KORLAT === 10 && KOINON_POTLAS_KOZ === 3600000 && KOINON_JELOLT_IDO === 1800000
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ ki, j }) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// A jelölt terhe a nyitó jeléből (`knd` + `knk`, a mélységgel súlyozva), és a választás: a „megnézem”-et mondók közül a legkisebb
+// terhű — a már tartó és az elutasító a kisebb terhével sem; holtversenyben a korábbi; az ismeretlen terhű a végén. Rontás: a választás
+// a LEGTÖBBET őrzőt veszi → a `legkisebb` bukik; a „már tartja” is választható → a `csakMegnezem` bukik; a teher a `knk`-t nem nézi →
+// a `teher` bukik.
+proba('⭐⭐ D130 (④c3, KO15 (A)): a jelölt terhe a nyitó jeléből, és a választás — a „megnézem”-et mondók közül a legkevesebbet őrző; holtversenyben a korábbi', () => {
+  const knd = (m) => gyokerJelSzovege(m, ['a', 'b', 'c']);
+  const knk = (m, d) => kosarJelSzovege({ melyseg: m, darab: d, lenyomatok: ['x', 'y', 'z'] });
+  const j = (az, allapot, teher, ido) => ({ az, allapot, teher, ido });
+  const ki = {
+    teher: nyitasTerhe({ knd: knd(1) }) === 0.5 && nyitasTerhe({ knd: knd(1), knk: [knk(2, 1n)] }) === 0.75
+      && nyitasTerhe({ knd: knd(0) }) === 1 && nyitasTerhe({ knd: knd(2), knk: [knk(2, 1n), 'hibás', knk(0, 0n)] }) === 0.5,
+    nincsJel: nyitasTerhe(null) === null && nyitasTerhe({ knk: [knk(2, 1n)] }) === null,
+    korlat: nyitasTerhe({ knd: knd(1), knk: Array.from({ length: 40 }, () => knk(5, 1n)) }) === 0.5 + 32 / 32,
+    legkisebb: potlasValasztasa([j('B', 'megnezem', 0.75, 1), j('C', 'megnezem', 0.5, 2), j('D', 'megnezem', 0.625, 3)])?.az === 'C',
+    csakMegnezem: potlasValasztasa([j('M', 'mar', 0.1, 1), j('E', 'elutasitva', 0.1, 2), j('C', 'megnezem', 0.5, 3)])?.az === 'C',
+    holtverseny: potlasValasztasa([j('X', 'megnezem', 0.5, 5), j('Y', 'megnezem', 0.5, 2)])?.az === 'Y',
+    ismeretlen: potlasValasztasa([j('N', 'megnezem', null, 1), j('C', 'megnezem', 0.9, 2)])?.az === 'C'
+      && potlasValasztasa([j('N', 'megnezem', null, 1)])?.az === 'N',
+    senki: potlasValasztasa([j('M', 'mar', 0.1, 1)]) === null && potlasValasztasa([]) === null
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// A kérelem és a függő nyilvántartás: a kérdezés jele (`kerdes`) a kérelemben és a nyilvántartásban megmarad; a kérdezés és az igazi
+// felkérés KÜLÖN kérelem (ugyanarra a kosárra is); az igazi felkérés egy azonos IP-jű, más portú társnak nem szól (a kérdezés igen), a
+// pontos címre igen; a cél kivétele csak azt a címet veszi ki. Rontás: a `kerdes` a nyilvántartásban elvész → a `nyilvantartas` bukik;
+// az igazi felkérés az azonos IP-re is → az `ipre` bukik.
+proba('⭐⭐ D130 (④c3): a kérdezés jele a kérelemben és a függő nyilvántartásban; a kérdezés és az igazi felkérés külön kérelem; az igazi csak a pontos címre szól', () => {
+  const kulcs = koinonDarabKulcsa(1, 0n);
+  let ny = ujNyilvantartas();
+  const kerdezes = kerelemFelvetele(ny, { fajta: 'felkeres', kulcs, kerdes: true, celok: [{ hoszt: '10.0.0.1', port: 1 }, { hoszt: '10.0.0.2', port: 1 }],
+    kopogtatok: [{ fajta: 'gyoker', kulcs: '0:0' }] }, 1, 'kerdezes-az');
+  ny = kerdezes.nyilvantartas;
+  const igazi = kerelemFelvetele(ny, { fajta: 'felkeres', kulcs, celok: [{ hoszt: '10.0.0.5', port: 7 }] }, 2, 'igazi-az');
+  ny = nyilvantartasAlakja(JSON.parse(JSON.stringify(igazi.nyilvantartas)));
+  const kivett = celKivetele(ny, 'kerdezes-az', '10.0.0.1', 1);
+  const ki = {
+    kerelem: kerelemAlakja({ fajta: 'felkeres', kulcs, kerdes: true })?.kerdes === true
+      && !('kerdes' in (kerelemAlakja({ fajta: 'felkeres', kulcs, kerdes: 'igen' }) ?? {})),
+    kulon: kerdezes.uj && igazi.uj && ny.fuggo.length === 2,
+    nyilvantartas: ny.fuggo.find((x) => x.az === 'kerdezes-az')?.kerdes === true && !('kerdes' in (ny.fuggo.find((x) => x.az === 'igazi-az') ?? {})),
+    ipre: tarshozIllo(ny, '10.0.0.5', 8) === null && tarshozIllo(ny, '10.0.0.5', 7)?.az === 'igazi-az'
+      && tarshozIllo(ny, '10.0.0.1', 9)?.az === 'kerdezes-az',
+    kivetel: JSON.stringify(kivett.fuggo.find((x) => x.az === 'kerdezes-az').celok) === JSON.stringify([{ hoszt: '10.0.0.2', port: 1 }])
+      && kivett.fuggo.find((x) => x.az === 'igazi-az').celok.length === 1
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ ki, ny }) + ')\n');
   return Object.values(ki).every(Boolean);
 });
 

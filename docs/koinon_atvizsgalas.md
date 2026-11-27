@@ -426,8 +426,20 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
      mérete; a keret fölött a legújabb segítő szerepeim leadom (`leadandoSegitok`) — a címjegyzék-kör és a `koinon keret` is. Kézzel:
      `koinon felker <m:d> <cím> <port>`, `koinon felkeresek`; a `koinon kosarak` a szerep eredetét, a váró felkéréseket és a keretet is
      mutatja; az őrjárat naplója kimondja (🤝);
-   - ④c3 **a pótlás** — a látott cél alatt 1/n eséllyel, óránként legfeljebb egy; a jelöltek egy véletlen gyökér-darab témájáról (KO16
-     (A)), legfeljebb 10, közvetlen kopogással és a kopogtató úton; a nyitó jelükből a legkevesebbet őrző kapja a felkérést;
+   - ✅ **④c3 a pótlás** (2026-11-27) — a címjegyzék-kör a cél alatti kosaraimon SORSOL (kosaranként óránként egyszer, 1/n —
+     `cimjegyzek.js` `potlasSorsolasa`); a nyertes, ha óránként még nem kezdett pótlást, egy véletlen gyökér-darab témájának hirdetőit
+     veszi mintának (KO16 (A) — `veletlenDarab`, `potlasJeloltjei`: a saját cím:port és a kosár látott tartói nélkül), és legfeljebb 10
+     jelöltet KÉRDEZ meg egy függő kérelemmel (`felkeres` + `kerdes` — a próba-felkérés: a jelölt a gyors ellenőrzést elvégzi, de nem
+     jegyzi fel): a címükre kopog, és a minta témájának párján a kopogtató úton jelentkezik. ⭐ A terhüket a válasz előtti NYITÓ JELÜK
+     adja (a kérő a kérelem útján eddig átlépte — `vonal.js` most megjegyzi: `tarsKosarJele`; `nyitasTerhe`). Ha a minta kimerült (mind
+     felelt, legfeljebb 10) vagy 30 perc letelt (`potlasDonthet`), a legkevesebbet őrző (KO15 (A) — `potlasValasztasa`: a „megnézem”-et
+     mondók közül; holtversenyben a korábbi) kapja az IGAZI felkérést: egy újabb függő kérelem csak az ő címére (és a készülék-témáján, a
+     NAT mögé) — ⛔ egy azonos IP-jű MÁSIK készüléknek nem (`fuggoKerelmek.js` `csakNeki`; a bekopogó csak az ő IP-jéről). A helyi
+     jegyzék: `<koino>/koinon-potlas.json` (`fajlTar.js` `koinonPotlasTarolo` — a sorsolás, a folyó pótlás, az utolsó eredménye);
+     egyszerre egy pótlás. Kézzel: `koinon potol <m:d>` (a sorsolás és az ütem nélkül); a `koinon kosarak` és az őrjárat naplója (🧺)
+     kimondja. ⚠️ *Szándékos:* a jelöltek címenként (cím ÉS port) számítanak, nem IPv4-enként (egy router mögötti két telefon két
+     jelölt) — egy hamis hirdető így elfoglalhatja egy minta helyeit, de ezzel csak egy pótlást ront el (a következő órában más véletlen
+     darab a minta), tartót nem vesz el (a 6. pont);
    - ④c4 **a mélység változása** (a 7. pont): mi legyen kettéváláskor a kosár másik felével — ⏸️ **KO18**, előtte mérés (a teher a
      koino növekedésével).
 4. **④d A próba:** helyi DHT-hálóval (`halo.belepo`), rontásokkal: hamis hirdető, hamis felkérő, megtelt jelölt, mélység-váltás, a
@@ -610,3 +622,14 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
   keret és a leadás fölötte; kézzel `koinon felker | felkeresek | keret`. Három próba (két tiszta, egy a parancssoron egy hamis DHT-vel:
   már tartja, nem a mélységén, nincs hiány, vállalja, vár az ütem miatt, a keret betelt), mindhárom rontásra (nem nézi a hiányt; nincs
   ütem; a gyors ellenőrzés nem nézi a már tartottat) bukik. ⏭️ ④c3 a pótlás.
+- **2026-11-27** — ✅ **④c3: a pótlás** (Csaba: „Igen, jöhet a ④c3”): a sorsolás (kosaranként óránként 1/n), a minta egy véletlen
+  gyökér-darab hirdetőiből (KO16 (A)), a kérdezés (próba-felkérés legfeljebb 10 jelöltnek — függő kérelem, közvetlen kopogással és a
+  minta párján), a jelölt terhe a válasz előtti nyitó jeléből, és az igazi felkérés a legkevesebbet őrzőnek (KO15 (A) — csak a pontos
+  címére); `koinon-potlas.json`, `koinon potol`. Négy próba (három tiszta a `koinonDarabProba`-ban: a sorsolás, a minta és a döntés; a
+  teher és a választás; a kérdezés jele és a nyilvántartás — egy a parancssoron: egy hamis DHT gyökér-darab témáján két jelölt-postaláda,
+  B terhe 75%, C-é 50% → az őrjárat magától kisorsolja, mindkettőt megkérdezi, C-t kéri fel, B nem jegyez fel semmit, C vállalja).
+  Mind a 11 rontásra (7 a tiszta próbákon: a sorsolás 1/2; a saját cím IP szerint; a döntés a kis mintán is 10-re vár; a `kerdes`
+  elvész; az igazi felkérés az azonos IP-re is; a teher a `knk`-t nem nézi; a „már tartja” is választható — 4 a parancssorin: a
+  legtöbbet őrző; a jelölt a kérdezést feljegyzi; a saját címem nem marad ki; a vonal nem jegyzi meg a nyitó jelet) bukik. ⚠️ A
+  kopogtató-vihar: a kérdezés legfeljebb 10 választ gyűjt, de a minta párján a többi hirdető még 30 percig kopog (a csere a
+  kiszolgálási keret alatt — D109) — a ④d méri. ⏭️ ④c4 a mélység változása (⏸️ KO18, előtte mérés), ④d a próba.

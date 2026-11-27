@@ -2102,6 +2102,21 @@ export async function szeletKapcsolaton(tar, koino, kapcsolat, entitas, tovabb =
 }
 
 /**
+ * ⭐⭐ D130 (④c3): a társ NYITÓ JELÉBŐL, amit a pótló a jelöltről tudni akar — a tartott kosarai (`knd` — a saját darabja, `knk` — a
+ * segítő kosarai; a terhét a hívó számolja: `cimjegyzek.js` `nyitasTerhe`) és a tábla-aláírója. ⚠️ Az aláíró itt ELLENŐRIZETLEN: csak
+ * a kopogtató témájához kell (a kiválasztott jelölt készülék-témáján jelentkezünk — ha hamis, legfeljebb nem talál meg).
+ * @returns {{knd: string|null, knk: Array<string>, alairo: string|null}|null}
+ */
+function tarsKosarJele(n) {
+  if (!n || typeof n !== 'object') return null;
+  return {
+    knd: typeof n.knd === 'string' ? n.knd.slice(0, 80) : null,
+    knk: Array.isArray(n.knk) ? n.knk.filter((x) => typeof x === 'string').slice(0, KOINON_KOSAR_JEL_KORLAT) : [],
+    alairo: typeof n.tabla?.alairo === 'string' && /^[A-Za-z0-9_-]{43}$/.test(n.tabla.alairo) ? n.tabla.alairo : null
+  };
+}
+
+/**
  * ⭐⭐ EGY KÉRELEM (D92/6) EGY MÁR MEGNYITOTT KAPCSOLATON — a FEJLÉCEK és a TÖRZS (a szeletet a `szeletKapcsolaton`
  * kéri). A szállítás és a tartalom a hívóé: a minta-helyeket a `mintaValaszto` mondja meg (a gyökerek ismeretében),
  * a törzs fájljait a `blob`-ba hozza (ugyanazon a kapcsolaton, egymás után). ⚠️ Az ellenőrzés a hívóé
@@ -2131,14 +2146,19 @@ export async function kerelemKapcsolaton(kapcsolat, koino, kerelem, beallitas = 
     ...(kerelem.fajta === 'felajanlas' ? { bejegyzesek: kerelem.bejegyzesek ?? [], kiserok: kerelem.kiserok ?? [] } : {}),
     // ⭐ A kereső-réteg ⑤: a kérdés helye és szövege.
     ...(kerelem.fajta === 'kereses' ? { k: kerelem.k, s: kerelem.s ?? 0, darab: kerelem.darab ?? '0', kerdes: kerelem.kerdes } : {}),
+    // ⭐⭐ D130 (④c3): a felkérés kérdezés-e (a pótló próba-felkérése — a megkérdezett nem jegyzi fel)
+    ...(kerelem.fajta === 'felkeres' && kerelem.kerdes === true ? { kerdes: true } : {}),
     ...(beallitas.ki ? { ki: beallitas.ki } : {}),
     ...(beallitas.tabla ? { tabla: beallitas.tabla.kulcs, aa: beallitas.tabla.aa } : {}) };
   kuld(sajatKerelem);
   const bajt = () => ({ bajtKuldott: kapcsolat.bytesWritten, bajtKapott: kapcsolat.bytesRead });
   // A NYITAS-t (és bármi mást) átlépjük, amíg a válasz meg nem jön. ⭐ D93/3: a KELL-re a tagsági csomagunk megy.
+  // ⭐⭐ D130 (④c3): a NYITAS-t meg is jegyezzük — a felkérés válaszához a társ tartott kosarai (a pótló ebből látja a terhét).
   let u;
+  let tarsNyitas = null;
   for (;;) {
     u = await sor.kovetkezo();
+    if (u.uzenet === 'NYITAS') tarsNyitas = u;
     // ⭐⭐ D124: a társ nyelve (a NYITAS-ából, vagy ütközésnél a kérelméből) — ha nincs közös, megnevezett hibával állunk meg.
     if (u.uzenet === 'NYITAS' || u.uzenet === 'KERELEM') await tarsNyelvenekEllenorzese(kapcsolat, sor, u, sajatNy, keszlet);
     if (u.uzenet === 'KELL') { kuld(await tagsagValasz(beallitas)); continue; }
@@ -2168,7 +2188,7 @@ export async function kerelemKapcsolaton(kapcsolat, koino, kerelem, beallitas = 
   // ⭐⭐ D130 (④c2): a felkérés válasza — utána a megkérdezett KESZ-t mond.
   if (u.uzenet === 'FELKERESVALASZ') {
     for (;;) { const v = await sor.kovetkezo(); if (v.uzenet === 'KESZ') break; }
-    return { kiszolgalta: true, felkeres: felkeresValaszAlakja(u), ...bajt() };
+    return { kiszolgalta: true, felkeres: felkeresValaszAlakja(u), jel: tarsKosarJele(tarsNyitas), ...bajt() };
   }
   // ⭐ D107 L4 (④c): a felajánlás válasza — utána a tartó KESZ-t mond.
   if (u.uzenet === 'FELAJANLASVALASZ') {

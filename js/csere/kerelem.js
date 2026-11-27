@@ -146,9 +146,11 @@ export function kerelemAlakja(u) {
   // ⭐⭐ D130 (④c2): A FELKÉRÉS — „tartsd ezt a kosarat” (a ④c pótlása küldi): a kulcs egy koinon-kosár az 1. mélységtől (a 0. az
   // egész koinon — azt mindenki tartja). Hogy vállalja-e, a megkérdezett maga dönti el (a kerete, a mélysége, és maga is megnézi a
   // hiányt — `koino.js` `kerelemKiszolgaloja().felkeres`).
+  // ⭐⭐ D130 (④c3): a `kerdes` a pótló PRÓBA-FELKÉRÉSE — a megkérdezett a gyors ellenőrzést elvégzi, de nem jegyzi fel (az igazit
+  // csak a legkevesebbet őrző jelölt kapja).
   if (u.fajta === 'felkeres') {
     const d = typeof kulcs === 'string' ? koinonDarabBol(kulcs) : null;
-    return d && d.melyseg >= 1 ? { fajta: 'felkeres', kulcs } : null;
+    return d && d.melyseg >= 1 ? { fajta: 'felkeres', kulcs, ...(u.kerdes === true ? { kerdes: true } : {}) } : null;
   }
   if (u.fajta === 'felajanlas') {
     if (!gyokerE && !keresoRegioBol(kulcs)) return null;

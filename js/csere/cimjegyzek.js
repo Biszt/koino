@@ -682,6 +682,158 @@ export function leadandoSegitok({ segitok = [], osszBajt = 0, keretBajt = Infini
   return ki;
 }
 
+// ===================================
+// ⭐⭐ D130 (④c3 — KO15 (A), KO16 (A), a 98. mérés; `koinon_atvizsgalas.md` 11., 1., 4., 5. pont): A PÓTLÁS
+// ===================================
+//
+// Ha egy kosaramnak a látott cél alatt van a tartója, a kosár online tartói — egymásról nem tudva — SORSOLNAK: mindegyik
+// kosaranként óránként egyszer, 1/n eséllyel (n: a látott tartók), így átlagosan egy pótol (a 98. mérés 1. pontja: a kép a 97.-é).
+// A pótló egy VÉLETLEN GYÖKÉR-DARAB témájának hirdetőit veszi mintának (KO16 (A) — minden készülék a saját gyökér-darabját hirdeti,
+// így a most fent lévők egyenletes mintája), legfeljebb 10-et kérdez meg: közvetlen kopogással a címükön, és a minta témájának
+// PÁRJÁN a kopogtató úton (a NAT mögöttiek ott látják, és felé kopognak). A kérdezés egy PRÓBA-FELKÉRÉS (`kerdes`): a jelölt a gyors
+// ellenőrzését elvégzi (a kerete, a mélysége, tartja-e már), de nem jegyzi fel; a válaszát a NYITÓ JELE kíséri, amiből a pótló a
+// terhét látja (`nyitasTerhe`). Az igazi felkérést csak a legkevesebbet őrző kapja (KO15 (A)) — a hiányt ő maga is megnézi (④c2).
+// ⚠️ Korlát: egy készülék óránként legfeljebb egy pótlást kezd (a 6. pont — az elnémított téma is legfeljebb ennyi terhet hoz).
+// ⚠️ A jelöltek címenként (cím ÉS port) számítanak, nem IPv4-enként: egy router mögötti két telefon két jelölt. Egy hamis hirdető
+// így elfoglalhatja egy minta helyeit — de ezzel csak EGY pótlást ront el (a következő órában egy másik véletlen darab a minta),
+// tartót nem vesz el (a 6. pont).
+
+/** KO15 (A): ennyi jelölt közül a legkevesebbet őrző kapja a felkérést. */
+export const KOINON_JELOLT_KORLAT = 10;
+/** Kosaranként óránként egy sorsolás, és készülékenként óránként legfeljebb egy pótlás (a 98. mérés üteme; a 6. pont korlátja). */
+export const KOINON_POTLAS_KOZ = 60 * 60 * 1000;
+/**
+ * A jelöltek gyűjtése legfeljebb ennyi ideig tart, ha a minta nem merül ki előbb: a kopogtató út hirdetői ~20 percenként néznek rá
+ * a párra (a címjegyzék-körük), és onnan 30 percig kopognak.
+ */
+export const KOINON_JELOLT_IDO = 30 * 60 * 1000;
+
+/**
+ * A sorsolás: a kosár n látott tartója közül átlagosan egy pótol — mindegyik 1/n eséllyel (n legalább 1).
+ * @param {number} latott
+ * @param {Function} [veletlen] - [0, 1) közötti szám
+ * @returns {boolean}
+ */
+export function potlasSorsolasa(latott, veletlen = Math.random) {
+  const n = Number.isFinite(latott) && latott >= 1 ? latott : 1;
+  return veletlen() < 1 / n;
+}
+
+/**
+ * Egy véletlen darab a mélységen (a minta gyökér-darabja): a bájtok számának alsó `melyseg` bitje — a 0. mélységen 0.
+ * @param {number} melyseg
+ * @param {Uint8Array} bajtok - legalább ⌈melyseg / 8⌉ véletlen bájt
+ * @returns {bigint}
+ */
+export function veletlenDarab(melyseg, bajtok) {
+  if (!Number.isInteger(melyseg) || melyseg <= 0) return 0n;
+  const hex = Buffer.from(bajtok ?? []).toString('hex');
+  return BigInt.asUintN(melyseg, BigInt('0x' + (hex || '0')));
+}
+
+/**
+ * A minta jelöltjei: címenként (cím:port) egyszer, a saját címeim és a kizártak (a kosár látott tartói — ők már tartják) nélkül,
+ * véletlen sorrendben. A hívó az elejéből veszi a `KOINON_JELOLT_KORLAT`-ot; a lista hossza a minta mérete (a kimerüléshez).
+ * @param {Object} b
+ * @param {Array<{cim: string, port: number}>} [b.minta] - a gyökér-darab témájának hirdetői
+ * @param {Array<{cim: string, port: number}>} [b.sajat] - a saját címeim (a gép címei a kapu portjával, a mért külső cím)
+ * @param {Array<{cim: string, port: number}>} [b.kizart]
+ * @param {Function} [b.veletlen]
+ * @returns {Array<{cim: string, port: number}>}
+ */
+export function potlasJeloltjei({ minta = [], sajat = [], kizart = [], veletlen = Math.random } = {}) {
+  const kulcs = (t) => cimNormalizalasa(t?.cim) + ':' + Number(t?.port);
+  const tilos = new Set([...(Array.isArray(sajat) ? sajat : []), ...(Array.isArray(kizart) ? kizart : [])].map(kulcs));
+  const ki = new Map();
+  for (const t of Array.isArray(minta) ? minta : []) {
+    const cim = cimNormalizalasa(t?.cim);
+    const port = Number(t?.port);
+    if (!cim || !Number.isInteger(port) || port <= 0 || port >= 65536) continue;
+    const k = cim + ':' + port;
+    if (!tilos.has(k) && !ki.has(k)) ki.set(k, { cim, port });
+  }
+  const lista = [...ki.values()];
+  for (let i = lista.length - 1; i > 0; i--) {
+    const j = Math.floor(veletlen() * (i + 1));
+    [lista[i], lista[j]] = [lista[j], lista[i]];
+  }
+  return lista;
+}
+
+/**
+ * A jelölt TERHE a nyitó jeléből: a tartott kosarai (`knd` — a saját darabja, `knk` — a segítő kosarai) a koinon hányad részét adják
+ * (`koinonTeher`). Null, ha a jel nem mond semmit (a `knd` nélküli program).
+ * @param {{knd?: string, knk?: Array<string>}|null} jel
+ * @returns {number|null}
+ */
+export function nyitasTerhe(jel) {
+  const g = gyokerJelOlvasasa(jel?.knd);
+  if (!g) return null;
+  const knk = (Array.isArray(jel?.knk) ? jel.knk : []).slice(0, KOINON_KOSAR_JEL_KORLAT).map(kosarJelOlvasasa).filter(Boolean);
+  return koinonTeher([g, ...knk]);
+}
+
+/**
+ * A VÁLASZTÁS (KO15 (A)): a „megnézem”-et mondók közül a legkisebb terhű — holtversenyben a korábban felelt; az ismeretlen terhű
+ * (jel nélküli) a végére áll. Null, ha egy jelölt sem vállalná.
+ * @param {Array<{allapot: string, teher: number|null, ido: number}>} jeloltek
+ * @returns {Object|null}
+ */
+export function potlasValasztasa(jeloltek = []) {
+  const t = (x) => (Number.isFinite(x.teher) ? x.teher : Infinity);
+  const jok = (Array.isArray(jeloltek) ? jeloltek : []).filter((x) => x?.allapot === 'megnezem');
+  jok.sort((a, b) => t(a) - t(b) || (a.ido ?? 0) - (b.ido ?? 0));
+  return jok[0] ?? null;
+}
+
+/**
+ * Eldőlhet-e a pótlás: a minta kimerült (mind felelt, legfeljebb `korlat`), vagy letelt a gyűjtés ideje.
+ * @param {{felelt: number, minta: number, kezdet: number, most?: number}} b
+ * @returns {boolean}
+ */
+export function potlasDonthet({ felelt = 0, minta = 0, kezdet = 0, most = Date.now() } = {}) {
+  return felelt >= Math.min(KOINON_JELOLT_KORLAT, Math.max(1, minta)) || most - kezdet >= KOINON_JELOLT_IDO;
+}
+
+/** A teher szövege: a koinon hány százaléka (a napló és a `koinon kosarak`). */
+export function teherSzazalek(t) {
+  if (!Number.isFinite(t)) return '?';
+  const sz = t * 100;
+  return (sz >= 10 ? sz.toFixed(0) : sz >= 1 ? sz.toFixed(1) : sz.toPrecision(2)).replace('.', ',') + '%';
+}
+
+/**
+ * Egy pótlás indulásának mondata (a napló és a `koinon potol`).
+ * @param {{eredmeny: string, minta?: string, jeloltek?: number, meret?: number, latott?: number, cel?: number}} x
+ * @returns {string}
+ */
+export function potlasIndulasSzovege(x) {
+  const elo = Number.isFinite(x?.latott) ? 'a kosaramnak ' + x.latott + ' tartó látszik (a cél ' + x.cel + '), kisorsoltak (1/'
+    + Math.max(1, x.latott) + ')' : 'kézzel';
+  if (x?.eredmeny === 'indult') {
+    return elo + ' — ' + x.jeloltek + ' jelöltet kérdezek a DHT-mintáról (a ' + x.minta + ' gyökér-darab hirdetői'
+      + (x.meret > x.jeloltek ? ', ' + x.meret + ' közül' : '') + '; a legkevesebbet őrző kapja a felkérést)';
+  }
+  if (x?.eredmeny === 'nincs jelolt') return elo + ', de a mintán nincs jelölt (a ' + x.minta + ' gyökér-darab hirdetői közül)';
+  if (x?.eredmeny === 'nem felelt') return elo + ', de a DHT most nem felelt — a következő körben újra';
+  return 'már folyik egy pótlás — egyszerre egy';
+}
+
+/**
+ * Egy pótlás eredményének mondata (a napló, a `koinon kosarak` és a `koinon potol` ugyanígy mondja).
+ * @param {{valasztott?: {cim: string, port: number, teher: number|null}|null, felelt?: number, ok?: string,
+ *   felkeres?: {allapot: string, ok: string|null}}} e
+ * @returns {string}
+ */
+export function potlasEredmenySzovege(e) {
+  if (!e?.valasztott) return 'nem volt jelölt (' + (e?.ok ?? (e?.felelt ?? 0) + ' jelölt felelt, egyik sem vállalná') + ')';
+  const v = e.valasztott;
+  const f = e.felkeres;
+  return (e.felelt ?? 0) + ' jelölt felelt; a legkevesebbet őrző (' + v.cim + ':' + v.port + ', a koinon ' + teherSzazalek(v.teher)
+    + '-át őrzi) kapta a felkérést' + (!f ? ' — még nem értem el' : f.allapot === 'megnezem'
+      ? ': megnézi (a hiányt maga is megnézi, és ha valódi, vállalja)' : f.allapot === 'mar' ? ': már tartja' : ': nem vállalja — ' + (f.ok ?? '?'));
+}
+
 /**
  * Egy kosár számlálásának mondata — a napló, a `cimjegyzek hirdet` és a `vallalas` ugyanígy mondja (egy helyen).
  * @param {{latott: number, cel: number, szulovel?: boolean}} x

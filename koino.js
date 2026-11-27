@@ -88,7 +88,7 @@
 import { writeFile, readFile, mkdir, rename, mkdtemp, rm, stat } from 'node:fs/promises';
 import { tmpdir, homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { randomUUID, randomInt } from 'node:crypto';
+import { randomUUID, randomInt, randomBytes } from 'node:crypto';
 import { basename, dirname, join, resolve, sep } from 'node:path';
 
 import {
@@ -107,6 +107,7 @@ import {
   koinonTarolo,   // ⭐⭐ D130 (③d): a koinon ellenőrzött tömör alakjai
   koinonTartokTarolo,   // ⭐⭐ D130 (④b): a kosaraim látott tartói (a legutóbbi számlálás)
   koinonSzerepTarolo,   // ⭐⭐ D130 (④c1): a segítő szerepeim (a kosarak a sajátom mellett)
+  koinonPotlasTarolo,   // ⭐⭐ D130 (④c3): a pótlásaim (a sorsolás, a folyó pótlás, az utolsó eredménye)
   // ⭐ D95/2: a függő tagságok helyi jegyzéke.
   tagsagFuggoTarolo,
   // ⭐ D95/3: a csak küldő út kézbesítési jegyzéke.
@@ -223,12 +224,15 @@ import {
   // ⭐⭐ D130 (④c1): a segítő kosarak (a kulcsaik, a jel határa)
   koinonKosarKulcsai, KOINON_KOSAR_JEL_KORLAT, koinonDarabKulcsa, DARAB_MAX_MELYSEG,
   // ⭐⭐ D130 (④c2): a felkérés és a keret
-  kosarTartalmazza, leadandoSegitok, KOINON_KERET_ALAP_MB, KOINON_UJ_SZEREP_KOZ, KOINON_FUGGO_KORLAT, KOINON_FUGGO_ELEVULES
+  kosarTartalmazza, leadandoSegitok, KOINON_KERET_ALAP_MB, KOINON_UJ_SZEREP_KOZ, KOINON_FUGGO_KORLAT, KOINON_FUGGO_ELEVULES,
+  // ⭐⭐ D130 (④c3): a pótlás (a sorsolás, a minta jelöltjei, a terhük a nyitó jelből, a választás)
+  KOINON_JELOLT_KORLAT, KOINON_POTLAS_KOZ, potlasSorsolasa, veletlenDarab, potlasJeloltjei, nyitasTerhe, potlasValasztasa,
+  potlasDonthet, teherSzazalek, potlasEredmenySzovege, potlasIndulasSzovege
 } from './js/csere/cimjegyzek.js';
 // ⭐⭐ D92/1: a függő kérelmek (a cím nélküli kérés — a kopogtatás).
 import {
   ujNyilvantartas, nyilvantartasAlakja, kerelemFelvetele, lejartakKivetele, tarshozIllo, tarshozIllok, kerelemLezarasa, probalkozas,
-  ujraProbalhato,
+  ujraProbalhato, celKivetele,
   fuggoCelok, fuggoKopogtatok
 } from './js/csere/fuggoKerelmek.js';
 import { atmenetiTarNyitasa, ketTarBemenete, ketTarNezet } from './js/tar/atmenetiTar.js';
@@ -4328,6 +4332,194 @@ function felkeresEredmenySzovege(x) {
   return 'a ' + jel + ' felkérés elévült';
 }
 
+// ===== ⭐⭐ D130 (④c3 — KO15 (A), KO16 (A), `koinon_atvizsgalas.md` 11.): A PÓTLÁS =====
+//
+// Ha egy kosaramnak a látott cél alatt van a tartója, kosaranként óránként egyszer SORSOLOK (1/n — `potlasSorsolasa`); ha nyertem, és
+// óránként még nem kezdtem pótlást, egy véletlen gyökér-darab témájának hirdetői közül (a minta — KO16 (A)) legfeljebb 10 jelöltet
+// KÉRDEZEK meg egy függő kérelemmel (`felkeres` + `kerdes`: a címükre kopogok, és a minta témájának párján a kopogtató úton
+// jelentkezem — a NAT mögöttiek ott látnak meg). A válaszuk a nyitó jelükkel jön, abból a terhük (`potlasValaszFeljegyzese`). Ha a minta
+// kimerült, vagy letelt a gyűjtés ideje, a legkevesebbet őrző (KO15 (A)) kapja az IGAZI felkérést — egy újabb függő kérelemmel, csak az
+// ő címére (és a készülék-témáján). Egyszerre egy pótlás folyik. ⚠️ A jegyzéket egy zár védi: a címjegyzék-kör és a rés-munkák
+// ugyanabban a folyamatban, egymás mellett futnak.
+
+let potlasZar = Promise.resolve();
+/** A pótlás-jegyzék módosításai egymás után. */
+function potlasModositasa(fn) {
+  const p = potlasZar.then(fn);
+  potlasZar = p.catch(() => {});
+  return p;
+}
+
+/** A saját címeim a jelöltek szűréséhez: a gép címei a kapu (és a hirdetett) portjával, és a mért külső cím. */
+async function sajatJeloltCimek({ kulso = null, portok = [] } = {}) {
+  const ps = [...new Set([await kapuPortja(), ...portok].filter((p) => Number.isInteger(p) && p > 0))];
+  const ki = [];
+  for (const c of await sajatOsszesCim()) for (const p of ps) ki.push({ cim: c, port: p });
+  if (kulso?.cim && Number.isInteger(kulso.port)) ki.push({ cim: kulso.cim, port: kulso.port });
+  return ki;
+}
+
+/**
+ * Egy pótlás INDÍTÁSA (a zár alatt, a jegyzékkel — a `P`-t a hívó írja): a minta a DHT-ről (egy véletlen gyökér-darab témája a
+ * mélységemen — KO16 (A)), a jelöltek (a saját címeim és a kizártak nélkül), és a kérdezés függő kérelme.
+ * @returns {Promise<{eredmeny: 'indult'|'nincs jelolt'|'nem felelt'|'folyik', kulcs: string, minta?: string, jeloltek?: number,
+ *   meret?: number}>}
+ */
+async function potlasInditasa(P, kliens, kulcs, { kizart = [], kulso = null, portok = [] } = {}) {
+  if (P.folyik) return { eredmeny: 'folyik', kulcs: P.folyik.kulcs };
+  const m = (await gyokerMelysegem()).melyseg;
+  const d = veletlenDarab(m, randomBytes(Math.max(1, Math.ceil(m / 8))));
+  const minta = m + ':' + d;
+  const t = await temaKeresesElerve(kliens, temaValtozatai((n) => gyokerDarabTemaja(KOINO, m, d, n)));
+  if (!t.elerte) return { eredmeny: 'nem felelt', kulcs, minta };
+  const osszes = potlasJeloltjei({ minta: t.tarsak, sajat: await sajatJeloltCimek({ kulso, portok }), kizart });
+  const jeloltek = osszes.slice(0, KOINON_JELOLT_KORLAT);
+  P.utolso = Date.now();
+  if (!jeloltek.length) {
+    P.eredmeny = { kulcs, ido: Date.now(), dontes: Date.now(), minta, felelt: 0, valasztott: null,
+      ok: 'a mintán nincs jelölt — a ' + minta + ' gyökér-darab hirdetői közül' };
+    return { eredmeny: 'nincs jelolt', kulcs, minta, jeloltek: 0, meret: 0 };
+  }
+  const r = kerelemFelvetele(await kerelmekOlvasasa(), { fajta: 'felkeres', kulcs, kerdes: true,
+    celok: jeloltek.map((x) => ({ hoszt: x.cim, port: x.port })), kopogtatok: [{ fajta: 'gyoker', kulcs: minta }] }, Date.now(), randomUUID());
+  await kerelmekIrasa(r.nyilvantartas);
+  P.folyik = { kulcs, ido: Date.now(), minta, meret: osszes.length, az: r.az, jeloltek: {} };
+  return { eredmeny: 'indult', kulcs, minta, jeloltek: jeloltek.length, meret: osszes.length };
+}
+
+/**
+ * A DÖNTÉS (a zár alatt — a `P`-t a hívó írja): a kérdezés lezárul, és a legkevesebbet őrző (KO15 (A) — `potlasValasztasa`) kapja az
+ * igazi felkérést: csak az ő címére, és ha a jele megmondta a tábla-aláíróját, a készülék-témáján is (a NAT mögött ott lát meg).
+ * @returns {Promise<Object|null>} az eredmény (a jegyzékbe is)
+ */
+async function potlasDontese(P) {
+  const f = P.folyik;
+  if (!f) return null;
+  const lista = Object.values(f.jeloltek);
+  const v = potlasValasztasa(lista);
+  let ny = kerelemLezarasa(await kerelmekOlvasasa(), f.az, lista.length + ' jelölt felelt'
+    + (v ? ' — a felkérés: ' + v.cim + ':' + v.port : ' — egyik sem vállalná'), Date.now());
+  let az = null;
+  if (v) {
+    const r = kerelemFelvetele(ny, { fajta: 'felkeres', kulcs: f.kulcs,
+      celok: [{ hoszt: v.cim, port: v.port, ...(v.alairo ? { alairo: v.alairo } : {}) }],
+      kopogtatok: v.alairo ? [{ fajta: 'keszulek', kulcs: v.alairo }] : [] }, Date.now(), randomUUID());
+    ny = r.nyilvantartas;
+    az = r.az;
+  }
+  await kerelmekIrasa(ny);
+  P.eredmeny = { kulcs: f.kulcs, ido: f.ido, dontes: Date.now(), minta: f.minta, felelt: lista.length,
+    valasztott: v ? { cim: v.cim, port: v.port, teher: Number.isFinite(v.teher) ? v.teher : null } : null, ...(az ? { az } : {}) };
+  P.folyik = null;
+  return P.eredmeny;
+}
+
+/**
+ * ⭐⭐ D130 (④c3): A PÓTLÁS A CÍMJEGYZÉK-KÖRBEN — (1) ha folyik egy pótlás: a döntés, ha a gyűjtés ideje letelt (vagy a kérdezése
+ * elfogyott); (2) ha nem folyik, és óránként még nem kezdtem: a cél alatti kosaraimon a sorsolás (kosaranként óránként egyszer), és
+ * az első nyertesen a pótlás indul. A kizártak a kosár látott tartói (a hirdetés találatából — ők már tartják).
+ * @param {Object} kliens - a nyitott DHT-kliens
+ * @param {Array<{kulcs: string, latott: number, cel: number}>} kosarak - a mostani számlálás (`kosaraimSzamlalasa`)
+ * @param {Array<{fajta: string, kulcs: string, tarsak?: Array}>} eredmeny - a hirdetés eredménye témánként
+ * @returns {Promise<{dontes?: Object, indult?: Object, sorsolt?: Array}>}
+ */
+async function koinonPotlasKor(kliens, kosarak, eredmeny, { kulso = null, portok = [] } = {}) {
+  return potlasModositasa(async () => {
+    const tarolo = koinonPotlasTarolo(KOINO);
+    const P = await tarolo.olvas();
+    const ki = {};
+    if (P.folyik) {
+      const fk = (await kerelmekOlvasasa()).fuggo.find((x) => x.az === P.folyik.az);
+      if (!fk || potlasDonthet({ felelt: Object.keys(P.folyik.jeloltek).length, minta: P.folyik.meret, kezdet: P.folyik.ido })) {
+        ki.dontes = await potlasDontese(P);
+        await tarolo.ir(P);
+      }
+      return ki;
+    }
+    if (Date.now() - (P.utolso ?? 0) < KOINON_POTLAS_KOZ) return ki;
+    // a sorsolás jegyzéke csak a mostani kosaraimra (egy kettéválás után a régi kosár kiesik)
+    const mostani = new Set(kosarak.map((x) => x.kulcs));
+    for (const k of Object.keys(P.sorsolas)) if (!mostani.has(k)) delete P.sorsolas[k];
+    ki.sorsolt = [];
+    for (const x of kosarak) {
+      if (!(x.latott < x.cel) || Date.now() - (P.sorsolas[x.kulcs] ?? 0) < KOINON_POTLAS_KOZ) continue;
+      P.sorsolas[x.kulcs] = Date.now();
+      const nyert = potlasSorsolasa(x.latott);
+      ki.sorsolt.push({ kulcs: x.kulcs, latott: x.latott, cel: x.cel, nyert });
+      if (!nyert) continue;
+      const kizart = eredmeny.find((e) => e.fajta === 'szelet' && e.kulcs === x.kulcs)?.tarsak ?? [];
+      ki.indult = { ...(await potlasInditasa(P, kliens, x.kulcs, { kizart, kulso, portok })), latott: x.latott, cel: x.cel };
+      // ⚠️ ha a DHT nem felelt, a sorsolás a következő körben újra (a minta most semmit nem mondana)
+      if (ki.indult.eredmeny === 'nem felelt') delete P.sorsolas[x.kulcs];
+      break;
+    }
+    await tarolo.ir(P);
+    return ki;
+  });
+}
+
+/**
+ * ⭐⭐ D130 (④c3): EGY PÓTLÁS KÉZZEL (`koinon potol <m:d>`) — a sorsolás és az óránkénti ütem nélkül (egyszerre itt is egy). A
+ * kizártak: a kosár témájának hirdetői (egy keresés). A kérdezést és a döntést az őrjárat viszi tovább.
+ */
+async function koinonPotlasKezzel(kliens, kulcs) {
+  return potlasModositasa(async () => {
+    const tarolo = koinonPotlasTarolo(KOINO);
+    const P = await tarolo.olvas();
+    const k = await temaKeresesElerve(kliens, temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', kulcs, n)));
+    const x = await potlasInditasa(P, kliens, kulcs, { kizart: k.tarsak });
+    await tarolo.ir(P);
+    return x;
+  });
+}
+
+/**
+ * ⭐⭐ D130 (④c3): EGY JELÖLT VÁLASZA a kérdezésre (a rés-munkából): a válasz és a terhe (a nyitó jeléből — `nyitasTerhe`) a
+ * jegyzékbe; a címe kikerül a kérdezés céljai közül (egyszer kérdezem); és ha a minta kimerült, a döntés. Ha a pótlás már nem
+ * folyik, a kérdezés lezárul.
+ */
+async function potlasValaszFeljegyzese(fk, r, tars) {
+  return potlasModositasa(async () => {
+    const tarolo = koinonPotlasTarolo(KOINO);
+    const P = await tarolo.olvas();
+    const f = P.folyik;
+    if (!f || f.az !== fk.az) {
+      await kerelmekIrasa(kerelemLezarasa(await kerelmekOlvasasa(), fk.az, 'a pótlás már nem folyik', Date.now()));
+      return null;
+    }
+    const v = r.kiszolgalta && r.felkeres ? r.felkeres : { allapot: 'elutasitva',
+      ok: r.kesobb ? 'most nem szolgál ki (a kiszolgálási kerete)' : 'nem fogadta (a programja nem ismeri a felkérést)' };
+    const teher = nyitasTerhe(r.jel);
+    f.jeloltek[tars.cim + ':' + tars.port] = { cim: tars.cim, port: Number(tars.port), allapot: v.allapot, ok: v.ok ?? null, teher,
+      alairo: r.jel?.alairo ?? null, ido: Date.now() };
+    await kerelmekIrasa(celKivetele(await kerelmekOlvasasa(), fk.az, tars.cim, tars.port));
+    const d = koinonDarabBol(f.kulcs);
+    const jel = d.melyseg + ':' + d.darab;
+    kiir(SZIN.halvany + '  🧺 ' + ora() + ' pótlás (' + jel + '): ' + tars.cim + ':' + tars.port + ' — '
+      + (v.allapot === 'megnezem' ? 'vállalná' : v.allapot === 'mar' ? 'már tartja' : 'nem vállalná: ' + (v.ok ?? '?'))
+      + (Number.isFinite(teher) ? ' · a koinon ' + teherSzazalek(teher) + '-át őrzi' : '') + SZIN.vege);
+    let dontes = null;
+    if (potlasDonthet({ felelt: Object.keys(f.jeloltek).length, minta: f.meret, kezdet: f.ido })) {
+      dontes = await potlasDontese(P);
+      kiir((dontes.valasztott ? SZIN.jo : SZIN.nem) + '  🧺 ' + ora() + ' pótlás (' + jel + '): ' + potlasEredmenySzovege(dontes) + SZIN.vege);
+    }
+    await tarolo.ir(P);
+    return dontes;
+  });
+}
+
+/** ⭐⭐ D130 (④c3): az igazi felkérés válasza (a kiválasztott jelölttől) — a jegyzék eredményébe. */
+async function potlasFelkeresEredmenye(fk, v) {
+  return potlasModositasa(async () => {
+    const tarolo = koinonPotlasTarolo(KOINO);
+    const P = await tarolo.olvas();
+    if (P.eredmeny?.kulcs === fk.kulcs && (!P.eredmeny.az || P.eredmeny.az === fk.az)) {
+      P.eredmeny.felkeres = { allapot: v.allapot, ok: v.ok ?? null, ido: Date.now() };
+      await tarolo.ir(P);
+    }
+  });
+}
+
 let kezikonyvDarabEmlek = null;
 /**
  * ⭐⭐ D130 (③e, KO5 (B)): a kézikönyv bejegyzései, amelyek a koinon-DARABOMBA esnek — a vállalásom részei (a többit a darab tartói
@@ -4493,6 +4685,11 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
     catch (hiba) { console.warn('a keret szerinti leadás most nem ment', { ok: hiba.message }); }
     try { felkeresek = await koinonFelkeresekFeldolgozasa(kliens, { kulso }); }
     catch (hiba) { console.warn('a felkéréseket most nem néztem meg', { ok: hiba.message }); }
+    // ⭐⭐ D130 (④c3): a pótlás — a cél alatti kosaraimon a sorsolás, vagy a folyó pótlás döntése. ⚠️ A függő kopogtatók bejelentése
+    // ELŐTT (lent): a kérdezés kopogtató témáján (a minta párján) még ebben a körben jelentkezem.
+    let potlas = {};
+    try { potlas = await koinonPotlasKor(kliens, kosarak, eredmeny, { kulso, portok: [port, kapuPort] }); }
+    catch (hiba) { console.warn('a pótlás most nem ment', { ok: hiba.message }); }
     const kopogtatok = new Map();
     for (const f of figyelendoKopogtatok({ koino: KOINO, alairo: tablaKulcs.alairoNyilvanos, hirdetett: temak,
       valtozatok: eloAlakok('tema') })) {
@@ -4524,7 +4721,7 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
     try { rekesz = await belepoRekeszKiirasa(kliens, { kulso, kapuPort }); }
     catch (hiba) { console.warn('a meghívó rekeszébe most nem írtam', { ok: hiba.message }); }
     await dhtIsmertekMentese(kliens);
-    return { eredmeny, kosarak, leadott, felkeresek, kopogtatok: [...kopogtatok.values()], regioTarsak: [...regioTarsak.values()], bejelentve, bejelentett,
+    return { eredmeny, kosarak, leadott, felkeresek, potlas, kopogtatok: [...kopogtatok.values()], regioTarsak: [...regioTarsak.values()], bejelentve, bejelentett,
       bejelentesek, rekesz, felajanlas, forgalom: kliens.forgalom() };
   } finally {
     kliens.bezar();
@@ -5754,6 +5951,10 @@ async function fuggoKerelemMunkaja(allapot, halo, tars, fk) {
       : fk.fajta === 'kereses'
       ? await kerelemUdpResen(halo, tars.cim, tars.port, KOINO,
         { fajta: 'kereses', kulcs: fk.kulcs, ...fk.ker, n: KERESES_TALALAT_KORLAT }, { ...await azonossagBeallitasa(), utkozesben })
+      // ⭐⭐ D130 (④c3): a pótló felkérése — a kérdezés (`kerdes`) vagy az igazi; a válasz a társ nyitó jelével jön (a terhe)
+      : fk.fajta === 'felkeres'
+      ? await kerelemUdpResen(halo, tars.cim, tars.port, KOINO,
+        { fajta: 'felkeres', kulcs: fk.kulcs, ...(fk.kerdes ? { kerdes: true } : {}) }, { ...await azonossagBeallitasa(), utkozesben })
       : await kerelemUdpResen(halo, tars.cim, tars.port, KOINO, k, {
         ...await azonossagBeallitasa(), utkozesben,
         mintaValaszto: (valasz) => mintaKeres(valasz),
@@ -5787,6 +5988,11 @@ async function fuggoKerelemMunkaja(allapot, halo, tars, fk) {
  * @returns {Promise<number>} hány új esemény jött
  */
 async function fuggoEredmenyFeldolgozasa(fk, r, tars) {
+  // ⭐⭐ D130 (④c3): a pótló kérdezése nem zárul le egy válasszal — a jelöltek válaszait gyűjti (és a kimerüléskor dönt)
+  if (fk.fajta === 'felkeres' && fk.kerdes) {
+    await potlasValaszFeljegyzese(fk, r, tars);
+    return 0;
+  }
   let siker = false, osszegzes = '', uj = 0;
   if (fk.fajta === 'szelet') { siker = (r.kapott ?? 0) > 0; uj = r.uj ?? 0; osszegzes = (r.kapott ?? 0) + ' esemény'; }
   else if (fk.fajta === 'fejlecek' && r.kiszolgalta) {
@@ -5818,6 +6024,12 @@ async function fuggoEredmenyFeldolgozasa(fk, r, tars) {
     siker = true;
     osszegzes = r.felajanlas.felvett + ' bejegyzést vett fel' + (r.felajanlas.osztodott.length ? ', ' + r.felajanlas.osztodott.length
       + ' fiók osztódott' : '');
+  } else if (fk.fajta === 'felkeres' && r.kiszolgalta && r.felkeres) {
+    // ⭐⭐ D130 (④c3): az igazi felkérés — a kiválasztott jelölt felelt (megnézi / már tartja / nem vállalja); a kérelem lezárul
+    await potlasFelkeresEredmenye(fk, r.felkeres);
+    siker = true;
+    osszegzes = 'felkérés: ' + (r.felkeres.allapot === 'megnezem' ? 'megnézi' : r.felkeres.allapot === 'mar' ? 'már tartja'
+      : 'nem vállalja — ' + (r.felkeres.ok ?? '?'));
   }
   if (!siker && r.kesobb) {
     // ⭐ D109 (KK6): a tartó kiszolgálási kerete most nem enged — nem az ő hibája, és nem elbukott próbálkozás: addig nem
@@ -6216,9 +6428,13 @@ function kerelemKiszolgaloja() {
       const kn = await koinonMelysegem();
       const d = koinonDarabBol(k.kulcs);
       const jel = d ? d.melyseg + ':' + d.darab : '?';
+      // ⭐⭐ D130 (④c3): a KÉRDEZÉS (a pótló próba-felkérése) — ugyanaz a gyors ellenőrzés, de nem jegyzem fel: a pótló a válaszomból és
+      // a nyitó jelemből (a terhem) választ, és az igazit csak a legkevesebbet őrző kapja.
+      const kerdes = k.kerdes === true;
       const valasz = (allapot, ok = null) => {
-        kiir(SZIN.halvany + '  🤝 ' + ora() + ' felkérés a ' + jel + ' kosárra: ' + (allapot === 'megnezem'
-          ? 'megnézem (a címjegyzék-köröm maga is megnézi a hiányt — D130 ④c2)' : allapot === 'mar' ? 'már tartom (' + ok + ')'
+        kiir(SZIN.halvany + '  🤝 ' + ora() + ' ' + (kerdes ? 'kérdezés (egy pótló jelöltet keres)' : 'felkérés') + ' a ' + jel + ' kosárra: '
+          + (allapot === 'megnezem' ? (kerdes ? 'vállalnám (nem jegyzem fel — az igazit a kiválasztott jelölt kapja; D130 ④c3)'
+            : 'megnézem (a címjegyzék-köröm maga is megnézi a hiányt — D130 ④c2)') : allapot === 'mar' ? 'már tartom (' + ok + ')'
             : 'nem vállalom — ' + ok) + SZIN.vege);
         return { allapot, ok };
       };
@@ -6234,6 +6450,7 @@ function kerelemKiszolgaloja() {
       if (!j.fuggo[k.kulcs] && Object.keys(j.fuggo).length >= KOINON_FUGGO_KORLAT) {
         return valasz('elutasitva', 'már ' + KOINON_FUGGO_KORLAT + ' függő felkérésem van');
       }
+      if (kerdes) return valasz('megnezem');
       j.fuggo[k.kulcs] ??= { ido: Date.now(), tabla: typeof tabla === 'string' ? tabla : null,
         honnan: typeof honnan?.cim === 'string' && Number.isInteger(honnan.port) ? { cim: honnan.cim, port: honnan.port } : null };
       await tarolo.ir(j);
@@ -6991,8 +7208,13 @@ async function fuggoKerelemValasztasa(allapot, tars) {
   // kapna újra esélyt ettől a futó őrjárattól. Ugyanazt a társat ugyanazzal a kérelemmel legfeljebb kétpercenként.
   allapot.kerelemProbaltak ??= new Map();
   const ny = await kerelmekOlvasasa();
-  const nemProbalt = (x) => ujraProbalhato(allapot.kerelemProbaltak, x.az + '|' + tars.cim + ':' + tars.port, Date.now(),
-    KERELEM_UJRAPROBA);
+  // ⭐⭐ D130 (④c3): a pótló kérdezése egy jelöltnek egyszer szól — aki már felelt (a pótlás jegyzékében), azt nem kérdezzük újra
+  let kerdezettek = null;
+  if (ny.fuggo.some((x) => x.fajta === 'felkeres' && x.kerdes)) {
+    try { kerdezettek = new Set(Object.keys((await koinonPotlasTarolo(KOINO).olvas()).folyik?.jeloltek ?? {})); } catch { kerdezettek = null; }
+  }
+  const nemProbalt = (x) => !(x.fajta === 'felkeres' && x.kerdes && kerdezettek?.has(tars.cim + ':' + tars.port))
+    && ujraProbalhato(allapot.kerelemProbaltak, x.az + '|' + tars.cim + ':' + tars.port, Date.now(), KERELEM_UJRAPROBA);
   // ⭐ A ⑦ terepi próba lelete: a társ a KÖTÉSE szerint is (ha ez a cím egy kötésem címe) — a kérelem célja lehet a régi címe.
   const kotes = await tarsKotese(tars);
   // ⭐ D102 (J4): a társ azt viszi, amelyiknek a céllistáján ő áll a legelöl (a már próbáltakat kihagyva).
@@ -7007,7 +7229,10 @@ async function fuggoKerelemValasztasa(allapot, tars) {
   // őrjárat címjegyzék-köre: `bejelentettKopogtatok`). A lap magától ír be kérelmet; e nélkül minden új bekopogó (egy
   // csatlakozó készülék kézi cseréje is) a csere helyett egy kérelmet kapna, amit nem tud kiszolgálni (mérve).
   const kopogtattunk = (x) => x.kopogtatok.some((k) => allapot.bejelentettKopogtatok?.has(k.fajta + ':' + k.kulcs));
-  if (!fk && tars.bekopogo) fk = ny.fuggo.find((x) => kopogtattunk(x) && nemProbalt(x)) ?? null;
+  // ⭐⭐ D130 (④c3): az igazi felkérés csak a kiválasztott jelöltnek — egy bekopogó csak az ő IP-jéről lehet ő (a NAT portot válthat);
+  // a kérdezés bárkinek, aki a minta párján meglátott (ő a minta egy hirdetője)
+  if (!fk && tars.bekopogo) fk = ny.fuggo.find((x) => kopogtattunk(x) && nemProbalt(x)
+    && (x.fajta !== 'felkeres' || x.kerdes === true || x.celok.some((c) => c.hoszt === tars.cim))) ?? null;
   return fk ? { fk } : null;
 }
 
@@ -7111,6 +7336,20 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
         }
         for (const x of h.felkeresek ?? []) {
           kiir((x.eredmeny === 'vallaltam' ? SZIN.jo : SZIN.halvany) + '  🤝 ' + ora() + ' ' + kk + felkeresEredmenySzovege(x) + SZIN.vege);
+        }
+        // ⭐⭐ D130 (④c3): a pótlás — a sorsolás (ha nem én pótolok, halványan), az indulás, és a folyó pótlás döntése
+        const pj = (k) => { const d = koinonDarabBol(k); return d ? d.melyseg + ':' + d.darab : '?'; };
+        for (const s of (h.potlas?.sorsolt ?? []).filter((y) => !y.nyert)) {
+          kiir(SZIN.halvany + '  🧺 ' + ora() + ' ' + kk + 'pótlás (' + pj(s.kulcs) + '): ' + s.latott + ' tartó látszik (a cél ' + s.cel
+            + '), sorsoltam (1/' + Math.max(1, s.latott) + ') — most nem én pótolok' + SZIN.vege);
+        }
+        if (h.potlas?.indult) {
+          kiir((h.potlas.indult.eredmeny === 'indult' ? SZIN.jo : SZIN.halvany) + '  🧺 ' + ora() + ' ' + kk + 'pótlás ('
+            + pj(h.potlas.indult.kulcs) + '): ' + potlasIndulasSzovege(h.potlas.indult) + SZIN.vege);
+        }
+        if (h.potlas?.dontes) {
+          kiir((h.potlas.dontes.valasztott ? SZIN.jo : SZIN.nem) + '  🧺 ' + ora() + ' ' + kk + 'pótlás (' + pj(h.potlas.dontes.kulcs) + '): '
+            + potlasEredmenySzovege(h.potlas.dontes) + SZIN.vege);
         }
         // ⭐⭐ D92/1: akik a kopogtató témáimon jelezték, hogy tőlem kérnek — a következő körökben feléjük is
         // kopogok (30 percig). A saját címemet kihagyom.
@@ -8158,7 +8397,7 @@ return {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, koinonKeretem, koinonKeretFajl, koinonTerhem, koinonLeadasKeretSzerint, koinonFelkeresekFeldolgozasa, felkeresEredmenySzovege, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, koinonKeretem, koinonKeretFajl, koinonTerhem, koinonLeadasKeretSzerint, koinonFelkeresekFeldolgozasa, felkeresEredmenySzovege, koinonPotlasKezzel, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -8202,7 +8441,7 @@ const {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, koinonKeretem, koinonKeretFajl, koinonTerhem, koinonLeadasKeretSzerint, koinonFelkeresekFeldolgozasa, felkeresEredmenySzovege, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, koinonKeretem, koinonKeretFajl, koinonTerhem, koinonLeadasKeretSzerint, koinonFelkeresekFeldolgozasa, felkeresEredmenySzovege, koinonPotlasKezzel, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -9330,6 +9569,9 @@ try {
       // node koino.js koinon felker <m:d> <cím> <port>  — megkérek egy készüléket, hogy tartsa a kosarat (a ④c3 pótlása is ezt küldi)
       // node koino.js koinon felkeresek                 — a hozzám jött felkérések megnézése most (az őrjárat címjegyzék-köre is)
       // node koino.js koinon keret [MB]                 — amennyit a koinonnak adok (fölötte a legújabb segítő szerepeim leadom)
+      // ⭐⭐ D130 (④c3): A PÓTLÁS kézzel
+      // node koino.js koinon potol <m:d>                — egy kosaram pótlása most (a sorsolás és az óránkénti ütem nélkül): a minta
+      //                                                    a DHT-ről, a kérdezést és a döntést az őrjárat viszi tovább
       const alParancs = ervek[0] ?? '';
       /** Egy kosár a parancssorból: `mélység:sorszám`. */
       const kosarErv = (s) => {
@@ -9358,6 +9600,19 @@ try {
           : (v.allapot === 'megnezem' ? SZIN.jo : SZIN.halvany) + 'Felkérés a ' + melyseg + ':' + darab + ' kosárra → ' + ervek[2] + ':'
             + ervek[3] + ': ' + (v.allapot === 'megnezem' ? 'megnézi (a címjegyzék-körében maga is megnézi a hiányt, és ha valódi, vállalja)'
               : v.allapot === 'mar' ? 'már tartja' + (v.ok ? ' (' + v.ok + ')' : '') : 'nem vállalja — ' + (v.ok ?? '?')) + SZIN.vege);
+        break;
+      }
+      if (alParancs === 'potol') {
+        const { melyseg, darab, kulcs } = kosarErv(ervek[1]);
+        const kn = await koinonMelysegem();
+        if (!kn.kosarak.includes(kulcs)) {
+          throw new Error('A ' + melyseg + ':' + darab + ' kosarat nem tartom — pótolni a kosár egy tartója pótol (a kosaraim: node koino.js koinon kosarak).');
+        }
+        const kliens = await tablaKliens();
+        let x;
+        try { x = await koinonPotlasKezzel(kliens, kulcs); await dhtIsmertekMentese(kliens); } finally { kliens.bezar(); }
+        kiir((x.eredmeny === 'indult' ? SZIN.jo : SZIN.halvany) + '🧺 pótlás (' + melyseg + ':' + darab + '): ' + potlasIndulasSzovege(x) + SZIN.vege
+          + (x.eredmeny === 'indult' ? SZIN.halvany + '\n  a kérdezést és a döntést az őrjárat viszi tovább (a `koinon kosarak` mutatja, hol tart)' + SZIN.vege : ''));
         break;
       }
       if (alParancs === 'felkeresek') {
@@ -9421,6 +9676,18 @@ try {
           const d = koinonDarabBol(k);
           if (d) kiir(SZIN.halvany + '  ' + d.melyseg + ':' + d.darab + '  · felkérés vár (' + Math.max(0, Math.round((Date.now() - (x?.ido ?? 0)) / 60000))
             + ' perce jött — a címjegyzék-köröm megnézi a hiányt)' + SZIN.vege);
+        }
+        // ⭐⭐ D130 (④c3): a pótlás — a folyó, vagy az utolsó eredménye
+        const P = await koinonPotlasTarolo(KOINO).olvas();
+        const perce = (t0) => Math.max(0, Math.round((Date.now() - (t0 ?? 0)) / 60000));
+        const pd = (k) => { const x = koinonDarabBol(k); return x ? x.melyseg + ':' + x.darab : '?'; };
+        if (P.folyik) {
+          kiir(SZIN.halvany + '  pótlás folyik: a ' + pd(P.folyik.kulcs) + ' kosárra (' + perce(P.folyik.ido) + ' perce indult) — '
+            + Object.keys(P.folyik.jeloltek).length + ' jelölt felelt (legfeljebb ' + Math.min(KOINON_JELOLT_KORLAT, P.folyik.meret)
+            + '; a minta: a ' + P.folyik.minta + ' gyökér-darab hirdetői)' + SZIN.vege);
+        } else if (P.eredmeny) {
+          kiir(SZIN.halvany + '  az utolsó pótlás (' + pd(P.eredmeny.kulcs) + ', ' + perce(P.eredmeny.dontes ?? P.eredmeny.ido) + ' perce): '
+            + potlasEredmenySzovege(P.eredmeny) + SZIN.vege);
         }
         const t = await koinonTerhem();
         kiir(SZIN.halvany + '  a keretem ' + (await koinonKeretem()) + ' MB, a terhem ' + (t.ossz / 1024 / 1024).toFixed(2) + ' MB' + SZIN.vege);

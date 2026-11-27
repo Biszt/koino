@@ -6704,7 +6704,10 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     `vallalas`-ban. ✅ **④c1 kész (2026-11-27):** a segítő szerepek — a helyi jegyzék, a `koinon kosarak | segit | lead`, a nyitó jel
     `knk` mezője (a csere a két fél bármely tartott kosarából egyeztet), a tömörítés megtartja. ✅ **④c2 kész (2026-11-27):** a felkérés
     — a `felkeres` kérelem, a jelölt gyors ellenőrzése és a hiány saját megnézése (a DHT-n), óránként egy új szerep, a keret (alapból
-    256 MB) és a leadás fölötte. ⏭️ ④c3 a pótlás, ④c4 a mélység változása (⏸️ KO18), ④d a próba.
+    256 MB) és a leadás fölötte. ✅ **④c3 kész (2026-11-27):** a pótlás — a cél alatti kosáron kosaranként óránként egy sorsolás (1/n),
+    a nyertes egy véletlen gyökér-darab hirdetői közül legfeljebb 10 jelöltet kérdez meg (próba-felkérés, a terhük a nyitó jelükből), és
+    a legkevesebbet őrző kapja az igazi felkérést (csak az ő címére); óránként legfeljebb egy pótlás; kézzel `koinon potol`. ⏭️ ④c4 a
+    mélység változása (⏸️ KO18), ④d a próba.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.
