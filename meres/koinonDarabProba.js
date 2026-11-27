@@ -40,7 +40,9 @@ import {
   potlasSorsolasa, veletlenDarab, potlasJeloltjei, nyitasTerhe, potlasValasztasa, potlasDonthet, gyokerJelSzovege,
   KOINON_JELOLT_KORLAT, KOINON_POTLAS_KOZ, KOINON_JELOLT_IDO,
   // ⭐⭐ D130 (④c4): a kettéválás és az átadás
-  kettevalasSzerepei, orokoltEllenorzese, kettevalasSzovege, KOINON_ATADAS_SOR, KOINON_ELLENORZES_KOZ
+  kettevalasSzerepei, orokoltEllenorzese, kettevalasSzovege, KOINON_ATADAS_SOR, KOINON_ELLENORZES_KOZ,
+  // ⭐⭐ D130 (④d3): a kopogtató út csak kevés közvetlen válasz után
+  kopogtatoUtKell, KOINON_KOZVETLEN_KOROK
 } from '../js/csere/cimjegyzek.js';
 import { kerelemAlakja, felkeresValaszAlakja, KERELEM_FAJTAK, TOVABBADHATO_FAJTAK } from '../js/csere/kerelem.js';
 import { kerelemFelvetele, nyilvantartasAlakja, tarshozIllo, celKivetele, ujNyilvantartas } from '../js/csere/fuggoKerelmek.js';
@@ -750,6 +752,21 @@ proba('⭐⭐ D130 (④c4 — KO18 (C)): az örökölt kosár ellenőrzése — 
     szoveg: kosarSzamlalasSzovege({ latott: 3, cel: 2, szulovel: true, nagyszulovel: true }).includes('(a szülő- és a nagyszülő-kosáréval együtt)')
   };
   if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ ki, e1, e2, e3, kudarc, utana, vege }) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// ⭐⭐ D130 (④d3): a kopogtató út (a minta párja) csak a közvetlen próba körei után, és csak ha kevesebben feleltek, mint amennyi a
+// döntéshez kell (a minta, legfeljebb 10). Rontás: a körök nélkül (azonnal) → a `korok` bukik; a felelők nélkül (mindig) → az `elegFelelt`
+// bukik.
+proba('⭐⭐ D130 (④d3): a kopogtató út csak a közvetlen próba körei után, és csak ha kevés jelölt felelt — a minta mérete szerint, legfeljebb 10', () => {
+  const ki = {
+    korok: !kopogtatoUtKell({ korok: KOINON_KOZVETLEN_KOROK - 1, felelt: 0, meret: 5 }) && kopogtatoUtKell({ korok: KOINON_KOZVETLEN_KOROK, felelt: 0, meret: 5 }),
+    elegFelelt: !kopogtatoUtKell({ korok: 9, felelt: 5, meret: 5 }) && !kopogtatoUtKell({ korok: 9, felelt: 10, meret: 40 }),
+    keves: kopogtatoUtKell({ korok: 9, felelt: 4, meret: 5 }) && kopogtatoUtKell({ korok: 9, felelt: 9, meret: 40 }),
+    ures: kopogtatoUtKell({ korok: 9, felelt: 0, meret: 0 }),
+    allando: KOINON_KOZVETLEN_KOROK === 3
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
   return Object.values(ki).every(Boolean);
 });
 

@@ -790,7 +790,26 @@ export function potlasValasztasa(jeloltek = []) {
 }
 
 /**
- * Eldőlhet-e a pótlás: a minta kimerült (mind felelt, legfeljebb `korlat`), vagy letelt a gyűjtés ideje.
+ * ⭐⭐ D130 (④d3 — `koinon_atvizsgalas.md` 11., 5. pont; 13., 4. pont): A KOPOGTATÓ ÚT CSAK KEVÉS KÖZVETLEN VÁLASZ UTÁN. A minta témájának
+ * PÁRJÁN jelentkezve a téma minden hirdetője 30 percig felém kopog (a 99. utáni próba mérte: mind a négy jelölt kérőt látott, pedig a
+ * kérdezésre 3 másodperc alatt közvetlenül feleltek — és egy kis koinoban minden pótló ezt teszi: a vihar a pótlók számával szorzódik).
+ * Ezért a kérdezés előbb csak a címükre kopog, és ennyi őrjárat-kör után, ha addig kevés jelölt felelt, jelentkezik a párján (a NAT
+ * mögöttiek ott látnak meg). Az őrjárat alapból 5 percenként kör: ~15 perc közvetlen próba.
+ */
+export const KOINON_KOZVETLEN_KOROK = 3;
+
+/**
+ * Kell-e a kopogtató út: letelt a közvetlen próba (`korok`), és kevesebben feleltek, mint amennyi a döntéshez kell.
+ * @param {{korok: number, felelt: number, meret: number}} b
+ * @returns {boolean}
+ */
+export function kopogtatoUtKell({ korok = 0, felelt = 0, meret = 0 } = {}) {
+  return korok >= KOINON_KOZVETLEN_KOROK && felelt < Math.min(KOINON_JELOLT_KORLAT, Math.max(1, meret));
+}
+
+/**
+ * Eldőlhet-e a pótlás: a minta kimerült (mind felelt, legfeljebb `korlat`), vagy letelt a gyűjtés ideje (⭐ ④d3: a `kezdet` a párján
+ * jelentkezés ideje, ha volt — a kopogtató útnak idő kell: a hirdetők ~20 percenként néznek rá).
  * @param {{felelt: number, minta: number, kezdet: number, most?: number}} b
  * @returns {boolean}
  */

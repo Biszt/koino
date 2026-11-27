@@ -577,6 +577,20 @@ egyezmény a jelölt tárában, a címe a kosár témáján).
 örökölte, és arra kisorsolta a pótlást — ez vitte el az órás ütemet). Ez a (C) értelme szerint helyes: amíg tartom, gondoskodom róla —
 utódot keresek, és ha nélkülem is megvan, átadom.
 
+✅ **④d3 kész (2026-11-28) — a kopogtató-vihar.** ⭐ *Mérve (a javítás előtt, a ④c3 alakjával):* négy jelölt a gyökér-darab témáján,
+a kérdezésre 3 másodperc alatt KÖZVETLENÜL mind a négy felelt — mégis, amikor az induló címjegyzék-körük a párokat megnézte, mind a
+négy kérőt látott a minta párján (és egy 30 percig A felé kopogna); és mert egy kis koinoban MINDEN tartó pótol (mindegyik kosárnak
+kevés a tartója), mindegyik jelentkezik egy gyökér-darab párján — egy jelölt „4 kérő vár rám”-ot írt: a vihar a pótlók számával
+szorzódik. Egy bekopogó minden körében (alapból 5 percenként) egy csere a pótlónál; a kapu egyszerre legfeljebb 3 ismeretlen
+bekopogóval dolgozik (`BEKOPOGO_KORLAT` — a többinek „foglalt”, később sorra kerül), de a sima csere nincs a kiszolgálási keret alatt
+— 30 perc alatt hirdetőnként ~6 csere. **A javítás** (a 4. pont — a 11. szakasz 5. pontja szerint): a kérdezés előbb csak a jelöltek
+CÍMÉRE kopog (kopogtató nélkül); az őrjárat a kérdezés köreit számolja (`potlasKozvetlenKor`), és ha `KOINON_KOZVETLEN_KOROK` (3 — ~15
+perc) kör után kevesebben feleltek, mint amennyi a döntéshez kell (`kopogtatoUtKell`), a kérdezés kérelme a minta párját is megkapja
+(a házimunka erre előre hozza a címjegyzék-kört), és a gyűjtés 30 perce innen számít. ⚠️ *Ami marad:* ha a közvetlen kopogás kevés (a
+NAT mögött ez a gyakori — a 60. mérés: egy oldalról ~20%), a kopogtató út kell, és akkor a minta témájának minden fent lévő hirdetője
+30 percig kopog (egy kis mélységű gyökér-darabnak száz fölötti hirdetője is lehet — ~600 csere pótlásonként, legfeljebb 3 egyszerre);
+ezt a ⑤ terep méri meg a valódi elérhetőséggel.
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
@@ -784,3 +798,8 @@ utódot keresek, és ha nélkülem is megvan, átadom.
   függő felkérés; nincs hiány — nem vállal; a határ felszabadul), a megtelt jelölt (a kérdezésre nemet mond, a vállaló kapja).
   Mind az 5 rontásra bukik (a port is számít; a pótlás nem nézi a látott számot; nincs határ a függő felkérésekre; a választás az
   elutasítókat is nézi; a jelölt nem nézi a keretét). ⏭️ ④d3 a kopogtató-vihar.
+- **2026-11-28** — ✅ **④d3: a kopogtató-vihar** (Csaba: „Igen, jöhet a ④d3”): mérve — a ④c3 alakjával négy, közvetlenül felelő jelölt
+  is mind kérőt látott a minta párján (30 percig kopogna), és egy kis koinoban minden pótló jelentkezik (a vihar szorzódik); javítva —
+  a minta párja csak 3 közvetlen kör után, ha kevés jelölt felelt. Két próba (egy tiszta: a döntés; egy a parancssoron: a közvetlen elég
+  → senki nem lát kérőt; a közvetlen kevés → a párján jelentkezik, a jelöltek bekopognak, a pótlás eldől). Mind a 4 rontásra bukik (a
+  körök nélkül; a felelők nélkül; a kopogtató út azonnal — a ④c3 alakja; a kopogtató út soha). ⏭️ a teljes próbasor (a ④ vége).
