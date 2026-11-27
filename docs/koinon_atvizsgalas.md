@@ -565,6 +565,18 @@ a kört. ⚠️ *A próba első alakja szeszélyes volt* (3-ból egyszer bukott)
 vállalás után a jelölt a kosár cseréjében is részt vesz, és az néha előbb hozza. Mindkettő jó út; a próba most az EREDMÉNYT nézi (az
 egyezmény a jelölt tárában, a címe a kosár témáján).
 
+✅ **④d2 kész (2026-11-28)** — három próba, kód-változás nélkül (a védelmek a ④b–④c3-ban már megvoltak; most a pótlás egészén mérve):
+- **a hamis hirdető:** egy idegen cím öt porton egynek számít (a kosár „kevés” marad — a pótlás nem nyomható el egy címről); három
+  különböző cím (a látott cél 3) elnyomja a pótlást (sem sorsolás, sem indulás); nélkülük ugyanaz az őrjárat kisorsolja (a kontroll).
+  ⭐ *A kódból:* a sima segítő szerepet a látott szám sosem adja le (csak a keret és a `koinon lead`) — a hamis hirdető csak az ÖRÖKÖLT
+  felet adathatja át (12 ellenőrzés után), így a ③ alapja (a természetes tartók) és a segítők maradnak;
+- **a hamis felkérő:** legfeljebb 4 függő felkérés (a többi „nem vállalja — már 4 függő felkérésem van”); ahol nincs hiány, a jelölt
+  semmit nem vállal; a függők elfogyta után a határ felszabadul;
+- **a megtelt jelölt:** a keretén túli jelölt a kérdezésre nemet mond, és a felkérést a nagyobb terhű, de vállaló jelölt kapja.
+⭐ *Mérve a próbán:* a tartó az ÖRÖKÖLT kosarát is pótolja, ha kevés a tartója (az alapító a 0 → 1 kettéváláskor a másik felet
+örökölte, és arra kisorsolta a pótlást — ez vitte el az órás ütemet). Ez a (C) értelme szerint helyes: amíg tartom, gondoskodom róla —
+utódot keresek, és ha nélkülem is megvan, átadom.
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
@@ -767,3 +779,8 @@ egyezmény a jelölt tárában, a címe a kosár témáján).
   két jelöltet, a választott azonnal vállal, a kosarat letölti, és csak adattal hirdeti; a másik kézi szerepe adat nélkül „még nem”
   hirdetett) — az 1–3. pont javításával; a ④c3 és a ④c4 próbája egy közös segéddel (`egyezmenyKosarba`) tesz eseményt a kosárba.
   ⏭️ ④d2 a hamisítások.
+- **2026-11-28** — ✅ **④d2: a hamisítások** (Csaba: „Igen, jöhet a ④d2”): három parancssori próba, kód-változás nélkül — a hamis
+  hirdető (egy cím sok porton egynek számít; elég különböző cím elnyomja a pótlást; nélkülük elindul), a hamis felkérő (legfeljebb 4
+  függő felkérés; nincs hiány — nem vállal; a határ felszabadul), a megtelt jelölt (a kérdezésre nemet mond, a vállaló kapja).
+  Mind az 5 rontásra bukik (a port is számít; a pótlás nem nézi a látott számot; nincs határ a függő felkérésekre; a választás az
+  elutasítókat is nézi; a jelölt nem nézi a keretét). ⏭️ ④d3 a kopogtató-vihar.

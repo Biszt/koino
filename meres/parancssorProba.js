@@ -5934,6 +5934,243 @@ proba('⭐⭐ D130 (④d1): a TELJES KÖR valódi őrjáratokkal — a tartó p�
   }
 });
 
+// ⭐⭐ D130 (④d2 — `koinon_atvizsgalas.md` 11., 6. pont; 13.): A HAMIS HIRDETŐ. Egy r = 2-es nyílt koinoban A négy tagot ismer (1.
+// mélység — a látott cél 3), a kosarában egy általános egyezmény. Egy hamis DHT-n: (1) EGY idegen cím öt porton hirdeti A kosarát → a
+// `cimjegyzek hirdet` 2 tartót lát (címenként egyszer: magam és ő) — kevés; (2) három különböző idegen cím → A őrjárata 4 tartót lát,
+// és pótlás NEM indul (sem sorsolás, sem indulás — a „pótlás (…)” sor sem); (3) a kontroll: a hamis hirdetők nélkül ugyanez az őrjárat
+// kisorsolja a pótlást (a minta itt üres — „nincs jelölt” —, de a pótlás elindul). Rontás: a port is számít → az (1) 6-ot lát → bukik;
+// a pótlás a látott számot nem nézi → a (2)-ben sorsol → bukik.
+proba('⭐⭐ D130 (④d2): a HAMIS HIRDETŐ — egy cím sok porton egynek számít (kevés marad), elég különböző cím elnyomja a pótlást; nélkülük a pótlás elindul', async () => {
+  const { hamisHalozat } = await import('./dhtProba.js');
+  const { cimjegyzekTema, koinonDarabKulcsai, koinonDarabBol } = await import('../js/csere/cimjegyzek.js');
+  const a = await ujKeszulek();
+  const tagok = [];
+  const PA = 8111;
+  const halo = await hamisHalozat(12);
+  const dht = { KOINO_DHT_BELEPOK: halo.belepo(0), KOINO_TUKOR: '127.0.0.1:9', KOINO_KISZOLGALAS: 'alap' };
+  const tiszta = (x) => x.replace(/\x1b\[[0-9;]*m/g, '');
+  let oa = null;
+  try {
+    await fut(a, 'koino', 'Hamis hirdető', 'próba', 'nyilt', 'koinonPeldany=2', dht);
+    await fut(a, 'tabla', dht);
+    const K = await koinoNeve(a);
+    const aAl = JSON.parse(await readFile(join(a, 'tabla-kulcs.json'), 'utf8').catch(() => '{}')).alairoNyilvanos ?? null;
+    if (!aAl) { process.stdout.write('    (④d2 hirdető: A tábla-kulcsa nincs meg)\n'); return false; }
+    for (let i = 0; i < 3; i++) {
+      const t = await ujKeszulek();
+      tagok.push(t);
+      await fut(t, 'csatlakoz', K, dht);
+      await fut(t, 'belep', dht);
+      await csereKor(a, t, 7996, { ...dht, KOINO_KISZOLGALAS: 'mindent' });
+    }
+    const A1 = koinonDarabKulcsai(aAl, 1)[0];
+    const jel = '1:' + koinonDarabBol(A1).darab;
+    if (!(await egyezmenyKosarba(a, A1, 1, dht))) { process.stdout.write('    (④d2 hirdető: 16 egyezményből egy sem esett A kosarába)\n'); return false; }
+    const tema = cimjegyzekTema(K, 'szelet', A1).toString('hex');
+    const hirdetok = (cimek) => { for (const g of halo.gepek) { g.hirdetok ??= new Map(); g.hirdetok.set(tema, cimek.map(([cim, port]) => ({ cim, port }))); } };
+    // (1) egy idegen cím öt porton
+    hirdetok([1, 2, 3, 4, 5].map((p) => ['10.0.0.1', p]));
+    const egyCim = tiszta(await fut(a, 'cimjegyzek', 'hirdet', String(PA), dht));
+    // (2) három különböző idegen cím — A őrjárata
+    let naplo = '';
+    const orjarat = () => {
+      const o = spawn(process.execPath, [KOINO_JS, 'orjarat', '0.05', String(PA)],
+        { env: { ...process.env, KOINO_ADAT: a, KOINO_NAPLO: '', ...dht }, stdio: ['ignore', 'pipe', 'pipe'] });
+      o.stdout.on('data', (x) => { naplo += x; });
+      return o;
+    };
+    hirdetok([['10.0.0.1', 1], ['10.0.0.2', 1], ['10.0.0.3', 1]]);
+    oa = orjarat();
+    const szamlalt = new RegExp('🧺[^\\n]*a koinon-kosaram \\(' + jel + '\\): 4 tartó látszik a DHT-n, a cél 3\\b');
+    for (let i = 0; i < 60 && !szamlalt.test(tiszta(naplo)); i++) await varj(500);
+    await varj(3000);
+    const elnyomva = tiszta(naplo);
+    oa.kill();
+    oa = null;
+    await varj(1500);
+    // (3) a kontroll: a hamis hirdetők nélkül. ⚠️ A (2)-ben A az ÖRÖKÖLT kosarát (a 0 → 1 kettéválásból — az alapító előtte az egész
+    // koinont tartotta) jogosan pótolta (kevés a tartója), és ez az óránként egy pótlást elvitte: a próba a pótlás jegyzékét törli (az
+    // órát nem várhatja ki).
+    await rm(join(await koinoMappa(a), 'koinon-potlas.json'), { force: true });
+    hirdetok([]);
+    naplo = '';
+    oa = orjarat();
+    const indult = new RegExp('pótlás \\(' + jel + '\\): a kosaramnak 1 tartó látszik \\(a cél 3\\), kisorsoltak \\(1/1\\)');
+    for (let i = 0; i < 60 && !indult.test(tiszta(naplo)); i++) await varj(500);
+    const kontroll = tiszta(naplo);
+    const ki = {
+      egyCim: egyCim.includes('koinon-kosár ' + jel + ' (2 tartó látszik a DHT-n, a cél 3 — kevés)'),
+      szamlalt: szamlalt.test(elnyomva),
+      elnyomva: !elnyomva.includes('pótlás (' + jel + ')'),
+      kontroll: indult.test(kontroll)
+    };
+    if (!Object.values(ki).every(Boolean)) {
+      process.stdout.write('    (④d2 hirdető — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ' · ' + JSON.stringify({
+        jel, egyCim: (egyCim.match(/koinon-kosár[^\n]*/g) ?? []).join(' | '),
+        elnyomva: (elnyomva.match(/[^\n]*(🧺|pótlás)[^\n]*/g) ?? []).join(' | ').slice(0, 900),
+        kontroll: (kontroll.match(/[^\n]*(🧺|pótlás)[^\n]*/g) ?? []).join(' | ').slice(0, 900) }).slice(0, 2600) + ')\n');
+    }
+    return Object.values(ki).every(Boolean);
+  } finally {
+    if (oa) oa.kill();
+    halo.bezar();
+    await varj(1000);
+    for (const h of [a, ...tagok]) await rm(h, { recursive: true, force: true });
+  }
+});
+
+// ⭐⭐ D130 (④d2 — 11., 6. pont): A HAMIS FELKÉRŐ. Egy r = 1-es nyílt koinoban B négy tagot ismer (2. mélység); B postaládája
+// (`figyel`) fogadja A felkéréseit hat különböző 3. mélységű kosárra, amelyeket nem tart: (1) az első négy „megnézi”, az ötödik és a
+// hatodik „nem vállalja — már 4 függő felkérésem van” (egy felkérő nem halmozhat fel tetszőleges terhet); (2) a hamis DHT-n mind a
+// négynek két idegen tartója látszik (a cél 2 — nincs hiány) → a `koinon felkeresek` mind a négyet elutasítja, B semmit nem vállal; (3)
+// a függők így kiürültek: az ötödik újra „megnézi”. Rontás: nincs határ a függő felkérésekre → az (1) ötödikje „megnézi” → bukik.
+proba('⭐⭐ D130 (④d2): a HAMIS FELKÉRŐ — legfeljebb 4 függő felkérés; ahol nincs hiány, a jelölt semmit nem vállal, és a határ felszabadul', async () => {
+  const { hamisHalozat } = await import('./dhtProba.js');
+  const { cimjegyzekTema, koinonDarabKulcsai, koinonDarabKulcsa, koinonDarabBol } = await import('../js/csere/cimjegyzek.js');
+  const a = await ujKeszulek();
+  const b = await ujKeszulek();
+  const tagok = [];
+  const PB = 8103;
+  const halo = await hamisHalozat(12);
+  const dht = { KOINO_DHT_BELEPOK: halo.belepo(0), KOINO_TUKOR: '127.0.0.1:9', KOINO_KISZOLGALAS: 'alap' };
+  const tiszta = (x) => x.replace(/\x1b\[[0-9;]*m/g, '');
+  let figyelo = null;
+  try {
+    await fut(a, 'koino', 'Hamis felkérő', 'próba', 'nyilt', 'koinonPeldany=1', dht);
+    const K = await koinoNeve(a);
+    for (let i = 0; i < 2; i++) {
+      const t = await ujKeszulek();
+      tagok.push(t);
+      await fut(t, 'csatlakoz', K, dht);
+      await fut(t, 'belep', dht);
+      await csereKor(a, t, 7996, { ...dht, KOINO_KISZOLGALAS: 'mindent' });
+    }
+    await fut(b, 'csatlakoz', K, dht);
+    await fut(b, 'belep', dht);
+    await csereKor(a, b, 7996, { ...dht, KOINO_KISZOLGALAS: 'mindent' });
+    const bV = tiszta(await fut(b, 'vallalas', dht));
+    const bAl = JSON.parse(await readFile(join(b, 'tabla-kulcs.json'), 'utf8').catch(() => '{}')).alairoNyilvanos ?? null;
+    if (!bAl) { process.stdout.write('    (④d2 felkérő: B tábla-kulcsa nincs meg)\n'); return false; }
+    const bd = koinonDarabBol(koinonDarabKulcsai(bAl, 2)[0]).darab;
+    // hat 3. mélységű kosár, ami nem B kosarában van (B a 2. mélységen: a saját kosarának két fele kimarad)
+    const kosarak = [];
+    for (let d = 0n; d < 8n && kosarak.length < 6; d++) if ((d >> 1n) !== bd) kosarak.push(d);
+    figyelo = spawn(process.execPath, [KOINO_JS, 'figyel', String(PB)], { env: { ...process.env, KOINO_ADAT: b, KOINO_NAPLO: '', ...dht }, stdio: 'ignore' });
+    await varj(1500);
+    const felker = async (d) => tiszta(await fut(a, 'koinon', 'felker', '3:' + d, '127.0.0.1', String(PB), dht));
+    const valaszok = [];
+    for (const d of kosarak) valaszok.push(await felker(d));
+    // a négy függőnek két idegen tartója a DHT-n (nincs hiány)
+    for (const d of kosarak.slice(0, 4)) {
+      const tema = cimjegyzekTema(K, 'szelet', koinonDarabKulcsa(3, d)).toString('hex');
+      for (const g of halo.gepek) { g.hirdetok ??= new Map(); g.hirdetok.set(tema, [{ cim: '10.0.0.1', port: 1 }, { cim: '10.0.0.2', port: 1 }]); }
+    }
+    const feld = tiszta(await fut(b, 'koinon', 'felkeresek', dht));
+    const sz = JSON.parse(await readFile(join(await koinoMappa(b), 'koinon-szerepek.json'), 'utf8').catch(() => '{}'));
+    const ujra = await felker(kosarak[4]);
+    const ki = {
+      melyseg: /a koinon darabja: 2\. mélység/.test(bV) && kosarak.length === 6,
+      negy: valaszok.slice(0, 4).every((v) => v.includes('megnézi')),
+      hatar: valaszok.slice(4).every((v) => v.includes('nem vállalja — már 4 függő felkérésem van')),
+      nincsHiany: kosarak.slice(0, 4).every((d) => feld.includes('a 3:' + d + ' felkérést nem vállaltam: nincs hiány')),
+      semmi: Object.keys(sz.segito ?? {}).length === 0,
+      felszabadul: ujra.includes('megnézi')
+    };
+    if (!Object.values(ki).every(Boolean)) {
+      process.stdout.write('    (④d2 felkérő — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ' · ' + JSON.stringify({
+        bd: String(bd), kosarak: kosarak.map(String), bV: (bV.match(/a koinon darabja:[^\n]*/) ?? [''])[0],
+        valaszok: valaszok.map((v) => (v.match(/Felkérés[^\n]*|A felkérést[^\n]*/) ?? [v.slice(0, 120)])[0]), feld: feld.slice(0, 700), sz,
+        ujra: ujra.slice(0, 200) }).slice(0, 3000) + ')\n');
+    }
+    return Object.values(ki).every(Boolean);
+  } finally {
+    if (figyelo) figyelo.kill();
+    halo.bezar();
+    await varj(1000);
+    for (const h of [a, b, ...tagok]) await rm(h, { recursive: true, force: true });
+  }
+});
+
+// ⭐⭐ D130 (④d2 — KO15 (A)): A MEGTELT JELÖLT. Mint a ④c3 próbája (A pótol, B a koinon 75%-át, C az 50%-át őrzi — mindkettő postaláda
+// a gyökér-darab témáján), de C kerete 0: a kérdezésre C „nem vállalná: a keretem betelt”, és a felkérést a kisebb terhű C helyett B
+// kapja (a legkevesebbet őrző a VÁLLALÓK közül). Rontás: a választás az elutasítókat is nézi → C kapja → bukik; a jelölt nem nézi a
+// keretét → C „vállalná”, és ő kapja → bukik.
+proba('⭐⭐ D130 (④d2): a MEGTELT JELÖLT — a keretén túli jelölt a kérdezésre nemet mond, és a felkérést a következő (a nagyobb terhű, de vállaló) kapja', async () => {
+  const { hamisHalozat } = await import('./dhtProba.js');
+  const { gyokerDarabTemaja, koinonDarabKulcsai, koinonDarabBol } = await import('../js/csere/cimjegyzek.js');
+  const a = await ujKeszulek();
+  const probalt = [];
+  const PO = 8105, PB = 8107, PC = 8109;
+  const halo = await hamisHalozat(12);
+  const dht = { KOINO_DHT_BELEPOK: halo.belepo(0), KOINO_TUKOR: '127.0.0.1:9', KOINO_KISZOLGALAS: 'alap' };
+  const tiszta = (x) => x.replace(/\x1b\[[0-9;]*m/g, '');
+  const futok = [];
+  let naplo = '';
+  try {
+    await fut(a, 'koino', 'Megtelt jelölt', 'próba', 'nyilt', 'koinonPeldany=1', dht);
+    await fut(a, 'tabla', dht);
+    const K = await koinoNeve(a);
+    const alairo = async (h) => JSON.parse(await readFile(join(h, 'tabla-kulcs.json'), 'utf8').catch(() => '{}')).alairoNyilvanos ?? null;
+    const aAl = await alairo(a);
+    if (!aAl) { process.stdout.write('    (④d2 megtelt: A tábla-kulcsa nincs meg)\n'); return false; }
+    const aKosar = koinonDarabKulcsai(aAl, 1)[0];
+    const ad = koinonDarabBol(aKosar).darab;
+    const jeloltek = [];
+    for (let i = 0; i < 16 && jeloltek.length < 2; i++) {
+      const j = await ujKeszulek();
+      probalt.push(j);
+      await fut(j, 'tabla', dht);
+      const al = await alairo(j);
+      if (al && koinonDarabKulcsai(al, 1)[0] !== aKosar) jeloltek.push(j);
+    }
+    if (jeloltek.length < 2) { process.stdout.write('    (④d2 megtelt: nem találtam két jelöltet)\n'); return false; }
+    const [b, c] = jeloltek;
+    for (const t of [b, c]) {
+      await fut(t, 'csatlakoz', K, dht);
+      await fut(t, 'belep', dht);
+      await csereKor(a, t, 7996, { ...dht, KOINO_KISZOLGALAS: 'mindent' });
+    }
+    await csereKor(a, b, 7996, { ...dht, KOINO_KISZOLGALAS: 'mindent' });
+    await fut(b, 'koinon', 'segit', '2:' + (2n * ad), dht);     // B terhe 75%
+    await fut(c, 'koinon', 'keret', '0', dht);                  // C kerete betelt
+    if (!(await egyezmenyKosarba(a, aKosar, 1, dht))) { process.stdout.write('    (④d2 megtelt: 16 egyezményből egy sem esett A kosarába)\n'); return false; }
+    const tema = gyokerDarabTemaja(K, 0, 0n).toString('hex');
+    for (const g of halo.gepek) { g.hirdetok ??= new Map(); g.hirdetok.set(tema, [{ cim: '127.0.0.1', port: PB }, { cim: '127.0.0.1', port: PC }]); }
+    futok.push(spawn(process.execPath, [KOINO_JS, 'figyel', String(PB)], { env: { ...process.env, KOINO_ADAT: b, KOINO_NAPLO: '', ...dht }, stdio: 'ignore' }));
+    futok.push(spawn(process.execPath, [KOINO_JS, 'figyel', String(PC)], { env: { ...process.env, KOINO_ADAT: c, KOINO_NAPLO: '', ...dht }, stdio: 'ignore' }));
+    await varj(1500);
+    const oa = spawn(process.execPath, [KOINO_JS, 'orjarat', '0.05', String(PO)],
+      { env: { ...process.env, KOINO_ADAT: a, KOINO_NAPLO: '', ...dht }, stdio: ['ignore', 'pipe', 'pipe'] });
+    futok.push(oa);
+    oa.stdout.on('data', (x) => { naplo += x; });
+    for (let i = 0; i < 120 && !/megjött: felkérés: /.test(tiszta(naplo)); i++) await varj(500);
+    for (const f of futok) f.kill();
+    futok.length = 0;
+    await varj(1000);
+    const n = tiszta(naplo);
+    const jel = '1:' + ad;
+    const szerepek = async (h) => JSON.parse(await readFile(join(await koinoMappa(h), 'koinon-szerepek.json'), 'utf8').catch(() => '{}'));
+    const bSz = await szerepek(b);
+    const cSz = await szerepek(c);
+    const ki = {
+      cNem: n.includes('127.0.0.1:' + PC + ' — nem vállalná: a keretem betelt (0 MB)'),
+      bIgen: n.includes('127.0.0.1:' + PB + ' — vállalná · a koinon 75%-át őrzi'),
+      dontes: n.includes('pótlás (' + jel + '): 2 jelölt felelt; a legkevesebbet őrző (127.0.0.1:' + PB + ', a koinon 75%-át őrzi) kapta a felkérést'),
+      bKapta: !!bSz.fuggo?.[aKosar] && !cSz.fuggo?.[aKosar]
+    };
+    if (!Object.values(ki).every(Boolean)) {
+      process.stdout.write('    (④d2 megtelt — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ' · ' + JSON.stringify({
+        jel, naplo: (n.match(/[^\n]*(🧺|🤝|függő kérelem)[^\n]*/g) ?? []).join(' | ').slice(0, 1500), bSz, cSz }).slice(0, 2600) + ')\n');
+    }
+    return Object.values(ki).every(Boolean);
+  } finally {
+    for (const f of futok) f.kill();
+    halo.bezar();
+    await varj(1000);
+    for (const h of [a, ...probalt]) await rm(h, { recursive: true, force: true });
+  }
+});
+
 // ===================================
 // ⭐ A HÁZ (D100): A CSATLAKOZÓ KÉSZÜLÉK KÉZI CSERÉJE CSERE MARAD, ha a gazdánál függő kérelem vár (2026-10-10)
 // ===================================

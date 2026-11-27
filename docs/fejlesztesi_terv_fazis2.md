@@ -6715,7 +6715,8 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     kész (2026-11-27):** a kettéválás a `koinonMelysegem`-ben (csak ahol van eseményem, egy szint lépésnél), az átadás a számlálásban, a
     nagyszülő a kérő és a számláló kulcsai közt. ⭐ **A ④d** (`koinon_atvizsgalas.md` 13.) három részben: ✅ **④d1 a teljes kör**
     (2026-11-27 — valódi őrjáratokkal; a javítások: egy új felkérés előre hozza a címjegyzék-kört, a segítő csak adattal hirdet, üres
-    kosarat nem pótol); ⏭️ ④d2 a hamisítások, ④d3 a kopogtató-vihar; utána a teljes próbasor, majd a kézikönyv mindenkinél (KO5 (A)).
+    kosarat nem pótol); ✅ **④d2 a hamisítások** (2026-11-28 — a hamis hirdető, a hamis felkérő és a megtelt jelölt a pótlás egészén,
+    kód-változás nélkül); ⏭️ ④d3 a kopogtató-vihar; utána a teljes próbasor, majd a kézikönyv mindenkinél (KO5 (A)).
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.
