@@ -38,7 +38,9 @@ import {
   kosarTartalmazza, leadandoSegitok, KOINON_KERET_ALAP_MB, KOINON_UJ_SZEREP_KOZ, KOINON_FUGGO_KORLAT,
   // ⭐⭐ D130 (④c3): a pótlás
   potlasSorsolasa, veletlenDarab, potlasJeloltjei, nyitasTerhe, potlasValasztasa, potlasDonthet, gyokerJelSzovege,
-  KOINON_JELOLT_KORLAT, KOINON_POTLAS_KOZ, KOINON_JELOLT_IDO
+  KOINON_JELOLT_KORLAT, KOINON_POTLAS_KOZ, KOINON_JELOLT_IDO,
+  // ⭐⭐ D130 (④c4): a kettéválás és az átadás
+  kettevalasSzerepei, orokoltEllenorzese, kettevalasSzovege, KOINON_ATADAS_SOR, KOINON_ELLENORZES_KOZ
 } from '../js/csere/cimjegyzek.js';
 import { kerelemAlakja, felkeresValaszAlakja, KERELEM_FAJTAK, TOVABBADHATO_FAJTAK } from '../js/csere/kerelem.js';
 import { kerelemFelvetele, nyilvantartasAlakja, tarshozIllo, celKivetele, ujNyilvantartas } from '../js/csere/fuggoKerelmek.js';
@@ -411,23 +413,29 @@ proba('⭐⭐ D130 (④a): a kosár témája a `szelet` fajtán, a darab-kulcson
   return Object.values(ki).every(Boolean);
 });
 
-// A kérő a darab saját témáján és a SZÜLŐJÉÉN keres (a sekélyebb tartó az egészet tartja) — a gyermekekén nem (fél válasz), a 0.
-// mélységű szülőn nem (senki nem hirdeti). Rontás: a szülő helyett a gyermek → a `szulo` bukik; a 0. mélység is → az `elso` bukik.
-proba('⭐⭐ D130 (④a): a kérő a darab témáján és a szülőjéén keres — a szülő tartalmazza a darabot; a 0. mélységű szülőn és a gyermekeken nem', () => {
+// A kérő a darab saját témáján, a SZÜLŐJÉÉN és (⭐⭐ ④c4 — KO19 (A), a 3. mélységtől) a NAGYSZÜLŐJÉÉN keres (a sekélyebb tartó az
+// egészet tartja) — a gyermekekén nem (fél válasz), a 0. mélységű ősön nem (senki nem hirdeti). Rontás: a szülő helyett a gyermek → a
+// `szulo` bukik; a 0. mélység is → az `elso` / a `masodik` bukik; nincs nagyszülő → a `nagyszulo` bukik.
+proba('⭐⭐ D130 (④a, ④c4 — KO19 (A)): a kérő a darab témáján, a szülőjéén és a nagyszülőjéén keres — mindkettő tartalmazza a darabot; a 0. mélységű ősön és a gyermekeken nem', () => {
   const k = koinonDarabKulcsa(4, 11);
-  const [sajat, szulo, ...tobb] = koinonKeresoKulcsai(k);
+  const [sajat, szulo, nagyszulo, ...tobb] = koinonKeresoKulcsai(k);
   const sz = koinonDarabBol(szulo);
-  // a szülő az egészet tartja: egy egyezmény, ami a darabba esik, a szülőbe is
+  const nsz = koinonDarabBol(nagyszulo);
+  // a szülő és a nagyszülő az egészet tartja: egy egyezmény, ami a darabba esik, beléjük is
   let tartalmazza = true;
   for (let i = 0; i < 200; i++) {
     const az = 'e' + i;
     const l = koinonLenyomata(az);
-    if (darabbaEsik(l, 4, 11n) && !darabbaEsik(l, sz.melyseg, sz.darab)) tartalmazza = false;
+    if (darabbaEsik(l, 4, 11n) && (!darabbaEsik(l, sz.melyseg, sz.darab) || !darabbaEsik(l, nsz.melyseg, nsz.darab))) tartalmazza = false;
   }
   const ki = {
     sajat: sajat === k && tobb.length === 0,
     szulo: sz?.melyseg === 3 && sz.darab === 5n && tartalmazza,
+    nagyszulo: nsz?.melyseg === 2 && nsz.darab === 2n,
     elso: koinonKeresoKulcsai(koinonDarabKulcsa(1, 1)).length === 1,
+    masodik: koinonKeresoKulcsai(koinonDarabKulcsa(2, 3)).length === 2,
+    harmadik: JSON.stringify(koinonKeresoKulcsai(koinonDarabKulcsa(3, 6)))
+      === JSON.stringify([koinonDarabKulcsa(3, 6), koinonDarabKulcsa(2, 3), koinonDarabKulcsa(1, 1)]),
     nemDarab: koinonKeresoKulcsai(gyokerDarabKulcsa(4, 11)).length === 0 && koinonKeresoKulcsai('x').length === 0
   };
   if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
@@ -686,6 +694,62 @@ proba('⭐⭐ D130 (④c3): a kérdezés jele a kérelemben és a függő nyilv�
       && kivett.fuggo.find((x) => x.az === 'igazi-az').celok.length === 1
   };
   if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ ki, ny }) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// ===================================
+// ⭐⭐ D130 (④c4 — KO18 (C)): A KETTÉVÁLÁS ÉS AZ ÁTADÁS
+// ===================================
+
+// A kettéválás szerepei: egy szint lépésnél a régi saját kosár másik fele és a régi mélységen (vagy fölötte) lévő segítő mindkét fele
+// örökölt (az eredeti idejével), de csak az a fél, amelyben van esemény; a mélyebb segítő változatlan; ha egyik felében sincs, a
+// szerep megszűnik; több szint ugrásnál és az első látáskor semmi. Rontás: az esemény-ellenőrzés nélkül → a `csakAmiVan` bukik; a
+// segítő nem bomlik → a `finomodik` bukik; több szintnél is örököl → az `ugras` bukik.
+proba('⭐⭐ D130 (④c4 — KO18 (C)): a kettéválás szerepei — egy szintnél a másik fél és a segítők felei örököltek (csak ahol van esemény), a mélyebb segítő marad; több szint ugrásnál semmi', () => {
+  const K = (m, d) => koinonDarabKulcsa(m, d);
+  const a = kettevalasSzerepei({ regi: 2, uj: 3, regiSajat: K(2, 1), ujSajat: K(3, 3), most: 100, vanBenne: (k) => k !== K(3, 1),
+    segito: { [K(2, 0)]: { ido: 5, ok: 'felkérés' }, [K(3, 5)]: { ido: 9, ok: 'kézzel' } } });
+  const b = kettevalasSzerepei({ regi: 2, uj: 3, regiSajat: K(2, 1), ujSajat: K(3, 3), vanBenne: () => false,
+    segito: { [K(2, 0)]: { ido: 5, ok: 'felkérés' } } });
+  const ugras = kettevalasSzerepei({ regi: 2, uj: 4, regiSajat: K(2, 1), ujSajat: K(4, 7), segito: { [K(2, 0)]: { ido: 5 } } });
+  const elso = kettevalasSzerepei({ regi: undefined, uj: 3, regiSajat: K(2, 1), ujSajat: K(3, 3), segito: {} });
+  const ki = {
+    masikFel: a.segito[K(3, 2)]?.orokolt === true && a.segito[K(3, 2)].ok === 'kettéválás' && a.segito[K(3, 2)].ido === 100,
+    finomodik: !a.segito[K(2, 0)] && a.segito[K(3, 0)]?.orokolt === true && a.segito[K(3, 0)].ido === 5 && a.segito[K(3, 0)].ok === 'felkérés',
+    csakAmiVan: !a.segito[K(3, 1)] && JSON.stringify(a.orokolt.sort()) === JSON.stringify([K(3, 2), K(3, 0)].sort()),
+    melyebbMarad: JSON.stringify(a.segito[K(3, 5)]) === JSON.stringify({ ido: 9, ok: 'kézzel' }),
+    sajatNem: !a.segito[K(3, 3)] && Object.keys(a.segito).length === 3,
+    megszunik: Object.keys(b.segito).length === 0 && b.orokolt.length === 0 && JSON.stringify(b.elengedett) === JSON.stringify([K(2, 0)]),
+    ugras: ugras.orokolt.length === 0 && !!ugras.segito[K(2, 0)] && Object.keys(ugras.segito).length === 1,
+    elso: elso.orokolt.length === 0 && Object.keys(elso.segito).length === 0,
+    szoveg: kettevalasSzovege({ regi: 2, uj: 3, orokolt: [K(3, 2)], elengedett: [], levagott: [] }).includes('1 örökölt szerep (3:2)')
+      && kettevalasSzovege({ regi: 2, uj: 4 }).includes('több szint egyszerre')
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ ki, a, b }) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// Az örökölt kosár ellenőrzése: ha nélkülem is megvan a cél, számít (óránként legfeljebb egy), ha nem, a sor elölről; a 12.-nél
+// átadom; a nagyszülővel számolt mondat. Rontás: velem együtt számol → a `nelkulem` bukik; minden kör számít → az `oranként` bukik; a
+// kudarc nem nulláz → a `nullaz` bukik.
+proba('⭐⭐ D130 (④c4 — KO18 (C)): az örökölt kosár ellenőrzése — nélkülem is a cél, óránként legfeljebb egy számít, egy kudarc elölről kezdi, a 12. után átadom', () => {
+  const cel = 2, t0 = 1e12, ora = 60 * 60 * 1000;
+  const e1 = orokoltEllenorzese({ latott: 3, cel, most: t0 });
+  const e2 = orokoltEllenorzese({ ...e1, latott: 3, cel, most: t0 + 10 * 60 * 1000 });
+  const e3 = orokoltEllenorzese({ ...e2, latott: 3, cel, most: t0 + ora });
+  const kudarc = orokoltEllenorzese({ ...e3, latott: 2, cel, most: t0 + 2 * ora });
+  const utana = orokoltEllenorzese({ ...kudarc, latott: 3, cel, most: t0 + 2 * ora + 1 });
+  const vege = orokoltEllenorzese({ sor: 11, sorIdo: t0, latott: 4, cel, most: t0 + ora });
+  const ki = {
+    elso: e1.sor === 1 && e1.sorIdo === t0 && !e1.atad,
+    orankent: e2.sor === 1 && e3.sor === 2,
+    nelkulem: orokoltEllenorzese({ latott: 2, cel, most: t0 }).sor === 0,
+    nullaz: kudarc.sor === 0 && utana.sor === 1,
+    atad: vege.sor === 12 && vege.atad && !orokoltEllenorzese({ sor: 10, sorIdo: t0, latott: 4, cel, most: t0 + ora }).atad,
+    allandok: KOINON_ATADAS_SOR === 12 && KOINON_ELLENORZES_KOZ === 50 * 60 * 1000,
+    szoveg: kosarSzamlalasSzovege({ latott: 3, cel: 2, szulovel: true, nagyszulovel: true }).includes('(a szülő- és a nagyszülő-kosáréval együtt)')
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify({ ki, e1, e2, e3, kudarc, utana, vege }) + ')\n');
   return Object.values(ki).every(Boolean);
 });
 

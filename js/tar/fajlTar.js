@@ -1245,14 +1245,19 @@ export function koinonSzerepTarolo(koino, hely = alapHely()) {
     fajl,
     /**
      * ⭐⭐ D130 (④c2): a `fuggo` — a még meg nem nézett felkérések (`{ <darab-kulcs>: { ido, honnan, tabla } }`): a jelölt a
-     * címjegyzék-körében maga is megnézi a hiányt, és csak utána vállal.
-     * @returns {Promise<{segito: Object, fuggo: Object}>}
+     * címjegyzék-körében maga is megnézi a hiányt, és csak utána vállal. ⭐⭐ D130 (④c4): a `melyseg` és a `darab` — a legutóbb látott
+     * mélységem és saját kosaram; a `kettevalas` — az utolsó kettéválás (mikor, honnan hová, mi lett örökölt); egy segítő szerep
+     * `orokolt: true`-val a kettéválásból jött (KO18 (C) — átadom, ha nélkülem is megvan).
+     * @returns {Promise<{segito: Object, fuggo: Object, melyseg?: number, darab?: string, kettevalas?: Object}>}
      */
     async olvas() {
       const obj = (x) => (x && typeof x === 'object' && !Array.isArray(x) ? x : {});
       try {
         const j = JSON.parse(await readFile(fajl, 'utf8'));
-        return { segito: obj(j?.segito), fuggo: obj(j?.fuggo) };
+        // ⭐⭐ D130 (④c4): az utolsó mélységem és saját kosaram (ebből tudom, hogy kettévált-e), és az utolsó kettéválás
+        return { segito: obj(j?.segito), fuggo: obj(j?.fuggo),
+          ...(Number.isInteger(j?.melyseg) ? { melyseg: j.melyseg } : {}), ...(typeof j?.darab === 'string' ? { darab: j.darab } : {}),
+          ...(j?.kettevalas && typeof j.kettevalas === 'object' ? { kettevalas: j.kettevalas } : {}) };
       } catch {
         return { segito: {}, fuggo: {} };
       }

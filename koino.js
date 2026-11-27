@@ -227,7 +227,9 @@ import {
   kosarTartalmazza, leadandoSegitok, KOINON_KERET_ALAP_MB, KOINON_UJ_SZEREP_KOZ, KOINON_FUGGO_KORLAT, KOINON_FUGGO_ELEVULES,
   // ⭐⭐ D130 (④c3): a pótlás (a sorsolás, a minta jelöltjei, a terhük a nyitó jelből, a választás)
   KOINON_JELOLT_KORLAT, KOINON_POTLAS_KOZ, potlasSorsolasa, veletlenDarab, potlasJeloltjei, nyitasTerhe, potlasValasztasa,
-  potlasDonthet, teherSzazalek, potlasEredmenySzovege, potlasIndulasSzovege
+  potlasDonthet, teherSzazalek, potlasEredmenySzovege, potlasIndulasSzovege,
+  // ⭐⭐ D130 (④c4 — KO18 (C)): a kettéválás és az átadás
+  kettevalasSzerepei, orokoltEllenorzese, KOINON_ATADAS_SOR, kettevalasSzovege
 } from './js/csere/cimjegyzek.js';
 // ⭐⭐ D92/1: a függő kérelmek (a cím nélküli kérés — a kopogtatás).
 import {
@@ -4156,12 +4158,17 @@ async function koinonMelysegem() {
   const reszvetel = new Set(kulcsok);
   const darab = kulcsok[0];
   const d = koinonDarabBol(darab);
+  // ⭐⭐ D130 (④c4 — KO18 (C)): A KETTÉVÁLÁS — ha a mélységem (vagy a saját kosaram) a legutóbb látotthoz képest változott, itt, minden
+  // más ELŐTT: a csere, a tömörítés és a hirdetés ebből tudja, mit tartok (ha később történne, a tömörítés közben elengedhetné a másik
+  // fél eseményeit).
+  let sz = await szerepek.olvas();
+  if (sz.melyseg !== melyseg || sz.darab !== darab) sz = await kettevalasFeljegyzese(szerepek, sz, { melyseg, darab, alairo });
   // ⭐⭐ D130 (④c1): A SEGÍTŐ KOSARAIM — a helyi jegyzékből (a ④c pótlása, vagy a `koinon segit` vállalta): a 0. mélységen nincs
   // segítő (egy darab van, azt mindenki tartja), a sajátom nem az, és legfeljebb `KOINON_KOSAR_JEL_KORLAT` (a nyitó jel határa). A
   // mélységük a sajátomtól eltérhet (a felvételkori mélység) — a csere a szomszéd mélységet is egyezteti.
   const segitok = [];
   if (melyseg > 0) {
-    for (const k of Object.keys((await szerepek.olvas()).segito).sort()) {
+    for (const k of Object.keys(sz.segito).sort()) {
       const x = koinonDarabBol(k);
       if (!x || x.melyseg === 0 || k === darab || segitok.some((s) => s.kulcs === k)) continue;
       if (segitok.length >= KOINON_KOSAR_JEL_KORLAT) break;
@@ -4180,6 +4187,42 @@ async function koinonMelysegem() {
   const b = { melyseg, tagok, r, alairo, darab, reszvetel, tartja, bejegyzesTartja, darabja, segitok, kosarak };
   koinonBecslesEmlek = { valtozat, b };
   return b;
+}
+
+/**
+ * ⭐⭐ D130 (④c4 — KO18 (C), `koinon_atvizsgalas.md` 12.): A KETTÉVÁLÁS FELJEGYZÉSE — a mélységem a legutóbb látotthoz képest változott.
+ * Ha pontosan EGGYEL nőtt, a régi saját kosaram másik fele és a segítő kosaraim felei ÖRÖKÖLT szerepek lesznek — de csak az a fél,
+ * amelyben tényleg van eseményem (`kettevalasSzerepei`); a jel határán (32) a legújabb esik ki. Az első látáskor, csökkenéskor és
+ * több szint ugrásakor csak az új mélységet jegyzem fel (az utóbbinál a kettéválás is feljegyződik, örökölt szerep nélkül).
+ * @returns {Promise<Object>} a szerep-jegyzék (már az új mélységgel)
+ */
+async function kettevalasFeljegyzese(szerepek, sz, { melyseg, darab, alairo }) {
+  const regi = sz.melyseg;
+  const j = { ...sz, melyseg, darab };
+  if (Number.isInteger(regi) && melyseg > regi) {
+    const regiSajat = typeof sz.darab === 'string' && koinonDarabBol(sz.darab)?.melyseg === regi ? sz.darab : koinonDarabKulcsai(alairo, regi)[0];
+    // melyik félben van eseményem — a koinon kulcsához bejelentett eseményeim helyei (csak egy szint lépésnél kell)
+    let helyek = [];
+    if (melyseg === regi + 1) {
+      for (const e of await tar.bejelentesek(KOINON_KULCS)) {
+        if (esemenyKoinoja(e) === KOINO) for (const az of koinonHelyei(e)) helyek.push(koinonLenyomata(az));
+      }
+    }
+    const vanBenne = (k) => { const x = koinonDarabBol(k); return !!x && helyek.some((l) => darabbaEsik(l, x.melyseg, x.darab)); };
+    const k = kettevalasSzerepei({ regi, uj: melyseg, regiSajat, ujSajat: darab, segito: sz.segito, vanBenne, most: Date.now() });
+    j.segito = k.segito;
+    // a jel határa (32 segítő): a legújabb esik ki
+    const levagott = [];
+    const kulcsok = Object.keys(j.segito);
+    if (kulcsok.length > KOINON_KOSAR_JEL_KORLAT) {
+      kulcsok.sort((a, b) => (j.segito[b]?.ido ?? 0) - (j.segito[a]?.ido ?? 0));
+      for (const kk of kulcsok.slice(0, kulcsok.length - KOINON_KOSAR_JEL_KORLAT)) { delete j.segito[kk]; levagott.push(kk); }
+    }
+    j.kettevalas = { ido: Date.now(), regi, uj: melyseg, orokolt: k.orokolt.filter((x) => !levagott.includes(x)), elengedett: k.elengedett,
+      levagott };
+  }
+  try { await szerepek.ir(j); } catch (hiba) { console.warn('a kettéválás nem íródott', { ok: hiba.message }); }
+  return j;
 }
 
 /**
@@ -4300,10 +4343,12 @@ async function koinonFelkeresekFeldolgozasa(kliens, { kulso = null } = {}) {
     const t = await temaKeresesElerve(kliens, temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', kulcs, n)));
     if (!t.elerte) { ki.push({ kulcs, eredmeny: 'var', ok: 'a DHT most nem felelt' }); continue; }
     let latott = koinonLatottTartok({ tarsak: t.tarsak, sajatCimek, sajatIs: false });
-    const [, szulo] = koinonKeresoKulcsai(kulcs);
-    if (latott < cel && szulo) {
-      const sz = await temaKeresesElerve(kliens, temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', szulo, n)));
-      latott = koinonLatottTartok({ tarsak: t.tarsak, szuloTarsak: sz.tarsak, sajatCimek, sajatIs: false });
+    // a szülő, és ha vele együtt is kevés, a nagyszülő (⭐⭐ ④c4 — KO19 (A))
+    const fole = [];
+    for (const f of koinonKeresoKulcsai(kulcs).slice(1)) {
+      if (latott >= cel) break;
+      fole.push(...(await temaKeresesElerve(kliens, temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', f, n)))).tarsak);
+      latott = koinonLatottTartok({ tarsak: t.tarsak, szuloTarsak: fole, sajatCimek, sajatIs: false });
     }
     delete j.fuggo[kulcs];
     if (latott >= cel) { ki.push({ kulcs, eredmeny: 'elutasitottam', ok: 'nincs hiány', latott, cel }); continue; }
@@ -4606,28 +4651,62 @@ async function kosaraimSzamlalasa(kliens, eredmeny, { kulso = null } = {}) {
   const sajatCimek = [...(await sajatOsszesCim()), ...(kulso?.cim ? [kulso.cim] : [])];
   const tarolo = koinonTartokTarolo(KOINO);
   const regi = (await tarolo.olvas()).kosarak;
+  // ⭐⭐ D130 (④c4 — KO18 (C)): az örökölt kosaraim (a kettéválásból) — ezeknél az ellenőrzés sora is (átadom, ha nélkülem is megvan)
+  const orokoltek = new Set(Object.entries((await koinonSzerepTarolo(KOINO).olvas()).segito).filter(([, y]) => y?.orokolt).map(([k]) => k));
   const jegyzek = {};
   const ki = [];
+  const tarsai = async (k) => (await temakKeresese(kliens, temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', k, n)))).tarsak;
   for (const e of kosarak) {
     // ⚠️ Ha egyetlen DHT-gép sem felelt, a szám semmit nem mondana (csak magamat látnám): a régi számlálás marad
     if (!(e.probalt > 0)) { if (regi[e.kulcs]) jegyzek[e.kulcs] = regi[e.kulcs]; continue; }
     let latott = koinonLatottTartok({ tarsak: e.tarsak, sajatCimek });
-    let szulovel = false;
-    const [, szulo] = koinonKeresoKulcsai(e.kulcs);
-    if (latott < cel && szulo) {
-      try {
-        const sz = await temakKeresese(kliens, temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', szulo, n)));
-        latott = koinonLatottTartok({ tarsak: e.tarsak, szuloTarsak: sz.tarsak, sajatCimek });
+    let szulovel = false, nagyszulovel = false;
+    const orokolt = orokoltek.has(e.kulcs);
+    // az örökölt kosárnál a „nélkülem” számít: a pillantás addig, amíg nélkülem is el nem éri a célt
+    const hatar = orokolt ? cel + 1 : cel;
+    const [, szulo, nagyszulo] = koinonKeresoKulcsai(e.kulcs);
+    const fole = [];
+    try {
+      if (latott < hatar && szulo) {
+        fole.push(...await tarsai(szulo));
+        latott = koinonLatottTartok({ tarsak: e.tarsak, szuloTarsak: fole, sajatCimek });
         szulovel = true;
-      } catch { /* a DHT segédeszköz — a saját témám száma marad */ }
-    }
-    const x = { kulcs: e.kulcs, latott, cel, szulovel, ido: Date.now() };
+      }
+      // ⭐⭐ D130 (④c4 — KO19 (A)): ha a szülővel együtt is kevés, a NAGYSZÜLŐ is (egy keresés — a kettéválás átmenetében a durvább
+      // szerepek ott vannak)
+      if (latott < hatar && nagyszulo) {
+        fole.push(...await tarsai(nagyszulo));
+        latott = koinonLatottTartok({ tarsak: e.tarsak, szuloTarsak: fole, sajatCimek });
+        nagyszulovel = true;
+      }
+    } catch { /* a DHT segédeszköz — az eddigi szám marad */ }
+    const x = { kulcs: e.kulcs, latott, cel, szulovel, ...(nagyszulovel ? { nagyszulovel } : {}), ido: Date.now() };
+    if (orokolt) Object.assign(x, { orokolt: true, ...orokoltEllenorzese({ sor: regi[e.kulcs]?.sor, sorIdo: regi[e.kulcs]?.sorIdo, latott, cel }) });
     jegyzek[e.kulcs] = x;
     ki.push(x);
   }
   // a jegyzékben csak a mostani kosaraim (egy kettéválás után a régi kosár kiesik)
   try { await tarolo.ir({ kosarak: jegyzek }); }
   catch (hiba) { console.warn('a kosaraim tartóinak jegyzéke nem íródott', { ok: hiba.message }); }
+  return ki;
+}
+
+/**
+ * ⭐⭐ D130 (④c4 — KO18 (C)): AZ ÁTADÁS — az örökölt kosaraim közül azok, amelyeknél nélkülem is megvolt a látott cél
+ * `KOINON_ATADAS_SOR` egymás utáni ellenőrzésen (`orokoltEllenorzese` — a számlálás jelölte): a szerepet leadom (nem hirdetem tovább,
+ * a tömörítés elengedi). Csaba szabályának („leadni csak a megtelt készülék ad le”) egyetlen kivétele: az örökölt fél nem az enyém
+ * volt, csak a kettéválás hagyta nálam.
+ * @param {Array<Object>} kosarak - a számlálás eredménye
+ * @returns {Promise<Array<Object>>} az átadottak (a számlálásukkal)
+ */
+async function koinonAtadasok(kosarak) {
+  const atadando = kosarak.filter((x) => x.orokolt && x.atad);
+  if (!atadando.length) return [];
+  const t = koinonSzerepTarolo(KOINO);
+  const j = await t.olvas();
+  const ki = atadando.filter((x) => j.segito[x.kulcs]?.orokolt);
+  for (const x of ki) delete j.segito[x.kulcs];
+  if (ki.length) await t.ir(j);
   return ki;
 }
 
@@ -4641,10 +4720,11 @@ async function cimjegyzekHirdetese(port) {
       const be = await temakBejelentese(kliens, t.temak, port);
       eredmeny.push({ fajta: t.fajta, kulcs: t.kulcs, tarolta: be.tarolta, probalt: be.probalt, tarsak: be.tarsak });
     }
-    // ⭐⭐ D130 (④b): a kosaraim tartói (a hirdetés találatából)
+    // ⭐⭐ D130 (④b): a kosaraim tartói (a hirdetés találatából); ⭐⭐ ④c4 (KO18 (C)): és az örökölt kosarak átadása
     const kosarak = await kosaraimSzamlalasa(kliens, eredmeny);
+    const atadott = await koinonAtadasok(kosarak);
     await dhtIsmertekMentese(kliens);
-    return { eredmeny, kosarak, forgalom: kliens.forgalom() };
+    return { eredmeny, kosarak, atadott, forgalom: kliens.forgalom() };
   } finally {
     kliens.bezar();
   }
@@ -4679,6 +4759,10 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
     let kosarak = [];
     try { kosarak = await kosaraimSzamlalasa(kliens, eredmeny, { kulso }); }
     catch (hiba) { console.warn('a kosaraim tartóit most nem számoltam', { ok: hiba.message }); }
+    // ⭐⭐ D130 (④c4 — KO18 (C)): az örökölt kosarak átadása (ha nélkülem is megvolt 12 egymás utáni ellenőrzésen), és az utolsó kettéválás
+    let atadott = [], kettevalas = null;
+    try { atadott = await koinonAtadasok(kosarak); kettevalas = (await koinonSzerepTarolo(KOINO).olvas()).kettevalas ?? null; }
+    catch (hiba) { console.warn('az örökölt kosarakat most nem néztem meg', { ok: hiba.message }); }
     // ⭐⭐ D130 (④c2): a keret fölött a legújabb segítő szerepeim leadása, és a függő felkérések megnézése (a hiány a DHT-n)
     let leadott = [], felkeresek = [];
     try { leadott = await koinonLeadasKeretSzerint(); }
@@ -4721,7 +4805,7 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
     try { rekesz = await belepoRekeszKiirasa(kliens, { kulso, kapuPort }); }
     catch (hiba) { console.warn('a meghívó rekeszébe most nem írtam', { ok: hiba.message }); }
     await dhtIsmertekMentese(kliens);
-    return { eredmeny, kosarak, leadott, felkeresek, potlas, kopogtatok: [...kopogtatok.values()], regioTarsak: [...regioTarsak.values()], bejelentve, bejelentett,
+    return { eredmeny, kosarak, atadott, kettevalas, leadott, felkeresek, potlas, kopogtatok: [...kopogtatok.values()], regioTarsak: [...regioTarsak.values()], bejelentve, bejelentett,
       bejelentesek, rekesz, felajanlas, forgalom: kliens.forgalom() };
   } finally {
     kliens.bezar();
@@ -7328,6 +7412,16 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
               + d.darab + '): ' + kosarSzamlalasSzovege(x) + SZIN.vege);
           }
         }
+        // ⭐⭐ D130 (④c4 — KO18 (C)): a kettéválás (egyszer mondja ki) és az örökölt kosarak átadása
+        if (h.kettevalas && h.kettevalas.ido > (allapot.kimondottKettevalas ?? 0) && Date.now() - h.kettevalas.ido < 24 * 3600 * 1000) {
+          allapot.kimondottKettevalas = h.kettevalas.ido;
+          kiir(SZIN.halvany + '  🧺 ' + ora() + ' ' + kk + kettevalasSzovege(h.kettevalas) + SZIN.vege);
+        }
+        for (const x of h.atadott ?? []) {
+          const d = koinonDarabBol(x.kulcs);
+          kiir(SZIN.halvany + '  🧺 ' + ora() + ' ' + kk + 'az örökölt ' + d.melyseg + ':' + d.darab + ' kosarat átadtam: nélkülem is a cél'
+            + ' látszott ' + KOINON_ATADAS_SOR + ' egymás utáni ellenőrzésen (most ' + kosarSzamlalasSzovege(x) + '; KO18 (C))' + SZIN.vege);
+        }
         // ⭐⭐ D130 (④c2): a leadott szerepek (a keret fölött) és a felkérések sorsa
         for (const k of h.leadott ?? []) {
           const d = koinonDarabBol(k);
@@ -9649,7 +9743,9 @@ try {
             if (!j.segito[kulcs] && Object.keys(j.segito).length >= KOINON_KOSAR_JEL_KORLAT) {
               throw new Error('Már ' + KOINON_KOSAR_JEL_KORLAT + ' segítő kosaram van — ennél többet a nyitó jel nem visz (9. szabály).');
             }
-            j.segito[kulcs] = j.segito[kulcs] ?? { ido: Date.now(), ok: 'kézzel' };
+            // ⭐⭐ D130 (④c4): egy örökölt szerepet a `segit` véglegesít (nem adom át magától)
+            j.segito[kulcs] = j.segito[kulcs]?.orokolt ? { ido: j.segito[kulcs].ido ?? Date.now(), ok: 'kézzel' }
+              : j.segito[kulcs] ?? { ido: Date.now(), ok: 'kézzel' };
           } else {
             if (!j.segito[kulcs]) throw new Error('A ' + melyseg + ':' + darab + ' kosárnak nem vagyok segítő tartója.');
             delete j.segito[kulcs];
@@ -9668,8 +9764,15 @@ try {
           const d = koinonDarabBol(k);
           const x = szamlalt[k];
           kiir('  ' + d.melyseg + ':' + d.darab + SZIN.halvany + '  · ' + (k === kn.darab ? 'a sajátom (a tábla-aláírásomból)'
+            // ⭐⭐ D130 (④c4 — KO18 (C)): az örökölt szerep (a kettéválásból) — átadom, ha nélkülem is megvan
+            : sz.segito[k]?.orokolt ? 'örökölt (a kettéválásból — átadom, ha nélkülem is megvan: ' + (x?.sor ?? 0) + '/' + KOINON_ATADAS_SOR
+              + ' ellenőrzés)'
             : 'segítő' + (sz.segito[k]?.ok ? ' (' + sz.segito[k].ok + ')' : ''))
             + (x && Number.isFinite(x.latott) ? ' · ' + kosarSzamlalasSzovege(x) : '') + SZIN.vege);
+        }
+        if (sz.kettevalas) {
+          kiir(SZIN.halvany + '  az utolsó ' + Math.max(0, Math.round((Date.now() - (sz.kettevalas.ido ?? 0)) / 60000)) + ' perce: '
+            + kettevalasSzovege(sz.kettevalas) + SZIN.vege);
         }
         // ⭐⭐ D130 (④c2): a függő felkérések és a keret
         for (const [k, x] of Object.entries(sz.fuggo)) {
@@ -11142,10 +11245,17 @@ try {
           const kd = e.fajta === 'szelet' ? koinonDarabBol(e.kulcs) : null;
           // ⭐⭐ D130 (④b): a kosár látott tartói (a hirdetés találatából)
           const ksz = kd ? (h.kosarak ?? []).find((x) => x.kulcs === e.kulcs) : null;
+          // ⭐⭐ D130 (④c4): az örökölt kosárnál az átadás sora is
           kiir('  ' + (e.tarolta > 0 ? SZIN.jo + '✓' : SZIN.nem + '✗') + SZIN.vege + ' '
-            + (kd ? 'koinon-kosár ' + kd.melyseg + ':' + kd.darab + (ksz ? ' (' + kosarSzamlalasSzovege(ksz) + ')' : '') : e.fajta + ' '
-              + (e.fajta === 'szelet' ? e.kulcs.slice(0, 12) + '…' : e.kulcs)) + SZIN.halvany + '  · ' + e.tarolta
+            + (kd ? 'koinon-kosár ' + kd.melyseg + ':' + kd.darab + (ksz ? ' (' + kosarSzamlalasSzovege(ksz)
+              + (ksz.orokolt ? '; örökölt — nélkülem is megvolt ' + ksz.sor + '/' + KOINON_ATADAS_SOR + ' ellenőrzésen' : '') + ')' : '')
+              : e.fajta + ' ' + (e.fajta === 'szelet' ? e.kulcs.slice(0, 12) + '…' : e.kulcs)) + SZIN.halvany + '  · ' + e.tarolta
             + '/' + e.probalt + ' gép tárolta' + SZIN.vege);
+        }
+        for (const x of h.atadott ?? []) {
+          const d = koinonDarabBol(x.kulcs);
+          kiir(SZIN.jo + '  🧺 az örökölt ' + d.melyseg + ':' + d.darab + ' kosarat átadtam: nélkülem is a cél látszott ' + KOINON_ATADAS_SOR
+            + ' egymás utáni ellenőrzésen (KO18 (C))' + SZIN.vege);
         }
         if (!h.eredmeny.some((e) => e.probalt > 0)) {
           kiir(SZIN.nem + '  A DHT most nem érhető el — egyetlen gép sem felelt (ez nem azt jelenti, hogy senki nem'
@@ -11480,7 +11590,8 @@ try {
         for (const t of knHirdetes) {
           const d = koinonDarabBol(t.kulcs);
           const x = szamlalt[t.kulcs];
-          kiir(SZIN.halvany + '    ' + d.melyseg + ':' + d.darab + (t.kulcs === knV.darab ? '' : ' (segítő — D130 ④c1)') + ': ' + (x && Number.isFinite(x.latott) && Number.isFinite(x.cel)
+          kiir(SZIN.halvany + '    ' + d.melyseg + ':' + d.darab + (t.kulcs === knV.darab ? '' : x?.orokolt ? ' (örökölt — D130 ④c4)'
+            : ' (segítő — D130 ④c1)') + ': ' + (x && Number.isFinite(x.latott) && Number.isFinite(x.cel)
             ? kosarSzamlalasSzovege(x) + ' (' + Math.max(0, Math.round((Date.now() - (x.ido ?? 0)) / 60000)) + ' perce számoltam; D130 ④b)'
             : 'a tartóit még nem számoltam — az őrjárat címjegyzék-köre számolja (D130 ④b)') + SZIN.vege);
         }

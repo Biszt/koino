@@ -6710,7 +6710,10 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     mérés (2026-11-27 — `koinon_atvizsgalas.md` 12.):** a mélység változása egy növekvő koinoban — a „mindent megtart” nem skálázódik
     (a teher a koinóval nő, a jel határa vaktában vág), a „fele marad” minden kettéválás után gödröt hagy, az „átadja” a kis teherrel jár;
     a kettéválás utáni gödör LÁTHATÓSÁG (a durvább szerepek a nagyszülő szintjére kerülnek) — a nagyszülő témáján is keresve eltűnik.
-    ⏸️ **KO18** (a kosár másik fele) és **KO19** (az átmenet hídja) Csabánál; utána ④c4, ④d a próba.
+    ✅ **Csaba: „Igen, KO18 (C), KO19 (A)”** — kettéváláskor a másik fél örökölt szerep, amíg nélkülem is megvan a látott cél (12
+    egymás utáni ellenőrzés; a „csak a megtelt ad le” egyetlen kivétele); a kérő és a számláló a nagyszülő témáján is keres. ✅ **④c4
+    kész (2026-11-27):** a kettéválás a `koinonMelysegem`-ben (csak ahol van eseményem, egy szint lépésnél), az átadás a számlálásban, a
+    nagyszülő a kérő és a számláló kulcsai közt. ⏭️ ④d a próba (helyi DHT, rontásokkal), utána a kézikönyv mindenkinél (KO5 (A)).
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

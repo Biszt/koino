@@ -572,14 +572,17 @@ export function koinonHirdetendoTemak({ koino, kosarak = [], valtozatok = [1] })
  * SZÜLŐJÉÉN: a sekélyebb tartó az egész szülőt tartja, benne a kért darabot is (a mélység csak nő, és egy új tag sekélyebben kezd —
  * kevesebb tagot ismer). ⛔ A gyermekekén NEM (a gyökértől eltérően): a mélyebb tartó a darabnak csak a felét tartja, és a fél válasz
  * a kérelmet „megjött”-nek jelölné. A 0. mélységű szülőt senki nem hirdeti (ott mindenki mindent tart), arra nem kell jelentkezni.
+ * ⭐⭐ D130 (④c4 — KO19 (A), a 99. mérés): és a NAGYSZÜLŐJÉÉN (a 3. mélységtől): egy kettéválás átmenetében a durvább szerepek a
+ * nagyszülő szintjére kerülnek — az adat megvan, csak a szülőnél tovább senki nem keresett (a kettéválás utáni gödör láthatóság volt).
  * @param {string} kulcs - egy koinon-darab kulcsa
- * @returns {Array<string>} a darab-kulcsok, elöl a kért — nem koinon-darab kulcsra üres
+ * @returns {Array<string>} a darab-kulcsok, elöl a kért, utána a szülő és a nagyszülő — nem koinon-darab kulcsra üres
  */
 export function koinonKeresoKulcsai(kulcs) {
   const d = typeof kulcs === 'string' ? koinonDarabBol(kulcs) : null;
   if (!d) return [];
   const ki = [kulcs];
   if (d.melyseg >= 2) ki.push(koinonDarabKulcsa(d.melyseg - 1, d.darab >> 1n));
+  if (d.melyseg >= 3) ki.push(koinonDarabKulcsa(d.melyseg - 2, d.darab >> 2n));
   return ki;
 }
 
@@ -834,14 +837,106 @@ export function potlasEredmenySzovege(e) {
       ? ': megnézi (a hiányt maga is megnézi, és ha valódi, vállalja)' : f.allapot === 'mar' ? ': már tartja' : ': nem vállalja — ' + (f.ok ?? '?'));
 }
 
+// ===================================
+// ⭐⭐ D130 (④c4 — KO18 (C), KO19 (A), a 99. mérés; `koinon_atvizsgalas.md` 12.): A KETTÉVÁLÁS ÉS AZ ÁTADÁS
+// ===================================
+//
+// A mélység csak nő (az ismert tagok száma csak nő). Ha EGGYEL nő, a régi saját kosaram két félre válik: az egyik az új saját kosaram,
+// a MÁSIK FELE (és minden segítő kosaram mindkét fele) ÖRÖKÖLT szerep lesz — a szerep finomodik, különben a kérő és a számláló nem
+// látná (a 99. mérés: a nagyszülőnél tovább senki nem keres). ⚠️ Csak az a fél, amelyben TÉNYLEG van eseményem: amit nem kaptam meg
+// (egy friss tag a sekély becslésén semmit nem kap egy nagy koinoban — a közös kosár csak szomszéd mélységen van), azt nem hirdethetem
+// tartóként. Több szint ugrásnál (egy friss tag tanul, vagy sokáig nem voltam fent) nincs örökölt szerep: a régi mélységem nem volt
+// kiforrott, a segítőim maradnak (a nagyszülő-pillantás látja őket). Az ÁTADÁS (KO18 (C) — Csaba szabályának egyetlen kivétele: „leadni
+// csak a megtelt készülék ad le”): ha nélkülem is legalább a látott cél látszik 12 egymás utáni ellenőrzésen (óránként legfeljebb egy
+// számít — a 99. mérés ellenőrzése egy fent töltött óra), az örökölt szerepet leadom; ha egyszer kevés, a sor elölről kezdődik.
+
+/** KO18 (C): ennyi egymás utáni ellenőrzés után adom át az örökölt szerepet. */
+export const KOINON_ATADAS_SOR = 12;
+/** Egy ellenőrzés legfeljebb ennyi időnként számít (a címjegyzék-kör ~20 percenként fut). */
+export const KOINON_ELLENORZES_KOZ = 50 * 60 * 1000;
+
+/**
+ * A KETTÉVÁLÁS SZEREPEI: ha a mélységem pontosan eggyel nőtt, a régi saját kosaram másik fele és a régi mélységemen (vagy fölötte)
+ * lévő segítő kosaraim mindkét fele örökölt szerep — de csak az a fél, amelyben van eseményem; a mélyebb segítők változatlanok.
+ * @param {Object} b
+ * @param {number} b.regi - a régi mélységem
+ * @param {number} b.uj - az új mélységem
+ * @param {string} b.regiSajat - a régi saját kosaram kulcsa
+ * @param {string} b.ujSajat - az új saját kosaram kulcsa
+ * @param {Object} [b.segito] - a segítő szerepeim: { <kulcs>: { ido, ok, orokolt? } }
+ * @param {Function} [b.vanBenne] - (kulcs) → van-e eseményem ebben a kosárban
+ * @param {number} [b.most]
+ * @returns {{segito: Object, orokolt: Array<string>, elengedett: Array<string>}} az új jegyzék, az új örökölt kulcsok, és a segítő
+ *   szerepek, amelyeknek egyik felében sincs eseményem (azok megszűnnek)
+ */
+export function kettevalasSzerepei({ regi, uj, regiSajat, ujSajat, segito = {}, vanBenne = () => true, most = Date.now() }) {
+  const ki = { ...segito };
+  const orokolt = [], elengedett = [];
+  if (!Number.isInteger(regi) || uj !== regi + 1) return { segito: ki, orokolt, elengedett };
+  const felei = (k) => { const d = koinonDarabBol(k); return d ? [koinonDarabKulcsa(d.melyseg + 1, 2n * d.darab), koinonDarabKulcsa(d.melyseg + 1, 2n * d.darab + 1n)] : []; };
+  const felvesz = (k, x) => {
+    if (k === ujSajat || ki[k] || !vanBenne(k)) return false;
+    ki[k] = x;
+    orokolt.push(k);
+    return true;
+  };
+  // a régi saját kosaram másik fele
+  for (const f of felei(regiSajat)) if (f !== ujSajat) felvesz(f, { ido: most, ok: 'kettéválás', orokolt: true });
+  // a segítő kosaraim a régi mélységemen vagy fölötte: mindkét fele (az eredeti idejével — a keret a legújabbat adja le előbb)
+  for (const [k, x] of Object.entries(segito)) {
+    const d = koinonDarabBol(k);
+    if (!d || d.melyseg > regi || d.melyseg >= DARAB_MAX_MELYSEG) continue;
+    delete ki[k];
+    let marad = false;
+    for (const f of felei(k)) marad = felvesz(f, { ido: x?.ido ?? most, ok: x?.ok ?? 'kettéválás', orokolt: true }) || marad || f === ujSajat;
+    if (!marad) elengedett.push(k);
+  }
+  return { segito: ki, orokolt, elengedett };
+}
+
+/**
+ * Egy örökölt kosár ELLENŐRZÉSE a számláláskor: ha nélkülem (`latott − 1`) is legalább a cél látszik, az ellenőrzés számít (óránként
+ * legfeljebb egy); ha nem, a sor elölről kezdődik. A `KOINON_ATADAS_SOR`-adik után átadom.
+ * @param {{sor?: number, sorIdo?: number, latott: number, cel: number, most?: number}} b - a `latott` velem együtt
+ * @returns {{sor: number, sorIdo: number, atad: boolean}}
+ */
+export function orokoltEllenorzese({ sor = 0, sorIdo = 0, latott = 0, cel, most = Date.now() } = {}) {
+  let s = Number.isInteger(sor) && sor > 0 ? sor : 0;
+  let t = Number.isFinite(sorIdo) ? sorIdo : 0;
+  if (latott - 1 >= cel) {
+    if (most - t >= KOINON_ELLENORZES_KOZ) { s += 1; t = most; }
+  } else {
+    s = 0; t = 0;
+  }
+  return { sor: s, sorIdo: t, atad: s >= KOINON_ATADAS_SOR };
+}
+
+/**
+ * Egy kettéválás mondata (a napló és a `koinon kosarak`).
+ * @param {{regi: number, uj: number, orokolt?: Array<string>, elengedett?: Array<string>, levagott?: Array<string>}} x
+ * @returns {string}
+ */
+export function kettevalasSzovege(x) {
+  const jel = (k) => { const d = koinonDarabBol(k); return d ? d.melyseg + ':' + d.darab : '?'; };
+  if (x?.uj !== x?.regi + 1) {
+    return 'a koinon-mélységem ' + x?.regi + ' → ' + x?.uj + ' (több szint egyszerre — örökölt szerep nélkül; KO18 (C))';
+  }
+  return 'kettéválás (a koinon-mélységem ' + x.regi + ' → ' + x.uj + '): ' + (x.orokolt?.length
+    ? x.orokolt.length + ' örökölt szerep (' + x.orokolt.map(jel).join(', ') + ') — átadom, ha nélkülem is megvan'
+    : 'örökölt szerep nincs (a másik félben nincs eseményem)')
+    + (x.elengedett?.length ? ' · ' + x.elengedett.length + ' segítő szerep megszűnt (egyik felében sincs eseményem)' : '')
+    + (x.levagott?.length ? ' · a jel határán ' + x.levagott.length + ' levágva (a legújabbak)' : '') + ' (KO18 (C))';
+}
+
 /**
  * Egy kosár számlálásának mondata — a napló, a `cimjegyzek hirdet` és a `vallalas` ugyanígy mondja (egy helyen).
- * @param {{latott: number, cel: number, szulovel?: boolean}} x
+ * ⭐⭐ D130 (④c4 — KO19 (A)): ha a nagyszülőre is ránézett, azt is.
+ * @param {{latott: number, cel: number, szulovel?: boolean, nagyszulovel?: boolean}} x
  * @returns {string}
  */
 export function kosarSzamlalasSzovege(x) {
-  return x.latott + ' tartó látszik a DHT-n' + (x.szulovel ? ' (a szülő-kosáréval együtt)' : '') + ', a cél ' + x.cel
-    + (x.latott < x.cel ? ' — kevés' : '');
+  return x.latott + ' tartó látszik a DHT-n' + (x.nagyszulovel ? ' (a szülő- és a nagyszülő-kosáréval együtt)'
+    : x.szulovel ? ' (a szülő-kosáréval együtt)' : '') + ', a cél ' + x.cel + (x.latott < x.cel ? ' — kevés' : '');
 }
 
 // ===================================

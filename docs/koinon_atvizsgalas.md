@@ -440,8 +440,13 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
      kimondja. ⚠️ *Szándékos:* a jelöltek címenként (cím ÉS port) számítanak, nem IPv4-enként (egy router mögötti két telefon két
      jelölt) — egy hamis hirdető így elfoglalhatja egy minta helyeit, de ezzel csak egy pótlást ront el (a következő órában más véletlen
      darab a minta), tartót nem vesz el (a 6. pont);
-   - ④c4 **a mélység változása** (a 7. pont): mi legyen kettéváláskor a kosár másik felével — ⏸️ **KO18** és **KO19** (a 12. szakasz —
-     a 99. mérés után).
+   - ✅ **④c4 a mélység változása** (2026-11-27 — a 12. szakasz, a 99. mérés, KO18 (C), KO19 (A)) — a kettéválás a `koinonMelysegem`-ben,
+     minden más előtt (`kettevalasFeljegyzese`: a szerep-jegyzék a legutóbb látott mélységet és saját kosarat is őrzi; `cimjegyzek.js`
+     `kettevalasSzerepei` — egy szint lépésnél a másik fél és a segítők felei ÖRÖKÖLT szerepek, csak ahol van eseményem; a jel határán a
+     legújabb esik ki); az átadás a számlálásban (`orokoltEllenorzese` — nélkülem is a cél, óránként legfeljebb egy ellenőrzés, a 12.
+     után `koinonAtadasok`); a nagyszülő (`koinonKeresoKulcsai` a 3. mélységtől; a számlálás és a jelölt hiány-keresése a szülő után);
+     kimondva a naplóban (🧺), a `koinon kosarak`-ban, a `cimjegyzek hirdet`-ben és a `vallalas`-ban (örökölt — ④c4); a `koinon segit`
+     egy örökölt szerepet véglegesít.
 4. **④d A próba:** helyi DHT-hálóval (`halo.belepo`), rontásokkal: hamis hirdető, hamis felkérő, megtelt jelölt, mélység-váltás, a
    kopogtató-vihar korlátja. Utána a kézikönyv mindenkinél (KO5 (A) — a ③e egy része visszafordul), majd a ⑤ terep (a valódi
    elérhetőség és a DHT késése — ebből a ráhagyás).
@@ -495,6 +500,30 @@ megvan a látott cél — 12 egymás utáni ellenőrzésen), **(C′)** ugyanez 
   mélyebbre): ~6 óra alatt lezajlik az átmenet, a gödör (C)-nél 1,9–9,5% — ⚠️ de a mélyebb a veszélyes irány (KO2: a túlbecslés kevesebb
   természetes tartót ad), és egy hamis társ mélyebbre tolhatná (a pótlás pótol, (C) alatt adat nem vész — csak teher). (C) **egyik sem**
   (a mai): a kettéválás után 3 napig a kosár-órák 10–46%-ában 20 alatt.
+
+✅ **Csaba (2026-11-27): „Igen, KO18 (C), KO19 (A)”** — **KO18 (C)**: kettéváláskor a kosár másik fele (és egy segítő mindkét fele)
+ÖRÖKÖLT szerepként marad, amíg nélkülem is megvan a látott cél 12 egymás utáni ellenőrzésen; utána átadom (a „csak a megtelt ad le”
+egyetlen kivétele); **KO19 (A)**: a kérő és a számláló a nagyszülő-kosár témáján is keres (a 3. mélységtől; csak ha a szülővel együtt is
+kevés).
+
+**A ④c4 terve** (a döntések és a 12. szakasz kérdés nélküli pontjai szerint):
+1. **A nagyszülő** (KO19 (A)): `koinonKeresoKulcsai` a 3. mélységtől a nagyszülőt is adja (a kérő jelentkezik és keres rajta); a
+   számlálás (`kosaraimSzamlalasa`) és a jelölt hiány-keresése (`koinonFelkeresekFeldolgozasa`) a szülő után, ha még mindig kevés, a
+   nagyszülőre is ránéz.
+2. **A kettéválás** (KO18 (C), 1. pont): ha a mélységem pontosan EGGYEL nő, a régi saját kosaram másik fele, és minden segítő kosaram
+   (ami a régi mélységemen vagy fölötte van) mindkét fele ÖRÖKÖLT szerep lesz (a szerep finomodik — különben láthatatlan) — de csak ha
+   abban a félben TÉNYLEG van eseményem (amit nem kaptam meg, azt nem állíthatom, hogy tartom: egy friss tag, aki a sekély becslésén
+   semmit nem kapott, így nem jelent hamis tartót). Ha a mélység egyszerre többet ugrik (egy friss tag tanul, vagy sokáig nem voltam
+   fent), nincs örökölt szerep — a saját kosaram marad. A jel határán (32) a legújabb esik ki, kimondva.
+3. **Az átadás** (KO18 (C)): a címjegyzék-kör az örökölt kosaraimat is számolja; ha nélkülem is legalább a látott cél látszik, az
+   ellenőrzés számít (óránként legfeljebb egy — a 99. mérés ellenőrzése egy fent töltött óra), ha nem, a sor elölről kezdődik; a 12.
+   egymás utáni után átadom (nem hirdetem tovább, a tömörítés elengedi). Kimondva a naplóban és a `koinon kosarak`-ban.
+4. A próba: tiszta próbák (a kulcsok, a kettéválás szerepei, az ellenőrzés sora), és a parancssoron egy valódi kettéválás (egy
+   egyezmény a másik félben), a nagyszülő-pillantás egy hamis DHT-n, és az átadás.
+
+✅ **④c4 kész (2026-11-27)** — a terv szerint (a 11. szakasz ④c4 sora). ⭐ *Egy részlet az építésből:* az örökölt kosárnál a
+számlálás a „nélkülem” határig néz a szülőre és a nagyszülőre (a cél + 1): különben egy pontosan a célon álló kosárnál nem nézne fel,
+és az ellenőrzés a felsőbb szintek tartói nélkül számolna.
 
 ## 6. Napló
 
@@ -688,3 +717,7 @@ megvan a látott cél — 12 egymás utáni ellenőrzésen), **(C′)** ugyanez 
   határa vaktában vág; (B) a fele marad: minden kettéválás után gödör (19–80%); (C) átadja: a (B) terhével, kisebb gödörrel. ⭐ A lelet:
   a gödör láthatóság, nem adathiány — az átmenetben a durvább szerepek a nagyszülő szintjére kerülnek, ahol senki nem keres; a nagyszülő
   témáján is keresve eltűnik. ⏸️ **KO18** (a másik fél) és **KO19** (az átmenet hídja) Csabánál.
+- **2026-11-27** — ✅ **Csaba: „Igen, KO18 (C), KO19 (A)”**, és ✅ **④c4: a kettéválás** (a 12. szakasz terve): az örökölt fél (csak ahol
+  van eseményem, egy szint lépésnél; a szerep finomodik), az átadás 12 egymás utáni ellenőrzés után, a nagyszülő a kérő és a
+  számláló kulcsai közt. Három próba (kettő tiszta — és a ④a kulcs-próbája a nagyszülővel —, egy a parancssoron: egy valódi
+  kettéválás, az átadás egy hamis DHT-n, a kérő és a számláló a nagyszülőn). Mind a 11 rontásra bukik. ⏭️ ④d a próba.
