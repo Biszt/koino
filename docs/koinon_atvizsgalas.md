@@ -525,6 +525,46 @@ kevés).
 számlálás a „nélkülem” határig néz a szülőre és a nagyszülőre (a cél + 1): különben egy pontosan a célon álló kosárnál nem nézne fel,
 és az ellenőrzés a felsőbb szintek tartói nélkül számolna.
 
+## 13. A ④d átvizsgálása — a próba előtt (2026-11-27, kód előtt)
+
+Csaba: „Igen, jöhet a ④d”. A terv (a 11. szakasz 4. pontja): „helyi DHT-hálóval, rontásokkal: hamis hirdető, hamis felkérő, megtelt
+jelölt, mélység-váltás, a kopogtató-vihar korlátja”. **Ami már próbázva van** (a ④a–④c4 próbái): a hirdetés és a kérő útja, a
+számlálás (címenként egyszer, a saját címem nélkül, a szülő és a nagyszülő), a segítő szerep a cserében, a felkérés gyors ellenőrzése és
+a jelölt hiány-keresése (nincs hiány, ütem, keret), a pótlás kérdezése és a választás (két postaláda-jelölttel), a kettéválás és az
+átadás. **Ami nincs:** a TELJES kör valódi őrjáratokkal (a pótló kérdez, a jelölt a saját őrjáratában vállal, letölti a kosarat a
+pótlótól, és hirdeti), a hamisítások a pótlás egészén, és a kopogtató-vihar. **Amit a lánc kódjában láttam:**
+1. **A felkérés 20 percet vár:** a jelölt a felkérést a címjegyzék-körében nézi meg (a hiány a DHT-n), és ma semmi nem hozza előre a
+   kört (egy új KOPOGTATÓRA igen — D92/1 —, egy új felkérésre nem). → egy új felkérés (és egy megjött segítő kosár) egyszer előre hozza a
+   címjegyzék-kört (a D92/1 szabályának párja — egy DHT-kör felkérésenként).
+2. **A segítő a letöltés ELŐTT hirdet:** a vállalt kosarat a következő címjegyzék-kör hirdeti, akár megjött az adat, akár nem — a
+   jelölt egy ideig (ha a letöltés nem sikerül: amíg a szerep él) olyan kosár tartójának mondja magát, amiből semmije nincs; a számláló
+   és a kérő ezt valódi tartónak veszi. → ugyanaz az elv, mint a ④c4-ben („amit nem kaptam meg, azt nem állíthatom, hogy tartom”): a
+   segítő kosarat csak akkor hirdetem, ha van belőle eseményem (a cserében viszont részt veszek benne — onnan jön meg).
+3. **Üres kosarat is pótol:** egy kosárra, amelyben még nincs általános egyezmény, a tartó óránként újra pótol (a segítők a 2. pont
+   után sosem hirdetnének, így a látott szám nem nő) — nincs mit őrizni. → a pótlás csak olyan kosárra indul, amelyből van eseményem.
+4. ⚠️ **Eltérés a 11. szakasz 5. pontjától:** a kopogtató úton csak akkor kellene jelentkezni, „ha kevesebb mint 10 felelt” a közvetlen
+   kopogásra; a ④c3 azonnal jelentkezik — így a minta témájának minden hirdetője 30 percig kopog. A ④d3 méri meg, és javítja.
+5. *A hamis hirdető és az átadás* (a 6. pont kiegészítése a ④c4 után): sok hamis cím egy örökölt kosár témáján a 12 ellenőrzés után az
+   átadást is kiváltja — a kosár így a természetes tartóira és a segítőire esik vissza: a ③ alapja marad, tartót nem vesz el.
+
+**A ④d részlépései:**
+- ④d1 **a teljes kör** valódi őrjáratokkal (egy hamis DHT-n: a tartó kisorsolja, megkérdezi a két jelöltet, a választott a saját
+  őrjáratában vállalja, letölti a kosarat a tartótól, és hirdeti), az 1–3. pont javításával;
+- ④d2 **a hamisítások** a pótlás egészén: a hamis hirdető (a pótlás elmarad, a meglévő szerepek maradnak, az örökölt átadódik), a hamis
+  felkérő (nincs hiány — nem vállal; a függő felkérések határa és az ütem), a megtelt jelölt (a pótló a következőt választja);
+- ④d3 **a kopogtató-vihar** (több őrjárat a minta témáján — mérve), és a 4. pont: a kopogtató út csak kevés közvetlen válasz után;
+- utána a teljes próbasor (a ④ vége).
+
+✅ **④d1 kész (2026-11-27)** — az 1–3. pont javításával: egy új felkérés egyszer előre hozza a címjegyzék-kört (a házimunka a
+`koinon-szerepek.json` `fuggo`-ját figyeli — felkérésenként egyszer); a segítő kosarat csak akkor hirdetem, ha van belőle eseményem a
+TÁRAMBAN (`koinonHirdetettKosaraim` — a `vallalas` a még nem hirdetettet kimondja); üres kosárra nem indul pótlás. ⭐ *Mérve a próbán:*
+a függő kérelem a kosarat az ÁTMENETI tárba hozza, a fő tárba a csere hozza át (a segítő most már részt vesz a kosár cseréjében) — egy
+„a kérelem megjött” jelre a hirdetés túl korán indult (még nem volt adat a fő tárban), és utána 20 percig semmi. Ezért az őrjárat a
+még nem hirdetett segítő kosarakat figyeli (a legutóbbi címjegyzék-körből), és amint valamelyikből esemény van a tárban, előre hozza
+a kört. ⚠️ *A próba első alakja szeszélyes volt* (3-ból egyszer bukott): azt várta, hogy az adat a függő kérelemmel jön A-tól — de a
+vállalás után a jelölt a kosár cseréjében is részt vesz, és az néha előbb hozza. Mindkettő jó út; a próba most az EREDMÉNYT nézi (az
+egyezmény a jelölt tárában, a címe a kosár témáján).
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
@@ -721,3 +761,9 @@ számlálás a „nélkülem” határig néz a szülőre és a nagyszülőre (a
   van eseményem, egy szint lépésnél; a szerep finomodik), az átadás 12 egymás utáni ellenőrzés után, a nagyszülő a kérő és a
   számláló kulcsai közt. Három próba (kettő tiszta — és a ④a kulcs-próbája a nagyszülővel —, egy a parancssoron: egy valódi
   kettéválás, az átadás egy hamis DHT-n, a kérő és a számláló a nagyszülőn). Mind a 11 rontásra bukik. ⏭️ ④d a próba.
+- **2026-11-27** — a ④d átvizsgálása (a 13. szakasz: három hiány a lánc kódjában — a felkérés 20 percet vár, a segítő adat nélkül
+  hirdet, üres kosarat is pótol —, és egy eltérés a 11. szakasz 5. pontjától: a kopogtató út azonnal); a ④d három részlépésre bontva.
+  ✅ **④d1: a teljes kör** valódi őrjáratokkal (egy hamis DHT-n: üres kosárra nincs pótlás; egyezménnyel a tartó kisorsolja, megkérdezi a
+  két jelöltet, a választott azonnal vállal, a kosarat letölti, és csak adattal hirdeti; a másik kézi szerepe adat nélkül „még nem”
+  hirdetett) — az 1–3. pont javításával; a ④c3 és a ④c4 próbája egy közös segéddel (`egyezmenyKosarba`) tesz eseményt a kosárba.
+  ⏭️ ④d2 a hamisítások.

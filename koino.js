@@ -4234,6 +4234,20 @@ async function koinonKosaraim() {
   return (await koinonMelysegem()).kosarak;
 }
 
+/**
+ * ⭐⭐ D130 (④d1 — `koinon_atvizsgalas.md` 13., 2. pont): A HIRDETETT KOSARAIM — a sajátom mindig, egy segítő kosár csak akkor, ha van
+ * belőle eseményem (amit még nem kaptam meg, annak nem mondom magam tartójának: a számláló és a kérő valódi tartónak venné). A cserében
+ * a még üres segítő kosárban is részt veszek (onnan jön meg); a `varo` a még nem hirdetett.
+ * @returns {Promise<{hirdetett: Array<string>, varo: Array<string>}>}
+ */
+async function koinonHirdetettKosaraim() {
+  const kn = await koinonMelysegem();
+  if (!kn.segitok.length) return { hirdetett: kn.kosarak, varo: [] };
+  const { kosaronkent } = await koinonTerhem();
+  const van = (k) => k === kn.darab || (kosaronkent.get(k) ?? 0) > 0;
+  return { hirdetett: kn.kosarak.filter(van), varo: kn.kosarak.filter((k) => !van(k)) };
+}
+
 // ===== ⭐⭐ D130 (④c2): A KERET, A TEHER ÉS A FELKÉRÉSEK =====
 //
 // A keret: amennyit ez a készülék ennek a koinonak a koinonjára ad (MB — helyi beállítás, `<koino>/koinon-keret.json`; alapból
@@ -4486,8 +4500,11 @@ async function koinonPotlasKor(kliens, kosarak, eredmeny, { kulso = null, portok
     const mostani = new Set(kosarak.map((x) => x.kulcs));
     for (const k of Object.keys(P.sorsolas)) if (!mostani.has(k)) delete P.sorsolas[k];
     ki.sorsolt = [];
-    for (const x of kosarak) {
-      if (!(x.latott < x.cel) || Date.now() - (P.sorsolas[x.kulcs] ?? 0) < KOINON_POTLAS_KOZ) continue;
+    // ⭐⭐ D130 (④d1 — `koinon_atvizsgalas.md` 13., 3. pont): üres kosarat nem pótolok — nincs mit őrizni (és a segítő úgysem hirdetné)
+    const kevesek = kosarak.filter((x) => x.latott < x.cel);
+    const kosaronkent = kevesek.length ? (await koinonTerhem()).kosaronkent : new Map();
+    for (const x of kevesek) {
+      if (!((kosaronkent.get(x.kulcs) ?? 0) > 0) || Date.now() - (P.sorsolas[x.kulcs] ?? 0) < KOINON_POTLAS_KOZ) continue;
       P.sorsolas[x.kulcs] = Date.now();
       const nyert = potlasSorsolasa(x.latott);
       ki.sorsolt.push({ kulcs: x.kulcs, latott: x.latott, cel: x.cel, nyert });
@@ -4629,8 +4646,11 @@ async function sajatHirdetendoTemak() {
     valtozatok));
   // ⭐⭐ D130 (④a — KO11 (A)): a koinon kosaraim (a 0. mélységen nincs mit: egy darab van, azt minden tag tartja). A `szelet` fajtán —
   // a párját a kör a többivel együtt figyeli, így a kosár kérője eléri a tartót.
-  temak.push(...koinonHirdetendoTemak({ koino: KOINO, kosarak: await koinonKosaraim(), valtozatok }));
-  return { temak, legfelso: gy.becsles, melyseg: gy.melyseg, sajatMelyseg: gy.sajat, tanultMelyseg: gy.tanult, szeletHirdetes };
+  // ⭐⭐ D130 (④d1): a segítő kosarat csak akkor, ha van belőle eseményem (a többi vár — `varo`: az őrjárat figyeli, mikor jön meg)
+  const hk = await koinonHirdetettKosaraim();
+  temak.push(...koinonHirdetendoTemak({ koino: KOINO, kosarak: hk.hirdetett, valtozatok }));
+  return { temak, legfelso: gy.becsles, melyseg: gy.melyseg, sajatMelyseg: gy.sajat, tanultMelyseg: gy.tanult, szeletHirdetes,
+    varoKosarak: hk.varo };
 }
 
 /**
@@ -4746,7 +4766,7 @@ function kopogtatoTemaBuffer(k, n = 1) {
 const REGIO_TARS_KORLAT = 4;
 
 async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
-  const { temak } = await sajatHirdetendoTemak();
+  const { temak, varoKosarak = [] } = await sajatHirdetendoTemak();
   const tablaKulcs = await tablaKulcsBiztositasa();
   const kliens = await tablaKliens();
   try {
@@ -4805,7 +4825,7 @@ async function cimjegyzekKor(port, { kulso = null, kapuPort = null } = {}) {
     try { rekesz = await belepoRekeszKiirasa(kliens, { kulso, kapuPort }); }
     catch (hiba) { console.warn('a meghívó rekeszébe most nem írtam', { ok: hiba.message }); }
     await dhtIsmertekMentese(kliens);
-    return { eredmeny, kosarak, atadott, kettevalas, leadott, felkeresek, potlas, kopogtatok: [...kopogtatok.values()], regioTarsak: [...regioTarsak.values()], bejelentve, bejelentett,
+    return { eredmeny, kosarak, atadott, kettevalas, varoKosarak, leadott, felkeresek, potlas, kopogtatok: [...kopogtatok.values()], regioTarsak: [...regioTarsak.values()], bejelentve, bejelentett,
       bejelentesek, rekesz, felajanlas, forgalom: kliens.forgalom() };
   } finally {
     kliens.bezar();
@@ -6078,7 +6098,9 @@ async function fuggoEredmenyFeldolgozasa(fk, r, tars) {
     return 0;
   }
   let siker = false, osszegzes = '', uj = 0;
-  if (fk.fajta === 'szelet') { siker = (r.kapott ?? 0) > 0; uj = r.uj ?? 0; osszegzes = (r.kapott ?? 0) + ' esemény'; }
+  if (fk.fajta === 'szelet') {
+    siker = (r.kapott ?? 0) > 0; uj = r.uj ?? 0; osszegzes = (r.kapott ?? 0) + ' esemény';
+  }
   else if (fk.fajta === 'fejlecek' && r.kiszolgalta) {
     const f = await fejlecValaszFeldolgozasa(r);
     // ⭐ A ház (D100): az ÜRES, de kiszolgált válasz is válasz — az entitásnak nincs (ismert) gyereke. ⛔ Ha jöttek tételek,
@@ -7392,6 +7414,22 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
   if (!allapot.hirdetesFut) {
     const kellene = fuggoKopogtatok(await kerelmekOlvasasa()).map((k) => k.fajta + ':' + k.kulcs);
     if (kellene.some((k) => !(allapot.bejelentettKopogtatok ?? new Set()).has(k))) allapot.utolsoHirdetes = 0;
+    // ⭐⭐ D130 (④d1 — `koinon_atvizsgalas.md` 13., 1. pont): egy ÚJ felkérés (a hiányt a címjegyzék-kör nézi meg) és egy MEGJÖTT segítő
+    // kosár (a kör hirdeti) sem vár 20 percet — a D92/1 szabályának párja: egyszer, egy DHT-kör felkérésenként
+    try {
+      allapot.latottFelkeresek ??= new Set();
+      const ujak = Object.entries((await koinonSzerepTarolo(KOINO).olvas()).fuggo).map(([k, x]) => k + '|' + (x?.ido ?? 0))
+        .filter((k) => !allapot.latottFelkeresek.has(k));
+      if (ujak.length) { for (const k of ujak) allapot.latottFelkeresek.add(k); allapot.utolsoHirdetes = 0; }
+    } catch { /* a szerep-jegyzék segédeszköz */ }
+    // a még nem hirdetett segítő kosaraim (a legutóbbi címjegyzék-körből): ha valamelyikből már van eseményem a TÁRAMBAN (a függő kérelem
+    // az átmeneti tárba hozza, a fő tárba a csere vagy az előléptetés — ezért nem a kérelem megjöttét figyelem), a kör előre jön
+    if (allapot.varoKosarak?.length) {
+      try {
+        const { kosaronkent } = await koinonTerhem();
+        if (allapot.varoKosarak.some((k) => (kosaronkent.get(k) ?? 0) > 0)) { allapot.varoKosarak = []; allapot.utolsoHirdetes = 0; }
+      } catch { /* a teher segédeszköz */ }
+    }
   }
   if (!allapot.hirdetesFut && Date.now() - (allapot.utolsoHirdetes ?? 0) >= HIRDETES_KOZ) {
     allapot.utolsoHirdetes = Date.now();
@@ -7412,6 +7450,8 @@ async function orjaratHazimunkaja(allapot, { port, sikeres }) {
               + d.darab + '): ' + kosarSzamlalasSzovege(x) + SZIN.vege);
           }
         }
+        // ⭐⭐ D130 (④d1): a még nem hirdetett segítő kosaraim — a házimunka figyeli, mikor jön meg az adatuk
+        allapot.varoKosarak = h.varoKosarak ?? [];
         // ⭐⭐ D130 (④c4 — KO18 (C)): a kettéválás (egyszer mondja ki) és az örökölt kosarak átadása
         if (h.kettevalas && h.kettevalas.ido > (allapot.kimondottKettevalas ?? 0) && Date.now() - h.kettevalas.ido < 24 * 3600 * 1000) {
           allapot.kimondottKettevalas = h.kettevalas.ido;
@@ -8491,7 +8531,7 @@ return {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, koinonKeretem, koinonKeretFajl, koinonTerhem, koinonLeadasKeretSzerint, koinonFelkeresekFeldolgozasa, felkeresEredmenySzovege, koinonPotlasKezzel, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, koinonKeretem, koinonKeretFajl, koinonTerhem, koinonLeadasKeretSzerint, koinonFelkeresekFeldolgozasa, felkeresEredmenySzovege, koinonPotlasKezzel, koinonHirdetettKosaraim, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -8535,7 +8575,7 @@ const {
   ellenorzottOsszegzesek, eszlelesEsBejelentes, fajlForrasTudas, fajlMunkak, fajlResz, fajlTanulsag, fajlTarTakaritasa,
   fejlecTudas, fejlecValaszFeldolgozasa, felajanlasCsoportjai, felajanlasEredmenye, felajanlasKor, felderitesJegyzekIrasa,
   felderitesJegyzekOlvasasa, felderitesKor, feloldas, frissUdpCimJegyzese, frissUdpCimek, fuggoKerelemFelvetele,
-  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, koinonKeretem, koinonKeretFajl, koinonTerhem, koinonLeadasKeretSzerint, koinonFelkeresekFeldolgozasa, felkeresEredmenySzovege, koinonPotlasKezzel, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
+  fuggoKerelmekAllasa, gyokerMelysegem, koinonMelysegem, koinonKosaraim, koinonKeretem, koinonKeretFajl, koinonTerhem, koinonLeadasKeretSzerint, koinonFelkeresekFeldolgozasa, felkeresEredmenySzovege, koinonPotlasKezzel, koinonHirdetettKosaraim, kezikonyvBejegyzeseim, halozatiKereses, horgonyok, hozzarendelesMegjegyzes, reszletekMegjegyzes, kezikonyvMegjegyzes,
   kapottCimekBeolvasztasa,
   kapuJelzesKiiro, kapuPortja, kapuPortjaFeljegyzese, kartyaKodjanakKiirasa, kepetKeszit, kerelmekIrasa, kerelmekOlvasasa, kereses,
   keresesFuggoAllasa, keresesMegjegyzes, keresoRegioim, keresoTar, keresoTarTomoritese, keretFajl, kesobbHivando,
@@ -11579,11 +11619,16 @@ try {
         + (await kezikonyvBejegyzeseim()).length + ' kézikönyv-bejegyzés, ' + koinonbol.filter((e) => !KOINON_TIPUSOK.has(e.tipus)).length
         + ' kézikönyv-esemény (D130)' + SZIN.vege);
       // ⭐⭐ D130 (④a): a kosaraim a DHT-n — a kosár kérője így a társaim nélkül is eléri
-      const knHirdetes = koinonHirdetendoTemak({ koino: KOINO, kosarak: await koinonKosaraim() });
+      // ⭐⭐ D130 (④d1): a még üres segítő kosarat nem hirdetem (kimondva, hogy vár)
+      const knHK = await koinonHirdetettKosaraim();
+      const knHirdetes = koinonHirdetendoTemak({ koino: KOINO, kosarak: knHK.hirdetett });
+      const knVaro = koinonHirdetendoTemak({ koino: KOINO, kosarak: knHK.varo });
+      const knJel = (t) => { const d = koinonDarabBol(t.kulcs); return d.melyseg + ':' + d.darab; };
       kiir(SZIN.halvany + '  a koinon a DHT-n: ' + (knHirdetes.length
-        ? knHirdetes.length + ' kosaramat hirdetem (' + knHirdetes.map((t) => { const d = koinonDarabBol(t.kulcs); return d.melyseg + ':' + d.darab; })
-          .join(', ') + ' — az őrjárat címjegyzék-körében, ~20 percenként; D130 ④a)'
-        : 'nem hirdetem — egy darab van (az egész koinon), azt minden tag tartja') + SZIN.vege);
+        ? knHirdetes.length + ' kosaramat hirdetem (' + knHirdetes.map(knJel).join(', ') + ' — az őrjárat címjegyzék-körében, ~20 percenként; D130 ④a)'
+        : 'nem hirdetem — egy darab van (az egész koinon), azt minden tag tartja')
+        + (knVaro.length ? ' · ' + knVaro.length + ' segítő kosaram még nem (' + knVaro.map(knJel).join(', ') + ' — még nincs belőle eseményem; D130 ④d1)' : '')
+        + SZIN.vege);
       // ⭐⭐ D130 (④b): a kosaraim tartói — a legutóbbi számlálás (az őrjárat címjegyzék-köre, vagy a `cimjegyzek hirdet` írja)
       if (knHirdetes.length) {
         const szamlalt = (await koinonTartokTarolo(KOINO).olvas()).kosarak;

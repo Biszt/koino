@@ -6713,7 +6713,9 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     ✅ **Csaba: „Igen, KO18 (C), KO19 (A)”** — kettéváláskor a másik fél örökölt szerep, amíg nélkülem is megvan a látott cél (12
     egymás utáni ellenőrzés; a „csak a megtelt ad le” egyetlen kivétele); a kérő és a számláló a nagyszülő témáján is keres. ✅ **④c4
     kész (2026-11-27):** a kettéválás a `koinonMelysegem`-ben (csak ahol van eseményem, egy szint lépésnél), az átadás a számlálásban, a
-    nagyszülő a kérő és a számláló kulcsai közt. ⏭️ ④d a próba (helyi DHT, rontásokkal), utána a kézikönyv mindenkinél (KO5 (A)).
+    nagyszülő a kérő és a számláló kulcsai közt. ⭐ **A ④d** (`koinon_atvizsgalas.md` 13.) három részben: ✅ **④d1 a teljes kör**
+    (2026-11-27 — valódi őrjáratokkal; a javítások: egy új felkérés előre hozza a címjegyzék-kört, a segítő csak adattal hirdet, üres
+    kosarat nem pótol); ⏭️ ④d2 a hamisítások, ④d3 a kopogtató-vihar; utána a teljes próbasor, majd a kézikönyv mindenkinél (KO5 (A)).
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.
