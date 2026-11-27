@@ -5372,6 +5372,90 @@ nézet jele, a sorrendet nem dönti el. → a felderítetlen rész (D116).
 
 ---
 
+## 99. ⭐⭐ A KOINON MÉLYSÉGÉNEK VÁLTOZÁSA — mi legyen kettéváláskor a kosár másik felével (D130 ④c4, KO18 előtt, 2026-11-27, a laptopon)
+
+Csaba: „Igen, mérd meg” (a ④c3 után; `koinon_atvizsgalas.md` 11., 7. pont). A 97–98. mérés a mélységet állandónak vette. Itt a koino
+**nő**: 640 tagon 30 napig áll (5. mélység), utána 120 napig 30 naponként kétszeresére (~10 240 tag, 9. mélység — **négy kettéválás**),
+és a mélység az ismert tagokból lépésenként nő (`floor(log2(tagok / r))`). `meres/koinonMelysegMeres.js` (új szimulátor — a 97.
+elérhetőségi mintái és a ④c3 pótlása: a látott cél 25 DHT-késéssel, 1/n sorsolás, 10 jelölt egy DHT-mintából, a legkevesebbet őrző; a
+jelölt ±1 mélységet és óránként egy új szerepet vállal; a keret 256 MB, a jel 32 segítő). Egy készülék a kettéválást **csak fent**, és
+a globális változás után **0–48 órával** veszi észre (a tagság a cseréken terjed); egy friss tag eggyel sekélyebben kezd (a ③
+alulbecslése). A „fogyó” koinoban naponta a tagok 0,75%-a végleg elmegy (a csatlakozás pótolja), és az ismert tagok száma az
+elmentekkel együtt nő (12 751 ismert, 9585 élő). A négy szabály:
+- **(A) mindent megtart** — a mostani szabály szó szerint („leadni csak a megtelt készülék ad le”): a természetes tartó a másik felét
+  segítőként tartja tovább, a segítő mindkét felét. ⚠️ A szerepek a mélységgel **finomodnak** (a felekre bomlanak) — különben a
+  számlálás és a kérő nem látná őket: csak a kosár és a szülője témáján keres;
+- **(B) a fele marad** — kettéváláskor minden szerep a felére szűkül (a segítő a kevesebb tartójú felére), a másik felet azonnal leadja;
+- **(C) átadja** — mindkét fél marad, de a nem saját fél (és a segítő mindkét fele) csak addig, amíg **nélküle is** megvan a látott cél
+  (12 egymás utáni ellenőrzésen — hogy ne vándoroljon folyton); **(C′)** ugyanez, de a leadás is sorsolással (1/n — kosaranként óránként
+  átlagosan egy).
+
+```
+T-nél kevesebb VALÓBAN online, % (a kettéválás utáni 3 napban) — a mostani mélység kosarain, ahol a kérő keres
+                      (A) 48 ó     (B) 48 ó     (C) 48 ó     (C′) 48 ó    (C) 6 ó      (C) + nagyszülő, 48 ó
+gépes · növekvő       0,0 (0,0)    1,8 (18,6)   1,2 (12,5)   1,0 (10,5)   0,2 (1,9)    0,0 (0,0)
+gépes · fogyó         0,0 (0,0)    5,0 (33,1)   3,1 (20,1)   2,7 (17,8)   0,3 (2,0)    0,0 (0,0)
+telefonos · növekvő   0,0 (0,0)    4,0 (42,4)   3,0 (31,3)   2,5 (26,5)   0,6 (4,8)    0,2 (0,1)
+telefonos · fogyó     0,2 (1,3)    8,0 (52,2)   5,8 (36,7)   5,1 (33,0)   1,2 (4,5)    0,6 (0,4)
+borúlátó · növekvő    0,6 (6,0)    9,2 (71,1)   8,0 (40,9)   6,1 (39,0)   5,7 (8,5)    4,8 (1,8)
+borúlátó · fogyó      2,3 (15,0)   18,5 (79,5)  12,5 (46,1)  10,9 (44,1)  8,4 (9,5)    6,9 (2,9)
+esti · növekvő        0,0 (0,2)    3,3 (35,2)   2,9 (29,6)   2,5 (25,4)   0,5 (3,9)    0,3 (1,0)
+esti · fogyó          1,4 (9,1)    7,0 (45,8)   5,7 (36,3)   5,3 (33,3)   1,4 (6,7)    0,9 (2,4)
+
+a teher átlaga / az alapítóké a végén (MB) — a koinon 1000 MB (fogyó: 1245 MB), egy kosár ~2 MB
+gépes · növekvő       27,5 / 143,7   10,1 / 21,3    9,1 / 11,2     10,1 / 13,9    9,1 / 10,3     8,9 / 10,8
+gépes · fogyó         21,8 / 99,6    10,6 / 16,4    10,6 / 11,7    11,7 / 14,6    9,9 / 11,0     10,0 / 11,2
+telefonos · növekvő   30,1 / 161,2   15,7 / 33,8    14,0 / 19,3    15,4 / 22,0    13,4 / 16,2    13,3 / 18,1
+telefonos · fogyó     26,1 / 106,9   17,8 / 26,8    18,5 / 30,3    19,5 / 27,0    17,3 / 24,1    17,6 / 26,3
+borúlátó · növekvő    46,0 / 167,0   30,6 / 64,1    29,1 / 78,0    30,4 / 49,2    28,7 / 71,3    28,8 / 76,5
+borúlátó · fogyó      46,8 / 106,5   32,3 / 45,8    35,0 / 103,1   35,5 / 59,0    34,1 / 96,0    34,7 / 101,9
+esti · növekvő        28,5 / 137,3   11,5 / 24,3    10,1 / 12,3    12,3 / 19,4    9,8 / 11,6     9,5 / 11,6
+esti · fogyó          24,0 / 99,5    12,0 / 18,6    12,2 / 13,8    14,7 / 19,9    11,2 / 12,0    11,4 / 12,2
+```
+
+**(A) — nincs gödör, de a teher a koinoval nő, és a jel határa vaktában vág:** egy mostani kosárnak 160–358 tartója van (a többi
+szabálynál 43–268), az alapítók a koinon 8–17%-át őrzik (95–167 MB — az új tagok 2–8-szorosát), a legnagyobb a kereten (161–256 MB),
+267–1171 készülék a jel határán (32 segítő), és a határ 13 600–39 900 szerepet vágott le — a legújabbat, nem azt, amelyik nem kell. Egy
+ötödik kettéválás után (20 485 tag, 2000 MB, telefonos, 6 órás észrevétel) az alapítóké 155 MB, 735 készülék a jel határán, 40 755
+szerep levágva: a teher fölött nem a szabály, hanem a jel határa és a keret dönt.
+
+**(B) — a teher kicsi, de minden kettéválás gödröt hagy:** a kettéválás utáni 3 napban a kosár-órák 19–80%-ában 20 alatt (a borúlátó
+fogyóban az egész időre 18,5%).
+
+**(C), (C′) — a teher (B)-é, a gödör kisebb, de a mai észrevétellel (48 óra) még nagy:** 10–46% a kettéválás után. ⭐ **A LELET: a
+gödör nem adathiány, hanem láthatóság.** Ha a nagyszülő tartóit is számolnánk, (B)-nél 42,4 → 0,6%, (C)-nél és (C′)-nél 0% (telefonos,
+növekvő). Kik ezek? Egy nappal a kettéválás után a szerepek legnagyobb csoportja **segítő, két szinttel a mostani mélység fölött, egy
+még régi mélységű készüléken** (a telefonos mintán, (B)-vel, az első három kettéváláskor 1452 / 2604 / 5309 ilyen szerep — az összes
+szerep ~35%-a). Az
+átmenetben a régi mélységű tartó a saját kosarát ÜRÜLNI látja (aki már kettévált, a felét tartja — a számláló a felekét nem nézi),
+pótol, és egy mélyebb jelölt (±1) elvállalja a nagy régi kosarat; a következő kettéváláskor ez a nagyszülő szintjére kerül, ahol
+senki nem keres. **Két híd:**
+- **a gyors észrevétel** (6 óra — a társak nyitó jeléből: a `knd` a mélységüket viszi): a fent lévőknek a kettéválás után 3 napig csak
+  3–7%-a áll a régi mélységen (48 óránál 34–35%), a gödör (C)-nél 1,9–9,5%;
+- **a nagyszülő témáján is keres** (a kérő és a számláló — egy keresés, csak hiány esetén): a mai 48 órás észrevétellel is (C)-nél
+  0,0–2,9% a kettéválás után, az egész időre 0–0,9% (a borúlátón 4,8 / 6,9%); a teher ugyanaz. A 6 órás észrevétel emellett már nem
+  javít ((C)-nél 0,0–5,3%). ⚠️ A régi mélységű kérőnek (a régi kosarat kéri, a felekén nem keres — a fent lévők szemével súlyozva) mindenhol
+  kicsi: (C)-nél 0,2–12%.
+
+**Változatok** (telefonos és esti, növekvő, 6 órás észrevétel): a (C) türelme — 4 ellenőrzés után 6,1 / 6,2% a kettéválás után (a
+legnagyobb teher 36 / 49 MB), 12-nél 4,8 / 3,9% (105 / 60 MB), 24-nél 4,4 / 2,9% (223 / 216 MB — sokáig tart, a legnagyobb a keretnél);
+⛔ **a jelölt durvább kosarat nem vállal** és **a számláló a két fél tartóit is látja**: mindkettő ROSSZABB (az egész időre 4,8 / 2,4%
+és 4,9 / 2,2%, a régi mélységű kérőnek 25–53%) — a ±1 marad; **a friss tag a mostani mélységen kezd**: (C)-nél ugyanaz (5,0 / 4,2%,
+13,1 / 9,4 MB), (A)-nál az új tagok terhe 22,2 → 14,1 MB (A-ban a friss tag sekélyebb kezdése a kétszeres részét örökre megtartja).
+A pótlás forgalma: (C) 0,13–0,72 MB/készülék/nap (a legrosszabb napon 0,5–2,7), (A) 0,01–0,49 (0,3–2,0).
+
+⭐ **A következtetés:** (1) **(A) nem skálázódik** — a teher a koinóval nő (az alapítóké a koinon egy rögzített hányada), és amit
+megtart, azt a jel határa és a keret vaktában vágja; a tartók száma a szükségesnek a többszöröse (a gépes és a telefonos mintán 4–5×).
+(2) **(B) gödröt hagy** minden kettéválás után. (3) **(C) a (B) terhével jár, és a gödre átmeneti láthatóság** — ha a kérő és a
+számláló a nagyszülő témáján is keres, a mai észrevétellel is eltűnik (és a 6 órás észrevétel ehhez semmit nem tesz hozzá); (C) és (C′)
+közel azonos — a (C) átlagos terhe kicsit kisebb, a (C′) a borúlátón egyenletesebb (az alapítóké 49 / 59 MB a (C) 78 / 103-ja helyett).
+(4) A kettéváláskor megtartott szerepnek a mélységgel **finomodnia** kell (bármelyik szabálynál), a jelölt ±1-e marad. ⚠️ Nem mérte: a
+valódi terjedést (ki mikor veszi észre — itt 0–48 óra egyenletesen), a gyorsabb növekedést (30 napnál rövidebb duplázás), és a
+borúlátó minta alsó óráit (ott minden szabálynál 5–8% az egész időre — a 98. mérésben is ez a legnehezebb). → KO18, KO19
+(`koinon_atvizsgalas.md` 12.).
+
+---
+
 ## 98. ⭐ A KOINON PÓTLÁSA A HÁLÓN — ki pótol, mit lát a DHT, és honnan jönnek a jelöltek (D130 ④c, 2026-11-26, a laptopon)
 
 A KO14 (A) (T = 20) és a KO15 (A) (10 jelölt) után, a pótlás kódja előtt (`koinon_atvizsgalas.md` 11.). A 97. mérés három dolgot

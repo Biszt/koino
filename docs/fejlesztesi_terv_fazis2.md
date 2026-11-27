@@ -6706,8 +6706,11 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     — a `felkeres` kérelem, a jelölt gyors ellenőrzése és a hiány saját megnézése (a DHT-n), óránként egy új szerep, a keret (alapból
     256 MB) és a leadás fölötte. ✅ **④c3 kész (2026-11-27):** a pótlás — a cél alatti kosáron kosaranként óránként egy sorsolás (1/n),
     a nyertes egy véletlen gyökér-darab hirdetői közül legfeljebb 10 jelöltet kérdez meg (próba-felkérés, a terhük a nyitó jelükből), és
-    a legkevesebbet őrző kapja az igazi felkérést (csak az ő címére); óránként legfeljebb egy pótlás; kézzel `koinon potol`. ⏭️ ④c4 a
-    mélység változása (⏸️ KO18), ④d a próba.
+    a legkevesebbet őrző kapja az igazi felkérést (csak az ő címére); óránként legfeljebb egy pótlás; kézzel `koinon potol`. ⭐ **A 99.
+    mérés (2026-11-27 — `koinon_atvizsgalas.md` 12.):** a mélység változása egy növekvő koinoban — a „mindent megtart” nem skálázódik
+    (a teher a koinóval nő, a jel határa vaktában vág), a „fele marad” minden kettéválás után gödröt hagy, az „átadja” a kis teherrel jár;
+    a kettéválás utáni gödör LÁTHATÓSÁG (a durvább szerepek a nagyszülő szintjére kerülnek) — a nagyszülő témáján is keresve eltűnik.
+    ⏸️ **KO18** (a kosár másik fele) és **KO19** (az átmenet hídja) Csabánál; utána ④c4, ④d a próba.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

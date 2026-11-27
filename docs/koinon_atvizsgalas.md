@@ -440,11 +440,61 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
      kimondja. ⚠️ *Szándékos:* a jelöltek címenként (cím ÉS port) számítanak, nem IPv4-enként (egy router mögötti két telefon két
      jelölt) — egy hamis hirdető így elfoglalhatja egy minta helyeit, de ezzel csak egy pótlást ront el (a következő órában más véletlen
      darab a minta), tartót nem vesz el (a 6. pont);
-   - ④c4 **a mélység változása** (a 7. pont): mi legyen kettéváláskor a kosár másik felével — ⏸️ **KO18**, előtte mérés (a teher a
-     koino növekedésével).
+   - ④c4 **a mélység változása** (a 7. pont): mi legyen kettéváláskor a kosár másik felével — ⏸️ **KO18** és **KO19** (a 12. szakasz —
+     a 99. mérés után).
 4. **④d A próba:** helyi DHT-hálóval (`halo.belepo`), rontásokkal: hamis hirdető, hamis felkérő, megtelt jelölt, mélység-váltás, a
    kopogtató-vihar korlátja. Utána a kézikönyv mindenkinél (KO5 (A) — a ③e egy része visszafordul), majd a ⑤ terep (a valódi
    elérhetőség és a DHT késése — ebből a ráhagyás).
+
+## 12. A ④c4 átvizsgálása — a mélység változása (2026-11-27, a 99. mérés után, kód előtt)
+
+Csaba: „Igen, mérd meg”. A 97–98. mérés a mélységet állandónak vette; a **99. mérés** (`meres/eredmenyek.md` 99., `meres/koinonMelysegMeres.js`)
+egy NÖVEKVŐ koinot szimulál: 640 tagról 120 nap alatt ~10 240-re (négy kettéválás, az 5. mélységről a 9.-re), a ④c3 pótlásával, a
+97. négy elérhetőségi mintáján, növekvő és fogyó tagsággal. Egy készülék a kettéválást csak fent, és 0–48 órával a globális változás
+után veszi észre (a tagság a cseréken terjed). Négy szabályt mért a kosár MÁSIK felére: **(A) mindent megtart** (a mostani szabály
+szó szerint — „leadni csak a megtelt készülék ad le”), **(B) a fele marad** (azonnal leadja), **(C) átadja** (marad, amíg nélküle is
+megvan a látott cél — 12 egymás utáni ellenőrzésen), **(C′)** ugyanez sorsolással (1/n).
+
+**Amit mért:**
+- **(A) nem skálázódik.** Gödör nincs (az idő 0–2,3%-ában van egy kosárnak 20-nál kevesebb valóban online tartója), de a tartók a
+  szükségesnek a többszörösei (egy kosárnak 160–358), az alapítók a koinon 8–17%-át őrzik (95–167 MB — az új tagok 2–8-szorosát), és
+  amit megtart, azt a JEL HATÁRA (32 segítő — 267–1171 készülék a határon, 13 600–39 900 levágott szerep) és a keret vágja: a
+  legújabbat, nem azt, amelyik nem kell. A teher fölött nem a szabály dönt;
+- **(B) minden kettéválás után gödröt hagy:** a következő 3 napban a kosár-órák 19–80%-ában 20 alatt;
+- **(C), (C′) a (B) terhével jár** (átlagosan 9–35 MB, az alapítóké 10–103 MB), és a gödre a mai észrevétellel 10–46%;
+- ⭐ **A LELET — a gödör nem adathiány, hanem LÁTHATÓSÁG:** a nagyszülő tartóit is számolva eltűnik ((B) 42 → 0,6%, (C) 31 → 0%). Az
+  átmenetben a régi mélységű tartó a kosarát ürülni látja (aki már kettévált, a felét tartja — a számláló a felekét nem nézi), pótol,
+  és egy mélyebb jelölt (±1) elvállalja a nagy régi kosarat; a következő kettéváláskor ez a szerep a NAGYSZÜLŐ szintjére kerül, ahol a
+  kérő és a számláló nem keres (`koinonKeresoKulcsai`: a kosár és a szülője). Két híd: **a nagyszülő témáján is keresni** — a mai
+  észrevétellel is (C)-nél 0–2,9% a kettéválás után, az egész időre 0–0,9% (a borúlátón 4,8–6,9%); vagy **a gyors észrevétel** (a
+  társak nyitó jeléből, 6 óra) — (C)-nél 1,9–9,5%. A kettő együtt nem jobb, mint a nagyszülő egyedül.
+
+**A többi pont (a mérésből és a kódból — kérdés nélkül, a ④c4 építésében):**
+1. **A megtartott szerep a mélységgel FINOMODIK** (bármelyik szabálynál): kettéváláskor a felekre bomlik, különben egy szint után
+   láthatatlan (a kérő és a számláló a szülőnél tovább nem keres).
+2. **A jelölt ±1-e marad.** A „durvább kosarat nem vállal” és a „számláló a két fél tartóit is látja” változat ROSSZABB: a régi mélységű
+   kérőnek a kosár-órák 25–53%-ában 20 alatt (mert az új tartók a régi mélységről nem látszanak).
+3. **A friss tag** (eggyel sekélyebben kezd — a ③ alulbecslése) (C)-vel nem kíván külön kezelést (ugyanaz a kép, mint a mostani
+   mélységen kezdve); (A)-val a kétszeres részét örökre megtartaná (az új tagok terhe 14 → 22 MB). ⭐ *Pontosítás a ④c1 próbájának
+   leletéhez* („egy friss tag az első cseréjén a 0. mélységen mindent felvesz”): ez csak KIS koinoban igaz — a közös kosár csak azonos
+   vagy szomszéd mélységen van (`kozosKoinonDarab`: „⛔ Két szint távolságnál nincs közös darab”), így egy nagy koinoban a 0. mélységű
+   friss tag egyik társától sem kap koinont, amíg a mélysége a társakéhoz egy szintre meg nem közelít; utána legfeljebb a saját részének
+   kétszeresét veszi fel, és a kettéválás szabálya adja vissza.
+
+**A kérdések (Csabáé):**
+- **KO18 — kettéváláskor mi legyen a kosár MÁSIK felével annál, aki eddig az egészet tartotta?** (A) **mindent megtart** (a mostani
+  „csak a megtelt ad le” szó szerint): gödör nincs, de a teher a koinóval nő (az alapítóké a koinon egy rögzített hányada — 10 000 tagnál
+  95–167 MB, utána a keret), és a jel határa vaktában vág. (B) **a fele marad** (azonnal leadja): kis teher, de minden kettéválás után
+  3 napig a kosár-órák 19–80%-ában 20 alatt. ⭐ (C) **átadja:** a másik fél (és a segítő mindkét fele) marad, amíg nélküle is megvan a
+  látott cél — 12 egymás utáni ellenőrzésen —, utána leadja; a teher (B)-é, és a KO19 (A)-jával a gödör 0–2,9%. Ez a „csak a megtelt ad
+  le” szabály egy kivétele: az örökölt fél akkor is mehet, ha nem vagyok tele — de csak ha nélkülem is megvan. (C′) ugyanez, a leadás
+  sorsolással (1/n) — közel azonos (a borúlátón egyenletesebb teher, máshol kicsit több).
+- **KO19 — hogyan hidaljuk át az átmenetet** (amíg a két mélység együtt él)? ⭐ (A) **a nagyszülő témáján is keres** — a kérő és a
+  számláló (egy keresés, ~3 KB, csak ha a szülővel együtt is kevés): a mai észrevétellel is eltűnik a gödör, és nem kell a társak
+  bevallott mélységében bízni. (B) **a mélységet a társak nyitó jeléből tanulja** (a `knd` a mélységüket viszi — a D110 mintájára, csak
+  mélyebbre): ~6 óra alatt lezajlik az átmenet, a gödör (C)-nél 1,9–9,5% — ⚠️ de a mélyebb a veszélyes irány (KO2: a túlbecslés kevesebb
+  természetes tartót ad), és egy hamis társ mélyebbre tolhatná (a pótlás pótol, (C) alatt adat nem vész — csak teher). (C) **egyik sem**
+  (a mai): a kettéválás után 3 napig a kosár-órák 10–46%-ában 20 alatt.
 
 ## 6. Napló
 
@@ -633,3 +683,8 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
   legtöbbet őrző; a jelölt a kérdezést feljegyzi; a saját címem nem marad ki; a vonal nem jegyzi meg a nyitó jelet) bukik. ⚠️ A
   kopogtató-vihar: a kérdezés legfeljebb 10 választ gyűjt, de a minta párján a többi hirdető még 30 percig kopog (a csere a
   kiszolgálási keret alatt — D109) — a ④d méri. ⏭️ ④c4 a mélység változása (⏸️ KO18, előtte mérés), ④d a próba.
+- **2026-11-27** — ⭐ **a 99. mérés: a mélység változása** (Csaba: „Igen, mérd meg”; a 12. szakasz): egy növekvő koino (640 → ~10 240
+  tag, négy kettéválás) négy szabállyal a kosár másik felére. (A) mindent megtart: gödör nincs, de a teher a koinóval nő, és a jel
+  határa vaktában vág; (B) a fele marad: minden kettéválás után gödör (19–80%); (C) átadja: a (B) terhével, kisebb gödörrel. ⭐ A lelet:
+  a gödör láthatóság, nem adathiány — az átmenetben a durvább szerepek a nagyszülő szintjére kerülnek, ahol senki nem keres; a nagyszülő
+  témáján is keresve eltűnik. ⏸️ **KO18** (a másik fél) és **KO19** (az átmenet hídja) Csabánál.
