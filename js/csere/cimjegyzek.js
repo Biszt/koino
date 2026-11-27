@@ -445,7 +445,8 @@ export function koinonMelysege(tagok, r = KOINON_PELDANY) {
  * @returns {{kulcs: string, a: string|null, b: string|null}|null}
  */
 export function kozosKoinonDarab(a, b) {
-  const darabja = (x) => keszulekDarabjai(KOINON_SO, x.alairo, x.melyseg, 1)[0];
+  // ⭐⭐ D130 (④c1): a darab a jelből is jöhet (`darab` — egy SEGÍTŐ kosár: nem a tábla-aláírásból számolt), különben az aláírásból
+  const darabja = (x) => (typeof x.darab === 'bigint' ? x.darab : keszulekDarabjai(KOINON_SO, x.alairo, x.melyseg, 1)[0]);
   const l = (x, i) => x.lenyomatok[i] ?? null;
   if (a.melyseg === b.melyseg) {
     const d = darabja(a);
@@ -458,6 +459,84 @@ export function kozosKoinonDarab(a, b) {
   const sekelyL = l(sekely, 1 + Number(dm & 1n));
   const melyL = l(mely, 0);
   return { kulcs: koinonDarabKulcsa(mely.melyseg, dm), a: a === sekely ? sekelyL : melyL, b: b === sekely ? sekelyL : melyL };
+}
+
+// ===================================
+// ⭐⭐ D130 (④c1 — `koinon_atvizsgalas.md` 11., 4. pont): A SEGÍTŐ KOSARAK A NYITÓ JELBEN
+// ===================================
+//
+// A segítő kosár (amit a ④c pótlása ad egy készüléknek a sajátja mellé) nem a tábla-aláírásból jön, ezért a társ nem tudja
+// kiszámolni: a nyitó jel `knk` mezője viszi — kosaranként a mélysége, a darab száma és a három rövid lenyomat (a kosáré és a két
+// feléé, mint a saját darabé a `knd`-ben). ⭐ Ebből a társ két dolgot tud: (1) a KÖZÖS kosarakat (`kozosKoinonKosarak` — a saját és a
+// segítő kosarak bármely párja, ugyanazon vagy szomszéd mélységen, mint a `kozosKoinonDarab`), így a segítő kosár a többi tartójával
+// egyeztetődik; (2) a TERHÉT (`koinonTeher`) — a ④c pótlásának jelöltjei ebből választanak. ⚠️ A bevallott teher hamisítható: aki
+// többet mond, potyázik, aki kevesebbet, magára vesz többet — tartót egyik sem vesz el (a 11. szakasz 6. pontja). A régebbi program a
+// mezőt nem nézi: vele csak a saját darab egyeztetődik (mint eddig).
+
+/** ⭐ 9. szabály: a nyitó jel legfeljebb ennyi segítő kosarat visz (a megtelt készülék nem vállal többet). */
+export const KOINON_KOSAR_JEL_KORLAT = 32;
+
+/**
+ * Egy kosár kulcsai a jelhez: a kosár maga és a két fele (a legmélyebb szinten csak maga) — a `koinonDarabKulcsai` párja, az
+ * aláírás helyett a megadott darabbal.
+ * @param {number} melyseg
+ * @param {bigint} darab
+ * @returns {Array<string>}
+ */
+export function koinonKosarKulcsai(melyseg, darab) {
+  const ki = [koinonDarabKulcsa(melyseg, darab)];
+  if (melyseg < DARAB_MAX_MELYSEG) ki.push(koinonDarabKulcsa(melyseg + 1, 2n * darab), koinonDarabKulcsa(melyseg + 1, 2n * darab + 1n));
+  return ki;
+}
+
+/** Egy segítő kosár a jelben: `m:d:l:l0:l1` (a darab hexában, az üres lenyomat üres). */
+export function kosarJelSzovege({ melyseg, darab, lenyomatok = [] }) {
+  return melyseg + ':' + darab.toString(16) + ':' + [0, 1, 2].map((i) => lenyomatok[i] ?? '').join(':');
+}
+
+/**
+ * …és az olvasása: null, ha nem ilyen alakú, a mélység 1 és a határ közé nem esik (a 0. mélységű kosár az egész koinon — azt
+ * mindenki tartja, segítő nem lehet), vagy a darab a mélységen kívül van.
+ * @returns {{melyseg: number, darab: bigint, lenyomatok: Array<string|null>}|null}
+ */
+export function kosarJelOlvasasa(szoveg) {
+  if (typeof szoveg !== 'string' || !/^\d{1,3}:[0-9a-f]{1,36}(:[A-Za-z0-9_-]{0,11}){3}$/.test(szoveg)) return null;
+  const g = szoveg.split(':');
+  const melyseg = parseInt(g[0], 10);
+  if (melyseg < 1 || melyseg > DARAB_MAX_MELYSEG) return null;
+  const darab = BigInt('0x' + g[1]);
+  if (darab >= (1n << BigInt(melyseg))) return null;
+  return { melyseg, darab, lenyomatok: g.slice(2).map((x) => x || null) };
+}
+
+/**
+ * ⭐ A KÖZÖS KOSARAK két készülék között — a két fél minden tartott kosarának (a saját és a segítő kosarak) bármely párjára a
+ * `kozosKoinonDarab` (ugyanaz a darab, vagy szomszéd mélységen a mélyebb, ha a sekélyebbnek fele), kulcsonként egyszer.
+ * @param {Array<{alairo?: string, darab?: bigint, melyseg: number, lenyomatok: Array<string|null>}>} sajatok
+ * @param {Array<{alairo?: string, darab?: bigint, melyseg: number, lenyomatok: Array<string|null>}>} ovek
+ * @returns {Array<{kulcs: string, a: string|null, b: string|null}>} az `a` a saját oldal lenyomata, a `b` a társé
+ */
+export function kozosKoinonKosarak(sajatok = [], ovek = []) {
+  const ki = new Map();
+  for (const a of sajatok) {
+    for (const b of ovek) {
+      const k = kozosKoinonDarab(a, b);
+      if (k && !ki.has(k.kulcs)) ki.set(k.kulcs, k);
+    }
+  }
+  return [...ki.values()];
+}
+
+/**
+ * ⭐ A TEHER a jelből — a tartott kosarak a koinon hányad részét adják (a mélységükkel súlyozva: egy kettéválás így nem
+ * duplázza — a két fél ugyanannyi, mint az egész). A kosarak átfedését nem vonja le (a jel nem szól róla): a szám bevallás.
+ * @param {Array<{melyseg: number}>} kosarak
+ * @returns {number}
+ */
+export function koinonTeher(kosarak = []) {
+  let t = 0;
+  for (const k of Array.isArray(kosarak) ? kosarak : []) if (Number.isInteger(k?.melyseg) && k.melyseg >= 0) t += 2 ** -k.melyseg;
+  return t;
 }
 
 // ===================================

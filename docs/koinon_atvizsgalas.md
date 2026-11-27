@@ -407,6 +407,21 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
    (m:d): N tartó látszik a DHT-n, a cél C”, a cél alatt pirosan), a `cimjegyzek hirdet` kosár-sorában és a `vallalas`-ban (hány perce).
 3. **④c A pótlás:** 1/n eséllyel; a jelöltek a KO16 szerint, legfeljebb 10, a jelük szerint a legkevesebbet őrző; a felkérés és a jelölt
    három ellenőrzése; óránként legfeljebb egy pótlás és egy új szerep; a szerep helyben feljegyezve; leadás csak a keret fölött.
+   ⭐ *Négy részlépésben (2026-11-27):*
+   - ✅ **④c1 a segítő szerepek** — a helyi jegyzék (`<koino>/koinon-szerepek.json`, `fajlTar.js` `koinonSzerepTarolo` — nem esemény), a
+     `koinon kosarak | segit <m:d> | lead <m:d>` parancs (a pótlás is ide ír; kézzel egy bekapcsolva hagyott gép önként is vállalhat);
+     a `koinonMelysegem` a segítőket is tartja (a részvétel, a tömörítés megtartása, a kézikönyv-bejegyzések — bármelyik kosárban); a
+     nyitó jel `knk` mezője viszi őket (`m:d:l:l0:l1`, legfeljebb 32 — `cimjegyzek.js` `kosarJelSzovege`/`kosarJelOlvasasa`), a csere
+     a két fél BÁRMELY tartott kosarából számolja a közöseket (`kozosKoinonKosarak` — ugyanazon vagy szomszéd mélységen), a régebbi
+     program a mezőt nem nézi; a hirdetés és a számlálás a segítőkre is; a jelből a teher (`koinonTeher` — a ④c3 jelöltjeihez).
+     ⚠️ *Mérve a próbán:* egy friss tag az első cseréjén még csak magát ismeri (0. mélység — az egész koinon az övé), és mindent felvesz
+     (a ③ alulbecslése — a biztonságos irány, de egy nagy koinoban egy új tagnak egyszeri teher; a ④c4 része);
+   - ④c2 **a felkérés** — egy új kérelem-fajta a kosár kulcsával; a jelölt három ellenőrzése (a kerete; érvényes kosár a mélységén;
+     maga is látja a hiányt — egy saját DHT-keresés); óránként legfeljebb egy új szerep; a készülékenkénti keret és a leadás fölötte;
+   - ④c3 **a pótlás** — a látott cél alatt 1/n eséllyel, óránként legfeljebb egy; a jelöltek egy véletlen gyökér-darab témájáról (KO16
+     (A)), legfeljebb 10, közvetlen kopogással és a kopogtató úton; a nyitó jelükből a legkevesebbet őrző kapja a felkérést;
+   - ④c4 **a mélység változása** (a 7. pont): mi legyen kettéváláskor a kosár másik felével — ⏸️ **KO18**, előtte mérés (a teher a
+     koino növekedésével).
 4. **④d A próba:** helyi DHT-hálóval (`halo.belepo`), rontásokkal: hamis hirdető, hamis felkérő, megtelt jelölt, mélység-váltás, a
    kopogtató-vihar korlátja. Utána a kézikönyv mindenkinél (KO5 (A) — a ③e egy része visszafordul), majd a ⑤ terep (a valódi
    elérhetőség és a DHT késése — ebből a ráhagyás).
@@ -575,3 +590,10 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
   látott cél (25 — r = 20-nál) alatt a szülő-kosárra is ránéz; a szám a helyi jegyzékbe, a naplóba, a `cimjegyzek hirdet`-be és a
   `vallalas`-ba. Három próba (két tiszta, egy a parancssoron: hamis DHT idegen címekkel, négy ismert tag, és az őrjárat naplója),
   mindhárom rontásra (a port is számít; nincs második pillantás; a saját címem is számít) bukik. ⏭️ ④c a pótlás.
+- **2026-11-27** — ✅ **④c1: a segítő szerepek** (Csaba: „Igen, jöhet a ④c”; a ④c négy részlépésre bontva — a 11. szakasz terve, 3.
+  pont): a helyi jegyzék, a `koinon kosarak | segit | lead`, a nyitó jel `knk` mezője, a közös kosarak bármely párból, a tömörítés
+  megtartja, a hirdetés és a számlálás a segítőkre is. Négy próba (három a `koinonDarabProba`-ban: a jel, a közös kosarak, a valódi
+  csere; egy a parancssoron). ⚠️ A parancssori próba első két alakja két rontás mellett is átment — a szerző a saját eseményeit a csak
+  küldő úton annak is odaadja, aki a kosarat tartja, és egy friss tag az első cseréjén a 0. mélységen mindent felvesz; a végleges
+  alakban (előbb mindenki megismeri egymást, az egyezmény utána születik, és a vendég nem a szerzővel cserél) mindhárom rontásra
+  (a csere nem kapja meg a segítőket; a tömörítés csak a saját darabot tartja; a jel nem viszi) bukik. ⏭️ ④c2 a felkérés.

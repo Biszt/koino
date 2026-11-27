@@ -5376,7 +5376,8 @@ proba('⭐⭐ D130 (④b): a kosár látott tartói — címenként egyszer, a s
     oa = spawn(process.execPath, [KOINO_JS, 'orjarat', '0.05', String(PO)],
       { env: { ...process.env, KOINO_ADAT: a, KOINO_NAPLO: '', ...dht }, stdio: ['ignore', 'pipe', 'pipe'] });
     oa.stdout.on('data', (x) => { naplo += x; });
-    const minta = new RegExp('🧺 \\d\\d:\\d\\d(:\\d\\d)? a koinon-kosaram \\(' + jel + '\\): 2 tartó látszik a DHT-n, a cél 2');
+    // ⚠️ az óra egy jeggyel is jöhet (éjfél után „1:09:18” — a teljes soron így bukott el)
+    const minta = new RegExp('🧺 \\d{1,2}:\\d\\d(:\\d\\d)? a koinon-kosaram \\(' + jel + '\\): 2 tartó látszik a DHT-n, a cél 2');
     for (let i = 0; i < 60 && !minta.test(tiszta(naplo)); i++) await varj(500);
     const ki = {
       melyseg: /a koinon darabja: 2\. mélység \(4 ismert tag, r = 1/.test(elotteV) && !!kosar && !!szulo,
@@ -5398,6 +5399,102 @@ proba('⭐⭐ D130 (④b): a kosár látott tartói — címenként egyszer, a s
     halo.bezar();
     await varj(1000);
     for (const h of [a, ...tagok]) await rm(h, { recursive: true, force: true });
+  }
+});
+
+// ⭐⭐ D130 (④c1): A SEGÍTŐ KOSÁR a valódi programban. Egy r = 1-es nyílt koinoban két tag (P, Q) az 1. mélységen MÁS-MÁS saját kosarat
+// tart (a próba addig keres új készüléket, amíg ilyeneket nem talál); mind szigorú („alap”). ⚠️ A SORREND a próba lényege: előbb
+// mindenki megismeri egymást (A ↔ P, P ↔ Q — ekkor még nincs koinon-esemény), és az egyezmény csak UTÁNA születik. Különben a vendég
+// az első cseréjén még csak magát ismeri (0. mélység — az egész koinon az övé), és mindent felvesz (mérve: a szerep előtt is megvolt).
+// Utána A elfogad egy általános egyezményt; akinek a saját kosara az egyezményé, az a TARTÓ (T), a másik a VENDÉG (V). T az
+// egyezményt A-tól kapja (A a szerző — a csak küldő úton). V csak T-vel cserél, nem A-val: a szerző a saját eseményeit annak is
+// odaadja, aki a kosarat tartja — így a jel útja nem volna próbára téve. (1) Szerep nélkül V nem kapja meg (a darab-sorában 0
+// általános egyezmény); (2) a `koinon segit m:d` után a `koinon kosarak` és a `vallalas` két kosarat mutat (a sajátot és a segítőt),
+// és a következő cserén T-től az egyezmény tömör alakja és állásfoglalása átjön (1 általános egyezmény); (3) a tömörítés után is
+// megvan; (4) a `koinon lead` után a kosár kiesik. Rontás: a csere nem kapja meg a segítőket → a (2) nem jön át → bukik; a
+// tömörítés csak a saját darabot tartja → a (3) bukik; a jel nem viszi a segítőt → a (2) bukik.
+proba('⭐⭐ D130 (④c1): a SEGÍTŐ kosár a valódi programban — a `koinon segit` után a vendég a nem saját kosarának egyezményét is megkapja a cserén, a tömörítés után is megvan, a `koinon lead` után kiesik', async () => {
+  const { egyezmenyKoinonDarabKulcsa, koinonDarabKulcsai, koinonDarabBol } = await import('../js/csere/cimjegyzek.js');
+  const { esemenyTarNyitasa } = await import('../js/tar/fajlTar.js');
+  const { szelet: szeleteOf, KOINON_KULCS: KK } = await import('../js/esemeny/esemeny.js');
+  const a = await ujKeszulek();
+  const probalt = [];
+  const alap = { KOINO_KISZOLGALAS: 'alap', KOINO_DHT_BELEPOK: 'nincs', KOINO_TUKOR: '127.0.0.1:9' };
+  const tiszta = (x) => x.replace(/\x1b\[[0-9;]*m/g, '');
+  const sor = (s) => (tiszta(s).match(/a koinon darabja:[^\n]*/) ?? [''])[0];
+  try {
+    await fut(a, 'koino', 'Segítő kosár', 'nyilt', 'koinonPeldany=1', alap);
+    const K = await koinoNeve(a);
+    // két készülék, más-más saját kosárral az 1. mélységen
+    const sajatja = new Map();
+    for (let i = 0; i < 12 && sajatja.size < 2; i++) {
+      const jelolt = await ujKeszulek();
+      probalt.push(jelolt);
+      await fut(jelolt, 'tabla', alap);
+      const al = JSON.parse(await readFile(join(jelolt, 'tabla-kulcs.json'), 'utf8').catch(() => '{}')).alairoNyilvanos ?? null;
+      if (!al) continue;
+      const k = koinonDarabKulcsai(al, 1)[0];
+      if (![...sajatja.values()].includes(k)) sajatja.set(jelolt, k);
+    }
+    if (sajatja.size < 2) return false;
+    const [p, q] = [...sajatja.keys()];
+    for (const t of [p, q]) {
+      await fut(t, 'csatlakoz', K, alap);
+      await fut(t, 'belep', alap);
+    }
+    // mindenki megismeri egymást (még nincs koinon-esemény): A ↔ P kétszer (A is két tagot lát), P ↔ Q
+    await csereKor(a, p, 7499, alap);
+    await csereKor(a, p, 7499, alap);
+    await csereKor(p, q, 7499, alap);
+    // az egyezmény — most születik
+    const gondolat = azonosito(await fut(a, 'gondolat', 'A HELY', alap), 'Létrejött:');
+    if (!gondolat) return false;
+    await fut(a, 'ertek', gondolat, '51', '0', '2', '2', alap);
+    const javaslat = azonosito(await fut(a, 'altalanos', 'A KÖZÖS ÁLLÁSPONT', gondolat, alap), 'Általános javaslat beadva:');
+    if (!javaslat) return false;
+    await fut(a, 'szavaz', javaslat, 'tamogat', alap);
+    await varj(3000);                                    // a lezárás (a döntési idő 2 mp)
+    await fut(a, 'allast', javaslat, 'csatlakozik', alap);
+    await fut(a, 'koinon', alap);
+    // az egyezmény kosara az 1. mélységen (a TELJES azonosítóból — a parancs csak az elejét írja ki: A tárában a koinon kulcsához
+    // bejelentett esemény szelete)
+    const aTar = await esemenyTarNyitasa(K, a);
+    const koinonE = (await aTar.bejelentesek(KK)).find((e) => szeleteOf(e).startsWith(javaslat));
+    if (!koinonE) return false;
+    const x = egyezmenyKoinonDarabKulcsa(szeleteOf(koinonE), 1);
+    const t = sajatja.get(p) === x ? p : q;
+    const v = t === p ? q : p;
+    const xd = koinonDarabBol(x);
+    const jel = xd.melyseg + ':' + xd.darab;
+    // T megkapja A-tól (a saját kosarában); V szerep nélkül T-vel cserél
+    await csereKor(a, t, 7499, alap);
+    const tSor = sor(await fut(t, 'vallalas', alap));
+    await csereKor(t, v, 7499, alap);
+    const nelkul = sor(await fut(v, 'vallalas', alap));
+    const segitKi = tiszta(await fut(v, 'koinon', 'segit', jel, alap));
+    await csereKor(t, v, 7499, alap);
+    const vV = tiszta(await fut(v, 'vallalas', alap));
+    await fut(v, 'tomorit', alap);
+    const tomorites = sor(await fut(v, 'vallalas', alap));
+    const leadKi = tiszta(await fut(v, 'koinon', 'lead', jel, alap));
+    const ki = {
+      tarto: /1\. mélység \(\d ismert tag, r = 1 — 2\^1 darabból egy\) · 1 általános egyezmény, 2 esemény/.test(tSor),
+      nelkul: /1\. mélység \(\d ismert tag, r = 1 — 2\^1 darabból egy\) · 0 általános egyezmény, 0 esemény/.test(nelkul),
+      segit: segitKi.includes('✓ a ' + jel + ' kosár segítő tartója vagyok') && /A KOSARAIM: 2/.test(segitKi)
+        && segitKi.includes(jel + '  · segítő'),
+      atjott: /· 1 általános egyezmény, 2 esemény/.test(sor(vV)),
+      hirdet: new RegExp('a koinon a DHT-n: 2 kosaramat hirdetem \\(1:\\d, ' + jel + ' ').test(vV) && vV.includes(jel + ' (segítő — D130 ④c1)'),
+      tomorites: /· 1 általános egyezmény, 2 esemény/.test(tomorites),
+      lead: leadKi.includes('✓ a ' + jel + ' kosár segítő szerepét leadtam') && /A KOSARAIM: 1/.test(leadKi)
+    };
+    if (!Object.values(ki).every(Boolean)) {
+      process.stdout.write('    (④c1 — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ' · ' + JSON.stringify({
+        jel, tSor, nelkul, segitKi: segitKi.slice(0, 400), vV: (vV.match(/a koinon[^\n]*(\n[^\n]*){0,3}/) ?? [''])[0], tomorites,
+        leadKi: leadKi.slice(0, 300) }).slice(0, 1800) + ')\n');
+    }
+    return Object.values(ki).every(Boolean);
+  } finally {
+    for (const h of [a, ...probalt]) await rm(h, { recursive: true, force: true });
   }
 });
 

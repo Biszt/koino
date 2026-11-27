@@ -31,7 +31,9 @@ import {
   // ⭐⭐ D130 (④a): a kosarak a DHT-n
   koinonHirdetendoTemak, koinonKeresoKulcsai, cimjegyzekTema, figyelendoKopogtatok, temaKopogtatoja,
   // ⭐⭐ D130 (④b): a látott tartók és a látott cél
-  koinonLatottTartok, koinonLatottCel, kosarSzamlalasSzovege, KOINON_KESES_RAHAGYAS
+  koinonLatottTartok, koinonLatottCel, kosarSzamlalasSzovege, KOINON_KESES_RAHAGYAS,
+  // ⭐⭐ D130 (④c1): a segítő kosarak a nyitó jelben
+  koinonKosarKulcsai, kosarJelSzovege, kosarJelOlvasasa, kozosKoinonKosarak, koinonTeher, KOINON_KOSAR_JEL_KORLAT
 } from '../js/csere/cimjegyzek.js';
 import { sajatKuldo, kuldoFogado } from '../js/allapot/osszegzoTartas.js';
 
@@ -450,6 +452,108 @@ proba('⭐⭐ D130 (④b): a látott tartók címenként egyszer, a saját címe
       && kosarSzamlalasSzovege({ latott: 25, cel: 25 }) === '25 tartó látszik a DHT-n, a cél 25'
   };
   if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// ===================================
+// ⭐⭐ D130 (④c1): A SEGÍTŐ KOSARAK A NYITÓ JELBEN ÉS A CSERÉBEN
+// ===================================
+
+// A jel alakja oda-vissza; a 0. mélységű, a mélységen kívüli és a hibás alakú kosár null; a kulcsok a kosár és a két fele; a teher
+// a mélységgel súlyozva (egy kettéválás nem duplázza). Rontás: a 0. mélységet is elfogadja → a `nulla` bukik; a darabot nem nézi a
+// mélységhez → a `kivul` bukik; a teher a kosarak száma → a `teher` bukik.
+proba('⭐⭐ D130 (④c1): a segítő kosár jele (`m:d:l:l0:l1`) oda-vissza — a 0. mélység, a mélységen kívüli darab és a hibás alak nem; a teher a mélységgel súlyozva', () => {
+  const k = { melyseg: 3, darab: 5n, lenyomatok: ['AAAAAAAAAAA', null, 'BBBBBBBBBBB'] };
+  const sz = kosarJelSzovege(k);
+  const vissza = kosarJelOlvasasa(sz);
+  const [kk, f0, f1] = koinonKosarKulcsai(3, 5n);
+  const ki = {
+    alak: sz === '3:5:AAAAAAAAAAA::BBBBBBBBBBB',
+    vissza: vissza?.melyseg === 3 && vissza.darab === 5n && vissza.lenyomatok[0] === 'AAAAAAAAAAA' && vissza.lenyomatok[1] === null
+      && vissza.lenyomatok[2] === 'BBBBBBBBBBB',
+    nulla: kosarJelOlvasasa('0:0:::') === null,
+    kivul: kosarJelOlvasasa('2:4:::') === null && kosarJelOlvasasa('2:3:::') !== null,
+    hibas: kosarJelOlvasasa('x') === null && kosarJelOlvasasa('2:3::') === null && kosarJelOlvasasa(null) === null
+      && kosarJelOlvasasa('2:3:' + 'A'.repeat(12) + '::') === null,
+    kulcsok: koinonDarabBol(kk).darab === 5n && koinonDarabBol(f0).melyseg === 4 && koinonDarabBol(f0).darab === 10n
+      && koinonDarabBol(f1).darab === 11n && koinonKosarKulcsai(DARAB_MAX_MELYSEG, 0n).length === 1,
+    teher: koinonTeher([{ melyseg: 1 }, { melyseg: 2 }]) === 0.75 && koinonTeher([{ melyseg: 2 }, { melyseg: 2 }]) === koinonTeher([{ melyseg: 1 }])
+      && koinonTeher([]) === 0,
+    korlat: KOINON_KOSAR_JEL_KORLAT === 32
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// A közös kosarak a két fél MINDEN tartott kosarából (a saját darab az aláírásból, a segítő a jelből): két segítő egy kosáron, a
+// saját és a társ segítője, szomszéd mélységen a mélyebb; kulcsonként egyszer. Rontás: csak a saját darabot nézi → a `segito` bukik.
+proba('⭐⭐ D130 (④c1): a KÖZÖS kosarak a saját és a segítő kosarakból — két segítő egy kosáron, a saját és a társ segítője, szomszéd mélységen a mélyebb; kulcsonként egyszer', async () => {
+  const m = 2;
+  const [tA, tB] = await kulcsPar((x, y) => darabKulcsa(x, m) !== darabKulcsa(y, m));
+  const ka = koinonDarabBol(darabKulcsa(tA, m));
+  const ures = [null, null, null];
+  const sajatA = { alairo: alairoja(tA), melyseg: m, lenyomatok: ['L', null, null] };
+  const sajatB = { alairo: alairoja(tB), melyseg: m, lenyomatok: ures };
+  // egy kosár, ami egyiküknek sem a sajátja
+  const kb = koinonDarabBol(darabKulcsa(tB, m));
+  const masik = [0n, 1n, 2n, 3n].find((d) => d !== ka.darab && d !== kb.darab);
+  const ki = {
+    nincs: kozosKoinonKosarak([sajatA], [sajatB]).length === 0,
+    segito: (() => { const k = kozosKoinonKosarak([sajatA], [sajatB, { melyseg: m, darab: ka.darab, lenyomatok: ['M', null, null] }]);
+      return k.length === 1 && k[0].kulcs === darabKulcsa(tA, m) && k[0].a === 'L' && k[0].b === 'M'; })(),
+    ketSegito: (() => { const k = kozosKoinonKosarak([sajatA, { melyseg: m, darab: masik, lenyomatok: ['X', null, null] }],
+      [sajatB, { melyseg: m, darab: masik, lenyomatok: ['Y', null, null] }]);
+      return k.length === 1 && koinonDarabBol(k[0].kulcs).darab === masik && k[0].a === 'X' && k[0].b === 'Y'; })(),
+    szomszed: (() => { const k = kozosKoinonKosarak([{ melyseg: m, darab: masik, lenyomatok: ['P', 'Q', 'R'] }],
+      [{ melyseg: m + 1, darab: 2n * masik + 1n, lenyomatok: ['S', null, null] }]);
+      return k.length === 1 && koinonDarabBol(k[0].kulcs).melyseg === m + 1 && k[0].a === 'R' && k[0].b === 'S'; })(),
+    egyszer: kozosKoinonKosarak([sajatA, { melyseg: m, darab: ka.darab, lenyomatok: ['L', null, null] }],
+      [{ melyseg: m, darab: ka.darab, lenyomatok: ['M', null, null] }]).length === 1
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (' + JSON.stringify(ki) + ')\n');
+  return Object.values(ki).every(Boolean);
+});
+
+// A valódi cserén: (1) B egy kosarat SEGÍTŐKÉNT tart (a jelben viszi), ami A saját kosara — a kosár eseményei átjönnek, a többi nem, és
+// a második csere a nyitásnál véget ér; (2) két segítő (egyiknek sem a sajátja) ugyanígy; (3) a régi program (jel nélkül) semmit nem
+// kap. Rontás: a vonal a `knk`-t nem küldi vagy nem olvassa → az (1) és a (2) semmit nem kap → bukik.
+proba('⭐⭐ D130 (④c1): a SEGÍTŐ kosár a cserében — a nyitó jel viszi, a kosár eseményei átjönnek (a többi nem); két segítő között is; jel nélkül (a régi program) semmi', async () => {
+  const m = 2;
+  const { letrehozas, a } = await allasfoglalasok(40, 'sg');
+  // (1) A saját kosara K, B-é nem — B segítőként tartja
+  const [tA, tB] = await kulcsPar((x, y) => darabKulcsa(x, m) !== darabKulcsa(y, m));
+  const K = darabKulcsa(tA, m);
+  const kd = koinonDarabBol(K);
+  const segitoK = [{ melyseg: m, darab: kd.darab }];
+  const bentK = a.filter((e) => esik(e, K));
+  const tarA = await tar([letrehozas, ...a]);
+  const tarB = await tar([letrehozas]);
+  const r1 = await csere(tarA, tarB, tA, tB, { mA: m, mB: m, b: { koinonSegitok: segitoK } });
+  const r2 = await csere(tarA, tarB, tA, tB, { mA: m, mB: m, b: { koinonSegitok: segitoK } });
+  // (2) egy H kosár, ami C-nek és D-nek sem a sajátja — mindkettő segítőként tartja. ⚠️ A két saját kosár is különbözzön: ha egyezne,
+  // annak eseményei is átjönnének (a teljes soron így bukott el); és a H-t a pár UTÁN választjuk (a `kulcsPar` az első kulcsot rögzíti —
+  // ha annak a saját kosara volna a H, nem találna párt)
+  const [tC, tD] = await kulcsPar((x, y) => darabKulcsa(x, m) !== darabKulcsa(y, m));
+  const hd = [0n, 1n, 2n, 3n].find((d) => koinonDarabKulcsa(m, d) !== darabKulcsa(tC, m) && koinonDarabKulcsa(m, d) !== darabKulcsa(tD, m));
+  const H = koinonDarabKulcsa(m, hd);
+  const segitoH = [{ melyseg: m, darab: hd }];
+  const bentH = a.filter((e) => esik(e, H));
+  const tarC = await tar([letrehozas, ...a]);
+  const tarD = await tar([letrehozas]);
+  const r3 = await csere(tarC, tarD, tC, tD, { mA: m, mB: m, a: { koinonSegitok: segitoH }, b: { koinonSegitok: segitoH } });
+  // (3) a régi program: E-nek nincs segítő-jele
+  const tarE = await tar([letrehozas]);
+  await csere(tarC, tarE, tC, tD, { mA: m, mB: m, a: { koinonSegitok: segitoH } });
+  const kiD = await megvan(tarD, a);
+  const ki = {
+    egy: bentK.length > 0 && (await megvan(tarB, bentK)) === bentK.length && (await megvan(tarB, a)) === bentK.length
+      && r1.b.uj === bentK.length,
+    masodik: r2.b.egyeztetoUzenetek === 0 && r2.b.uj === 0,
+    ketSegito: bentH.length > 0 && (await megvan(tarD, bentH)) === bentH.length && kiD === bentH.length && r3.b.uj === bentH.length,
+    regi: (await megvan(tarE, a)) === 0
+  };
+  if (!Object.values(ki).every(Boolean)) process.stdout.write('    (ami bukott: ' + Object.keys(ki).filter((x) => !ki[x]).join(', ')
+    + ' · ' + JSON.stringify({ bentK: bentK.length, bentH: bentH.length, r1: r1.b.uj, r3: r3.b.uj, kiD }) + ')\n');
   return Object.values(ki).every(Boolean);
 });
 
