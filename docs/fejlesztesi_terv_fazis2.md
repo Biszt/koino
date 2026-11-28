@@ -6721,7 +6721,7 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     kód-változás nélkül); ✅ **④d3 a kopogtató-vihar** (2026-11-28 — mérve: a minta párján a ④c3 azonnal jelentkezett, és a téma minden
     hirdetője kérőt látott; javítva: a pár csak 3 közvetlen kör után, ha kevés jelölt felelt); ✅ a teljes próbasor (2026-11-28 —
     1598/1598 zöld + 2 ismert hiba): **a ④ kész**; ✅ a KO5 (B) marad (Csaba, 2026-11-28 — a kézikönyv a kosarakban, a „mindenkinél”
-    lépés kimarad); ⭐ a ⑤ terep előkészítése (`koinon_atvizsgalas.md` 14. — ⑤a a műszerek, ⑤b a terep, ⑤c az elemzés); ⏸️ KO20 (melyik koino), KO21 (mely készülékek, meddig) Csabánál.
+    lépés kimarad); ⭐ a ⑤ terep előkészítése (`koinon_atvizsgalas.md` 14. — ⑤a a műszerek, ⑤b a terep, ⑤c az elemzés); ✅ KO20 (A) új terep-koino (`koinonPeldany=1`), KO21 (A) a laptop és a telefon mobilneten, egy hétig (Csaba, 2026-11-28); ✅ **⑤a a műszerek** (2026-11-28 — a fent-szakaszok, a számlálás és a pótlás naplója, `terep [be|ki|kivisz]`, `meres/terepElemzes.js`); ⏭️ ⑤b a terep.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.

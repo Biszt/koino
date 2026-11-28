@@ -623,14 +623,23 @@ export function koinonLatottCel(r = KOINON_PELDANY) {
  * @returns {number} legalább 1 (én)
  */
 export function koinonLatottTartok({ tarsak = [], szuloTarsak = [], sajatCimek = [], sajatIs = true } = {}) {
+  // ⭐⭐ D130 (④c2): a felkért jelölt még nem tartó — ő magát nem számolja (`sajatIs: false`)
+  return (sajatIs === false ? 0 : 1) + koinonLatottCimek({ tarsak, szuloTarsak, sajatCimek }).size;
+}
+
+/**
+ * ⭐⭐ D130 (⑤a): a kosár LÁTOTT CÍMEI — a `koinonLatottTartok` halmaza (címenként egyszer, a saját címeim nélkül), egy helyen: a
+ * terep számlálás-naplója pontosan ezeket jegyzi fel (lenyomatként), amiket a számlálás számol.
+ * @returns {Set<string>} a normalizált címek
+ */
+export function koinonLatottCimek({ tarsak = [], szuloTarsak = [], sajatCimek = [] } = {}) {
   const sajat = new Set((Array.isArray(sajatCimek) ? sajatCimek : []).map(cimNormalizalasa));
   const cimek = new Set();
   for (const t of [...(Array.isArray(tarsak) ? tarsak : []), ...(Array.isArray(szuloTarsak) ? szuloTarsak : [])]) {
     const c = cimNormalizalasa(t?.cim);
     if (c && !sajat.has(c)) cimek.add(c);
   }
-  // ⭐⭐ D130 (④c2): a felkért jelölt még nem tartó — ő magát nem számolja (`sajatIs: false`)
-  return (sajatIs === false ? 0 : 1) + cimek.size;
+  return cimek;
 }
 
 // ===================================

@@ -6279,6 +6279,111 @@ proba('⭐⭐ D130 (④d3): a KOPOGTATÓ-VIHAR — a minta párján csak akkor j
   }
 });
 
+// ⭐⭐ D130 (⑤a — `koinon_atvizsgalas.md` 14.; KO20 (A)): A TEREP MŰSZEREI a valódi programban. Egy r = 1-es nyílt koinoban A az 1.
+// mélységen áll, a kosarában egy általános egyezmény; egy hamis DHT-n. (0) KIKAPCSOLVA: A őrjárata fut — a terep-fájlokba semmi nem
+// íródik. (1) `terep be`, és az őrjárat újra: a fent-szakasz, a kosár számlálása (1 tartó, a cél 2) és a pótlás eseménye (nincs jelölt —
+// a minta csak A maga) a naplóba; a `terep` kimondja. (2) Egy idegen hirdető (10.0.0.5) A kosarán, és a `cimjegyzek hirdet`: a
+// számlálás a címét LENYOMATKÉNT jegyzi — a kivitt fájlban a nyers cím sehol. (3) `terep ki`, és még egy hirdetés: új bejegyzés nincs. A
+// `terep kivisz` fájlját az elemző (`meres/terepElemzes.js`) beolvassa (1 készülék, 1 idegen cím). Rontás: a kapcsoló nélkül (mindig
+// ír) → a (0) bukik; a cím nyersen kerül a fájlba → a (2) bukik; a számlálás nem kerül a naplóba → az (1) bukik.
+proba('⭐⭐ D130 (⑤a): a TEREP MŰSZEREI — csak a `terep be` után írnak (fent-szakasz, számlálás, pótlás), a cím csak lenyomatként, a `ki` után semmi, és az elemző beolvassa', async () => {
+  const { hamisHalozat } = await import('./dhtProba.js');
+  const { cimjegyzekTema, koinonDarabKulcsai, koinonDarabBol } = await import('../js/csere/cimjegyzek.js');
+  const a = await ujKeszulek();
+  const tagok = [];
+  const PA = 8123;
+  const halo = await hamisHalozat(12);
+  const dht = { KOINO_DHT_BELEPOK: halo.belepo(0), KOINO_TUKOR: '127.0.0.1:9', KOINO_KISZOLGALAS: 'alap' };
+  const tiszta = (x) => x.replace(/\x1b\[[0-9;]*m/g, '');
+  let oa = null;
+  let naplo = '';
+  const orjarat = async (mire) => {
+    naplo = '';
+    oa = spawn(process.execPath, [KOINO_JS, 'orjarat', '0.05', String(PA)],
+      { env: { ...process.env, KOINO_ADAT: a, KOINO_NAPLO: '', ...dht }, stdio: ['ignore', 'pipe', 'pipe'] });
+    oa.stdout.on('data', (x) => { naplo += x; });
+    for (let i = 0; i < 80 && !mire(tiszta(naplo)); i++) await varj(500);
+    await varj(2500);
+    oa.kill(); oa = null;
+    await varj(1500);
+  };
+  try {
+    await fut(a, 'koino', 'Terep műszerei', 'próba', 'nyilt', 'koinonPeldany=1', dht);
+    await fut(a, 'tabla', dht);
+    const K = await koinoNeve(a);
+    const aAl = JSON.parse(await readFile(join(a, 'tabla-kulcs.json'), 'utf8').catch(() => '{}')).alairoNyilvanos ?? null;
+    if (!aAl) { process.stdout.write('    (⑤a: A tábla-kulcsa nincs meg)\n'); return false; }
+    for (let i = 0; i < 2; i++) {
+      const t = await ujKeszulek();
+      tagok.push(t);
+      await fut(t, 'csatlakoz', K, dht);
+      await fut(t, 'belep', dht);
+      await csereKor(a, t, 7996, { ...dht, KOINO_KISZOLGALAS: 'mindent' });
+    }
+    const A1 = koinonDarabKulcsai(aAl, 1)[0];
+    const jel = '1:' + koinonDarabBol(A1).darab;
+    if (!(await egyezmenyKosarba(a, A1, 1, dht))) { process.stdout.write('    (⑤a: 16 egyezményből egy sem esett A kosarába)\n'); return false; }
+    const mappa = await koinoMappa(a);
+    const fajlja = async (n) => JSON.parse(await readFile(join(mappa, n), 'utf8').catch(() => 'null'));
+    // (0) kikapcsolva
+    await orjarat((n) => /🧺[^\n]*a koinon-kosaram/.test(n));
+    const kiFent = await fajlja('terep.json');
+    const kiNaplo = await fajlja('terep-naplo.json');
+    // (1) bekapcsolva. ⚠️ A (0)-ban az őrjárat már pótolt egyszer (kikapcsolva — így helyesen nem került a naplóba), és az elvitte az
+    // óránként egy pótlást: a próba a pótlás jegyzékét törli (az órát nem várhatja ki).
+    await rm(join(mappa, 'koinon-potlas.json'), { force: true });
+    const be = tiszta(await fut(a, 'terep', 'be', dht));
+    await orjarat((n) => /pótlás \(/.test(n));
+    const allapot = tiszta(await fut(a, 'terep', dht));
+    const n1 = await fajlja('terep-naplo.json');
+    // (2) egy idegen hirdető a kosáron
+    const tema = cimjegyzekTema(K, 'szelet', A1).toString('hex');
+    for (const g of halo.gepek) { g.hirdetok ??= new Map(); g.hirdetok.set(tema, [{ cim: '10.0.0.5', port: 1 }]); }
+    await fut(a, 'cimjegyzek', 'hirdet', String(PA), dht);
+    const kiFajl = join(a, 'terep-kivitel.json');
+    const kivisz = tiszta(await fut(a, 'terep', 'kivisz', kiFajl, dht));
+    const kivitelSzoveg = await readFile(kiFajl, 'utf8').catch(() => '');
+    const kivitel = JSON.parse(kivitelSzoveg || 'null');
+    // (3) kikapcsolva újra
+    await fut(a, 'terep', 'ki', dht);
+    await varj(500);
+    await fut(a, 'cimjegyzek', 'hirdet', String(PA), dht);
+    const n3 = await fajlja('terep-naplo.json');
+    const elemzes = tiszta(await new Promise((ok) => {
+      const p = spawn(process.execPath, [join(dirname(KOINO_JS), 'meres', 'terepElemzes.js'), kiFajl], { stdio: ['ignore', 'pipe', 'pipe'] });
+      let s = '';
+      p.stdout.on('data', (x) => { s += x; });
+      p.on('close', () => ok(s));
+    }));
+    const szamlalasok = (kivitel?.szamlalas ?? []).filter((s) => s.k === jel);
+    const ki = {
+      kikapcsolva: !kiFent?.fent?.length && !kiNaplo,
+      be: be.includes('BEKAPCSOLVA'),
+      fent: (kivitel?.fent ?? []).length >= 1,
+      szamlalas: (n1?.szamlalas ?? []).some((s) => s.k === jel && s.l === 1 && s.c === 2),
+      potlas: (n1?.potlas ?? []).some((p) => p.k === jel && p.e === 'nincs'),
+      allapot: /A TEREP MŰSZEREI: BE/.test(allapot) && /a kosaraim számlálásai: [1-9]/.test(allapot),
+      lenyomat: szamlalasok.some((s) => s.l === 2 && s.a.length === 1 && /^[A-Za-z0-9_-]{12}$/.test(s.a[0])),
+      nyersNincs: !!kivitelSzoveg && !kivitelSzoveg.includes('10.0.0.5') && !kivitelSzoveg.includes('127.0.0.1'),
+      kivisz: kivisz.includes('a terep naplói kivive') && kivitel?.fajta === 'koino-terep-1' && /^[A-Za-z0-9_-]{12}$/.test(kivitel?.keszulek ?? ''),
+      kiUtanSemmi: (n3?.szamlalas ?? []).length === (kivitel?.szamlalas ?? []).length,
+      elemzo: elemzes.includes('A TEREP ELEMZÉSE — 1 készülék') && elemzes.includes('idegen (nem terep-készülék) cím: 1')
+    };
+    if (!Object.values(ki).every(Boolean)) {
+      process.stdout.write('    (⑤a — ami bukott: ' + Object.keys(ki).filter((k) => !ki[k]).join(', ') + ' · ' + JSON.stringify({
+        jel, kiFent, kiNaplo, be: be.slice(0, 160), allapot: allapot.slice(0, 300), n1, szamlalasok, n3sz: (n3?.szamlalas ?? []).length,
+        kivisz: kivisz.slice(0, 200), elemzes: elemzes.slice(0, 600), naplo: (tiszta(naplo).match(/[^\n]*(🧺|pótlás)[^\n]*/g) ?? []).join(' | ').slice(0, 500) })
+        .slice(0, 3600) + ')\n');
+    }
+    return Object.values(ki).every(Boolean);
+  } finally {
+    if (oa) oa.kill();
+    halo.bezar();
+    await varj(1000);
+    for (const h of [a, ...tagok]) await rm(h, { recursive: true, force: true });
+  }
+});
+
 // ===================================
 // ⭐ A HÁZ (D100): A CSATLAKOZÓ KÉSZÜLÉK KÉZI CSERÉJE CSERE MARAD, ha a gazdánál függő kérelem vár (2026-10-10)
 // ===================================

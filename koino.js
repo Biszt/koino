@@ -55,6 +55,7 @@
 //   node koino.js kerelem fejlecek|torzs <az> [cím] [port]   — ⭐ D92: a kérelem (fejlécek mintákkal, törzs)
 //   node koino.js csomag [javaslat]        — ⭐ D85 T3: a lezárt, több érintettes döntés csomagja
 //   node koino.js kiszolgalas [mindent|alap] — ⭐ D83/2, D95/1: a nagy szeleteket is egészében tartom?
+//   node koino.js terep [be|ki|kivisz <fájl>] — ⭐⭐ D130 ⑤a: a terep műszerei (fent-szakaszok, a számlálás és a pótlás naplója)
 //   node koino.js osszegzes                — ⭐ D95/1: a lezárási összegzések (kiadás, és a kapott ellenőrzöttek)
 //   node koino.js pajzsfuro <cím> <port> [helyi port]  — ⭐ a rés: csere ÉS fájlok
 //   node koino.js kulsoport [port]         — kívülről melyik portomat látják?
@@ -108,6 +109,7 @@ import {
   koinonTartokTarolo,   // ⭐⭐ D130 (④b): a kosaraim látott tartói (a legutóbbi számlálás)
   koinonSzerepTarolo,   // ⭐⭐ D130 (④c1): a segítő szerepeim (a kosarak a sajátom mellett)
   koinonPotlasTarolo,   // ⭐⭐ D130 (④c3): a pótlásaim (a sorsolás, a folyó pótlás, az utolsó eredménye)
+  terepTarolo,          // ⭐⭐ D130 (⑤a): a terep műszerei (a fent-szakaszok, a számlálás és a pótlás naplója)
   // ⭐ D95/2: a függő tagságok helyi jegyzéke.
   tagsagFuggoTarolo,
   // ⭐ D95/3: a csak küldő út kézbesítési jegyzéke.
@@ -231,8 +233,15 @@ import {
   // ⭐⭐ D130 (④c4 — KO18 (C)): a kettéválás és az átadás
   kettevalasSzerepei, orokoltEllenorzese, KOINON_ATADAS_SOR, kettevalasSzovege,
   // ⭐⭐ D130 (④d3): a kopogtató út csak kevés közvetlen válasz után
-  kopogtatoUtKell, KOINON_KOZVETLEN_KOROK
+  kopogtatoUtKell, KOINON_KOZVETLEN_KOROK,
+  // ⭐⭐ D130 (⑤a): a látott címek (a terep számlálás-naplójához — egy forrásból a számlálással)
+  koinonLatottCimek
 } from './js/csere/cimjegyzek.js';
+// ⭐⭐ D130 (⑤a): a terep műszerei — a lenyomat, a fent-szakaszok, a naplók alakja
+import {
+  TEREP_FAJTA, SZAMLALAS_KORLAT, POTLAS_KORLAT, cimLenyomata, keszulekLenyomata, fentAlakja, fentFeljegyzes, naploAlakja,
+  szamlalasBejegyzes, hozzafuz
+} from './js/csere/terepNaplo.js';
 // ⭐⭐ D92/1: a függő kérelmek (a cím nélküli kérés — a kopogtatás).
 import {
   ujNyilvantartas, nyilvantartasAlakja, kerelemFelvetele, lejartakKivetele, tarshozIllo, tarshozIllok, kerelemLezarasa, probalkozas,
@@ -4403,6 +4412,58 @@ function felkeresEredmenySzovege(x) {
 // ő címére (és a készülék-témáján). Egyszerre egy pótlás folyik. ⚠️ A jegyzéket egy zár védi: a címjegyzék-kör és a rés-munkák
 // ugyanabban a folyamatban, egymás mellett futnak.
 
+// ===== ⭐⭐ D130 (⑤a — `koinon_atvizsgalas.md` 14.; KO20 (A), KO21 (A)): A TEREP MŰSZEREI =====
+//
+// Csak a `terep be` után írnak (egy hétköznapi készüléken semmi nem gyűlik): a fent-szakaszok (az őrjárat minden körében), a számlálás
+// naplója (a címjegyzék-körben) és a pótlás naplója (az eseményeinél). Helyi feljegyzés, nem esemény; a cím a fájlba csak lenyomatként
+// kerül (`terepNaplo.js`). ⚠️ Egy műszer hibája soha nem állítja meg a kört — minden hívása elnyeli a hibát.
+let terepZar = Promise.resolve();
+function terepModositasa(fn) {
+  const p = terepZar.then(fn);
+  terepZar = p.catch(() => {});
+  return p;
+}
+let terepBeEmlek = { ido: 0, be: false };
+/** Be van-e kapcsolva (30 másodpercig emlékszik — a `terep be` / `ki` fél percen belül hat). */
+async function terepBe() {
+  if (Date.now() - terepBeEmlek.ido < 30000) return terepBeEmlek.be;
+  let be = false;
+  try { be = (await terepTarolo(KOINO).olvas()).be; } catch { be = false; }
+  terepBeEmlek = { ido: Date.now(), be };
+  return be;
+}
+/** A fent-szakasz (az őrjárat minden körében): most fent vagyok, ezzel a külső címmel. */
+async function terepFent(kulso) {
+  try {
+    if (!(await terepBe())) return;
+    await terepModositasa(async () => {
+      const t = terepTarolo(KOINO);
+      const j = await t.olvas();
+      if (!j.be) return;
+      j.fent = fentFeljegyzes(j.fent, { most: Date.now(), k: kulso?.cim ? cimLenyomata(KOINO, kulso.cim) : null });
+      await t.ir(j);
+    });
+  } catch (hiba) { console.warn('a terep fent-szakasza most nem íródott', { ok: hiba.message }); }
+}
+/** Egy módosítás a naplón (a számlálás vagy a pótlás bejegyzése). */
+async function terepNaploba(fn) {
+  try {
+    if (!(await terepBe())) return;
+    await terepModositasa(async () => {
+      const t = terepTarolo(KOINO);
+      const n = naploAlakja(await t.naploOlvas());
+      fn(n);
+      await t.naploIr(n);
+    });
+  } catch (hiba) { console.warn('a terep naplója most nem íródott', { ok: hiba.message }); }
+}
+/** Egy pótlás-esemény a naplóba (`e`: indult | nincs | parjan | dontes | felkeres; a kosár jelével). */
+async function terepPotlas(kulcs, e, adat = {}) {
+  const d = koinonDarabBol(kulcs);
+  if (!d) return;
+  await terepNaploba((n) => { n.potlas = hozzafuz(n.potlas, { t: Date.now(), e, k: d.melyseg + ':' + d.darab, ...adat }, POTLAS_KORLAT); });
+}
+
 let potlasZar = Promise.resolve();
 /** A pótlás-jegyzék módosításai egymás után. */
 function potlasModositasa(fn) {
@@ -4496,6 +4557,7 @@ async function koinonPotlasKor(kliens, kosarak, eredmeny, { kulso = null, portok
       if (!fk || potlasDonthet({ felelt: Object.keys(P.folyik.jeloltek).length, minta: P.folyik.meret, kezdet: P.folyik.parjan ?? P.folyik.ido })) {
         ki.dontes = await potlasDontese(P);
         await tarolo.ir(P);
+        if (ki.dontes) await terepPotlas(ki.dontes.kulcs, 'dontes', { f: ki.dontes.felelt, v: !!ki.dontes.valasztott, th: ki.dontes.valasztott?.teher ?? null });
       }
       return ki;
     }
@@ -4517,6 +4579,9 @@ async function koinonPotlasKor(kliens, kosarak, eredmeny, { kulso = null, portok
       ki.indult = { ...(await potlasInditasa(P, kliens, x.kulcs, { kizart, kulso, portok })), latott: x.latott, cel: x.cel };
       // ⚠️ ha a DHT nem felelt, a sorsolás a következő körben újra (a minta most semmit nem mondana)
       if (ki.indult.eredmeny === 'nem felelt') delete P.sorsolas[x.kulcs];
+      // ⭐⭐ D130 (⑤a): a terep pótlás-naplójába
+      await terepPotlas(x.kulcs, ki.indult.eredmeny === 'indult' ? 'indult' : 'nincs', { l: x.latott, c: x.cel, j: ki.indult.jeloltek ?? 0,
+        m: ki.indult.meret ?? 0, ok: ki.indult.eredmeny });
       break;
     }
     await tarolo.ir(P);
@@ -4554,6 +4619,8 @@ async function potlasKozvetlenKor(allapot) {
     g.parjan = Date.now();
     await tarolo.ir(P);
     allapot.potlasKorok.delete(g.az);
+    // ⭐⭐ D130 (⑤a): a terep pótlás-naplójába — a közvetlen kopogásra hány felelt a hányból
+    await terepPotlas(g.kulcs, 'parjan', { f: Object.keys(g.jeloltek).length, n: g.kozvetlen ?? 0 });
     return { kulcs: g.kulcs, felelt: Object.keys(g.jeloltek).length, kozvetlen: g.kozvetlen ?? 0, minta: g.minta };
   });
 }
@@ -4604,6 +4671,7 @@ async function potlasValaszFeljegyzese(fk, r, tars) {
       kiir((dontes.valasztott ? SZIN.jo : SZIN.nem) + '  🧺 ' + ora() + ' pótlás (' + jel + '): ' + potlasEredmenySzovege(dontes) + SZIN.vege);
     }
     await tarolo.ir(P);
+    if (dontes) await terepPotlas(dontes.kulcs, 'dontes', { f: dontes.felelt, v: !!dontes.valasztott, th: dontes.valasztott?.teher ?? null });
     return dontes;
   });
 }
@@ -4617,6 +4685,8 @@ async function potlasFelkeresEredmenye(fk, v) {
       P.eredmeny.felkeres = { allapot: v.allapot, ok: v.ok ?? null, ido: Date.now() };
       await tarolo.ir(P);
     }
+    // ⭐⭐ D130 (⑤a): a terep pótlás-naplójába — a kiválasztott jelölt válasza
+    await terepPotlas(fk.kulcs, 'felkeres', { a: v.allapot });
   });
 }
 
@@ -4713,6 +4783,7 @@ async function kosaraimSzamlalasa(kliens, eredmeny, { kulso = null } = {}) {
   const orokoltek = new Set(Object.entries((await koinonSzerepTarolo(KOINO).olvas()).segito).filter(([, y]) => y?.orokolt).map(([k]) => k));
   const jegyzek = {};
   const ki = [];
+  const terepSzamlalasok = [];
   const tarsai = async (k) => (await temakKeresese(kliens, temaValtozatai((n) => cimjegyzekTema(KOINO, 'szelet', k, n)))).tarsak;
   for (const e of kosarak) {
     // ⚠️ Ha egyetlen DHT-gép sem felelt, a szám semmit nem mondana (csak magamat látnám): a régi számlálás marad
@@ -4742,6 +4813,13 @@ async function kosaraimSzamlalasa(kliens, eredmeny, { kulso = null } = {}) {
     if (orokolt) Object.assign(x, { orokolt: true, ...orokoltEllenorzese({ sor: regi[e.kulcs]?.sor, sorIdo: regi[e.kulcs]?.sorIdo, latott, cel }) });
     jegyzek[e.kulcs] = x;
     ki.push(x);
+    // ⭐⭐ D130 (⑤a): a terep számlálás-naplójába — ugyanazok a címek, amiket a számlálás számolt (`koinonLatottCimek`), lenyomatként
+    const d = koinonDarabBol(e.kulcs);
+    terepSzamlalasok.push(szamlalasBejegyzes({ most: x.ido, jel: d.melyseg + ':' + d.darab, latott, cel, szulovel, nagyszulovel,
+      cimek: koinonLatottCimek({ tarsak: e.tarsak, szuloTarsak: fole, sajatCimek }), koino: KOINO }));
+  }
+  if (terepSzamlalasok.length) {
+    await terepNaploba((n) => { for (const b of terepSzamlalasok) n.szamlalas = hozzafuz(n.szamlalas, b, SZAMLALAS_KORLAT); });
   }
   // a jegyzékben csak a mostani kosaraim (egy kettéválás után a régi kosár kiesik)
   try { await tarolo.ir({ kosarak: jegyzek }); }
@@ -7445,6 +7523,8 @@ async function korCeljaim(allapot, celok) {
  */
 async function orjaratHazimunkaja(allapot, { port, sikeres }) {
   const kk = allapot.koinoJel ?? '';   // a napló a nem fő koino sorait megjelöli
+  // ⭐⭐ D130 (⑤a): a terep fent-szakasza (csak a `terep be` után — a külső címem lenyomatával)
+  await terepFent(allapot.sajatKulsoUdp ?? null);
   // ⭐⭐ D91/3: A CÍMJEGYZÉK HIRDETÉSE — ~20 percenként (a háló 30–60 perc alatt felejt, 58. mérés): a saját
   // gyökér-darabom, és a beállítás szerint néhány vállalt szeletem. ⚠️ Segédeszköz: a hibája nem dönti el a kört.
   // ⚠️ A HÁTTÉRBEN: egy bejelentés 7–17 mp (58. mérés) — a kört nem tarthatja fel, és egyszerre egy fut.
@@ -9737,6 +9817,49 @@ try {
       } catch {
         kiir(SZIN.halvany + '  (még nincs feljegyzés — a kiszolgálást az őrjárat vagy a postaláda könyveli)' + SZIN.vege);
       }
+      break;
+    }
+
+    case 'terep': {
+      // ===== ⭐⭐ D130 (⑤a — `koinon_atvizsgalas.md` 14.): A TEREP MŰSZEREI =====
+      // node koino.js terep               — az állapot: be van-e kapcsolva, és mennyi gyűlt
+      // node koino.js terep be | ki       — a naplók be- és kikapcsolása (helyi beállítás; a gyűjtött adat a `ki` után is marad)
+      // node koino.js terep kivisz <fájl> — a három napló egy fájlban (az elemzés: node meres/terepElemzes.js <fájlok…>)
+      // ⭐ A fájlba nyers IP-cím nem kerül: a cím lenyomata a koino sójával (a terep készülékei így is párosítják egymást).
+      const t = terepTarolo(KOINO);
+      const al = ervek[0] ?? '';
+      if (al === 'be' || al === 'ki') {
+        const j = await t.olvas();
+        j.be = al === 'be';
+        await t.ir({ be: j.be, fent: fentAlakja(j.fent) });
+        kiir(SZIN.jo + '✓ a terep műszerei ' + (j.be ? 'BEKAPCSOLVA' : 'kikapcsolva') + SZIN.vege + SZIN.halvany + (j.be
+          ? ' — az őrjárat fél percen belül ír: a fent-szakaszok, a kosaraim számlálása és a pótlások (helyi, nem esemény; D130 ⑤a)'
+          : ' — a gyűjtött adat megmarad (`terep kivisz <fájl>`)') + SZIN.vege);
+        break;
+      }
+      if (al === 'kivisz') {
+        if (!ervek[1]) throw new Error('Hová írjam? node koino.js terep kivisz <fájl>');
+        const j = await t.olvas();
+        const n = naploAlakja(await t.naploOlvas());
+        const alairo = (await tablaKulcsBiztositasa()).alairoNyilvanos;
+        const kivitel = { fajta: TEREP_FAJTA, koino: KOINO, keszulek: keszulekLenyomata(KOINO, alairo), ido: Date.now(),
+          fent: fentAlakja(j.fent), ...n };
+        await writeFile(resolve(ervek[1]), JSON.stringify(kivitel), 'utf8');
+        kiir(SZIN.jo + '✓ a terep naplói kivive: ' + resolve(ervek[1]) + SZIN.vege + SZIN.halvany + ' — ' + kivitel.fent.length
+          + ' fent-szakasz, ' + n.szamlalas.length + ' számlálás, ' + n.potlas.length + ' pótlás-esemény (az elemzés: node meres/terepElemzes.js'
+          + ' <a készülékek fájljai>)' + SZIN.vege);
+        break;
+      }
+      if (al) throw new Error('Mit tegyek? node koino.js terep [be|ki|kivisz <fájl>]');
+      const j = await t.olvas();
+      const n = naploAlakja(await t.naploOlvas());
+      const fent = fentAlakja(j.fent);
+      const fentPerc = fent.reduce((a, s) => a + (s[1] - s[0]) / 60000, 0);
+      kiir(SZIN.vastag + 'A TEREP MŰSZEREI: ' + (j.be ? 'BE' : 'ki') + SZIN.vege + SZIN.halvany + '  (D130 ⑤a — helyi, nem esemény)' + SZIN.vege);
+      kiir('  fent-szakaszok: ' + fent.length + (fent.length ? ' — összesen ~' + Math.round(fentPerc) + ' perc, '
+        + new Date(fent[0][0]).toLocaleString('hu-HU') + ' óta' : ''));
+      kiir('  a kosaraim számlálásai: ' + n.szamlalas.length + ' · pótlás-események: ' + n.potlas.length);
+      if (!j.be) kiir(SZIN.halvany + '  (bekapcsolás: node koino.js terep be)' + SZIN.vege);
       break;
     }
 

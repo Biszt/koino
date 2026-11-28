@@ -644,6 +644,24 @@ Csaba: „Igen, jöhet”. A ④ minden száma MODELLEN áll — a terep mondja 
   laptopon a DHT-n a laptoppal egy cím), **egy hétig**; (B) ugyanez **egy harmadik eszközzel egy harmadik hálózaton** (pl. egy
   családtag telefonja vagy egy másik gép — a közvetlen kopogás és a NAT-párosok így többfélék, és a kosaraknak több valódi tartója van).
 
+✅ **Csaba (2026-11-28): „Igen, mindkettő (A)”** — **KO20 (A)**: egy új terep-koino `koinonPeldany=1`-gyel (a fejlesztési koino marad,
+ahogy van); **KO21 (A)**: a laptop és a telefon (mobilneten), egy hétig.
+
+✅ **⑤a kész (2026-11-28) — a műszerek:** `js/csere/terepNaplo.js` (tiszta: a cím lenyomata a koino sójával — `cimLenyomata`; a
+fent-szakaszok — `fentFeljegyzes`: a tűrésen (5 perc) belül nyúlik, a külső cím váltásakor új; a naplók alakja és korlátja; a
+TEREP-ELEMZÉS — `terepElemzese`: az elérhetőség a terep EGÉSZ idején, percre, napszakos profillal; a DHT késése: a terep-készülékek
+látott címei közül hány volt valóban fent, a többi mióta nem; az idegen címek; a pótlások — a közvetlen válaszok aránya is —; a kosarak
+látott száma), `fajlTar.js` `terepTarolo` (két fájl: a kicsi `terep.json` — a kapcsoló és a fent-szakaszok, percenként —, és a
+`terep-naplo.json` — a számlálás és a pótlás, csak a címjegyzék-körben és pótláskor —, hogy a telefon tárolóját ne koptassa), a
+`koino.js` horgai (a házimunka minden körében a fent-szakasz; a `kosaraimSzamlalasa` a látott címeket — ugyanazokat, amiket számol:
+`cimjegyzek.js` `koinonLatottCimek`, egy forrásból —; a pótlás az indulásnál, a párján jelentkezésnél, a döntésnél és a felkérés
+válaszánál), a **`terep [be|ki|kivisz <fájl>]`** parancs, és a **`meres/terepElemzes.js`** (több készülék kivitt fájljából magyarul).
+⚠️ Csak a `terep be` után írnak (egy hétköznapi készüléken semmi nem gyűlik); egy műszer hibája soha nem állítja meg a kört; nyers IP-cím
+nem kerül a fájlba. ⚠️ *A ⑤b-hez a kódból:* az indító (`termux/indit.sh`, `windows/indit.ps1`) a `KOINO_AZONOSITO` becenév koinoját
+futtatja (alapból `sajat`) — a terep-koino saját becenevet kap, és egy készüléken, ahol a másik koino is fut, egy második őrjáratot egy
+másik porton: a ⑤b lépéseit (a terep-koino születése, a meghívó a telefonnak, a `terep be` mindkét készüléken, a hét végén a `terep
+kivisz` és az elemzés) a futtatás előtt Csabával lépésenként nézzük végig.
+
 ## 6. Napló
 
 - **2026-11-19** — az átvizsgálás (kód nélkül); a KO1–KO5 Csabánál.
@@ -869,3 +887,9 @@ Csaba: „Igen, jöhet”. A ④ minden száma MODELLEN áll — a terep mondja 
   ⚠️ Javítva: az indítók 1 percenként futtatják az őrjáratot — a ④d3 számai (a közvetlen próba ~3 perc, a vihar hirdetőnként ~30 csere
   30 perc alatt) a 13. szakaszban és a `cimjegyzek.js` kommentjében. ⏸️ **KO20** (melyik koino) és **KO21** (mely készülékek, meddig)
   Csabánál.
+- **2026-11-28** — ✅ **Csaba: „Igen, mindkettő (A)”** — KO20 (A) új terep-koino `koinonPeldany=1`, KO21 (A) a laptop és a telefon
+  mobilneten, egy hétig. ✅ **⑤a: a műszerek** (a 14. szakasz): a fent-szakaszok, a számlálás és a pótlás naplója (lenyomatolt
+  címekkel), a `terep [be|ki|kivisz]` parancs, a `meres/terepElemzes.js`. Öt próba (négy tiszta a `meres/terepProba.js`-ben — a
+  lenyomat, a fent-szakaszok, a napló, a terep-elemzés egy kitalált két-készülékes terepen —, egy a parancssoron: kikapcsolva semmi;
+  bekapcsolva a fent-szakasz, a számlálás és a pótlás; az idegen cím csak lenyomatként, nyers IP sehol; a `ki` után semmi; az elemző
+  beolvassa). Mind a 11 rontásra bukik (8 a tiszta próbákon, 3 a parancssorin: a kapcsoló nélkül; nyers cím a fájlban — ott a napló alak-őre is kiszűri: csak 12 jeles lenyomat megy át, kettős védelem —; a számlálás nem kerül a naplóba). ⏭️ ⑤b a terep (a lépéseit a futtatás előtt együtt).

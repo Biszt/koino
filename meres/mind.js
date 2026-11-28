@@ -111,6 +111,8 @@ import osszegzoTartas from './osszegzoTartasProba.js';
 import tagsagKisero from './tagsagKiseroProba.js';
 import gyokerDarab from './gyokerDarabProba.js';
 import koinonDarab from './koinonDarabProba.js';
+// ⭐⭐ D130 (⑤a): a terep műszerei (a lenyomat, a fent-szakaszok, a naplók, a terep-elemzés).
+import terep from './terepProba.js';
 // ⭐⭐ D105 (a ⑦ ②): a kereső-réteg tiszta számításai — a szavak, a kulcsok, az osztódás, a régiók.
 import kereso from './keresoProba.js';
 import kozosHalmaz from './kozosHalmazProba.js';
@@ -182,6 +184,7 @@ const PROBAK = [
   { nev: 'tagsagkisero', futtat: tagsagKisero },
   { nev: 'gyokerdarab', futtat: gyokerDarab },
   { nev: 'koinondarab', futtat: koinonDarab },
+  { nev: 'terep', futtat: terep },
   { nev: 'kereso', futtat: kereso },
   { nev: 'kozoshalmaz', futtat: kozosHalmaz },
   { nev: 'reszvetel', futtat: reszvetel },
@@ -222,7 +225,7 @@ const CSOPORTOK = {
   // a felületnek felelő réteg
   felulet: ['kapu', 'pakli', 'ter', 'csereallapot', 'magyarazat'],
   // két készülék között: a párbeszéd, a kézi út, a társak, a kapu, a kötések, a tábla, a DHT
-  csere: ['csere', 'fajlcsere', 'tarsak', 'tartomany', 'titkositas', 'udpkapu', 'kotes', 'tabla', 'dht', 'cimjegyzek', 'kerelem', 'osszegzotartas', 'tagsagkisero', 'gyokerdarab', 'koinondarab', 'kereso', 'kozoshalmaz', 'reszvetel', 'tarsemlekezet', 'vizsga', 'kiszolgalasikeret', 'keresoregio', 'melysegtanulas', 'felajanlas', 'kereses', 'meghivo', 'nyelv'],
+  csere: ['csere', 'fajlcsere', 'tarsak', 'tartomany', 'titkositas', 'udpkapu', 'kotes', 'tabla', 'dht', 'cimjegyzek', 'kerelem', 'osszegzotartas', 'tagsagkisero', 'gyokerdarab', 'koinondarab', 'terep', 'kereso', 'kozoshalmaz', 'reszvetel', 'tarsemlekezet', 'vizsga', 'kiszolgalasikeret', 'keresoregio', 'melysegtanulas', 'felajanlas', 'kereses', 'meghivo', 'nyelv'],
   // a fájl-bájtok és a szöveg-darab: tár, igény, kérelem, átvitel
   fajl: ['fajl', 'fajligeny', 'fajlkerelem', 'fajlatvitel', 'szovegdarab'],
   // az A pillér: az összegző Merkle-fa és ami rá épül

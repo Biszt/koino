@@ -1315,6 +1315,40 @@ export function koinonPotlasTarolo(koino, hely = alapHely()) {
 }
 
 /**
+ * ⭐⭐ D130 (⑤a — `koinon_atvizsgalas.md` 14.): A TEREP MŰSZEREI — két helyi fájl: `<koino>/terep.json` (`{ be, fent }` — a kapcsoló és
+ * a fent-szakaszok: kicsi, az őrjárat percenként írja) és `<koino>/terep-naplo.json` (`{ szamlalas, potlas }` — a számlálás és a
+ * pótlás naplója: nagyobb, csak címjegyzék-körönként és pótláskor íródik — a telefon tárolóját ne koptassa). ⚠️ HELYI feljegyzés (nem
+ * esemény, nem terjed — 3. szabály); az alakot a `terepNaplo.js` tartja. Az írás átnevezéssel kerül a helyére.
+ * @returns {{olvas: Function, ir: Function, naploOlvas: Function, naploIr: Function, fajl: string, naploFajl: string}}
+ */
+export function terepTarolo(koino, hely = alapHely()) {
+  const fajl = join(hely, koino, 'terep.json');
+  const naploFajl = join(hely, koino, 'terep-naplo.json');
+  const irj = async (ut, adat) => {
+    await mkdir(dirname(ut), { recursive: true });
+    const ideiglenes = ut + '.' + process.pid + '-' + Math.random().toString(36).slice(2) + '.uj';
+    try {
+      await writeFile(ideiglenes, JSON.stringify(adat), 'utf8');
+      await rename(ideiglenes, ut);
+    } catch (hiba) {
+      await rm(ideiglenes, { force: true }).catch(() => {});
+      throw hiba;
+    }
+  };
+  const olvass = async (ut) => { try { return JSON.parse(await readFile(ut, 'utf8')); } catch { return null; } };
+  return {
+    fajl,
+    naploFajl,
+    /** @returns {Promise<{be: boolean, fent: Array}>} */
+    async olvas() { const j = await olvass(fajl); return { be: j?.be === true, fent: Array.isArray(j?.fent) ? j.fent : [] }; },
+    async ir(adat) { await irj(fajl, adat); },
+    /** @returns {Promise<{szamlalas: Array, potlas: Array}>} */
+    async naploOlvas() { const j = await olvass(naploFajl); return { szamlalas: j?.szamlalas ?? [], potlas: j?.potlas ?? [] }; },
+    async naploIr(adat) { await irj(naploFajl, adat); }
+  };
+}
+
+/**
  * ⭐ D95/2: a FÜGGŐ TAGSÁGOK helyi jegyzéke (`<koino>/tagsagfuggo.json`): akiknek a tagságát a vállalt szeleteimben nem
  * tudom, és a cserében kérdezem (`tagsagKisero.js`). Helyi feljegyzés, nem esemény, nem terjed; korlátos és lejár.
  * @param {string} koino
