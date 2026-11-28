@@ -258,6 +258,12 @@ vándoróljon folyton, de a közös terhet, meg kell próbálnunk igazságossan 
 kerűljön, akik a legkevesebb általános egyezményt őrzik.”* Ebből:
 1. **A kézikönyvet mindenki tartja** → a KO5 visszakerül (A)-ra: a ③e egy része visszafordul (a kézikönyv-esemény újra egy mindenkitől
    vállalt szeletbe kerül, a KO9 (A) „kérésre látszik” megszűnik). 40 ismert tag alatt ez ma is így működik.
+   ⛔ **Visszavonva (2026-11-28 — Csaba, a ④ után):** *„lehet hogy egyszerübb lenne, a kézikönyvet is, úgy tárólni, mint az általános
+   egyezményeket?”* — *„Igen, maradjon (B)”*. A **KO5 (B) marad**: a kézikönyv eseményei a koinon kosaraiban, mint az általános
+   egyezmények (ugyanaz a besorolás — `esemeny.js` `koinonHelyei`: az egyezmény az azonosítója, a kézikönyv-esemény a bejegyzés neve
+   szerint), így a ④ minden része (a hirdetés, a számlálás, a pótlás, a kettéválás és az átadás) a kézikönyvre is vonatkozik. A ③e nem
+   fordul vissza; a kézikönyv alapszövege a programmal úgyis minden készüléken ott van, a kosarakban a közösség módosításai utaznak, és
+   a saját kosáron kívüli bejegyzés friss változatát a buborék kéri el (KO9 (A) — kimondva).
 2. **Az általános egyezmény egészben** — ez már így van: a darab egy KOSÁR, benne egész általános egyezmények (az azonosítójuk szerint). A
    kosár az adminisztráció miatt kell: általános egyezményenként külön hirdetve egy 400-at tartó készülék napi ~170 MB-ot hirdetne.
 3. **Mindig T tartó ONLINE**: a tartók az éppen online tartókat számolják; ha kevesebb, egy új készülék lesz tartó.
@@ -448,7 +454,8 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
      kimondva a naplóban (🧺), a `koinon kosarak`-ban, a `cimjegyzek hirdet`-ben és a `vallalas`-ban (örökölt — ④c4); a `koinon segit`
      egy örökölt szerepet véglegesít.
 4. **④d A próba:** helyi DHT-hálóval (`halo.belepo`), rontásokkal: hamis hirdető, hamis felkérő, megtelt jelölt, mélység-váltás, a
-   kopogtató-vihar korlátja. Utána a kézikönyv mindenkinél (KO5 (A) — a ③e egy része visszafordul), majd a ⑤ terep (a valódi
+   kopogtató-vihar korlátja. Utána ~~a kézikönyv mindenkinél (KO5 (A) — a ③e egy része visszafordul)~~ (⛔ 2026-11-28: a KO5 (B)
+   marad — a 10. szakasz 1. pontja), majd a ⑤ terep (a valódi
    elérhetőség és a DHT késése — ebből a ráhagyás). ✅ **Kész (2026-11-28)** — három részben (a 13. szakasz: ④d1 a teljes kör, ④d2 a
    hamisítások, ④d3 a kopogtató-vihar; a mélység-váltás a ④c4 próbájában), és a teljes próbasor: 1598/1598 zöld + a 2 ismert hiba.
 
@@ -807,3 +814,7 @@ ezt a ⑤ terep méri meg a valódi elérhetőséggel.
 - **2026-11-28** — ✅ **a teljes próbasor — a ④ vége:** 1598/1598 zöld + a 2 ismert hiba (a D124 két „valódi régi program” próbája, más
   koino-család), 53 perc; a terhelés alatt szeszélyes próbák most mind zöldek. **A D130 ④ (a koinon fenntartó köre) KÉSZ.** ⏭️ a
   kézikönyv mindenkinél (KO5 (A) — a ③e egy része visszafordul), majd a ⑤ terep.
+- **2026-11-28** — ✅ **Csaba: „Igen, maradjon (B)”** — a kérdése: *„lehet hogy egyszerübb lenne, a kézikönyvet is, úgy tárólni, mint az
+  általános egyezményeket?”*. A KO5 (B) marad (a kézikönyv a kosarakban, mint az általános egyezmények — ma is így működik, a ④ rá is
+  vonatkozik); a nov. 26-i „a kézikönyvet mindenki tartja” visszavonva, a ③e nem fordul vissza (a 10. szakasz 1. pontja). Kód nem
+  változott. ⏭️ a ⑤ terep.

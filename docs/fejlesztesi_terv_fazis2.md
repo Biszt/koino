@@ -6689,7 +6689,9 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     lesz tartó; aki visszajön, tartó marad (nem vándorol folyton — leadni csak a megtelt készülék ad le); az új teher a legkevesebbet
     őrzőhöz. Így a 11. pont „eggyel sekélyebbre lép”-je helyett a pótlás. ✅ *A 97. mérés:* működik (egyik mintán sem volt kosár online tartó
     nélkül, a tartók száma magától áll be, a teher 7–34 MB); a legkevesebbet őrző néhány jelölt közül — mindenki közül torlódik.
-12. **A kézikönyvet mindenki tartja** (Csaba, 2026-11-26 — a 6. pont KO5 (B)-je visszakerül (A)-ra): a ③e egy része visszafordul.
+12. ~~**A kézikönyvet mindenki tartja** (Csaba, 2026-11-26 — a 6. pont KO5 (B)-je visszakerül (A)-ra): a ③e egy része visszafordul.~~
+    ⛔ **Visszavonva (2026-11-28 — Csaba: „Igen, maradjon (B)”):** a KO5 (B) marad — a kézikönyv a koinon kosaraiban, mint az általános
+    egyezmények (ugyanaz a besorolás, és a ④ rá is vonatkozik); a ③e nem fordul vissza.
     ✅ **KO14 (A)** (Csaba, 2026-11-26): a célszám **T = 20 online**, ugyanaz a szám, mint a mélység `r`-je — a születés `koinonPeldany`
     szabálya „a koinon online őrzői darabonként”. ✅ **KO15 (A)**: az új tartó **10 jelölt közül a legkevesebbet őrző** —
     `koinon_atvizsgalas.md` 10. ⭐ *A ④c átvizsgálása és a 98. mérés (2026-11-26, kód előtt — a 11. szakasz):* a pótlót sorsolás
@@ -6718,8 +6720,8 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     kosarat nem pótol); ✅ **④d2 a hamisítások** (2026-11-28 — a hamis hirdető, a hamis felkérő és a megtelt jelölt a pótlás egészén,
     kód-változás nélkül); ✅ **④d3 a kopogtató-vihar** (2026-11-28 — mérve: a minta párján a ④c3 azonnal jelentkezett, és a téma minden
     hirdetője kérőt látott; javítva: a pár csak 3 közvetlen kör után, ha kevés jelölt felelt); ✅ a teljes próbasor (2026-11-28 —
-    1598/1598 zöld + 2 ismert hiba): **a ④ kész**; ⏭️ a
-    kézikönyv mindenkinél (KO5 (A)).
+    1598/1598 zöld + 2 ismert hiba): **a ④ kész**; ✅ a KO5 (B) marad (Csaba, 2026-11-28 — a kézikönyv a kosarakban, a „mindenkinél”
+    lépés kimarad); ⏭️ a ⑤ terep.
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
 a fenntartó kör terhe — a 95. mérés.
