@@ -449,7 +449,8 @@ számra 1,25-ös ráhagyást tesz (a terepen mért késéssel pontosítható).
      egy örökölt szerepet véglegesít.
 4. **④d A próba:** helyi DHT-hálóval (`halo.belepo`), rontásokkal: hamis hirdető, hamis felkérő, megtelt jelölt, mélység-váltás, a
    kopogtató-vihar korlátja. Utána a kézikönyv mindenkinél (KO5 (A) — a ③e egy része visszafordul), majd a ⑤ terep (a valódi
-   elérhetőség és a DHT késése — ebből a ráhagyás).
+   elérhetőség és a DHT késése — ebből a ráhagyás). ✅ **Kész (2026-11-28)** — három részben (a 13. szakasz: ④d1 a teljes kör, ④d2 a
+   hamisítások, ④d3 a kopogtató-vihar; a mélység-váltás a ④c4 próbájában), és a teljes próbasor: 1598/1598 zöld + a 2 ismert hiba.
 
 ## 12. A ④c4 átvizsgálása — a mélység változása (2026-11-27, a 99. mérés után, kód előtt)
 
@@ -803,3 +804,6 @@ ezt a ⑤ terep méri meg a valódi elérhetőséggel.
   a minta párja csak 3 közvetlen kör után, ha kevés jelölt felelt. Két próba (egy tiszta: a döntés; egy a parancssoron: a közvetlen elég
   → senki nem lát kérőt; a közvetlen kevés → a párján jelentkezik, a jelöltek bekopognak, a pótlás eldől). Mind a 4 rontásra bukik (a
   körök nélkül; a felelők nélkül; a kopogtató út azonnal — a ④c3 alakja; a kopogtató út soha). ⏭️ a teljes próbasor (a ④ vége).
+- **2026-11-28** — ✅ **a teljes próbasor — a ④ vége:** 1598/1598 zöld + a 2 ismert hiba (a D124 két „valódi régi program” próbája, más
+  koino-család), 53 perc; a terhelés alatt szeszélyes próbák most mind zöldek. **A D130 ④ (a koinon fenntartó köre) KÉSZ.** ⏭️ a
+  kézikönyv mindenkinél (KO5 (A) — a ③e egy része visszafordul), majd a ⑤ terep.

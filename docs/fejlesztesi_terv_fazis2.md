@@ -6717,7 +6717,8 @@ megszületnek, akkor azok kapnak, 1 tudatpontot a koinon-tól is, ezáltal bizto
     (2026-11-27 — valódi őrjáratokkal; a javítások: egy új felkérés előre hozza a címjegyzék-kört, a segítő csak adattal hirdet, üres
     kosarat nem pótol); ✅ **④d2 a hamisítások** (2026-11-28 — a hamis hirdető, a hamis felkérő és a megtelt jelölt a pótlás egészén,
     kód-változás nélkül); ✅ **④d3 a kopogtató-vihar** (2026-11-28 — mérve: a minta párján a ④c3 azonnal jelentkezett, és a téma minden
-    hirdetője kérőt látott; javítva: a pár csak 3 közvetlen kör után, ha kevés jelölt felelt); ⏭️ a teljes próbasor (a ④ vége), majd a
+    hirdetője kérőt látott; javítva: a pár csak 3 közvetlen kör után, ha kevés jelölt felelt); ✅ a teljes próbasor (2026-11-28 —
+    1598/1598 zöld + 2 ismert hiba): **a ④ kész**; ⏭️ a
     kézikönyv mindenkinél (KO5 (A)).
 
 **Az építés előtt mérni** (`koinon_atvizsgalas.md` 4.): a tömör alak mérete, a készülékszám becslése és a darabok tartóinak eloszlása,
