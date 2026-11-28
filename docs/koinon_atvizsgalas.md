@@ -589,15 +589,60 @@ utódot keresek, és ha nélkülem is megvan, átadom.
 a kérdezésre 3 másodperc alatt KÖZVETLENÜL mind a négy felelt — mégis, amikor az induló címjegyzék-körük a párokat megnézte, mind a
 négy kérőt látott a minta párján (és egy 30 percig A felé kopogna); és mert egy kis koinoban MINDEN tartó pótol (mindegyik kosárnak
 kevés a tartója), mindegyik jelentkezik egy gyökér-darab párján — egy jelölt „4 kérő vár rám”-ot írt: a vihar a pótlók számával
-szorzódik. Egy bekopogó minden körében (alapból 5 percenként) egy csere a pótlónál; a kapu egyszerre legfeljebb 3 ismeretlen
-bekopogóval dolgozik (`BEKOPOGO_KORLAT` — a többinek „foglalt”, később sorra kerül), de a sima csere nincs a kiszolgálási keret alatt
-— 30 perc alatt hirdetőnként ~6 csere. **A javítás** (a 4. pont — a 11. szakasz 5. pontja szerint): a kérdezés előbb csak a jelöltek
-CÍMÉRE kopog (kopogtató nélkül); az őrjárat a kérdezés köreit számolja (`potlasKozvetlenKor`), és ha `KOINON_KOZVETLEN_KOROK` (3 — ~15
-perc) kör után kevesebben feleltek, mint amennyi a döntéshez kell (`kopogtatoUtKell`), a kérdezés kérelme a minta párját is megkapja
-(a házimunka erre előre hozza a címjegyzék-kört), és a gyűjtés 30 perce innen számít. ⚠️ *Ami marad:* ha a közvetlen kopogás kevés (a
-NAT mögött ez a gyakori — a 60. mérés: egy oldalról ~20%), a kopogtató út kell, és akkor a minta témájának minden fent lévő hirdetője
-30 percig kopog (egy kis mélységű gyökér-darabnak száz fölötti hirdetője is lehet — ~600 csere pótlásonként, legfeljebb 3 egyszerre);
-ezt a ⑤ terep méri meg a valódi elérhetőséggel.
+szorzódik. Egy bekopogó minden körében egy csere a pótlónál; a kapu egyszerre legfeljebb 3 ismeretlen bekopogóval dolgozik
+(`BEKOPOGO_KORLAT` — a többinek „foglalt”, később sorra kerül), de a sima csere nincs a kiszolgálási keret alatt. ⚠️ *Javítva (a ⑤
+előkészítésekor, az indítókból):* a telepített indítók az őrjáratot **1 percenként** futtatják (`termux/indit.sh`, `windows/indit.ps1`
+— `KOINO_KOR=1`; az 5 perc csak a kód alapértéke) — így 30 perc alatt hirdetőnként **~30 csere** (5 perces körrel ~6). **A javítás**
+(a 4. pont — a 11. szakasz 5. pontja szerint): a kérdezés előbb csak a jelöltek CÍMÉRE kopog (kopogtató nélkül); az őrjárat a kérdezés
+köreit számolja (`potlasKozvetlenKor`), és ha `KOINON_KOZVETLEN_KOROK` (3 — az indítókkal ~3 perc, 5 perces körrel ~15) kör után
+kevesebben feleltek, mint amennyi a döntéshez kell (`kopogtatoUtKell`), a kérdezés kérelme a minta párját is megkapja (a házimunka
+erre előre hozza a címjegyzék-kört), és a gyűjtés 30 perce innen számít. ⚠️ *Ami marad:* ha a közvetlen kopogás kevés (a NAT mögött ez
+a gyakori — a 60. mérés: egy oldalról ~20%), a kopogtató út kell, és akkor a minta témájának minden fent lévő hirdetője 30 percig kopog
+(egy kis mélységű gyökér-darabnak száz fölötti hirdetője is lehet — az indítók 1 perces körével **~3000 csere pótlásonként**, legfeljebb
+3 egyszerre); ezt a ⑤ terep méri meg a valódi elérhetőséggel.
+
+## 14. A ⑤ terep előkészítése — mit és hogyan mérünk a valódi hálón (2026-11-28, kód előtt)
+
+Csaba: „Igen, jöhet”. A ④ minden száma MODELLEN áll — a terep mondja meg, mennyire igaz. **Amit a terepnek meg kell mondania:**
+1. **A valódi elérhetőség:** a 96.–99. mérés mintái feltevések (gépes / telefonos / borúlátó / esti); a tartók száma, a teher és a
+   kettéválás utáni gödör ezeken áll. Mérni: készülékenként az órák, amikor az őrjárat fent volt.
+2. **A DHT késése:** a KO17 (A) ráhagyása (1,25) a 98. mérés ROSSZABB esetéből jön (a lekapcsolt tartó 30–60 percig még látszik).
+   Mérni: a látott címek közül melyik volt valóban fent — a terep készülékeinek egymás fent-naplójából.
+3. **A közvetlen kopogás aránya és a kopogtató út terhe:** a 60. mérés (egy oldalról ~20%, a kopogtató úton ~76%) egy korábbi terep; a
+   ④d3 óta a pótló előbb közvetlenül kopog. Mérni: hány jelölt felel közvetlenül, hánynál kell a minta párja, és hány csere jön utána.
+4. **A pótlás a valóságban:** a ④d1 a hamis DHT-n mérte (indul, kérdez, a választott vállal, letölti, hirdeti) — a terepen a valódi DHT
+   és a NAT.
+
+**Amit a kódban láttam:**
+- az őrjárat naplója (`<adat>/orjarat.log`) jó műszer lehetne, de az indítók minden induláskor FELÜLÍRJÁK (`>` és `Start-Process
+  -RedirectStandardOutput`), és a sorok csak órát mondanak, dátumot nem — többnapos mérésre nem jó;
+- a helyi jegyzékek csak a LEGUTOLSÓT őrzik: `koinon-tartok.json` (a legutóbbi számlálás), `koinon-potlas.json` (az utolsó pótlás);
+- ⚠️ **a fejlesztési koino** (`kjX136WV…`) a ③f előtt született, a `koinonPeldany` mező nélkül → r = 20: két-három taggal EGY darab —
+  ott a ④ nem dolgozik (nincs mit hirdetni, nincs pótlás);
+- az indítók 1 percenként futtatják az őrjáratot (`KOINO_KOR=1` — a ④d3 számai ezért javítva, a 13. szakaszban);
+- ⚠️ egy gépen futó két koino (Csaba és az én tagságom a laptopon) a DHT-n EGY IPv4-cím — a látott szám egynek számolja (a ④b szabálya:
+  az alulszámolás a biztonságos irány); a telefon mobilneten külön cím.
+
+**A terv:**
+- **⑤a a műszerek** (kód — kérdés nélkül, a ④ meglévő jegyzékeire építve; helyi feljegyzések, nem események, korlátosak):
+  1. **a fent-napló** — az őrjárat óránként feljegyzi, hogy fent volt-e, és elérte-e a DHT-t (60 nap);
+  2. **a számlálás naplója** — a kosaraim minden számlálása (az idő, a kosár, a látott szám, és a látott címek LENYOMATA a koino sójával —
+     nyers IP-cím nem kerül a fájlba; az elemzés a saját címeket ugyanígy lenyomatolja és párosítja);
+  3. **a pótlás naplója** — minden pótlás (az indulás, a közvetlen válaszok, a páron jelentkezés, a döntés, a felkérés sorsa);
+  4. **`terep kivisz <fájl>`** — a három napló egy fájlban (a saját címeim lenyomatával), és **`meres/terepElemzes.js`** — több készülék
+     fájljából: az elérhetőség profilja (a 96. mintáihoz mérve), a DHT késése (a látott és a valóban fent lévő), a közvetlen arány, a
+     vihar. Próbával (a ④ próbáinak mintájára), rontásokkal.
+- **⑤b a terep** (Csaba futtatja — a telefon ilyenkor frissül): a KO20 és a KO21 szerint, legalább egy hétig (a napszak és a hét napjai).
+- **⑤c az elemzés** (`meres/eredmenyek.md` — egy új mérés): a ráhagyás (KO17 — marad-e 1,25), a minták pontosítása (a 97–99. újra a
+  valódi profillal), és a kopogtató út terhe — ha kell, új döntés (KO-kérdés).
+
+**A kérdések (Csabáé):**
+- **KO20 — melyik koinoban fusson a terep?** (A) ⭐ **egy új terep-koino kis r-rel** (`koinonPeldany=1` a születésben — két-három taggal
+  már két kosár, a látott cél 2: a ④ minden része dolgozik); a fejlesztési koino marad, ahogy van. (B) **a fejlesztési koino** (r = 20:
+  csak az elérhetőség és a DHT késése mérhető a gyökér-darabokon, a ④ — a pótlás, a felkérés, a kettéválás — nem).
+- **KO21 — mely készülékek, és meddig?** (A) ⭐ **a laptop és a telefon** (a telefon mobilneten — két hálózat, két cím; az én tagságom a
+  laptopon a DHT-n a laptoppal egy cím), **egy hétig**; (B) ugyanez **egy harmadik eszközzel egy harmadik hálózaton** (pl. egy
+  családtag telefonja vagy egy másik gép — a közvetlen kopogás és a NAT-párosok így többfélék, és a kosaraknak több valódi tartója van).
 
 ## 6. Napló
 
@@ -818,3 +863,9 @@ ezt a ⑤ terep méri meg a valódi elérhetőséggel.
   általános egyezményeket?”*. A KO5 (B) marad (a kézikönyv a kosarakban, mint az általános egyezmények — ma is így működik, a ④ rá is
   vonatkozik); a nov. 26-i „a kézikönyvet mindenki tartja” visszavonva, a ③e nem fordul vissza (a 10. szakasz 1. pontja). Kód nem
   változott. ⏭️ a ⑤ terep.
+- **2026-11-28** — a ⑤ terep előkészítése (a 14. szakasz, kód előtt): mit kell mérni (a valódi elérhetőség, a DHT késése, a közvetlen
+  arány és a kopogtató út terhe, a pótlás a valóságban), mi hiányzik (az őrjárat naplója felülíródik és dátum nélküli; a jegyzékek csak
+  a legutolsót őrzik; a fejlesztési koinoban r = 20 — a ④ ott nem dolgozik), a terv (⑤a a műszerek, ⑤b a terep, ⑤c az elemzés).
+  ⚠️ Javítva: az indítók 1 percenként futtatják az őrjáratot — a ④d3 számai (a közvetlen próba ~3 perc, a vihar hirdetőnként ~30 csere
+  30 perc alatt) a 13. szakaszban és a `cimjegyzek.js` kommentjében. ⏸️ **KO20** (melyik koino) és **KO21** (mely készülékek, meddig)
+  Csabánál.

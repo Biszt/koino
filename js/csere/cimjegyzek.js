@@ -794,7 +794,8 @@ export function potlasValasztasa(jeloltek = []) {
  * PÁRJÁN jelentkezve a téma minden hirdetője 30 percig felém kopog (a 99. utáni próba mérte: mind a négy jelölt kérőt látott, pedig a
  * kérdezésre 3 másodperc alatt közvetlenül feleltek — és egy kis koinoban minden pótló ezt teszi: a vihar a pótlók számával szorzódik).
  * Ezért a kérdezés előbb csak a címükre kopog, és ennyi őrjárat-kör után, ha addig kevés jelölt felelt, jelentkezik a párján (a NAT
- * mögöttiek ott látnak meg). Az őrjárat alapból 5 percenként kör: ~15 perc közvetlen próba.
+ * mögöttiek ott látnak meg). ⚠️ A kör hossza: a kód alapértéke 5 perc, de a telepített indítók (`termux/indit.sh`, `windows/indit.ps1`
+ * — `KOINO_KOR`) 1 perccel indítják az őrjáratot: a közvetlen próba így ~3 perc (5 perces körrel ~15).
  */
 export const KOINON_KOZVETLEN_KOROK = 3;
 
